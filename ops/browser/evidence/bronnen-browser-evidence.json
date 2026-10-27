@@ -1,0 +1,1376 @@
+{
+  "generatedAt": "2026-10-27T09:23:42.275Z",
+  "kind": "fixture-browser-check",
+  "task": "BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij",
+  "base": "feat/bronnen-74",
+  "port": 3139,
+  "screenshots": [
+    {
+      "file": "be31-scherm1-1280-light.png",
+      "sha256": "048ad42138400f2706ab36e6145b046517b7b1bb07f04ca8c19e437d6309fd6b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 1,
+      "theme": "light",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm2-1280-light.png",
+      "sha256": "92a55c4376bf3678c9e24e35fd8ccf71ccdc1e91489e0a36f01f67904fa39505",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 2,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm3-1280-light.png",
+      "sha256": "b328eaaa9d5b690930b603eb1e07223c3ed6a7cb0b8667838b74a9fae0eddd34",
+      "width": 1280,
+      "height": 800,
+      "viewport": "1280x800",
+      "screen": 3,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm5-1280-light.png",
+      "sha256": "6598499a988fa03ee7f34f64b324456626dcfc366b1461a48f90118318d71c83",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm7-1280-light.png",
+      "sha256": "a5a70b2148f1e9c985f74a56503b68f6e6d9496d714aeb52e7b9b14f8123a24f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm1-390-light.png",
+      "sha256": "670f7a7f854bd42844dc0ff7605ec8e3ecc2cce3e4e2a2aa99b1b713eeffd949",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 1,
+      "theme": "light",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm6-390-light.png",
+      "sha256": "2183e46e8ebe5df759a817ee3966d7a00f7e362f70de59d71831075c8f936de2",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 6,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm2-390-light.png",
+      "sha256": "c3aab5d8e175b597a011b8133f3a55b8c1fb1e12351e6bc2e2c89b60f0c49e7b",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 2,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm3-390-light.png",
+      "sha256": "116329ed7f0f5db1cf7e688a8cee1e0c50b43258c9a20c6c86e9a42410bc4ced",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 3,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm5-390-light.png",
+      "sha256": "f98ae772690e74135e80825eb5448d127a49966fb4de7b4656894424e5cfc713",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm7-390-light.png",
+      "sha256": "420c3840c96415e86f3154f5e19c0555121de8509a9b8f3cd8793eaf78f94af6",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm1-320-light.png",
+      "sha256": "e2545d9fe27061e405af6f2487339904831d915f0713c926771bb8a981ce7552",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 1,
+      "theme": "light",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm6-320-light.png",
+      "sha256": "88cbc53f1ee50e151d80b86ddca4c1af3466fe07100e3914eac466d6ec4dec04",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 6,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm2-320-light.png",
+      "sha256": "cacc47d997138da3dde6a46b3004648a85e752385b12230710bdaaf76c61f5a8",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 2,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm3-320-light.png",
+      "sha256": "0e10149d823ece910bae2c5b094a6fa6d2acde17cd67296addc825969fb59da0",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 3,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm5-320-light.png",
+      "sha256": "e7b5cc01c50e8374fe75efa494e9fea23bc1e4533dc3d2be294c338403ae3fd3",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm7-320-light.png",
+      "sha256": "a966127530ef309cbcc9f2cd97f01670f64773e85a57670596ae9324a934a50e",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 7,
+      "theme": "light"
+    },
+    {
+      "file": "be31-scherm1-1280-dark.png",
+      "sha256": "7380209edfbe14ef794e94aa7458ecb4c1de12f5b8980104001f23c045cb345d",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 1,
+      "theme": "dark",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm2-1280-dark.png",
+      "sha256": "0f3cf5c03931ba95bbdc0a371252e041a9db168922cc086a421fde1c506edf47",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 2,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm4-1280-dark.png",
+      "sha256": "dc6b3742d2ae0c0aac67d2c48d4b08007b85f6fc0ada7cb0ef16a93dbd554bf9",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 4,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm3-1280-dark.png",
+      "sha256": "5385bd783eb50de8db5b347c8a9faa74b66f131469b17051a05fb5df78801a71",
+      "width": 1280,
+      "height": 800,
+      "viewport": "1280x800",
+      "screen": 3,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm5-1280-dark.png",
+      "sha256": "ed94ec395736329766dc0fec51a835ca056ca57cb753958577f52982c7f51129",
+      "width": 1280,
+      "height": 1000,
+      "viewport": "1280x1000",
+      "screen": 5,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm7-1280-dark.png",
+      "sha256": "d4d0037866de3823dc927684b95ba5a0c59428db0342a4df07d381cc69cd2fb5",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "screen": 7,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm1-390-dark.png",
+      "sha256": "7a626af9e95bd0c5d72528bae6452933b506aca0afaf70b290609b8a4d59b9c7",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 1,
+      "theme": "dark",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm6-390-dark.png",
+      "sha256": "0f0e020e03116e6163c6ee9b679476e22d7d861880690cafe723651a07413809",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 6,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm2-390-dark.png",
+      "sha256": "3810de1914bb1d898ab34ac545a4fd463b096bebaefafa3f5c1993d615159674",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 2,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm4-390-dark.png",
+      "sha256": "4588063097105d055eb67be0453ce0c41f1613c829945810d9c7cd507d0fd32a",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 4,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm3-390-dark.png",
+      "sha256": "c773981e2038b873182282687543b076449525afbfe11bbcc4e36e17849cdff9",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 3,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm5-390-dark.png",
+      "sha256": "58ff6e253e868b220f54f7703c021497306ecad84838813c04a929b0722f41ae",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 5,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm7-390-dark.png",
+      "sha256": "8c4abaed46b0c22df8c84c4679a49fe8706074a1207601d26bf77075c4bddf6a",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "screen": 7,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm1-320-dark.png",
+      "sha256": "c5d91618bf376f05b45377aaa3c057b303f020c9deace85e214e7168fd276f45",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 1,
+      "theme": "dark",
+      "fixture": "bronnen"
+    },
+    {
+      "file": "be31-scherm6-320-dark.png",
+      "sha256": "50b26a5c5dd216ea98739485052c08d317e486302224b2f9d23ef2e23e62c453",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 6,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm2-320-dark.png",
+      "sha256": "c7b450ef220408a80263e5e9da3537b7e1b1ee5e72959a4bf613be82395243f7",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 2,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm4-320-dark.png",
+      "sha256": "68621023b5fe86a2cf53a93194983cecae4d5450cad84c6c9471e218c5da1aa8",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 4,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm3-320-dark.png",
+      "sha256": "05f0004d8d4784d199e28e529bf153b314fda76ea0200784c92ab721d3e0321f",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 3,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm5-320-dark.png",
+      "sha256": "8592e9492064f93f4d884140a9cc22d8fec6f5059776d5b2a048b63f1a928c0f",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 5,
+      "theme": "dark"
+    },
+    {
+      "file": "be31-scherm7-320-dark.png",
+      "sha256": "e756e0554ff6ff445190e0a007d1b8ac9bd387ddfba51c66f988fec8b980d5ae",
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "screen": 7,
+      "theme": "dark"
+    }
+  ],
+  "checks": [
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "warm-up: the route compiles and the task list renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (1280/light): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (1280/light): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (1280/light): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (1280/light): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (1280/light): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "onze menukaarten Dekking Werkvoorraad (3) + Restaurant of menu toevoegen Licht Donker Sign out"
+    },
+    {
+      "name": "theme (1280/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen overloop (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (1280/light): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (1280/light): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (1280/light): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (1280/light): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (1280/light): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (1280/light): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (1280/light): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 2 (1280/light): the list stays next to the detail",
+      "passed": true,
+      "detail": "{\"list\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (1280/light): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (1280/light): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (1280/light): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "onze menukaarten Dekking Werkvoorraad (0) + Restaurant of menu toevoegen Licht D"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (1280/light): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (1280/light): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (1280/light): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | \\t🔎 Controleer bron\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/light): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "scherm 5 (1280/light): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=light&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (1280/light): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/light): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (1280/light): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (390/light): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (390/light): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (390/light): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (390/light): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (390/light): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "Dekking Werk (3) +"
+    },
+    {
+      "name": "theme (390/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen overloop (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (390/light): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (390/light): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (390/light): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (390/light): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (390/light): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (390/light): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (390/light): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 6 (390/light): a chosen task is its own screen on a telephone",
+      "passed": true,
+      "detail": "{\"list\":false,\"back\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (390/light): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (390/light): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (390/light): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "Dekking Werk (0) +"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (390/light): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (390/light): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (390/light): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/light): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 5 (390/light): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=light&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (390/light): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/light): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (390/light): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (320/light): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (320/light): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (320/light): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (320/light): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (320/light): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "Dekking Werk (3) +"
+    },
+    {
+      "name": "theme (320/light): the requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen overloop (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (320/light): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (320/light): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (320/light): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (320/light): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (320/light): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (320/light): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (320/light): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 6 (320/light): a chosen task is its own screen on a telephone",
+      "passed": true,
+      "detail": "{\"list\":false,\"back\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=light&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (320/light): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (320/light): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (320/light): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "Dekking Werk (0) +"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=light&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (320/light): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (320/light): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (320/light): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/light): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 5 (320/light): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=light&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (320/light): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/light): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (320/light): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/light): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (1280/dark): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (1280/dark): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (1280/dark): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (1280/dark): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (1280/dark): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "onze menukaarten Dekking Werkvoorraad (3) + Restaurant of menu toevoegen Licht Donker Sign out"
+    },
+    {
+      "name": "theme (1280/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "geen overloop (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (1280/dark): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (1280/dark): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (1280/dark): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (1280/dark): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (1280/dark): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (1280/dark): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (1280/dark): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 2 (1280/dark): the list stays next to the detail",
+      "passed": true,
+      "detail": "{\"list\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (1280/dark): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (1280/dark): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (1280/dark): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "onze menukaarten Dekking Werkvoorraad (0) + Restaurant of menu toevoegen Licht D"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (1280/dark): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (1280/dark): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (1280/dark): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | \\t🔎 Controleer bron\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/dark): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "scherm 5 (1280/dark): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=dark&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (1280/dark): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/dark): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (1280/dark): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (1280/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (390/dark): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (390/dark): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (390/dark): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (390/dark): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (390/dark): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "Dekking Werk (3) +"
+    },
+    {
+      "name": "theme (390/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "geen overloop (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (390/dark): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (390/dark): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (390/dark): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (390/dark): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (390/dark): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (390/dark): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (390/dark): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 6 (390/dark): a chosen task is its own screen on a telephone",
+      "passed": true,
+      "detail": "{\"list\":false,\"back\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (390/dark): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (390/dark): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (390/dark): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "Dekking Werk (0) +"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (390/dark): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (390/dark): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (390/dark): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/dark): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 5 (390/dark): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=dark&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (390/dark): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/dark): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (390/dark): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (390/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 1 (320/dark): three real tasks render",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (320/dark): the chips carry the real numbers",
+      "passed": true,
+      "detail": "[\"Alles 3\",\"🧪 Batches 1\",\"💡 Voorstellen 1\",\"📡 Aandacht 1\"]"
+    },
+    {
+      "name": "scherm 1 (320/dark): the batch, the proposal and the attention source are the tasks",
+      "passed": true,
+      "detail": "[\"Batch\",\"Voorstel\",\"Bron vraagt aandacht\"]"
+    },
+    {
+      "name": "scherm 1 (320/dark): the detail waits for a choice",
+      "passed": true,
+      "detail": "Kies een taak links"
+    },
+    {
+      "name": "teller (320/dark): the Werkvoorraad number equals the number of tasks",
+      "passed": true,
+      "detail": "Dekking Werk (3) +"
+    },
+    {
+      "name": "theme (320/dark): the requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "geen overloop (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 2 (320/dark): the batch task can be chosen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (320/dark): the batch detail shows its rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 2 (320/dark): the chosen task is programmatically current",
+      "passed": true,
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (320/dark): exactly one next step per row state",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 2 (320/dark): twijfel opens the BE-30 screen of the same batch item",
+      "passed": true,
+      "detail": "/internal/bronnen/batch?batch=batch-bronnen-0001&item=2&return=%2Finternal%2Fbronnen%3Fbatch%3Dbatch-bronnen-0001"
+    },
+    {
+      "name": "scherm 2 (320/dark): no menu reuses the existing AI reading link",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-bronnen-3&restaurant=9001&name=Fictief+Restaurant+Smelt&url=https%3A%2F%2Ffictief-smelt.invalid%2Fmenu"
+    },
+    {
+      "name": "scherm 2 (320/dark): a blocked result goes to the existing manual import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief+Restaurant+Smelt"
+    },
+    {
+      "name": "scherm 6 (320/dark): a chosen task is its own screen on a telephone",
+      "passed": true,
+      "detail": "{\"list\":false,\"back\":true}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/bronnen?theme=dark&fixture=bronnenLeeg&navCounts=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 3 (320/dark): the empty state renders",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 3 (320/dark): only \"Geen open bronwerk\" with the link to Dekking",
+      "passed": true,
+      "detail": "{\"title\":\"✅ Geen open bronwerk\",\"links\":[\"/internal/coverage\"],\"chips\":0}"
+    },
+    {
+      "name": "teller-leeg (320/dark): the bar's number also drops to 0",
+      "passed": true,
+      "detail": "Dekking Werk (0) +"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/coverage?theme=dark&fixture=bronnen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 5 (320/dark): \"Nog niet gecontroleerd\" lists the restaurants without a check",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 5 (320/dark): the heading counts the real rows",
+      "passed": true,
+      "detail": "Nog niet gecontroleerd (4)"
+    },
+    {
+      "name": "scherm 5 (320/dark): the existing reason texts are shown",
+      "passed": true,
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/dark): every row with a website offers \"Controleer bron\"",
+      "passed": true,
+      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
+      "passed": true,
+      "detail": "Maximaal 10 per controle · vandaag nog 22 van 25 URL's. De controle loopt alleen zolang deze pagina open is. Sluit je hem, dan pauzeert de controle en gaat hij verder zodra je terugkomt."
+    },
+    {
+      "name": "scherm 5 (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "scherm 5 (320/dark): selecting a row updates the count",
+      "passed": true,
+      "detail": "🔎 Controleer 1 geselecteerde"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3139/internal/toevoegen?theme=dark&fixture=bronnenToevoegen&navCounts=bronnen&batch=batch-bronnen-0001)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "scherm 7 (320/dark): the result appears under the form as the same rows",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/dark): the same one next step per row",
+      "passed": true,
+      "detail": "[\"✅ Bevestig bron\",\"⚠️ Menukopjes controleren\",\"📖 Lees met AI\",\"✍️ Handmatig toevoegen\",\"⏳ Even wachten\"]"
+    },
+    {
+      "name": "scherm 7 (320/dark): the form stays available above the result",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 7 (320/dark): no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "network guard: the page recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: the CDP layer recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "passed": true,
+  "network": {
+    "pageViolations": [],
+    "guardViolations": []
+  },
+  "screenshotsDir": "ops/browser/evidence/be-31"
+}

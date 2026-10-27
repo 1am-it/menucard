@@ -855,7 +855,7 @@ test('REGRESSION (review 6250261342): an inherited section and a skipped portion
   })
   assert.equal(inherited.length, 1)
   assert.match(inherited[0], /1 kolom\(men\)/)
-  assert.match(inherited[0], /onzekere rubricering/)
+  assert.match(inherited[0], /onzekere menukopje-indeling/)
 
   const portions = pdfLayoutLimitations('https://fixture.example/menu.pdf', { portionLines: 2 })
   assert.equal(portions.length, 1)

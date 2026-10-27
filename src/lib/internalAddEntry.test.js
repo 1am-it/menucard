@@ -28,7 +28,7 @@ test('decideAddEntry: a known restaurant with one URL goes to the existing analy
   assert.equal(result.ok, true);
   assert.equal(result.kind, 'batch');
   assert.deepEqual(result.urls, [URL_ONE]);
-  assert.match(result.href, /^\/internal\/source-triage\/batch\?urls=/);
+  assert.match(result.href, /^\/internal\/bronnen\/batch\?urls=/);
 });
 
 test('decideAddEntry: a new restaurant (no choice) with one URL opens the existing onboarding with that URL filled in', () => {

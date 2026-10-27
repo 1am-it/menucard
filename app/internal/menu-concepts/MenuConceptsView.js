@@ -24,7 +24,7 @@ import {
   useConceptEdits,
   conceptParts,
   ProductReview,
-} from '../source-triage/batch/MenuReview'
+} from '../bronnen/batch/MenuReview'
 
 const STATUS_VIEW = {
   waiting: { role: 'neutral', icon: 'clock', label: 'Wacht op beoordeling' },
@@ -128,7 +128,7 @@ export function ConceptList({ data, loadError }) {
           </h2>
           {waiting.length === 0 ? (
             <p className="bta-muted">
-              Er wachten geen menuconcepten. Een concept ontstaat in <a className="stg-link" href="/internal/source-triage/batch">Batchanalyse</a> na
+              Er wachten geen menuconcepten. Een concept ontstaat in <a className="stg-link" href="/internal/bronnen/batch">Batchanalyse</a> na
               &quot;Bevestig bron&quot; en &quot;Concept opslaan&quot;.
             </p>
           ) : (
@@ -323,7 +323,7 @@ function PublicationPreview({ preview, restaurantName, version, dirty }) {
       </div>
       {entries.length > 0 && (
         <p className="mcr-meta">
-          {plural(dishCount(entries), 'gerecht', 'gerechten')} · {plural(sections, 'rubriek', 'rubrieken')}
+          {plural(dishCount(entries), 'gerecht', 'gerechten')} · {plural(sections, 'menukopje', 'menukopjes')}
           {mode === 'concept' ? ' · volledige menukaart' : ` · ${plural(entries.length, 'menukaart', 'menukaarten')}`}
         </p>
       )}
@@ -438,7 +438,7 @@ function ProductConceptReview({ data, crumbs, loadError, message }) {
           <strong>{product ? product.counts.items : 0}</strong> items
         </li>
         <li>
-          <strong>{product ? product.counts.categories : 0}</strong> rubrieken
+          <strong>{product ? product.counts.categories : 0}</strong> menukopjes
         </li>
         <li>
           <StatusIcon name="file" /> conceptversie {c.version}
@@ -588,7 +588,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
           <strong>{dishCount}</strong> gerechten
         </li>
         <li>
-          <strong>{sectionCount}</strong> rubrieken
+          <strong>{sectionCount}</strong> menukopjes
         </li>
         <li>
           <StatusIcon name="warning" /> <strong>{concept.attentionLines.length + concept.removed.length}</strong> aandachtspunten

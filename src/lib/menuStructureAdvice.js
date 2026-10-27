@@ -35,12 +35,12 @@ const CONFIDENCE_LEVELS = ['hoog', 'midden'];
 
 const ADVICE_MESSAGES = Object.freeze({
   forbidden: 'Alleen interne medewerkers kunnen AI om een advies vragen.',
-  advice_failed: 'Het AI-advies lukte niet. Je kunt de rubrieken zelf beoordelen.',
-  advice_timeout: 'Het AI-advies duurde te lang. Je kunt de rubrieken zelf beoordelen.',
-  advice_rejected: 'Het antwoord van de AI bevatte geen bruikbaar advies. Beoordeel de rubrieken zelf.',
+  advice_failed: 'Het AI-advies lukte niet. Je kunt de menukopjes zelf beoordelen.',
+  advice_timeout: 'Het AI-advies duurde te lang. Je kunt de menukopjes zelf beoordelen.',
+  advice_rejected: 'Het antwoord van de AI bevatte geen bruikbaar advies. Beoordeel de menukopjes zelf.',
   source_text_unavailable:
-    'Van deze bronversie is geen letterlijke brontekst bewaard, dus de AI kan geen citaat leveren. Beoordeel de rubrieken zelf.',
-  structure_sections_unknown: 'Er zijn geen onzekere rubrieken om advies over te vragen.',
+    'Van deze bronversie is geen letterlijke brontekst bewaard, dus de AI kan geen citaat leveren. Beoordeel de menukopjes zelf.',
+  structure_sections_unknown: 'Er zijn geen onzekere menukopjes om advies over te vragen.',
   advice_not_stored: 'Het advies kon niet worden vastgelegd; er is niets bewaard.',
   not_found: 'Dit resultaat hoort niet bij jouw batch.',
   invalid_request: 'Ongeldig verzoek.',

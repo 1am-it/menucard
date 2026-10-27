@@ -33,7 +33,7 @@ export function ConceptStructure({ captured }) {
     <details className="bta-category">
       <summary>
         <span className="bta-category-name">Structuur</span>
-        <span className="bta-muted"> · {plural(categories.length, 'rubriek', 'rubrieken')}{title ? ` onder "${title}"` : ''}</span>
+        <span className="bta-muted"> · {plural(categories.length, 'menukopje', 'menukopjes')}{title ? ` onder "${title}"` : ''}</span>
       </summary>
       <ul className="bta-structure">
         {categories.map((category, i) => {
@@ -45,7 +45,7 @@ export function ConceptStructure({ captured }) {
               {category.uncertain && (
                 <span className="status-badge status-badge--neutral bta-badge">
                   <StatusIcon name="warning" />
-                  <span>Rubriekindeling onzeker</span>
+                  <span>Menukopjes onzeker</span>
                 </span>
               )}
               <span className="bta-source-route">Bronroute: {source || 'niet vastgelegd'}</span>
@@ -68,7 +68,7 @@ const PRODUCT_KIND_LABELS = {
   arrangement: 'Arrangement',
   beverage: 'Drank',
   unknown: 'Soort onbekend',
-  section: 'Rubriek',
+  section: 'Menukopje',
   choice_group: 'Keuzegroep',
 };
 
@@ -117,7 +117,7 @@ export function ProductReview({ product }) {
       </div>
       <ul className="bta-chips" aria-label="Aantallen in deze kaart">
         <li className="bta-chip">{plural(product.counts.items, 'item', 'items')}</li>
-        <li className="bta-chip">{plural(product.counts.categories, 'rubriek', 'rubrieken')}</li>
+        <li className="bta-chip">{plural(product.counts.categories, 'menukopje', 'menukopjes')}</li>
         {product.counts.priceVariants > 0 && <li className="bta-chip">{plural(product.counts.priceVariants, 'prijsvariant', 'prijsvarianten')}</li>}
         {product.counts.supplements > 0 && <li className="bta-chip">{plural(product.counts.supplements, 'supplement', 'supplementen')}</li>}
       </ul>
@@ -147,7 +147,7 @@ export function ProductReview({ product }) {
           {menu.categories.map((category) => (
             <details key={category.id} className="bta-category">
               <summary>
-                <span className="bta-category-name">{category.name || 'Zonder rubriek'}</span>
+                <span className="bta-category-name">{category.name || 'Zonder menukopje'}</span>
                 <span className="bta-muted"> · {plural(category.items.length, 'item', 'items')}</span>
                 {category.kind !== 'section' && (
                   <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
@@ -157,7 +157,7 @@ export function ProductReview({ product }) {
                 {category.uncertain && (
                   <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
                     <StatusIcon name="warning" />
-                    <span>Rubriekindeling onzeker</span>
+                    <span>Menukopjes onzeker</span>
                   </span>
                 )}
               </summary>
@@ -285,7 +285,7 @@ export function MenuControl({ item }) {
     <section className="bta-control" aria-label="Menukaartcontrole">
       <div className="bta-control-head">
         <p className="bta-control-count">
-          {menu ? `${plural(menu.itemCount, 'gerecht', 'gerechten')} in ${plural(menu.categoryCount, 'rubriek', 'rubrieken')}` : 'Geen herkende gerechten'}
+          {menu ? `${plural(menu.itemCount, 'gerecht', 'gerechten')} in ${plural(menu.categoryCount, 'menukopje', 'menukopjes')}` : 'Geen herkende gerechten'}
         </p>
         {href && (
           <a className="stg-btn-secondary bta-btn" href={href} target="_blank" rel="noopener noreferrer">
@@ -320,7 +320,7 @@ export function MenuControl({ item }) {
             {item.attentionGroups.map((group) => (
               <li key={group.id}>
                 <span className="bta-dish">{group.label}</span>{' '}
-                <span className="bta-muted">· {plural(group.itemCount, 'gerecht', 'gerechten')} · rubriekindeling onzeker</span>
+                <span className="bta-muted">· {plural(group.itemCount, 'gerecht', 'gerechten')} · menukopjes onzeker</span>
               </li>
             ))}
           </ul>
@@ -361,7 +361,7 @@ export function MenuControl({ item }) {
               {category.uncertain && (
                 <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
                   <StatusIcon name="warning" />
-                  <span>Rubriekindeling onzeker</span>
+                  <span>Menukopjes onzeker</span>
                 </span>
               )}
             </summary>
@@ -421,12 +421,12 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
   return (
     <div className="bta-structure-review" role="group" aria-labelledby={titleId}>
       <p id={titleId} className="bta-attention-title">
-        <StatusIcon name="warning" /> Rubriekindeling controleren
+        <StatusIcon name="warning" /> Menukopjes controleren
       </p>
       <p className="bta-muted">
-        {plural(required.length, 'onzekere rubriek', 'onzekere rubrieken')} in deze bronversie. Klap een rubriek open: je
+        {plural(required.length, 'onzeker menukopje', 'onzekere menukopjes')} in deze bronversie. Klap een menukopje open: je
         ziet de gerechten met hun prijs, waarom de indeling onzeker is en de plek in de bron. Handhaaf of corrigeer elke
-        rubriek; daarna kun je de bron bevestigen.
+        menukopje; daarna kun je de bron bevestigen.
       </p>
       <p className="bta-structure-count" role="status">
         {handled.length} van {required.length} behandeld
@@ -437,7 +437,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
             <StatusIcon name="warning" />
           </span>
           <span>
-            <strong>Controle niet beschikbaar.</strong> De opgeslagen rubriekcontrole kan niet worden gelezen. Er kan nu
+            <strong>Controle niet beschikbaar.</strong> De opgeslagen menukopje-controle kan niet worden gelezen. Er kan nu
             niets worden bevestigd; probeer het later opnieuw.
           </span>
         </div>
@@ -449,8 +449,8 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
           </button>
           <p className="bta-muted">
             {adviceByKey.size > 0
-              ? `Neem de adviezen over waar ze er zijn; de overige ${required.length - adviceByKey.size} rubrieken blijven op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`
-              : `Zet alle ${required.length} rubrieken op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`}
+              ? `Neem de adviezen over waar ze er zijn; de overige ${required.length - adviceByKey.size} menukopjes blijven op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`
+              : `Zet alle ${required.length} menukopjes op “klopt zo”. Je bevestigt daarna zelf de bron; niets wordt automatisch vastgelegd.`}
           </p>
         </div>
       )}
@@ -491,7 +491,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                       <span className="status-badge status-badge--neutral bta-badge bta-inline-badge">
                         <span>AI-advies</span>
                       </span>{' '}
-                      {adviceEntry.label || (adviceEntry.decision === 'correct' ? 'Corrigeer de rubriek' : 'Klopt zo')}
+                      {adviceEntry.label || (adviceEntry.decision === 'correct' ? 'Corrigeer het menukopje' : 'Klopt zo')}
                       <span className="bta-advice-confidence"> · zekerheid {adviceEntry.confidence || 'midden'}</span>
                     </p>
                     <p className="bta-advice-quote">Citaat uit de bron: “{adviceEntry.quote}”</p>
@@ -520,7 +520,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                     ))}
                   </ul>
                 ) : (
-                  <p className="bta-muted">Geen gerechten met een naam in deze rubriek gelezen.</p>
+                  <p className="bta-muted">Geen gerechten met een naam in dit menukopje gelezen.</p>
                 )}
                 {treated && (
                   <p className="bta-muted">
@@ -537,7 +537,7 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                     disabled={!editable}
                     onChange={() => onChange(section.key, { action: 'keep', text: formatPath(section.path) })}
                   />{' '}
-                  Rubriek klopt zo
+                  Menukopje klopt zo
                 </label>
                 <label>
                   <input
@@ -549,12 +549,12 @@ export function StructureReview({ idPrefix, review, value, readOnly, onChange, o
                       onChange(section.key, { action: 'correct', text: choice.action === 'correct' ? choice.text : formatPath(section.path) })
                     }
                   />{' '}
-                  Rubriek corrigeren
+                  Menukopje corrigeren
                 </label>
               </div>
               {corrected && (
                 <div className="bta-structure-edit">
-                  <label htmlFor={`${fieldId}-path`}>Gecorrigeerde rubriek en pad</label>
+                  <label htmlFor={`${fieldId}-path`}>Gecorrigeerd menukopje en pad</label>
                   <input
                     id={`${fieldId}-path`}
                     className="stg-input"
@@ -598,7 +598,7 @@ function DishValue({ value, empty }) {
     <p className="bta-compare-value">
       <span className="bta-dish">{value.name}</span>
       <span className="bta-muted">
-        {value.category || 'Zonder rubriek'} · {displayPrice(value.price) || 'geen prijs'}
+        {value.category || 'Zonder menukopje'} · {displayPrice(value.price) || 'geen prijs'}
       </span>
     </p>
   )
@@ -640,7 +640,7 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
         </div>
       ) : (
         <p className="bta-muted">
-          {line.category || 'Zonder rubriek'} · {displayPrice(line.price) || (line.priceText ? `${line.priceText} (meerdere prijzen)` : 'geen prijs')}
+          {line.category || 'Zonder menukopje'} · {displayPrice(line.price) || (line.priceText ? `${line.priceText} (meerdere prijzen)` : 'geen prijs')}
           {line.status === 'price_changed' && line.livePrice ? ` (nu live ${displayPrice(line.livePrice)})` : ''}
         </p>
       )}
@@ -657,7 +657,7 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
             value={edit.price ?? (line.original.price ? line.original.price.replace('.', ',') : '')}
             onChange={(e) => setEdit({ price: e.target.value })}
           />
-          <label htmlFor={`${id}-category`}>Rubriek</label>
+          <label htmlFor={`${id}-category`}>Menukopje</label>
           <input id={`${id}-category`} className="stg-input" list={`${idPrefix}-categories`} value={edit.category ?? line.original.category} onChange={(e) => setEdit({ category: e.target.value })} />
           <datalist id={`${idPrefix}-categories`}>
             {categories.map((c) => (
@@ -670,7 +670,7 @@ export function LineEditor({ idPrefix, line, edit, setEdit, categories, readOnly
             </label>
             {canAcceptCategory && (
               <label>
-                <input type="checkbox" checked={line.categoryAccepted === true} onChange={(e) => setEdit({ acceptCategory: e.target.checked })} /> Rubriek klopt zo
+                <input type="checkbox" checked={line.categoryAccepted === true} onChange={(e) => setEdit({ acceptCategory: e.target.checked })} /> Menukopje klopt zo
               </label>
             )}
             {canAcceptDuplicate && (
@@ -808,8 +808,8 @@ function StructureTrail({ review }) {
   return (
     <details className="bta-category">
       <summary>
-        <span className="bta-category-name">Rubriekcontrole</span>
-        <span className="bta-muted"> · {plural(treated.length, 'rubriek', 'rubrieken')} behandeld</span>
+        <span className="bta-category-name">Menukopje-controle</span>
+        <span className="bta-muted"> · {plural(treated.length, 'menukopje', 'menukopjes')} behandeld</span>
       </summary>
       <ul className="bta-notes">
         {treated.map((decision) => (
@@ -885,9 +885,9 @@ function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
   }
   if (groups.length === 0) return null
   return (
-    <div className="bta-attention" role="group" aria-label="Gedeelde rubriekonzekerheid">
+    <div className="bta-attention" role="group" aria-label="Gedeelde menukopje-onzekerheid">
       <p className="bta-attention-title">
-        <StatusIcon name="warning" /> {plural(groups.length, 'gedeelde rubriekonzekerheid', 'gedeelde rubriekonzekerheden')}
+        <StatusIcon name="warning" /> {plural(groups.length, 'gedeelde menukopje-onzekerheid', 'gedeelde menukopje-onzekerheden')}
       </p>
       <ul>
         {groups.map((group) => (
@@ -896,13 +896,13 @@ function UncertainGroups({ lines, readOnly, onAcceptGroup }) {
             <span className="bta-muted">· {plural(group.lines.length, 'gerecht', 'gerechten')}</span>
             {!readOnly && (
               <button type="button" className="stg-btn-secondary bta-btn" onClick={() => onAcceptGroup(group.lines)}>
-                Rubriek klopt zo
+                Menukopje klopt zo
               </button>
             )}
           </li>
         ))}
       </ul>
-      <p className="bta-muted">Deze keuze geldt alleen voor de getoonde rubriek en lost geen ontbrekende prijzen of andere blokkades op.</p>
+      <p className="bta-muted">Deze keuze geldt alleen voor het getoonde menukopje en lost geen ontbrekende prijzen of andere blokkades op.</p>
     </div>
   )
 }

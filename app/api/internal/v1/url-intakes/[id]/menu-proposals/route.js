@@ -81,7 +81,7 @@ export async function POST(request, { params }) {
     // It is refused here before it can become an empty snapshot, and a
     // v2-shaped value can never lose its version into `categories`.
     if (categories.length === 0) {
-      results.push({ context_slug: slug, ok: false, error: 'Deze menucontext bevat geen bruikbare rubrieken.' })
+      results.push({ context_slug: slug, ok: false, error: 'Deze menucontext bevat geen bruikbare menukopjes.' })
       continue
     }
     const capturedContent = { categories }

@@ -708,7 +708,7 @@ test('K5: een onzekere rubriek vraagt per regel een menselijke beslissing', () =
   assert.equal(report.ok, true, JSON.stringify(report.problems || report.message));
   const salad = report.rows.find((entry) => entry.name === 'Broodplank');
   assert.equal(salad.state, 'unverifiable');
-  assert.equal(salad.label, 'rubriek controleren');
+  assert.equal(salad.label, 'menukopje controleren');
   assert.equal(salad.askAi, true);
   assert.equal(reviewView({ report, decisions: new Map() }).canSave, false);
   const decisions = fullyReviewed(report);

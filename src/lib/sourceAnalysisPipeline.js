@@ -86,7 +86,7 @@ async function buildDirectPdfAnalysis({ pdfBytes, sourceUrl, sourceId = 'source-
   ];
   const notes = [
     ...limitations,
-    ...(converted ? [`Menukaart herkend uit de PDF: ${converted.itemCount} gerechten met prijs in ${converted.menu.categories.length} rubrieken.`] : []),
+    ...(converted ? [`Menukaart herkend uit de PDF: ${converted.itemCount} gerechten met prijs in ${converted.menu.categories.length} menukopjes.`] : []),
   ];
   const sourceTexts = new Map();
   if (extractionText) sourceTexts.set(sourceId, extractionText);

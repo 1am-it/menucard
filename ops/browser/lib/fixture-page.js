@@ -50,7 +50,12 @@ function fixtureBootstrap(scenarios, options = {}) {
     const fixture = requestedFixture
       || (pathname.indexOf('/internal/menu-concepts') === 0
         ? 'concepts'
-        : pathname === '/internal/source-triage' ? 'triage' : 'review');
+        : pathname.indexOf('/internal/bronnen/batch') === 0 ? 'review'
+        : pathname === '/internal/source-triage' ? 'triage'
+        : pathname === '/internal/bronnen'
+          ? (params.get('reason') === 'image_only' ? 'triage' : 'bronnen')
+        : pathname.indexOf('/internal/coverage') === 0 ? 'bronnen'
+        : 'review');
     const theme = params.get('theme') === 'light' ? 'light' : 'dark';
     const session = {
       access_token: 'fixture-token',
@@ -120,6 +125,12 @@ function fixtureBootstrap(scenarios, options = {}) {
         return jsonResponse({ roles: [{ role: 'internal', restaurant_id: null }, { role: 'editor', restaurant_id: null }] });
       }
       if (verdict.routeId === 'workqueue-counts') {
+        if (params.get('navCounts') === 'leeg') {
+          return jsonResponse({ counts: { 'menu-concepts': 0, 'source-triage': 0, 'import-inbox': 0, moderation: 0 } });
+        }
+        if (params.get('navCounts') === 'bronnen') {
+          return jsonResponse({ counts: { 'menu-concepts': 0, 'source-triage': 3, 'import-inbox': 0, moderation: 0 } });
+        }
         if (params.get('countsState') === 'error') {
           return jsonResponse({ error: 'De werkvoorraad kon niet worden geteld.' }, 503);
         }
@@ -254,7 +265,20 @@ function fixtureBootstrap(scenarios, options = {}) {
           return jsonResponse({ error: 'De batchanalyse kon niet worden geladen.' }, 500);
         }
         const scenario = fixtures[fixture] || fixtures.review;
+        // BE-31 (#74): the same route answers the overview (recent batches) and,
+        // with ?batch=<id>, that batch's detail. The Bronnen page asks both.
+        const wantedBatch = new URL(verdict.url).searchParams.get('batch');
+        if (wantedBatch) {
+          if (scenario && scenario.batchDetail) return jsonResponse({ ...scenario.batchOverview, detail: scenario.batchDetail });
+          return jsonResponse(scenario && scenario.batch ? scenario.batch : scenario);
+        }
+        if (scenario && scenario.batchOverview) return jsonResponse(scenario.batchOverview);
         return jsonResponse(scenario && scenario.batch ? scenario.batch : scenario);
+      }
+      if (verdict.routeId === 'coverage') {
+        const scenario = fixtures[fixture] || fixtures.triage;
+        const body = (scenario && scenario.coverage) || (fixtures.triage && fixtures.triage.coverage);
+        return body ? jsonResponse(body) : jsonResponse({ error: 'Fictief dekkingsscenario ontbreekt.' }, 500);
       }
       if (verdict.routeId === 'source-triage') {
         const scenario = fixtures[fixture] || fixtures.triage;

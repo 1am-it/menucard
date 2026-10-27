@@ -82,3 +82,5 @@ data, without a live database read for consumers.
   infrastructure decision.
 - The export mechanism (script or workflow, who opens the pull request)
   is a BE-27 build decision; it must never merge automatically.
+
+> **Amendment (2026-10-27):** the *Find* step is widened by decision 017 (OpenStreetMap and AI, proposals only).

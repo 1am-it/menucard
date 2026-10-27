@@ -15,7 +15,7 @@ const path = require('node:path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const PAGE = fs.readFileSync(path.join(ROOT, 'app', 'internal', 'menu-import', 'page.js'), 'utf8');
 const BLOCK = fs.readFileSync(path.join(ROOT, 'src', 'components', 'AiMenuReadBlock.js'), 'utf8');
-const BATCH = fs.readFileSync(path.join(ROOT, 'app', 'internal', 'source-triage', 'batch', 'BatchAnalysisView.js'), 'utf8');
+const BATCH = fs.readFileSync(path.join(ROOT, 'app', 'internal', 'bronnen', 'batch', 'BatchAnalysisView.js'), 'utf8');
 
 test('Y2: the AI card comes after the source card and before the manual steps', () => {
   const steps = PAGE.indexOf('<div className="mai-steps">');

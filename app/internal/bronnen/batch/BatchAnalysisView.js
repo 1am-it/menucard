@@ -13,6 +13,7 @@ import { MAX_BATCH_URLS, DAILY_URL_LIMIT, COPY, ACTION_LABELS, precheckLines, sp
 import { formatPath } from '@/src/lib/menuHierarchy'
 import { parsePathText, reviewKey, keepAllChoices } from '@/src/lib/menuStructureReview'
 import { applyAdviceChoices } from '@/src/lib/menuStructureAdvice'
+import { menukopjesBackHref } from '@/src/lib/sourceReview'
 
 /** The local per-section state starts from the recorded decisions, otherwise
  * from a stored AI advice (a suggestion the reviewer still confirms). */
@@ -315,7 +316,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
     if (!structureReview) return
     if (adviceSections && adviceSections.length > 0) {
       // "Neem alle adviezen over": apply every advice, keep the rest as the
-      // reviewer would with "Alles klopt zo". Rubrieken zonder advies staan er
+      // reviewer would with "Alles klopt zo". Menukopjes zonder advies staan er
       // expliciet bij in de hint; de bevestiging noemt het aantal.
       const advised = applyAdviceChoices(structureReview.required, adviceSections)
       const rest = keepAllChoices(structureReview.required.filter((section) => !advised[section.key]))
@@ -338,7 +339,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
     if (!result || result.ok !== true || !next) {
       setAdviceNote({
         tone: 'notice',
-        text: (result && result.body && result.body.error) || 'Het AI-advies lukte niet. Je kunt de rubrieken zelf beoordelen.',
+        text: (result && result.body && result.body.error) || 'Het AI-advies lukte niet. Je kunt de menukopjes zelf beoordelen.',
       })
       return
     }
@@ -346,7 +347,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
     setStructure(applyAdviceChoices(structureReview.required, next.sections))
     setAdviceNote({
       tone: 'notice',
-      text: `AI-advies over ${next.sections.length} van ${structureReview.required.length} rubrieken. Controleer het citaat en bevestig zelf.`,
+      text: `AI-advies over ${next.sections.length} van ${structureReview.required.length} menukopjes. Controleer het citaat en bevestig zelf.`,
     })
   }
 
@@ -367,14 +368,15 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
   // old unfiltered source-triage list lost the restaurant, source and page;
   // this link reopens the same result with its source context intact.
   const reviewHref = item.restaurant && batchId
-    ? `/internal/source-triage/batch?batch=${encodeURIComponent(batchId)}&item=${item.position}`
+    ? `/internal/bronnen/batch?batch=${encodeURIComponent(batchId)}&item=${item.position}`
     : `/internal/onboarding-restaurant${item.url ? `?url=${encodeURIComponent(item.url)}` : ''}`
-  // The image/scan route deliberately leaves the batch: the existing Bronnen
-  // beoordelen page lets a human propose another text/PDF source or mark this
-  // one unusable. The reason travels with the link so it stays visible.
+  // The image/scan route deliberately leaves the batch: the existing "Bronnen
+  // beoordelen" page lets a human propose another text/PDF source or mark this
+  // one unusable. BE-31 (#74) moved that page to /internal/bronnen; the same
+  // restaurant's task opens there.
   const reviewSourceHref = item.restaurant
-    ? `/internal/source-triage?restaurant=${encodeURIComponent(item.restaurant.id)}&reason=image_only`
-    : '/internal/source-triage?reason=image_only'
+    ? `/internal/bronnen?restaurant=${encodeURIComponent(item.restaurant.id)}&reason=image_only`
+    : '/internal/bronnen?reason=image_only'
 
   // W1 of Lead review 6380804419: on a failed or empty automatic read, the
   // existing job is the allowed source of an AI reading. The link opens the
@@ -481,21 +483,21 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           {isStarter && (
             <section className="bta-ai-help" aria-labelledby={`bta-advice-${item.jobId}`}>
               <h3 id={`bta-advice-${item.jobId}`} className="bta-ai-title">
-                {adviceSections ? 'AI-advies bij deze rubrieken' : 'AI-advies vragen'}
+                {adviceSections ? 'AI-advies bij deze menukopjes' : 'AI-advies vragen'}
               </h3>
               {adviceSections ? (
                 <p className="bta-muted">
-                  Eén suggestie voor alle onzekere rubrieken samen, met een letterlijk citaat als bewijs. De AI beslist
+                  Eén suggestie voor alle onzekere menukopjes samen, met een letterlijk citaat als bewijs. De AI beslist
                   niets; jij bevestigt hieronder zelf.
                 </p>
               ) : aiEnabled ? (
                 <p className="bta-muted">
-                  Eén aanroep voor alle {structureReview.required.length} onzekere rubrieken samen. Het advies is een
+                  Eén aanroep voor alle {structureReview.required.length} onzekere menukopjes samen. Het advies is een
                   suggestie met een letterlijk citaat; jij bevestigt.
                 </p>
               ) : (
                 <p className="bta-muted">
-                  {aiUnavailable || 'AI-advies is nu niet beschikbaar.'} Je kunt de rubrieken hieronder zelf beoordelen.
+                  {aiUnavailable || 'AI-advies is nu niet beschikbaar.'} Je kunt de menukopjes hieronder zelf beoordelen.
                 </p>
               )}
               {aiEnabled && !adviceSections && (
@@ -534,7 +536,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           <button type="button" className="di-btn-primary bta-btn" disabled={busy} onClick={() => setConfirming(item.jobId)}>
             {ACTION_LABELS.confirm}
           </button>
-          <p className="bta-muted">Alle {structureReview.required.length} onzekere rubrieken zijn behandeld. Bevestig daarna de bron; er wordt niets gepubliceerd.</p>
+          <p className="bta-muted">Alle {structureReview.required.length} onzekere menukopjes zijn behandeld. Bevestig daarna de bron; er wordt niets gepubliceerd.</p>
         </div>
       )}
 
@@ -545,8 +547,8 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           </p>
           {structureReview && (
             <p className="bta-confirm-count" role="status">
-              {plural(structureReview.required.length, 'rubriek', 'rubrieken')} bevestigen? Je bevestigt de
-              rubriekindeling van deze bronversie en daarna de bron zelf.
+              {plural(structureReview.required.length, 'menukopje', 'menukopjes')} bevestigen? Je bevestigt de
+              menukopjes van deze bronversie en daarna de bron zelf.
             </p>
           )}
           <p className="bta-muted">
@@ -555,7 +557,7 @@ function ResultCard({ item, batchId, focusItem, isStarter, batchOpen, ownOpenBat
           </p>
           {structureReview && structureState && (
             <p className="bta-muted">
-              {plural(structureState.payload.sections.length, 'onzekere rubriek', 'onzekere rubrieken')} behandeld:{' '}
+              {plural(structureState.payload.sections.length, 'onzeker menukopje', 'onzekere menukopjes')} behandeld:{' '}
               {structureState.payload.sections.filter((section) => section.action === 'keep').length} gehandhaafd,{' '}
               {structureState.payload.sections.filter((section) => section.action === 'correct').length} gecorrigeerd. Deze
               keuzes worden als edits in het concept opgenomen.
@@ -795,6 +797,14 @@ function BatchDetail({ detail, focusItem, ownOpenBatchId, busy, confirming, setC
 
 /** Everything below the internal navigation. */
 export default function BatchAnalysisView({ data, loadError, message, viewing, focusItem, ownOpenBatchId, busy, confirming, setConfirming, onConfirm, onRerun, onAdjust, onSaveConcept, onNew, notice, text, setText, onStart, actionError, onShowOpen, onSelect, aiStatus, onAdvice }) {
+  // BE-31 (#74): "Menukopjes controleren" is opened from a row that names its own
+  // screen as the way back. Only those two internal screens are accepted; an
+  // unknown or external value falls back to the task list.
+  const [returnTo, setReturnTo] = useState(null)
+  useEffect(() => {
+    setReturnTo(new URLSearchParams(window.location.search).get('return'))
+  }, [])
+  const backHref = menukopjesBackHref(returnTo)
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -802,7 +812,7 @@ export default function BatchAnalysisView({ data, loadError, message, viewing, f
         <span className="bta-desktop-only" aria-hidden="true">
           /
         </span>
-        <a href="/internal/source-triage" className="stg-link">
+        <a href={backHref} className="stg-link">
           <span className="bta-mobile-only" aria-hidden="true">
             ←{' '}
           </span>

@@ -78,12 +78,12 @@ test('the v1 concept reader is guarded and never flattens a versioned envelope',
 });
 
 test('UI renders the v2 view as text only and keeps the v1 click path', () => {
-  for (const file of ['app/internal/source-triage/batch/MenuReview.js', 'app/internal/menu-concepts/MenuConceptsView.js']) {
+  for (const file of ['app/internal/bronnen/batch/MenuReview.js', 'app/internal/menu-concepts/MenuConceptsView.js']) {
     const src = read(file);
     assert.doesNotMatch(src, /dangerouslySetInnerHTML|innerHTML\s*=/, file);
     assert.doesNotMatch(src, /eval\(|new Function\(/, file);
   }
-  const review = read('app/internal/source-triage/batch/MenuReview.js');
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
   assert.match(review, /export function ProductReview\(/);
   assert.match(review, /Alleen-lezen/);
   assert.match(review, /item\.product && <ProductReview/);

@@ -46,7 +46,7 @@ test('control view: dishes and prices per section, counts, and only uncertain li
     [
       ['Fictieve salade', 'Komt meer dan eens voor'],
       ['Fictieve vis', 'Prijs ontbreekt'],
-      ['Fictief kaasplankje', 'Rubriek onduidelijk'],
+      ['Fictief kaasplankje', 'Menukopje onduidelijk'],
       ['Fictieve salade', 'Komt meer dan eens voor'],
     ]
   );

@@ -117,7 +117,7 @@ test('an uncertain structure is "Controle nodig": unclear sections block until n
   const analysis = await runRestaurantSourceAnalysis({ homepageHtml: page, homepageUrl: 'https://bistro-fictief.example/', fetchCandidate: async () => ({ status: 'blocked' }) });
   const menu = analysis.menuContexts[0];
   assert.equal(menu.structure, 'uncertain');
-  assert.ok(analysis.notes.some((n) => /rubriekindeling is onzeker/.test(n)));
+  assert.ok(analysis.notes.some((n) => /menukopjes zijn onzeker/.test(n)));
   const summary = buildCandidateSummary({ restaurantCandidateFields: {}, menus: analysis.menuContexts });
   const concept = buildMenuConcept({ menus: summary.menus, liveLines: [], edits: {} });
   assert.deepEqual(concept.blockers.map((b) => b.status), ['unclear_category', 'unclear_category']);

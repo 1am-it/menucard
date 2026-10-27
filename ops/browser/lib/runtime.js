@@ -43,7 +43,7 @@ function killTree(child) {
   }
 }
 
-async function startServer({ port, appUrl, outputDir }) {
+async function startServer({ port, appUrl, outputDir, readyPath }) {
   fs.mkdirSync(outputDir, { recursive: true });
   const log = fs.createWriteStream(path.join(outputDir, 'next-dev.log'));
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -61,7 +61,10 @@ async function startServer({ port, appUrl, outputDir }) {
   });
   child.stdout.pipe(log);
   child.stderr.pipe(log);
-  await waitForHttp(`${appUrl}/internal/source-triage/batch`, 120000);
+  // BE-31 (#74): the old batch page address answers with a 308, so the default
+  // ready path is the login route (always 200, no auth) and a check can name its
+  // own path instead.
+  await waitForHttp(`${appUrl}${readyPath || '/internal/login'}`, 120000);
   return child;
 }
 

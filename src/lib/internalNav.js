@@ -67,7 +67,7 @@ const ADD_ENTRY_HREF = '/internal/toevoegen';
 const INTERNAL_MODULES = [
   { id: 'coverage', label: 'Dekking', href: COVERAGE_HREF, requiredRole: 'internal', placement: 'primary' },
   { id: 'menu-concepts', label: 'Menuconcepten beoordelen', href: '/internal/menu-concepts', requiredRole: 'internal', placement: 'open-work', countKey: 'menu-concepts', subtitle: 'Concepten controleren en intern goedkeuren' },
-  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/source-triage', requiredRole: 'internal', placement: 'open-work', countKey: 'source-triage', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
+  { id: 'source-triage', label: 'Bronnen beoordelen', href: '/internal/bronnen', requiredRole: 'internal', placement: 'open-work', countKey: 'source-triage', subtitle: 'Bronvoorstellen vastleggen en beoordelen' },
   { id: 'import-inbox', label: 'Nieuwe aanleveringen', href: '/internal/import-inbox', requiredRole: 'internal', placement: 'open-work', countKey: 'import-inbox', subtitle: 'Nieuwe bronnen' },
   { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'open-work', countKey: 'moderation', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'source-workqueue', label: 'Stadsoverzicht', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'secondary', subtitle: 'Bron en menukaart per restaurant' },

@@ -34,7 +34,7 @@ test('a known account lands on the section with the most real open work', async 
     [COUNT_API]: { body: { counts: { 'menu-concepts': 2, 'source-triage': 7, 'import-inbox': 1 } } },
   });
   const href = await resolveLandingAfterSignIn('fixture-token', impl);
-  assert.equal(href, '/internal/source-triage');
+  assert.equal(href, '/internal/bronnen');
   assert.deepEqual(calls.map((call) => call.url), [ME_API, COUNT_API]);
   for (const call of calls) {
     assert.equal(call.options.headers.Authorization, 'Bearer fixture-token');
