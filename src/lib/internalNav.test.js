@@ -482,7 +482,7 @@ test('structural safety net: the add page is one form with the existing restaura
   assert.match(source, /import InternalNav from '@\/src\/components\/InternalNav'/);
   assert.match(source, /<InternalNav accessToken=\{session\.access_token\} \/>/);
   assert.match(source, /\/api\/internal\/v1\/manual-menu-import\/restaurants/);
-  assert.match(source, /decideAddEntry\(\{ restaurant: selectedRestaurant, urls \}\)/);
+  assert.match(source, /decideAddEntry\(\{ restaurant, urls \}\)/);
   assert.match(source, /manualImportHref\(selectedRestaurant\)/);
   assert.match(source, /Restaurant of menu toevoegen/);
   assert.match(source, /Liever zelf invoeren of plakken/);

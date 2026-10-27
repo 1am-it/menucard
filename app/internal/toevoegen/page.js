@@ -23,6 +23,7 @@ import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import useAiReading from '@/src/components/useAiReading'
 import { decideAddEntry, manualImportHref, MAX_BATCH_URLS } from '@/src/lib/internalAddEntry'
+import { decideRestaurantPick, restaurantChoiceLabel } from '@/src/lib/restaurantPick'
 import { rowForBatchItem, stepHref, aiReadReady, confirmedCheckUrl, recheckUrlFor, CHECK_URL_SOURCE_LABELS, CHECK_COPY } from '@/src/lib/sourceReview'
 import { discoveryRow, originLabel, costLine } from '@/src/lib/sourceDiscovery'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
@@ -50,6 +51,11 @@ export default function AddEntryPage() {
   const [session, setSession] = useState(undefined)
   const [restaurantQuery, setRestaurantQuery] = useState('')
   const [restaurantChoices, setRestaurantChoices] = useState([])
+  // BE-35 (#84, criterion 4): a list of choices belongs to one typed query; a
+  // stale list may never decide for a newer name.
+  const [choicesQuery, setChoicesQuery] = useState('')
+  // The clear question when several restaurants match, or nothing.
+  const [restaurantNotice, setRestaurantNotice] = useState(null)
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [urls, setUrls] = useState('')
   const [error, setError] = useState(null)
@@ -370,11 +376,13 @@ export default function AddEntryPage() {
     if (!token) return undefined
     if (selectedRestaurant && selectedRestaurant.name === restaurantQuery) {
       setRestaurantChoices([])
+      setChoicesQuery('')
       return undefined
     }
     const query = restaurantQuery.trim()
     if (query.length < 2) {
       setRestaurantChoices([])
+      setChoicesQuery('')
       return undefined
     }
     let cancelled = false
@@ -389,6 +397,7 @@ export default function AddEntryPage() {
         const data = await res.json().catch(() => ({}))
         if (cancelled) return
         setRestaurantChoices(res.ok && Array.isArray(data.restaurants) ? data.restaurants : [])
+        setChoicesQuery(query)
       } catch {
         if (!cancelled) setRestaurantChoices([])
       }
@@ -403,6 +412,8 @@ export default function AddEntryPage() {
     setSelectedRestaurant(choice)
     setRestaurantQuery(choice.name)
     setRestaurantChoices([])
+    setChoicesQuery('')
+    setRestaurantNotice(null)
     setError(null)
   }
 
@@ -412,14 +423,69 @@ export default function AddEntryPage() {
     // A proposal belongs to the name it was searched for.
     setNameSearch({ busy: false, proposal: null, message: null, cost: null, monthly: null })
     if (selectedRestaurant && value !== selectedRestaurant.name) setSelectedRestaurant(null)
+    setRestaurantNotice(null)
   }
+
+  // BE-35 (#84, criterion 4): the typed name chooses the restaurant by itself
+  // when it is unambiguous — one match, or one exact name among several. The
+  // same pure rule as the manual import page; several matches ask a clear
+  // question and start nothing. It runs when the field is left, on Enter and on
+  // the primary button ("Doorgaan"), so all three agree.
+  const searchRestaurants = useCallback(
+    async (query) => {
+      if (!token) return []
+      try {
+        const res = await fetch(`${RESTAURANTS_API}?q=${encodeURIComponent(query)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (!res.ok) return []
+        const data = await res.json().catch(() => ({}))
+        return data && Array.isArray(data.restaurants) ? data.restaurants : []
+      } catch {
+        return []
+      }
+    },
+    [token]
+  )
+
+  const resolveRestaurantChoice = useCallback(async () => {
+    if (selectedRestaurant) return { status: 'chosen', choice: selectedRestaurant, message: null }
+    const query = restaurantQuery.trim()
+    if (query.length < 2) {
+      setRestaurantNotice(null)
+      return { status: 'idle', choice: null, message: null }
+    }
+    let choices = choicesQuery === query ? restaurantChoices : []
+    if (choicesQuery !== query) {
+      choices = await searchRestaurants(query)
+      setRestaurantChoices(choices)
+      setChoicesQuery(query)
+    }
+    const pick = decideRestaurantPick({ query, choices })
+    if (pick.status === 'chosen') {
+      chooseRestaurant(pick.choice)
+      return pick
+    }
+    setRestaurantNotice(pick.status === 'multiple' ? pick.message : null)
+    return pick
+  }, [choicesQuery, restaurantChoices, restaurantQuery, searchRestaurants, selectedRestaurant])
 
   const start = useCallback(
     async (event) => {
       event.preventDefault()
       setError(null)
       setFallbackHref(null)
-      const decision = decideAddEntry({ restaurant: selectedRestaurant, urls })
+      // BE-35 (#84, criterion 4): a typed, unambiguous name is the restaurant.
+      // Several matches stop here with the clear question; nothing is created.
+      const pick = await resolveRestaurantChoice()
+      if (pick.status === 'multiple') {
+        setRestaurantNotice(pick.message)
+        setError(pick.message)
+        return
+      }
+      const restaurant = pick.choice || selectedRestaurant
+      const decision = decideAddEntry({ restaurant, urls })
       if (!decision.ok) {
         setError(decision.error)
         return
@@ -458,7 +524,7 @@ export default function AddEntryPage() {
         setBusy(false)
       }
     },
-    [loadBatch, router, selectedRestaurant, token, urls],
+    [loadBatch, resolveRestaurantChoice, router, selectedRestaurant, token, urls],
   )
 
   if (session === undefined) {
@@ -497,10 +563,7 @@ export default function AddEntryPage() {
             </label>
             {selectedRestaurant ? (
               <div className="mai-chosen">
-                <span className="mai-chosen-name">
-                  {selectedRestaurant.name}
-                  {selectedRestaurant.buurt ? ` · ${selectedRestaurant.buurt}` : ''}
-                </span>
+                <span className="mai-chosen-name">{restaurantChoiceLabel(selectedRestaurant)}</span>
                 <button
                   type="button"
                   className="stg-btn-secondary mai-btn"
@@ -508,6 +571,8 @@ export default function AddEntryPage() {
                     setSelectedRestaurant(null)
                     setRestaurantQuery('')
                     setRestaurantChoices([])
+                    setChoicesQuery('')
+                    setRestaurantNotice(null)
                     setError(null)
                   }}
                 >
@@ -522,6 +587,15 @@ export default function AddEntryPage() {
                   type="search"
                   value={restaurantQuery}
                   onChange={(event) => changeRestaurantQuery(event.target.value)}
+                  onBlur={() => {
+                    resolveRestaurantChoice()
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault()
+                      resolveRestaurantChoice()
+                    }
+                  }}
                   autoComplete="off"
                   placeholder="Typ de naam van het restaurant"
                   aria-describedby="add-restaurant-help"
@@ -541,7 +615,12 @@ export default function AddEntryPage() {
                     ))}
                   </ul>
                 ) : null}
-                {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 ? (
+                {restaurantNotice ? (
+                  <p className="bta-muted" role="status">
+                    {restaurantNotice}
+                  </p>
+                ) : null}
+                {restaurantQuery.trim().length >= 2 && restaurantChoices.length === 0 && !restaurantNotice ? (
                   <p className="bta-muted">Geen restaurant gevonden met deze naam. Laat het veld leeg voor een nieuw restaurant.</p>
                 ) : null}
                 {/* BE-34 (#81, criterion 2): a name that is not in our list can be
