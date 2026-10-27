@@ -12,16 +12,20 @@ const {
   MAX_MENU_IMAGES,
   MAX_SCAN_PAGES,
   MAX_IMAGE_BYTES,
+  MIN_MENU_IMAGE_EDGE,
   MENU_TEXT_MIN_PRICE_LINES,
   CONTROLE_NODIG,
   collectMenuImages,
   hasMenuText,
   imageReadNotice,
   imageProvenance,
+  isSharedSiteImage,
+  isSiteAssetUrl,
   menuPriceLineCount,
   pageHasMenuContext,
   planImageRead,
   provenanceLabel,
+  sharedSiteImageKeys,
 } = require('./menuImageRead');
 const schema = require('./menuExtractionSchema');
 
@@ -67,6 +71,49 @@ test('BE-33: at most ten menu images are collected, and a page without a menu wo
   assert.equal(collectMenuImages({ html: many, pageUrl: 'https://voorbeeld.nl/menu', limit: MAX_MENU_IMAGES + 1 }).length, MAX_MENU_IMAGES + 1);
   // The caller can also count every candidate and decide what it reads itself.
   assert.equal(collectMenuImages({ html: many, pageUrl: 'https://voorbeeld.nl/menu', limit: Number.MAX_SAFE_INTEGER }).length, 13);
+test('BE-35 ronde 3: site-opmaak is geen menukaart — cropped-header, klein beeld en een beeld op elke pagina', () => {
+  const pageUrl = 'https://www.aldente-voorbeeld.example/menukaart-restaurant-2/';
+  const html = [
+    // The WordPress header/site icon: "cropped-" in the file name.
+    '<header><a href="/"><img src="/wp-content/uploads/2022/03/cropped-PNG-afbeelding.png" alt="" width="1920" height="240"></a></header>',
+    // A declared icon: longest side below the minimum edge.
+    '<img src="/wp-content/uploads/2026/08/small-menu-icon.jpg" alt="Menukaart" width="480" height="480">',
+    // A portrait menu scan: a short width, a long side above the minimum.
+    '<img src="/wp-content/uploads/2026/08/Menukaart0826a.jpg" alt="" width="300" height="1700">',
+    // No declared size at all is never a reason to drop an image.
+    '<img src="/wp-content/uploads/2026/08/Menukaart0826b.jpg" alt="">',
+  ].join('\n');
+  const found = collectMenuImages({ html, pageUrl });
+  assert.deepEqual(
+    found.map((entry) => entry.url),
+    [
+      'https://www.aldente-voorbeeld.example/wp-content/uploads/2026/08/Menukaart0826a.jpg',
+      'https://www.aldente-voorbeeld.example/wp-content/uploads/2026/08/Menukaart0826b.jpg',
+    ],
+  );
+  assert.equal(MIN_MENU_IMAGE_EDGE, 600);
+  assert.equal(isSiteAssetUrl('https://voorbeeld.nl/uploads/cropped-logo-2022.png'), true);
+  assert.equal(isSiteAssetUrl('https://voorbeeld.nl/uploads/Menukaart0826a.jpg'), false);
+
+  // An image that this same reading finds on more than one page is site layout:
+  // the pure rule names its key, with WordPress size variants grouped together.
+  const shared = sharedSiteImageKeys([
+    { pageUrl: 'https://voorbeeld.nl/menukaart/', images: [{ url: 'https://voorbeeld.nl/uploads/kop-2022.png' }, { url: 'https://voorbeeld.nl/uploads/Menukaart0826a.jpg' }] },
+    { pageUrl: 'https://voorbeeld.nl/menu-classico/', images: [{ url: 'https://voorbeeld.nl/uploads/kop-2022-768x120.png' }, { url: 'https://voorbeeld.nl/uploads/Classico0826a.jpg' }] },
+  ]);
+  assert.equal(isSharedSiteImage('https://voorbeeld.nl/uploads/kop-2022.png', shared), true);
+  assert.equal(isSharedSiteImage('https://voorbeeld.nl/uploads/kop-2022-300x47.png', shared), true);
+  assert.equal(isSharedSiteImage('https://voorbeeld.nl/uploads/Menukaart0826a.jpg', shared), false);
+  assert.equal(isSharedSiteImage('https://voorbeeld.nl/uploads/Classico0826a.jpg', shared), false);
+  // One page alone never makes an image "shared".
+  assert.equal(sharedSiteImageKeys([{ pageUrl: 'https://voorbeeld.nl/menukaart/', images: [{ url: 'https://voorbeeld.nl/uploads/kop-2022.png' }] }]).size, 0);
+  // The same image twice on one page is still one page.
+  assert.equal(sharedSiteImageKeys([
+    { pageUrl: 'https://voorbeeld.nl/menukaart/', images: [{ url: 'https://voorbeeld.nl/uploads/kop-2022.png' }, { url: 'https://voorbeeld.nl/uploads/kop-2022.png' }] },
+  ]).size, 0);
+});
+
+
   assert.deepEqual(collectMenuImages({ html: '<img src="/header-1.jpg" alt="Welkom">', pageUrl: 'https://voorbeeld.nl/' }), []);
   assert.deepEqual(collectMenuImages({ html: '', pageUrl: 'https://voorbeeld.nl/' }), []);
 });
@@ -165,13 +212,21 @@ test('BE-33: a text source wins; images and a scan are planned within the fixed 
   assert.equal(scan.pageCount, 3);
   assert.match(scan.estimate.label, /3 pagina/);
 
-  // Criterion 2: ten images are the maximum, an eleventh is refused.
+  // Criterion 2 (BE-35 ronde 3, #84): ten images are the maximum of a reading. An
+  // eleventh is never a refusal: the first ten are read and the real number is
+  // said out loud in ordinary language.
   const tenImages = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => image(n)), hasText: false }] });
   assert.equal(tenImages.ok, true);
+  assert.equal(tenImages.imageCount, 10);
+  assert.equal(tenImages.limitation, null);
   const elevenImages = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((n) => image(n)), hasText: false }] });
-  assert.equal(elevenImages.ok, false);
-  assert.equal(elevenImages.reason, 'too_many_images');
-  assert.match(elevenImages.message, /maximaal 10/);
+  assert.equal(elevenImages.ok, true);
+  assert.equal(elevenImages.imageCount, 10);
+  assert.equal(elevenImages.availableImageCount, 11);
+  assert.equal(elevenImages.limitation, 'Deze lezing heeft 11 menu-afbeeldingen; de eerste 10 zijn gelezen.');
+  assert.match(elevenImages.estimate.label, /10 afbeeldingen/);
+  assert.equal(elevenImages.sources.length, 1);
+  assert.equal(elevenImages.sources[0].imageCount, 10);
 
   // Ten pages are the maximum; eleven are refused before anything is sent.
   const ten = planImageRead({ sources: [{ id: 'source-1', kind: 'pdf', documentBase64: TINY_PNG, pageCount: MAX_SCAN_PAGES, hasText: false }] });

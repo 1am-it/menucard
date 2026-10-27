@@ -7,10 +7,16 @@
 
 const ORIGIN = 'https://www.aldente-voorbeeld.example';
 const UPLOAD = '/wp-content/uploads/2026/08';
+const SITE_HEADER_IMAGE = `${ORIGIN}/wp-content/uploads/2022/03/cropped-PNG-afbeelding.png`;
 
 function navigation() {
   return [
-    '<header class="site-header"><nav aria-label="Hoofdmenu">',
+    '<header class="site-header">',
+    // BE-35 ronde 3 (#84): the live Al Dente pages carry this WordPress header
+    // image on every page ("/wp-content/uploads/2022/03/cropped-PNG-afbeelding.png").
+    // It is site layout, never a menu page.
+    `<a href="${ORIGIN}/"><img src="${SITE_HEADER_IMAGE}" alt="" width="1920" height="240" class="custom-logo"></a>`,
+    '<nav aria-label="Hoofdmenu">',
     `<a href="${ORIGIN}/">Home</a>`,
     `<a href="${ORIGIN}/menukaart-restaurant-2/">Menukaart</a>`,
     `<a href="${ORIGIN}/menu-classico/">Menu Classico</a>`,
@@ -130,4 +136,4 @@ function wordpressVariantsPage() {
   return page;
 }
 
-module.exports = { ORIGIN, UPLOAD, alDenteMenuPage, classicoPage, menuImagePage, textMenuPage, wordpressVariantsPage };
+module.exports = { ORIGIN, UPLOAD, SITE_HEADER_IMAGE, alDenteMenuPage, classicoPage, menuImagePage, textMenuPage, wordpressVariantsPage };

@@ -18,7 +18,16 @@
 const { createHash } = require('node:crypto');
 const { decodeEntities } = require('./htmlMenuStructure');
 const { sourceHashForText } = require('./manualMenuImportBundle');
-const { MAX_IMAGE_BYTES, MAX_MENU_IMAGES, collectMenuImages, hasMenuText, mediaTypeForUrl } = require('./menuImageRead');
+const {
+  MAX_IMAGE_BYTES,
+  MAX_MENU_IMAGES,
+  collectMenuImages,
+  hasMenuText,
+  isSharedSiteImage,
+  mediaTypeForUrl,
+  readingImageLimitNotice,
+  sharedSiteImageKeys,
+} = require('./menuImageRead');
 
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 const MAX_TEXT_CHARS = 120_000;
@@ -116,10 +125,18 @@ async function readMenuImages({ images, fetchImpl, robotsCheck, maxImageBytes = 
 }
 
 /**
- * Leest één bron. `fetchImpl` is altijd de veilige fetch van de bestaande
- * route; deze module kent zelf geen netwerk.
+ * BE-35 ronde 3 (#84): phase one of one reading. A page becomes either a ready
+ * source (text, PDF, a concrete limitation) or an *open* capture: the menu
+ * images of this page are candidates that still have to be fetched. Only the
+ * page itself is fetched here.
+ *
+ * Waarom twee fasen: een afbeelding die op meer dan één pagina van dezelfde
+ * lezing staat is site-opmaak en geen menukaart, en de tien afbeeldingen van een
+ * lezing worden over alle bronnen verdeeld. Beide regels vragen om alle pagina's
+ * voordat er één afbeelding wordt opgehaald. `fetchImpl` is altijd de veilige
+ * fetch van de bestaande route; deze module kent zelf geen netwerk.
  */
-async function readManualImportSource({
+async function capturePageSource({
   id,
   url,
   fetchImpl,
@@ -134,20 +151,22 @@ async function readManualImportSource({
   if (typeof robotsCheck === 'function') {
     const gate = await robotsCheck(url);
     if (gate && gate.shouldFetchPage === false) {
-      return failureSource({
-        id,
-        url,
-        kind: 'other',
-        status: 'blocked',
-        limitation: 'robots.txt staat het ophalen van deze pagina niet toe.',
-      });
+      return {
+        source: failureSource({
+          id,
+          url,
+          kind: 'other',
+          status: 'blocked',
+          limitation: 'robots.txt staat het ophalen van deze pagina niet toe.',
+        }),
+      };
     }
   }
   let response;
   try {
     response = await fetchImpl(url, { encoding: 'buffer', maxBytes });
   } catch {
-    return failureSource({ id, url, kind: 'other', status: 'failed', limitation: 'Deze pagina kon niet worden opgehaald.' });
+    return { source: failureSource({ id, url, kind: 'other', status: 'failed', limitation: 'Deze pagina kon niet worden opgehaald.' }) };
   }
   const finalUrl = response && response.finalUrl ? response.finalUrl : url;
   const contentType = response && response.contentType ? response.contentType : '';
@@ -164,24 +183,26 @@ async function readManualImportSource({
       : null;
     const tooLarge = Boolean(bytes && typeof bytes.length === 'number' && bytes.length > maxDocumentBytes);
     return {
-      id,
-      url: finalUrl,
-      kind: 'pdf',
-      status: 'read',
-      text: '',
-      hasText: false,
-      imageRead: true,
-      sha256,
-      pageCount,
-      documentBase64: bytes && typeof bytes.length === 'number' && bytes.length > 0 && !tooLarge ? bytes.toString('base64') : null,
-      fetchedAt,
-      limitation: tooLarge
-        ? 'De PDF is groter dan de vaste limiet en gaat niet als document naar de AI.'
-        : 'De PDF gaat als document naar de AI; de pagina’s worden niet als tekst gelezen.',
+      source: {
+        id,
+        url: finalUrl,
+        kind: 'pdf',
+        status: 'read',
+        text: '',
+        hasText: false,
+        imageRead: true,
+        sha256,
+        pageCount,
+        documentBase64: bytes && typeof bytes.length === 'number' && bytes.length > 0 && !tooLarge ? bytes.toString('base64') : null,
+        fetchedAt,
+        limitation: tooLarge
+          ? 'De PDF is groter dan de vaste limiet en gaat niet als document naar de AI.'
+          : 'De PDF gaat als document naar de AI; de pagina’s worden niet als tekst gelezen.',
+      },
     };
   }
   if (contentType !== 'text/html' && contentType !== 'application/xhtml+xml') {
-    return failureSource({ id, url: finalUrl, kind: 'other', status: 'failed', limitation: 'Dit type bron wordt niet ondersteund.' });
+    return { source: failureSource({ id, url: finalUrl, kind: 'other', status: 'failed', limitation: 'Dit type bron wordt niet ondersteund.' }) };
   }
   const html = response.bytes ? response.bytes.toString('utf8') : String(response.body || '');
   const text = htmlToPlainText(html);
@@ -194,51 +215,142 @@ async function readManualImportSource({
   const menuOnlyAsImage = candidates.length > 0 && !hasMenuText(text);
   if (text === '' || menuOnlyAsImage) {
     if (candidates.length > 0) {
-      // BE-33 (#79, criterion 2) with the BE-35 ronde 2 (#84) overflow rule: the
-      // first 10 candidates in page order are fetched, each through the same safe
-      // route. More candidates is never an empty reading, and the limitation
-      // names the real number.
-      const selected = candidates.slice(0, MAX_MENU_IMAGES);
-      const { images, limitations } = await readMenuImages({ images: selected, fetchImpl, robotsCheck });
-      const notes = [];
-      if (candidates.length > MAX_MENU_IMAGES) {
-        notes.push(`Deze pagina heeft ${candidates.length} menu-afbeeldingen; de eerste ${MAX_MENU_IMAGES} zijn gelezen.`);
-      }
-      notes.push(...limitations);
       return {
-        id,
-        url: finalUrl,
-        kind: 'image',
-        status: 'read',
-        text: '',
-        hasText: false,
-        imageRead: true,
-        sha256: createHash('sha256').update(candidates.map((candidate) => candidate.url).join('\n')).digest('hex'),
-        images,
-        imageCandidates: candidates.length,
-        fetchedAt,
-        limitation: notes.length > 0 ? notes.join(' ') : 'Deze pagina toont de menukaart als afbeelding; de AI leest de afbeeldingen.',
+        source: imageSourceDraft({ id, url: finalUrl, candidates, fetchedAt }),
+        candidates,
+        // Wat deze pagina is als geen enkele kandidaat een menukaart blijkt
+        // (alleen site-opmaak): gewone tekst, of de bestaande lege bron.
+        fallback: text === ''
+          ? {
+              ...failureSource({ id, url: finalUrl, kind: 'html', status: 'read', limitation: 'De pagina bevat geen leesbare tekst.' }),
+              fetchedAt,
+            }
+          : {
+              id,
+              url: finalUrl,
+              kind: 'html',
+              status: 'read',
+              text,
+              hasText: true,
+              sha256: sourceHashForText(text),
+              fetchedAt,
+              limitation: null,
+            },
       };
     }
     return {
-      ...failureSource({ id, url: finalUrl, kind: 'html', status: 'read', limitation: 'De pagina bevat geen leesbare tekst.' }),
-      fetchedAt,
+      source: {
+        ...failureSource({ id, url: finalUrl, kind: 'html', status: 'read', limitation: 'De pagina bevat geen leesbare tekst.' }),
+        fetchedAt,
+      },
     };
   }
   return {
+    source: {
+      id,
+      url: finalUrl,
+      kind: 'html',
+      status: 'read',
+      text,
+      hasText: true,
+      sha256: sourceHashForText(text),
+      fetchedAt,
+      limitation: null,
+    },
+  };
+}
+
+
+/** The stable binding of an image reading: the candidate URLs, never a byte. */
+function imageCandidateHash(candidates) {
+  return createHash('sha256').update(candidates.map((candidate) => candidate.url).join('\n')).digest('hex');
+}
+
+/** The image source of one page, before its images are fetched. */
+function imageSourceDraft({ id, url, candidates, fetchedAt }) {
+  return {
     id,
-    url: finalUrl,
-    kind: 'html',
+    url,
+    kind: 'image',
     status: 'read',
-    text,
-    hasText: true,
-    sha256: sourceHashForText(text),
+    text: '',
+    hasText: false,
+    imageRead: true,
+    sha256: imageCandidateHash(candidates),
+    images: [],
+    imageCandidates: candidates.length,
     fetchedAt,
     limitation: null,
   };
 }
 
-/** Leest een begrensde set URL's, met een vaste sourceId per bron. */
+/**
+ * Fetches the chosen images of one page through the same safe route and words
+ * the limitation: a failed image is named, a cut reading says how many it has.
+ */
+async function sourceWithImages({ source, candidates, fetchImpl, robotsCheck, notes = [] }) {
+  const read = candidates.length > 0
+    ? await readMenuImages({ images: candidates, fetchImpl, robotsCheck })
+    : { images: [], limitations: [] };
+  const all = [...notes, ...read.limitations];
+  return {
+    ...source,
+    images: read.images,
+    limitation: all.length > 0
+      ? all.join(' ')
+      : 'Deze pagina toont de menukaart als afbeelding; de AI leest de afbeeldingen.',
+  };
+}
+
+/**
+ * Leest één bron. `fetchImpl` is altijd de veilige fetch van de bestaande
+ * route; deze module kent zelf geen netwerk. Binnen één bron geldt de grens van
+ * tien afbeeldingen per pagina; over meerdere bronnen verdeelt
+ * `readManualImportSources` die tien.
+ */
+async function readManualImportSource({
+  id,
+  url,
+  fetchImpl,
+  robotsCheck,
+  now = new Date(),
+  maxBytes = MAX_SOURCE_BYTES,
+  maxDocumentBytes = MAX_DOCUMENT_BYTES,
+  readPdfPages = null,
+} = {}) {
+  const captured = await capturePageSource({
+    id,
+    url,
+    fetchImpl,
+    robotsCheck,
+    now,
+    maxBytes,
+    maxDocumentBytes,
+    readPdfPages,
+  });
+  if (!Array.isArray(captured.candidates)) return captured.source;
+  const notes = [];
+  if (captured.candidates.length > MAX_MENU_IMAGES) {
+    notes.push(`Deze pagina heeft ${captured.candidates.length} menu-afbeeldingen; de eerste ${MAX_MENU_IMAGES} zijn gelezen.`);
+  }
+  return sourceWithImages({
+    source: captured.source,
+    candidates: captured.candidates.slice(0, MAX_MENU_IMAGES),
+    fetchImpl,
+    robotsCheck,
+    notes,
+  });
+}
+
+
+/**
+ * Leest een begrensde set URL's, met een vaste sourceId per bron en de regels
+ * van BE-35 ronde 3 (#84) over de hele lezing:
+ *   1. een afbeelding die op meer dan één pagina van deze lezing staat is
+ *      site-opmaak en geen menukandidaat;
+ *   2. de eerste tien menu-afbeeldingen in volgorde van bron en pagina worden
+ *      gelezen, nooit nul als er één past, met het echte aantal erbij.
+ */
 async function readManualImportSources({
   urls,
   fetchImpl,
@@ -250,9 +362,9 @@ async function readManualImportSources({
 } = {}) {
   const list = (Array.isArray(urls) ? urls : []).filter((url) => typeof url === 'string' && url.trim());
   if (list.length === 0) return [];
-  return Promise.all(
+  const captured = await Promise.all(
     list.slice(0, MAX_SOURCES).map((url, index) =>
-      readManualImportSource({
+      capturePageSource({
         id: `source-${index + 1}`,
         url: url.trim(),
         fetchImpl,
@@ -264,7 +376,55 @@ async function readManualImportSources({
       }),
     ),
   );
+
+  // Regel 1: site-opmaak staat op meer dan één pagina van deze lezing.
+  const pages = captured
+    .map((entry, index) => (
+      Array.isArray(entry.candidates)
+        ? { pageUrl: entry.source.url || `page-${index + 1}`, images: entry.candidates }
+        : null
+    ))
+    .filter(Boolean);
+  const shared = sharedSiteImageKeys(pages);
+  const menuCandidates = captured.map((entry) => (Array.isArray(entry.candidates)
+    ? entry.candidates.filter((candidate) => !isSharedSiteImage(candidate.url, shared))
+    : null));
+  const totalCandidates = menuCandidates.reduce((sum, candidates) => sum + (candidates ? candidates.length : 0), 0);
+
+  // Regel 2: de eerste tien menu-afbeeldingen van de lezing, in bronvolgorde.
+  let remaining = MAX_MENU_IMAGES;
+  const planned = captured.map((entry, index) => {
+    if (!Array.isArray(entry.candidates)) return { type: 'plain', entry };
+    const kept = menuCandidates[index];
+    if (kept.length === 0) return { type: 'fallback', entry };
+    const take = kept.slice(0, Math.max(0, remaining));
+    remaining -= take.length;
+    const notes = [];
+    if (kept.length > take.length) notes.push(readingImageLimitNotice(totalCandidates));
+    return {
+      type: 'image',
+      entry,
+      // De binding en het eerlijke aantal gaan over de kandidaten zonder
+      // site-opmaak, ook als deze pagina zelf geen plaats meer had.
+      source: { ...entry.source, sha256: imageCandidateHash(kept), imageCandidates: kept.length },
+      take,
+      notes,
+    };
+  });
+
+  return Promise.all(planned.map((plan) => {
+    if (plan.type === 'plain') return plan.entry.source;
+    if (plan.type === 'fallback') return plan.entry.fallback;
+    return sourceWithImages({
+      source: plan.source,
+      candidates: plan.take,
+      fetchImpl,
+      robotsCheck,
+      notes: plan.notes,
+    });
+  }));
 }
+
 
 module.exports = {
   MAX_SOURCE_BYTES,
