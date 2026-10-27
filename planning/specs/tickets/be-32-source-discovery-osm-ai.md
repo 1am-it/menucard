@@ -50,3 +50,52 @@ Live contract en status: GitHub issue #75.
 - andere steden.
 
 **Rollen:** Lead = Claude Code. Developer = DeepSeek via de lokale runner.
+
+## Implementatie (BE-32, ronde 2 — DeepSeek, 27 okt)
+
+De motor en de schermen zijn gebouwd binnen de grenzen hierboven. Keuzes die een
+reviewer moet kunnen volgen:
+
+- **Laag 1 (OpenStreetMap):** één server-side POST naar de openbare
+  Overpass-API met een eigen User-Agent, begrensd tot de Breda-bbox en met
+  `next: { revalidate: 86400 }`, zodat er nooit per klik een opvraag gaat.
+  `src/lib/osmSource.js` (puur, getest) bouwt de vraag, parseert het antwoord en
+  koppelt een restaurant via een genormaliseerde naam (zonder soortwoord) plus
+  postcode, of afstand als beide kanten coördinaten hebben. Twijfel is geen
+  koppeling. Van de tags blijven alleen naam, adres, website, soort en het
+  OSM-object-id over — geen telefoon, e-mail of openingstijden.
+- **Laag 2 en 3:** de bestaande zelfde-website-zoekfunctie (BE-20, max. 5
+  kandidaten) levert de menulink als een link of zijn tekst op een menu wijst;
+  anders kiest dezelfde AI-client (zelfde model, zelfde sleutel, zelfde
+  maandteller) uit die kandidaten, met een citaat dat met
+  `normalizeEvidenceText` aantoonbaar in de tekst van die pagina staat. Zonder
+  citaat of buiten de kandidatenlijst: geen voorstel.
+- **Laag 4:** AI-zoeken alleen als er na laag 1 geen website bekend is, met de
+  webzoekfunctie van dezelfde provider en per resultaat een bron-URL. Een vaste,
+  geteste lijst bezorg- en reserveringsplatforms wordt altijd verworpen.
+- **Voorstel en herkomst:** elk resultaat is een BE-24-voorstel
+  (`add_candidate`) met de herkomst in het bestaande `note`-veld (max. 280
+  tekens): laag, website, menulink, citaat, bron en de gemeten AI-kosten. De rij
+  toont "Bevestig voorstel"; daarna volgt de bestaande controle. Wat blijft
+  liggen is een 💡-taak in Bronnen beoordelen.
+- **"Negeren" bij Nieuw gevonden:** een BE-24-voorstel `mark_unusable` op de
+  sleutel van het OSM-object (`osm-node-…`, met de OSM-URL als `current_url`).
+  `buildTriageView` kent alleen restaurant-id's uit `data/restaurants.json`, dus
+  zo'n rij wordt daar als verweesd voorstel geteld en nooit werk op een ander
+  scherm. Geen migratie, geen nieuwe tabel.
+- **Budget:** vóór elke AI-aanroep wordt het bestaande maandbedrag uit de
+  duurzame AI-kosten gelezen en met `budgetDecision` getoetst; een betaalde
+  mislukking telt mee. Wat niet in een voorstel kon worden vastgelegd (een
+  AI-zoekactie zonder bruikbaar resultaat) telt niet in de maandteller; de
+  schermen tonen daarom de kosten van de zoekactie zelf en noemen dat bedrag
+  apart. Volledige vastlegging van zulke kosten vraagt een kleine eigen
+  kostenrij (migratie) — dat is een besluit voor de Lead, niet iets om hier stil
+  te doen.
+- **Bewijs:** unit-tests met nagebootste Overpass- en AI-antwoorden
+  (`src/lib/osmSource.test.js`, `osmOverpass.test.js`, `sourceDiscovery.test.js`,
+  `sourceDiscoveryHandlers.test.js`), een schermtest op de broncode
+  (`sourceDiscoverySurface.test.js`) en een fixture-browsercheck met
+  screenshots op 1280/390/320 px in licht en donker
+  (`ops/browser/run-bronnen-vind-check.js`, `ops/browser/evidence/be-32/`).
+  Geen echte betaalde aanroep, geen productietoegang.
+

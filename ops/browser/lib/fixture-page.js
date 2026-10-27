@@ -294,6 +294,21 @@ function fixtureBootstrap(scenarios, options = {}) {
         const triage = scenario && scenario.triage ? scenario.triage : (fixtures.triage && fixtures.triage.triage);
         return triage ? jsonResponse(triage) : jsonResponse({ error: 'Fictief brontriagescenario ontbreekt.' }, 500);
       }
+      // BE-32 (#75): the fictional answers of the discovery engine. GET is
+      // "Nieuw gevonden", POST is "Vind bronnen" for the screen that asked.
+      if (verdict.routeId === 'source-discovery') {
+        const scenario = fixtures[fixture] || fixtures.triage;
+        const method = String(verdict.method || 'GET').toUpperCase();
+        const body = method === 'POST' ? scenario && scenario.discoveryFind : scenario && scenario.discoveryNew;
+        if (!body) return jsonResponse({ error: 'Fictief vindbronnenscenario ontbreekt.' }, 500);
+        return jsonResponse(body);
+      }
+      if (verdict.routeId === 'source-discovery-ignore') {
+        return jsonResponse({ ok: true, ignored: 'osm-node-fictief-1', alreadyIgnored: false });
+      }
+      if (verdict.routeId === 'source-triage-decision') {
+        return jsonResponse({ proposal: { id: 'proposal-fictief-vind-1', status: 'accepted' } });
+      }
       if (verdict.routeId === 'menu-concepts-list' || verdict.routeId === 'menu-concepts-detail') {
         const scenario = fixtures[fixture];
         if (!scenario) return jsonResponse({ error: 'Fictief conceptenscenario ontbreekt.' }, 500);

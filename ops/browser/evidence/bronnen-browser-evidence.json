@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T10:42:15.791Z",
+  "generatedAt": "2026-10-27T12:03:02.431Z",
   "kind": "fixture-browser-check",
   "task": "BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij",
   "base": "fix/bronnen-74-echt-werk",
@@ -8,7 +8,7 @@
   "screenshots": [
     {
       "file": "be31-scherm1-1280-light.png",
-      "sha256": "4967b6e3e49f50e39b142449c18e6b7714e5aaf6b851eb20ed6ef7b9ac5a3bbc",
+      "sha256": "6d8281c9227c17ae3d2872461a6da5562b5d7bd1f325233d976250097d649846",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -18,7 +18,7 @@
     },
     {
       "file": "be31-scherm2-1280-light.png",
-      "sha256": "4fe9e225588ae06218b1681028179ac5791b92110fe85bea81580d2cce783954",
+      "sha256": "34b5a50557cde3e23fc4d78de72ec282c0a8c61f53d6577ff2ee897f3d2ba520",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -27,7 +27,7 @@
     },
     {
       "file": "be31-scherm3-1280-light.png",
-      "sha256": "b328eaaa9d5b690930b603eb1e07223c3ed6a7cb0b8667838b74a9fae0eddd34",
+      "sha256": "a943564a786c302deef6af49484ee5218196629ede2d1a564f30249bad25d125",
       "width": 1280,
       "height": 800,
       "viewport": "1280x800",
@@ -36,7 +36,7 @@
     },
     {
       "file": "be31-scherm5-1280-light.png",
-      "sha256": "2614be34b16468d1f30c5aba7146567e76bfe809084dc4f02c03009812a6dbca",
+      "sha256": "cca0585bf8e9d002eaab6dece04c1843843964315b32dc532470bd718be107f5",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -45,7 +45,7 @@
     },
     {
       "file": "be31-scherm7-1280-light.png",
-      "sha256": "cb2be7ab478cbdabfef4571c9fd78837b4105da341f99bdeeeabf11bcaffb734",
+      "sha256": "46f90773369a899266e38b197d575c69ea43357eb1595b8e3500784064e52fba",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -54,7 +54,7 @@
     },
     {
       "file": "be31-scherm1-390-light.png",
-      "sha256": "20fed960b58e5127f94a723fae1e36209c8a244c50c5020061e138383c2c3060",
+      "sha256": "b377964fae23faa5b64931aa93c9d4cc4e172e7186194d4208a5e5f0109c9c9d",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -64,7 +64,7 @@
     },
     {
       "file": "be31-scherm6-390-light.png",
-      "sha256": "d2940860ea3c8272e5019dc2e946f00ea41ba811f9955cb50c72787e64b84719",
+      "sha256": "cc14e540e96d977ced68541962f0dc1073e1ab7bbf1e75648084b6d7bdd7bdf3",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -73,7 +73,7 @@
     },
     {
       "file": "be31-scherm2-390-light.png",
-      "sha256": "74f1e9219f18c9deb745db88b0d55e21f15e7cb5940e9c62e156368cdf41a5c9",
+      "sha256": "358b8c8da30c76b68c2da6f94b42d48792f668bd4420848a9b94946bbe787295",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -91,7 +91,7 @@
     },
     {
       "file": "be31-scherm5-390-light.png",
-      "sha256": "a191fc9d33f5e0f21fec7b27d1536cf9ad6846d709da628dcbe46d3ab534e3a3",
+      "sha256": "b00b5c13ca5403dd7c7278f8713fc14eaaf389b944da6cf396b854b51c3fb03e",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -100,7 +100,7 @@
     },
     {
       "file": "be31-scherm7-390-light.png",
-      "sha256": "aab8e32b06dc97032a1e516f37bd2aa7aaa1948c138e105652e25c2eb11556fa",
+      "sha256": "eb0593d2d7b3a768cde2ea79917cd66aec1974e0665ac2d389d336f8d6742b8f",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -109,7 +109,7 @@
     },
     {
       "file": "be31-scherm1-320-light.png",
-      "sha256": "8fbe941a25932bb51914f2dee413dfd9115361a39b6b39bd48c48821847aa919",
+      "sha256": "472554b0da9e89620dbde2ad5e14da87c68a25704291fa9d42805bd3d20a19b3",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -119,7 +119,7 @@
     },
     {
       "file": "be31-scherm6-320-light.png",
-      "sha256": "225359a732a12361a2823742325a476c300dff7e1affa25d1f57c0d2718e78e1",
+      "sha256": "20f66cfd47dd3ac160634d27250d57d40ad219d37ff8f3e7e9809e6556ef716e",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -128,7 +128,7 @@
     },
     {
       "file": "be31-scherm2-320-light.png",
-      "sha256": "0b33035b5ebc96d85b041e2eecc3cb96de12487b7c0b02a9b928695855cdf0ec",
+      "sha256": "f931ae101b70eb3676eb8e035e73e271ce74a715737d2f4bf5be1826d2e4ba47",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -146,7 +146,7 @@
     },
     {
       "file": "be31-scherm5-320-light.png",
-      "sha256": "97584a6c5a9a5df5825f1344d3ca7400106eab93af663cbd0b664a533be1269b",
+      "sha256": "faa7b0adefcd5936da36bf191beda0f24e1531ec10326be25987928beb5376cd",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -155,7 +155,7 @@
     },
     {
       "file": "be31-scherm7-320-light.png",
-      "sha256": "e5a6f8c3474046890dfacc1c9cf1c9e61e79015bfb52cfe00f7de28bb6ca1acb",
+      "sha256": "c2cd6c6eb7e0ef1989381a4595a03cdae4809c81d82432cca83a3622b6e52a06",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -164,7 +164,7 @@
     },
     {
       "file": "be31-scherm1-1280-dark.png",
-      "sha256": "57b6ef21ac8ae847dadbe078a0e2499d6bf58cbd2a333fe767b6d70f887d7bb1",
+      "sha256": "5a815e697c4a9a9eb294fa141a2ac9a935ad046935f7b08c51b7e4ab3c27af00",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -174,7 +174,7 @@
     },
     {
       "file": "be31-scherm2-1280-dark.png",
-      "sha256": "81883f185ddf6a88bd137b17cef848f18d338fc216fe3ea429295da742d66aaf",
+      "sha256": "eacc259e9df4129d8349a320b72000f4ea6d993a5c8002ccb1107c2677465f2c",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -183,7 +183,7 @@
     },
     {
       "file": "be31-scherm4-1280-dark.png",
-      "sha256": "ce5eedb9ea6a1cf6e84e5d8847b4322b6687b1a99049fc3f9de46406d4cd154f",
+      "sha256": "dc83a2313e0dff6eb34bcadb3e5ffa668612c53b1f903d3aa3e182fe3f55b49c",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -201,7 +201,7 @@
     },
     {
       "file": "be31-scherm5-1280-dark.png",
-      "sha256": "a16c95e62641967e43b7c52b28fb8f98c488bf3b34a7b6e4ec5be8c41fa8be18",
+      "sha256": "ab8be746f15001eac9d7fb94e4fa73eb08fac1c2617e13448fab0e5ba3a4f94c",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -210,7 +210,7 @@
     },
     {
       "file": "be31-scherm7-1280-dark.png",
-      "sha256": "93e01c40630d9cb361189766f19e63527466c29d9c0abad7ccf0439e16dfecb7",
+      "sha256": "b028b41776f13402b47ff633eeeee4b24a5b17e008338f38231dbddcd16824cf",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -219,7 +219,7 @@
     },
     {
       "file": "be31-scherm1-390-dark.png",
-      "sha256": "bbf7fb676ba5cdcad4587bb7796789944007acbe3b2f143a89f03e8ca61b7f9b",
+      "sha256": "088324362c8e70b096fde847a282527bc75599fa90a37974a9f1d609cb027615",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -229,7 +229,7 @@
     },
     {
       "file": "be31-scherm6-390-dark.png",
-      "sha256": "4aaec89ba54010585108ced4096e8a6847415244343f22b7d530a7e3d5854866",
+      "sha256": "fd2aa138017b9989b7a9dc8af06d91f51a223df3c8f90c04efb75f320d9452e5",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -238,7 +238,7 @@
     },
     {
       "file": "be31-scherm2-390-dark.png",
-      "sha256": "237dbbb5c555cc1b4bedabec0f1943339d6cd58bc22c6c149561a3c48d2517dd",
+      "sha256": "4e57ee60c9047fcdbdf7035aff9ed5183539f75ed16ea6790667b584d34a6835",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -247,7 +247,7 @@
     },
     {
       "file": "be31-scherm4-390-dark.png",
-      "sha256": "f3a3151e85b738730222156fefe3a0999b0795576e69158b73b95a179eb9872c",
+      "sha256": "9b85fa4e84f3030a78b79e3278efbe6579f062ec117534880360d54cf98d7860",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -256,7 +256,7 @@
     },
     {
       "file": "be31-scherm3-390-dark.png",
-      "sha256": "c5aace97ab221aa0f5c3f595c4bec36dc2a7e3aefd55390b5d6c7661dd28f1c6",
+      "sha256": "c773981e2038b873182282687543b076449525afbfe11bbcc4e36e17849cdff9",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -265,7 +265,7 @@
     },
     {
       "file": "be31-scherm5-390-dark.png",
-      "sha256": "a857b2bc686053fb805ef8c1b634f007fbcc78e7a5cd8f06fe3c91364f5ad5a8",
+      "sha256": "e6de80793144c20744b34e29342fbadd3bb0a4837c2a9ce218acc29543ffa8f8",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -274,7 +274,7 @@
     },
     {
       "file": "be31-scherm7-390-dark.png",
-      "sha256": "4fd75a8dd3f88d5479304ef87c1360312b69fff591564a4d69985a898a2667ff",
+      "sha256": "ea0f7e041c1899ab5e6f0d252110585e2f3d048c87fcc90ed5a8a1fee1b7f22a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -283,7 +283,7 @@
     },
     {
       "file": "be31-scherm1-320-dark.png",
-      "sha256": "eb37ce27e7f3639af0b955e8b03833064163506be05bdbd98646a5470750fbd6",
+      "sha256": "236ff71004299f710cf2a8517a3f51cfd42b90a793797b57b20d64b3d87ed97e",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -293,7 +293,7 @@
     },
     {
       "file": "be31-scherm6-320-dark.png",
-      "sha256": "c7fa22cbdaf627b04576c10945295a0428d0d7b25e2f78d1a91e9f3a1c7e36d7",
+      "sha256": "228fd63d05c52c4cdd46b0a2ec645ccf5c4a2b87dd65d8e65f82c752b5b99897",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -302,7 +302,7 @@
     },
     {
       "file": "be31-scherm2-320-dark.png",
-      "sha256": "78f903382910324da6d65bbf6131ddc824614ff8a8be3e843101b143fa14b31d",
+      "sha256": "7f94bfb44d37cd248d4ac56938325f947a359a271e72b5bda443d10073ca4bc6",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -311,7 +311,7 @@
     },
     {
       "file": "be31-scherm4-320-dark.png",
-      "sha256": "4fae86e2d6b3818df8ad8517a38e0581c1ad810bfedb9fe3cb818f545df9fe34",
+      "sha256": "2666827006a858f0a083844f75f5eaebca51d59947202f4a546fc6b0c8cc2747",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -320,7 +320,7 @@
     },
     {
       "file": "be31-scherm3-320-dark.png",
-      "sha256": "05f0004d8d4784d199e28e529bf153b314fda76ea0200784c92ab721d3e0321f",
+      "sha256": "9bfa9c11d7f037427c48f704de7d0c824da495c0f02686ccc6197f4e49a91998",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -329,7 +329,7 @@
     },
     {
       "file": "be31-scherm5-320-dark.png",
-      "sha256": "3835f207d32fef42f575488e8b318063f3af953742090d9a242f181f80ba4a5d",
+      "sha256": "d8d1a7c16b1b2101de37dc1bfad04464e2e64d801528566cbdc8a926b7eccec6",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -338,7 +338,7 @@
     },
     {
       "file": "be31-scherm7-320-dark.png",
-      "sha256": "fc800d1d8595d498192bee392287e2464bd1a29c310b924998d7fa96e4ce85a9",
+      "sha256": "8385bf902d02d2fbd6b23096d522136ccab1348979021511fffc34189203aeee",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -408,14 +408,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (1280/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (1280/light): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (1280/light): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (1280/light): the batch task can be chosen",
@@ -603,14 +603,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (390/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (390/light): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (390/light): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (390/light): the batch task can be chosen",
@@ -798,14 +798,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (320/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (320/light): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (320/light): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (320/light): the batch task can be chosen",
@@ -993,14 +993,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (1280/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (1280/dark): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (1280/dark): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (1280/dark): the batch task can be chosen",
@@ -1188,14 +1188,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (390/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (390/dark): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (390/dark): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (390/dark): the batch task can be chosen",
@@ -1383,14 +1383,14 @@
       "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
     },
     {
-      "name": "scherm 1 (320/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "name": "scherm 1 (320/dark): the cleanup action names what it will close (\"Alle N opruimen\")",
       "passed": true,
       "detail": null
     },
     {
       "name": "scherm 1 (320/dark): the cleanup confirmation names the number and deletes nothing",
       "passed": true,
-      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+      "detail": "Alle 7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, alle 7 afhandelen Annuleren"
     },
     {
       "name": "scherm 2 (320/dark): the batch task can be chosen",
