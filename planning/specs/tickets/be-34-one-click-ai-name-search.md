@@ -39,10 +39,10 @@ Live contract en status: GitHub issue #81.
    - **per rij:** "⏳ Zoeken…" bij het restaurant waar de app op dat moment mee bezig is;
    - **na afloop:** "Bijgewerkt om HH:MM"; bij een mislukking de reden in gewone taal ("duurde te lang" of "server bezet") en de knop "Opnieuw proberen".
 5. **OpenStreetMap 's nachts ophalen:**
-   - een tweede dagelijkse Vercel-cron (naast de keep-alive in , alleen ) roept een route aan die het OSM-antwoord vooraf in de cache zet (, tag );
-   - die route schrijft geen data, geeft niets terug behalve , en controleert  als die bestaat;
+   - een tweede dagelijkse Vercel-cron (naast de keep-alive in `vercel.json`, alleen `crons`) roept een route aan die het OSM-antwoord vooraf in de cache zet (`unstable_cache`, tag `osm-breda`);
+   - die route schrijft geen data, geeft niets terug behalve `{ ok }`, en controleert `CRON_SECRET` als die bestaat;
    - overdag staat "Nieuw gevonden" daardoor meteen klaar;
-   - de Y1-test (alleen  in ) blijft groen.
+   - de Y1-test (alleen `crons` in `vercel.json`) blijft groen.
 6. **Bewijs:**
    - unit-tests met een nagebootste AI: de één-klik-lezing (geslaagd, mislukt, budget op, AI uit), het zoeken op naam (gevonden, niet gevonden, alleen een platform gevonden) en het meenemen van de gegevens naar de onboarding;
    - screenshots van de rij tijdens en na de AI-lezing, en van het zoeken op naam, op 1280 en 390 px, in licht en donker;
