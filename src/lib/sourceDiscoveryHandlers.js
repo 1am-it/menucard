@@ -31,7 +31,6 @@ const {
   validateSearchAnswer,
   proposalNote,
   discoverySummary,
-  costLine,
   originLabel,
   originChainLabel,
   ignoreProposalInput,
@@ -328,8 +327,10 @@ function createSourceDiscoveryHandlers(deps = {}) {
       }
     }
 
-    // 3 — the AI chooses among pages of the SAME website, with a quote.
-    const needsChoice = website && !menu && candidates.length > 0;
+    // 3 — the AI chooses among pages of the SAME website, with a quote. Which
+    // layers may run is the tested rule of sourceDiscovery.planLayers.
+    const allowed = planLayers({ hasWebsite: Boolean(website) });
+    const needsChoice = allowed.includes('ai_choice') && Boolean(website) && !menu && candidates.length > 0;
     if (needsChoice) {
       if (typeof readHomepage === 'function') {
         for (const candidate of candidates.slice(0, MAX_PAGES_FOR_CHOICE)) {
@@ -367,7 +368,7 @@ function createSourceDiscoveryHandlers(deps = {}) {
     }
 
     // 4 — AI web search, only when no website is known at all.
-    if (!website) {
+    if (allowed.includes('ai_search') && !website) {
       const ai = await runAi({ purpose: 'search', payload: { restaurant }, spend, notices });
       if (Number.isInteger(ai.cost)) aiCostEurCents += ai.cost;
       if (!ai.ok) {
