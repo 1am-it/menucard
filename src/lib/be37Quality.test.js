@@ -1,0 +1,180 @@
+'use strict';
+
+// BE-37 (#89) — de kwaliteitscheck als regressie. Elke assert hoort bij een
+// gemeten bevinding uit ops/browser/evidence/kwaliteit-voor.json; de "na"-
+// meting staat in kwaliteit-na.json. Zelfde conventie als de andere
+// surface-tests: fs.readFileSync + regex, geen gerenderde DOM-harness.
+
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { test } = require('node:test');
+
+const ROOT = path.join(__dirname, '..', '..');
+const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\r\n/g, '\n');
+const css = () => read('app/globals.css');
+
+function rule(selector) {
+  const source = css();
+  const index = source.indexOf(selector);
+  assert.ok(index > -1, `missing rule: ${selector}`);
+  return source.slice(index, source.indexOf('}', index));
+}
+
+// ── criterium 1: contrast ─────────────────────────────────────────────────
+test('BE-37 contrast: control borders use the input-border token, not the decorative card edge', () => {
+  const block = rule('.back-btn,\n.detail-menu-btn-outline,\n.dip-btn-secondary,\n.rp-btn-website,\n.rp-btn-reserveer { border-color');
+  assert.match(block, /border-color: var\(--input-border\)/);
+  for (const selector of ['.internal-nav-workqueue-trigger,', '.internal-nav-signout,', '.brn-chip,', '.srr-recheck { border-color: var(--input-border); }']) {
+    assert.ok(css().includes(selector), `missing internal control border: ${selector}`);
+  }
+});
+
+// ── criterium 3: toetsenbord, focus en schermlezer ────────────────────────
+test('BE-37 focus: every interactive element has the shared focus ring', () => {
+  const source = css();
+  for (const selector of ['button:focus-visible', 'a:focus-visible', 'summary:focus-visible', 'input:focus-visible']) {
+    assert.ok(source.includes(selector), selector);
+  }
+  const global = source.slice(source.indexOf('button:focus-visible,\na:focus-visible,'));
+  assert.match(global.slice(0, 400), /outline: 2px solid var\(--border-focus\)/);
+});
+
+test('BE-37 focus: the phone tab bar rings in its own text colour, not on the oker', () => {
+  assert.match(css(), /\.mobile-tab-link:focus-visible \{ outline-color: var\(--tabbar-text\); \}/);
+});
+
+test('BE-37 focus: a search field only hides its ring for the mouse', () => {
+  const source = css();
+  assert.match(source, /\.search-field \.search-input:focus:not\(:focus-visible\)/);
+  assert.match(source, /\.home-search-input:focus:not\(:focus-visible\)/);
+  assert.match(source, /\.mf-search:focus:not\(:focus-visible\)/);
+  assert.match(source, /\.mf-search:focus-visible \{ outline: 2px solid var\(--border-focus\)/);
+});
+
+test('BE-37 screen reader: the shared row action and AI block render labels through <EmojiText>', () => {
+  const row = read('src/components/SourceResultRow.js');
+  assert.match(row, /import EmojiText from '@\/src\/components\/EmojiText'/);
+  assert.equal((row.match(/<EmojiText value=\{step\.label\} \/>/g) || []).length, 2);
+  const action = read('src/components/AiReadAction.js');
+  assert.match(action, /<EmojiText value=\{label\} \/>/);
+  assert.match(action, /<EmojiText value=\{aiReadOutcomeLine/);
+  assert.match(action, /<EmojiText value=\{state\.nextLabel\} \/>/);
+  const section = read('app/internal/coverage/CoverageCheckSection.js');
+  assert.equal((section.match(/<EmojiText value=\{row\.step\.label\} \/>/g) || []).length, 3);
+});
+
+test('BE-37 screen reader: Dekking, Bronnen, de menukaart en de restaurantpagina show no bare emoji', () => {
+  const files = [
+    'app/internal/coverage/page.js',
+    'app/internal/coverage/NewFoundSection.js',
+    'app/internal/bronnen/BronnenView.js',
+    'app/internal/toevoegen/page.js',
+    'src/components/RestaurantListCard.js',
+    'src/components/MenuBody.js',
+    'app/menu/[id]/MenuView.js',
+    'app/restaurant/[id]/RestaurantDetailView.js',
+  ];
+  const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/u;
+  const offenders = [];
+  for (const file of files) {
+    read(file).split('\n').forEach((line, index) => {
+      const code = line
+        .replace(/\/\/.*$/, '')
+        .replace(/'[^']*'/g, "''")
+        .replace(/"[^"]*"/g, '""');
+      if (!EMOJI.test(code)) return;
+      if (/aria-hidden="true"/.test(line)) return;
+      offenders.push(`${file}:${index + 1}: ${line.trim()}`);
+    });
+  }
+  assert.deepEqual(offenders, [], 'a decorative emoji must go through <Emoji> or <EmojiText>');
+});
+
+// ── criterium 4: telefoon ─────────────────────────────────────────────────
+test('BE-37 phone: the measured controls have a 44px tap target and the checkboxes a 44px hit area', () => {
+  const source = css();
+  const minHeight = source.slice(source.indexOf('.home-chip,\n.home-meal-btn,\n.now-open-btn,'));
+  assert.match(minHeight.slice(0, 900), /min-height: 44px/);
+  for (const selector of ['.theme-btn { min-height: 44px;', '.primary-nav-link { min-height: 44px; }', '.mf-search,', '.stg-btn-secondary,', '.internal-nav-link { min-height: 44px;']) {
+    assert.ok(source.includes(selector), selector);
+  }
+  assert.match(source, /\.cov-check-select,\s*\n\.brn-pick \{ width: 24px; height: 24px; padding: 10px; box-sizing: content-box; \}/);
+  assert.match(source, /\.search-clear,\s*\n\.mf-clear \{ width: 44px; height: 44px;/);
+});
+
+test('BE-37 phone: Dekking keeps its two action buttons inside the screen at 320px', () => {
+  const source = css();
+  assert.match(source, /\.cov-check,\s*\n\.cov-check-head \{ min-width: 0; \}/);
+  assert.match(source, /\.cov-check-head > \.cov-check-action \{ flex: 1 1 100%; white-space: normal;/);
+});
+
+// ── criterium 5: slordigheden ─────────────────────────────────────────────
+test('BE-37 Dekking: the column heads no longer run into each other', () => {
+  const source = css();
+  assert.match(source, /\.cov-check-table th \{ padding-right: 14px; vertical-align: bottom; \}/);
+  assert.match(source, /\.cov-check-table th:first-child \{ width: 1%; white-space: nowrap; \}/);
+  assert.match(source, /\.cov-check-table th:last-child \{ padding-right: 0; \}/);
+});
+
+test('BE-37 Dekking: a row that is in the control is shown once, not twice', () => {
+  const section = read('app/internal/coverage/CoverageCheckSection.js');
+  assert.match(section, /const activeBatchUrls = useMemo\(/);
+  assert.match(section, /const visibleRows = useMemo\(\s*\n\s*\(\) => rows\.filter\(\(row\) => !row\.url \|\| !activeBatchUrls\.has\(row\.url\)\),/);
+  assert.match(section, /\{visibleRows\.map\(\(row\) => \(/);
+  assert.doesNotMatch(section, /\{rows\.map\(\(row\) => \(/);
+  assert.match(section, /van deze rijen staan hieronder bij &quot;Resultaat van de controle&quot;/);
+  assert.match(section, /checkSelection\(visibleRows, selected\)/);
+});
+
+test('BE-37 slordigheden: the internal sign-in screens are Dutch', () => {
+  const login = read('app/internal/login/page.js');
+  assert.match(login, /<h1[^>]*>Inloggen \(intern\)<\/h1>/);
+  assert.match(login, /placeholder="E-mailadres"/);
+  assert.match(login, /placeholder="Wachtwoord"/);
+  assert.match(login, /\{loading \? 'Bezig met inloggen…' : 'Inloggen'\}/);
+  assert.doesNotMatch(login, /Sign in|Signing in|Internal sign-in/);
+
+  const activate = read('app/internal/activate/page.js');
+  assert.match(activate, />Je account activeren</);
+  assert.match(activate, /'Account activeren'/);
+  assert.doesNotMatch(activate, /Activate your account|Activate account|Activating…|Enter the email address/);
+
+  const setPassword = read('app/internal/set-password/page.js');
+  assert.match(setPassword, />Stel je wachtwoord in</);
+  assert.match(setPassword, /'Wachtwoord opslaan'/);
+  assert.doesNotMatch(setPassword, /Set your password|'Set password'|Checking your invitation link|New password|Confirm new password/);
+
+  assert.match(read('src/lib/activationFlow.js'), /Deze code is ongeldig of verlopen\. Vraag een nieuwe code aan\./);
+  assert.match(read('src/lib/setPasswordFlow.js'), /De wachtwoorden zijn niet gelijk\./);
+  assert.doesNotMatch(read('src/lib/setPasswordFlow.js'), /Passwords do not match|Password must be at least|Something went wrong setting/);
+});
+
+// ── criterium 2 en 6: meten en bewijs ─────────────────────────────────────
+test('BE-37 evidence: the browser check is a real, runnable script with the contract routes', () => {
+  const script = read('ops/browser/run-kwaliteit-browser-check.js');
+  assert.match(script, /run-kwaliteit-browser-check/);
+  for (const route of ["path: '/'", "path: '/alle-restaurants'", "path: '/restaurant/6'", "path: '/menu/6-diner'"]) {
+    assert.ok(script.includes(route), route);
+  }
+  for (const page of ['/internal/coverage', '/internal/bronnen', '/internal/toevoegen', '/internal/menu-import']) {
+    assert.ok(script.includes(page), page);
+  }
+  assert.match(script, /summary\.totalKb < 250/);
+  assert.match(script, /kwaliteit-\$\{LABEL\}\.json/);
+  const pkg = JSON.parse(read('package.json'));
+  assert.equal(pkg.scripts['test:browser:kwaliteit'], 'node ops/browser/run-kwaliteit-browser-check.js');
+});
+
+
+test('BE-37 dialog: the cleanup confirmation opens with focus inside, closes with Escape and returns focus', () => {
+  const view = read('app/internal/bronnen/BronnenView.js');
+  assert.match(view, /const cleanupTriggerRef = useRef\(null\)/);
+  assert.match(view, /const cleanupDialogRef = useRef\(null\)/);
+  assert.match(view, /if \(event\.key !== 'Escape'\) return/);
+  assert.match(view, /onCancelCleanup\(\)/);
+  assert.match(view, /if \(trigger\) trigger\.focus\(\)/);
+  assert.match(view, /ref=\{cleanupTriggerRef\}/);
+  assert.match(view, /role="alertdialog"[^>]*ref=\{cleanupDialogRef\}/);
+  assert.match(view, /const first = dialog \? dialog\.querySelector\('button'\) : null/);
+});

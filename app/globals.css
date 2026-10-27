@@ -4737,3 +4737,110 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   .cov-check-table td { border: 0; padding: 2px 0; }
 }
 
+/* ============================================================================
+   BE-37 (#89) - kwaliteitscheck van de nieuwe stijl
+   Alleen de reparaties die uit de meting kwamen (contrast, focus, toetsenbord,
+   telefoon). Geen nieuw palet en geen nieuwe opbouw: elke waarde is een
+   bestaande token. De metingen staan in docs/guides/design-reference.md
+   ("BE-37") en in ops/browser/evidence/kwaliteit-voor.json / -na.json.
+   ============================================================================ */
+
+/* 1. Zichtbare focus voor elk bedieningselement. Sommige chips, knoppen en
+   gewone links leunden op de standaardring van de browser, die op het
+   antraciet onzichtbaar is. Dezelfde token als de bestaande ringen. */
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+/* De zoekvelden zetten `outline: none` op :focus, wat de focus-visible-regel
+   per specificiteit overschreef. Alleen de muisfocus verbergt de ring nog;
+   met het toetsenbord blijft hij zichtbaar. */
+.search-field .search-input:focus:not(:focus-visible),
+.home-search-input:focus:not(:focus-visible),
+.mf-search:focus:not(:focus-visible) { outline: none; }
+.mf-search:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+/* Op de donkere telefoonbalk is de okeren ring te zwak (2,5:1 tegen de balk);
+   de tekstkleur van de balk haalt het wel in beide thema's. */
+.mobile-tab-link:focus-visible { outline-color: var(--tabbar-text); }
+
+/* 2. Randen van bedieningselementen >= 3:1. Deze knoppen gebruikten
+   --border (1,2:1 op wit); --input-border is de bestaande token die de
+   veldranden al op 3:1 brengt. Kaartranden blijven --card-border-color: die
+   zijn decoratief en geen bediening. */
+.back-btn,
+.detail-menu-btn-outline,
+.dip-btn-secondary,
+.rp-btn-website,
+.rp-btn-reserveer { border-color: var(--input-border); }
+
+/* 3. Tikvlakken >= 44 px (criterium 4). Dezelfde controls, dezelfde vorm;
+   alleen de maat waarop je mikt groeit. */
+.theme-btn { min-height: 44px; padding: 0 12px; }
+.primary-nav-link { min-height: 44px; }
+.home-chip,
+.home-meal-btn,
+.now-open-btn,
+.filters-toggle-btn,
+.chip,
+.meal-btn,
+.cat-nav-item,
+.rp-btn-website,
+.rp-btn-reserveer,
+.dip-btn-primary,
+.dip-btn-secondary,
+.back-btn,
+.ar-sort,
+.srr-recheck,
+.home-all-link { min-height: 44px; }
+.home-all-link { display: inline-flex; align-items: center; }
+.search-clear,
+.mf-clear { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+/* Een selectievakje van 20 px is te klein om te raken; de zichtbare box
+   blijft klein, het klikbare vlak eromheen wordt 44 px. */
+.cov-check-select,
+.brn-pick { width: 24px; height: 24px; padding: 10px; box-sizing: content-box; }
+
+/* 4. Randen van de interne bediening: dezelfde 3:1-eis als publiek. */
+.internal-nav-workqueue-trigger,
+.internal-nav-signout,
+.brn-chip,
+.srr-recheck { border-color: var(--input-border); }
+
+/* 5. Tikvlakken in de interne pagina's. */
+.internal-nav-home,
+.internal-nav-link { min-height: 44px; display: inline-flex; align-items: center; }
+.mai-input,
+.mai-select,
+.brn-chip { min-height: 44px; }
+
+/* 6. Dekking: de kolomkoppen liepen in elkaar over ("SELECTEERRESTAURANT").
+   De cellen hadden geen ruimte rechts, dus twee koppen stonden tegen elkaar
+   aan. Kop en cel krijgen nu dezelfde tussenruimte; de selectiekolom blijft
+   smal en op één regel. */
+.cov-check-table th { padding-right: 14px; vertical-align: bottom; }
+.cov-check-table th:first-child { width: 1%; white-space: nowrap; }
+.cov-check-table th:last-child { padding-right: 0; }
+
+/* 7. Tikvlakken op de menukaart en in de interne knoppen (44 px). */
+.mf-search,
+.mf-btn,
+.mf-price-slider,
+.nvwa-teaser-btn,
+.stg-btn-secondary,
+.di-btn-primary { min-height: 44px; }
+.mf-price-slider { padding: 14px 0; }
+
+/* 8. Dekking op 320 px: twee knoppen met nowrap duwden het raster 10 px
+   buiten het scherm. Op de telefoon staat elke knop op zijn eigen regel en
+   mag de tekst doorlopen; zo blijft de kolom binnen het scherm. */
+.cov-check,
+.cov-check-head { min-width: 0; }
+@media (max-width: 720px) {
+  .cov-check-head > .cov-check-action { flex: 1 1 100%; white-space: normal; justify-content: center; text-align: center; }
+}
+
