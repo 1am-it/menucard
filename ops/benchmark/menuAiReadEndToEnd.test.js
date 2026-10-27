@@ -171,5 +171,7 @@ test('BB4: een ongeldige uitvoer blijft een weigering zonder concept', async () 
   assert.equal(result.status, 422);
   assert.equal(result.body.reason, 'schema_violation');
   assert.equal(h.saved.length, 0);
-  assert.equal(h.transport.state.calls, 1);
+  // BE-36 (#87, criterion 2): an invalid answer is retried exactly once, and a
+  // second refusal still writes nothing.
+  assert.equal(h.transport.state.calls, 2);
 });

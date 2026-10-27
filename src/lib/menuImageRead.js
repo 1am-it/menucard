@@ -293,20 +293,37 @@ function modeOfSource(source) {
   return 'none';
 }
 
+/**
+ * BE-36 (#87, criterion 5): the estimate and the maximum of one reading follow
+ * the number of pages it is made of. A reading is read page by page, so a menu
+ * of nine images reserves nine page prices instead of one fixed ceiling. The
+ * reservation is a ceiling, not a price: the real cost comes from the provider's
+ * own usage and is counted in the same month ledger. The hard maximum per
+ * reading stays the existing 30 cent per call (`AI_MAX_COST_EUR_CENTS`).
+ */
+const COST_PER_PAGE_EUR_CENTS = 1;
+const MAX_COST_PER_PAGE_EUR_CENTS = 3;
+
+function readingMaxCostEurCents(pageCount) {
+  const pages = Number.isInteger(pageCount) && pageCount > 0 ? pageCount : 1;
+  return Math.min(30, Math.max(MAX_COST_PER_PAGE_EUR_CENTS, pages * MAX_COST_PER_PAGE_EUR_CENTS));
+}
+
 function estimateOf(imageCount, pageCount) {
+  const pages = Math.max(1, (Number.isInteger(imageCount) ? imageCount : 0) + (Number.isInteger(pageCount) ? pageCount : 0));
+  const maxEurCents = readingMaxCostEurCents(pages);
+  const cost = `geschat ± ${pages * COST_PER_PAGE_EUR_CENTS} cent · maximaal ${maxEurCents} cent per lezing`;
   return {
     imageCount,
     pageCount,
-    // A reservation, not a price: the real cost comes from the provider's own
-    // usage and is counted in the same month ledger. The hard per-call maximum
-    // stays the existing one.
-    maxEurCents: 30,
+    estimatedEurCents: pages * COST_PER_PAGE_EUR_CENTS,
+    maxEurCents,
     label:
       imageCount > 0
-        ? `Geschat: ${imageCount} ${imageCount === 1 ? 'afbeelding' : 'afbeeldingen'} · maximaal 30 cent per lezing`
+        ? `Geschat: ${imageCount} ${imageCount === 1 ? 'afbeelding' : 'afbeeldingen'} · ${cost}`
         : pageCount > 0
-          ? `Geschat: ${pageCount} ${pageCount === 1 ? 'pagina' : "pagina's"} · maximaal 30 cent per lezing`
-          : 'Geschat: 1 tekstbron · maximaal 30 cent per lezing',
+          ? `Geschat: ${pageCount} ${pageCount === 1 ? 'pagina' : "pagina's"} · ${cost}`
+          : `Geschat: 1 tekstbron · ${cost}`,
   };
 }
 
@@ -508,6 +525,8 @@ module.exports = {
   MAX_DOCUMENT_BYTES,
   MIN_MENU_IMAGE_EDGE,
   MENU_TEXT_MIN_PRICE_LINES,
+  COST_PER_PAGE_EUR_CENTS,
+  MAX_COST_PER_PAGE_EUR_CENTS,
   IMAGE_MEDIA_TYPES,
   MENU_HINT,
   NOT_MENU,
@@ -533,5 +552,6 @@ module.exports = {
   planImageRead,
   provenanceLabel,
   readingImageLimitNotice,
+  readingMaxCostEurCents,
   sharedSiteImageKeys,
 };

@@ -119,6 +119,28 @@ function assertStateShape(state) {
     if (origin.kind !== 'ai_gelezen') throw new ManualImportStateError('state_invalid');
     if (!isNonEmptyString(origin.readId)) throw new ManualImportStateError('state_invalid');
   }
+  // BE-36 (#87, criterion 2): a reading that was read page by page carries its
+  // page list and the pages that failed, so "Opnieuw proberen" can read exactly
+  // those pages again. Fixed shape, bounded, metadata only — never bytes.
+  if (state.imageRead !== undefined && state.imageRead !== null) {
+    const read = state.imageRead;
+    if (typeof read !== 'object' || Array.isArray(read)) throw new ManualImportStateError('state_invalid');
+    if (!Array.isArray(read.units) || read.units.length === 0 || read.units.length > 20) throw new ManualImportStateError('state_invalid');
+    for (const unit of read.units) {
+      if (!unit || typeof unit !== 'object' || Array.isArray(unit)) throw new ManualImportStateError('state_invalid');
+      if (!Number.isInteger(unit.number) || unit.number < 1) throw new ManualImportStateError('state_invalid');
+      if (!isNonEmptyString(unit.sourceId) || !isNonEmptyString(unit.locator)) throw new ManualImportStateError('state_invalid');
+    }
+    for (const key of ['read', 'failed']) {
+      if (read[key] === undefined) continue;
+      if (!Array.isArray(read[key]) || read[key].length > 20 || read[key].some((number) => !Number.isInteger(number) || number < 1)) {
+        throw new ManualImportStateError('state_invalid');
+      }
+    }
+  }
+  if (state.plan !== undefined && state.plan !== null && (typeof state.plan !== 'object' || Array.isArray(state.plan))) {
+    throw new ManualImportStateError('state_invalid');
+  }
 }
 
 /**
@@ -199,6 +221,10 @@ function createManualImportStateCipher({
         followUpTotal: Number.isInteger(state.followUpTotal) ? state.followUpTotal : 0,
         // Fixed-shape origin of an AI reading; absent for the manual import.
         origin: state.origin && typeof state.origin === 'object' ? state.origin : null,
+        // BE-36 (#87): what the page-by-page reading read and which page failed.
+        // Absent for the manual import and for older tokens.
+        plan: state.plan && typeof state.plan === 'object' ? state.plan : null,
+        imageRead: state.imageRead && typeof state.imageRead === 'object' ? state.imageRead : null,
       },
     };
     const token = encryptState(key(), JSON.stringify(envelope));

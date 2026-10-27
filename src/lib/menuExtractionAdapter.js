@@ -188,7 +188,7 @@ function failedCall(reason, budget, extra = {}) {
  * over-budget jobs. Timeout aborts the provider signal and invokes an optional
  * adapter.cancel() so a future provider cannot keep running invisibly.
  */
-async function runStructuredExtraction({ adapter, protocol, sources, limits, budget } = {}) {
+async function runStructuredExtraction({ adapter, protocol, sources, limits, budget, repairOutput } = {}) {
   if (!adapter || adapter.configured !== true || typeof adapter.extract !== 'function') {
     return { ok: false, reason: 'provider_not_configured' };
   }
@@ -238,35 +238,56 @@ async function runStructuredExtraction({ adapter, protocol, sources, limits, bud
     // two bookkeeping values it can know exactly, before any check runs. The
     // raw answer is kept by the provider module; this only shapes the copy that
     // is validated and measured.
-    const { output, normalizations } = applyDerivableNormalizations(rawOutput);
+    //
+    // BE-36 (#87, criterion 3): an image page can first be repaired for the
+    // deviations the contract calls a review point (an origin that does not
+    // match the page, a missing price). The repair runs before normalization and
+    // the strict validator still decides; a repair never approves anything.
+    const repaired = typeof repairOutput === 'function' ? repairOutput(rawOutput) : null;
+    const candidate = repaired && repaired.output !== undefined ? repaired.output : rawOutput;
+    const repairs = repaired && Array.isArray(repaired.repairs) ? repaired.repairs : [];
+    const { output, normalizations } = applyDerivableNormalizations(candidate);
     if (estimateTokens(output) > effective.maxOutputTokens) {
-      return failedCall('output_limit', budget, { normalizations });
+      return failedCall('output_limit', budget, { normalizations, repairs });
     }
-    if (output && output.coverage && Number.isInteger(output.coverage.pagesRead) && output.coverage.pagesRead > effective.maxPages) {
-      return failedCall('page_limit', budget, { normalizations });
+    // A page limit is a limit of PDF pages. Loose menu images are not pages of a
+    // document, so a model that counts them as pages can no longer refuse the
+    // whole reading with `page_limit` (the live Al Dente failure of #87).
+    const imagesOnly = sourceList.length > 0 && sourceList.every((source) => (
+      source
+      && Array.isArray(source.images)
+      && source.images.length > 0
+      && typeof source.documentBase64 !== 'string'
+      && !(typeof source.text === 'string' && source.text.trim() !== '')
+    ));
+    if (!imagesOnly && output && output.coverage && Number.isInteger(output.coverage.pagesRead) && output.coverage.pagesRead > effective.maxPages) {
+      return failedCall('page_limit', budget, { normalizations, repairs });
     }
     const problems = validateStructuredOutput(output, sourceList);
     if (problems.length > 0) {
-      return failedCall('schema_violation', budget, { problems, normalizations });
+      return failedCall('schema_violation', budget, { problems, normalizations, repairs });
     }
     // Unknown actual cost must never be treated as zero spend: the reservation
     // stays charged, so the same budget cannot fund a second call.
     if (!Number.isInteger(budget.costEurCents) || budget.costEurCents < 0) {
-      return failedCall('cost_unknown', budget, { normalizations });
+      return failedCall('cost_unknown', budget, { normalizations, repairs });
     }
     const actualCost = budget.costEurCents;
     if (actualCost > effective.maxCostEurCents) {
-      return failedCall('budget_exceeded', budget, { normalizations });
+      return failedCall('budget_exceeded', budget, { normalizations, repairs });
     }
     const booked = settleBudget(budget, actualCost);
     if (!booked.ok) {
       // A valid result whose cost could not be booked is not a success.
-      return { ok: false, reason: booked.mode === 'async_guard_unsupported' ? 'async_budget_guard_unsupported' : 'budget_settle_failed', budgetAccounting: booked.mode, meta: { actualCostEurCents: actualCost }, normalizations };
+      return { ok: false, reason: booked.mode === 'async_guard_unsupported' ? 'async_budget_guard_unsupported' : 'budget_settle_failed', budgetAccounting: booked.mode, meta: { actualCostEurCents: actualCost }, normalizations, repairs };
     }
     return {
       ok: true,
       output,
       normalizations,
+      // BE-36 (#87): what the page repair changed, so the review can show it
+      // instead of hiding it.
+      repairs,
       meta: {
         adapterVersion: adapter.version,
         provider: adapter.provider,

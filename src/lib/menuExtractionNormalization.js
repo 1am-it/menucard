@@ -32,6 +32,14 @@ const NORMALIZATION_SCHEMA_VERSION = 'menu-extraction-normalization/v1';
 const NORMALIZATION_RULES = Object.freeze({
   derivedItemCount: 'derived_item_count',
   completeWithLimitations: 'complete_with_limitations',
+  // BE-36 (#87, criterion 3): the page repairs of a reading that is read page by
+  // page. A repair never approves anything; it only decides between "refuse the
+  // whole page" and "this one dish needs a human look".
+  imageLocatorRepaired: 'image_locator_repaired',
+  imageSourceRepaired: 'image_source_repaired',
+  missingPriceReviewed: 'missing_price_reviewed',
+  pageFieldDropped: 'page_field_dropped',
+  pageCoverageDerived: 'page_coverage_derived',
 });
 
 // V2 of the Delivery Lead order for review 6377050602: a correction that was
@@ -49,6 +57,18 @@ const NORMALIZATION_NOTICES = Object.freeze({
     entry.to === 'no_items'
       ? 'Status bijgesteld naar geen gerechten, omdat de AI zelf een beperking noemde.'
       : 'Status bijgesteld naar gedeeltelijk, omdat de AI zelf een beperking noemde.',
+  [NORMALIZATION_RULES.imageLocatorRepaired]: (entry) =>
+    typeof entry.to === 'string' && entry.to !== ''
+      ? `Herkomst aangevuld: dit gerecht is gelezen van ${entry.to} en staat op Controle nodig.`
+      : 'De herkomst van een gerecht is aangevuld; het staat op Controle nodig.',
+  [NORMALIZATION_RULES.imageSourceRepaired]: () =>
+    'De bron van een gerecht is bijgesteld naar de pagina die gelezen is.',
+  [NORMALIZATION_RULES.missingPriceReviewed]: () =>
+    'Een ontbrekende prijs is niet ingevuld; het gerecht staat op Controle nodig.',
+  [NORMALIZATION_RULES.pageFieldDropped]: () =>
+    'Een gegeven dat de app niet kan opslaan is weggelaten; het gerecht blijft staan.',
+  [NORMALIZATION_RULES.pageCoverageDerived]: () =>
+    'De telling van deze pagina is door het systeem gedaan, niet door de AI.',
 });
 
 function isObject(value) {

@@ -865,12 +865,60 @@ export default function ManualMenuImportPage() {
         // banner would duplicate it above the source card, so it is not set.
       } catch {
         setAiPhase('error')
-        setAiError('De AI-lezing lukte niet. Ga verder met de handmatige import.')
+        setAiError('De AI-lezing lukte niet. Probeer het opnieuw.')
       } finally {
         setBusy(false)
       }
     },
-    [api, loadAiStatus, resolveRestaurantChoice, restaurantId, token, urls]
+    [api, loadAiStatus, resolveRestaurantChoice, restaurantId, token, urls],
+  )
+
+  /**
+   * BE-36 (#87, criterion 2): "Opnieuw proberen" reads only the page that failed.
+   * The request names one page number; the source URLs come from the sealed
+   * state of this reading, never from the client. On a refusal the earlier
+   * result stays on screen with its own message.
+   */
+  const retryAiPage = useCallback(
+    async (page) => {
+      const state = aiResult && typeof aiResult.state === 'string' ? aiResult.state : null
+      if (!token || !state || !Number.isInteger(page)) return null
+      setBusy(true)
+      setAiError(null)
+      setAiPhase('reading')
+      try {
+        const res = await fetch(AI_API, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ state, retry_pages: [page] }),
+          cache: 'no-store',
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setAiPhase('done')
+          setAiError(data.error || 'De AI-lezing lukte niet. Probeer het opnieuw.')
+          if (data.monthly) setAiStatus((current) => (current ? { ...current, monthly: data.monthly } : current))
+          await loadAiStatus()
+          return null
+        }
+        setAiResult(data)
+        setReport(data.import)
+        setReview(data.review)
+        setReceived(data.import.summary)
+        setAiError(null)
+        setAiPhase('done')
+        if (data.monthly) setAiStatus((current) => (current ? { ...current, monthly: data.monthly } : current))
+        await loadAiStatus()
+        return data
+      } catch {
+        setAiPhase('done')
+        setAiError('De AI-lezing lukte niet. Probeer het opnieuw.')
+        return null
+      } finally {
+        setBusy(false)
+      }
+    },
+    [aiResult, loadAiStatus, token],
   )
 
   // From the batch screen: the analysis job is the allowed source, so the
@@ -1123,6 +1171,7 @@ export default function ManualMenuImportPage() {
                 onManual={toggleManual}
                 onRead={() => readWithAi({ jobId: aiJobId })}
                 onReview={focusReview}
+                onRetryPage={retryAiPage}
               />
             </>
           ) : null}

@@ -64,24 +64,39 @@ const AI_LIMITS = Object.freeze({
   maxConcurrency: 1,
 });
 
+// BE-36 (#87, criterion 4): every reason has its own sentence in plain Dutch
+// with a next step. The manual import stays a small link on the screen; it is
+// never the only thing an error says.
 const MESSAGES = Object.freeze({
   ai_not_configured: 'AI is niet ingesteld.',
   ai_flagged_off: 'AI is niet ingesteld.',
   ai_key_missing: 'AI is niet ingesteld.',
   forbidden: 'Alleen interne medewerkers kunnen de kaart met AI laten lezen.',
   source_required: 'Kies eerst een bron die al in de app staat.',
-  source_unknown: 'Deze bron hoort niet bij een bestaande analyse of import.',
-  source_empty: 'Deze bron bevat geen leesbare tekst om aan de AI te geven.',
-  budget_exhausted: 'Het AI-budget van deze maand is op. Ga verder met de handmatige import.',
-  budget_unavailable: 'Het AI-gebruik kon niet worden gecontroleerd. Er is niets aangeroepen.',
-  invalid_request: 'Ongeldig verzoek.',
+  source_unknown: 'Deze bron hoort niet bij een bestaande analyse of import. Kies de bron opnieuw.',
+  source_empty: 'Deze bron bevat geen leesbare tekst of afbeelding om aan de AI te geven.',
+  budget_exhausted: 'Het budget van deze maand is op.',
+  budget_unavailable: 'Het AI-gebruik kon niet worden gecontroleerd. Er is niets aangeroepen; probeer het later opnieuw.',
+  budget_exceeded: 'Het budget van deze lezing is op. Probeer het opnieuw of lees minder pagina\'s.',
+  invalid_request: 'Ongeldig verzoek. Vernieuw de pagina en probeer het opnieuw.',
   restaurant_required: 'Kies eerst een restaurant uit de bestaande lijst.',
-  provider_unavailable: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.',
-  timeout: 'De AI deed er te lang over. Ga verder met de handmatige import.',
-  schema_violation: 'Het antwoord van de AI past niet bij de afspraken. Er is niets opgeslagen; ga verder met de handmatige import.',
-  no_items: 'De AI vond geen gerechten. Dit is geen geslaagde lezing; ga verder met de handmatige import.',
-  model_unavailable: 'De AI is nu niet bereikbaar. Ga verder met de handmatige import.',
-  concept_failed: 'Het concept kon niet worden opgeslagen. De lezing is niet verloren: probeer het opnieuw of ga verder met de handmatige import.',
+  provider_unavailable: 'De AI is even niet bereikbaar. Probeer het over een minuut opnieuw.',
+  model_unavailable: 'De AI is even niet bereikbaar. Probeer het over een minuut opnieuw.',
+  rate_limited: 'De AI krijgt te veel verzoeken. Probeer het over een minuut opnieuw.',
+  timeout: 'De AI deed er te lang over. Probeer het opnieuw.',
+  output_truncated: 'Het antwoord van de AI was afgekapt. Probeer het opnieuw.',
+  output_limit: 'Het antwoord van de AI was te groot voor één pagina. Probeer het opnieuw.',
+  input_limit: 'Deze bron is te groot voor de AI. Lees een kleinere pagina of minder pagina\'s.',
+  page_limit: 'Deze PDF heeft te veel pagina\'s voor één lezing.',
+  document_limit: 'Er zijn te veel documenten voor één lezing.',
+  schema_violation: 'Het antwoord van de AI past niet bij de afspraken. Er is niets opgeslagen; probeer het opnieuw.',
+  no_items: 'De AI vond geen gerechten op deze pagina. Controleer de bron of probeer het opnieuw.',
+  partial_read: 'Een deel van de kaart is gelezen. Probeer de pagina\'s die niet lukten opnieuw.',
+  source_missing: 'De pagina staat niet meer op deze bron. Controleer de link of probeer het later opnieuw.',
+  concept_failed: 'Het concept kon niet worden opgeslagen. De lezing is niet verloren: probeer het opnieuw.',
+  budget_guard_required: 'De kostenbewaking is niet beschikbaar; er is niets aangeroepen.',
+  async_budget_guard_unsupported: 'De kostenbewaking is niet beschikbaar; er is niets aangeroepen.',
+  budget_settle_failed: 'De kosten van deze lezing konden niet worden vastgelegd; er is niets opgeslagen.',
 });
 
 function reply(status, body) {
@@ -89,7 +104,7 @@ function reply(status, body) {
 }
 
 function messageFor(reason) {
-  return MESSAGES[reason] || 'De AI-lezing lukte niet. Ga verder met de handmatige import.';
+  return MESSAGES[reason] || 'De AI-lezing lukte niet. Probeer het opnieuw.';
 }
 
 /** W3: both the key and the explicit switch are required. Never echoes a key. */
@@ -159,11 +174,18 @@ function monthlySpendFromRows(rows, { now = new Date() } = {}) {
   };
 }
 
-/** Refuse when the next call could pass the monthly ceiling. */
-function budgetDecision(spend) {
+/**
+ * Refuse when the next call could pass the monthly ceiling. BE-36 (#87,
+ * criterion 5): the reservation is no longer one fixed per-call maximum but the
+ * planned maximum of this reading, which follows the number of pages. The
+ * default stays the existing per-call maximum, so every other caller keeps its
+ * current rule.
+ */
+function budgetDecision(spend, { maxEurCents = AI_MAX_COST_EUR_CENTS } = {}) {
   if (!spend || typeof spend !== 'object') return { allowed: false, reason: 'budget_unavailable' };
   if (!Number.isInteger(spend.spentEurCents)) return { allowed: false, reason: 'budget_unavailable' };
-  const projected = spend.spentEurCents + AI_MAX_COST_EUR_CENTS;
+  const reservation = Number.isInteger(maxEurCents) && maxEurCents >= 0 ? maxEurCents : AI_MAX_COST_EUR_CENTS;
+  const projected = spend.spentEurCents + reservation;
   if (projected > AI_MONTH_LIMIT_EUR_CENTS) {
     return { allowed: false, reason: 'budget_exhausted', projectedEurCents: projected };
   }
