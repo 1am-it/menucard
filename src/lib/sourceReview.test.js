@@ -458,9 +458,13 @@ test('Bronnen beoordelen: cleanup names a selection, or explicitly "Alle N oprui
   assert.equal(cleanupConfirmText({ count: 1, all: false }), '1 resultaat afhandelen?');
   // The screen uses exactly these helpers, never its own sentence.
   const view = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/BronnenView.js'), 'utf8');
-  assert.match(view, /cleanupLabel\(pickedCount, pickableCount\)/);
+  assert.match(view, /cleanupLabel\(pickedCount, cleanupCount\)/);
   assert.match(view, /cleanupConfirmText\(cleanup\)/);
   assert.doesNotMatch(view, /opruimen geldt dan voor alle/i);
+  // "Alle N opruimen" counts the results it closes, not the tasks that carry them.
+  const page = fs.readFileSync(path.join(REPO_ROOT, 'app/internal/bronnen/page.js'), 'utf8');
+  assert.match(page, /pickableJobCount = useMemo\(/);
+  assert.match(page, /pickableJobCount=\{pickableJobCount\}/);
 });
 
 // BE-32 (#75): "✨ Vind bronnen" proposes through the existing BE-24 proposal.

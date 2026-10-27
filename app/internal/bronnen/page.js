@@ -292,6 +292,12 @@ export default function BronnenPage() {
   // through the existing job rows. One confirmation names the number, nothing
   // is deleted and the record stays.
   const pickable = useMemo(() => tasks.filter((task) => task.kind === 'batch'), [tasks])
+  // BE-32 (#75, criterion 7): "Alle N opruimen" counts the RESULTS it closes,
+  // not the tasks that carry them.
+  const pickableJobCount = useMemo(
+    () => new Set(pickable.flatMap((task) => task.handledJobIds || [])).size,
+    [pickable],
+  )
 
   useEffect(() => {
     // A closed task can no longer be picked.
@@ -462,6 +468,7 @@ export default function BronnenPage() {
           onRecheckRow={recheck}
           picked={picked}
           pickableCount={pickable.length}
+          pickableJobCount={pickableJobCount}
           onTogglePick={togglePick}
           onPickAll={pickAll}
           cleanup={cleanup}

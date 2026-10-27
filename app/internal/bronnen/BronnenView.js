@@ -91,6 +91,7 @@ export default function BronnenView({
   onRecheckRow,
   picked,
   pickableCount,
+  pickableJobCount,
   onTogglePick,
   onPickAll,
   cleanup,
@@ -102,6 +103,8 @@ export default function BronnenView({
 }) {
   const empty = Boolean(triage) && totalTasks === 0
   const pickedCount = picked ? picked.size : 0
+  // BE-32 (#75, criterion 7): the number of RESULTS the cleanup closes.
+  const cleanupCount = Number.isInteger(pickableJobCount) && pickableJobCount > 0 ? pickableJobCount : pickableCount
   return (
     <>
       <nav aria-label="Kruimelpad" className="brn-breadcrumb">
@@ -183,7 +186,7 @@ export default function BronnenView({
               {pickableCount > 0 ? (
                 <div className="brn-toolbar">
                   <button type="button" className="stg-btn-secondary" onClick={onStartCleanup} disabled={busy}>
-                    🗄️ {cleanupLabel(pickedCount, pickableCount)}
+                    🗄️ {cleanupLabel(pickedCount, cleanupCount)}
                   </button>
                   <button type="button" className="stg-btn-secondary" aria-pressed={pickedCount === pickableCount} onClick={onPickAll}>
                     {pickedCount === pickableCount ? 'Selectie wissen' : 'Alles selecteren'}
@@ -191,7 +194,7 @@ export default function BronnenView({
                   <span className="brn-hint">
                     {pickedCount > 0
                       ? `${pickedCount} van ${pickableCount} geselecteerd: alleen die resultaten worden afgehandeld.`
-                      : `Niets geselecteerd: "Alle ${pickableCount} opruimen" handelt alle batchresultaten af. Vink rijen aan om een selectie te maken.`}
+                      : `Niets geselecteerd: "Alle ${cleanupCount} opruimen" handelt alle batchresultaten af. Vink rijen aan om een selectie te maken.`}
                   </span>
                 </div>
               ) : null}

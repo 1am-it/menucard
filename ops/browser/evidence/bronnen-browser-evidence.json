@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T12:03:02.431Z",
+  "generatedAt": "2026-10-27T12:14:31.424Z",
   "kind": "fixture-browser-check",
   "task": "BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij",
   "base": "fix/bronnen-74-echt-werk",
@@ -8,7 +8,7 @@
   "screenshots": [
     {
       "file": "be31-scherm1-1280-light.png",
-      "sha256": "6d8281c9227c17ae3d2872461a6da5562b5d7bd1f325233d976250097d649846",
+      "sha256": "1a49ec2052f557dbdb99029aaffc6f23e745eb3473bb5b763e667e1eab2380ac",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -18,7 +18,7 @@
     },
     {
       "file": "be31-scherm2-1280-light.png",
-      "sha256": "34b5a50557cde3e23fc4d78de72ec282c0a8c61f53d6577ff2ee897f3d2ba520",
+      "sha256": "16a0557ee6044e8b57cc27cf60b7666d2f1cc484fa1ac2bee2b8597618a4b642",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -27,7 +27,7 @@
     },
     {
       "file": "be31-scherm3-1280-light.png",
-      "sha256": "a943564a786c302deef6af49484ee5218196629ede2d1a564f30249bad25d125",
+      "sha256": "b328eaaa9d5b690930b603eb1e07223c3ed6a7cb0b8667838b74a9fae0eddd34",
       "width": 1280,
       "height": 800,
       "viewport": "1280x800",
@@ -36,7 +36,7 @@
     },
     {
       "file": "be31-scherm5-1280-light.png",
-      "sha256": "cca0585bf8e9d002eaab6dece04c1843843964315b32dc532470bd718be107f5",
+      "sha256": "3d443b1e0d3e5c285939fb329d57c3e7c18e8f3615f4e9edf3555a748cba24c2",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -54,7 +54,7 @@
     },
     {
       "file": "be31-scherm1-390-light.png",
-      "sha256": "b377964fae23faa5b64931aa93c9d4cc4e172e7186194d4208a5e5f0109c9c9d",
+      "sha256": "e3a613c6136c3f7b06d4f8e611447c8bc80856be309949d8632876251647128a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -64,7 +64,7 @@
     },
     {
       "file": "be31-scherm6-390-light.png",
-      "sha256": "cc14e540e96d977ced68541962f0dc1073e1ab7bbf1e75648084b6d7bdd7bdf3",
+      "sha256": "694ec7ede5d6a797ec46adb0a48d9950f96657b231af0486e9a7a87ee5db7c0a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -73,7 +73,7 @@
     },
     {
       "file": "be31-scherm2-390-light.png",
-      "sha256": "358b8c8da30c76b68c2da6f94b42d48792f668bd4420848a9b94946bbe787295",
+      "sha256": "80096a954351859eb804ef6529ae6cebc2a02052272e4807b72811adb1398a09",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -91,7 +91,7 @@
     },
     {
       "file": "be31-scherm5-390-light.png",
-      "sha256": "b00b5c13ca5403dd7c7278f8713fc14eaaf389b944da6cf396b854b51c3fb03e",
+      "sha256": "1b6c53c6284bdcc821708379224a5aad9785def3865bab1714165c7fe51e2f02",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -109,7 +109,7 @@
     },
     {
       "file": "be31-scherm1-320-light.png",
-      "sha256": "472554b0da9e89620dbde2ad5e14da87c68a25704291fa9d42805bd3d20a19b3",
+      "sha256": "e818180bf69ea4b6a51991d8af2413629e5f9d37faa7bda9fea0b9a7144b04fd",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -128,7 +128,7 @@
     },
     {
       "file": "be31-scherm2-320-light.png",
-      "sha256": "f931ae101b70eb3676eb8e035e73e271ce74a715737d2f4bf5be1826d2e4ba47",
+      "sha256": "e88365c646e79667a8d520bd98afb201245af5b8102e6c35814b0975ddf774ea",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -146,7 +146,7 @@
     },
     {
       "file": "be31-scherm5-320-light.png",
-      "sha256": "faa7b0adefcd5936da36bf191beda0f24e1531ec10326be25987928beb5376cd",
+      "sha256": "dbad6ee2f71e294b6779f444e413d626d78688a967f6300519a1423791d78695",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -164,7 +164,7 @@
     },
     {
       "file": "be31-scherm1-1280-dark.png",
-      "sha256": "5a815e697c4a9a9eb294fa141a2ac9a935ad046935f7b08c51b7e4ab3c27af00",
+      "sha256": "f8645aa8fe0a7c6174bf1ab8ff6804e04dd070abdb874499639284a0044e5076",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -174,7 +174,7 @@
     },
     {
       "file": "be31-scherm2-1280-dark.png",
-      "sha256": "eacc259e9df4129d8349a320b72000f4ea6d993a5c8002ccb1107c2677465f2c",
+      "sha256": "5f4101fac8f3c66a841aabc7da035a3024df5bb5282c170bac7126ccd3ae4c02",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -183,7 +183,7 @@
     },
     {
       "file": "be31-scherm4-1280-dark.png",
-      "sha256": "dc83a2313e0dff6eb34bcadb3e5ffa668612c53b1f903d3aa3e182fe3f55b49c",
+      "sha256": "0d8dd3a89c2652b2cbe625e5abff691ef1116ad7f5f641ddcd90a6eaae104d6b",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -192,7 +192,7 @@
     },
     {
       "file": "be31-scherm3-1280-dark.png",
-      "sha256": "a4b1331f8d9eaa6e0074820e174c367ca3857305be3451ca8428efacb435ae56",
+      "sha256": "5385bd783eb50de8db5b347c8a9faa74b66f131469b17051a05fb5df78801a71",
       "width": 1280,
       "height": 800,
       "viewport": "1280x800",
@@ -201,7 +201,7 @@
     },
     {
       "file": "be31-scherm5-1280-dark.png",
-      "sha256": "ab8be746f15001eac9d7fb94e4fa73eb08fac1c2617e13448fab0e5ba3a4f94c",
+      "sha256": "99540da2d31f4b76ba74c27428625f141a004ef3d89fe9eba1c1968177d9fd28",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -219,7 +219,7 @@
     },
     {
       "file": "be31-scherm1-390-dark.png",
-      "sha256": "088324362c8e70b096fde847a282527bc75599fa90a37974a9f1d609cb027615",
+      "sha256": "239103d2cf4c1d583650164a33b51989e5c827cc2821b1da80e283f22ee2361d",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -238,7 +238,7 @@
     },
     {
       "file": "be31-scherm2-390-dark.png",
-      "sha256": "4e57ee60c9047fcdbdf7035aff9ed5183539f75ed16ea6790667b584d34a6835",
+      "sha256": "7fc8330ddcf931103c5101bf969441216e2367938ac05759290e2e1019196fff",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -247,7 +247,7 @@
     },
     {
       "file": "be31-scherm4-390-dark.png",
-      "sha256": "9b85fa4e84f3030a78b79e3278efbe6579f062ec117534880360d54cf98d7860",
+      "sha256": "d6890397efe3ab4b581c3fdc28f3d2880361c2be99150fa35a9c3871e2adcf64",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -265,7 +265,7 @@
     },
     {
       "file": "be31-scherm5-390-dark.png",
-      "sha256": "e6de80793144c20744b34e29342fbadd3bb0a4837c2a9ce218acc29543ffa8f8",
+      "sha256": "59d73fcd7ddfe8ab1fdf85978e27bfa7373460ee6931d0b137f3464f345a30a3",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -283,7 +283,7 @@
     },
     {
       "file": "be31-scherm1-320-dark.png",
-      "sha256": "236ff71004299f710cf2a8517a3f51cfd42b90a793797b57b20d64b3d87ed97e",
+      "sha256": "4488516c92a1d8127c73234a31dd7d7c80fcceb89ab4aec96133072f2670067c",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -302,7 +302,7 @@
     },
     {
       "file": "be31-scherm2-320-dark.png",
-      "sha256": "7f94bfb44d37cd248d4ac56938325f947a359a271e72b5bda443d10073ca4bc6",
+      "sha256": "be5d467271b5cde1aa4cedd6c0cef4ae46c3aa07282efde5647f659e6c33e7d6",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -311,7 +311,7 @@
     },
     {
       "file": "be31-scherm4-320-dark.png",
-      "sha256": "2666827006a858f0a083844f75f5eaebca51d59947202f4a546fc6b0c8cc2747",
+      "sha256": "ba80f804da5e01e14b78ee2d462b6d4c8143448474366a2e6de88dbf9754a520",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -320,7 +320,7 @@
     },
     {
       "file": "be31-scherm3-320-dark.png",
-      "sha256": "9bfa9c11d7f037427c48f704de7d0c824da495c0f02686ccc6197f4e49a91998",
+      "sha256": "05f0004d8d4784d199e28e529bf153b314fda76ea0200784c92ab721d3e0321f",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -329,7 +329,7 @@
     },
     {
       "file": "be31-scherm5-320-dark.png",
-      "sha256": "d8d1a7c16b1b2101de37dc1bfad04464e2e64d801528566cbdc8a926b7eccec6",
+      "sha256": "ef6e74348e00d93f855a69dee3dcc109f8642cc6c828fbae48d124edd8779fe2",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
