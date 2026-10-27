@@ -408,6 +408,40 @@ the product code itself always uses the browser clock and
 or independent acceptance.
 
 
+## BE-31 (#74) — Bronnen beoordelen, Dekking en afhandelen in de rij
+
+`run-bronnen-browser-check.js` (also `npm run test:browser:bronnen`) uses the same
+harness as the #59/#62 checks, with fictional data from
+`fixtures/bronnenFixtures.js`. It drives the real `/internal/bronnen`,
+`/internal/coverage` and `/internal/toevoegen` routes and the real
+`BronnenView`, `ProposalDetail`, `CoverageCheckSection` and `SourceResultRow`
+components at 1280, 390 and 320 px in light and dark, and saves screenshots of
+screens 1-7 of the approved mockup to `ops/browser/output/be-31/`:
+
+- screen 1: the task list with the real chip numbers (`Alles 3`, `🧪 Batches 1`,
+  `💡 Voorstellen 1`, `📡 Aandacht 1`), the detail still saying "Kies een taak
+  links", and the Werkvoorraad number equal to the number of tasks;
+- screen 2: a chosen batch task with one next step per row (✅ Bevestig bron,
+  ⚠️ Menukopjes controleren, 📖 Lees met AI, ✍️ Handmatig toevoegen, ⏳ Even
+  wachten) and the BE-30 link of the same batch item;
+- screen 3: no work at all → only "✅ Geen open bronwerk" with the link to
+  Dekking, no chips, no detail pane, and the bar's number at 0;
+- screen 4: the chosen task in antraciet (dark);
+- screen 5: Dekking's "Nog niet gecontroleerd (4)" with the existing reason
+  texts, the per-row "🔎 Controleer bron", the selection that updates
+  "🔎 Controleer N geselecteerde" and the existing limits and
+  "loopt zolang de pagina open is";
+- screen 6: on 390/320 px a task opens as its own screen with a way back;
+- screen 7: the same rows under the add form, with the same one next step.
+
+The evidence lands in `ops/browser/evidence/bronnen-browser-evidence.json`. It is
+fixture evidence on a local machine: no production session, database, source
+activation or publication happens, and a green run is not independent review or
+production acceptance. The counts in the fixture are fictional; that the real
+number is computed from the same task definition is unit-tested in
+`src/lib/sourceReviewCount.test.js`.
+
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

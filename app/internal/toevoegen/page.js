@@ -88,6 +88,31 @@ export default function AddEntryPage() {
   const batchRunning = Boolean(activeBatch && activeBatch.batch && !activeBatch.batch.closed_at)
   useBatchProcessing({ token, batchId: activeBatch ? activeBatch.batch.id : null, enabled: batchRunning, onTick: loadBatch })
 
+  // "Bevestig bron" in a result row is the same BE-25 confirmation route the
+  // batch screen already uses; nothing is published and the row is re-read.
+  async function confirmRow(row) {
+    if (!activeBatch || !row || !row.jobId) return
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(`${BATCH_API}/${encodeURIComponent(activeBatch.batch.id)}/confirm`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_ids: [row.jobId] }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(body.error || 'De bevestiging kon niet worden opgeslagen.')
+        return
+      }
+      await loadBatch(activeBatch.batch.id)
+    } catch {
+      setError('De bevestiging kon niet worden opgeslagen.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   // Same search endpoint, same minimum length and the same guard against a
   // stale response as the existing manual import page.
   useEffect(() => {
@@ -335,6 +360,7 @@ export default function AddEntryPage() {
                     row={row}
                     position={item.position}
                     href={stepHref(row, { batchId: activeBatch.batch.id, returnTo })}
+                    onConfirm={confirmRow}
                     busy={busy}
                   />
                 )
