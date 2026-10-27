@@ -499,3 +499,20 @@ test('BE-35 ronde 3: een tekstbron en een beeldbron gaan samen naar de AI', asyn
   assert.equal(content.filter((block) => block.type === 'image').length, 2);
   assert.ok(content.some((block) => block.type === 'text' && block.text.includes('Huiswijn 5,00')));
 });
+
+
+test('BE-35 ronde 3: een pagina zonder leesbare afbeeldingen valt uit de lezing en breekt de dekking niet', async () => {
+  // A reader can hand over an image page whose images were all cut or failed.
+  // It is not a source of this reading: the bundle and the model name the same
+  // one source, so complete coverage still means what it says.
+  const emptyPage = { ...imageSource(0), id: 'source-2', url: 'https://bistro-voorbeeld.example/leeg', imageCandidates: 2 };
+  const client = fakeClient(() => responseOf(answerFor(['afbeelding 1'])));
+  const h = harness({ client, sources: [imageSource(2), emptyPage] });
+  const result = await h.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  assert.equal(result.status, 200, JSON.stringify(result.body));
+  assert.equal(result.body.plan.imageCount, 2);
+  assert.equal(result.body.plan.sources.length, 1);
+  const content = client.calls[0].body.messages[0].content;
+  assert.equal(content.filter((block) => block.type === 'image').length, 2);
+  assert.equal(h.saved.length, 1);
+});

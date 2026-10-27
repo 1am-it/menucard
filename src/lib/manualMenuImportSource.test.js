@@ -10,7 +10,7 @@ const assert = require('node:assert/strict');
 const { htmlToPlainText, pdfPageCount, readManualImportSource, readManualImportSources, MAX_SOURCES } = require('./manualMenuImportSource');
 const { sourceHashForText } = require('./manualMenuImportBundle');
 const { alDenteMenuPage, classicoPage, textMenuPage, wordpressVariantsPage, menuImagePage, ORIGIN, UPLOAD, SITE_HEADER_IMAGE } = require('./__fixtures__/menuImagePages');
-const { collectMenuImages, planImageRead } = require('./menuImageRead');
+const { collectMenuImages, imageReadNotice, planImageRead } = require('./menuImageRead');
 
 test('K2: HTML wordt platte, gecodeerde tekst zonder scripts of opmaak', () => {
   const text = htmlToPlainText(
@@ -308,7 +308,8 @@ test('BE-35 ronde 3: over alle bronnen samen zijn de eerste tien menu-afbeelding
   assert.equal(requested.length, 11, 'two pages and nine menu images, nothing else');
 
   // Twelve and three candidates: the reading is cut over the sources together,
-  // in source order. The second page keeps no image and says why.
+  // in source order. The second page falls outside the ten and is no source of
+  // this reading; the picked page carries the real total of the whole reading.
   const big = alDenteMenuPage({ count: 12 });
   const overflowRequested = [];
   const overflow = await readManualImportSources({
@@ -320,16 +321,17 @@ test('BE-35 ronde 3: over alle bronnen samen zijn de eerste tien menu-afbeelding
       return { finalUrl: url, contentType: 'image/jpeg', bytes: PNG_BYTES };
     },
   });
+  assert.equal(overflow.length, 1, 'a page outside the ten is not an empty image source');
+  assert.equal(overflow[0].id, 'source-1');
   assert.equal(overflow[0].images.length, 10, 'the first ten of the reading, in source order');
   assert.deepEqual(overflow[0].images.map((image) => image.url), big.imageUrls.slice(0, 10));
   assert.equal(overflow[0].imageCandidates, 12);
+  assert.equal(overflow[0].readingImageCandidates, 14);
   assert.match(overflow[0].limitation, /Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
-  assert.equal(overflow[1].images.length, 0);
-  assert.equal(overflow[1].imageCandidates, 2);
-  assert.match(overflow[1].limitation, /Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
   assert.equal(overflowRequested.includes(SITE_HEADER_IMAGE), false);
   assert.equal(overflowRequested.length, 12, 'two pages and ten menu images, nothing else');
-  // Never refused: the plan reads what fits and estimates that number.
+  // Never refused: the plan reads what fits, names the real total and estimates
+  // that read number.
   const overflowPlan = planImageRead({ sources: overflow });
   assert.equal(overflowPlan.ok, true);
   assert.equal(overflowPlan.imageCount, 10);
@@ -337,6 +339,8 @@ test('BE-35 ronde 3: over alle bronnen samen zijn de eerste tien menu-afbeelding
   assert.equal(overflowPlan.limitation, 'Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen.');
   assert.match(overflowPlan.estimate.label, /10 afbeeldingen/);
   assert.deepEqual(overflowPlan.sources.map((entry) => [entry.id, entry.imageCount]), [['source-1', 10]]);
+  // Nothing is refused and nothing is dropped silently: the notice says it.
+  assert.match(imageReadNotice(overflowPlan), /Deze lezing heeft 14 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
 });
 
 test('BE-35 ronde 3: een afbeelding op meer dan één pagina is site-opmaak, geen menukaart', async () => {

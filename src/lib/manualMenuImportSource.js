@@ -349,7 +349,9 @@ async function readManualImportSource({
  *   1. een afbeelding die op meer dan één pagina van deze lezing staat is
  *      site-opmaak en geen menukandidaat;
  *   2. de eerste tien menu-afbeeldingen in volgorde van bron en pagina worden
- *      gelezen, nooit nul als er één past, met het echte aantal erbij.
+ *      gelezen, nooit nul als er één past, met het echte aantal erbij. Een
+ *      pagina die buiten die tien valt wordt geen lege beeldbron: zij valt uit
+ *      de lezing, zodat de bundel en het model dezelfde bronnen zien.
  */
 async function readManualImportSources({
   urls,
@@ -392,6 +394,10 @@ async function readManualImportSources({
   const totalCandidates = menuCandidates.reduce((sum, candidates) => sum + (candidates ? candidates.length : 0), 0);
 
   // Regel 2: de eerste tien menu-afbeeldingen van de lezing, in bronvolgorde.
+  // Een pagina die geen plaats meer heeft levert geen lege beeldbron op: zij
+  // valt uit de lezing, zodat de bundel en het model precies dezelfde bronnen
+  // zien. Het echte aantal van de hele lezing blijft op de gelezen bron staan.
+  const cut = totalCandidates > MAX_MENU_IMAGES;
   let remaining = MAX_MENU_IMAGES;
   const planned = captured.map((entry, index) => {
     if (!Array.isArray(entry.candidates)) return { type: 'plain', entry };
@@ -399,30 +405,42 @@ async function readManualImportSources({
     if (kept.length === 0) return { type: 'fallback', entry };
     const take = kept.slice(0, Math.max(0, remaining));
     remaining -= take.length;
-    const notes = [];
-    if (kept.length > take.length) notes.push(readingImageLimitNotice(totalCandidates));
+    if (take.length === 0) return { type: 'cut' };
     return {
       type: 'image',
       entry,
       // De binding en het eerlijke aantal gaan over de kandidaten zonder
-      // site-opmaak, ook als deze pagina zelf geen plaats meer had.
-      source: { ...entry.source, sha256: imageCandidateHash(kept), imageCandidates: kept.length },
+      // site-opmaak; `readingImageCandidates` is het aantal van de hele lezing.
+      source: {
+        ...entry.source,
+        sha256: imageCandidateHash(kept),
+        imageCandidates: kept.length,
+        ...(cut ? { readingImageCandidates: totalCandidates } : {}),
+      },
       take,
-      notes,
+      notes: cut ? [readingImageLimitNotice(totalCandidates)] : [],
     };
   });
 
-  return Promise.all(planned.map((plan) => {
+  const finished = await Promise.all(planned.map(async (plan) => {
     if (plan.type === 'plain') return plan.entry.source;
+    if (plan.type === 'cut') return null;
     if (plan.type === 'fallback') return plan.entry.fallback;
-    return sourceWithImages({
+    const source = await sourceWithImages({
       source: plan.source,
       candidates: plan.take,
       fetchImpl,
       robotsCheck,
       notes: plan.notes,
     });
+    if (source.images.length > 0) return source;
+    // Geen enkele afbeelding kwam binnen: dan is dit geen beeldbron maar de
+    // gewone pagina (met de eerlijke beperking), of anders niets leesbaars.
+    const fallback = plan.entry.fallback;
+    if (!fallback || fallback.hasText !== true) return null;
+    return { ...fallback, limitation: [source.limitation, fallback.limitation].filter(Boolean).join(' ') };
   }));
+  return finished.filter(Boolean);
 }
 
 

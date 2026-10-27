@@ -376,6 +376,7 @@ function planImageRead({ sources } = {}) {
   const selectedPerSource = new Map();
   const images = [];
   let availableImageCount = 0;
+  let readingImageCount = 0;
   let remaining = MAX_MENU_IMAGES;
   for (const source of imageSources) {
     const entries = Array.isArray(source.images) ? source.images : [];
@@ -383,6 +384,11 @@ function planImageRead({ sources } = {}) {
       ? source.imageCandidates
       : entries.length;
     availableImageCount += offered;
+    // BE-35 ronde 3 (#84): the reading itself can name the real total even when
+    // a page fell outside the ten and is no source of this reading any more.
+    if (Number.isInteger(source.readingImageCandidates) && source.readingImageCandidates > readingImageCount) {
+      readingImageCount = source.readingImageCandidates;
+    }
     let selected = 0;
     for (const image of entries) {
       if (base64Bytes(image.data) > MAX_IMAGE_BYTES) return refused('image_too_large', { imageUrl: image.url || null });
@@ -394,6 +400,7 @@ function planImageRead({ sources } = {}) {
     }
     if (selected > 0) selectedPerSource.set(source.id, selected);
   }
+  if (readingImageCount > availableImageCount) availableImageCount = readingImageCount;
   const imageCount = images.length;
   // Only a reading that really used all ten places was cut by the limit; a
   // failed download is named per source and is no reading limit.

@@ -51,6 +51,9 @@ Live contract en status: GitHub issue #79.
        bruikbare afbeelding wordt nooit geweigerd; zij zegt het echte aantal:
        "Deze lezing heeft N menu-afbeeldingen; de eerste 10 zijn gelezen." en
        de kostenschatting volgt het gelezen aantal. Nooit 0;
+     - een pagina die buiten die tien valt wordt geen lege beeldbron in de
+       bundel: zij valt uit de lezing, zodat de bundel, de dekking van het
+       antwoord en wat het model ziet dezelfde bronnen noemen;
      - een vaste maximale bestandsgrootte;
      - de budgetcontrole gebeurt vooraf;
      - de kosten worden zichtbaar.

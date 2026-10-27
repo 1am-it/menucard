@@ -286,7 +286,7 @@ function createMenuAiReadHandlers({
       const read = await readSources({ urls, now: stamp() });
       // BE-33 (#79, criterion 2): a menu that only exists as an image or as a
       // scan is planned here, before any budget is spent. The plan enforces the
-      // 6-image / 10-page limits and the fixed file size; a refusal names the
+      // 10-image / 10-page limits and the fixed file size; a refusal names the
       // reason instead of sending something unbounded to the model.
       const fetched = (Array.isArray(read) ? read : []).filter(
         (source) => source && (source.status === 'read' || source.status === undefined) && typeof source.sha256 === 'string',
@@ -294,6 +294,11 @@ function createMenuAiReadHandlers({
       if (fetched.length === 0) return { ok: false, status: 422, reason: 'source_empty' };
       const plan = planImageRead({ sources: fetched });
       if (!plan.ok) return { ok: false, status: 422, reason: plan.reason, message: plan.message, plan };
+      // BE-35 ronde 3 (#84): the bundle holds exactly the sources the model gets,
+      // so the validator's coverage rule and the reading name the same sources. A
+      // page whose images were all cut or failed is no source of this reading.
+      const byId = new Map(fetched.map((source) => [source.id, source]));
+      const sent = plan.sources.map((entry) => byId.get(entry.id)).filter(Boolean);
       const built = buildImportBundle({
         bundleId: `AI-${generateId ? generateId() : 'job'}`,
         actorUserId: auth.userId,
@@ -301,7 +306,7 @@ function createMenuAiReadHandlers({
         restaurantName: job.restaurantName || null,
         fetchedAt: stamp().toISOString(),
         protocol,
-        sources: fetched,
+        sources: sent,
         now: stamp(),
       });
       return {
@@ -312,7 +317,7 @@ function createMenuAiReadHandlers({
         // The model receives exactly what the plan reads: text, the images of
         // this website, or the PDF as a document. The bytes stay in this request
         // only; the sealed bundle keeps metadata only.
-        sources: modelSources(plan, new Map(fetched.map((source) => [source.id, source]))),
+        sources: modelSources(plan, byId),
       };
     }
 
