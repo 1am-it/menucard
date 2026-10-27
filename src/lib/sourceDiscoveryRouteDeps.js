@@ -146,6 +146,21 @@ async function loadBusinesses() {
   }
 }
 
+/**
+ * BE-34 (#81, criterion 5) — the nightly warm-up. It calls the one cached OSM
+ * read that "Nieuw gevonden" already uses (tag `osm-breda`, 24 h), so the cron
+ * cannot request more often than that cache allows. Nothing is written; the
+ * route only needs to know whether the cached answer exists.
+ */
+export async function warmOsmCache() {
+  try {
+    const result = await cachedBusinesses()
+    return { ok: Boolean(result && result.ok === true) }
+  } catch {
+    return { ok: false }
+  }
+}
+
 export const sourceDiscoveryHandlers = createSourceDiscoveryHandlers({
   authenticate: authenticateInternalRequest,
   restaurants: restaurantsData,
