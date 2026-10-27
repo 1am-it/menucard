@@ -372,7 +372,7 @@ function createMenuAiReadHandlers({
             ok: false,
             status: 422,
             reason: 'source_empty',
-            message: 'De beeldbronnen van deze import konden niet opnieuw worden gelezen. Ga verder met de handmatige import.',
+            message: 'De beeldbronnen van deze import konden niet opnieuw worden gelezen. Kies de bron opnieuw of probeer het later.',
           };
         }
       }

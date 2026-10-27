@@ -818,9 +818,10 @@ small link. What is new is what the card says when a menu is read page by page.
   rest of the reading stays on screen.
 - **Budget**: "Het budget van deze maand is op." and the manual import link
   remains visible; the manual import is never the only sentence a failure says.
-- **One click in a row** (Dekking / Bronnen beoordelen): the same measured
-  sentence is used in the row's own reason line; the row's result and the card
-  describe the same reading.
+- **One click in a row** (Dekking / Bronnen beoordelen): the row's own outcome
+  line says how many pages were not read ("1 pagina niet gelezen"), so a partial
+  reading never looks complete there either; the manual step stays the small link
+  next to it.
 
 Layout rules that do not change: the card is the same `.bta-card` with
 `mai-step-head`, the numbers follow the visible order (BB3), the primary button

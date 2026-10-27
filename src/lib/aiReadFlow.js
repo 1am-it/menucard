@@ -65,10 +65,15 @@ function aiReadProgressLine() {
  * "✅ 42 gerechten gelezen · 3 controle nodig". Only counts the server actually
  * reported are used; nothing is estimated here.
  */
-function aiReadOutcomeLine({ items, needsReview } = {}) {
+function aiReadOutcomeLine({ items, needsReview, pagesFailed } = {}) {
   const read = Number.isInteger(items) && items >= 0 ? items : 0;
   const open = Number.isInteger(needsReview) && needsReview >= 0 ? needsReview : 0;
-  return `✅ ${read} ${read === 1 ? 'gerecht' : 'gerechten'} gelezen · ${open} controle nodig`;
+  // BE-36 (#87, criterion 2): a partial reading says so in the same line, so a
+  // row never looks complete when a page is missing.
+  const missing = Number.isInteger(pagesFailed) && pagesFailed > 0
+    ? ` · ${pagesFailed} ${pagesFailed === 1 ? 'pagina' : "pagina's"} niet gelezen`
+    : '';
+  return `✅ ${read} ${read === 1 ? 'gerecht' : 'gerechten'} gelezen · ${open} controle nodig${missing}`;
 }
 
 /** The measured cost of the reading, or the honest "not measured". */
