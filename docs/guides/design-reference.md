@@ -541,6 +541,115 @@ production build (developer evidence, 2026-10-25), cold cache, dark, 1280 px:
 This remains developer evidence on a local build; it is not production or
 independent acceptance.
 
+### BE-37 (#89) — kwaliteitscheck van de nieuwe stijl
+
+Owner decision 2026-10-27 ("optie 1 ook"), after BE-36 (#87). No new build-up,
+no new behaviour and no other palette: only what the measurement showed, fixed
+with the existing tokens in `app/globals.css`.
+
+**How it is measured.** `ops/browser/run-kwaliteit-browser-check.js` (also
+`npm run test:browser:kwaliteit`) measures five public routes (`/`,
+`/search?q=pizza`, `/alle-restaurants`, `/restaurant/6`, `/menu/6-diner`) on
+the real production build and four internal screens (`/internal/coverage`,
+`/internal/bronnen`, `/internal/toevoegen`, `/internal/menu-import`) against a
+fictional in-page session and fictional API answers. Same script for "voor" and
+"na", so the numbers are comparable:
+
+- every visible text (>= 4.5:1), every control border and focus ring (>= 3:1),
+  measured from the real computed styles rather than a hand-picked list;
+- decorative emoji outside an `aria-hidden` element;
+- horizontal overflow and every tap target under 44 px;
+- a real Tab walk: is each control reachable, does it show a ring, and does
+  that ring reach 3:1 (measured after the transition has finished);
+- the transfer of the four routes named in the contract, cold cache, dark,
+  1280 px;
+- screenshots at 1280/390/320 px in light and dark.
+
+Records: `ops/browser/evidence/kwaliteit-voor.json` (base `32d40f7`) and
+`ops/browser/evidence/kwaliteit-na.json`; screenshots in
+`ops/browser/evidence/be-37/{voor,na}/`. This is developer evidence on a local
+build; the internal phase is fixture evidence (no production identity, session
+or data). It is not independent review and not production acceptance.
+
+**Contrast.** Before: all text passed except the wine line on the dark card
+(`.td-wine`, `--wine` `#a87c4a` on `#2A2F35` = **3.63:1**; 6 texts on the
+restaurant page, 22 on the menu page), and control borders failed on 8 of the 9
+pages (1.09:1 to 1.29:1 for the secondary buttons, the internal navigation
+actions and the Bronnen row and chips). After:
+
+| page | text, light | text, dark | borders, light | borders, dark |
+| --- | --- | --- | --- | --- |
+| `/` | 6.41:1 | 5.99:1 | 3.56:1 | 3.56:1 |
+| `/search` | 6.41:1 | 5.99:1 | 3.56:1 | 3.56:1 |
+| `/alle-restaurants` | 6.41:1 | 5.99:1 | 3.56:1 | 3.56:1 |
+| `/restaurant/[id]` | 6.28:1 | 5.99:1 | 3.56:1 | 3.56:1 |
+| `/menu/[id]` | 5.74:1 | 5.99:1 | 3.24:1 | 3.02:1 |
+| Dekking (internal) | 6.29:1 | 5.99:1 | 3.15:1 | 3.02:1 |
+| Bronnen beoordelen | 6.43:1 | 5.99:1 | 3.15:1 | 3.02:1 |
+| Toevoegen | 6.41:1 | 4.85:1 | 3.15:1 | 3.02:1 |
+| Menu importeren | 6.43:1 | 5.99:1 | 3.56:1 | 3.56:1 |
+
+0 text and 0 border failures in both themes on all nine pages. The repairs are
+token-level: `--wine` in the dark root is now the existing gold shade
+`#d8bc7a` (7.3:1 on the dark card), control borders use `--input-border`
+(public secondary buttons, the internal navigation actions, the Bronnen row and
+chips) and card edges stay `--card-border-color`, because a card is not a
+control. No new colour was introduced.
+
+**Speed.** Initial transfer, cold cache, dark, 1280 px, target < 250 KB:
+
+| route | before | after |
+| --- | --- | --- |
+| `/` | 164.7 KB | 164.8 KB |
+| `/alle-restaurants` | 162.6 KB | 165.2 KB |
+| `/restaurant/[id]` | 168.3 KB | 169.2 KB |
+| `/menu/[id]` | 168.6 KB | 169.4 KB |
+
+None of the four routes was above the target, so there was nothing to trim:
+the largest single cause is the shared framework chunk (~128 KB of script on
+every route), and this change adds only ~2 KB of CSS. No dependency was added.
+
+**Keyboard and screen reader.** Every control is reachable with Tab on all nine
+pages; every tab stop shows a ring of at least 6.4:1 (public) and 6.55:1
+(internal). Repaired: the shared focus ring for buttons, links, `summary`,
+fields and `[tabindex]` (several chips and links had no ring or a ring under
+3:1), search fields that kept `outline: none` on keyboard focus, the active
+chips on the menu (their `transition: all` left the ring in a half colour for
+150 ms) and the phone tab bar (it rings in its own text colour instead of the
+oker on the dark bar). The Bronnen cleanup confirmation is the only dialog: it
+opens with the focus on its first button, closes with Escape and gives the
+focus back to the button that opened it. Decorative emoji render through
+`<Emoji>`/`<EmojiText>` (always `aria-hidden`) on every measured page; before
+that 11 to 20 emoji per public page and 1 to 10 per internal screen were read
+aloud.
+
+**Phone.** No horizontal overflow at 390 and 320 px on any of the nine pages.
+Before, `/restaurant/[id]` and Dekking ran 10 px off the screen and 24 measured
+controls were under 44 px. Repaired with existing shapes only: the chips, meal
+buttons, category navigation, back buttons, secondary buttons and search fields
+get a 44 px minimum height, the small text links (address, phone, source,
+"Liever zelf plakken", claim, allergen matrix, breadcrumb) get a 44 px row and
+the checkboxes get a 44 px label around the unchanged 20 px box (a native
+checkbox ignores padding, so its own box cannot grow without changing the
+design).
+
+**Slordigheden.** Dekking: the column heads no longer run into each other
+("SELECTEERRESTAURANT" was two heads without spacing) — the first column is
+`nowrap` and 1% wide, the other heads keep 14 px of space. A row that is part
+of the running control is no longer shown twice: it appears once, in "Resultaat
+van de controle", and the list says how many rows are listed there. The
+remaining English on the internal screens is gone: sign-in ("Inloggen
+(intern)", "E-mailadres", "Wachtwoord", "Bezig met inloggen…"), account
+activation ("Je account activeren", "Account activeren", "Bezig met
+activeren…"), the password screen ("Stel je wachtwoord in", "Wachtwoord
+opslaan", "Herhaal het nieuwe wachtwoord") and their validation and error
+messages ("Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.",
+"De wachtwoorden zijn niet gelijk."). Labels follow one pattern: an action says
+what happens ("Bekijk matrix", "Wachtwoord opslaan", "Zoek de bron voor mij").
+
+Regressions for every finding are in `src/lib/be37Quality.test.js`; the
+existing surface tests were updated where a label's rendering changed.
+
 ## Internal navigation hierarchy
 
 Sources:
@@ -570,7 +679,8 @@ Sources:
      directly after `Bronwerkvoorraad`, decided for v1);
    - `Profielconcepten` → `/internal/profile-drafts`;
    - `Beoordelen` → `/internal/moderation`, editor only.
-4. **Right side:** the shared theme toggle, then `Sign out`.
+4. **Right side:** the shared theme toggle, then `Uitloggen` (BE-37 #89 made
+   the internal navigation Dutch).
 5. **No counts:** no entry shows a count today. BE-23 added
    `Bronwerkvoorraad` without a badge count and lists "any nav badge
    count" under "Not built (deliberately)".

@@ -199,6 +199,17 @@ test('BE-37 slordigheden: the internal sign-in screens are Dutch', () => {
   assert.match(read('src/lib/activationFlow.js'), /Deze code is ongeldig of verlopen\. Vraag een nieuwe code aan\./);
   assert.match(read('src/lib/setPasswordFlow.js'), /De wachtwoorden zijn niet gelijk\./);
   assert.doesNotMatch(read('src/lib/setPasswordFlow.js'), /Passwords do not match|Password must be at least|Something went wrong setting/);
+
+  // BE-37 (#89): ook de gedeelde interne navigatie en de statuspagina.
+  const nav = read('src/components/InternalNav.js');
+  assert.match(nav, />\s*Uitloggen\s*</);
+  assert.doesNotMatch(nav, /Sign out/);
+  assert.doesNotMatch(nav, /Owner tools|not available yet|No internal access/);
+  const home = read('app/internal/page.js');
+  assert.match(home, /Uitloggen/);
+  assert.match(home, /Beheerdersfuncties/);
+  assert.match(home, /Dit account heeft geen interne toegang\./);
+  assert.doesNotMatch(home, /Sign out|Owner tools|Nothing to open yet|Your account has no internal role/);
 });
 
 // ── criterium 2 en 6: meten en bewijs ─────────────────────────────────────

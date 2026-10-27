@@ -12,12 +12,12 @@
 // Issue #62's structure (contract criteria 1, 2 and 5):
 //  - inline: the logo (always the landing rule, through /internal), "Dekking",
 //    "Werkvoorraad (N)", "+ Restaurant of menu toevoegen", Licht/Donker and
-//    Sign out;
+//    Uitloggen;
 //  - the Werkvoorraad menu is a real button with aria-expanded (never a
 //    hover-only or CSS-only menu), followed by a panel with the counted
 //    "Open werk" rows sorted by real numbers, one separating line, then
 //    Stadsoverzicht and Restaurantgegevens (concept), and on a telephone the
-//    same Licht/Donker and Sign out at the bottom;
+//    same Licht/Donker and Uitloggen at the bottom;
 //  - on a narrow screen the bar keeps the logo, Dekking, "Werk (N)" and a "+"
 //    button of at least 44 px; the full labels live in the menu.
 //
@@ -142,7 +142,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
   const triggerRef = useRef(null)
   const wrapperRef = useRef(null)
 
-  // Which copy of Licht/Donker + Sign out is mounted: the bar's on a wide
+  // Which copy of Licht/Donker + Uitloggen is mounted: the bar's on a wide
   // screen, the menu's at the bottom on a telephone. Exactly one exists at a
   // time, so two independent toggles can never disagree after a resize and a
   // screen reader or the tab order never meets a duplicate. The 640 px CSS rule
@@ -338,7 +338,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
                   <>
                     <ThemeToggle />
                     <button type="button" onClick={signOut} className="internal-nav-signout">
-                      Sign out
+                      Uitloggen
                     </button>
                   </>
                 )}
@@ -360,14 +360,14 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
         <span className="internal-nav-add-text">Restaurant of menu toevoegen</span>
       </a>
 
-      {showOwnerNote && <span className="internal-nav-note">Owner tools — not available yet</span>}
-      {noAccess && <span className="internal-nav-note">No internal access for this account</span>}
+      {showOwnerNote && <span className="internal-nav-note">Beheerdersfuncties — nog niet beschikbaar</span>}
+      {noAccess && <span className="internal-nav-note">Dit account heeft geen interne toegang</span>}
 
       {!narrow && (
         <div className="internal-nav-actions">
           <ThemeToggle />
           <button type="button" onClick={signOut} className="internal-nav-signout">
-            Sign out
+            Uitloggen
           </button>
         </div>
       )}

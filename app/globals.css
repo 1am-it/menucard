@@ -2475,7 +2475,7 @@ mark.search-highlight {
   color: var(--text-secondary);
 }
 .internal-nav-signout:hover { border-color: var(--border-hover); color: var(--text-primary); }
-/* #62 — Licht/Donker and Sign out live together on the right of the bar; the
+/* #62 — Licht/Donker en Uitloggen staan samen on the right of the bar; the
    same two controls are rendered once more at the bottom of the Werkvoorraad
    menu for the telephone layout (only one copy is ever displayed, so a screen
    reader and the tab order never see a duplicate). Focus rings stay scoped to
@@ -2597,7 +2597,7 @@ mark.search-highlight {
   font-variant-numeric: tabular-nums;
 }
 .internal-nav-workqueue-separator { border: 0; border-top: 1px solid var(--border); margin: 6px 4px; }
-/* Telephone only: Licht/Donker and Sign out at the bottom of the same menu.
+/* Alleen op de telefoon: Licht/Donker en Uitloggen onderaan of the same menu.
    On a wider screen this block is display: none, so the bar's own copy is the
    only one a screen reader or the tab order can reach. */
 .internal-nav-workqueue-actions {
@@ -2623,7 +2623,7 @@ mark.search-highlight {
 /* #62 criterion 5 — 640 px (and therefore both 390 and 320 px): the bar keeps
    the logo, Dekking, "Werk (N)" and a "+" button of at least 44 px; the menu
    opens full width under the bar with the same rows, the same numbers and
-   Licht/Donker + Sign out at the bottom. */
+   Licht/Donker + Uitloggen onderaan. */
 @media (max-width: 640px) {
   .internal-nav { padding: 8px 10px; gap: 6px 8px; }
   /* The mark alone is the logo on a telephone (the link keeps its full

@@ -129,7 +129,7 @@ export default function InternalHomePage() {
         fontSize: 13,
       }}
     >
-      Sign out
+      Uitloggen
     </button>
   )
 
@@ -177,8 +177,8 @@ export default function InternalHomePage() {
             color: 'var(--text-secondary)',
           }}
         >
-          <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Owner tools</div>
-          <p style={{ margin: 0, fontSize: 13 }}>Nothing to open yet — no owner-facing internal page exists.</p>
+          <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Beheerdersfuncties</div>
+          <p style={{ margin: 0, fontSize: 13 }}>Nog niets te openen — er is nog geen interne pagina voor de beheerder.</p>
         </div>
         <div style={{ marginTop: 16 }}>{signOutButton}</div>
       </main>
@@ -197,10 +197,10 @@ export default function InternalHomePage() {
           background: 'var(--bg-card)',
         }}
       >
-        <strong style={{ color: 'var(--text-primary)' }}>No internal access for this account.</strong>
+        <strong style={{ color: 'var(--text-primary)' }}>Dit account heeft geen interne toegang.</strong>
         <p style={{ marginTop: 8, marginBottom: 16, fontSize: 14, color: 'var(--text-secondary)' }}>
-          Your account has no internal role assigned. If you believe this is a mistake, contact an administrator —
-          there is nothing else to do from here.
+          Je account heeft geen interne rol. Denk je dat dit niet klopt? Neem contact op met een beheerder —
+          verder is er vanaf hier niets te doen.
         </p>
         {signOutButton}
       </div>
