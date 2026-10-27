@@ -127,7 +127,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
   }, [load])
 
   const rows = useMemo(
-    () => coverageRows(entries || [], { batchDetails: details, now: new Date(), aiReady: aiReadReady(aiStatus) }),
+    () => coverageRows(entries || [], { batchDetails: details, now: new Date(), aiReady: aiReadReady(aiStatus), aiStatus }),
     [entries, details, aiStatus],
   )
   // Criterium 6: de tegel "nog niet gecontroleerd" toont dezelfde telling als
@@ -547,6 +547,9 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                   ) : (
                     <span className="cov-check-meta">Geen automatische controle mogelijk</span>
                   )}
+                  {/* BE-35 (#84, criterion 3): without the AI route the row says
+                      why, in the same words as the menu-import page's reason. */}
+                  {row.aiReason ? <div className="cov-check-meta cov-check-why">{row.aiReason}</div> : null}
                   {row.deadEnd && row.canCheck ? (
                     <button type="button" className="srr-recheck cov-check-recheck" disabled={busy} onClick={() => start([row.url])}>
                       {CHECK_COPY.recheck}
@@ -564,7 +567,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           <h3 className="cov-check-title">{activeBatch.batch.closed_at ? 'Resultaat van de controle' : CHECK_COPY.running}</h3>
           <ol className="srr-list" aria-label="Resultaat van de controle">
             {activeBatch.items.map((item) => {
-              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus) })
+              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date(), aiReady: aiReadReady(aiStatus), aiStatus })
               return (
                 <SourceResultRow
                   key={`${item.position}-${item.jobId || item.key}`}

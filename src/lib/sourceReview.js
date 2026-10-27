@@ -169,16 +169,59 @@ function aiReadReady(status) {
   return true;
 }
 
+// ── BE-35 (#84, criterion 3): say out loud why the AI route is not offered ────
+// The owner's practical test (Al Dente, 2026-10-27) showed an image-only row
+// offering "✍️ Handmatig toevoegen" without a word about the cause: it looked
+// like a choice while the AI was simply unavailable. The row now states the
+// reason in plain language.
+//
+// The words come from the answer the menu-import page already reads
+// (GET /api/internal/v1/menu-ai-import: `reason`, `message` and
+// `budget.allowed`/`budget.reason` in src/lib/menuAiReadHandlers.js). No new
+// API, no new status: the three AI-off reasons there mean the same thing as the
+// "AI is niet ingesteld." that page shows, and the two budget reasons are the
+// same ones its AI card reports.
+const AI_UNAVAILABLE_TEXT = Object.freeze({
+  ai_not_configured: 'AI staat uit (instelling ontbreekt).',
+  ai_flagged_off: 'AI staat uit (instelling ontbreekt).',
+  ai_key_missing: 'AI staat uit (instelling ontbreekt).',
+  budget_exhausted: 'Het budget van deze maand is op.',
+  budget_unavailable: 'Het budget kon niet worden gelezen.',
+});
+
+/**
+ * Why the AI reading cannot be offered, in one plain sentence, or null when the
+ * AI is available (or when nothing is known yet — the row then claims nothing).
+ */
+function aiUnavailableText(status) {
+  if (!status || typeof status !== 'object') return null;
+  if (status.enabled !== true) {
+    const reason = typeof status.reason === 'string' ? status.reason : '';
+    if (AI_UNAVAILABLE_TEXT[reason]) return AI_UNAVAILABLE_TEXT[reason];
+    // Any other server sentence is the same one the menu-import page shows.
+    if (typeof status.message === 'string' && status.message.trim() !== '') return status.message.trim();
+    return 'AI staat uit.';
+  }
+  const budget = status.budget;
+  if (budget && typeof budget === 'object' && budget.allowed === false) {
+    const reason = typeof budget.reason === 'string' ? budget.reason : '';
+    return AI_UNAVAILABLE_TEXT[reason] || 'De AI is nu niet beschikbaar.';
+  }
+  return null;
+}
+
 /**
  * One batch result (BE-25 `deriveItemView` output) → one row:
  * { key, position, url, jobId, restaurant, foundUrl, detail, actions,
  *   resultAt, age, handled, state, emoji, label, step }.
  * Exactly one `step`; `null` only for a finished, closed or work-free row.
  *
- * `aiReady` is the answer of the existing AI status endpoint (`aiReadReady`);
- * it decides only the image/scan row, never a text reading.
+ * `aiReady` is the answer of the existing AI status endpoint (`aiReadReady`); it
+ * decides only the image/scan row, never a text reading. `aiStatus` is that same
+ * answer itself, so an image-only row can say why the AI route is not offered
+ * (BE-35 / #84, criterion 3).
  */
-function rowForBatchItem(item, { batchId, returnTo, now, aiReady } = {}) {
+function rowForBatchItem(item, { batchId, returnTo, now, aiReady, aiStatus } = {}) {
   const key = item && typeof item.key === 'string' ? item.key : null;
   const resultAt = (item && item.resultAt) || null;
   const base = {
@@ -195,6 +238,9 @@ function rowForBatchItem(item, { batchId, returnTo, now, aiReady } = {}) {
     handled: null,
     step: null,
     batchId: batchId || null,
+    // BE-35 (#84, criterion 3): why this row offers the manual route, when the
+    // reason is the AI being unavailable. null = no such claim.
+    aiReason: null,
   };
   const row = (state, step, extra) => ({
     ...base,
@@ -239,7 +285,9 @@ function rowForBatchItem(item, { batchId, returnTo, now, aiReady } = {}) {
       // can read an image, the manual import when it cannot.
       if (!base.jobId) return row('blocked', STEPS.manual);
       if (aiReady === true) return row('no_menu', STEPS.ai_read_image);
-      return row('no_menu', STEPS.manual);
+      // BE-35 (#84, criterion 3): the manual step stays, and the row says why it
+      // is not the AI route. Without a known status the row claims nothing.
+      return row('no_menu', STEPS.manual, { aiReason: aiUnavailableText(aiStatus) });
     }
     // An AI reading needs the existing analysis job; without one, the honest
     // fallback is the manual import, never a button that cannot work.
@@ -390,14 +438,14 @@ function newestFirst(a, b) {
  *   detailById: Map<batchId, detail>
  * }
  */
-function groupBatchResults(batchDetails, { returnTo, now, aiReady } = {}) {
+function groupBatchResults(batchDetails, { returnTo, now, aiReady, aiStatus } = {}) {
   const groups = new Map();
   for (const detail of Array.isArray(batchDetails) ? batchDetails : []) {
     if (!detail || !detail.batch || !detail.batch.id) continue;
     const batch = detail.batch;
     const items = Array.isArray(detail.items) ? detail.items : [];
     for (const item of items) {
-      const row = rowForBatchItem(item, { batchId: batch.id, returnTo, now, aiReady });
+      const row = rowForBatchItem(item, { batchId: batch.id, returnTo, now, aiReady, aiStatus });
       const restaurant = row.restaurant;
       if (!restaurant || !restaurant.id) continue;
       const id = String(restaurant.id);
@@ -529,9 +577,9 @@ function entryById(entries, restaurantId) {
  *    newest result decides (task or not); its triage attention signal never
  *    adds a second task for the same restaurant.
  */
-function selectTasks({ entries, batchDetails, returnTo, now, aiReady } = {}) {
+function selectTasks({ entries, batchDetails, returnTo, now, aiReady, aiStatus } = {}) {
   const entryList = Array.isArray(entries) ? entries : [];
-  const groups = groupBatchResults(batchDetails, { returnTo, now, aiReady });
+  const groups = groupBatchResults(batchDetails, { returnTo, now, aiReady, aiStatus });
   const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
   const tasks = [];
   for (const group of groups) {
@@ -591,8 +639,8 @@ function effectiveTaskFilter(filter) {
  *  - a row without a website cannot be checked and says so instead of offering
  *    a dead button.
  */
-function coverageRows(entries, { batchDetails, now, aiReady } = {}) {
-  const groups = groupBatchResults(batchDetails, { now, aiReady });
+function coverageRows(entries, { batchDetails, now, aiReady, aiStatus } = {}) {
+  const groups = groupBatchResults(batchDetails, { now, aiReady, aiStatus });
   const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
   const rows = [];
   const seen = new Set();
@@ -647,6 +695,85 @@ function discoveryProposalFromEntry(entry) {
   };
 }
 
+/**
+ * BE-35 (#84, criteria 1 and 2) — the one rule for the URL a check analyses.
+ *
+ * The owner's practical test (Al Dente, 2026-10-27) went wrong here: the menu
+ * link `.../menukaart-restaurant-2/` had been confirmed, and "Controleer" still
+ * analysed the homepage `https://www.aldentebreda.nl/`, so the result was
+ * "Geen menukaart gevonden". A confirmed link therefore leads:
+ *
+ *  1. the menu link of the newest accepted BE-24 proposal, read back from the
+ *     provenance BE-32 wrote into its note (`website:` / `menulink:`);
+ *  2. otherwise the link that proposal itself confirmed (for a proposal without
+ *     a separate menu link that is the website);
+ *  3. otherwise the confirmed website the restaurant list already knows.
+ *
+ * Every screen that starts a check uses this function — Dekking (per row and
+ * for "Controleer N geselecteerde"), Bronnen beoordelen and Toevoegen — so the
+ * same restaurant is never checked on two different addresses.
+ */
+function acceptedSourceProposal(entry) {
+  const proposals = entry && Array.isArray(entry.proposals) ? entry.proposals : [];
+  const accepted = proposals.filter(
+    (proposal) =>
+      proposal &&
+      proposal.status === 'accepted' &&
+      (proposal.kind === 'add_candidate' || proposal.kind === 'replace_source') &&
+      typeof proposal.proposed_url === 'string' &&
+      proposal.proposed_url.trim() !== '',
+  );
+  if (accepted.length === 0) return null;
+  // The last confirmation wins, whatever order the rows arrive in.
+  accepted.sort((a, b) => {
+    const left = timeOf(a.decided_at || a.proposed_at);
+    const right = timeOf(b.decided_at || b.proposed_at);
+    if (left === null && right === null) return 0;
+    if (left === null) return 1;
+    if (right === null) return -1;
+    return right - left;
+  });
+  return accepted[0];
+}
+
+/** The check URL of one restaurant: { url, from, origin, website, proposalId } or null. */
+const CHECK_URL_SOURCE_LABELS = Object.freeze({
+  proposal_menu: 'menulink van het bevestigde voorstel',
+  proposal: 'link van het bevestigde voorstel',
+  website: 'website van het restaurant',
+});
+
+function confirmedCheckUrl(entry) {
+  const proposal = acceptedSourceProposal(entry);
+  if (proposal) {
+    const parsed = parseProposalNote(proposal.note);
+    const menu = typeof parsed.menu === 'string' && parsed.menu.trim() !== '' ? parsed.menu.trim() : null;
+    return {
+      url: menu || proposal.proposed_url.trim(),
+      // `from` names the origin in the row and in the tests: a menu link, the
+      // confirmed link itself, or the website we already knew.
+      from: menu ? 'proposal_menu' : 'proposal',
+      origin: parsed.origin || null,
+      website: parsed.website || null,
+      proposalId: proposal.id || null,
+    };
+  }
+  const known = entry && typeof entry.known_url === 'string' ? entry.known_url.trim() : '';
+  if (known === '') return null;
+  return { url: known, from: 'website', origin: null, website: known, proposalId: null };
+}
+
+/**
+ * "Opnieuw controleren" (criterion 2) asks the same question, so it gets the same
+ * answer: the confirmed link when there is one, otherwise the URL of the result
+ * that is being looked at again.
+ */
+function recheckUrlFor(row, entry) {
+  const confirmed = confirmedCheckUrl(entry);
+  if (confirmed && confirmed.url) return confirmed.url;
+  return (row && (row.url || row.foundUrl)) || null;
+}
+
 /** One Dekking row: the existing reason plus, for a dead end, the outcome, the
  * age and the one fitting next step of the same batch result. */
 function coverageRow(entry, group, now) {
@@ -656,10 +783,13 @@ function coverageRow(entry, group, now) {
   const proposal = discoveryProposalFromEntry(entry);
   const openProposal = proposal && proposal.status === 'open' ? proposal : null;
   const acceptedProposal = proposal && proposal.status === 'accepted' ? proposal : null;
-  const knownUrl = (entry && entry.known_url) || null;
-  // A proposal is a found source: the row shows it and checks it once the human
-  // has confirmed it. An open proposal is the next step; nothing is automatic.
-  const url = openProposal ? openProposal.url : knownUrl || (acceptedProposal ? acceptedProposal.url : null) || (resultRow && resultRow.url) || null;
+  // BE-35 (#84, criteria 1 and 2): the confirmed link is leading, not the website
+  // we merely know. One rule for the row, for the selection and for "Opnieuw
+  // controleren": confirmedCheckUrl above.
+  const confirmed = confirmedCheckUrl(entry);
+  // An open proposal is still the next step (nothing is checked before the human
+  // confirms it); after confirmation the confirmed link decides.
+  const url = openProposal ? openProposal.url : (confirmed && confirmed.url) || (resultRow && resultRow.url) || null;
   const reason = (entry && entry.not_in_queue_reason) || (deadEnd ? DEAD_END_REASON : null);
   const resultAt = (resultRow && resultRow.resultAt) || (newest && newest.at) || null;
   return {
@@ -673,6 +803,11 @@ function coverageRow(entry, group, now) {
       name: (entry && entry.name) || (group && group.name) || '',
     },
     url,
+    // BE-35 (#84, criterion 1): where that URL comes from — a menu link from the
+    // confirmed proposal (BE-32's provenance), that proposal's own link, or the
+    // website we already knew. null when the row has no check URL at all.
+    checkUrlSource: confirmed ? confirmed.from : null,
+    checkUrlOrigin: confirmed ? confirmed.origin : null,
     reason,
     reasonLabel: NOT_IN_QUEUE_LABELS[reason] || 'Nog niet gecontroleerd',
     canCheck: Boolean(url),
@@ -686,6 +821,9 @@ function coverageRow(entry, group, now) {
     age: ageLabel(resultAt, now),
     jobId: resultRow ? resultRow.jobId : null,
     batchId: newest ? newest.batchId : null,
+    // BE-35 (#84, criterion 3): when the AI is unavailable, the row says why it
+    // offers "Handmatig toevoegen" instead of "Lees met AI".
+    aiReason: resultRow ? resultRow.aiReason : null,
     // BE-32: the proposal and its provenance, for the row's own text and step.
     proposal: openProposal || (acceptedProposal ? { ...acceptedProposal, confirmed: true } : null),
     proposedUrl: openProposal ? openProposal.url : acceptedProposal ? acceptedProposal.url : null,
@@ -694,7 +832,7 @@ function coverageRow(entry, group, now) {
       : deadEnd && resultRow.step
         ? resultRow.step
         : url
-          ? acceptedProposal && !knownUrl
+          ? confirmed && confirmed.from !== 'website'
             ? STEPS.check_proposal
             : STEPS.check
           : null,
@@ -702,8 +840,9 @@ function coverageRow(entry, group, now) {
 }
 
 /**
- * The URLs of one explicit "Controleer N geselecteerde" click. Only known
- * websites are checked, duplicates are dropped, and the existing maximum of
+ * The URLs of one explicit "Controleer N geselecteerde" click. Only rows with a
+ * check URL take part (since BE-35 / #84 that is the confirmed menu link when the
+ * human confirmed one), duplicates are dropped, and the existing maximum of
  * MAX_BATCH_URLS per batch is respected instead of silently cut: the caller
  * shows `tooMany`.
  */
@@ -787,11 +926,14 @@ module.exports = {
   DAILY_URL_LIMIT,
   ageLabel,
   aiReadReady,
+  aiUnavailableText,
+  AI_UNAVAILABLE_TEXT,
   rowForBatchItem,
   stepHref,
   safeReturnHref,
   menukopjesBackHref,
   rowNeedsAction,
+  entryById,
   taskFromEntry,
   groupBatchResults,
   selectTasks,
@@ -800,6 +942,10 @@ module.exports = {
   effectiveTaskFilter,
   coverageRows,
   discoveryProposalFromEntry,
+  acceptedSourceProposal,
+  confirmedCheckUrl,
+  CHECK_URL_SOURCE_LABELS,
+  recheckUrlFor,
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,

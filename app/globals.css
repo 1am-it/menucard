@@ -4570,6 +4570,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .srr-step { display: flex; align-items: center; }
 .srr-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; }
 .srr-wait, .srr-none { font-size: 13px; color: var(--text-secondary); }
+/* BE-35 (#84, criterion 3): the reason under a manual step stays readable next
+   to the button instead of being squeezed beside it. */
+.srr-step--stack { flex-direction: column; align-items: flex-end; gap: 4px; }
+.srr-why { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; text-align: right; max-width: 260px; }
 .srr-age { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .srr-recheck { min-height: 28px; padding: 0 8px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
 .srr-recheck:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
@@ -4700,6 +4704,8 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .cov-check-table td:last-child { padding-right: 0; }
 .cov-check-name { font-weight: 700; overflow-wrap: anywhere; }
 .cov-check-meta { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* BE-35 (#84, criterion 3): the reason a dead-end row offers the manual route. */
+.cov-check-why { margin-top: 4px; }
 .cov-check-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap; }
 .cov-check-select { width: 20px; height: 20px; }
 .cov-check-result { display: grid; gap: 2px; margin-top: 4px; }
