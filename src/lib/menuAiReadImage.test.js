@@ -181,6 +181,11 @@ test('BE-33: menu images of this website are read as images by the same model', 
   assert.equal(result.body.review.summary.valid, 0);
   assert.equal(result.body.review.canSave, false);
   assert.equal(h.saved.length, 1, 'one draft concept is written, nothing published');
+  // The durable draft keeps the dishes with their origin, and stays unreviewed.
+  const items = h.saved[0].content.categories.flatMap((category) => category.items);
+  assert.deepEqual(items.map((item) => item.name), ['Fictief gerecht 1', 'Fictief gerecht 2']);
+  assert.deepEqual(items.map((item) => item.evidence.locator), ['afbeelding 1', 'afbeelding 2']);
+  assert.equal(h.saved[0].content.importProvenance.reviewed, false);
 });
 
 test('BE-33: a scan PDF goes as a document and keeps "pagina N" per dish', async () => {
