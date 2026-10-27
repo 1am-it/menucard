@@ -593,6 +593,10 @@ async function auditKeyboard(cdp, page, theme, width) {
   const limit = Math.min(60, tabbable.length + 4);
   for (let index = 0; index < limit; index += 1) {
     await pressKey(cdp, 'Tab', 'Tab', 9);
+    // Een ring met een CSS-transition is pas na die transition op kleur; een
+    // toetsenbordgebruiker ziet de eindkleur. Meten in de overgang zou een
+    // halve kleur als bevinding opleveren.
+    await new Promise((resolve) => setTimeout(resolve, 220));
     const info = await evalJs(cdp, FOCUS_JS);
     if (!info) break;
     steps.push(info);

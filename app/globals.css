@@ -4131,7 +4131,7 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .ar-sort:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .ar-search { max-width: 520px; margin: 18px 0 0; }
 .ar-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.ar-chips .chip { min-height: 38px; }
+.ar-chips .chip { min-height: 44px; }
 .ar-count { margin: 20px 0 12px; font-size: 14px; font-weight: 600; color: var(--text-secondary); }
 .ar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; align-items: stretch; }
 /* Eén kaart = één link. Even hoog, rond, en de CTA zakt naar de onderkant. */
@@ -4802,10 +4802,6 @@ textarea:focus-visible,
 .home-all-link { display: inline-flex; align-items: center; }
 .search-clear,
 .mf-clear { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
-/* Een selectievakje van 20 px is te klein om te raken; de zichtbare box
-   blijft klein, het klikbare vlak eromheen wordt 44 px. */
-.cov-check-select,
-.brn-pick { width: 24px; height: 24px; padding: 10px; box-sizing: content-box; }
 
 /* 4. Randen van de interne bediening: dezelfde 3:1-eis als publiek. */
 .internal-nav-workqueue-trigger,
@@ -4857,4 +4853,28 @@ textarea:focus-visible,
 .rp-source a { min-height: 44px; display: inline-flex; align-items: center; }
 .dip-claim,
 .dip-nvwa-btn { display: inline-flex; align-items: center; min-height: 44px; }
+a.srr-paste-link { min-height: 44px; display: inline-flex; align-items: center; }
+/* Het woordmerk in de kop en de interne huislink zijn zelf een tikvlak. */
+a.wordmark { min-height: 44px; }
+a.internal-nav-home { min-width: 44px; min-height: 44px; }
+/* Een selectievakje van 20 px is te klein om te raken. De zichtbare box blijft
+   klein; het klikbare vlak eromheen wordt 44 px. De `input`-prefix is nodig:
+   de bestaande `input[type=checkbox]`-regel zet de padding anders terug. */
+input.cov-check-select,
+input.brn-pick { width: 24px; height: 24px; padding: 10px; box-sizing: content-box; }
+.cov-new,
+.cov-new > * { min-width: 0; }
+
+/* 10. De focusring verschijnt meteen. `.meal-btn`, `.cat-nav-item`, `.mf-btn`
+   en `.primary-nav-link` hadden `transition: all`, waardoor de ring 150 ms
+   lang in een halve kleur stond (gemeten als 1:1 tot 2,4:1). De ring zelf
+   doet niet meer mee aan de transition; de hover blijft zoals hij was. */
+.meal-btn,
+.cat-nav-item,
+.mf-btn,
+.primary-nav-link,
+.home-chip,
+.home-meal-btn,
+.now-open-btn,
+.chip { transition-property: background-color, border-color, color; }
 

@@ -109,6 +109,17 @@ test('BE-37 screen reader: Dekking, Bronnen, de menukaart en de restaurantpagina
   assert.deepEqual(offenders, [], 'a decorative emoji must go through <Emoji> or <EmojiText>');
 });
 
+test('BE-37 focus: the ring appears immediately on the components that animate', () => {
+  // `transition: all` liet de ring 150 ms in een halve kleur staan; de ring
+  // zelf doet daarom niet meer mee aan de transition.
+  const source = css();
+  const block = source.slice(source.indexOf('.meal-btn,\n.cat-nav-item,\n.mf-btn,\n.primary-nav-link,'));
+  assert.match(block.slice(0, 400), /transition-property: background-color, border-color, color;/);
+  for (const selector of ['.meal-btn,', '.cat-nav-item,', '.mf-btn,', '.primary-nav-link,']) {
+    assert.ok(block.slice(0, 200).includes(selector), selector);
+  }
+});
+
 // ── criterium 4: telefoon ─────────────────────────────────────────────────
 test('BE-37 phone: the measured controls have a 44px tap target and the checkboxes a 44px hit area', () => {
   const source = css();
@@ -117,7 +128,7 @@ test('BE-37 phone: the measured controls have a 44px tap target and the checkbox
   for (const selector of ['.theme-btn { min-height: 44px;', '.primary-nav-link { min-height: 44px; }', '.mf-search,', '.stg-btn-secondary,', '.internal-nav-link { min-height: 44px;']) {
     assert.ok(source.includes(selector), selector);
   }
-  assert.match(source, /\.cov-check-select,\s*\n\.brn-pick \{ width: 24px; height: 24px; padding: 10px; box-sizing: content-box; \}/);
+  assert.match(source, /input\.cov-check-select,\s*\ninput\.brn-pick \{ width: 24px; height: 24px; padding: 10px; box-sizing: content-box; \}/);
   assert.match(source, /\.search-clear,\s*\n\.mf-clear \{ width: 44px; height: 44px;/);
   assert.match(
     source,
@@ -127,6 +138,15 @@ test('BE-37 phone: the measured controls have a 44px tap target and the checkbox
   const detail = read('app/restaurant/[id]/RestaurantDetailView.js');
   assert.match(detail, /className="dip-claim"/);
   assert.match(detail, /className="dip-nvwa-btn"/);
+  // Het woordmerk en de interne huislink zijn zelf een tikvlak.
+  assert.match(source, /a\.wordmark \{ min-height: 44px; \}/);
+  assert.match(source, /a\.internal-nav-home \{ min-width: 44px; min-height: 44px; \}/);
+  assert.match(source, /a\.srr-paste-link \{ min-height: 44px; display: inline-flex; align-items: center; \}/);
+});
+
+test('BE-37 phone: Dekking at 320px can shrink its column, so nothing runs off the screen', () => {
+  const source = css();
+  assert.match(source, /\.cov-new,\s*\n\.cov-new > \* \{ min-width: 0; \}/);
 });
 
 test('BE-37 phone: Dekking keeps its two action buttons inside the screen at 320px', () => {
