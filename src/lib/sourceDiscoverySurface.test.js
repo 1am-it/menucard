@@ -24,10 +24,10 @@ function read(file) {
 
 test('Dekking: the Dutch top with three tiles, then the check section and Nieuw gevonden', () => {
   const page = read(COVERAGE_PAGE);
-  assert.match(page, /<h1 className="cov-title">Dekking 📊<\/h1>/);
-  assert.match(page, /🍽️ restaurants/);
-  assert.match(page, /📋 met menukaart/);
-  assert.match(page, /🔎 nog niet gecontroleerd/);
+  assert.match(page, /<h1 className="cov-title">Dekking <Emoji glyph="📊" \/><\/h1>/);
+  assert.match(page, /<Emoji glyph="🍽️" \/> restaurants/);
+  assert.match(page, /<Emoji glyph="📋" \/> met menukaart/);
+  assert.match(page, /<Emoji glyph="🔎" \/> nog niet gecontroleerd/);
   assert.match(page, /<CoverageCheckSection token=\{session\.access_token\} onUncheckedCount=\{setUncheckedCount\} \/>/);
   assert.match(page, /<NewFoundSection token=\{session\.access_token\} \/>/);
   assert.match(page, /Kaartgegevens: © OpenStreetMap-bijdragers/);

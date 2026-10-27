@@ -133,14 +133,14 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
       )}
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
-      {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
+      {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}
 
       {/* Allergen status badges */}
       {hasAllergenFilter && (
         <div className="mc-allergen-status">
           {unknown && (
             <span className="mc-badge mc-badge-unknown">
-              ⚠ Allergeneninformatie onbekend
+              <Emoji glyph="⚠" /> Allergeneninformatie onbekend
             </span>
           )}
           {!safe && !unknown && (
@@ -164,7 +164,8 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
                 className={`mc-allergen-icon ${isExcluded ? 'excluded' : ''}`}
                 title={a.name}
               >
-                {a.icon}
+                <Emoji glyph={a.icon} />
+                <span className="visually-hidden">{a.name}</span>
               </span>
             )
           })}

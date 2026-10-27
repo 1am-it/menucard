@@ -6,6 +6,7 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
@@ -70,7 +71,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           {/* Left: main info */}
           <div>
             {restaurant.badge && (
-              <div className="detail-badge">{restaurant.badge}</div>
+              <div className="detail-badge"><EmojiText value={restaurant.badge} /></div>
             )}
             <h1 className="detail-name">{restaurant.name}</h1>
             <div className="detail-cuisine">{restaurant.cuisineLabel || restaurant.cuisine}</div>
@@ -80,7 +81,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             {restaurant.tags?.length > 0 && (
               <div className="detail-tags">
                 {restaurant.tags.map(tag => (
-                  <span key={tag} className="detail-tag">{tag}</span>
+                  <span key={tag} className="detail-tag"><EmojiText value={tag} /></span>
                 ))}
               </div>
             )}
@@ -90,7 +91,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               <div className="detail-menu-links">
                 {menuLinks.map(link => (
                   <Link key={link.id} href={`/menu/${link.id}`} className="detail-menu-btn">
-                    {link.label}
+                    <EmojiText value={link.label} />
                   </Link>
                 ))}
               </div>
@@ -116,12 +117,12 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
             <div>
               <div className="dip-section-title">Contact</div>
               <div className="dip-row">
-                <span className="dip-icon">📍</span>
+                <span className="dip-icon" aria-hidden="true">📍</span>
                 <span>{restaurant.address}</span>
               </div>
               {isValidPhone(restaurant.phone) && (
                 <div className="dip-row" style={{ marginTop: 6 }}>
-                  <span className="dip-icon">📞</span>
+                  <span className="dip-icon" aria-hidden="true">📞</span>
                   <a href={`tel:${restaurant.phone}`} style={{ color: 'inherit' }}>
                     {restaurant.phoneDisplay || restaurant.phone}
                   </a>
@@ -129,7 +130,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               )}
               {isValidUrl(restaurant.website) && (
                 <div className="dip-row" style={{ marginTop: 6 }}>
-                  <span className="dip-icon">🌐</span>
+                  <span className="dip-icon" aria-hidden="true">🌐</span>
                   <a href={restaurant.website} target="_blank" rel="noopener noreferrer"
                     style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: 12 }}>
                     {restaurant.website.replace('https://','').replace('http://','').replace(/\/$/,'')}
@@ -137,7 +138,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                 </div>
               )}
               <div className="dip-row" style={{ marginTop: 6 }}>
-                <span className="dip-icon">💶</span>
+                <span className="dip-icon" aria-hidden="true">💶</span>
                 <span>{priceStr} · {restaurant.price}</span>
               </div>
             </div>
@@ -226,7 +227,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
                     )}
                   </div>
                   {item.desc && <div className="td-desc">{item.desc}</div>}
-                  {item.wine && <div className="td-wine">🍷 {item.wine}</div>}
+                  {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}
                   <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6 }}>{item.category}</div>
                 </div>
               ))}
@@ -236,7 +237,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
               <div style={{ marginTop: 24, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 {menuLinks.map(link => (
                   <Link key={link.id} href={`/menu/${link.id}`} className="detail-menu-btn">
-                    {link.label}
+                    <EmojiText value={link.label} />
                   </Link>
                 ))}
               </div>
@@ -244,7 +245,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
           </section>
         ) : (
           <section style={{ textAlign: 'center', padding: '60px 0' }}>
-            <div style={{ fontSize: 36, marginBottom: 16 }}>📋</div>
+            <div style={{ fontSize: 36, marginBottom: 16 }}><Emoji glyph="📋" /></div>
             <h3 style={{ color: 'var(--text-secondary)', marginBottom: 8 }}>Menukaart nog niet beschikbaar</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 24 }}>
               Bekijk de website van het restaurant voor de actuele menukaart.
@@ -273,7 +274,7 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
         }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--accent)', marginBottom: 4 }}>
-              🛡 Allergeneninformatie (NVWA)
+              <Emoji glyph="🛡" /> Allergeneninformatie (NVWA)
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Wettelijk verplichte allergenenmatrix · EU Verordening 1169/2011

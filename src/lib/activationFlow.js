@@ -5,7 +5,7 @@
 // the earlier design (a link with `#token_hash=...&type=...`, verified
 // only after a button click) was itself found live to be insufficient —
 // a real reset link reached this page already invalid *before* the
-// human could ever click "Activate account," meaning whatever
+// human could ever click "Account activeren," meaning whatever
 // consumed it did so by more than a passive GET (the token was only
 // ever in the URL fragment, never sent to any server at all — see the
 // previous version of this file's own header comment for that design).
@@ -88,8 +88,8 @@ function validateActivationForm(email, code) {
 }
 
 function activationValidationMessage(reason) {
-  if (reason === 'invalid-email') return 'Enter the email address the code was sent to.';
-  if (reason === 'missing-code') return 'Enter the code from the email.';
+  if (reason === 'invalid-email') return 'Vul het e-mailadres in waar de code naartoe is gestuurd.';
+  if (reason === 'missing-code') return 'Vul de code uit de e-mail in.';
   return '';
 }
 
@@ -106,7 +106,7 @@ function resolveActivationOutcome(error) {
   }
   return {
     ok: false,
-    message: 'That code is invalid or has expired. Please request a new one.',
+    message: 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.',
   };
 }
 

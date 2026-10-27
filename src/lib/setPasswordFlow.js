@@ -157,10 +157,10 @@ function validateNewPassword(password, confirmPassword) {
 
 function passwordValidationMessage(reason) {
   if (reason === 'too-short') {
-    return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+    return `Je wachtwoord moet minstens ${MIN_PASSWORD_LENGTH} tekens hebben.`;
   }
   if (reason === 'mismatch') {
-    return 'Passwords do not match.';
+    return 'De wachtwoorden zijn niet gelijk.';
   }
   return '';
 }
@@ -181,12 +181,12 @@ function resolveUpdatePasswordOutcome(error) {
   if (error.name === 'AuthWeakPasswordError' || error.weakPassword) {
     return {
       ok: false,
-      message: "That password doesn't meet this site's requirements — please choose a different one.",
+      message: 'Dat wachtwoord voldoet niet aan de eisen van deze site. Kies een ander wachtwoord.',
     };
   }
   return {
     ok: false,
-    message: 'Something went wrong setting your password. Please request a new invitation link and try again.',
+    message: 'Er ging iets mis bij het instellen van je wachtwoord. Vraag een nieuwe uitnodiging aan en probeer het opnieuw.',
   };
 }
 

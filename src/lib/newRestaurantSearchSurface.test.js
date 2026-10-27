@@ -37,7 +37,10 @@ test('the name search reuses the existing route family and the same engine', () 
 test('the add form offers the search only for a name that is not in our list', () => {
   const page = read('app/internal/toevoegen/page.js');
   assert.match(page, /const NAME_API = '\/api\/internal\/v1\/source-discovery\/name'/);
-  assert.match(page, /✨ Zoek op internet: \$\{restaurantQuery\.trim\(\)\.slice\(0, 120\)\}, Breda/);
+  // BE-37 (#89): the star is decoration and goes through <Emoji>; the label is
+  // the same text as before, so the button still reads "Zoek op internet: …".
+  assert.match(page, /<Emoji glyph="✨" \/>\{' '\}/);
+  assert.match(page, /`Zoek op internet: \$\{restaurantQuery\.trim\(\)\.slice\(0, 120\)\}, Breda`/);
   assert.match(page, /restaurantQuery\.trim\(\)\.length >= 2 && restaurantChoices\.length === 0/);
   assert.match(page, /body: JSON\.stringify\(\{ name \}\)/);
 });

@@ -177,7 +177,7 @@ test('validateNewPassword: rejects a mismatched confirmation', () => {
   const result = validateNewPassword('longenough1', 'longenough2');
   assert.equal(result.valid, false);
   assert.equal(result.reason, 'mismatch');
-  assert.equal(passwordValidationMessage(result.reason), 'Passwords do not match.');
+  assert.equal(passwordValidationMessage(result.reason), 'De wachtwoorden zijn niet gelijk.');
 });
 
 test('validateNewPassword: accepts a long-enough, matching password', () => {
@@ -209,7 +209,7 @@ test('resolveUpdatePasswordOutcome: no error is a clean success', () => {
 test('resolveUpdatePasswordOutcome: a weak-password error maps to a specific, still-safe message', () => {
   const outcome = resolveUpdatePasswordOutcome({ name: 'AuthWeakPasswordError', message: 'Password should contain at least one character of each: abc, ABC, 123' });
   assert.equal(outcome.ok, false);
-  assert.match(outcome.message, /requirements/);
+  assert.match(outcome.message, /eisen/);
   // Never leaks Supabase's own raw message.
   assert.equal(outcome.message.includes('ABC'), false);
 });
@@ -217,7 +217,7 @@ test('resolveUpdatePasswordOutcome: a weak-password error maps to a specific, st
 test('resolveUpdatePasswordOutcome: a weakPassword field (without the exact error name) is also recognized', () => {
   const outcome = resolveUpdatePasswordOutcome({ message: 'Some wrapper', weakPassword: { reasons: ['length'] } });
   assert.equal(outcome.ok, false);
-  assert.match(outcome.message, /requirements/);
+  assert.match(outcome.message, /eisen/);
 });
 
 test('resolveUpdatePasswordOutcome: any other error maps to one fully generic message, never the raw error text', () => {
@@ -226,7 +226,7 @@ test('resolveUpdatePasswordOutcome: any other error maps to one fully generic me
   assert.equal(outcome.message.includes('deadbeef'), false);
   assert.equal(outcome.message.includes('abc123'), false);
   assert.equal(outcome.message.includes('401'), false);
-  assert.equal(outcome.message, 'Something went wrong setting your password. Please request a new invitation link and try again.');
+  assert.equal(outcome.message, 'Er ging iets mis bij het instellen van je wachtwoord. Vraag een nieuwe uitnodiging aan en probeer het opnieuw.');
 });
 
 test('resolveUpdatePasswordOutcome: an error with no message/name at all still gets the generic message, never throws', () => {

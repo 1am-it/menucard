@@ -7,7 +7,7 @@
 // design — a link carrying `#token_hash=...&type=...`, verified only
 // after a button click — was found live to still fail: a real reset
 // link reached this page already invalid *before* the human could ever
-// click "Activate account." Whatever consumed it did so from more than
+// click "Account activeren." Whatever consumed it did so from more than
 // a passive server-side GET (the token lived only in the URL fragment,
 // which no server ever receives at all), meaning even a click-gated
 // link is not safe against every real-world email-scanning behavior.
@@ -87,7 +87,7 @@ export default function ActivatePage() {
       // getSupabaseBrowser() itself throwing (e.g. a browser/embedded
       // context that blocks storage access) must degrade the same safe
       // way here too, never crash this page.
-      outcome = { ok: false, message: 'That code is invalid or has expired. Please request a new one.' }
+      outcome = { ok: false, message: 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.' }
     }
     setSubmitting(false)
 
@@ -109,15 +109,15 @@ export default function ActivatePage() {
         color: 'var(--text-primary)',
       }}
     >
-      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Activate your account</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Je account activeren</h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
-        Enter the email address and the code from {type === 'invite' ? 'your invitation' : 'the password reset'} email.
+        Vul het e-mailadres en de code in uit {type === 'invite' ? 'je uitnodiging' : 'de e-mail over je wachtwoord'}.
       </p>
 
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="E-mailadres"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
@@ -149,7 +149,7 @@ export default function ActivatePage() {
             cursor: 'pointer',
           }}
         >
-          {submitting ? 'Activating…' : 'Activate account'}
+          {submitting ? 'Bezig met activeren…' : 'Account activeren'}
         </button>
       </form>
     </main>

@@ -12,6 +12,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import SourceResultRow from '@/src/components/SourceResultRow'
+import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import AiReadAction from '@/src/components/AiReadAction'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import useAiReading from '@/src/components/useAiReading'
@@ -136,6 +138,22 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
     if (typeof onUncheckedCount === 'function' && Array.isArray(entries)) onUncheckedCount(rows.length)
   }, [rows, entries, onUncheckedCount])
   const remaining = daily && Number.isInteger(daily.used) ? Math.max(0, DAILY_URL_LIMIT - daily.used) : DAILY_URL_LIMIT
+  // BE-37 (#89, criterium 5): een rij die in de controle zit, staat niet twee
+  // keer op dit scherm. De rij blijft bestaan (de telling en de tegel blijven
+  // gelijk); hij staat alleen op één plek: bij "Resultaat van de controle".
+  const activeBatchUrls = useMemo(
+    () =>
+      new Set(
+        (activeBatch && Array.isArray(activeBatch.items) ? activeBatch.items : [])
+          .map((item) => item && item.url)
+          .filter(Boolean),
+      ),
+    [activeBatch],
+  )
+  const visibleRows = useMemo(
+    () => rows.filter((row) => !row.url || !activeBatchUrls.has(row.url)),
+    [rows, activeBatchUrls],
+  )
 
 
   const loadBatch = useCallback(
@@ -167,7 +185,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
     load()
   }, [activeBatch, load])
 
-  const selection = useMemo(() => checkSelection(rows, selected), [rows, selected])
+  const selection = useMemo(() => checkSelection(visibleRows, selected), [visibleRows, selected])
   const startCheck = canStartCheck({ count: selection.count, remaining })
 
   function toggle(id) {
@@ -336,7 +354,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
     }
   }
 
-  const discoveryIds = selected.size > 0 ? [...selected] : rows.map((row) => row.restaurantId)
+  const discoveryIds = selected.size > 0 ? [...selected] : visibleRows.map((row) => row.restaurantId)
   const discoveryLabel = `✨ Vind bronnen (${discoveryIds.length})`
 
   return (
@@ -351,10 +369,10 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
         <button
           type="button"
           className="stg-btn-secondary cov-check-action"
-          disabled={busy || discoveryBusy || rows.length === 0}
+          disabled={busy || discoveryBusy || visibleRows.length === 0}
           onClick={() => findSources(discoveryIds)}
         >
-          {discoveryBusy ? '✨ Bezig…' : discoveryLabel}
+          {discoveryBusy ? <><Emoji glyph="✨" /> Bezig…</> : <EmojiText value={discoveryLabel} />}
         </button>
         <button
           type="button"
@@ -363,7 +381,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           title={startCheck.reason || undefined}
           onClick={() => start(selection.urls)}
         >
-          🔎 Controleer {selection.count} geselecteerde
+          <Emoji glyph="🔎" /> Controleer {selection.count} geselecteerde
         </button>
       </div>
       <p className="cov-check-meta">
@@ -443,8 +461,18 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
         </div>
       ) : null}
 
-      {rows.length === 0 ? (
-        <p className="brn-hint">Alle restaurants hebben al een bruikbare broncontrole.</p>
+      {rows.length > visibleRows.length ? (
+        <p className="cov-check-meta">
+          {rows.length - visibleRows.length} van deze rijen staan hieronder bij &quot;Resultaat van de controle&quot; en
+          worden daar afgehandeld.
+        </p>
+      ) : null}
+      {visibleRows.length === 0 ? (
+        <p className="brn-hint">
+          {rows.length === 0
+            ? 'Alle restaurants hebben al een bruikbare broncontrole.'
+            : 'Alle open rijen staan hieronder bij "Resultaat van de controle".'}
+        </p>
       ) : (
         <table className="cov-check-table">
           <thead>
@@ -457,7 +485,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {visibleRows.map((row) => (
               <tr key={row.restaurantId}>
                 <td>
                   <input
@@ -511,7 +539,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                       disabled={busy}
                       onClick={() => confirmProposal(row)}
                     >
-                      {row.step.label}
+                      <EmojiText value={row.step.label} />
                     </button>
                   ) : row.deadEnd ? (
                     // The one fitting step of this dead end: "Handmatig
@@ -532,7 +560,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                         className="stg-btn-secondary cov-check-action"
                         href={stepHref(row, { batchId: row.batchId, returnTo: COVERAGE_HREF }) || MANUAL_IMPORT_HREF}
                       >
-                        {row.step.label}
+                        <EmojiText value={row.step.label} />
                       </a>
                     )
                   ) : row.canCheck ? (
@@ -542,7 +570,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
                       disabled={busy}
                       onClick={() => start([row.url])}
                     >
-                      {row.step.label}
+                      <EmojiText value={row.step.label} />
                     </button>
                   ) : (
                     <span className="cov-check-meta">Geen automatische controle mogelijk</span>
