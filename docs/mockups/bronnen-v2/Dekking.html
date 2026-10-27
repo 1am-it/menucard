@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Dekking vind bronnen en handel af</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#7A4E00}
+</style>
+</helmet>
+<div style="width: 1280px; height: 1120px; box-sizing: border-box; overflow: hidden; background: #FFFFFF; color: #1A1410; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; padding: 20px 40px">
+  <header style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; border: 1px solid #EEEAE2; border-radius: 18px">
+    <span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 9px; background: #F2C35B; color: #1F1600; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center">om</span>
+    <span style="font-weight: 800; font-size: 16px">onze menukaarten</span>
+    <span aria-current="page" style="min-height: 40px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 800; box-shadow: inset 0 -3px 0 #F6C057">📊 Dekking</span>
+    <span style="min-height: 40px; display: flex; align-items: center; padding: 0 14px; border-radius: 999px; border: 1px solid #8E877B; background: #F3F1EC; font-size: 14px; font-weight: 700">🧰 Werkvoorraad 0 ▾</span>
+    <span style="min-height: 40px; display: flex; align-items: center; padding: 0 16px; border-radius: 999px; background: #F6C057; color: #1F1600; font-size: 14px; font-weight: 800">＋ Restaurant of menu toevoegen</span>
+  </header>
+
+  <h1 style="margin: 18px 0 4px; font-size: 28px; font-weight: 800">Dekking 📊</h1>
+  <p style="margin: 0; font-size: 14px; color: #5C5650">Hoeveel van Breda staat er al in, en waar zitten de gaten. Je start én rondt het werk hier af.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px">
+    <div style="padding: 16px; border-radius: 16px; background: #F3F1EC"><div style="font-size: 26px; font-weight: 800">25</div><div style="font-size: 13px; color: #5C5650">🍽️ restaurants</div></div>
+    <div style="padding: 16px; border-radius: 16px; background: #F3F1EC"><div style="font-size: 26px; font-weight: 800">5</div><div style="font-size: 13px; color: #5C5650">📋 met menukaart <span style="color: #1D5E35; font-weight: 700">+1 vandaag</span></div></div>
+    <div style="padding: 16px; border-radius: 16px; background: #FFF6E2; border: 1px solid #7A4E00"><div style="font-size: 26px; font-weight: 800">21</div><div style="font-size: 13px; color: #5C5650">🔎 nog niet gecontroleerd</div></div>
+  </div>
+
+  <section aria-labelledby="dk-niet" style="margin-top: 18px; border: 1px solid #EEEAE2; border-radius: 18px; padding: 18px">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <h2 id="dk-niet" style="margin: 0; font-size: 19px; font-weight: 800">Nog niet gecontroleerd (21)</h2>
+      <div style="flex: 1"></div>
+      <span style="padding: 11px 16px; border-radius: 999px; border: 1px solid #8E877B; font-weight: 800; font-size: 14px">✨ Vind bronnen (21)</span>
+      <span style="padding: 11px 16px; border-radius: 999px; background: #F6C057; color: #1F1600; font-weight: 800; font-size: 14px">🔎 Controleer 4 geselecteerde</span>
+    </div>
+
+    <div style="margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #F3F1EC; font-size: 13px; line-height: 1.5">
+      <b>✨ Vind bronnen klaar:</b> 17 websites voorgesteld (🗺️ 12 OpenStreetMap · 🌐 3 eigen website · 🤖 2 AI-zoeken) · 4 niet gevonden. Alles is een <b>voorstel</b>: je bevestigt per rij. Kosten AI: 6 cent van je maandbudget (€ 9,62 over). <span style="color: #5C5650">Max. 10 per batch · vandaag nog 21 van 25 URL's.</span>
+    </div>
+
+    <div style="margin-top: 10px; display: grid; grid-template-columns: 32px minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1.1fr) 230px; align-items: center; font-size: 14px">
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2"><input type="checkbox" aria-label="Alles selecteren"></span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">RESTAURANT</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">BRON (VOORSTEL) EN HERKOMST</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">CONTROLE</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">VOLGENDE STAP</span>
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+        <span style="padding: 12px 0; border-bottom: 1px solid #EEEAE2; align-self: stretch; display: flex; align-items: center"><input type="checkbox" checked="{{r.checked}}" aria-label="Selecteer {{r.name}}"></span>
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; align-self: stretch; display: flex; align-items: center; font-weight: 700">{{r.emoji}} {{r.name}}</span>
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; align-self: stretch; display: flex; flex-direction: column; justify-content: center; gap: 2px"><span>{{r.site}}</span><span style="font-size: 12px; color: #5C5650">{{r.origin}}</span></span>
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; align-self: stretch; display: flex; flex-direction: column; justify-content: center; gap: 2px"><span style="font-weight: 700">{{r.result}}</span><span style="font-size: 12px; color: #5C5650">{{r.detail}}</span></span>
+        <span style="padding: 12px 0; border-bottom: 1px solid #EEEAE2; align-self: stretch; display: flex; align-items: center"><span style="padding: 9px 14px; border-radius: 999px; font-weight: 800; font-size: 13px; background: {{r.btnBg}}; color: {{r.btnFg}}; border: {{r.btnBorder}}">{{r.action}}</span></span>
+      </sc-for>
+    </div>
+    <p style="margin: 10px 0 0; font-size: 13px; color: #5C5650">… en nog 14 restaurants. Wat je hier niet afrondt, blijft als taak staan onder <b>Werkvoorraad → Bronnen beoordelen</b>. Kaartgegevens: © OpenStreetMap-bijdragers.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1120}}'>
+class Component extends DCLogic {
+renderVals() {
+const primary = { btnBg: '#F6C057', btnFg: '#1F1600', btnBorder: '0' };
+const outline = { btnBg: 'transparent', btnFg: '#1A1410', btnBorder: '1px solid #8E877B' };
+const quiet = { btnBg: '#F3F1EC', btnFg: '#5C5650', btnBorder: '0' };
+const r = (emoji, name, site, origin, result, detail, action, style, checked) => ({ emoji, name, site, origin, result, detail, action, checked: !!checked, ...style });
+return { rows: [
+r('🍝', 'Al Dente Ristorante', 'aldentebreda.nl/menu', '🗺️ OpenStreetMap → 🌐 menulink op eigen website', '✅ Zeker resultaat', 'Menukaart gevonden, menukopjes herkend', '✅ Bevestig bron', primary, true),
+r('🍺', 'Beers & Barrels', 'beersbarrels.nl/kaart', '🗺️ OpenStreetMap → 🤖 AI koos de menupagina (citaat: “Onze kaart”)', '⏳ Bezig…', 'Controle loopt, laat deze pagina open', 'Even wachten', quiet, true),
+r('🥩', 'Con Fuego', 'restaurantconfuego.com/menu.pdf', '🌐 eigen website', '⚠️ Controle nodig', '5 menukopjes onzeker', '⚠️ Menukopjes controleren', outline, true),
+r('🍺', 'De Beyerd', 'debeyerd.nl', '🤖 AI-zoeken · bron: KvK-vermelding en Google-resultaat', '— Nog niet gecontroleerd', 'Website-voorstel, nog niet bevestigd', '🔎 Controleer', outline, true),
+r('🍕', 'Dolce e Salato', 'dolceesalato.nl', '🗺️ OpenStreetMap', '📋 Geen menukaart gevonden', 'Website bereikbaar, geen kaart herkend', '🤖 Lees met AI', outline, false),
+r('🥡', 'Gantau Village', '— geen website gevonden', 'Niet in OpenStreetMap, AI vond geen officiële site', '—', 'Alleen bezorgplatforms gevonden (genegeerd)', '✍️ Handmatig toevoegen', quiet, false),
+r('🍜', 'Klein Java', 'kleinjava.nl', '🗺️ OpenStreetMap', '⛔ Robots geblokkeerd', 'De site staat lezen niet toe', '✍️ Handmatig toevoegen', quiet, false)
+] };
+}
+}
+</script>
+</body>
+</html>

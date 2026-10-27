@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Nieuw gevonden restaurants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#7A4E00}
+</style>
+</helmet>
+<div style="width: 1280px; height: 640px; box-sizing: border-box; overflow: hidden; background: #FFFFFF; color: #1A1410; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; padding: 24px 40px">
+  <div style="font-size: 13px; color: #5C5650">📊 Dekking · onder "Nog niet gecontroleerd"</div>
+  <section aria-labelledby="nw" style="margin-top: 10px; border: 1px solid #EEEAE2; border-radius: 18px; padding: 18px">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <h2 id="nw" style="margin: 0; font-size: 19px; font-weight: 800">🆕 Nieuw gevonden (4)</h2>
+      <span style="font-size: 13px; color: #5C5650">Restaurants in Breda die OpenStreetMap kent en wij nog niet. Dekking voegt nooit zelf iets toe.</span>
+      <div style="flex: 1"></div>
+      <span style="font-size: 13px; color: #5C5650">Laatst opgehaald: vandaag 08:12</span>
+    </div>
+    <div style="margin-top: 12px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1fr) 260px; align-items: center; font-size: 14px">
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">NAAM</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">ADRES · WEBSITE</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2; font-size: 12px; font-weight: 700; color: #5C5650">SOORT (VOLGENS OSM)</span>
+      <span style="padding: 8px 0; border-bottom: 1px solid #EEEAE2"></span>
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; font-weight: 700">{{r.emoji}} {{r.name}}</span>
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; display: flex; flex-direction: column; gap: 2px"><span>{{r.address}}</span><span style="font-size: 12px; color: #5C5650">{{r.site}}</span></span>
+        <span style="padding: 12px 8px 12px 0; border-bottom: 1px solid #EEEAE2; color: #5C5650">{{r.kind}}</span>
+        <span style="padding: 12px 0; border-bottom: 1px solid #EEEAE2; display: flex; gap: 8px; align-items: center"><span style="padding: 9px 14px; border-radius: 999px; background: #F6C057; color: #1F1600; font-weight: 800; font-size: 13px">＋ Toevoegen</span><span style="padding: 9px 12px; border-radius: 999px; border: 1px solid #8E877B; font-weight: 700; font-size: 13px">Negeren</span></span>
+      </sc-for>
+    </div>
+    <p style="margin: 10px 0 0; font-size: 13px; color: #5C5650">"＋ Toevoegen" opent het formulier "Restaurant of menu toevoegen" met naam, adres en website al ingevuld (eerst de restaurantgegevens). "Negeren" onthoudt dat het geen restaurant voor ons is, bijv. een snackbar of een gesloten zaak. Kaartgegevens: © OpenStreetMap-bijdragers.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+const r = (emoji, name, address, site, kind) => ({ emoji, name, address, site, kind });
+return { rows: [
+r('🍝', 'Trattoria Voorbeeld', 'Havermarkt 1, Breda', 'trattoria-voorbeeld.example', 'restaurant · italiaans'),
+r('🍜', 'Noodlebar Voorbeeld', 'Ginnekenweg 2, Breda', '— geen website in OSM', 'restaurant · aziatisch'),
+r('🥐', 'Bakkerij Voorbeeld', 'Haagdijk 3, Breda', 'bakkerij-voorbeeld.example', 'café'),
+r('🍺', 'Café Voorbeeld', 'Grote Markt 4, Breda', 'cafe-voorbeeld.example', 'bar · met keuken')
+] };
+}
+}
+</script>
+</body>
+</html>
