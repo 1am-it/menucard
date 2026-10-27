@@ -33,15 +33,15 @@ async function fetchOverpassBusinesses({ fetchImpl = fetch, now = () => new Date
   const query = buildOverpassQuery();
   let response;
   try {
-    response = await fetchImpl(OVERPASS_ENDPOINT, {
-      method: 'POST',
+    // GET with the query in the URL: Next only caches GET reliably inside a
+    // route handler, so this keeps it at one shared answer per day.
+    response = await fetchImpl(`${OVERPASS_ENDPOINT}?${new URLSearchParams({ data: query }).toString()}`, {
+      method: 'GET',
       headers: {
         'User-Agent': OVERPASS_USER_AGENT,
-        'Content-Type': 'application/x-www-form-urlencoded',
         Accept: 'application/json',
       },
-      body: new URLSearchParams({ data: query }).toString(),
-      // Existing Next/fetch revalidation: one shared answer per day.
+      cache: 'force-cache',
       next: { revalidate: OSM_CACHE_SECONDS, tags: ['osm-breda'] },
       signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined,
     });

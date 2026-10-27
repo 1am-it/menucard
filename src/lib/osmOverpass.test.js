@@ -27,7 +27,7 @@ function fakeFetch({ json = { elements: [] }, ok = true, throws = false } = {}) 
   return { impl, calls };
 }
 
-test('osm fetch: one POST to the public Overpass API, with our own User-Agent and a 24-hour cache', async () => {
+test('osm fetch: one cached GET to the public Overpass API, with our own User-Agent and a 24-hour cache', async () => {
   const { impl, calls } = fakeFetch({
     json: { elements: [{ type: 'node', id: 1, lat: 51.5, lon: 4.7, tags: { amenity: 'restaurant', name: 'Voorbeeld' } }] },
   });
@@ -37,12 +37,13 @@ test('osm fetch: one POST to the public Overpass API, with our own User-Agent an
   assert.equal(result.fetchedAt, '2026-10-27T08:12:00.000Z');
   assert.equal(result.attribution, OSM_ATTRIBUTION);
   assert.equal(calls.length, 1, 'exactly one request, never one per restaurant');
-  assert.equal(calls[0].url, OVERPASS_ENDPOINT);
-  assert.equal(calls[0].init.method, 'POST');
+  const url = new URL(calls[0].url);
+  assert.equal(`${url.origin}${url.pathname}`, OVERPASS_ENDPOINT);
+  assert.equal(calls[0].init.method, 'GET');
+  assert.equal(calls[0].init.cache, 'force-cache');
   assert.equal(calls[0].init.headers['User-Agent'], OVERPASS_USER_AGENT);
   assert.equal(calls[0].init.next.revalidate, OSM_CACHE_SECONDS);
-  assert.match(String(calls[0].init.body), /data=/);
-  assert.equal(new URLSearchParams(String(calls[0].init.body)).get('data'), buildOverpassQuery());
+  assert.equal(url.searchParams.get('data'), buildOverpassQuery());
 });
 
 test('osm fetch: a failing API is an honest reason, never an exception and never inventing data', async () => {
