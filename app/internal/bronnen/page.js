@@ -7,9 +7,16 @@
 // route writes.
 //
 // What counts as work is decided in one pure, tested place
-// (src/lib/sourceReview.js): open proposals, sources asking attention and batch
-// results with a human action. "Nog niet gecontroleerd" is NOT work here; those
-// restaurants live in Dekking (owner decision 2026-10-27).
+// (src/lib/sourceReview.js): one task per restaurant, built from its newest
+// batch result (a certain result or a doubt result), plus open proposals and
+// sources that ask attention. Dead ends and "Nog niet gecontroleerd" are NOT
+// work here; those restaurants live in Dekking (owner decision 2026-10-27, Lead
+// review #6439131777).
+//
+// The age of a result stays visible and "Opnieuw controleren" reuses the
+// existing batch analysis (10 per batch, 25 per day, only while this page is
+// open). "Oude resultaten opruimen" closes results by hand through the existing
+// job row's field_evidence (like BE-30, no migration); nothing is deleted.
 //
 // The old /internal/source-triage and /internal/source-triage/batch addresses
 // answer with a 308 (next.config.js). The technical names of tables, APIs and
@@ -19,8 +26,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import useBatchProcessing from '@/src/components/useBatchProcessing'
 import BronnenView from './BronnenView'
-import { BRONNEN_HREF, selectTasks, countTasks, filterTasks, effectiveTaskFilter } from '@/src/lib/sourceReview'
+import { BRONNEN_HREF, CHECK_COPY, selectTasks, countTasks, filterTasks, effectiveTaskFilter } from '@/src/lib/sourceReview'
 import { readFollowUp, followUpForEntry } from '@/src/lib/sourceTriage'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
@@ -28,6 +36,10 @@ const BATCH_API = '/api/internal/v1/batch-analysis'
 // The same bound the batch overview itself uses for its recent batches.
 const BATCH_DETAIL_LIMIT = 10
 const LOAD_ERROR = 'Bronnen beoordelen kon niet worden geladen.'
+
+function newBatchId() {
+  return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
+}
 
 export default function BronnenPage() {
   const router = useRouter()
@@ -41,6 +53,13 @@ export default function BronnenPage() {
   const [selectedId, setSelectedId] = useState(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
+  // "Oude resultaten opruimen" (review point 6): the picked tasks and the one
+  // confirmation that names the number.
+  const [picked, setPicked] = useState(() => new Set())
+  const [cleanup, setCleanup] = useState(null)
+  // "Opnieuw controleren" runs the existing batch analysis while this page is
+  // open, exactly like the batch screen.
+  const [recheckBatchId, setRecheckBatchId] = useState(null)
   const headingRef = useRef(null)
   const focusDetail = useRef(false)
   const feedbackRef = useRef(null)
@@ -117,9 +136,37 @@ export default function BronnenPage() {
     if (token) load(token)
   }, [token, load])
 
+  // One batch detail through the existing GET: used for "Opnieuw controleren".
+  const fetchDetail = useCallback(async (accessToken, batchId) => {
+    if (!accessToken || !batchId) return null
+    try {
+      const res = await fetch(`${BATCH_API}?batch=${encodeURIComponent(batchId)}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: 'no-store',
+      })
+      if (!res.ok) return null
+      const body = await res.json().catch(() => null)
+      return body && body.detail ? body : null
+    } catch {
+      return null
+    }
+  }, [])
+
+  useBatchProcessing({
+    token,
+    batchId: recheckBatchId,
+    enabled: Boolean(recheckBatchId),
+    onTick: async (id) => {
+      const body = await fetchDetail(token, id)
+      await load(token, { refresh: true })
+      return body
+    },
+  })
+
   const entries = useMemo(() => (triage && triage.restaurants) || [], [triage])
+  // The age of a result is calculated once per load, with the browser's clock.
   const tasks = useMemo(
-    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF }),
+    () => selectTasks({ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date() }),
     [entries, details],
   )
   const counts = useMemo(() => countTasks(tasks), [tasks])
@@ -141,15 +188,18 @@ export default function BronnenPage() {
   )
   const bannerFollowUp = followUpContext && !detailFollowUp ? followUpContext.followUp : null
 
-  // A deep link keeps working: ?batch=<id> opens that batch task, ?restaurant=<id>
-  // opens the task of that restaurant (proposal, attention or its batch row).
+  // A deep link keeps working: ?batch=<id> opens the task whose newest result
+  // came from that batch, ?restaurant=<id> opens the task of that restaurant
+  // (proposal, attention or its batch result).
   useEffect(() => {
     if (selectedId || tasks.length === 0) return
     const params = new URLSearchParams(window.location.search)
     const batch = params.get('batch')
     const restaurant = params.get('restaurant')
     if (batch) {
-      const match = tasks.find((task) => task.kind === 'batch' && task.batchId === batch)
+      const match = tasks.find(
+        (task) => task.kind === 'batch' && (task.batchId === batch || (task.batchIds || []).includes(batch)),
+      )
       // An older batch is not among the recent ones shown here: keep the old
       // deeplink usable by opening the existing batch screen for exactly that id.
       if (match) setSelectedId(match.id)
@@ -164,7 +214,7 @@ export default function BronnenPage() {
       )
       if (match) setSelectedId(match.id)
     }
-  }, [tasks, selectedId])
+  }, [tasks, selectedId, router])
 
   useEffect(() => {
     if (focusDetail.current && headingRef.current) {
@@ -201,6 +251,117 @@ export default function BronnenPage() {
     window.history.replaceState(null, '', url)
   }
 
+  // ── Opnieuw controleren (review point 5) ───────────────────────────────────
+  // The existing batch analysis for exactly this URL: same POST, same limits
+  // (10 per batch, 25 per day) and the same rule that it only runs while this
+  // page is open. Nothing is published and nothing expires by itself.
+  async function recheck(row) {
+    const url = row && (row.url || row.foundUrl)
+    if (!url) return
+    const batchId = newBatchId()
+    if (!batchId) {
+      setMessage({ tone: 'error', text: 'Deze browser kan geen controle starten.' })
+      return
+    }
+    setBusy(true)
+    setMessage(null)
+    try {
+      const res = await fetch(BATCH_API, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch_id: batchId, urls: [url] }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'De controle kon niet worden gestart.' })
+        return
+      }
+      setRecheckBatchId(batchId)
+      setMessage({ tone: 'notice', text: `${CHECK_COPY.running}. ${CHECK_COPY.keepOpen}` })
+      await load(token, { refresh: true })
+    } catch {
+      setMessage({ tone: 'error', text: 'De controle kon niet worden gestart.' })
+    } finally {
+      focusFeedback.current = true
+      setBusy(false)
+    }
+  }
+
+  // ── Oude resultaten opruimen (review point 6) ──────────────────────────────
+  // The picked tasks, or all of them when none is picked, are closed by hand
+  // through the existing job rows. One confirmation names the number, nothing
+  // is deleted and the record stays.
+  const pickable = useMemo(() => tasks.filter((task) => task.kind === 'batch'), [tasks])
+
+  useEffect(() => {
+    // A closed task can no longer be picked.
+    setPicked((prev) => {
+      const ids = new Set(pickable.map((task) => task.id))
+      const next = new Set([...prev].filter((id) => ids.has(id)))
+      return next.size === prev.size ? prev : next
+    })
+  }, [pickable])
+
+  function togglePick(id) {
+    setPicked((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function pickAll() {
+    setPicked((prev) => (prev.size === pickable.length ? new Set() : new Set(pickable.map((task) => task.id))))
+  }
+
+  function startCleanup() {
+    const chosen = pickable.filter((task) => picked.has(task.id))
+    const targets = chosen.length > 0 ? chosen : pickable
+    const jobIds = [...new Set(targets.flatMap((task) => task.handledJobIds || []))]
+    if (jobIds.length === 0) {
+      setMessage({ tone: 'notice', text: 'Er zijn geen oude batchresultaten om op te ruimen.' })
+      return
+    }
+    setMessage(null)
+    setCleanup({ jobIds, count: jobIds.length, taskCount: targets.length })
+  }
+
+  async function confirmCleanup() {
+    if (!cleanup) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      const res = await fetch(`${BATCH_API}/handled`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ job_ids: cleanup.jobIds }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setMessage({ tone: 'error', text: body.error || 'De resultaten konden niet worden afgehandeld.' })
+        return
+      }
+      const closed = (Number(body.handled) || 0) + (Number(body.already) || 0)
+      const when = body.at ? new Date(body.at) : null
+      const on = when && !Number.isNaN(when.getTime()) ? when.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : null
+      setCleanup(null)
+      setPicked(new Set())
+      const refreshed = await load(token, { refresh: true })
+      setMessage({
+        tone: refreshed ? 'success' : 'notice',
+        text:
+          `${closed} ${closed === 1 ? 'resultaat' : 'resultaten'} afgehandeld${on ? ` op ${on}` : ''}. ` +
+          `${CHECK_COPY.cleanupHint}${refreshed ? '' : ' De lijst kon niet worden vernieuwd; herlaad de pagina.'}`,
+      })
+    } catch {
+      setMessage({ tone: 'error', text: 'De resultaten konden niet worden afgehandeld.' })
+    } finally {
+      focusFeedback.current = true
+      setBusy(false)
+    }
+  }
+
   // One write through an existing route, then a reload of the same lists. The
   // message reports the real outcome: saved and refreshed, saved but not
   // refreshed, or not saved.
@@ -234,11 +395,14 @@ export default function BronnenPage() {
   }
 
   // The existing confirmation route of BE-25 — the same call the batch page
-  // makes, for exactly this job.
+  // makes, for exactly this job. A grouped task can span batches, so the row's
+  // own batch is used, never the task's.
   function confirmRow(task, row) {
     if (!task || task.kind !== 'batch' || !row || !row.jobId) return Promise.resolve(false)
+    const batchId = row.batchId || task.batchId
+    if (!batchId) return Promise.resolve(false)
     return postAndReload(
-      `${BATCH_API}/${encodeURIComponent(task.batchId)}/confirm`,
+      `${BATCH_API}/${encodeURIComponent(batchId)}/confirm`,
       { job_ids: [row.jobId] },
       'Bron bevestigd na jouw controle. Er is niets gepubliceerd.',
     )
@@ -292,6 +456,15 @@ export default function BronnenPage() {
           onCreateProposal={createProposal}
           onDecideProposal={decideProposal}
           onConfirmRow={confirmRow}
+          onRecheckRow={recheck}
+          picked={picked}
+          pickableCount={pickable.length}
+          onTogglePick={togglePick}
+          onPickAll={pickAll}
+          cleanup={cleanup}
+          onStartCleanup={startCleanup}
+          onConfirmCleanup={confirmCleanup}
+          onCancelCleanup={() => setCleanup(null)}
           followUp={detailFollowUp}
           followUpBanner={bannerFollowUp}
         />

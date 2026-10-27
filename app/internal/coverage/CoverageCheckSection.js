@@ -21,12 +21,15 @@ import {
   stepHref,
   CHECK_COPY,
   COVERAGE_HREF,
+  MANUAL_IMPORT_HREF,
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
 } from '@/src/lib/sourceReview'
 
 const TRIAGE_API = '/api/internal/v1/source-triage'
 const BATCH_API = '/api/internal/v1/batch-analysis'
+// The same bound the batch overview itself uses for its recent batches.
+const BATCH_DETAIL_LIMIT = 10
 
 function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
@@ -34,6 +37,7 @@ function newBatchId() {
 
 export default function CoverageCheckSection({ token }) {
   const [entries, setEntries] = useState(null)
+  const [details, setDetails] = useState([])
   const [daily, setDaily] = useState(null)
   const [selected, setSelected] = useState(() => new Set())
   const [activeBatch, setActiveBatch] = useState(null)
@@ -55,6 +59,24 @@ export default function CoverageCheckSection({ token }) {
       setLoadError(null)
       setEntries(triageBody.restaurants)
       if (overviewRes.ok) setDaily(overviewBody.daily || null)
+      // The newest result per restaurant is needed here too: a dead end
+      // ("geen bruikbaar resultaat", robots/access block, "geen menukaart
+      // gevonden") belongs to Dekking with its own reason and next step
+      // (Lead review #6439131777). Same read, same bound, no new query.
+      const recent = overviewRes.ok && Array.isArray(overviewBody.recent_batches) ? overviewBody.recent_batches : []
+      const loaded = await Promise.all(
+        recent.slice(0, BATCH_DETAIL_LIMIT).map(async (batch) => {
+          try {
+            const res = await fetch(`${BATCH_API}?batch=${encodeURIComponent(batch.id)}`, auth)
+            if (!res.ok) return null
+            const body = await res.json().catch(() => null)
+            return body && body.detail ? body.detail : null
+          } catch {
+            return null
+          }
+        }),
+      )
+      setDetails(loaded.filter(Boolean))
     } catch {
       setLoadError('Nog niet gecontroleerd kon niet worden geladen.')
     }
@@ -64,7 +86,10 @@ export default function CoverageCheckSection({ token }) {
     load()
   }, [load])
 
-  const rows = useMemo(() => coverageRows(entries || []), [entries])
+  const rows = useMemo(
+    () => coverageRows(entries || [], { batchDetails: details, now: new Date() }),
+    [entries, details],
+  )
   const remaining = daily && Number.isInteger(daily.used) ? Math.max(0, DAILY_URL_LIMIT - daily.used) : DAILY_URL_LIMIT
 
 
@@ -216,9 +241,25 @@ export default function CoverageCheckSection({ token }) {
                 </td>
                 <td>
                   <div className="cov-check-meta">{row.reasonLabel}</div>
+                  {row.deadEnd ? (
+                    <div className="cov-check-result">
+                      <span className="cov-check-outcome">{row.outcome}</span>
+                      {row.detail ? <span className="cov-check-meta">{row.detail}</span> : null}
+                      {row.age ? <span className="cov-check-meta">{row.age}</span> : null}
+                    </div>
+                  ) : null}
                 </td>
                 <td>
-                  {row.canCheck ? (
+                  {row.deadEnd ? (
+                    // The one fitting step of this dead end: "Handmatig
+                    // toevoegen" or "Lees met AI", the existing routes.
+                    <a
+                      className="stg-btn-secondary cov-check-action"
+                      href={stepHref(row, { batchId: row.batchId, returnTo: COVERAGE_HREF }) || MANUAL_IMPORT_HREF}
+                    >
+                      {row.step.label}
+                    </a>
+                  ) : row.canCheck ? (
                     <button
                       type="button"
                       className="stg-btn-secondary cov-check-action"
@@ -230,6 +271,11 @@ export default function CoverageCheckSection({ token }) {
                   ) : (
                     <span className="cov-check-meta">Geen automatische controle mogelijk</span>
                   )}
+                  {row.deadEnd && row.canCheck ? (
+                    <button type="button" className="srr-recheck cov-check-recheck" disabled={busy} onClick={() => start([row.url])}>
+                      {CHECK_COPY.recheck}
+                    </button>
+                  ) : null}
                 </td>
               </tr>
             ))}
@@ -242,13 +288,15 @@ export default function CoverageCheckSection({ token }) {
           <h3 className="cov-check-title">{activeBatch.batch.closed_at ? 'Resultaat van de controle' : CHECK_COPY.running}</h3>
           <ol className="srr-list" aria-label="Resultaat van de controle">
             {activeBatch.items.map((item) => {
-              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id })
+              const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date() })
               return (
                 <SourceResultRow
                   key={`${item.position}-${item.jobId || item.key}`}
                   row={row}
                   position={item.position}
                   href={stepHref(row, { batchId: activeBatch.batch.id, returnTo: COVERAGE_HREF })}
+                  onRecheck={(target) => start([target.url])}
+                  busy={busy}
                 />
               )
             })}

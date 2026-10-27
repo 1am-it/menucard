@@ -1,13 +1,14 @@
 {
-  "generatedAt": "2026-10-27T09:23:42.275Z",
+  "generatedAt": "2026-10-27T10:42:15.791Z",
   "kind": "fixture-browser-check",
   "task": "BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij",
-  "base": "feat/bronnen-74",
+  "base": "fix/bronnen-74-echt-werk",
   "port": 3139,
+  "screenshotsDir": "ops/browser/evidence/be-31",
   "screenshots": [
     {
       "file": "be31-scherm1-1280-light.png",
-      "sha256": "048ad42138400f2706ab36e6145b046517b7b1bb07f04ca8c19e437d6309fd6b",
+      "sha256": "4967b6e3e49f50e39b142449c18e6b7714e5aaf6b851eb20ed6ef7b9ac5a3bbc",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -17,7 +18,7 @@
     },
     {
       "file": "be31-scherm2-1280-light.png",
-      "sha256": "92a55c4376bf3678c9e24e35fd8ccf71ccdc1e91489e0a36f01f67904fa39505",
+      "sha256": "4fe9e225588ae06218b1681028179ac5791b92110fe85bea81580d2cce783954",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -35,7 +36,7 @@
     },
     {
       "file": "be31-scherm5-1280-light.png",
-      "sha256": "6598499a988fa03ee7f34f64b324456626dcfc366b1461a48f90118318d71c83",
+      "sha256": "2614be34b16468d1f30c5aba7146567e76bfe809084dc4f02c03009812a6dbca",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -44,7 +45,7 @@
     },
     {
       "file": "be31-scherm7-1280-light.png",
-      "sha256": "a5a70b2148f1e9c985f74a56503b68f6e6d9496d714aeb52e7b9b14f8123a24f",
+      "sha256": "cb2be7ab478cbdabfef4571c9fd78837b4105da341f99bdeeeabf11bcaffb734",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -53,7 +54,7 @@
     },
     {
       "file": "be31-scherm1-390-light.png",
-      "sha256": "670f7a7f854bd42844dc0ff7605ec8e3ecc2cce3e4e2a2aa99b1b713eeffd949",
+      "sha256": "20fed960b58e5127f94a723fae1e36209c8a244c50c5020061e138383c2c3060",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -63,7 +64,7 @@
     },
     {
       "file": "be31-scherm6-390-light.png",
-      "sha256": "2183e46e8ebe5df759a817ee3966d7a00f7e362f70de59d71831075c8f936de2",
+      "sha256": "d2940860ea3c8272e5019dc2e946f00ea41ba811f9955cb50c72787e64b84719",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -72,7 +73,7 @@
     },
     {
       "file": "be31-scherm2-390-light.png",
-      "sha256": "c3aab5d8e175b597a011b8133f3a55b8c1fb1e12351e6bc2e2c89b60f0c49e7b",
+      "sha256": "74f1e9219f18c9deb745db88b0d55e21f15e7cb5940e9c62e156368cdf41a5c9",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -81,7 +82,7 @@
     },
     {
       "file": "be31-scherm3-390-light.png",
-      "sha256": "116329ed7f0f5db1cf7e688a8cee1e0c50b43258c9a20c6c86e9a42410bc4ced",
+      "sha256": "704eaad93474bb1ed96f89669203a18d3489d8388a803b971f2e266285d0f995",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -90,7 +91,7 @@
     },
     {
       "file": "be31-scherm5-390-light.png",
-      "sha256": "f98ae772690e74135e80825eb5448d127a49966fb4de7b4656894424e5cfc713",
+      "sha256": "a191fc9d33f5e0f21fec7b27d1536cf9ad6846d709da628dcbe46d3ab534e3a3",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -99,7 +100,7 @@
     },
     {
       "file": "be31-scherm7-390-light.png",
-      "sha256": "420c3840c96415e86f3154f5e19c0555121de8509a9b8f3cd8793eaf78f94af6",
+      "sha256": "aab8e32b06dc97032a1e516f37bd2aa7aaa1948c138e105652e25c2eb11556fa",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -108,7 +109,7 @@
     },
     {
       "file": "be31-scherm1-320-light.png",
-      "sha256": "e2545d9fe27061e405af6f2487339904831d915f0713c926771bb8a981ce7552",
+      "sha256": "8fbe941a25932bb51914f2dee413dfd9115361a39b6b39bd48c48821847aa919",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -118,7 +119,7 @@
     },
     {
       "file": "be31-scherm6-320-light.png",
-      "sha256": "88cbc53f1ee50e151d80b86ddca4c1af3466fe07100e3914eac466d6ec4dec04",
+      "sha256": "225359a732a12361a2823742325a476c300dff7e1affa25d1f57c0d2718e78e1",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -127,7 +128,7 @@
     },
     {
       "file": "be31-scherm2-320-light.png",
-      "sha256": "cacc47d997138da3dde6a46b3004648a85e752385b12230710bdaaf76c61f5a8",
+      "sha256": "0b33035b5ebc96d85b041e2eecc3cb96de12487b7c0b02a9b928695855cdf0ec",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -145,7 +146,7 @@
     },
     {
       "file": "be31-scherm5-320-light.png",
-      "sha256": "e7b5cc01c50e8374fe75efa494e9fea23bc1e4533dc3d2be294c338403ae3fd3",
+      "sha256": "97584a6c5a9a5df5825f1344d3ca7400106eab93af663cbd0b664a533be1269b",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -154,7 +155,7 @@
     },
     {
       "file": "be31-scherm7-320-light.png",
-      "sha256": "a966127530ef309cbcc9f2cd97f01670f64773e85a57670596ae9324a934a50e",
+      "sha256": "e5a6f8c3474046890dfacc1c9cf1c9e61e79015bfb52cfe00f7de28bb6ca1acb",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -163,7 +164,7 @@
     },
     {
       "file": "be31-scherm1-1280-dark.png",
-      "sha256": "7380209edfbe14ef794e94aa7458ecb4c1de12f5b8980104001f23c045cb345d",
+      "sha256": "57b6ef21ac8ae847dadbe078a0e2499d6bf58cbd2a333fe767b6d70f887d7bb1",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -173,7 +174,7 @@
     },
     {
       "file": "be31-scherm2-1280-dark.png",
-      "sha256": "0f3cf5c03931ba95bbdc0a371252e041a9db168922cc086a421fde1c506edf47",
+      "sha256": "81883f185ddf6a88bd137b17cef848f18d338fc216fe3ea429295da742d66aaf",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -182,7 +183,7 @@
     },
     {
       "file": "be31-scherm4-1280-dark.png",
-      "sha256": "dc6b3742d2ae0c0aac67d2c48d4b08007b85f6fc0ada7cb0ef16a93dbd554bf9",
+      "sha256": "ce5eedb9ea6a1cf6e84e5d8847b4322b6687b1a99049fc3f9de46406d4cd154f",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -191,7 +192,7 @@
     },
     {
       "file": "be31-scherm3-1280-dark.png",
-      "sha256": "5385bd783eb50de8db5b347c8a9faa74b66f131469b17051a05fb5df78801a71",
+      "sha256": "a4b1331f8d9eaa6e0074820e174c367ca3857305be3451ca8428efacb435ae56",
       "width": 1280,
       "height": 800,
       "viewport": "1280x800",
@@ -200,7 +201,7 @@
     },
     {
       "file": "be31-scherm5-1280-dark.png",
-      "sha256": "ed94ec395736329766dc0fec51a835ca056ca57cb753958577f52982c7f51129",
+      "sha256": "a16c95e62641967e43b7c52b28fb8f98c488bf3b34a7b6e4ec5be8c41fa8be18",
       "width": 1280,
       "height": 1000,
       "viewport": "1280x1000",
@@ -209,7 +210,7 @@
     },
     {
       "file": "be31-scherm7-1280-dark.png",
-      "sha256": "d4d0037866de3823dc927684b95ba5a0c59428db0342a4df07d381cc69cd2fb5",
+      "sha256": "93e01c40630d9cb361189766f19e63527466c29d9c0abad7ccf0439e16dfecb7",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -218,7 +219,7 @@
     },
     {
       "file": "be31-scherm1-390-dark.png",
-      "sha256": "7a626af9e95bd0c5d72528bae6452933b506aca0afaf70b290609b8a4d59b9c7",
+      "sha256": "bbf7fb676ba5cdcad4587bb7796789944007acbe3b2f143a89f03e8ca61b7f9b",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -228,7 +229,7 @@
     },
     {
       "file": "be31-scherm6-390-dark.png",
-      "sha256": "0f0e020e03116e6163c6ee9b679476e22d7d861880690cafe723651a07413809",
+      "sha256": "4aaec89ba54010585108ced4096e8a6847415244343f22b7d530a7e3d5854866",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -237,7 +238,7 @@
     },
     {
       "file": "be31-scherm2-390-dark.png",
-      "sha256": "3810de1914bb1d898ab34ac545a4fd463b096bebaefafa3f5c1993d615159674",
+      "sha256": "237dbbb5c555cc1b4bedabec0f1943339d6cd58bc22c6c149561a3c48d2517dd",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -246,7 +247,7 @@
     },
     {
       "file": "be31-scherm4-390-dark.png",
-      "sha256": "4588063097105d055eb67be0453ce0c41f1613c829945810d9c7cd507d0fd32a",
+      "sha256": "f3a3151e85b738730222156fefe3a0999b0795576e69158b73b95a179eb9872c",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -255,7 +256,7 @@
     },
     {
       "file": "be31-scherm3-390-dark.png",
-      "sha256": "c773981e2038b873182282687543b076449525afbfe11bbcc4e36e17849cdff9",
+      "sha256": "c5aace97ab221aa0f5c3f595c4bec36dc2a7e3aefd55390b5d6c7661dd28f1c6",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -264,7 +265,7 @@
     },
     {
       "file": "be31-scherm5-390-dark.png",
-      "sha256": "58ff6e253e868b220f54f7703c021497306ecad84838813c04a929b0722f41ae",
+      "sha256": "a857b2bc686053fb805ef8c1b634f007fbcc78e7a5cd8f06fe3c91364f5ad5a8",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -273,7 +274,7 @@
     },
     {
       "file": "be31-scherm7-390-dark.png",
-      "sha256": "8c4abaed46b0c22df8c84c4679a49fe8706074a1207601d26bf77075c4bddf6a",
+      "sha256": "4fd75a8dd3f88d5479304ef87c1360312b69fff591564a4d69985a898a2667ff",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -282,7 +283,7 @@
     },
     {
       "file": "be31-scherm1-320-dark.png",
-      "sha256": "c5d91618bf376f05b45377aaa3c057b303f020c9deace85e214e7168fd276f45",
+      "sha256": "eb37ce27e7f3639af0b955e8b03833064163506be05bdbd98646a5470750fbd6",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -292,7 +293,7 @@
     },
     {
       "file": "be31-scherm6-320-dark.png",
-      "sha256": "50b26a5c5dd216ea98739485052c08d317e486302224b2f9d23ef2e23e62c453",
+      "sha256": "c7fa22cbdaf627b04576c10945295a0428d0d7b25e2f78d1a91e9f3a1c7e36d7",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -301,7 +302,7 @@
     },
     {
       "file": "be31-scherm2-320-dark.png",
-      "sha256": "c7b450ef220408a80263e5e9da3537b7e1b1ee5e72959a4bf613be82395243f7",
+      "sha256": "78f903382910324da6d65bbf6131ddc824614ff8a8be3e843101b143fa14b31d",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -310,7 +311,7 @@
     },
     {
       "file": "be31-scherm4-320-dark.png",
-      "sha256": "68621023b5fe86a2cf53a93194983cecae4d5450cad84c6c9471e218c5da1aa8",
+      "sha256": "4fae86e2d6b3818df8ad8517a38e0581c1ad810bfedb9fe3cb818f545df9fe34",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -328,7 +329,7 @@
     },
     {
       "file": "be31-scherm5-320-dark.png",
-      "sha256": "8592e9492064f93f4d884140a9cc22d8fec6f5059776d5b2a048b63f1a928c0f",
+      "sha256": "3835f207d32fef42f575488e8b318063f3af953742090d9a242f181f80ba4a5d",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -337,7 +338,7 @@
     },
     {
       "file": "be31-scherm7-320-dark.png",
-      "sha256": "e756e0554ff6ff445190e0a007d1b8ac9bd387ddfba51c66f988fec8b980d5ae",
+      "sha256": "fc800d1d8595d498192bee392287e2464bd1a29c310b924998d7fa96e4ce85a9",
       "width": 320,
       "height": 844,
       "viewport": "320x844",
@@ -397,6 +398,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (1280/light): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (1280/light): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (1280/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (1280/light): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (1280/light): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -409,7 +430,12 @@
     {
       "name": "scherm 2 (1280/light): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (1280/light): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFictief Restaurant Smelt\nht"
     },
     {
       "name": "scherm 2 (1280/light): exactly one next step per row state",
@@ -474,12 +500,17 @@
     {
       "name": "scherm 5 (1280/light): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | \\t🔎 Controleer bron\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
+      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | \\t✍️ Handmatig toevoegenOpnieuw controleren\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (1280/light): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (1280/light): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/light): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | \\t✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (1280/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -562,6 +593,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (390/light): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (390/light): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (390/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (390/light): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (390/light): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -574,7 +625,12 @@
     {
       "name": "scherm 2 (390/light): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (390/light): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "← Terug naar de taken\n🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFicti"
     },
     {
       "name": "scherm 2 (390/light): exactly one next step per row state",
@@ -639,12 +695,17 @@
     {
       "name": "scherm 5 (390/light): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (390/light): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (390/light): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/light): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (390/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -727,6 +788,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (320/light): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (320/light): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (320/light): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (320/light): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (320/light): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -739,7 +820,12 @@
     {
       "name": "scherm 2 (320/light): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (320/light): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "← Terug naar de taken\n🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFicti"
     },
     {
       "name": "scherm 2 (320/light): exactly one next step per row state",
@@ -804,12 +890,17 @@
     {
       "name": "scherm 5 (320/light): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (320/light): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (320/light): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/light): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (320/light): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -892,6 +983,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (1280/dark): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (1280/dark): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (1280/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (1280/dark): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (1280/dark): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -904,7 +1015,12 @@
     {
       "name": "scherm 2 (1280/dark): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (1280/dark): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFictief Restaurant Smelt\nht"
     },
     {
       "name": "scherm 2 (1280/dark): exactly one next step per row state",
@@ -969,12 +1085,17 @@
     {
       "name": "scherm 5 (1280/dark): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | \\t🔎 Controleer bron\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
+      "detail": "[\"\\t | Fictief De Beyerd | Centrum | \\t | https://fictief-debeyerd.invalid | \\t | Nog nooit gecontroleerd | \\t🔎 Controleer bron\",\"\\t | Fictief Gantau Village | Centrum | \\t | Geen website bekend | \\t | Geen website bekend | \\tGeen automatische controle mogelijk\",\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | \\t✍️ Handmatig toevoegenOpnieuw controleren\",\"\\t | Fictief Dolce e Salato | Centrum | \\t | https://fictief-dolce.invalid | \\t | Controle loopt nog | \\t🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (1280/dark): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (1280/dark): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (1280/dark): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"\\t | Fictief Klein Java | Centrum | \\t | https://fictief-kleinjava.invalid | \\t | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | \\t✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (1280/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -1057,6 +1178,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (390/dark): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (390/dark): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (390/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (390/dark): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (390/dark): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -1069,7 +1210,12 @@
     {
       "name": "scherm 2 (390/dark): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (390/dark): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "← Terug naar de taken\n🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFicti"
     },
     {
       "name": "scherm 2 (390/dark): exactly one next step per row state",
@@ -1134,12 +1280,17 @@
     {
       "name": "scherm 5 (390/dark): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (390/dark): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (390/dark): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (390/dark): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (390/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -1222,6 +1373,26 @@
       "detail": "overflow=0"
     },
     {
+      "name": "scherm 1 (320/dark): one task per restaurant, titled with the restaurant name",
+      "passed": true,
+      "detail": "[\"Fictief Restaurant Smelt\",\"Fictief Andalous\",\"Fictief Con Fuego\"]"
+    },
+    {
+      "name": "scherm 1 (320/dark): the age of the newest result is shown",
+      "passed": true,
+      "detail": "✅ Bevestig bron · resultaat van 12 dagen geleden"
+    },
+    {
+      "name": "scherm 1 (320/dark): \"Oude resultaten opruimen\" is offered for batch results",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "scherm 1 (320/dark): the cleanup confirmation names the number and deletes nothing",
+      "passed": true,
+      "detail": "7 resultaten afhandelen? Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.  Ja, 7 afhandelen Annuleren"
+    },
+    {
       "name": "scherm 2 (320/dark): the batch task can be chosen",
       "passed": true,
       "detail": null
@@ -1234,7 +1405,12 @@
     {
       "name": "scherm 2 (320/dark): the chosen task is programmatically current",
       "passed": true,
-      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"Menukopjes controleren · 1\",\"status\":\"⚠️ Controle nodig\",\"current\":\"true\"}"
+      "detail": "{\"name\":\"Fictief Restaurant Smelt\",\"kind\":\"Batch\",\"what\":\"✅ Bevestig bron · resultaat van 12 dagen geleden\",\"status\":\"✅ Klaar om te bevestigen\",\"current\":\"true\"}"
+    },
+    {
+      "name": "scherm 2 (320/dark): the task summary shows the age of its newest result",
+      "passed": true,
+      "detail": "← Terug naar de taken\n🧪 BATCH · ✅ KLAAR OM TE BEVESTIGEN\nFictief Restaurant Smelt\n\nResultaat van 12 dagen geleden · 5 resultaten · 2 met een volgende stap · nog 2 oudere resultaten verborgen\n\n✅\nFicti"
     },
     {
       "name": "scherm 2 (320/dark): exactly one next step per row state",
@@ -1299,12 +1475,17 @@
     {
       "name": "scherm 5 (320/dark): the existing reason texts are shown",
       "passed": true,
-      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | 🔎 Controleer bron\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
+      "detail": "[\"Fictief De Beyerd | Centrum | https://fictief-debeyerd.invalid | Nog nooit gecontroleerd | 🔎 Controleer bron\",\"Fictief Gantau Village | Centrum | Geen website bekend | Geen website bekend | Geen automatische controle mogelijk\",\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"Fictief Dolce e Salato | Centrum | https://fictief-dolce.invalid | Controle loopt nog | 🔎 Controleer bron\"]"
     },
     {
-      "name": "scherm 5 (320/dark): every row with a website offers \"Controleer bron\"",
+      "name": "scherm 5 (320/dark): every row with a website offers its fitting step",
       "passed": true,
-      "detail": "[\"🔎 Controleer bron\",\"\",\"🔎 Controleer bron\",\"🔎 Controleer bron\"]"
+      "detail": "[\"🔎 Controleer bron\",\"\",\"✍️ Handmatig toevoegen\",\"🔎 Controleer bron\"]"
+    },
+    {
+      "name": "scherm 5 (320/dark): the dead end shows its outcome, age and reason",
+      "passed": true,
+      "detail": "{\"text\":\"Fictief Klein Java | Centrum | https://fictief-kleinjava.invalid | Laatste controle gaf geen bruikbaar resultaat | Geen bruikbaar resultaat | De website staat automatische controle niet toe (robots.txt). | resultaat van 17 dagen geleden | ✍️ Handmatig toevoegenOpnieuw controleren\",\"checkable\":true,\"action\":\"✍️ Handmatig toevoegen\",\"recheck\":\"Opnieuw controleren\"}"
     },
     {
       "name": "scherm 5 (320/dark): the existing limits and \"loopt zolang de pagina open is\" are stated",
@@ -1371,6 +1552,5 @@
   "network": {
     "pageViolations": [],
     "guardViolations": []
-  },
-  "screenshotsDir": "ops/browser/evidence/be-31"
+  }
 }

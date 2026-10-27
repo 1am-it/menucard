@@ -45,7 +45,7 @@ const LOAD_ERROR = 'De batchanalyse kon niet worden geladen.';
 const RECENT_BATCH_LIMIT = 10;
 const BATCH_COLUMNS = 'id, actor_user_id, created_at, last_activity_at, closed_at, close_reason, item_count';
 const JOB_COLUMNS =
-  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol, structure_advice:field_evidence->structureAdvice';
+  'id, status, error_reason, attempt_count, next_attempt_at, lease_expires_at, expired_at, finished_at, created_at, updated_at, result_receipt_id, unknown_menu_contexts:field_evidence->unknown_menu_contexts, menu_source_urls:field_evidence->menu_source_urls, notes:field_evidence->notes, source_inventory:field_evidence->source_inventory, limitations:field_evidence->limitations, extraction_result:field_evidence->extraction_result, protocol:field_evidence->protocol, structure_advice:field_evidence->structureAdvice, handled:field_evidence->resultHandled';
 const RECEIPT_COLUMNS =
   'id, restaurant_match_type, matched_restaurant_id, created_at, canonical_source_url, actor_user_id, analysis_result_hash, menus:candidate_summary->menus, product:candidate_summary->menuExtractionV2';
 const STRUCTURE_COLUMNS = 'id, receipt_id, job_id, path_key, original_path, source_path, locator, decision, corrected_path, actor_user_id, created_at';
@@ -145,7 +145,7 @@ function createBatchAnalysisHandlers(deps) {
       }
       const job = jobById.get(item.job_id || item.reused_job_id) || null;
       const receipt = job && job.result_receipt_id ? receiptById.get(job.result_receipt_id) || null : null;
-      return deriveItemView({
+      const view = deriveItemView({
         item,
         job,
         receipt,
@@ -160,6 +160,16 @@ function createBatchAnalysisHandlers(deps) {
         // de voorgeselecteerde suggestie ook na herladen zichtbaar blijft.
         storedAdvice: job && job.structure_advice ? job.structure_advice : null,
       });
+      // BE-31 herstel (#74): when this result was produced (the job's own finish
+      // time; an unfinished job falls back to its last update) and whether a
+      // staff member already closed it by hand. Both are read-only additions to
+      // the existing view; the result itself is never changed here.
+      view.resultAt = (job && (job.finished_at || job.updated_at || job.created_at)) || batch.created_at || null;
+      view.handled =
+        job && job.handled && typeof job.handled === 'object'
+          ? { at: job.handled.at || null, by: job.handled.by || null, kind: job.handled.kind || null }
+          : null;
+      return view;
     });
 
     // Menukaartcontrole → concept: for a confirmed source of a known

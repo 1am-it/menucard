@@ -113,6 +113,34 @@ export default function AddEntryPage() {
     }
   }
 
+  // "Opnieuw controleren" (BE-31 review #6439131777) is the same existing
+  // analysis for exactly this URL: same route, same body, same limits, and it
+  // runs only while this page is open (useBatchProcessing below).
+  async function recheck(row) {
+    const url = row && (row.url || row.foundUrl)
+    const batchId = newBatchId()
+    if (!url || !batchId) return
+    setBusy(true)
+    setError(null)
+    try {
+      const res = await fetch(BATCH_API, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ batch_id: batchId, urls: [url] }),
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(body.error || 'De controle kon niet worden gestart.')
+        return
+      }
+      await loadBatch(body.batch.id)
+    } catch {
+      setError('De controle kon niet worden gestart.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   // Same search endpoint, same minimum length and the same guard against a
   // stale response as the existing manual import page.
   useEffect(() => {
@@ -352,7 +380,7 @@ export default function AddEntryPage() {
             </p>
             <ol className="srr-list" aria-label="Resultaat van deze toevoeging">
               {activeBatch.items.map((item) => {
-                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id })
+                const row = rowForBatchItem(item, { batchId: activeBatch.batch.id, now: new Date() })
                 const returnTo = `/internal/toevoegen?batch=${encodeURIComponent(activeBatch.batch.id)}`
                 return (
                   <SourceResultRow
@@ -361,6 +389,7 @@ export default function AddEntryPage() {
                     position={item.position}
                     href={stepHref(row, { batchId: activeBatch.batch.id, returnTo })}
                     onConfirm={confirmRow}
+                    onRecheck={recheck}
                     busy={busy}
                   />
                 )

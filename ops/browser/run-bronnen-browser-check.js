@@ -134,7 +134,7 @@ function writeEvidence(extra) {
     generatedAt: new Date().toISOString(),
     kind: 'fixture-browser-check',
     task: 'BE-31 (#74) Bronnen beoordelen, Dekking en afhandelen in de rij',
-    base: 'feat/bronnen-74',
+    base: 'fix/bronnen-74-echt-werk',
     port: PORT,
     screenshotsDir: 'ops/browser/evidence/be-31',
     screenshots: shots,
@@ -179,15 +179,64 @@ async function bronnenScenario(cdp, width, theme) {
   );
   check(`theme (${width}/${theme}): the requested theme is active`, list.theme === theme, list.theme);
   check(`geen overloop (${width}/${theme}): no horizontal overflow`, list.overflow <= 0, `overflow=${list.overflow}`);
+  // Lead review #6439131777: one task per restaurant, its age visible, and the
+  // cleanup action with its own selection.
+  check(
+    `scherm 1 (${width}/${theme}): one task per restaurant, titled with the restaurant name`,
+    list.tasks.length === 3 &&
+      list.tasks.filter((task) => task.name === 'Fictief Restaurant Smelt').length === 1 &&
+      list.tasks.every((task) => !/[0-9]+\s+restaurants/.test(task.name)),
+    JSON.stringify(list.tasks.map((task) => task.name)),
+  );
+  const batchTask = list.tasks.find((task) => task.kind === 'Batch');
+  check(
+    `scherm 1 (${width}/${theme}): the age of the newest result is shown`,
+    Boolean(batchTask) && /resultaat van \d+ dagen geleden/.test(batchTask.what),
+    batchTask && batchTask.what,
+  );
+  check(
+    `scherm 1 (${width}/${theme}): "Oude resultaten opruimen" is offered for batch results`,
+    await evalJs(cdp, `(() => {
+      const buttons = [...document.querySelectorAll('.brn-toolbar button')].map((b) => b.innerText.trim());
+      const picks = document.querySelectorAll('.brn-tasks input[type="checkbox"]').length;
+      return { buttons, picks };
+    })()`).then((value) => value.buttons.some((label) => label.includes('Oude resultaten opruimen')) && value.picks === 1),
+  );
   await shot(cdp, `be31-scherm1-${width}-${theme}.png`, { screen: 1, theme, fixture: 'bronnen' });
+
+  // The one confirmation names the number of results it closes.
+  await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('.brn-toolbar button')].find((b) => b.innerText.includes('Oude resultaten opruimen'));
+    if (button) button.click();
+    return true;
+  })()`);
+  const cleanup = await evalJs(cdp, `(() => {
+    const box = document.querySelector('.brn-cleanup-confirm');
+    return box ? box.innerText.replace(/\\n/g, ' ') : '';
+  })()`);
+  check(
+    `scherm 1 (${width}/${theme}): the cleanup confirmation names the number and deletes nothing`,
+    cleanup.includes('7 resultaten afhandelen?') && cleanup.toLowerCase().includes('niets gewist'),
+    cleanup,
+  );
+  await evalJs(cdp, `(() => {
+    const cancel = [...document.querySelectorAll('.brn-cleanup-actions button')].find((b) => b.innerText.trim() === 'Annuleren');
+    if (cancel) cancel.click();
+    return true;
+  })()`);
 
   const clicked = await clickTask(cdp, 0);
   check(`scherm 2 (${width}/${theme}): the batch task can be chosen`, clicked);
-  const rowsReady = await waitFor(cdp, `document.querySelectorAll('.srr-row').length === 6`, 20000);
+  const rowsReady = await waitFor(cdp, `document.querySelectorAll('.srr-row').length === 5`, 20000);
   check(`scherm 2 (${width}/${theme}): the batch detail shows its rows`, rowsReady);
   const chosen = await readBronnen(cdp);
   const picked = chosen.tasks.find((task) => task.current === 'true');
   check(`scherm 2 (${width}/${theme}): the chosen task is programmatically current`, Boolean(picked), JSON.stringify(picked || null));
+  check(
+    `scherm 2 (${width}/${theme}): the task summary shows the age of its newest result`,
+    chosen.detailText.includes('Resultaat van') && chosen.detailText.includes('dagen geleden'),
+    chosen.detailText.slice(0, 200),
+  );
 
   const steps = chosen.rows.map((row) => row.action).filter(Boolean);
   check(
@@ -268,6 +317,7 @@ async function coverageScenario(cdp, width, theme) {
       text: tr.innerText.replace(/\\n/g, ' | '),
       checkable: !(tr.querySelector('input[type="checkbox"]') || {}).disabled,
       action: ((tr.querySelector('.cov-check-action') || {}).textContent || '').trim(),
+      recheck: ((tr.querySelector('.cov-check-recheck') || {}).textContent || '').trim(),
     }));
     return {
       heading: (document.querySelector('.cov-check-title') || {}).textContent || '',
@@ -286,10 +336,24 @@ async function coverageScenario(cdp, width, theme) {
     JSON.stringify(section.rows.map((row) => row.text)),
   );
   check(
-    `scherm 5 (${width}/${theme}): every row with a website offers "Controleer bron"`,
-    section.rows.filter((row) => row.action === '🔎 Controleer bron').length === 3 &&
-      section.rows.some((row) => row.text.includes('Geen automatische controle mogelijk')),
+    `scherm 5 (${width}/${theme}): every row with a website offers its fitting step`,
+    section.rows.filter((row) => row.action === '🔎 Controleer bron').length === 2 &&
+      section.rows.some((row) => row.text.includes('Geen automatische controle mogelijk')) &&
+      section.rows.some((row) => row.action === '✍️ Handmatig toevoegen'),
     JSON.stringify(section.rows.map((row) => row.action)),
+  );
+  // Lead review #6439131777: a dead end is listed here, with its own outcome,
+  // its age and the existing reason text — and with its own next step.
+  const deadEnd = section.rows.find((row) => row.text.includes('Fictief Klein Java'));
+  check(
+    `scherm 5 (${width}/${theme}): the dead end shows its outcome, age and reason`,
+    Boolean(deadEnd) &&
+      deadEnd.text.includes('Laatste controle gaf geen bruikbaar resultaat') &&
+      deadEnd.text.includes('Geen bruikbaar resultaat') &&
+      /resultaat van [0-9]+ dagen geleden/.test(deadEnd.text) &&
+      deadEnd.action === '✍️ Handmatig toevoegen' &&
+      deadEnd.recheck === 'Opnieuw controleren',
+    JSON.stringify(deadEnd || null),
   );
   check(
     `scherm 5 (${width}/${theme}): the existing limits and "loopt zolang de pagina open is" are stated`,
@@ -311,7 +375,7 @@ async function addScenario(cdp, width, theme) {
     `${APP}/internal/toevoegen?theme=${theme}&fixture=bronnenToevoegen&navCounts=bronnen&batch=${BATCH_ID}`,
     `document.body.innerText.includes('Restaurant of menu toevoegen')`,
   );
-  const ready = await waitFor(cdp, `document.querySelectorAll('.srr-row').length === 6`, 45000);
+  const ready = await waitFor(cdp, `document.querySelectorAll('.srr-row').length === 5`, 45000);
   check(`scherm 7 (${width}/${theme}): the result appears under the form as the same rows`, ready);
   const page = await readBronnen(cdp);
   const steps = page.rows.map((row) => row.action).filter(Boolean);

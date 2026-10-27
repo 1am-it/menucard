@@ -28,9 +28,9 @@ function entry(overrides) {
   };
 }
 
-function detail(id, items) {
+function detail(id, items, createdAt) {
   return {
-    batch: { id, closed_at: '2026-10-27T10:00:00.000Z', is_starter: true, item_count: items.length },
+    batch: { id, created_at: createdAt || '2026-10-27T10:00:00.000Z', closed_at: '2026-10-27T10:00:00.000Z', is_starter: true, item_count: items.length },
     items,
     summary: { total: items.length },
   };
@@ -44,6 +44,7 @@ function item(overrides) {
     jobId: 'job-1',
     restaurant: { id: 'r-1', name: 'Restaurant Een' },
     actions: ['confirm'],
+    resultAt: '2026-10-27T09:00:00.000Z',
     ...overrides,
   };
 }
@@ -59,11 +60,50 @@ test('counter: the same tasks as the screen — proposals, attention and open ba
       ]),
     getBatchOverview: async (id) => {
       if (!id) return { recent_batches: [{ id: 'batch-1' }, { id: 'batch-2' }] };
-      if (id === 'batch-1') return { daily: { used: 1, limit: 25 }, detail: detail(id, [item({ key: 'confirmed', actions: [] }), item({ position: 2 })]) };
-      return { detail: detail(id, [item({ key: 'confirmed', actions: [] })]) };
+      if (id === 'batch-1') {
+        return {
+          daily: { used: 1, limit: 25 },
+          detail: detail(id, [
+            item({ key: 'confirmed', actions: [], resultAt: '2026-10-26T09:00:00.000Z' }),
+            item({ position: 2, resultAt: '2026-10-27T09:00:00.000Z' }),
+          ]),
+        };
+      }
+      return { detail: detail(id, [item({ key: 'confirmed', actions: [], resultAt: '2026-10-25T09:00:00.000Z' })]) };
     },
   });
   assert.equal(await counter(), 3);
+});
+
+test('counter: one restaurant counts once, however many old batches it has', async () => {
+  const counter = createSourceReviewCounter({
+    getTriage: async () => triage([entry({ restaurant_id: 'r-1', next_step: 'check_via_onboarding' })]),
+    getBatchOverview: async (id) => {
+      if (!id) return { recent_batches: [{ id: 'batch-new' }, { id: 'batch-old' }, { id: 'batch-older' }] };
+      if (id === 'batch-new') return { detail: detail(id, [item({ jobId: 'job-new', resultAt: '2026-10-20T09:00:00.000Z' })]) };
+      if (id === 'batch-old') {
+        return {
+          detail: detail(id, [item({ key: 'robots', jobId: 'job-old', actions: ['review_manually'], resultAt: '2026-10-17T09:00:00.000Z' })]),
+        };
+      }
+      return {
+        detail: detail(id, [
+          item({ key: 'no_menu', jobId: 'job-older', actions: ['review_manually'], resultAt: '2026-10-16T09:00:00.000Z' }),
+          item({
+            position: 2,
+            jobId: 'job-zuyd',
+            restaurant: { id: 'r-2', name: 'Zuyd' },
+            key: 'no_menu',
+            actions: ['review_manually'],
+            resultAt: '2026-10-16T09:00:00.000Z',
+          }),
+        ]),
+      };
+    },
+  });
+  // Only the certain result of the first restaurant is a task; the three dead
+  // ends are Dekking work, and Zuyd is not a task either.
+  assert.equal(await counter(), 1);
 });
 
 test('counter: a fully confirmed batch adds no task', async () => {
