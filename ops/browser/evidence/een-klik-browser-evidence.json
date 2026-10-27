@@ -1,0 +1,1237 @@
+{
+  "generatedAt": "2026-10-27T16:36:59.394Z",
+  "kind": "fixture-browser-check",
+  "task": "BE-34 (#81) Lees met AI met één klik en een nieuw restaurant zoeken op naam",
+  "port": 3142,
+  "screenshotsDir": "ops/browser/evidence/be-34",
+  "screenshots": [
+    {
+      "file": "be34-rij-voor-1280-light.png",
+      "sha256": "4d82194249d6a075933337df0f820cd43c873a624203117ceb1481b25e917c74",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-tijdens-1280-light.png",
+      "sha256": "793cb59f9f6b2af0f5a6d018693a30283f29b1b3223c704bbd50dd579e4e703b",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-na-1280-light.png",
+      "sha256": "07f5c92ef17ec7906b179add92679cfc308246f0c800c6da283651cb8065f9b7",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "light"
+    },
+    {
+      "file": "be34-review-1280-light.png",
+      "sha256": "69d20d86fdedb4b6edfd4deec3aad41ba030b6b1e1e240f38e282182d4f93013",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "review",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-fout-1280-light.png",
+      "sha256": "ab5b34199b92525e50883985a135f828e91ff0fdb0e286235eb52b277ff4fddc",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-zoeken-1280-light.png",
+      "sha256": "7485635773c22ece012635577f5c90b74b3609a810c8f52d504aa3d1adbcddae",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-voorstel-1280-light.png",
+      "sha256": "82f8d7258e423e5817b5862054c5f3e02444b47a3dd234b045822518b590ef24",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-voor-1280-dark.png",
+      "sha256": "fd2eed1f046272845fdf5195c81951a7707bc64d39536b6f1972a550b3667cd3",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-tijdens-1280-dark.png",
+      "sha256": "7f587c79046750e0bc95dcce43a874277a1378136191feb9f72f6bc6190ca579",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-na-1280-dark.png",
+      "sha256": "8185a4072c282ea532c1406df0091c3b68efa303389899bf71af95cb7764a7a1",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-review-1280-dark.png",
+      "sha256": "d46f3edd94095f79dd2a25f744e90ce7930f546b62b692ee3bf9466e1c9c9cdb",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "review",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-fout-1280-dark.png",
+      "sha256": "7a51deb1532dbc5ac23aac42a7fd568fba032ce48b6ea453da3d2d7df631cc15",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-zoeken-1280-dark.png",
+      "sha256": "12cccfc0c26cef8c0f0c21568ad8dbe5f57cd9b3e0dd36e3a0d90c624988a8c7",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-voorstel-1280-dark.png",
+      "sha256": "0bcf271effc3efec30adfa4e971700d522ca5d31b5aa243885345a007228632c",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-voor-390-light.png",
+      "sha256": "845470b7e60bddcb6d7dcc04d4088b1024fe0dd02714a9874ef52708670d6ee8",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-tijdens-390-light.png",
+      "sha256": "2283dbbecf4a56f91762f6aa4645d95b4c7618256569e981baf1ba91eaa967ee",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-na-390-light.png",
+      "sha256": "12ef36c739b222b7c90f426ead6cdaa21ced37e7bc22297143bf791d76fac003",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "light"
+    },
+    {
+      "file": "be34-review-390-light.png",
+      "sha256": "2a391112315000a47a65972da8e92c26c82bb1f25d7352521da0b0c2319986b8",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "review",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-fout-390-light.png",
+      "sha256": "9a50f30385f0effda08ec643cd2e980738cf1545bfe4659a207951553f191512",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-zoeken-390-light.png",
+      "sha256": "bce952b1f353e61197b19c6e226177a0275a9613068b79d69aa5c91fd6b311b6",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-voorstel-390-light.png",
+      "sha256": "6196fa7efce36d3f19a07853d7768f865163ace8aaf53cf5b980720a47700695",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-voor-390-dark.png",
+      "sha256": "d1d7b4a81ec7e755fed78346995e0f2049609427fc672a52804b659ed456d0a8",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-tijdens-390-dark.png",
+      "sha256": "cc103f7cd079dcfbc75b2787a7efda71bab68015243cb30da46ef423cec74bde",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-na-390-dark.png",
+      "sha256": "94b46775113a2b5a6ee583556faf083cd3246c7653088ebb4e5a000eea6323b3",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-review-390-dark.png",
+      "sha256": "68c0fe9f6597317525528840884b0effa0a0489d4612806738895d3181019798",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "review",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-fout-390-dark.png",
+      "sha256": "1663e0696c7450ad3d6ed6168ac5747f6dfb451a806358330253744cd1ede245",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-zoeken-390-dark.png",
+      "sha256": "e45cce2a797605d54130ab7af06e859e59895d7e9ad78ce7b2d7b8e4c13c2464",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-voorstel-390-dark.png",
+      "sha256": "20d877211a3bf9503b670694983f3e888732d6b442d2a4ae0ec8b6832acbdb1c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "dark"
+    }
+  ],
+  "checks": [
+    {
+      "name": "warm-up: the three routes compile",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/light): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (1280/light): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/light): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (1280/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/light): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (1280/light): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (1280/light): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (1280/light): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/light): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/light): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=7cfc78b9-064d-4136-b0a6-32a5579c3bca&fixture=eenKlik&theme=light"
+    },
+    {
+      "name": "review (1280/light): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (1280/light): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (1280/light): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (1280/light): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "review (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (1280/light): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/light): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/light): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (1280/light): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/toevoegen?theme=light&fixture=eenKlik)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "naam (1280/light): de naam is getypt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): een onbekende naam biedt het zoeken op internet aan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): de knop heet \"✨ Zoek op internet: Bobby's Bar, Breda\"",
+      "passed": true,
+      "detail": "✨ Zoek op internet: Bobby's Bar, Breda"
+    },
+    {
+      "name": "naam (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "naam (1280/light): de zoekactie start met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): het voorstel verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): het voorstel toont de naam",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart "
+    },
+    {
+      "name": "naam (1280/light): het voorstel toont het adres",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): het voorstel toont de website",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): het voorstel toont de menulink",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): het voorstel toont de herkomst",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart | | Herkomst: 🤖 AI-zoeken · bron: https"
+    },
+    {
+      "name": "naam (1280/light): de kosten zijn zichtbaar",
+      "passed": true,
+      "detail": "tomatisch aangemaakt: je bevestigt op de volgende stap zelf. Daar start ook de controle van de menukaart; daarna kun je in dezelfde rij \"Lees met AI\" gebruiken."
+    },
+    {
+      "name": "naam (1280/light): \"Toevoegen als nieuw restaurant\" opent de bestaande onboarding met de gegevens",
+      "passed": true,
+      "detail": "/internal/onboarding-restaurant?naam=Bobby%27s+Bar&adres=Haven+1%2C+4811+AB+Breda&website=https%3A%2F%2Fbobbys-bar.invalid&menu=https%3A%2F%2Fbobbys-bar.invalid%2Fmenukaart"
+    },
+    {
+      "name": "naam (1280/light): niets wordt automatisch aangemaakt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "naam (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (1280/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (1280/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (1280/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (1280/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (1280/dark): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=de356019-ec06-4524-a45e-ed263f5abebb&fixture=eenKlik&theme=dark"
+    },
+    {
+      "name": "review (1280/dark): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (1280/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (1280/dark): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (1280/dark): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "review (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (1280/dark): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/dark): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/dark): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (1280/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/toevoegen?theme=dark&fixture=eenKlik)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "naam (1280/dark): de naam is getypt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): een onbekende naam biedt het zoeken op internet aan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): de knop heet \"✨ Zoek op internet: Bobby's Bar, Breda\"",
+      "passed": true,
+      "detail": "✨ Zoek op internet: Bobby's Bar, Breda"
+    },
+    {
+      "name": "naam (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "naam (1280/dark): de zoekactie start met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): het voorstel verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): het voorstel toont de naam",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart "
+    },
+    {
+      "name": "naam (1280/dark): het voorstel toont het adres",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): het voorstel toont de website",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): het voorstel toont de menulink",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): het voorstel toont de herkomst",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart | | Herkomst: 🤖 AI-zoeken · bron: https"
+    },
+    {
+      "name": "naam (1280/dark): de kosten zijn zichtbaar",
+      "passed": true,
+      "detail": "tomatisch aangemaakt: je bevestigt op de volgende stap zelf. Daar start ook de controle van de menukaart; daarna kun je in dezelfde rij \"Lees met AI\" gebruiken."
+    },
+    {
+      "name": "naam (1280/dark): \"Toevoegen als nieuw restaurant\" opent de bestaande onboarding met de gegevens",
+      "passed": true,
+      "detail": "/internal/onboarding-restaurant?naam=Bobby%27s+Bar&adres=Haven+1%2C+4811+AB+Breda&website=https%3A%2F%2Fbobbys-bar.invalid&menu=https%3A%2F%2Fbobbys-bar.invalid%2Fmenukaart"
+    },
+    {
+      "name": "naam (1280/dark): niets wordt automatisch aangemaakt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "naam (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/light): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/light): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/light): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/light): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/light): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/light): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (390/light): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=2a027875-8edd-4c7f-a0ac-f3437005fb03&fixture=eenKlik&theme=light"
+    },
+    {
+      "name": "review (390/light): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (390/light): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (390/light): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (390/light): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "review (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (390/light): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/light): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/light): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (390/light): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/toevoegen?theme=light&fixture=eenKlik)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "naam (390/light): de naam is getypt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): een onbekende naam biedt het zoeken op internet aan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): de knop heet \"✨ Zoek op internet: Bobby's Bar, Breda\"",
+      "passed": true,
+      "detail": "✨ Zoek op internet: Bobby's Bar, Breda"
+    },
+    {
+      "name": "naam (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "naam (390/light): de zoekactie start met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): het voorstel verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): het voorstel toont de naam",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart "
+    },
+    {
+      "name": "naam (390/light): het voorstel toont het adres",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): het voorstel toont de website",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): het voorstel toont de menulink",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): het voorstel toont de herkomst",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart | | Herkomst: 🤖 AI-zoeken · bron: https"
+    },
+    {
+      "name": "naam (390/light): de kosten zijn zichtbaar",
+      "passed": true,
+      "detail": "tomatisch aangemaakt: je bevestigt op de volgende stap zelf. Daar start ook de controle van de menukaart; daarna kun je in dezelfde rij \"Lees met AI\" gebruiken."
+    },
+    {
+      "name": "naam (390/light): \"Toevoegen als nieuw restaurant\" opent de bestaande onboarding met de gegevens",
+      "passed": true,
+      "detail": "/internal/onboarding-restaurant?naam=Bobby%27s+Bar&adres=Haven+1%2C+4811+AB+Breda&website=https%3A%2F%2Fbobbys-bar.invalid&menu=https%3A%2F%2Fbobbys-bar.invalid%2Fmenukaart"
+    },
+    {
+      "name": "naam (390/light): niets wordt automatisch aangemaakt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "naam (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (390/dark): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=aaab1b9e-1c07-4df1-a8a2-eec868d6b68b&fixture=eenKlik&theme=dark"
+    },
+    {
+      "name": "review (390/dark): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (390/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (390/dark): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (390/dark): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "review (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (390/dark): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/dark): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/dark): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (390/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/toevoegen?theme=dark&fixture=eenKlik)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "naam (390/dark): de naam is getypt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): een onbekende naam biedt het zoeken op internet aan",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): de knop heet \"✨ Zoek op internet: Bobby's Bar, Breda\"",
+      "passed": true,
+      "detail": "✨ Zoek op internet: Bobby's Bar, Breda"
+    },
+    {
+      "name": "naam (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "naam (390/dark): de zoekactie start met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): het voorstel verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): het voorstel toont de naam",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart "
+    },
+    {
+      "name": "naam (390/dark): het voorstel toont het adres",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): het voorstel toont de website",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): het voorstel toont de menulink",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): het voorstel toont de herkomst",
+      "passed": true,
+      "detail": "Voorstel uit de zoekactie | | Bobby's Bar | | Haven 1, 4811 AB Breda | | Website: https://bobbys-bar.invalid | | Menulink: https://bobbys-bar.invalid/menukaart | | Herkomst: 🤖 AI-zoeken · bron: https"
+    },
+    {
+      "name": "naam (390/dark): de kosten zijn zichtbaar",
+      "passed": true,
+      "detail": "tomatisch aangemaakt: je bevestigt op de volgende stap zelf. Daar start ook de controle van de menukaart; daarna kun je in dezelfde rij \"Lees met AI\" gebruiken."
+    },
+    {
+      "name": "naam (390/dark): \"Toevoegen als nieuw restaurant\" opent de bestaande onboarding met de gegevens",
+      "passed": true,
+      "detail": "/internal/onboarding-restaurant?naam=Bobby%27s+Bar&adres=Haven+1%2C+4811+AB+Breda&website=https%3A%2F%2Fbobbys-bar.invalid&menu=https%3A%2F%2Fbobbys-bar.invalid%2Fmenukaart"
+    },
+    {
+      "name": "naam (390/dark): niets wordt automatisch aangemaakt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "naam (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "naam (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "network guard: the page recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: the CDP layer recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "passed": true,
+  "network": {
+    "pageViolations": [],
+    "guardViolations": []
+  }
+}

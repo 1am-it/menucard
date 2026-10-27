@@ -246,6 +246,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
     let cost = 0
     let costKnown = false
     let monthly = null
+    let attribution = null
     let failure = null
     for (const id of list) {
       setDiscoveryRun((prev) => (prev ? { ...prev, currentId: id } : prev))
@@ -273,6 +274,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
           costKnown = true
         }
         if (body.monthly) monthly = body.monthly
+        if (body.attribution) attribution = body.attribution
       } catch (error) {
         failure = discoveryFailure({ timedOut: Boolean(error && error.name === 'AbortError') })
         break
@@ -298,7 +300,7 @@ export default function CoverageCheckSection({ token, onUncheckedCount }) {
         messages,
         cost: { eurCents: costKnown ? cost : null, known: costKnown },
         monthly,
-        attribution: null,
+        attribution,
       })
       await load()
     }

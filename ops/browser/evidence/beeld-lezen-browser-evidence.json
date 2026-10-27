@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T14:29:20.693Z",
+  "generatedAt": "2026-10-27T16:29:42.857Z",
   "kind": "fixture-browser-check",
   "task": "BE-33 (#79) Menukaarten die alleen als afbeelding of scan bestaan",
   "port": 3140,
@@ -7,7 +7,7 @@
   "screenshots": [
     {
       "file": "be33-rij-1280-light-on.png",
-      "sha256": "28432efbcda1db2be935f30b3194bc8625bd0ec3214e8fc0447b4c7f7babb5d0",
+      "sha256": "372bcd2719f1f6c355324d8139336e770c5789237538731377e78055775af942",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -16,7 +16,7 @@
     },
     {
       "file": "be33-rij-1280-light-off.png",
-      "sha256": "ff92a1201f4a315ff41a9cba7cd8b28cdf62fa7377bf18528cf525e1eebad4d2",
+      "sha256": "84e8fe778d68c28b330c13fd6200bbddef4ebc65904d548babee8eb591ba0408",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -43,7 +43,7 @@
     },
     {
       "file": "be33-rij-390-light-on.png",
-      "sha256": "988871adcb0454f2702fccb63f3ea5d22d43f3559de8d4144d390442ece870fb",
+      "sha256": "b5f1a7f5c06527e29ed4d2c1e0891c92ab8df47ff29d3b15deac7a5268e99c6d",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -52,7 +52,7 @@
     },
     {
       "file": "be33-rij-390-light-off.png",
-      "sha256": "bbe79dadd331d216686d1269ea53ef4243901538b60ab2073d085b34b3a0d5ff",
+      "sha256": "028d536472a8a382316901aedeb5f585eff4c84a9aeea888ef8c2691a0e401d3",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -79,7 +79,7 @@
     },
     {
       "file": "be33-rij-1280-dark-on.png",
-      "sha256": "867c7282497b0516b01583b3e850e73067c532caf45bb8801c486fde09dd89fa",
+      "sha256": "1dcc07f9efaa03ef8a33db0d9ff40af46a1f6cc2707a0624cc2f42d81ef7b8f0",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -88,7 +88,7 @@
     },
     {
       "file": "be33-rij-1280-dark-off.png",
-      "sha256": "0010a5f35362137ac1cb8a68cd508007302ef5d2fe1cd756a2ec4af3b6cbe1cc",
+      "sha256": "e6eca9e245e897f2ad2725b832157004bf2d0b2b680635e54ba87a3e55b1b820",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -115,7 +115,7 @@
     },
     {
       "file": "be33-rij-390-dark-on.png",
-      "sha256": "9b455073872062e7a3e97e6345661153566d70bc10507011a8fb9b7818f0fd36",
+      "sha256": "c14e46ad88355fd306c6639e0bbb6720cf9c85d684a950cffd5b20f6ed5be549",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -124,7 +124,7 @@
     },
     {
       "file": "be33-rij-390-dark-off.png",
-      "sha256": "53d06341c5ae8c447123edd461f59e66750f437672b962155ae45811e34f35ef",
+      "sha256": "df741259a288d2ec1b66d5740d8571fbe9ab282e03e6ba616f77b559d9360ec1",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -184,12 +184,22 @@
     {
       "name": "rij (1280/light/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
       "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\"]}"
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
     },
     {
-      "name": "rij (1280/light/on): die stap is de bestaande AI-lezing van dit job, met de beeldvlag",
+      "name": "rij (1280/light/on): de stap is een knop die de bestaande lezing start",
       "passed": true,
-      "detail": "/internal/menu-import?job=job-bronnen-beeld&restaurant=9010&name=Fictief+Al+Dente&url=https%3A%2F%2Ffictief-aldente.invalid%2Fmenukaart&image=1"
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/light/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/light/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
     },
     {
       "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
@@ -224,7 +234,7 @@
     {
       "name": "rij (1280/light/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]}"
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
       "name": "rij (1280/light/off): die stap opent de bestaande handmatige import",
@@ -234,7 +244,7 @@
     {
       "name": "rij (1280/light/off): er is geen \"Lees met AI\" die niets kan",
       "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]"
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
     {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=light)",
@@ -334,12 +344,22 @@
     {
       "name": "rij (390/light/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
       "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\"]}"
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
     },
     {
-      "name": "rij (390/light/on): die stap is de bestaande AI-lezing van dit job, met de beeldvlag",
+      "name": "rij (390/light/on): de stap is een knop die de bestaande lezing start",
       "passed": true,
-      "detail": "/internal/menu-import?job=job-bronnen-beeld&restaurant=9010&name=Fictief+Al+Dente&url=https%3A%2F%2Ffictief-aldente.invalid%2Fmenukaart&image=1"
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/light/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/light/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
     },
     {
       "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
@@ -374,7 +394,7 @@
     {
       "name": "rij (390/light/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]}"
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
       "name": "rij (390/light/off): die stap opent de bestaande handmatige import",
@@ -384,7 +404,7 @@
     {
       "name": "rij (390/light/off): er is geen \"Lees met AI\" die niets kan",
       "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]"
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
     {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=light)",
@@ -484,12 +504,22 @@
     {
       "name": "rij (1280/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
       "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\"]}"
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
     },
     {
-      "name": "rij (1280/dark/on): die stap is de bestaande AI-lezing van dit job, met de beeldvlag",
+      "name": "rij (1280/dark/on): de stap is een knop die de bestaande lezing start",
       "passed": true,
-      "detail": "/internal/menu-import?job=job-bronnen-beeld&restaurant=9010&name=Fictief+Al+Dente&url=https%3A%2F%2Ffictief-aldente.invalid%2Fmenukaart&image=1"
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/dark/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
     },
     {
       "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
@@ -524,7 +554,7 @@
     {
       "name": "rij (1280/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]}"
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
       "name": "rij (1280/dark/off): die stap opent de bestaande handmatige import",
@@ -534,7 +564,7 @@
     {
       "name": "rij (1280/dark/off): er is geen \"Lees met AI\" die niets kan",
       "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]"
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
     {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=dark)",
@@ -634,12 +664,22 @@
     {
       "name": "rij (390/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
       "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\"]}"
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
     },
     {
-      "name": "rij (390/dark/on): die stap is de bestaande AI-lezing van dit job, met de beeldvlag",
+      "name": "rij (390/dark/on): de stap is een knop die de bestaande lezing start",
       "passed": true,
-      "detail": "/internal/menu-import?job=job-bronnen-beeld&restaurant=9010&name=Fictief+Al+Dente&url=https%3A%2F%2Ffictief-aldente.invalid%2Fmenukaart&image=1"
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/dark/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
     },
     {
       "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
@@ -674,7 +714,7 @@
     {
       "name": "rij (390/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]}"
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
       "name": "rij (390/dark/off): die stap opent de bestaande handmatige import",
@@ -684,7 +724,7 @@
     {
       "name": "rij (390/dark/off): er is geen \"Lees met AI\" die niets kan",
       "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\"]"
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
     {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=dark)",

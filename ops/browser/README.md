@@ -1,5 +1,30 @@
 # Isolated browser fixture — #59 menu import/review
 
+## BE-34 one-click AI reading and name search (#81)
+
+`run-een-klik-browser-check.js` (also `npm run test:browser:een-klik`) is the
+fixture browser check for the one-click "Lees met AI" row and for
+"✨ Zoek op internet: <naam>, Breda". It drives the real `/internal/coverage`
+row, the real `/internal/menu-import` review screen (reached through the row's
+own "Bekijk en controleer") and the real `/internal/toevoegen` form, with a
+fictional in-page session and fictional API answers
+(`fixtures/eenKlikFixtures.js`, built with the product's own
+`buildImportReport`/`reviewView`).
+
+- the row before, during and after the reading, including the estimate, the
+  measured cost and the small "Liever zelf plakken" link;
+- the existing review screen with the reading already loaded and the
+  "Alles nagelopen (N)" offer;
+- a failed reading with its honest reason and "Handmatig toevoegen";
+- the name search and its proposal (name, address, website, menu link,
+  provenance, cost, "Toevoegen als nieuw restaurant").
+
+At 1280 and 390 px in light and dark. `EEN_KLIK_MATRIX="1280:light"` limits the
+matrix for a quick run. Screenshots go to the committed
+`ops/browser/evidence/be-34/`, the record to
+`ops/browser/evidence/een-klik-browser-evidence.json`. FIXTURE EVIDENCE: no
+provider, database or production identity is involved and nothing is created.
+
 ## BE-28 public style check (#65) and BE-28b (#68)
 
 `run-public-style-browser-check.js` (also `npm run test:browser:public-style`)

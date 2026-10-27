@@ -31,6 +31,8 @@ const FIXTURE_API_ROUTES = [
   // runs in the fixture (no network, no AI).
   { id: 'source-discovery', match: 'exact', path: '/api/internal/v1/source-discovery', methods: ['GET', 'POST'] },
   { id: 'source-discovery-ignore', match: 'exact', path: '/api/internal/v1/source-discovery/ignore', methods: ['POST'] },
+  // BE-34 (#81): "Zoek op internet: <naam>, Breda" for a new restaurant.
+  { id: 'source-discovery-name', match: 'exact', path: '/api/internal/v1/source-discovery/name', methods: ['POST'] },
   // The human's "Bevestig voorstel" uses the existing BE-24 decision route; the
   // fixture answers it with a recorded decision and nothing else.
   { id: 'source-triage-decision', match: 'prefix', path: '/api/internal/v1/source-triage/proposals/', methods: ['POST'] },
