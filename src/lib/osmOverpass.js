@@ -1,8 +1,9 @@
 // BE-32 (#75) — the one server-side OpenStreetMap request.
 //
-// Public Overpass API, bounded to Breda, one request per 24 hours through the
-// Next/fetch cache (`next.revalidate`), so a click never becomes a request to
-// Overpass. The public API asks for an identifying User-Agent; ours names this
+// Public Overpass API, bounded to Breda. The main server is often at capacity
+// (502/504), so the public mirrors are tried in order. The request itself is
+// never cached: the route caches only a *successful* parsed answer for 24 hours
+// (sourceDiscoveryRouteDeps), so a busy moment is never remembered for a day. The public API asks for an identifying User-Agent; ours names this
 // feature, never a browser.
 //
 // Nothing here writes. On any failure the caller gets an honest
@@ -14,7 +15,7 @@
 'use strict';
 
 const {
-  OVERPASS_ENDPOINT,
+  OVERPASS_ENDPOINTS,
   OVERPASS_USER_AGENT,
   OSM_CACHE_SECONDS,
   OSM_ATTRIBUTION,
@@ -29,41 +30,34 @@ const DEFAULT_TIMEOUT_MS = 25000;
  * Fetches the Breda food businesses. `fetchImpl` is injectable so the
  * regressions never leave the machine; the real route passes global fetch.
  */
-async function fetchOverpassBusinesses({ fetchImpl = fetch, now = () => new Date(), timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+async function fetchOverpassBusinesses({ fetchImpl = fetch, now = () => new Date(), timeoutMs = DEFAULT_TIMEOUT_MS, endpoints = OVERPASS_ENDPOINTS } = {}) {
   const query = buildOverpassQuery();
-  let response;
-  try {
-    // GET with the query in the URL: Next only caches GET reliably inside a
-    // route handler, so this keeps it at one shared answer per day.
-    response = await fetchImpl(`${OVERPASS_ENDPOINT}?${new URLSearchParams({ data: query }).toString()}`, {
-      method: 'GET',
-      headers: {
-        'User-Agent': OVERPASS_USER_AGENT,
-        Accept: 'application/json',
-      },
-      cache: 'force-cache',
-      next: { revalidate: OSM_CACHE_SECONDS, tags: ['osm-breda'] },
-      signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined,
-    });
-  } catch {
-    return { ok: false, reason: OSM_UNREACHABLE, attribution: OSM_ATTRIBUTION };
+  for (const endpoint of endpoints) {
+    let payload;
+    try {
+      const response = await fetchImpl(`${endpoint}?${new URLSearchParams({ data: query }).toString()}`, {
+        method: 'GET',
+        headers: {
+          'User-Agent': OVERPASS_USER_AGENT,
+          Accept: 'application/json',
+        },
+        cache: 'no-store',
+        signal: typeof AbortSignal !== 'undefined' && AbortSignal.timeout ? AbortSignal.timeout(timeoutMs) : undefined,
+      });
+      if (!response || response.ok !== true || typeof response.json !== 'function') continue;
+      payload = await response.json();
+    } catch {
+      continue;
+    }
+    return {
+      ok: true,
+      businesses: parseOverpassResponse(payload),
+      fetchedAt: now() instanceof Date ? now().toISOString() : new Date(now()).toISOString(),
+      cacheSeconds: OSM_CACHE_SECONDS,
+      attribution: OSM_ATTRIBUTION,
+    };
   }
-  if (!response || response.ok !== true || typeof response.json !== 'function') {
-    return { ok: false, reason: OSM_UNREACHABLE, attribution: OSM_ATTRIBUTION };
-  }
-  let payload;
-  try {
-    payload = await response.json();
-  } catch {
-    return { ok: false, reason: OSM_UNREACHABLE, attribution: OSM_ATTRIBUTION };
-  }
-  return {
-    ok: true,
-    businesses: parseOverpassResponse(payload),
-    fetchedAt: now() instanceof Date ? now().toISOString() : new Date(now()).toISOString(),
-    cacheSeconds: OSM_CACHE_SECONDS,
-    attribution: OSM_ATTRIBUTION,
-  };
+  return { ok: false, reason: OSM_UNREACHABLE, attribution: OSM_ATTRIBUTION };
 }
 
 module.exports = { fetchOverpassBusinesses, OSM_UNREACHABLE, DEFAULT_TIMEOUT_MS };

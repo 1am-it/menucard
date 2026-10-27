@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
 const { fetchOverpassBusinesses, OSM_UNREACHABLE } = require('./osmOverpass');
-const { OVERPASS_ENDPOINT, OVERPASS_USER_AGENT, OSM_CACHE_SECONDS, OSM_ATTRIBUTION, buildOverpassQuery } = require('./osmSource');
+const { OVERPASS_ENDPOINT, OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT, OSM_CACHE_SECONDS, OSM_ATTRIBUTION, buildOverpassQuery } = require('./osmSource');
 
 function fakeFetch({ json = { elements: [] }, ok = true, throws = false } = {}) {
   const calls = [];
@@ -27,7 +27,7 @@ function fakeFetch({ json = { elements: [] }, ok = true, throws = false } = {}) 
   return { impl, calls };
 }
 
-test('osm fetch: one cached GET to the public Overpass API, with our own User-Agent and a 24-hour cache', async () => {
+test('osm fetch: one uncached GET to the public Overpass API with our own User-Agent (the route caches only successes)', async () => {
   const { impl, calls } = fakeFetch({
     json: { elements: [{ type: 'node', id: 1, lat: 51.5, lon: 4.7, tags: { amenity: 'restaurant', name: 'Voorbeeld' } }] },
   });
@@ -40,9 +40,9 @@ test('osm fetch: one cached GET to the public Overpass API, with our own User-Ag
   const url = new URL(calls[0].url);
   assert.equal(`${url.origin}${url.pathname}`, OVERPASS_ENDPOINT);
   assert.equal(calls[0].init.method, 'GET');
-  assert.equal(calls[0].init.cache, 'force-cache');
+  assert.equal(calls[0].init.cache, 'no-store');
   assert.equal(calls[0].init.headers['User-Agent'], OVERPASS_USER_AGENT);
-  assert.equal(calls[0].init.next.revalidate, OSM_CACHE_SECONDS);
+  assert.equal(result.cacheSeconds, OSM_CACHE_SECONDS);
   assert.equal(url.searchParams.get('data'), buildOverpassQuery());
 });
 
@@ -54,4 +54,20 @@ test('osm fetch: a failing API is an honest reason, never an exception and never
     assert.equal(result.reason, OSM_UNREACHABLE);
     assert.equal(result.businesses, undefined);
   }
+});
+
+test('osm fetch: a busy main server falls back to the mirror, and only all-failing is unreachable', async () => {
+  const calls = [];
+  const impl = async (url) => {
+    calls.push(url);
+    if (url.startsWith(OVERPASS_ENDPOINTS[0])) return { ok: false, status: 502, json: async () => ({}) };
+    return { ok: true, status: 200, json: async () => ({ elements: [] }) };
+  };
+  const result = await fetchOverpassBusinesses({ fetchImpl: impl });
+  assert.equal(result.ok, true);
+  assert.equal(calls.length, 2);
+  assert.ok(calls[1].startsWith(OVERPASS_ENDPOINTS[1]));
+  const down = await fetchOverpassBusinesses({ fetchImpl: async () => { throw new Error('down'); } });
+  assert.equal(down.ok, false);
+  assert.equal(down.reason, OSM_UNREACHABLE);
 });

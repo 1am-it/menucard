@@ -18,7 +18,9 @@ import { checkRobotsForUrl, fetchSameSiteWithRedirects } from '@/src/lib/restaur
 import { readAllAiUsageRows } from '@/src/lib/manualMenuImportUsageSource'
 import { createAnthropicStructuredCall } from '@/src/lib/menuExtractionAnthropicCall'
 import { findSameHostMenuCandidates } from '@/src/lib/sameHostDiscovery'
-import { fetchOverpassBusinesses } from '@/src/lib/osmOverpass'
+import { unstable_cache } from 'next/cache'
+import { fetchOverpassBusinesses, OSM_UNREACHABLE } from '@/src/lib/osmOverpass'
+import { OSM_CACHE_SECONDS, OSM_ATTRIBUTION } from '@/src/lib/osmSource'
 import {
   createSourceDiscoveryHandlers,
   buildChoiceRequest,
@@ -124,10 +126,30 @@ async function readIgnoredIds() {
   return { ok: true, ids: (Array.isArray(data) ? data : []).map((row) => row.restaurant_id).filter(Boolean) }
 }
 
+// One shared OSM answer per day. Only a successful answer is cached: a failure
+// throws inside the cache, so the next click tries again.
+const cachedBusinesses = unstable_cache(
+  async () => {
+    const result = await fetchOverpassBusinesses()
+    if (!result.ok) throw new Error(OSM_UNREACHABLE)
+    return result
+  },
+  ['osm-breda-businesses'],
+  { revalidate: OSM_CACHE_SECONDS, tags: ['osm-breda'] },
+)
+
+async function loadBusinesses() {
+  try {
+    return await cachedBusinesses()
+  } catch {
+    return { ok: false, reason: OSM_UNREACHABLE, attribution: OSM_ATTRIBUTION }
+  }
+}
+
 export const sourceDiscoveryHandlers = createSourceDiscoveryHandlers({
   authenticate: authenticateInternalRequest,
   restaurants: restaurantsData,
-  loadBusinesses: () => fetchOverpassBusinesses(),
+  loadBusinesses,
   readHomepage,
   findMenuCandidates: findSameHostMenuCandidates,
   // Dezelfde client en hetzelfde model als "Lees met AI"; de sleutel en de

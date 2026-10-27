@@ -22,6 +22,8 @@
 
 const OSM_ATTRIBUTION = '© OpenStreetMap-bijdragers';
 const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+/** Public mirrors tried in order when the main server is busy (it answers 502/504 at capacity). */
+const OVERPASS_ENDPOINTS = Object.freeze([OVERPASS_ENDPOINT, 'https://maps.mail.ru/osm/tools/overpass/api/interpreter']);
 /** One OSM request per day, never one per click. */
 const OSM_CACHE_SECONDS = 24 * 60 * 60;
 /** The public Overpass API asks for an identifying User-Agent. */
@@ -301,6 +303,7 @@ function addFormHref(business) {
 module.exports = {
   OSM_ATTRIBUTION,
   OVERPASS_ENDPOINT,
+  OVERPASS_ENDPOINTS,
   OSM_CACHE_SECONDS,
   OVERPASS_USER_AGENT,
   BREDA_BOUNDS,
