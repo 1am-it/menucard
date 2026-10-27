@@ -873,5 +873,33 @@ test('BE-35: every screen that starts a check uses that one rule', () => {
   assert.match(toevoegen, /Bevestigde link:/);
 });
 
+test('BE-36 dekking: een uitslag van vandaag is opnieuw te controleren op de bevestigde menulink', () => {
+  // Criterion 6: today's result is information, not a lock. The row keeps its
+  // age and offers the same recheck, on the confirmed menu link, not the
+  // homepage.
+  const now = new Date('2026-10-27T12:00:00.000Z');
+  const rows = coverageRows([confirmedAlDente()], {
+    batchDetails: [
+      batchDetail([
+        batchItem({
+          key: 'image_only',
+          restaurant: { id: 'aldente', name: 'Fictief Al Dente', known: true },
+          url: 'https://fictief-aldente.invalid/menukaart-restaurant-2/',
+          resultAt: '2026-10-27T09:10:00.000Z',
+        }),
+      ]),
+    ],
+    now,
+  });
+  const row = rows[0];
+  assert.equal(row.age, 'resultaat van vandaag');
+  assert.equal(recheckUrlFor(row, confirmedAlDente()), 'https://fictief-aldente.invalid/menukaart-restaurant-2/');
+  assert.equal(row.canCheck, true);
+  // The recheck is offered for a result that is not handled, whatever its age.
+  const component = fs.readFileSync(path.join(REPO_ROOT, 'src/components/SourceResultRow.js'), 'utf8');
+  assert.match(component, /const recheckable = Boolean\(row\.url && typeof onRecheck === 'function' && !row\.handled\)/);
+  assert.match(component, /onClick=\{\(\) => onRecheck\(row\)\}/);
+});
+
 
 
