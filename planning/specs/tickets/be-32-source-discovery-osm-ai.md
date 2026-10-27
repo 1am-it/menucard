@@ -3,7 +3,7 @@
 Live contract en status: GitHub issue #75.
 
 
-**Volgorde:** start pas na BE-31.
+**Volgorde:** na BE-31 (live 27 okt). Eigenaar gaf start-akkoord op 27 okt ("ja").
 
 **Eigenaarsbesluit (2026-10-27):** "alles akkoord". Dit omvat:
 - besluit 017: OpenStreetMap en AI mogen in de stap "Vinden", altijd als voorstel;
@@ -35,8 +35,10 @@ Live contract en status: GitHub issue #75.
    - de herkomst wordt per voorstel opgeslagen;
    - de bronvermelding "© OpenStreetMap-bijdragers" is zichtbaar;
    - er worden geen persoonsgegevens opgeslagen.
-6. **Documentatie:** `planning/decisions/017-source-discovery-osm-ai.md` beschrijft het besluit, en besluit 016 krijgt een verwijzing ernaar.
-7. **Bewijs:**
+6. **Dekking-pagina volgens mockup scherm 5:** de bovenkant wordt Nederlands ("Dekking 📊", drie tegels: restaurants, met menukaart, nog niet gecontroleerd) in de BE-28-stijl; de bestaande tabellen per buurt en keuken blijven, in het Nederlands.
+7. **Bronnen beoordelen (restpunten BE-31):** "Oude resultaten opruimen" werkt alleen op een selectie of heet expliciet "Alle N opruimen"; het vlak "Kies een taak links" over de volle hoogte zoals in de mockup.
+8. **Documentatie:** `planning/decisions/017-source-discovery-osm-ai.md` beschrijft het besluit, en besluit 016 krijgt een verwijzing ernaar.
+9. **Bewijs:**
    - tests met nagebootste OpenStreetMap- en AI-antwoorden; geen echte betaalde aanroep in tests;
    - screenshots;
    - `npm test` en `npm run build` groen.
