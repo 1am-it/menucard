@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T16:29:42.857Z",
+  "generatedAt": "2026-10-27T19:00:49.348Z",
   "kind": "fixture-browser-check",
   "task": "BE-33 (#79) Menukaarten die alleen als afbeelding of scan bestaan",
   "port": 3140,
@@ -16,12 +16,22 @@
     },
     {
       "file": "be33-rij-1280-light-off.png",
-      "sha256": "84e8fe778d68c28b330c13fd6200bbddef4ebc65904d548babee8eb591ba0408",
+      "sha256": "5762194c6c48b0d337b70f0bcd7e4589cb269bab02e41f5be70aac3e26d54e6f",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
       "scenario": "row",
       "aiState": "off"
+    },
+    {
+      "file": "be35-rij-1280-light-ai-uit.png",
+      "sha256": "5762194c6c48b0d337b70f0bcd7e4589cb269bab02e41f5be70aac3e26d54e6f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "scenario": "row-with-reason",
+      "aiState": "off",
+      "dir": "ops/browser/evidence/be-35"
     },
     {
       "file": "be33-kaart-1280-light.png",
@@ -52,7 +62,7 @@
     },
     {
       "file": "be33-rij-390-light-off.png",
-      "sha256": "028d536472a8a382316901aedeb5f585eff4c84a9aeea888ef8c2691a0e401d3",
+      "sha256": "c589d1168b30f59089d98bcc53cd9196e6f334cadb3e251387724bdef30de52a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -88,7 +98,7 @@
     },
     {
       "file": "be33-rij-1280-dark-off.png",
-      "sha256": "e6eca9e245e897f2ad2725b832157004bf2d0b2b680635e54ba87a3e55b1b820",
+      "sha256": "5ec450fc97bb6968dce11a84832f90e190d504fb32cdcd309bda88371734626e",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -124,7 +134,7 @@
     },
     {
       "file": "be33-rij-390-dark-off.png",
-      "sha256": "df741259a288d2ec1b66d5740d8571fbe9ab282e03e6ba616f77b559d9360ec1",
+      "sha256": "321c05de2070a1f7358b28b6fd58682dd18b528321115088d004b3ea3e654db9",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -235,6 +245,11 @@
       "name": "rij (1280/light/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
       "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (1280/light/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
     },
     {
       "name": "rij (1280/light/off): die stap opent de bestaande handmatige import",
@@ -397,6 +412,11 @@
       "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
+      "name": "rij (390/light/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
       "name": "rij (390/light/off): die stap opent de bestaande handmatige import",
       "passed": true,
       "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
@@ -557,6 +577,11 @@
       "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
     },
     {
+      "name": "rij (1280/dark/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
       "name": "rij (1280/dark/off): die stap opent de bestaande handmatige import",
       "passed": true,
       "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
@@ -715,6 +740,11 @@
       "name": "rij (390/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
       "passed": true,
       "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (390/dark/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
     },
     {
       "name": "rij (390/dark/off): die stap opent de bestaande handmatige import",
