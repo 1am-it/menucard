@@ -85,12 +85,14 @@ reviewer moet kunnen volgen:
   scherm. Geen migratie, geen nieuwe tabel.
 - **Budget:** vóór elke AI-aanroep wordt het bestaande maandbedrag uit de
   duurzame AI-kosten gelezen en met `budgetDecision` getoetst; een betaalde
-  mislukking telt mee. Wat niet in een voorstel kon worden vastgelegd (een
-  AI-zoekactie zonder bruikbaar resultaat) telt niet in de maandteller; de
-  schermen tonen daarom de kosten van de zoekactie zelf en noemen dat bedrag
-  apart. Volledige vastlegging van zulke kosten vraagt een kleine eigen
-  kostenrij (migratie) — dat is een besluit voor de Lead, niet iets om hier stil
-  te doen.
+  mislukking telt mee. De gemeten kosten van een run staan in het voorstel
+  (`kosten: N cent`) en `readAllAiUsageRows` leest ze daar terug, zodat ze in
+  dezelfde teller van 1000 cent vallen als de AI-lezingen en de AI-adviezen —
+  geen tweede teller, geen nieuwe tabel. Eén geval blijft buiten de maandteller:
+  een AI-zoekactie die niets bruikbaars oplevert (dan is er geen voorstel om de
+  kosten in vast te leggen). De schermen tonen dat bedrag wel apart. Volledige
+  vastlegging daarvan vraagt een eigen kostenrij (migratie); dat is een besluit
+  voor de Lead, niet iets om hier stil te doen.
 - **Bewijs:** unit-tests met nagebootste Overpass- en AI-antwoorden
   (`src/lib/osmSource.test.js`, `osmOverpass.test.js`, `sourceDiscovery.test.js`,
   `sourceDiscoveryHandlers.test.js`), een schermtest op de broncode
