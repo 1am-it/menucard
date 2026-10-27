@@ -370,3 +370,16 @@ test('S2: a typographic quote is the same passage through the whole adapter, and
   assert.equal(refused.reason, 'schema_violation');
   assert.ok(refused.problems.some((problem) => problem.includes('not present in the cited source')));
 });
+
+test('input estimate: an image counts as vision tokens, never as its base64 text', () => {
+  const { estimateSourceTokens } = require('./menuExtractionAdapter');
+  const bigBase64 = 'A'.repeat(2_000_000);
+  const sources = [
+    { id: 'S1', url: 'https://example.invalid/menu', kind: 'image', images: Array.from({ length: 9 }, (_, i) => ({ number: i + 1, data: bigBase64 })) },
+  ];
+  const tokens = estimateSourceTokens(sources);
+  assert.ok(tokens >= 9 * 1600, 'every image is counted');
+  assert.ok(tokens < 50_000, 'nine images stay well within the 50k input limit');
+  const pdf = estimateSourceTokens([{ id: 'S2', kind: 'pdf', pageCount: 3, documentBase64: bigBase64 }]);
+  assert.ok(pdf >= 3 * 1600 && pdf < 10_000);
+});
