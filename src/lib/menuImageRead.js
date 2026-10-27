@@ -7,7 +7,7 @@
 // test:
 //   1. which images of *this* website are menu images (not a logo, not an
 //      atmosphere photo, never another site);
-//   2. may this reading happen at all, within the fixed limits (6 images or 10
+//   2. may this reading happen at all, within the fixed limits (10 images or 10
 //      pages per reading, one fixed maximum file size);
 //   3. what does the human see before and after (the estimate, the notice);
 //   4. how is the origin of a dish that came from an image worded, and when is
@@ -18,12 +18,19 @@
 // origin ("afbeelding N" or "pagina N") and is shown as "Controle nodig".
 // Nothing is approved or published by any of this.
 
-// Criterion 2: at most 6 images or 10 pages per reading, and one fixed maximum
+// Criterion 2: at most 10 images or 10 pages per reading, and one fixed maximum
 // file size (the provider's own documented limit for an image is 5 MB).
-const MAX_MENU_IMAGES = 6;
+// BE-35 ronde 2 (#84): the live Al Dente pages have 7 (and more) menu images of
+// one menu; six was lower than the real page, so the page was refused. Ten is
+// the same order of magnitude and is read in page order, never silently zero.
+const MAX_MENU_IMAGES = 10;
 const MAX_SCAN_PAGES = 10;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
+// A picture that is *declared* smaller than this (both width and height
+// attributes) is an icon or thumbnail, not a menu page. Only an explicit HTML
+// size counts; a missing attribute is never a reason to drop an image.
+const MIN_MENU_IMAGE_EDGE = 200;
 
 const CONTROLE_NODIG = 'Controle nodig';
 const IMAGE_MEDIA_TYPES = Object.freeze({
@@ -101,23 +108,90 @@ function attributeOf(tag, name) {
 }
 
 
+// BE-35 ronde 2 (#84): "does this text already contain a menu?" — one pure,
+// tested rule. A price pattern is a euro amount, a comma/dot amount like 12,50
+// or 12.50, or 12,- . A date such as 27.10.2026 is not a price. A page with
+// fewer than three such lines has no menu text (navigation, footer and opening
+// hours alone), even when it does have readable text.
+const MENU_PRICE_PATTERN = /(?:€\s*\d|\b\d{1,4}\s*[.,]\s*\d{2}\b|\b\d{1,4}\s*[.,]\s*-)/;
+const DATE_LIKE_PATTERN = /\b\d{1,2}[./-]\d{1,2}[./-]\d{2,4}\b/g;
+const MENU_TEXT_MIN_PRICE_LINES = 3;
+
+/** How many lines of a plain-text page carry a price. */
+function menuPriceLineCount(text) {
+  const lines = String(text || '').split('\n');
+  let count = 0;
+  for (const line of lines) {
+    const withoutDates = line.replace(DATE_LIKE_PATTERN, ' ');
+    if (MENU_PRICE_PATTERN.test(withoutDates)) count += 1;
+  }
+  return count;
+}
+
+/** Does this readable text hold a menu? Three price lines are the threshold. */
+function hasMenuText(text) {
+  return menuPriceLineCount(text) >= MENU_TEXT_MIN_PRICE_LINES;
+}
+
+/** The `<title>` of a page, decoded, or an empty string. */
+function pageTitleOf(html) {
+  const match = /<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(String(html || ''));
+  return match ? decodeAttribute(match[1].replace(/\s+/g, ' ').trim()) : '';
+}
+
+/**
+ * BE-35 ronde 2 (#84): the page itself can name the menu. A URL such as
+ * "/menu-classico/" or "/menukaart-restaurant-2/" and a `<title>` with a menu
+ * word are a page-wide hint: images of this same website are then candidates
+ * even when the file name says nothing about a menu. NOT_MENU still applies.
+ */
+function pageHasMenuContext({ html, pageUrl } = {}) {
+  return MENU_HINT.test(`${String(pageUrl || '')} ${pageTitleOf(html)}`);
+}
+
+function edgeOf(tag, name) {
+  const raw = attributeOf(tag, name).trim();
+  if (raw === '') return null;
+  const value = Number.parseInt(raw, 10);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+/** An image that HTML itself declares smaller than a menu page (an icon). */
+function isSmallImageTag(tag) {
+  if (typeof tag !== 'string' || tag === '') return false;
+  const width = edgeOf(tag, 'width');
+  const height = edgeOf(tag, 'height');
+  return width !== null && height !== null && width < MIN_MENU_IMAGE_EDGE && height < MIN_MENU_IMAGE_EDGE;
+}
+
 /**
  * Is this image a menu image of the same website? The rule is intentionally
- * narrow and explainable: the same host as the page, an image extension, and a
- * menu word in the file name, the alt text or the text of the link around it.
- * A logo or an atmosphere photo is never included, and neither is any other
- * website (criterion 2: no Instagram, no Google).
+ * narrow and explainable: the same host as the page, an image extension, no
+ * logo/atmosphere word, and a menu word in the file name, the alt text, the
+ * link around it or — since BE-35 ronde 2 (#84) — in the page itself. A logo or
+ * an atmosphere photo is never included, and neither is any other website
+ * (criterion 2: no Instagram, no Google).
  */
-function isMenuImageCandidate({ url, alt, linkText } = {}, pageUrl) {
+function isMenuImageCandidate({ url, alt, linkText, small } = {}, pageUrl, { pageHint = false } = {}) {
   const absolute = absoluteUrl(url, pageUrl);
   if (!absolute) return false;
   const host = hostOfUrl(absolute);
   const pageHost = hostOfUrl(pageUrl);
   if (!host || !pageHost || host !== pageHost) return false;
   if (!mediaTypeForUrl(absolute)) return false;
+  if (small === true) return false;
   const haystack = [absolute, alt, linkText].filter(Boolean).join(' ');
   if (NOT_MENU.test(haystack)) return false;
-  return MENU_HINT.test(haystack);
+  return MENU_HINT.test(haystack) || pageHint;
+}
+
+/**
+ * The WordPress size suffix of one file ("-300x212", "-768x1024"), used as the
+ * grouping key so that the same picture is offered once. The version without
+ * the suffix is the original and is preferred.
+ */
+function fileVariantKey(url) {
+  return String(url || '').replace(/-\d+x\d+(\.[a-z0-9]+)$/i, '$1');
 }
 
 /**
@@ -129,6 +203,9 @@ function isMenuImageCandidate({ url, alt, linkText } = {}, pageUrl) {
 function collectMenuImages({ html, pageUrl, limit = MAX_MENU_IMAGES } = {}) {
   const source = String(html || '');
   if (source === '' || hostOfUrl(pageUrl) === null) return [];
+  // BE-35 ronde 2 (#84): a URL or <title> that names the menu makes the images
+  // of this same website candidates, even without a menu word in the file name.
+  const pageHint = pageHasMenuContext({ html: source, pageUrl });
   // The links around an image count as a menu hint, so their ranges are read
   // first; the images themselves are then taken in document order.
   const anchors = [];
@@ -144,23 +221,39 @@ function collectMenuImages({ html, pageUrl, limit = MAX_MENU_IMAGES } = {}) {
     return anchor ? anchor.hint : '';
   };
   const found = [];
-  const seen = new Set();
-  const push = (src, alt, linkText) => {
+  const groups = new Map();
+  const push = (src, alt, linkText, tag) => {
     const absolute = absoluteUrl(src, pageUrl);
-    if (!absolute || seen.has(absolute)) return;
-    if (!isMenuImageCandidate({ url: absolute, alt, linkText }, pageUrl)) return;
-    seen.add(absolute);
-    found.push({ number: found.length + 1, url: absolute, alt: String(alt || '').slice(0, 200), mediaType: mediaTypeForUrl(absolute) });
+    if (!absolute) return;
+    if (!isMenuImageCandidate({ url: absolute, alt, linkText, small: isSmallImageTag(tag) }, pageUrl, { pageHint })) return;
+    const key = fileVariantKey(absolute);
+    const existing = groups.get(key);
+    if (existing === undefined) {
+      groups.set(key, found.length);
+      found.push({ number: 0, url: absolute, alt: String(alt || '').slice(0, 200), mediaType: mediaTypeForUrl(absolute) });
+      return;
+    }
+    // The same file in another WordPress size: keep one image, preferring the
+    // original that has no -WxH suffix.
+    const stored = found[existing];
+    if (stored.url !== key && absolute === key) {
+      found[existing] = { ...stored, url: absolute, alt: String(alt || stored.alt || '').slice(0, 200), mediaType: mediaTypeForUrl(absolute) };
+    }
   };
   for (const match of source.matchAll(/<img\b[^>]*>/gi)) {
     const tag = match[0];
-    push(attributeOf(tag, 'src') || attributeOf(tag, 'data-src'), attributeOf(tag, 'alt'), `${attributeOf(tag, 'title')} ${hintFor(match.index)}`);
+    push(
+      attributeOf(tag, 'src') || attributeOf(tag, 'data-src'),
+      attributeOf(tag, 'alt'),
+      `${attributeOf(tag, 'title')} ${hintFor(match.index)}`,
+      tag,
+    );
   }
   for (const match of source.matchAll(/<source\b[^>]*>/gi)) {
     const srcset = attributeOf(match[0], 'srcset');
-    if (srcset) push(srcset.split(',')[0].trim().split(/\s+/)[0], '', hintFor(match.index));
+    if (srcset) push(srcset.split(',')[0].trim().split(/\s+/)[0], '', hintFor(match.index), match[0]);
   }
-  return found.slice(0, limit);
+  return found.slice(0, limit).map((entry, index) => ({ ...entry, number: index + 1 }));
 }
 
 /** The bytes of a base64 string, without decoding it into a new buffer. */
@@ -201,8 +294,9 @@ function refused(reason, extra = {}) {
 /**
  * What may go to the same model, within the fixed limits, before any budget is
  * spent. One text source always wins: text is free and exactly checkable. An
- * image page sends its own images (never more than 6); a scan PDF goes as one
- * document (never more than 10 pages, and only when its page count is known).
+ * image page sends its own images (never more than 10 in one reading); a scan
+ * PDF goes as one document (never more than 10 pages, and only when its page
+ * count is known).
  */
 function planImageRead({ sources } = {}) {
   const list = (Array.isArray(sources) ? sources : []).filter((source) => source && typeof source.id === 'string');
@@ -235,7 +329,15 @@ function planImageRead({ sources } = {}) {
       images.push({ sourceId: source.id, url: image.url || null, mediaType: image.mediaType || mediaTypeForUrl(image.url) });
     }
   }
-  if (imageCount > MAX_MENU_IMAGES) return refused('too_many_images', { imageCount });
+  // BE-35 ronde 2 (#84): the limit is per reading, so the reason says so instead
+  // of blaming one page. A single page is already cut to the first 10 images by
+  // its own reading; this is the total of several image pages together.
+  if (imageCount > MAX_MENU_IMAGES) {
+    return refused('too_many_images', {
+      imageCount,
+      message: `Deze lezing heeft ${imageCount} menu-afbeeldingen; maximaal ${MAX_MENU_IMAGES} per lezing.`,
+    });
+  }
 
   let pageCount = 0;
   const documents = [];
@@ -305,6 +407,8 @@ module.exports = {
   MAX_SCAN_PAGES,
   MAX_IMAGE_BYTES,
   MAX_DOCUMENT_BYTES,
+  MIN_MENU_IMAGE_EDGE,
+  MENU_TEXT_MIN_PRICE_LINES,
   IMAGE_MEDIA_TYPES,
   MENU_HINT,
   NOT_MENU,
@@ -315,12 +419,16 @@ module.exports = {
   base64Bytes,
   collectMenuImages,
   estimateOf,
+  hasMenuText,
   hostOfUrl,
   imageProvenance,
   imageReadNotice,
   isMenuImageCandidate,
   mediaTypeForUrl,
+  menuPriceLineCount,
   modeOfSource,
+  pageHasMenuContext,
+  pageTitleOf,
   planImageRead,
   provenanceLabel,
 };

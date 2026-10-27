@@ -16,6 +16,8 @@ const { sourceHashForText } = require('./manualMenuImportBundle');
 const { createManualImportStateCipher } = require('./manualMenuImportState');
 const { createAnthropicStructuredCall } = require('./menuExtractionAnthropicCall');
 const { MAX_MENU_IMAGES, MAX_SCAN_PAGES } = require('./menuImageRead');
+const { readManualImportSource } = require('./manualMenuImportSource');
+const { alDenteMenuPage, classicoPage } = require('./__fixtures__/menuImagePages');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PROTOCOL = loadMenuExtractionProtocol({ root: ROOT });
@@ -204,13 +206,13 @@ test('BE-33: a scan PDF goes as a document and keeps "pagina N" per dish', async
 });
 
 test('BE-33: too many images or pages, and a missing origin, are refused before or by the validator', async () => {
-  // Seven images: refused before any model call and without a concept.
-  const seven = harness({ client: fakeClient(() => responseOf(answerFor(['afbeelding 1']))), sources: [imageSource(MAX_MENU_IMAGES + 1)] });
-  const tooMany = await seven.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  // Eleven images: refused before any model call and without a concept.
+  const tooManyImages = harness({ client: fakeClient(() => responseOf(answerFor(['afbeelding 1']))), sources: [imageSource(MAX_MENU_IMAGES + 1)] });
+  const tooMany = await tooManyImages.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(tooMany.status, 422);
   assert.equal(tooMany.body.reason, 'too_many_images');
-  assert.match(tooMany.body.error, /maximaal 6/);
-  assert.equal(seven.saved.length, 0);
+  assert.match(tooMany.body.error, /maximaal 10/);
+  assert.equal(tooManyImages.saved.length, 0);
 
   // Eleven pages: refused, no call.
   const elevenClient = fakeClient(() => responseOf(answerFor(['pagina 1'])));
@@ -260,3 +262,55 @@ test('BE-33: a dry run gives the estimate of an image reading without spending a
   assert.equal(client.calls.length, 0, 'a dry run never calls the model');
   assert.equal(h.saved.length, 0);
 });
+
+/** Reads one fixture page through the real source reader, with a fake fetch. */
+async function sourceFromPage(page) {
+  return readManualImportSource({
+    id: 'source-1',
+    url: page.pageUrl,
+    fetchImpl: async (url) => {
+      if (url === page.pageUrl) return { finalUrl: url, contentType: 'text/html', bytes: Buffer.from(page.html, 'utf8') };
+      return { finalUrl: url, contentType: 'image/jpeg', bytes: Buffer.from(TINY_PNG, 'base64') };
+    },
+    now: new Date('2026-10-27T12:00:00.000Z'),
+  });
+}
+
+test('BE-35: the real menu-image pages reach the model as image blocks, ten at most', async () => {
+  // The live Al Dente shape, doubled to 12 images: navigation and footer text,
+  // no menu text. The page is an image source and the model gets ten images in
+  // page order, never zero.
+  const big = alDenteMenuPage({ count: 12 });
+  const bigSource = await sourceFromPage(big);
+  assert.equal(bigSource.kind, 'image');
+  assert.equal(bigSource.images.length, MAX_MENU_IMAGES);
+  assert.equal(bigSource.imageCandidates, 12);
+  assert.match(bigSource.limitation, /Deze pagina heeft 12 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
+
+  const bigClient = fakeClient(() => responseOf(answerFor(['afbeelding 1', 'afbeelding 10'])));
+  const bigRun = harness({ client: bigClient, sources: [bigSource] });
+  const bigResult = await bigRun.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  assert.equal(bigResult.status, 200, JSON.stringify(bigResult.body));
+  const bigContent = bigClient.calls[0].body.messages[0].content;
+  const bigImages = bigContent.filter((block) => block.type === 'image');
+  assert.equal(bigImages.length, 10);
+  assert.deepEqual(bigImages[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
+  assert.ok(bigContent.some((block) => block.type === 'text' && block.text.startsWith('afbeelding 10')));
+  assert.equal(bigResult.body.plan.mode, 'image');
+  assert.equal(bigResult.body.plan.imageCount, 10);
+  assert.match(bigResult.body.estimate.label, /10 afbeeldingen/);
+
+  // The menu-classico page: two images whose file name does not say "menu".
+  const classicoSource = await sourceFromPage(classicoPage());
+  assert.equal(classicoSource.kind, 'image');
+  assert.equal(classicoSource.images.length, 2);
+  const classicoClient = fakeClient(() => responseOf(answerFor(['afbeelding 1', 'afbeelding 2'])));
+  const classicoRun = harness({ client: classicoClient, sources: [classicoSource] });
+  const classicoResult = await classicoRun.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  assert.equal(classicoResult.status, 200, JSON.stringify(classicoResult.body));
+  const classicoContent = classicoClient.calls[0].body.messages[0].content;
+  assert.equal(classicoContent.filter((block) => block.type === 'image').length, 2);
+  assert.deepEqual(classicoResult.body.review.rows.map((row) => row.provenance), ['gelezen van afbeelding 1', 'gelezen van afbeelding 2']);
+  assert.deepEqual(classicoResult.body.review.rows.map((row) => row.label), ['Controle nodig', 'Controle nodig']);
+});
+

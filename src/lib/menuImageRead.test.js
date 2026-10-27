@@ -12,10 +12,14 @@ const {
   MAX_MENU_IMAGES,
   MAX_SCAN_PAGES,
   MAX_IMAGE_BYTES,
+  MENU_TEXT_MIN_PRICE_LINES,
   CONTROLE_NODIG,
   collectMenuImages,
+  hasMenuText,
   imageReadNotice,
   imageProvenance,
+  menuPriceLineCount,
+  pageHasMenuContext,
   planImageRead,
   provenanceLabel,
 } = require('./menuImageRead');
@@ -55,14 +59,92 @@ test('BE-33: only menu images of the same website are collected', () => {
   assert.equal(found.some((entry) => entry.url.includes('voorbeeld-cdn.nl')), false);
 });
 
-test('BE-33: at most six menu images are collected, and a page without a menu word yields none', () => {
-  const many = Array.from({ length: 9 }, (_, index) => `<img src="/kaart-${index + 1}.jpg" alt="Menukaart ${index + 1}">`).join('');
+test('BE-33: at most ten menu images are collected, and a page without a menu word yields none', () => {
+  const many = Array.from({ length: 13 }, (_, index) => `<img src="/kaart-${index + 1}.jpg" alt="Menukaart ${index + 1}">`).join('');
+  assert.equal(MAX_MENU_IMAGES, 10);
   assert.equal(collectMenuImages({ html: many, pageUrl: 'https://voorbeeld.nl/menu' }).length, MAX_MENU_IMAGES);
   // Slightly over the limit is still detectable by the caller (limit + 1).
   assert.equal(collectMenuImages({ html: many, pageUrl: 'https://voorbeeld.nl/menu', limit: MAX_MENU_IMAGES + 1 }).length, MAX_MENU_IMAGES + 1);
+  // The caller can also count every candidate and decide what it reads itself.
+  assert.equal(collectMenuImages({ html: many, pageUrl: 'https://voorbeeld.nl/menu', limit: Number.MAX_SAFE_INTEGER }).length, 13);
   assert.deepEqual(collectMenuImages({ html: '<img src="/header-1.jpg" alt="Welkom">', pageUrl: 'https://voorbeeld.nl/' }), []);
   assert.deepEqual(collectMenuImages({ html: '', pageUrl: 'https://voorbeeld.nl/' }), []);
 });
+
+test('BE-35: text with fewer than three price lines holds no menu; a date is not a price', () => {
+  assert.equal(MENU_TEXT_MIN_PRICE_LINES, 3);
+  // Real Al Dente text: navigation is not part of this text, but opening hours,
+  // an address and an intro are. No price line at all.
+  const pageText = [
+    'Menukaart',
+    'Onze kaart wisselt met de seizoenen.',
+    'Al Dente Voorbeeld · Grote Markt 1, 4811 XR Breda · 076 000 0000',
+    'Openingstijden: maandag tot en met zondag van 12:00 tot 22:00',
+    'Volg ons op Instagram en Facebook',
+  ].join('\n');
+  assert.equal(menuPriceLineCount(pageText), 0);
+  assert.equal(hasMenuText(pageText), false);
+
+  // Two price lines are not yet a menu; three are.
+  assert.equal(hasMenuText('Bruschetta 8,50\nPasta € 14,50'), false);
+  assert.equal(hasMenuText('Bruschetta 8,50\nPasta € 14,50\nTiramisu 7.50'), true);
+  assert.equal(hasMenuText('Insalata 11,-\nSoep 6,50\nWijn 4,00'), true);
+  assert.equal(menuPriceLineCount('Bruschetta 8,50'), 1);
+  // A date line is not a price, so a page of dates is still not a menu.
+  assert.equal(menuPriceLineCount('27.10.2026\n28.10.2026\n29.10.2026'), 0);
+  assert.equal(hasMenuText(''), false);
+  assert.equal(hasMenuText(null), false);
+});
+
+test('BE-35: a page URL or title that names the menu makes its own images candidates', () => {
+  const html = [
+    '<html><head><title>Menu Classico - Al Dente Voorbeeld</title></head><body>',
+    '<img src="/wp-content/uploads/2026/08/Classico0826a.jpg" alt="">',
+    '<img src="/wp-content/uploads/2026/08/logo-al-dente.png" alt="Logo Al Dente">',
+    '<img src="/wp-content/uploads/2026/08/Classico0826b.jpg" alt="">',
+    '<img src="/wp-content/uploads/2026/08/team-foto.jpg" alt="Ons team">',
+    '<img src="/wp-content/uploads/2026/08/pixel.gif" width="24" height="24" alt="">',
+    '<img src="https://cdn.instagram.com/classico.jpg" alt="Menu">',
+    '</body></html>',
+  ].join('');
+  const pageUrl = 'https://www.aldente-voorbeeld.example/menu-classico/';
+  assert.equal(pageHasMenuContext({ html, pageUrl }), true);
+  assert.deepEqual(
+    collectMenuImages({ html, pageUrl }).map((entry) => entry.url),
+    [
+      'https://www.aldente-voorbeeld.example/wp-content/uploads/2026/08/Classico0826a.jpg',
+      'https://www.aldente-voorbeeld.example/wp-content/uploads/2026/08/Classico0826b.jpg',
+    ],
+  );
+  // Without the page hint those file names say nothing about a menu.
+  const noHintHtml = html.replace('<title>Menu Classico - Al Dente Voorbeeld</title>', '<title>Al Dente Voorbeeld</title>');
+  assert.equal(pageHasMenuContext({ html: noHintHtml, pageUrl: 'https://www.aldente-voorbeeld.example/over-ons/' }), false);
+  assert.deepEqual(collectMenuImages({ html: noHintHtml, pageUrl: 'https://www.aldente-voorbeeld.example/over-ons/' }), []);
+  // NOT_MENU still applies inside a menu page: no logo, no team photo, no icon,
+  // and never another website.
+  const urls = collectMenuImages({ html, pageUrl }).map((entry) => entry.url);
+  assert.equal(urls.some((url) => url.includes('logo')), false);
+  assert.equal(urls.some((url) => url.includes('team')), false);
+  assert.equal(urls.some((url) => url.includes('pixel')), false);
+  assert.equal(urls.some((url) => url.includes('instagram')), false);
+});
+
+test('BE-35: WordPress size variants count as one image, and the original wins', () => {
+  const html = [
+    '<img src="/uploads/Menukaart0826a-300x212.jpg" alt="Menukaart a">',
+    '<img src="/uploads/Menukaart0826a-768x1086.jpg" alt="Menukaart a">',
+    '<img src="/uploads/Menukaart0826a.jpg" alt="Menukaart a">',
+    '<img src="/uploads/Menukaart0826b-300x212.jpg" alt="Menukaart b">',
+  ].join('');
+  const found = collectMenuImages({ html, pageUrl: 'https://voorbeeld.nl/menukaart' });
+  assert.deepEqual(
+    found.map((entry) => entry.url),
+    ['https://voorbeeld.nl/uploads/Menukaart0826a.jpg', 'https://voorbeeld.nl/uploads/Menukaart0826b-300x212.jpg'],
+  );
+  // The order stays the page order and the numbers stay 1..N.
+  assert.deepEqual(found.map((entry) => entry.number), [1, 2]);
+});
+
 
 test('BE-33: a text source wins; images and a scan are planned within the fixed limits', () => {
   const text = planImageRead({ sources: [{ id: 'source-1', kind: 'html', text: 'Huiswijn 5,00', hasText: true }] });
@@ -83,13 +165,13 @@ test('BE-33: a text source wins; images and a scan are planned within the fixed 
   assert.equal(scan.pageCount, 3);
   assert.match(scan.estimate.label, /3 pagina/);
 
-  // Criterion 2: six images are the maximum, a seventh is refused.
-  const six = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6].map((n) => image(n)), hasText: false }] });
-  assert.equal(six.ok, true);
-  const seven = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6, 7].map((n) => image(n)), hasText: false }] });
-  assert.equal(seven.ok, false);
-  assert.equal(seven.reason, 'too_many_images');
-  assert.match(seven.message, /maximaal 6/);
+  // Criterion 2: ten images are the maximum, an eleventh is refused.
+  const tenImages = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => image(n)), hasText: false }] });
+  assert.equal(tenImages.ok, true);
+  const elevenImages = planImageRead({ sources: [{ id: 'source-1', kind: 'image', images: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((n) => image(n)), hasText: false }] });
+  assert.equal(elevenImages.ok, false);
+  assert.equal(elevenImages.reason, 'too_many_images');
+  assert.match(elevenImages.message, /maximaal 10/);
 
   // Ten pages are the maximum; eleven are refused before anything is sent.
   const ten = planImageRead({ sources: [{ id: 'source-1', kind: 'pdf', documentBase64: TINY_PNG, pageCount: MAX_SCAN_PAGES, hasText: false }] });

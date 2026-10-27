@@ -19,9 +19,24 @@ Live contract en status: GitHub issue #79.
    - **wat de AI krijgt:**
      - een pdf zonder tekstlaag gaat als document naar het bestaande model;
      - menu-afbeeldingen (jpg/png/webp) gaan als afbeelding, en alleen van dezelfde website als de bron;
+     - **beeld vóór tekst (bijgewerkt in #84, ronde 2):** heeft een pagina
+       menu-afbeeldingen en bevat de leesbare tekst geen menu (minder dan drie
+       regels met een prijs), dan gaat de pagina als beeldbron naar de AI —
+       ook als er navigatie-, footer- of openingstijdentekst staat. Een echte
+       tekstmenu blijft een tekstbron;
+     - **paginacontext (bijgewerkt in #84, ronde 2):** noemt de pagina-URL of de
+       `<title>` zelf het menu (`menu-classico`, `menukaart-restaurant-2`), dan
+       zijn afbeeldingen van dezelfde website kandidaat, ook zonder menuwoord in
+       de bestandsnaam. `NOT_MENU` (logo, icoon, favicon, te kleine afbeelding)
+       blijft gelden, en WordPress-varianten (`-300x212`, `-768x…`) tellen als
+       één afbeelding met voorkeur voor het origineel;
    - **zelfde basis:** dezelfde client, hetzelfde model, dezelfde enable-vlag, hetzelfde schema en dezelfde validator;
    - **grenzen:**
-     - maximaal 6 afbeeldingen of 10 pagina's per lezing;
+     - maximaal 10 afbeeldingen of 10 pagina's per lezing (bijgewerkt in #84,
+       ronde 2; was 6);
+     - bij meer menu-afbeeldingen op één pagina leest de app de eerste 10 in
+       paginavolgorde en zegt zij het echte aantal: "Deze pagina heeft N
+       menu-afbeeldingen; de eerste 10 zijn gelezen." Nooit 0;
      - een vaste maximale bestandsgrootte;
      - de budgetcontrole gebeurt vooraf;
      - de kosten worden zichtbaar.

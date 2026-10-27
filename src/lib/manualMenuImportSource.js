@@ -18,7 +18,7 @@
 const { createHash } = require('node:crypto');
 const { decodeEntities } = require('./htmlMenuStructure');
 const { sourceHashForText } = require('./manualMenuImportBundle');
-const { MAX_IMAGE_BYTES, MAX_MENU_IMAGES, collectMenuImages, mediaTypeForUrl } = require('./menuImageRead');
+const { MAX_IMAGE_BYTES, MAX_MENU_IMAGES, collectMenuImages, hasMenuText, mediaTypeForUrl } = require('./menuImageRead');
 
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 const MAX_TEXT_CHARS = 120_000;
@@ -185,17 +185,26 @@ async function readManualImportSource({
   }
   const html = response.bytes ? response.bytes.toString('utf8') : String(response.body || '');
   const text = htmlToPlainText(html);
-  if (text === '') {
-    // BE-33 (#79, criterion 2): a page without text may carry its menu as
-    // images. Only images of the same website that are recognisable as a menu
-    // are fetched, never more than the fixed maximum, and each through the same
-    // safe route. Nothing is guessed when that fails.
-    const candidates = collectMenuImages({ html, pageUrl: finalUrl, limit: MAX_MENU_IMAGES + 1 });
+  // BE-35 ronde 2 (#84): a real menu page carries navigation, footer and
+  // opening-hours text while the menu itself is only an image. Menu images of
+  // this same page therefore go before the text when that text holds no menu
+  // (the tested hasMenuText rule: fewer than three price lines). A page with a
+  // real text menu stays a text source: free and exactly checkable.
+  const candidates = collectMenuImages({ html, pageUrl: finalUrl, limit: Number.MAX_SAFE_INTEGER });
+  const menuOnlyAsImage = candidates.length > 0 && !hasMenuText(text);
+  if (text === '' || menuOnlyAsImage) {
     if (candidates.length > 0) {
-      const overflow = candidates.length > MAX_MENU_IMAGES;
-      const { images, limitations } = overflow
-        ? { images: [], limitations: [`Deze pagina heeft meer dan ${MAX_MENU_IMAGES} menu-afbeeldingen; maximaal ${MAX_MENU_IMAGES} per lezing.`] }
-        : await readMenuImages({ images: candidates, fetchImpl, robotsCheck });
+      // BE-33 (#79, criterion 2) with the BE-35 ronde 2 (#84) overflow rule: the
+      // first 10 candidates in page order are fetched, each through the same safe
+      // route. More candidates is never an empty reading, and the limitation
+      // names the real number.
+      const selected = candidates.slice(0, MAX_MENU_IMAGES);
+      const { images, limitations } = await readMenuImages({ images: selected, fetchImpl, robotsCheck });
+      const notes = [];
+      if (candidates.length > MAX_MENU_IMAGES) {
+        notes.push(`Deze pagina heeft ${candidates.length} menu-afbeeldingen; de eerste ${MAX_MENU_IMAGES} zijn gelezen.`);
+      }
+      notes.push(...limitations);
       return {
         id,
         url: finalUrl,
@@ -208,7 +217,7 @@ async function readManualImportSource({
         images,
         imageCandidates: candidates.length,
         fetchedAt,
-        limitation: limitations.length > 0 ? limitations.join(' ') : 'Deze pagina toont de menukaart als afbeelding; de AI leest de afbeeldingen.',
+        limitation: notes.length > 0 ? notes.join(' ') : 'Deze pagina toont de menukaart als afbeelding; de AI leest de afbeeldingen.',
       };
     }
     return {
