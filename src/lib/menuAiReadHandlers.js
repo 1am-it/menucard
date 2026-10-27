@@ -622,7 +622,13 @@ function createMenuAiReadHandlers({
 
     const source = await resolveSource(parsed.body, auth);
     if (!source.ok) {
-      return reply(source.status || 422, { error: source.message || messageFor(source.reason), reason: source.reason });
+      // BE-36 (#87, criterion 4): a retry whose sealed reading expired asks for a
+      // new reading, not for a new prompt.
+      const retryExpired = source.reason === 'state_expired' && Array.isArray(parsed.body && parsed.body.retry_pages);
+      return reply(source.status || 422, {
+        error: retryExpired ? 'Deze lezing is verlopen. Lees de kaart opnieuw.' : source.message || messageFor(source.reason),
+        reason: source.reason,
+      });
     }
 
     const spend = await readSpend();

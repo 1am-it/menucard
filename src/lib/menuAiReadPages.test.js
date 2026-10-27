@@ -99,7 +99,7 @@ function imageSource(count, { id = 'source-1' } = {}) {
   };
 }
 
-function harness({ client, sources, rows = [], saveConcept = null }) {
+function harness({ client, sources, rows = [], saveConcept = null, openState = null }) {
   const saved = [];
   const sealed = createManualImportStateCipher({ secret: SECRET, now: () => new Date('2026-10-27T12:00:00.000Z') });
   const handlers = createMenuAiReadHandlers({
@@ -111,7 +111,7 @@ function harness({ client, sources, rows = [], saveConcept = null }) {
     resolveJob: async ({ jobId }) => (jobId === 'job-1' ? { ok: true, urls: [IMAGE_URL], restaurantId: '23' } : { ok: false }),
     restaurantExists: (id) => id === '23',
     loadProtocol: () => PROTOCOL,
-    openState: (token) => sealed.open(token),
+    openState: openState || ((token) => sealed.open(token)),
     sealState: (state) => sealed.seal(state),
     saveConcept:
       saveConcept ||
@@ -234,6 +234,24 @@ test('BE-36: een model dat losse afbeeldingen als pagina\'s telt, wordt niet mee
   assert.equal(result.status, 200, JSON.stringify(result.body));
   assert.equal(result.body.pages.read, 9);
   assert.equal(result.body.summary.items, 9);
+});
+
+test('BE-36: een verlopen lezing vraagt om een nieuwe lezing, niet om een prompt', async () => {
+  const client = fakeClient((body) => responseOf(answerForPage(pageOf(body))));
+  const h = harness({
+    client,
+    sources: [imageSource(2)],
+    openState: () => ({
+      ok: false,
+      code: 'state_expired',
+      message: 'Deze stap is verlopen. Maak opnieuw een prompt.',
+    }),
+  });
+  const result = await h.handlers.read(requestOf({ state: 'verlopen-token', retry_pages: [2] }));
+  assert.equal(result.status, 409);
+  assert.equal(result.body.reason, 'state_expired');
+  assert.equal(result.body.error, 'Deze lezing is verlopen. Lees de kaart opnieuw.');
+  assert.equal(client.calls.length, 0);
 });
 
 test('BE-36: elke foutreden heeft zijn eigen zin met een volgende stap', async () => {
