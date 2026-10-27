@@ -423,6 +423,58 @@ test('BE-35 ronde 3: negen menu-afbeeldingen bereiken de AI via job_id én via d
   assert.deepEqual(state.body.review.rows.map((row) => row.label), Array.from({ length: 9 }, () => 'Controle nodig'));
 });
 
+test('BE-35 ronde 3: een scan in de verzegelde staat gaat als document naar de AI', async () => {
+  // A sealed bundle of a scan PDF keeps only metadata; the state branch reads
+  // the URL again and sends the document, exactly like the job_id branch.
+  const url = 'https://bistro-voorbeeld.example/menukaart.pdf';
+  const bundle = buildImportBundle({
+    bundleId: 'AI-2026-10-24-SCAN',
+    actorUserId: 'user-1',
+    restaurantId: '23',
+    restaurantName: 'Restaurant Voorbeeld',
+    fetchedAt: '2026-10-24T12:00:00.000Z',
+    protocol: PROTOCOL,
+    now: new Date('2026-10-24T12:00:00.000Z'),
+    sources: [{
+      id: 'source-1',
+      url,
+      kind: 'pdf',
+      status: 'read',
+      text: '',
+      hasText: false,
+      imageRead: true,
+      hasDocument: true,
+      pageCount: 2,
+      sha256: sourceHashForText('pdf-fixture'),
+      limitation: 'De PDF gaat als document naar de AI; de pagina’s worden niet als tekst gelezen.',
+    }],
+  });
+  assert.equal(bundle.sources[0].mode, 'document');
+  const cipher = createManualImportStateCipher({ secret: SECRET, now: () => new Date('2026-10-24T12:00:00.000Z') });
+  const token = cipher.seal({ userId: 'user-1', restaurantId: '23', bundle, report: null, decisions: [], followUps: {}, followUpTotal: 0 }).token;
+
+  const client = fakeClient(() => responseOf(answerFor(['pagina 1', 'pagina 2'])));
+  const urls = [];
+  const h = harness({
+    client,
+    cipher,
+    readSources: async ({ urls: requested }) => {
+      urls.push(...requested);
+      return [{ ...scanSource(2), url }];
+    },
+  });
+  const result = await h.handlers.read(requestOf({ state: token }));
+  assert.equal(result.status, 200, JSON.stringify(result.body));
+  assert.deepEqual(urls, [url], 'the URL comes from the sealed state');
+  assert.equal(result.body.plan.mode, 'document');
+  assert.equal(result.body.plan.pageCount, 2);
+  const document = client.calls[0].body.messages[0].content.find((block) => block.type === 'document');
+  assert.ok(document, 'the scan is sent as a document');
+  assert.deepEqual(document.source, { type: 'base64', media_type: 'application/pdf', data: TINY_PNG });
+  assert.deepEqual(result.body.review.rows.map((row) => row.provenance), ['gelezen van pagina 1', 'gelezen van pagina 2']);
+});
+
+
 test('BE-35 ronde 3: een tekstbron en een beeldbron gaan samen naar de AI', async () => {
   // The job found a menu page (text) and a page that only shows images. Both
   // are sent: text by its text, the images as image blocks.
