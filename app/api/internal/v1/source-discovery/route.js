@@ -14,6 +14,13 @@
 import { NextResponse } from 'next/server'
 import { sourceDiscoveryHandlers } from '@/src/lib/sourceDiscoveryRouteDeps'
 
+// The first OSM request of the day takes ~20 s (two mirrors at most ~50 s), and
+// "Vind bronnen" walks up to 10 restaurants through the website and AI layers.
+// The platform default timeout cut both off, so "Nieuw gevonden" always showed
+// "OpenStreetMap is nu niet bereikbaar". 300 s is the Hobby maximum, as for
+// "Lees met AI" (menu-ai-import).
+export const maxDuration = 300
+
 export async function GET(request) {
   const { status, body } = await sourceDiscoveryHandlers.newRestaurants(request)
   return NextResponse.json(body, { status })
