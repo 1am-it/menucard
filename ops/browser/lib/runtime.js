@@ -46,19 +46,35 @@ function killTree(child) {
 async function startServer({ port, appUrl, outputDir, readyPath }) {
   fs.mkdirSync(outputDir, { recursive: true });
   const log = fs.createWriteStream(path.join(outputDir, 'next-dev.log'));
+  const env = {
+    ...process.env,
+    NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'fixture-anon-key-not-a-secret',
+    NEXT_TELEMETRY_DISABLED: '1',
+  };
+  // Prefer the project script through npm (the usual developer machine). A
+  // runner without a global npm (for example this isolated clone, which only has
+  // node) starts the same `next dev` directly through node: same command, same
+  // env, same log. This only changes how the local test server is started.
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const child = spawn(npm, ['run', 'dev', '--', '-p', String(port)], {
-    cwd: REPO_ROOT,
-    env: {
-      ...process.env,
-      NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'fixture-anon-key-not-a-secret',
-      NEXT_TELEMETRY_DISABLED: '1',
-    },
-    stdio: ['ignore', 'pipe', 'pipe'],
-    shell: process.platform === 'win32',
-    detached: process.platform !== 'win32',
-  });
+  const npmAvailable =
+    spawnSync(npm, ['--version'], { stdio: 'ignore', shell: process.platform === 'win32' }).status === 0;
+  const nextBin = path.join(REPO_ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
+  const child = npmAvailable
+    ? spawn(npm, ['run', 'dev', '--', '-p', String(port)], {
+        cwd: REPO_ROOT,
+        env,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
+        detached: process.platform !== 'win32',
+      })
+    : spawn(process.execPath, [nextBin, 'dev', '-p', String(port)], {
+        cwd: REPO_ROOT,
+        env,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: false,
+        detached: process.platform !== 'win32',
+      });
   child.stdout.pipe(log);
   child.stderr.pipe(log);
   // BE-31 (#74): the old batch page address answers with a 308, so the default

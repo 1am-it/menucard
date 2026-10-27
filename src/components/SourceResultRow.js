@@ -13,6 +13,7 @@
 // existing "Lees met AI" and the existing manual import).
 
 import StatusIcon from '@/src/components/StatusIcon'
+import { CHECK_COPY } from '@/src/lib/sourceReview'
 
 const STATE_ICON = {
   progress: { tone: 'neutral', icon: 'progress' },
@@ -21,15 +22,27 @@ const STATE_ICON = {
   no_menu: { tone: 'neutral', icon: 'minus' },
   blocked: { tone: 'blocked', icon: 'lock' },
   done: { tone: 'positive', icon: 'check' },
+  handled: { tone: 'neutral', icon: 'dot' },
   skip: { tone: 'neutral', icon: 'dot' },
 }
 
-export default function SourceResultRow({ row, href, onConfirm, busy, position }) {
+function handledDate(value) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+}
+
+export default function SourceResultRow({ row, href, onConfirm, onRecheck, busy, position }) {
   if (!row) return null
   const tone = STATE_ICON[row.state] || STATE_ICON.blocked
   const name = (row.restaurant && row.restaurant.name) || row.url || `Regel ${position || row.position || '?'}`
   const step = row.step
   const confirmable = Boolean(step && step.key === 'confirm' && typeof onConfirm === 'function')
+  // The age of a result stays visible and can be re-checked through the existing
+  // batch analysis; nothing expires by itself (review points 5 and 6).
+  const recheckable = Boolean(row.url && typeof onRecheck === 'function' && !row.handled)
+  const closedAt = row.handled ? handledDate(row.handled.at) : null
   return (
     <li className={`srr-row srr-row--${row.state}`}>
       <div className="srr-main">
@@ -55,6 +68,24 @@ export default function SourceResultRow({ row, href, onConfirm, busy, position }
             {row.detail ? <span className="srr-detail">{row.detail}</span> : null}
           </span>
           {row.foundUrl && row.foundUrl !== row.url ? <span className="srr-found">Gevonden: {row.foundUrl}</span> : null}
+          {row.handled ? (
+            <span className="srr-age">
+              {CHECK_COPY.handled}
+              {closedAt ? ` op ${closedAt}` : ''} · niets gewist
+            </span>
+          ) : row.age ? (
+            <span className="srr-age">
+              {row.age}
+              {recheckable ? (
+                <>
+                  {' · '}
+                  <button type="button" className="srr-recheck" disabled={busy} onClick={() => onRecheck(row)}>
+                    {CHECK_COPY.recheck}
+                  </button>
+                </>
+              ) : null}
+            </span>
+          ) : null}
         </span>
       </div>
       <div className="srr-step">
@@ -71,7 +102,7 @@ export default function SourceResultRow({ row, href, onConfirm, busy, position }
             {step.label}
           </span>
         ) : (
-          <span className="srr-none">Geen actie nodig</span>
+          <span className="srr-none">{row.handled ? CHECK_COPY.handled : 'Geen actie nodig'}</span>
         )}
       </div>
     </li>

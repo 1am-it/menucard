@@ -419,20 +419,33 @@ components at 1280, 390 and 320 px in light and dark, and saves screenshots of
 screens 1-7 of the approved mockup to `ops/browser/output/be-31/`:
 
 - screen 1: the task list with the real chip numbers (`Alles 3`, `🧪 Batches 1`,
-  `💡 Voorstellen 1`, `📡 Aandacht 1`), the detail still saying "Kies een taak
-  links", and the Werkvoorraad number equal to the number of tasks;
+  `💡 Voorstellen 1`, `📡 Aandacht 1`), one task per restaurant titled with that
+  restaurant's name, the age of its newest result ("resultaat van 12 dagen
+  geleden"), the detail still saying "Kies een taak links", the Werkvoorraad
+  number equal to the number of tasks, and "🗄️ Oude resultaten opruimen" with
+  one confirmation that names the number (7 results in the fixture);
 - screen 2: a chosen batch task with one next step per row (✅ Bevestig bron,
   ⚠️ Menukopjes controleren, 📖 Lees met AI, ✍️ Handmatig toevoegen, ⏳ Even
-  wachten) and the BE-30 link of the same batch item;
+  wachten), the BE-30 link of the same batch item, the age of each row and
+  "Opnieuw controleren";
 - screen 3: no work at all → only "✅ Geen open bronwerk" with the link to
   Dekking, no chips, no detail pane, and the bar's number at 0;
 - screen 4: the chosen task in antraciet (dark);
 - screen 5: Dekking's "Nog niet gecontroleerd (4)" with the existing reason
   texts, the per-row "🔎 Controleer bron", the selection that updates
   "🔎 Controleer N geselecteerde" and the existing limits and
-  "loopt zolang de pagina open is";
+  "loopt zolang de pagina open is", and the dead end of the same restaurant
+  ("Laatste controle gaf geen bruikbaar resultaat" + its own outcome, age and
+  "✍️ Handmatig toevoegen");
 - screen 6: on 390/320 px a task opens as its own screen with a way back;
 - screen 7: the same rows under the add form, with the same one next step.
+
+The fixture follows the real shape of the Lead finding: one restaurant in
+several old probe batches (only its newest result is a task), one batch with
+five source URLs of the same restaurant, a dead end of another restaurant
+(Dekking) and a restaurant with a confirmed source (no task). The older
+batches' job ids are part of the same "Oude resultaten opruimen" confirmation,
+so nothing silently resurfaces.
 
 The evidence lands in `ops/browser/evidence/bronnen-browser-evidence.json`. It is
 fixture evidence on a local machine: no production session, database, source

@@ -24,7 +24,7 @@ import {
 
 const KIND_NAMES = { batch: 'Batch', proposal: 'Voorstel', attention: 'Bron vraagt aandacht' }
 
-function BatchRows({ task, busy, onConfirmRow }) {
+function BatchRows({ task, busy, onConfirmRow, onRecheckRow }) {
   if (!task.rows || task.rows.length === 0) return null
   // "Menukopjes controleren" comes back to this row: the same task stays chosen.
   const returnTo = `${BRONNEN_HREF}?batch=${encodeURIComponent(task.batchId)}`
@@ -32,11 +32,12 @@ function BatchRows({ task, busy, onConfirmRow }) {
     <ol className="srr-list" aria-label="Resultaten van deze batch">
       {task.rows.map((row, index) => (
         <SourceResultRow
-          key={`${row.position}-${row.jobId || row.key}-${index}`}
+          key={`${row.batchId || task.batchId}-${row.position}-${row.jobId || row.key}-${index}`}
           row={row}
           position={row.position}
-          href={stepHref(row, { batchId: task.batchId, returnTo })}
+          href={stepHref(row, { batchId: row.batchId || task.batchId, returnTo })}
           onConfirm={(target) => onConfirmRow(task, target)}
+          onRecheck={onRecheckRow}
           busy={busy}
         />
       ))}
@@ -44,20 +45,23 @@ function BatchRows({ task, busy, onConfirmRow }) {
   )
 }
 
-function BatchSummary({ task }) {
-  const batch = (task.detail && task.detail.batch) || {}
-  const when = batch.created_at ? new Date(batch.created_at) : null
-  const label =
-    when && !Number.isNaN(when.getTime())
-      ? when.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) +
-        ` ${when.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`
-      : null
-  return (
-    <p className="brn-batch-summary">
-      {label ? `Batch van ${label}` : 'Batch'} · {batch.item_count || task.rows.length} URL
-      {(batch.item_count || task.rows.length) === 1 ? '' : "'s"} · {task.activeCount} met een volgende stap
-    </p>
-  )
+/**
+ * The chosen task's own summary: the restaurant name (its title), when its
+ * newest result was produced and how much older material exists for it. The age
+ * is information only — nothing expires by itself (review point 5).
+ */
+function TaskSummary({ task }) {
+  const age = task.ageLabel ? task.ageLabel.charAt(0).toUpperCase() + task.ageLabel.slice(1) : null
+  const rows = task.rows ? task.rows.length : 0
+  const parts = [
+    age,
+    `${rows} ${rows === 1 ? 'resultaat' : 'resultaten'}`,
+    `${task.activeCount} met een volgende stap`,
+  ].filter(Boolean)
+  if (task.olderCount > 0) {
+    parts.push(`nog ${task.olderCount} ouder${task.olderCount === 1 ? ' resultaat' : 'e resultaten'} verborgen`)
+  }
+  return <p className="brn-batch-summary">{parts.join(' · ')}</p>
 }
 
 
@@ -82,10 +86,20 @@ export default function BronnenView({
   onCreateProposal,
   onDecideProposal,
   onConfirmRow,
+  onRecheckRow,
+  picked,
+  pickableCount,
+  onTogglePick,
+  onPickAll,
+  cleanup,
+  onStartCleanup,
+  onConfirmCleanup,
+  onCancelCleanup,
   followUp,
   followUpBanner,
 }) {
   const empty = Boolean(triage) && totalTasks === 0
+  const pickedCount = picked ? picked.size : 0
   return (
     <>
       <nav aria-label="Kruimelpad" className="brn-breadcrumb">
@@ -164,12 +178,56 @@ export default function BronnenView({
               <p className="brn-count" aria-live="polite">
                 {tasks.length} van {totalTasks} taken
               </p>
+              {pickableCount > 0 ? (
+                <div className="brn-toolbar">
+                  <button type="button" className="stg-btn-secondary" onClick={onStartCleanup} disabled={busy}>
+                    🗄️ {CHECK_COPY.cleanup}
+                  </button>
+                  <button type="button" className="stg-btn-secondary" aria-pressed={pickedCount === pickableCount} onClick={onPickAll}>
+                    {pickedCount === pickableCount ? 'Selectie wissen' : 'Alles selecteren'}
+                  </button>
+                  <span className="brn-hint">
+                    {pickedCount > 0
+                      ? `${pickedCount} van ${pickableCount} geselecteerd`
+                      : 'Niets geselecteerd: opruimen geldt dan voor alle batchresultaten.'}
+                  </span>
+                </div>
+              ) : null}
+              {cleanup ? (
+                <div className="brn-cleanup-confirm" role="alertdialog" aria-labelledby="brn-cleanup-title">
+                  <p id="brn-cleanup-title">
+                    <b>
+                      {cleanup.count} {cleanup.count === 1 ? 'resultaat' : 'resultaten'} afhandelen?
+                    </b>{' '}
+                    {CHECK_COPY.cleanupHint}
+                  </p>
+                  <div className="brn-cleanup-actions">
+                    <button type="button" className="di-btn-primary" onClick={onConfirmCleanup} disabled={busy}>
+                      Ja, {cleanup.count} afhandelen
+                    </button>
+                    <button type="button" className="stg-btn-secondary" onClick={onCancelCleanup} disabled={busy}>
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               {tasks.length === 0 ? (
                 <p className="brn-hint">Geen taken voor deze selectie.</p>
               ) : (
                 <ul className="brn-tasks">
                   {tasks.map((task) => (
-                    <li key={task.id}>
+                    <li key={task.id} className="brn-task-row">
+                      {task.kind === 'batch' ? (
+                        <input
+                          type="checkbox"
+                          className="brn-pick"
+                          checked={Boolean(picked && picked.has(task.id))}
+                          onChange={() => onTogglePick(task.id)}
+                          aria-label={`Selecteer ${task.name} voor opruimen`}
+                        />
+                      ) : (
+                        <span className="brn-pick-spacer" aria-hidden="true" />
+                      )}
                       <button
                         type="button"
                         className="brn-task"
@@ -219,8 +277,13 @@ export default function BronnenView({
                       <h2 id="brn-detail-title" className="brn-detail-title" tabIndex={-1} ref={headingRef}>
                         {selected.name}
                       </h2>
-                      <BatchSummary task={selected} />
-                      <BatchRows task={selected} busy={busy} onConfirmRow={onConfirmRow} />
+                      <TaskSummary task={selected} />
+                      <BatchRows
+                        task={selected}
+                        busy={busy}
+                        onConfirmRow={onConfirmRow}
+                        onRecheckRow={onRecheckRow}
+                      />
                     </>
                   ) : (
                     <Detail

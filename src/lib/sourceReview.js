@@ -11,10 +11,21 @@
 // This module never touches Supabase, the network, the DOM or a clock. It only
 // turns already-fetched rows into what the screens show, and it refuses to
 // invent work:
-//  - a task exists only when a human action is needed (an open proposal, a
-//    source that asks attention, or a batch result with a next step);
-//  - "Nog niet gecontroleerd" is NOT a task (owner decision 2026-10-27): those
-//    restaurants live in Dekking, with their existing reason texts;
+//  - a task exists only when a decision is ready for a human: a certain result
+//    ("Bevestig bron"), a doubt result ("Menukopjes controleren"), an open
+//    proposal, or a source that asks attention (Lead review #6439131777);
+//  - there is at most ONE task per restaurant: the newest batch result wins and
+//    older results for the same restaurant are not a task. The title is always
+//    the restaurant name, never "N restaurants";
+//  - dead ends are not tasks (owner decision 2026-10-27): "geen bruikbaar
+//    resultaat", a robots/access block and "geen menukaart gevonden" move to
+//    Dekking → "Nog niet gecontroleerd" with the existing reason text and the
+//    fitting next step in that row;
+//  - a restaurant with an active, confirmed source and a published menu is not
+//    a task when the newest result says nothing new about that same URL;
+//  - nothing expires automatically. A result only stops being a task when a
+//    staff member closes it ("Oude resultaten opruimen"), and its age stays
+//    visible ("resultaat van 12 dagen geleden");
 //  - every batch result gets exactly one row state and exactly one next step
 //    (criterion 4), derived from the result the existing BE-25 deriveItemView
 //    already produced — no second status vocabulary.
@@ -51,11 +62,13 @@ const ATTENTION_STEPS = ['add_candidate', 'replace_or_mark', 'inspect_or_mark'];
 const TASK_STATUS_LABELS = {
   proposal: '🕒 Wacht op besluit',
   attention: '📡 Vraagt aandacht',
-  batch: '⚠️ Controle nodig',
+  certain: '✅ Klaar om te bevestigen',
+  doubt: '⚠️ Controle nodig',
 };
 
 // Five visible row states (criterion 4). `progress` is the ⏳ state, `done` is a
-// result that already reached its end, `skip` is a line that is not work.
+// result that already reached its end, `skip` is a line that is not work and
+// `handled` is a result a staff member closed by hand (never automatic).
 const ROW_STATES = {
   progress: { key: 'progress', emoji: '⏳', label: 'Bezig…' },
   certain: { key: 'certain', emoji: '✅', label: 'Zeker resultaat' },
@@ -63,8 +76,19 @@ const ROW_STATES = {
   no_menu: { key: 'no_menu', emoji: '📋', label: 'Geen menukaart gevonden' },
   blocked: { key: 'blocked', emoji: '⛔', label: 'Geen bruikbaar resultaat' },
   done: { key: 'done', emoji: '✅', label: 'Bron bevestigd' },
+  handled: { key: 'handled', emoji: '🗄️', label: 'Afgehandeld' },
   skip: { key: 'skip', emoji: '—', label: 'Geen actie nodig' },
 };
+
+// The row states that still hold a ready decision: only these make a task.
+const TASK_ROW_STATES = ['certain', 'doubt'];
+// Dead ends (Lead review #6439131777): a finished automatic read without a
+// usable menu is not work in Bronnen beoordelen. The restaurant moves to
+// Dekking with the existing reason "Laatste controle gaf geen bruikbaar
+// resultaat" (NOT_IN_QUEUE_LABELS.check_not_usable) and its own next step.
+const DEAD_END_STATES = ['blocked', 'no_menu'];
+const DEAD_END_REASON = 'check_not_usable';
+
 
 // Exactly one next step per row. A row never offers two.
 const STEPS = {
@@ -84,6 +108,13 @@ const CHECK_COPY = {
   staysTask: 'Wat je hier niet afrondt, blijft als taak staan onder Werkvoorraad → Bronnen beoordelen.',
   noWork: '✅ Geen open bronwerk',
   pickTask: 'Kies een taak links',
+  // Lead review #6439131777: the age of a result, re-checking it, and closing
+  // old results by hand. Nothing expires automatically (criterion 5).
+  recheck: 'Opnieuw controleren',
+  cleanup: 'Oude resultaten opruimen',
+  cleanupHint:
+    'Afgehandeld door een medewerker op een datum. Er wordt niets gewist: het resultaat en de vastlegging blijven bestaan.',
+  handled: 'Afgehandeld',
 };
 
 // The batch result keys that mean "the automatic read found no usable menu".
@@ -93,15 +124,38 @@ const AI_READ_KEYS = new Set(['no_menu', 'image_only', 'error']);
 // in an active batch (BE-25's own statuses).
 const SKIP_KEYS = new Set(['duplicate', 'not_queued']);
 
+/** A timestamp in milliseconds, or null — never NaN. */
+function timeOf(value) {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  return Number.isNaN(time) ? null : time;
+}
+
+/**
+ * The visible age of a result: "resultaat van vandaag", "resultaat van 1 dag
+ * geleden", "resultaat van 12 dagen geleden". Nothing expires by itself, so the
+ * age is information, never a reason to hide a result. `now` is passed by the
+ * caller (this module has no clock); without it there is no age claim.
+ */
+function ageLabel(resultAt, now) {
+  const then = timeOf(resultAt);
+  const base = timeOf(now);
+  if (then === null || base === null) return null;
+  const days = Math.max(0, Math.floor((base - then) / 86400000));
+  if (days === 0) return 'resultaat van vandaag';
+  if (days === 1) return 'resultaat van 1 dag geleden';
+  return `resultaat van ${days} dagen geleden`;
+}
 
 /**
  * One batch result (BE-25 `deriveItemView` output) → one row:
  * { key, position, url, jobId, restaurant, foundUrl, detail, actions,
- *   state, emoji, label, step }.
- * Exactly one `step`; `null` only for a finished or work-free row.
+ *   resultAt, age, handled, state, emoji, label, step }.
+ * Exactly one `step`; `null` only for a finished, closed or work-free row.
  */
-function rowForBatchItem(item, { batchId, returnTo } = {}) {
+function rowForBatchItem(item, { batchId, returnTo, now } = {}) {
   const key = item && typeof item.key === 'string' ? item.key : null;
+  const resultAt = (item && item.resultAt) || null;
   const base = {
     key,
     position: item && item.position !== undefined ? item.position : null,
@@ -111,6 +165,9 @@ function rowForBatchItem(item, { batchId, returnTo } = {}) {
     foundUrl: (item && item.foundUrl) || null,
     detail: (item && item.text) || null,
     actions: Array.isArray(item && item.actions) ? item.actions : [],
+    resultAt,
+    age: ageLabel(resultAt, now),
+    handled: null,
     step: null,
     batchId: batchId || null,
   };
@@ -124,10 +181,15 @@ function rowForBatchItem(item, { batchId, returnTo } = {}) {
   });
 
   if (!item) return row('skip', null);
+  // A result a staff member closed by hand is not work any more; the record
+  // itself stays (review point 6).
+  const handled = item.handled && typeof item.handled === 'object' ? item.handled : null;
+  if (handled) return row('handled', null, { handled: { at: handled.at || null, by: handled.by || null } });
   if (key === 'confirmed') return row('done', null);
   if (key === 'queued' || key === 'running') return row('progress', STEPS.wait);
   if (SKIP_KEYS.has(key)) return row('skip', null);
   if (key === 'menu_found') return row('certain', STEPS.confirm);
+
 
   const structureReview = item.structureReview;
   if (key === 'needs_review') {
@@ -199,9 +261,11 @@ function menukopjesBackHref(returnTo) {
   return safeReturnHref(returnTo) || BRONNEN_HREF;
 }
 
-/** True when this batch result still needs a human action (criterion 2). */
+/** True when this batch result is a ready decision that still waits for a
+ * human (criterion 2 + Lead review #6439131777). A running result, a dead end
+ * and a result a staff member already handled are not work in Bronnen. */
 function rowNeedsAction(row) {
-  return Boolean(row && (row.step || row.state === 'progress'));
+  return Boolean(row && row.step && TASK_ROW_STATES.includes(row.state) && !row.handled);
 }
 
 
@@ -252,62 +316,195 @@ function taskFromEntry(entry) {
   return null;
 }
 
+// ── One task per restaurant (Lead review #6439131777) ────────────────────────
+// A batch is not a task: a restaurant is. All loaded results of one restaurant
+// are grouped, the newest result decides, and older results are kept only as
+// context and as ids for "Oude resultaten opruimen".
+
+/** Newest result first: by result time, then by position, then batch id. */
+function newestFirst(a, b) {
+  const ta = timeOf(a.at);
+  const tb = timeOf(b.at);
+  if (ta !== tb) {
+    if (ta === null) return 1;
+    if (tb === null) return -1;
+    return tb - ta;
+  }
+  if (a.position !== b.position) return a.position - b.position;
+  return String(a.batchId).localeCompare(String(b.batchId));
+}
+
 /**
- * One batch detail (BE-25 GET `detail`: { batch, items }) → one task, or null
- * when no line still needs a human action. The rows are the same objects the
- * shared result row renders; nothing is copied.
+ * All loaded batch details → one group per known restaurant, newest result
+ * first. A result without a known restaurant cannot become a task: there is no
+ * name to show and no Dekking row to fall back to (the batch screen still shows
+ * the line itself).
+ *
+ * group: {
+ *   restaurantId, name,
+ *   newest: { row, batchId, at },          the result that decides
+ *   rows: row[]                            the newest result(s) of that batch
+ *   olderCount, resultAt, age,
+ *   handledJobIds: string[]                every job of this restaurant, still open
+ *   detailById: Map<batchId, detail>
+ * }
  */
-function taskFromBatch(detail, { returnTo } = {}) {
-  if (!detail || !detail.batch || !detail.batch.id) return null;
-  const batch = detail.batch;
-  const rows = (Array.isArray(detail.items) ? detail.items : []).map((item) =>
-    rowForBatchItem(item, { batchId: batch.id, returnTo }),
-  );
-  const active = rows.filter(rowNeedsAction);
-  if (active.length === 0) return null;
-  const doubt = active.filter((row) => row.state === 'doubt').length;
-  const progress = active.filter((row) => row.state === 'progress').length;
+function groupBatchResults(batchDetails, { returnTo, now } = {}) {
+  const groups = new Map();
+  for (const detail of Array.isArray(batchDetails) ? batchDetails : []) {
+    if (!detail || !detail.batch || !detail.batch.id) continue;
+    const batch = detail.batch;
+    const items = Array.isArray(detail.items) ? detail.items : [];
+    for (const item of items) {
+      const row = rowForBatchItem(item, { batchId: batch.id, returnTo, now });
+      const restaurant = row.restaurant;
+      if (!restaurant || !restaurant.id) continue;
+      const id = String(restaurant.id);
+      if (!groups.has(id)) {
+        groups.set(id, {
+          restaurantId: id,
+          name: restaurant.name || '',
+          results: [],
+          detailById: new Map(),
+        });
+      }
+      const group = groups.get(id);
+      group.detailById.set(batch.id, detail);
+      group.results.push({
+        row,
+        batchId: batch.id,
+        batchAt: batch.created_at || null,
+        at: row.resultAt || batch.created_at || null,
+        position: row.position === null || row.position === undefined ? Number.MAX_SAFE_INTEGER : Number(row.position),
+      });
+    }
+  }
+
+  const list = [];
+  for (const group of groups.values()) {
+    const results = group.results.slice().sort(newestFirst);
+    const newest = results[0];
+    // Everything of the winner's own batch for this restaurant: a restaurant
+    // with two URLs in one batch shows both lines, not a made-up summary.
+    const rows = results
+      .filter((entry) => entry.batchId === newest.batchId)
+      .slice()
+      .sort((a, b) => a.position - b.position)
+      .map((entry) => entry.row);
+    const handledJobIds = [];
+    for (const entry of results) {
+      const jobId = entry.row.jobId;
+      if (!jobId || entry.row.handled || handledJobIds.includes(jobId)) continue;
+      handledJobIds.push(jobId);
+    }
+    const resultAt = newest.at || null;
+    list.push({
+      restaurantId: group.restaurantId,
+      name: group.name,
+      newest,
+      rows,
+      olderCount: results.length - rows.length,
+      resultAt,
+      age: ageLabel(resultAt, now),
+      handledJobIds,
+      batchIds: [...new Set(results.map((entry) => entry.batchId))],
+      detailById: group.detailById,
+      results,
+    });
+  }
+  return list.sort((a, b) => String(a.name).localeCompare(String(b.name), 'nl', { sensitivity: 'base' }));
+}
+
+/** The URL of this restaurant's accepted proposal = its active, confirmed
+ * source (BE-24's own vocabulary). */
+function confirmedSourceUrl(entry) {
+  const proposals = entry && Array.isArray(entry.proposals) ? entry.proposals : [];
+  const accepted = proposals.find((p) => p && p.status === 'accepted' && p.proposed_url);
+  return accepted ? accepted.proposed_url : null;
+}
+
+function sameUrl(a, b) {
+  if (!a || !b) return false;
+  return String(a).trim().replace(/\/+$/, '') === String(b).trim().replace(/\/+$/, '');
+}
+
+/**
+ * Review point 4: an active, confirmed source (or a published menu on that
+ * source) means a result about exactly that same URL says nothing new. A
+ * different menu URL is new and stays a task.
+ */
+function resultMatchesConfirmedSource(row, entry) {
+  const confirmed = confirmedSourceUrl(entry);
+  return Boolean(confirmed && row.foundUrl && sameUrl(row.foundUrl, confirmed));
+}
+
+/**
+ * One restaurant's newest result → one task, or null when no decision is
+ * waiting. Only a certain result and a doubt result are tasks; dead ends,
+ * running results, confirmed results and handled results are not.
+ */
+function taskFromGroup(group, { entry } = {}) {
+  if (!group || !group.newest) return null;
+  const row = group.newest.row;
+  if (!TASK_ROW_STATES.includes(row.state)) return null;
+  if (resultMatchesConfirmedSource(row, entry)) return null;
+  const active = group.rows.filter(rowNeedsAction);
+  const what = [row.step ? row.step.label : null, group.age].filter(Boolean).join(' · ');
   return {
-    id: `batch:${batch.id}`,
+    id: `batch:${group.newest.batchId}:${group.restaurantId}`,
     kind: 'batch',
     emoji: TASK_EMOJI.batch,
-    name: batchName(rows),
-    status: TASK_STATUS_LABELS.batch,
-    what: batchTaskWhat({ active, doubt, progress }),
-    batchId: batch.id,
-    rows,
+    // The title is always the restaurant name, never "N restaurants".
+    name: group.name || 'Onbekend restaurant',
+    status: TASK_STATUS_LABELS[row.state] || TASK_STATUS_LABELS.doubt,
+    what,
+    batchId: group.newest.batchId,
+    batchIds: group.batchIds,
+    restaurantId: group.restaurantId,
+    rows: group.rows,
     activeCount: active.length,
-    detail,
-    url: null,
+    olderCount: group.olderCount,
+    resultAt: group.resultAt,
+    ageLabel: group.age,
+    // "Oude resultaten opruimen" closes this restaurant's whole result set;
+    // otherwise the next-oldest result would simply become the task.
+    handledJobIds: group.handledJobIds,
+    detail: group.detailById.get(group.newest.batchId) || null,
+    url: row.url || null,
     entry: null,
   };
 }
 
-/** The batch task's title: the restaurant when the rows agree on one, else a
- * plain count. Never an invented name. */
-function batchName(rows) {
-  const names = [...new Set(rows.map((row) => row.restaurant && row.restaurant.name).filter(Boolean))];
-  if (names.length === 1) return names[0];
-  if (names.length > 1) return `${names.length} restaurants`;
-  return 'Onbekend restaurant';
+function entryById(entries, restaurantId) {
+  const id = String(restaurantId);
+  return (Array.isArray(entries) ? entries : []).find((entry) => entry && String(entry.restaurant_id) === id) || null;
 }
-
-function batchTaskWhat({ active, doubt, progress }) {
-  if (progress > 0 && doubt === 0) return CHECK_COPY.running;
-  if (doubt > 0) return `Menukopjes controleren · ${doubt}`;
-  return `${active.length} resultaat${active.length === 1 ? '' : 'en'} met een volgende stap`;
-}
-
-/** All tasks of the screen, in the contract's own order (batch, proposal,
- * attention), then by name. */
-function selectTasks({ entries, batchDetails, returnTo } = {}) {
+/**
+ * All tasks of the screen: one per restaurant, in the contract's own order
+ * (batch, proposal, attention), then by name.
+ *  - an open proposal is the one task of its restaurant: it decides the source
+ *    itself, so a batch result of that same restaurant is not a second task;
+ *  - when a restaurant has a loaded batch result and no open proposal, that
+ *    newest result decides (task or not); its triage attention signal never
+ *    adds a second task for the same restaurant.
+ */
+function selectTasks({ entries, batchDetails, returnTo, now } = {}) {
+  const entryList = Array.isArray(entries) ? entries : [];
+  const groups = groupBatchResults(batchDetails, { returnTo, now });
+  const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
   const tasks = [];
-  for (const entry of Array.isArray(entries) ? entries : []) {
-    const task = taskFromEntry(entry);
+  for (const group of groups) {
+    const entry = entryById(entryList, group.restaurantId);
+    if (entry && entry.open_proposal_id) continue;
+    const task = taskFromGroup(group, { entry });
     if (task) tasks.push(task);
   }
-  for (const detail of Array.isArray(batchDetails) ? batchDetails : []) {
-    const task = taskFromBatch(detail, { returnTo });
+  for (const entry of entryList) {
+    if (!entry || !entry.restaurant_id) continue;
+    // The batch result already decided for this restaurant, unless the
+    // restaurant needs a decision on its source first (an open proposal).
+    if (groupById.has(String(entry.restaurant_id)) && !entry.open_proposal_id) continue;
+    const task = taskFromEntry(entry);
     if (task) tasks.push(task);
   }
   return tasks.sort((a, b) => {
@@ -341,23 +538,77 @@ function effectiveTaskFilter(filter) {
 }
 
 /**
- * Dekking: the restaurants without a usable source check (criterion 3), with
- * the existing reason texts and the two existing check routes. A row without a
- * website cannot be checked and says so instead of offering a dead button.
+ * Dekking: "Nog niet gecontroleerd" (criterion 3 + Lead review #6439131777).
+ *  - the existing queue-less reasons keep their own row and reason text;
+ *  - a restaurant whose newest batch result is a dead end ("geen bruikbaar
+ *    resultaat", a robots/access block, "geen menukaart gevonden") is listed
+ *    here with the existing reason "Laatste controle gaf geen bruikbaar
+ *    resultaat" and its own fitting next step ("Handmatig toevoegen" or
+ *    "Lees met AI") in the row;
+ *  - a restaurant with a ready decision is a task on /internal/bronnen instead,
+ *    so the same work never appears on both screens;
+ *  - a row without a website cannot be checked and says so instead of offering
+ *    a dead button.
  */
-function coverageRows(entries) {
-  return (Array.isArray(entries) ? entries : [])
-    .filter((entry) => entry && entry.not_in_queue_reason)
-    .map((entry) => ({
-      restaurantId: String(entry.restaurant_id),
-      name: entry.name || '',
-      wijk: entry.wijk || null,
-      url: entry.known_url || null,
-      reason: entry.not_in_queue_reason,
-      reasonLabel: NOT_IN_QUEUE_LABELS[entry.not_in_queue_reason] || 'Nog niet gecontroleerd',
-      canCheck: Boolean(entry.known_url),
-      step: entry.known_url ? STEPS.check : null,
-    }));
+function coverageRows(entries, { batchDetails, now } = {}) {
+  const groups = groupBatchResults(batchDetails, { now });
+  const groupById = new Map(groups.map((group) => [group.restaurantId, group]));
+  const rows = [];
+  const seen = new Set();
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!entry || !entry.not_in_queue_reason) continue;
+    const id = String(entry.restaurant_id);
+    if (seen.has(id)) continue;
+    const group = groupById.get(id) || null;
+    // A ready decision belongs to Bronnen beoordelen, not to Dekking.
+    if (group && TASK_ROW_STATES.includes(group.newest.row.state)) continue;
+    seen.add(id);
+    rows.push(coverageRow(entry, group, now));
+  }
+  for (const group of groups) {
+    if (seen.has(group.restaurantId)) continue;
+    if (!DEAD_END_STATES.includes(group.newest.row.state)) continue;
+    seen.add(group.restaurantId);
+    rows.push(coverageRow(null, group, now));
+  }
+  return rows;
+}
+
+/** One Dekking row: the existing reason plus, for a dead end, the outcome, the
+ * age and the one fitting next step of the same batch result. */
+function coverageRow(entry, group, now) {
+  const newest = group ? group.newest : null;
+  const resultRow = newest ? newest.row : null;
+  const deadEnd = Boolean(resultRow && DEAD_END_STATES.includes(resultRow.state));
+  const url = (entry && entry.known_url) || (resultRow && resultRow.url) || null;
+  const reason = (entry && entry.not_in_queue_reason) || (deadEnd ? DEAD_END_REASON : null);
+  const resultAt = (resultRow && resultRow.resultAt) || (newest && newest.at) || null;
+  return {
+    restaurantId: String((entry && entry.restaurant_id) || group.restaurantId),
+    name: (entry && entry.name) || (group && group.name) || '',
+    wijk: (entry && entry.wijk) || null,
+    // The same shape the shared row/step helpers already understand, so
+    // "Lees met AI" and "Handmatig toevoegen" keep their existing links.
+    restaurant: {
+      id: String((entry && entry.restaurant_id) || group.restaurantId),
+      name: (entry && entry.name) || (group && group.name) || '',
+    },
+    url,
+    reason,
+    reasonLabel: NOT_IN_QUEUE_LABELS[reason] || 'Nog niet gecontroleerd',
+    canCheck: Boolean(url),
+    // A dead end shows its own outcome and one next step; every other row keeps
+    // the existing "Controleer bron" action.
+    deadEnd,
+    outcome: resultRow ? resultRow.label : null,
+    outcomeState: resultRow ? resultRow.state : null,
+    detail: resultRow ? resultRow.detail : null,
+    resultAt,
+    age: ageLabel(resultAt, now),
+    jobId: resultRow ? resultRow.jobId : null,
+    batchId: newest ? newest.batchId : null,
+    step: deadEnd && resultRow.step ? resultRow.step : url ? STEPS.check : null,
+  };
 }
 
 /**
@@ -419,15 +670,19 @@ module.exports = {
   CHECK_COPY,
   AI_READ_KEYS,
   SKIP_KEYS,
+  TASK_ROW_STATES,
+  DEAD_END_STATES,
+  DEAD_END_REASON,
   MAX_BATCH_URLS,
   DAILY_URL_LIMIT,
+  ageLabel,
   rowForBatchItem,
   stepHref,
   safeReturnHref,
   menukopjesBackHref,
   rowNeedsAction,
   taskFromEntry,
-  taskFromBatch,
+  groupBatchResults,
   selectTasks,
   countTasks,
   filterTasks,

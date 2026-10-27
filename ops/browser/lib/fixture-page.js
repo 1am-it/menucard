@@ -269,6 +269,15 @@ function fixtureBootstrap(scenarios, options = {}) {
         // with ?batch=<id>, that batch's detail. The Bronnen page asks both.
         const wantedBatch = new URL(verdict.url).searchParams.get('batch');
         if (wantedBatch) {
+          // BE-31 herstel (#74): one detail per batch id, so several recent
+          // batches of the same restaurant really differ.
+          const map = scenario && scenario.batchDetails;
+          if (map) {
+            const detail = map[wantedBatch];
+            return detail
+              ? jsonResponse({ ...scenario.batchOverview, detail })
+              : jsonResponse({ error: 'Batch niet gevonden.' }, 404);
+          }
           if (scenario && scenario.batchDetail) return jsonResponse({ ...scenario.batchOverview, detail: scenario.batchDetail });
           return jsonResponse(scenario && scenario.batch ? scenario.batch : scenario);
         }

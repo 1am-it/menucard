@@ -20,6 +20,7 @@ const read = (relative) => fs.readFileSync(path.join(ROOT, relative), 'utf8');
 const PAGE_FILE = read('app/internal/bronnen/page.js');
 const VIEW_FILE = read('app/internal/bronnen/BronnenView.js');
 const DETAIL_FILE = read('app/internal/bronnen/ProposalDetail.js');
+const ROW_FILE = read('src/components/SourceResultRow.js');
 const PAGE = [PAGE_FILE, VIEW_FILE, DETAIL_FILE].join('\n');
 const CSS = read('app/globals.css');
 const code = PAGE
@@ -49,7 +50,7 @@ test('the screen talks only to the existing internal endpoints, always with the 
     "'/api/internal/v1/source-triage'",
     "'/api/internal/v1/batch-analysis'",
     '${BATCH_API}?batch=',
-    '${BATCH_API}/${encodeURIComponent(task.batchId)}/confirm',
+    '${BATCH_API}/${encodeURIComponent(batchId)}/confirm',
     '${TRIAGE_API}/proposals',
     '/proposals/${encodeURIComponent(id)}/decision',
   ]) {
@@ -80,11 +81,28 @@ test('one list with chips and exactly one detail: the detail waits for a chosen 
 
 test('the same result row component renders the batch rows here and elsewhere', () => {
   assert.match(code, /import SourceResultRow from '@\/src\/components\/SourceResultRow'/);
-  assert.match(code, /stepHref\(row, \{ batchId: task\.batchId, returnTo \}\)/);
+  assert.match(code, /stepHref\(row, \{ batchId: row\.batchId \|\| task\.batchId, returnTo \}\)/);
   assert.match(code, /const returnTo = `\$\{BRONNEN_HREF\}\?batch=/);
   assert.match(code, /onConfirm=\{\(target\) => onConfirmRow\(task, target\)\}/);
-  // One next step per row; the confirmation uses the existing route.
+  // One next step per row; the confirmation uses the existing route of the
+  // row's own batch (a task can span batches: one task per restaurant).
   assert.match(PAGE_FILE, /\/confirm`/);
+  assert.match(PAGE_FILE, /const batchId = row\.batchId \|\| task\.batchId/);
+});
+
+test('the new task definition is shown: one task per restaurant, the age and one recheck button', () => {
+  // The chips and the list keep the same one task per restaurant.
+  assert.match(code, /selectTasks\(\{ entries, batchDetails: details, returnTo: BRONNEN_HREF, now: new Date\(\) \}\)/);
+  assert.match(code, /import useBatchProcessing from '@\/src\/components\/useBatchProcessing'/);
+  assert.match(code, /batchId: recheckBatchId/);
+  // The age of a result stays visible; nothing expires automatically.
+  assert.match(ROW_FILE, /\{row\.age\}/);
+  assert.match(ROW_FILE, /CHECK_COPY\.recheck/);
+  // "Oude resultaten opruimen": one confirmation that names the number.
+  assert.match(code, /CHECK_COPY\.cleanup/);
+  assert.match(code, /cleanup\.count/);
+  assert.match(code, /\$\{BATCH_API\}\/handled/);
+  assert.match(code, /role="alertdialog"/);
 });
 
 

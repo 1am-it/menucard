@@ -52,4 +52,34 @@ Live contract en status: GitHub issue #74.
 - migraties: als iets alleen met een migratie kan, stoppen en melden;
 - publicatie; nieuwe rollen.
 
+### Herstel ronde 2 — alleen echt werk, ook met echte data (Lead review 6439131777, eigenaarsbesluit 2026-10-27)
+
+De Lead zag op de preview tien batchtaken voor bijna hetzelfde restaurant en een
+doodlopend resultaat ("Handmatig toevoegen") bij een restaurant dat al een
+menukaart heeft. Daarom, zonder migraties en zonder automatisch verlopen:
+
+1. **Eén taak per restaurant**, met het nieuwste batchresultaat van dat
+   restaurant. Oudere resultaten voor hetzelfde restaurant zijn geen taak meer.
+   De titel is altijd de restaurantnaam, nooit "N restaurants".
+2. **Alleen klaarliggende beslissingen zijn een taak:** ✅ zeker resultaat
+   (Bevestig bron), ⚠️ Menukopjes controleren, 💡 open voorstel en 📡 bron vraagt
+   aandacht. Een lopend resultaat is geen taak.
+3. **Doodlopende uitkomsten zijn geen taak:** geen bruikbaar resultaat,
+   robots-/toegangsblokkade en "geen menukaart gevonden" staan in Dekking onder
+   "Nog niet gecontroleerd" met de bestaande reden en de passende stap in de rij
+   ("Handmatig toevoegen" of "Lees met AI").
+4. **Geen taak** voor een restaurant met een actieve, bevestigde bron of een
+   gepubliceerde menukaart, tenzij het nieuwste resultaat iets **anders** zegt
+   dan die bron (bijvoorbeeld een andere menu-URL).
+5. **Leeftijd** staat in de taak en in de rij ("resultaat van 12 dagen
+   geleden"), met "Opnieuw controleren" via de bestaande batchanalyse en
+   limieten. Niets verloopt automatisch.
+6. **"Oude resultaten opruimen"** sluit de geselecteerde of alle batchresultaten
+   af als "afgehandeld door <medewerker> op <datum>", met één bevestiging die
+   het aantal noemt. Niets wordt gewist: de vastlegging gaat additief naar de
+   bestaande `field_evidence` van de jobrij (zoals BE-30), dus zonder migratie.
+7. **De teller bij Werkvoorraad** volgt dezelfde taakdefinitie.
+
+Dezelfde afbakening blijft gelden: geen BE-32-werk, geen publicatie, geen merge.
+
 **Rollen:** Lead = Claude Code. Developer = DeepSeek via de lokale runner.

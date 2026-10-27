@@ -24,7 +24,6 @@ const {
   safeReturnHref,
   menukopjesBackHref,
   rowNeedsAction,
-  taskFromBatch,
   selectTasks,
   countTasks,
   filterTasks,
@@ -33,6 +32,7 @@ const {
   checkSelection,
   canStartCheck,
   countSourceReviewTasks,
+  ageLabel,
 } = require('./sourceReview');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
@@ -93,45 +93,176 @@ test('tasks: only open proposals, attention sources and batch results with an ac
 });
 
 test('tasks: an empty batch and a fully confirmed batch are not work', () => {
-  assert.equal(taskFromBatch(batchDetail([], {})), null);
-  assert.equal(taskFromBatch(batchDetail([batchItem({ key: 'confirmed', actions: [] })], {})), null);
-  assert.equal(taskFromBatch(null), null);
+  assert.deepEqual(selectTasks({ batchDetails: [batchDetail([])] }), []);
+  assert.deepEqual(selectTasks({ batchDetails: [batchDetail([batchItem({ key: 'confirmed', actions: [] })])] }), []);
+  assert.deepEqual(selectTasks({}), []);
 });
 
-test('tasks: a batch with one open result is one task with its own rows', () => {
+// The real shape the Lead saw (review #6439131777): the same restaurant in
+// several old probe batches, one batch with two restaurants, and a name that
+// must never become "2 restaurants".
+function smeltBatches() {
+  return [
+    // The newest result of the first restaurant: a certain result.
+    batchDetail([batchItem({ position: 1, jobId: 'job-smelt-new', resultAt: '2026-10-20T09:00:00.000Z' })], {
+      id: 'batch-new',
+      created_at: '2026-10-20T09:00:00.000Z',
+    }),
+    // Older results of the same restaurant: they are not separate tasks.
+    batchDetail(
+      [batchItem({ position: 1, jobId: 'job-smelt-old', key: 'robots', actions: ['review_manually'], resultAt: '2026-10-17T09:00:00.000Z' })],
+      { id: 'batch-old-1', created_at: '2026-10-17T09:00:00.000Z' },
+    ),
+    batchDetail(
+      [
+        batchItem({ position: 1, jobId: 'job-smelt-older', key: 'no_menu', actions: ['review_manually'], resultAt: '2026-10-16T09:00:00.000Z' }),
+        batchItem({
+          position: 2,
+          jobId: 'job-zuyd',
+          restaurant: { id: 'r-2', name: 'Zuyd' },
+          key: 'needs_review',
+          structureReview: { eligible: true },
+          actions: ['review_structure'],
+          resultAt: '2026-10-16T09:10:00.000Z',
+        }),
+      ],
+      { id: 'batch-old-2', created_at: '2026-10-16T09:00:00.000Z' },
+    ),
+  ];
+}
+
+test('tasks: one task per restaurant with its newest result, never one per batch', () => {
+  const tasks = selectTasks({ batchDetails: smeltBatches(), now: '2026-10-27T10:00:00.000Z' });
+  // Two restaurants, so two tasks — not four batch tasks and not "2 restaurants".
+  assert.deepEqual(tasks.map((task) => task.name), ['Restaurant Een', 'Zuyd']);
+  assert.deepEqual(tasks.map((task) => task.kind), ['batch', 'batch']);
+  const smelt = tasks.find((task) => task.name === 'Restaurant Een');
+  assert.equal(smelt.batchId, 'batch-new');
+  assert.equal(smelt.rows.length, 1);
+  // The newest result decides the step; older results are context only.
+  assert.equal(smelt.rows[0].jobId, 'job-smelt-new');
+  assert.equal(smelt.rows[0].state, 'certain');
+  // Every result of this restaurant is closed by "Oude resultaten opruimen",
+  // otherwise the next-oldest dead end would simply become the task.
+  assert.deepEqual(smelt.handledJobIds, ['job-smelt-new', 'job-smelt-old', 'job-smelt-older']);
+  assert.equal(smelt.olderCount, 2);
+});
+
+test('tasks: the title is always the restaurant name and the age stays visible', () => {
+  const tasks = selectTasks({ batchDetails: smeltBatches(), now: '2026-10-27T10:00:00.000Z' });
+  for (const task of tasks) {
+    assert.match(task.name, /^[A-Za-z]/);
+    assert.doesNotMatch(task.name, /\d+\s+restaurants/);
+  }
+  const smelt = tasks.find((task) => task.name === 'Restaurant Een');
+  assert.equal(smelt.ageLabel, 'resultaat van 7 dagen geleden');
+  assert.match(smelt.what, /Bevestig bron/);
+  assert.match(smelt.what, /resultaat van 7 dagen geleden/);
+});
+
+test('tasks: a batch of two restaurants gives two named tasks', () => {
   const detail = batchDetail([
-    batchItem({ position: 1, key: 'menu_found', actions: ['confirm'] }),
-    batchItem({ position: 2, key: 'confirmed', actions: [] }),
-    batchItem({ position: 3, key: 'duplicate', actions: [] }),
+    batchItem({ position: 1, restaurant: { id: 'r-1', name: 'Een' } }),
+    batchItem({ position: 2, restaurant: { id: 'r-2', name: 'Twee' }, jobId: 'job-2' }),
   ]);
-  const task = taskFromBatch(detail);
-  assert.ok(task);
-  assert.equal(task.kind, 'batch');
-  assert.equal(task.name, 'Restaurant Een');
-  assert.equal(task.activeCount, 1);
-  assert.equal(task.rows.length, 3);
-  // Nothing is copied: the row keeps the job and the restaurant of the batch item.
-  assert.equal(task.rows[0].jobId, 'job-1');
-  assert.equal(task.rows[1].state, 'done');
-  assert.equal(task.rows[1].step, null);
-  assert.equal(task.rows[2].state, 'skip');
+  const tasks = selectTasks({ batchDetails: [detail] });
+  assert.deepEqual(tasks.map((task) => task.name), ['Een', 'Twee']);
+  assert.equal(tasks[0].rows.length, 1);
+  assert.equal(tasks[0].rows[0].jobId, 'job-1');
+  assert.equal(tasks[1].rows[0].jobId, 'job-2');
 });
 
-test('tasks: a batch of one restaurant keeps that name, several stay a count', () => {
-  const one = taskFromBatch(batchDetail([batchItem({})]));
-  assert.equal(one.name, 'Restaurant Een');
-  const two = taskFromBatch(
-    batchDetail([
-      batchItem({ position: 1, restaurant: { id: 'r-1', name: 'Een' } }),
-      batchItem({ position: 2, restaurant: { id: 'r-2', name: 'Twee' } }),
-    ]),
-  );
-  assert.equal(two.name, '2 restaurants');
+test('tasks: dead ends are no task, and Dekking shows them with the existing reason and step', () => {
+  const details = [
+    batchDetail([batchItem({ key: 'robots', jobId: 'job-robots', actions: ['review_manually'], resultAt: '2026-10-17T09:00:00.000Z' })], {
+      id: 'batch-robots',
+      created_at: '2026-10-17T09:00:00.000Z',
+    }),
+    batchDetail(
+      [
+        batchItem({
+          position: 1,
+          restaurant: { id: 'r-2', name: 'Zuyd' },
+          key: 'no_menu',
+          jobId: 'job-zuyd',
+          actions: ['review_manually'],
+          resultAt: '2026-10-16T09:00:00.000Z',
+        }),
+      ],
+      { id: 'batch-zuyd', created_at: '2026-10-16T09:00:00.000Z' },
+    ),
+  ];
+  assert.deepEqual(selectTasks({ batchDetails: details }), []);
+
+  const rows = coverageRows([], { batchDetails: details, now: '2026-10-27T10:00:00.000Z' });
+  assert.deepEqual(rows.map((row) => row.name), ['Restaurant Een', 'Zuyd']);
+  for (const row of rows) {
+    assert.equal(row.reason, 'check_not_usable');
+    assert.equal(row.reasonLabel, 'Laatste controle gaf geen bruikbaar resultaat');
+    assert.equal(row.canCheck, true);
+    assert.equal(row.deadEnd, true);
+    assert.match(row.age, /resultaat van \d+ dagen geleden/);
+  }
+  // The fitting step of each dead end, not a new status.
+  assert.equal(rows.find((row) => row.name === 'Restaurant Een').step, STEPS.manual);
+  assert.equal(rows.find((row) => row.name === 'Zuyd').step, STEPS.ai_read);
+  assert.equal(rows.find((row) => row.name === 'Restaurant Een').outcome, 'Geen bruikbaar resultaat');
+  assert.equal(rows.find((row) => row.name === 'Zuyd').outcome, 'Geen menukaart gevonden');
 });
 
-test('tasks: an unknown restaurant is named as such, never invented', () => {
-  const task = taskFromBatch(batchDetail([batchItem({ restaurant: null })]));
-  assert.equal(task.name, 'Onbekend restaurant');
+test('tasks: a dead-end triage entry stays in Dekking, not in Bronnen', () => {
+  const entries = [entry({ restaurant_id: 'r-1', name: 'Zuyd', menu: 'not_assessed', attention: 'Menukaart: Niet beoordeeld' })];
+  const details = [
+    batchDetail(
+      [batchItem({ key: 'no_menu', jobId: 'job-zuyd', actions: ['review_manually'], restaurant: { id: 'r-1', name: 'Zuyd' } })],
+      { id: 'batch-zuyd' },
+    ),
+  ];
+  assert.deepEqual(selectTasks({ entries, batchDetails: details }), []);
+  const rows = coverageRows(entries, { batchDetails: details });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].name, 'Zuyd');
+  assert.equal(rows[0].step.key, 'ai_read');
+});
+
+test('tasks: a confirmed source with a published menu is no task for the same URL, but is for a different one', () => {
+  const entries = [
+    entry({
+      restaurant_id: 'r-1',
+      source: 'reachable',
+      menu: 'ready_for_review',
+      proposals: [{ id: 'p1', status: 'accepted', proposed_url: 'https://een.nl/menu' }],
+    }),
+  ];
+  assert.deepEqual(selectTasks({ entries, batchDetails: [batchDetail([batchItem({ foundUrl: 'https://een.nl/menu' })])] }), []);
+
+  // A different menu URL is something new: that stays a task.
+  const tasks = selectTasks({ entries, batchDetails: [batchDetail([batchItem({ foundUrl: 'https://een.nl/nieuwe-kaart' })])] });
+  assert.equal(tasks.length, 1);
+  assert.equal(tasks[0].name, 'Restaurant Een');
+});
+
+test('tasks: an open proposal is the one task of its restaurant; a batch result never adds a second', () => {
+  const entries = [entry({ restaurant_id: 'r-1', name: 'Andalous', open_proposal_id: 'p1', next_step: 'review_proposal' })];
+  const tasks = selectTasks({ entries, batchDetails: [batchDetail([batchItem({})])] });
+  assert.equal(tasks.length, 1);
+  assert.equal(tasks[0].kind, 'proposal');
+  assert.equal(tasks[0].name, 'Andalous');
+});
+
+test('tasks: running and handled results are not tasks either', () => {
+  assert.deepEqual(selectTasks({ batchDetails: [batchDetail([batchItem({ key: 'running', actions: [], jobId: 'job-1' })])] }), []);
+
+  const handled = [batchDetail([batchItem({ handled: { at: '2026-10-26T09:00:00.000Z', by: 'user-1' } })])];
+  assert.deepEqual(selectTasks({ batchDetails: handled }), []);
+  const row = rowForBatchItem(batchItem({ handled: { at: '2026-10-26T09:00:00.000Z' } }), { batchId: 'batch-1' });
+  assert.equal(row.state, 'handled');
+  assert.equal(row.step, null);
+  assert.equal(rowNeedsAction(row), false);
+});
+
+test('tasks: an unknown restaurant cannot become a task and is never invented', () => {
+  assert.deepEqual(selectTasks({ batchDetails: [batchDetail([batchItem({ restaurant: null })])] }), []);
 });
 
 test('tasks: a source with a menu that is not in order asks attention, a clean source does not', () => {
@@ -234,7 +365,16 @@ test('row hrefs: confirm and wait are in-page actions without a destination', ()
   assert.equal(stepHref(rowForBatchItem(batchItem({ key: 'menu_found' }))), null);
   assert.equal(stepHref(rowForBatchItem(batchItem({ key: 'queued', actions: [] }))), null);
   assert.equal(rowNeedsAction(rowForBatchItem(batchItem({ key: 'confirmed', actions: [] }))), false);
-  assert.equal(rowNeedsAction(rowForBatchItem(batchItem({ key: 'queued', actions: [] }))), true);
+  // A running result is visible, but it is not a ready decision (review point 2).
+  assert.equal(rowNeedsAction(rowForBatchItem(batchItem({ key: 'queued', actions: [] }))), false);
+  assert.equal(rowNeedsAction(rowForBatchItem(batchItem({ key: 'menu_found' }))), true);
+  assert.equal(rowNeedsAction(rowForBatchItem(batchItem({ key: 'robots', actions: ['review_manually'] }))), false);
+  // Nothing expires: the age is information, never a reason to hide a result.
+  assert.equal(ageLabel('2026-10-15T09:00:00.000Z', '2026-10-27T10:00:00.000Z'), 'resultaat van 12 dagen geleden');
+  assert.equal(ageLabel('2026-10-26T09:00:00.000Z', '2026-10-27T10:00:00.000Z'), 'resultaat van 1 dag geleden');
+  assert.equal(ageLabel('2026-10-27T09:00:00.000Z', '2026-10-27T10:00:00.000Z'), 'resultaat van vandaag');
+  assert.equal(ageLabel(null, '2026-10-27T10:00:00.000Z'), null);
+  assert.equal(ageLabel('2026-10-15T09:00:00.000Z', null), null);
 });
 
 test('return hrefs: only the internal screens of this flow are accepted', () => {

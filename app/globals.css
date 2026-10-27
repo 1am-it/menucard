@@ -4510,6 +4510,19 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .srr-step { display: flex; align-items: center; }
 .srr-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 16px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; }
 .srr-wait, .srr-none { font-size: 13px; color: var(--text-secondary); }
+.srr-age { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.srr-recheck { min-height: 28px; padding: 0 8px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface-soft); color: var(--text-primary); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.srr-recheck:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+/* Lead review #6439131777: one task per restaurant, and "Oude resultaten
+   opruimen" with one confirmation that names the number. */
+.brn-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.brn-task-row { display: flex; gap: 8px; align-items: flex-start; }
+.brn-pick { width: 20px; height: 20px; flex: none; margin-top: 16px; }
+.brn-pick-spacer { width: 20px; flex: none; }
+.brn-cleanup-confirm { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-soft); }
+.brn-cleanup-confirm p { margin: 0; font-size: 14px; }
+.brn-cleanup-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* Dekking (criterion 3): "Nog niet gecontroleerd" — the same rows the owner
    approved, with real checkboxes and the existing check route. */
@@ -4524,6 +4537,9 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .cov-check-meta { font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
 .cov-check-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px; border-radius: var(--radius-pill); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap; }
 .cov-check-select { width: 20px; height: 20px; }
+.cov-check-result { display: grid; gap: 2px; margin-top: 4px; }
+.cov-check-outcome { font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.cov-check-recheck { margin-left: 6px; }
 
 @media (max-width: 900px) {
   .brn-list { width: 100%; }
