@@ -35,7 +35,7 @@ function newBatchId() {
   return typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : null
 }
 
-export default function CoverageCheckSection({ token }) {
+export default function CoverageCheckSection({ token, onUncheckedCount }) {
   const [entries, setEntries] = useState(null)
   const [details, setDetails] = useState([])
   const [daily, setDaily] = useState(null)
@@ -90,6 +90,11 @@ export default function CoverageCheckSection({ token }) {
     () => coverageRows(entries || [], { batchDetails: details, now: new Date() }),
     [entries, details],
   )
+  // Criterium 6: de tegel "nog niet gecontroleerd" toont dezelfde telling als
+  // deze lijst — geen tweede schatting, en niets zolang de lijst niet geladen is.
+  useEffect(() => {
+    if (typeof onUncheckedCount === 'function' && Array.isArray(entries)) onUncheckedCount(rows.length)
+  }, [rows, entries, onUncheckedCount])
   const remaining = daily && Number.isInteger(daily.used) ? Math.max(0, DAILY_URL_LIMIT - daily.used) : DAILY_URL_LIMIT
 
 

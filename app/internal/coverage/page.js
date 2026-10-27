@@ -68,14 +68,6 @@ function IconDocument() {
     </svg>
   )
 }
-function IconUtensils() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 2v6a2 2 0 0 0 4 0V2M8 8v14" />
-      <path d="M18 2c-1.4 1.6-1.8 4.2-1.8 6s.4 3 1.8 3v10" />
-    </svg>
-  )
-}
 function IconTag() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,14 +93,15 @@ function IconChevronDown() {
 }
 
 // Complete / partial / empty — always shown as text too, never by color
-// or shape alone. Kleurtaal v2: only "Complete" is a positive status;
-// "Partial" has no decided role and stays neutral (--status-neutral), and
-// "None yet" uses --text-secondary. Every label meets WCAG AA on the card
+// or shape alone. Kleurtaal v2: only "Compleet" is a positive status;
+// "Gedeeltelijk" has no decided role and stays neutral (--status-neutral), and
+// "Nog niets" uses --text-secondary. Every label meets WCAG AA on the card
 // in both themes (asserted in src/lib/coveragePriority.test.js).
+// BE-32 (#75, criterion 6): the visible copy is Dutch.
 const STATE_STYLE = {
-  complete: { label: 'Complete', color: 'var(--status-positive)' },
-  partial: { label: 'Partial', color: 'var(--status-neutral)' },
-  empty: { label: 'None yet', color: 'var(--text-secondary)' },
+  complete: { label: 'Compleet', color: 'var(--status-positive)' },
+  partial: { label: 'Gedeeltelijk', color: 'var(--status-neutral)' },
+  empty: { label: 'Nog niets', color: 'var(--text-secondary)' },
 }
 
 /** A small, purpose-built progress ring (decorative; the state is also
@@ -170,17 +163,17 @@ function BreakdownTable({ title, rows, tbodyId }) {
   return (
     <div
       role="region"
-      aria-label={`${title} table, horizontally scrollable`}
+      aria-label={`${title}: tabel, horizontaal scrollbaar`}
       tabIndex={0}
       style={{ overflowX: 'auto' }}
     >
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <thead>
           <tr style={{ textAlign: 'left', color: 'var(--text-secondary)', background: 'var(--bg-elevated)' }}>
-            <th scope="col" style={TH_STYLE}>Group</th>
+            <th scope="col" style={TH_STYLE}>Buurt</th>
             <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Restaurants</th>
-            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>With menu data</th>
-            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Coverage</th>
+            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Met menukaart</th>
+            <th scope="col" style={{ ...TH_STYLE, textAlign: 'center' }}>Dekking</th>
           </tr>
         </thead>
         <tbody id={tbodyId}>
@@ -230,6 +223,9 @@ export default function CoverageDashboardPage() {
   // The only client state PLATFORM-12 adds: whether the priority table
   // shows every neighbourhood or only the top PRIORITY_DEFAULT_VISIBLE.
   const [showAllBuurten, setShowAllBuurten] = useState(false)
+  // Criterium 6: de derde tegel telt dezelfde rijen als "Nog niet
+  // gecontroleerd". De sectie laadt ze; deze pagina toont alleen het getal.
+  const [uncheckedCount, setUncheckedCount] = useState(null)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -251,14 +247,14 @@ export default function CoverageDashboardPage() {
       })
       const json = await res.json()
       if (!res.ok) {
-        setError(json.error || 'Failed to load the coverage dashboard')
+        setError(json.error || 'Dekking kon niet worden geladen.')
         setData(null)
         return
       }
       setData(json)
       setGeneratedAt(new Date().toISOString())
     } catch {
-      setError('Failed to load the coverage dashboard')
+      setError('Dekking kon niet worden geladen.')
     } finally {
       setLoading(false)
     }
@@ -273,7 +269,7 @@ export default function CoverageDashboardPage() {
   const priorityRows = useMemo(() => (data ? sortByMenuDataGap(data.byBuurt) : []), [data])
 
   if (session === undefined) {
-    return <main className="cov-dashboard" style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Loading…</main>
+    return <main className="cov-dashboard" style={{ ...SHELL_STYLE, color: 'var(--text-secondary)' }}>Laden…</main>
   }
 
   if (error) {
@@ -300,7 +296,7 @@ export default function CoverageDashboardPage() {
     return (
       <main className="cov-dashboard" style={SHELL_STYLE}>
         <InternalNav accessToken={session.access_token} />
-        <p style={{ marginTop: 20, color: 'var(--text-secondary)' }}>Loading…</p>
+        <p style={{ marginTop: 20, color: 'var(--text-secondary)' }}>Laden…</p>
       </main>
     )
   }
@@ -312,102 +308,78 @@ export default function CoverageDashboardPage() {
     <main className="cov-dashboard" style={SHELL_STYLE}>
       <InternalNav accessToken={session.access_token} />
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap', marginTop: 20, marginBottom: 20 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <h1 style={{ fontSize: 26, margin: 0 }}>Coverage Dashboard</h1>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '5px 11px',
-                borderRadius: 'var(--radius-pill)',
-                border: '1px solid var(--border)',
-                background: 'var(--bg-elevated)',
-                color: 'var(--text-secondary)',
-                fontSize: 12,
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <span style={{ width: 13, height: 13, display: 'flex' }}>
-                <IconLock />
-              </span>
-              Internal only · Read-only
+      {/* Kop (BE-32, criterium 6): Nederlands, drie tegels in de BE-28-stijl. */}
+      <div className="cov-head">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <h1 className="cov-title">Dekking 📊</h1>
+          <span className="cov-badge">
+            <span style={{ width: 13, height: 13, display: 'flex' }}>
+              <IconLock />
             </span>
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '6px 0 2px' }}>
-            Overview of restaurant data coverage across {data.city}.
-          </p>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 12.5, margin: 0 }}>Read-only, recomputed on every load. Generated {generatedAt}.</p>
+            Alleen intern · Alleen lezen
+          </span>
+        </div>
+        <p className="cov-sub">
+          Hoeveel van {data.city} staat er al in, en waar zitten de gaten. Je start én rondt het werk hier af.
+        </p>
+        <p className="cov-stamp">Alleen lezen, bij elke load opnieuw berekend · bijgewerkt {generatedAt}.</p>
+      </div>
+
+      {/* De drie tegels van de mockup: restaurants, met menukaart, nog niet
+          gecontroleerd. De derde tegel komt uit dezelfde telling als de rijen
+          eronder (CoverageCheckSection), nooit uit een tweede schatting. */}
+      <div className="cov-tiles" role="group" aria-label="Dekking in drie cijfers">
+        <div className="cov-tile">
+          <span className="cov-tile-value">{data.totals.restaurants}</span>
+          <span className="cov-tile-label">🍽️ restaurants</span>
+        </div>
+        <div className={menuState === 'complete' ? 'cov-tile cov-tile--positive' : 'cov-tile'}>
+          <span className="cov-tile-value">{data.metrics.menuData.count}</span>
+          <span className="cov-tile-label">
+            📋 met menukaart
+            <span className="cov-tile-note">
+              {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`} van{' '}
+              {data.metrics.menuData.total}
+            </span>
+          </span>
+        </div>
+        <div className="cov-tile cov-tile--attention">
+          <span className="cov-tile-value">{uncheckedCount === null ? '…' : uncheckedCount}</span>
+          <span className="cov-tile-label">🔎 nog niet gecontroleerd</span>
         </div>
       </div>
 
       {/* BE-31 (#74): "Nog niet gecontroleerd" lives here now, with the existing
           reason texts, selection and the existing batch analysis as its check. */}
       <div style={{ marginBottom: 20 }}>
-        <CoverageCheckSection token={session.access_token} />
+        <CoverageCheckSection token={session.access_token} onUncheckedCount={setUncheckedCount} />
       </div>
 
-      {/* Hero: menu coverage — data presence, not verified accuracy */}
-      <section
-        aria-labelledby="coverage-hero-heading"
-        style={{ ...CARD_STYLE, padding: 24, display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start', marginBottom: 16 }}
-      >
-        <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
-            Overall menu coverage
-          </div>
-          <h2 id="coverage-hero-heading" style={{ fontSize: 22, margin: '6px 0 4px', color: 'var(--text-primary)' }}>
-            {menuState === 'complete' ? 'Menu coverage is complete' : 'Menu coverage needs attention'}
-          </h2>
-          <div style={{ fontSize: 'clamp(44px, 10vw, 64px)', fontWeight: 800, lineHeight: 1.05, color: 'var(--text-primary)' }}>
-            {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`}
-          </div>
-          <p style={{ margin: '6px 0 0', fontSize: 15, color: 'var(--text-secondary)' }}>
-            {data.metrics.menuData.count} of {data.metrics.menuData.total} restaurants have digitized menu data.
-          </p>
-          <p style={{ margin: '4px 0 0', fontSize: 12.5, color: 'var(--text-secondary)' }}>
-            Shows whether menu data is present — not whether it has been verified as accurate.
-          </p>
-        </div>
-
-        {data.metrics.menuData.missingRestaurantIds.length > 0 && (
-          <div
-            style={{
-              flex: '1 1 300px',
-              minWidth: 0,
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 10,
-              padding: 16,
-              borderRadius: 'var(--radius-lg)',
-              // Kleurtaal v2: limited menu data is incomplete data — neutral,
-              // not the "old source" attention role.
-              border: '1px solid var(--border)',
-              background: 'var(--status-neutral-bg)',
-            }}
-          >
-            <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--status-neutral)', marginTop: 1 }}>
-              <IconDocument />
-            </span>
-            <div style={{ minWidth: 0 }}>
-              <strong style={{ color: 'var(--status-neutral)' }}>Menu data is limited</strong>
-              <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
-                Dish search can currently only ever return results from these {data.metrics.menuData.count} restaurants:{' '}
-                {data.metrics.menuData.restaurantIds.join(', ')}. The other{' '}
-                {data.metrics.menuData.missingRestaurantIds.length} have no menu items in
-                <code style={{ margin: '0 4px' }}>data/menus.json</code> at all — not a display bug, an actual
-                data gap.
-              </div>
+      {/* Details: dezelfde cijfers als voorheen, zonder de dubbele
+          menukaart-hero — dat cijfer staat nu in de tweede tegel. */}
+      <h2 className="cov-section-title">Details per onderdeel</h2>
+      {data.metrics.menuData.missingRestaurantIds.length > 0 && (
+        <section className="cov-note" aria-labelledby="coverage-limit-heading">
+          <span style={{ width: 18, height: 18, display: 'flex', flexShrink: 0, color: 'var(--status-neutral)', marginTop: 1 }}>
+            <IconDocument />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <strong id="coverage-limit-heading" style={{ color: 'var(--status-neutral)' }}>
+              Menudata is beperkt
+            </strong>
+            <div style={{ marginTop: 6, fontSize: 13.5, color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
+              De gerechtzoekfunctie kan nu alleen resultaten geven uit deze {data.metrics.menuData.count} restaurants:{' '}
+              {data.metrics.menuData.restaurantIds.join(', ')}. De andere{' '}
+              {data.metrics.menuData.missingRestaurantIds.length} hebben helemaal geen gerechten in
+              <code style={{ margin: '0 4px' }}>data/menus.json</code> — geen weergavefout, maar een echt gat in de
+              data. Presence, geen bewezen juistheid.
             </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      {/* Four secondary metric cards — the same four figures as before */}
+      {/* The same figures as before, minus the menu-data card: that number is
+          now the second tile of the page top. */}
       <div
         style={{
           display: 'grid',
@@ -417,28 +389,21 @@ export default function CoverageDashboardPage() {
         }}
       >
         <Metric
-          label="Restaurants with basic info"
+          label="Restaurants met basisgegevens"
           count={data.metrics.basicInfo.count}
           total={data.metrics.basicInfo.total}
           pct={data.metrics.basicInfo.pct}
           icon={<IconDocument />}
         />
         <Metric
-          label="Restaurants with menu data"
-          count={data.metrics.menuData.count}
-          total={data.metrics.menuData.total}
-          pct={data.metrics.menuData.pct}
-          icon={<IconUtensils />}
-        />
-        <Metric
-          label="Menu items with a price"
+          label="Gerechten met een prijs"
           count={data.metrics.priceCoverage.count}
           total={data.metrics.priceCoverage.total}
           pct={data.metrics.priceCoverage.pct}
           icon={<IconTag />}
         />
         <Metric
-          label="Reservation method confirmed"
+          label="Reserveren bevestigd"
           count={data.metrics.reservationConfirmed.count}
           total={data.metrics.reservationConfirmed.total}
           pct={data.metrics.reservationConfirmed.pct}
@@ -446,15 +411,15 @@ export default function CoverageDashboardPage() {
         />
       </div>
 
-      {/* Priority gaps by neighbourhood */}
+      {/* Grootste gaten per buurt — dezelfde tabel, Nederlandse kop */}
       <section aria-labelledby="coverage-priority-heading" style={{ ...CARD_STYLE, marginBottom: 20 }}>
         <h2 id="coverage-priority-heading" style={{ fontSize: 17, margin: '0 0 4px', color: 'var(--text-primary)' }}>
-          Priority gaps by neighbourhood
+          Grootste gaten per buurt
         </h2>
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 12px' }}>
-          Neighbourhoods with the most restaurants still missing menu data, largest gap first.
+          Buurten met de meeste restaurants zonder menukaart, grootste gat eerst.
         </p>
-        <BreakdownTable title="Priority gaps by neighbourhood" rows={visibleBuurten} tbodyId={PRIORITY_TBODY_ID} />
+        <BreakdownTable title="Grootste gaten per buurt" rows={visibleBuurten} tbodyId={PRIORITY_TBODY_ID} />
         {hiddenCount > 0 && (
           <button
             type="button"
@@ -463,7 +428,7 @@ export default function CoverageDashboardPage() {
             aria-controls={PRIORITY_TBODY_ID}
             onClick={() => setShowAllBuurten((open) => !open)}
           >
-            {showAllBuurten ? `Show top ${PRIORITY_DEFAULT_VISIBLE} only` : `Show all ${priorityRows.length} neighbourhoods`}
+            {showAllBuurten ? `Toon alleen de top ${PRIORITY_DEFAULT_VISIBLE}` : `Toon alle ${priorityRows.length} buurten`}
             <span className="cov-toggle-chevron" aria-hidden="true">
               <IconChevronDown />
             </span>
@@ -471,58 +436,63 @@ export default function CoverageDashboardPage() {
         )}
       </section>
 
-      {/* Methodology & data notes — exactly one section, collapsed by default */}
+      {/* Methodologie & datanotities — één sectie, standaard dichtgeklapt */}
       <details className="di-accordion-item">
         <summary className="di-accordion-trigger">
           <span className="di-accordion-icon">
             <IconDocument />
           </span>
           <span className="di-accordion-heading">
-            <span className="di-accordion-title">Methodology &amp; data notes</span>
-            <span className="di-accordion-subtitle">Coverage shows data presence, not verified accuracy.</span>
+            <span className="di-accordion-title">Methodologie &amp; datanotities</span>
+            <span className="di-accordion-subtitle">Dekking toont aanwezigheid van data, geen bewezen juistheid.</span>
           </span>
           <span className="di-accordion-chevron">
             <IconChevronDown />
           </span>
         </summary>
         <div className="di-accordion-body">
-          <h3 style={NOTE_HEADING_STYLE}>How the priority order works</h3>
+          <h3 style={NOTE_HEADING_STYLE}>Hoe de volgorde werkt</h3>
           <p style={NOTE_TEXT_STYLE}>
-            Neighbourhoods are ordered by the number of restaurants still missing menu data (restaurants minus
-            restaurants with menu data), largest gap first. Ties go to the larger neighbourhood, then to the
-            neighbourhood name alphabetically. The order is worked out on this page from the same figures shown in
-            the table; no neighbourhood is left out, only the first {PRIORITY_DEFAULT_VISIBLE} are shown until the
-            list is expanded.
+            Buurten staan op het aantal restaurants zonder menukaart (restaurants min restaurants met menukaart),
+            grootste gat eerst. Bij een gelijk gat gaat de grotere buurt voor, daarna de naam op alfabet. De volgorde
+            wordt op deze pagina berekend uit dezelfde cijfers als de tabel; geen buurt valt weg, alleen de eerste{' '}
+            {PRIORITY_DEFAULT_VISIBLE} zijn zichtbaar tot je de lijst uitklapt.
           </p>
 
-          <h3 style={NOTE_HEADING_STYLE}>Sample size</h3>
+          <h3 style={NOTE_HEADING_STYLE}>Steekproefgrootte</h3>
           <p style={NOTE_TEXT_STYLE}>
-            Percentages are only shown for groups with at least {data.sampleThreshold} restaurants. Smaller groups
-            show a dash (—) instead.
+            Percentages verschijnen alleen bij groepen met minstens {data.sampleThreshold} restaurants. Kleinere
+            groepen tonen een streepje (—).
           </p>
 
-          <h3 style={NOTE_HEADING_STYLE}>Why there is no cuisine breakdown</h3>
+          <h3 style={NOTE_HEADING_STYLE}>Waarom er geen keuken-tabel is</h3>
           <p style={NOTE_TEXT_STYLE}>
-            The current <code>cuisine</code> field is a near-unique free-text description per restaurant (
-            {data.byCuisine.length} distinct values across {data.totals.restaurants} restaurants), not a shared
-            category taxonomy — most cuisine groups contain a single restaurant, so there is nothing meaningful to
-            average within them. A cuisine table would look like a ranked priority list without being one, so it is
-            not used as a prioritization axis here.
+            Het huidige <code>cuisine</code>-veld is een bijna unieke vrije tekst per restaurant (
+            {data.byCuisine.length} verschillende waarden over {data.totals.restaurants} restaurants), geen gedeelde
+            keuken-taxonomie — de meeste groepen bevatten één restaurant, dus er valt niets zinvols te middelen. Een
+            keuken-tabel zou op een prioriteitenlijst lijken zonder er een te zijn en wordt hier daarom niet gebruikt.
           </p>
 
-          <h3 style={NOTE_HEADING_STYLE}>Presence, not verified accuracy</h3>
+          <h3 style={NOTE_HEADING_STYLE}>Aanwezigheid, geen bewezen juistheid</h3>
           <p style={NOTE_TEXT_STYLE}>
-            All figures reflect data <em>presence</em>, not verified trust/provenance — the per-field trust model
-            (PLATFORM-03) doesn&apos;t exist yet.
+            Alle cijfers gaan over de <em>aanwezigheid</em> van data, niet over bewezen betrouwbaarheid of herkomst —
+            het trust-model per veld (PLATFORM-03) bestaat nog niet.
           </p>
 
-          <h3 style={NOTE_HEADING_STYLE}>Baseline</h3>
+          <h3 style={NOTE_HEADING_STYLE}>Nulmeting</h3>
           <p style={{ ...NOTE_TEXT_STYLE, marginBottom: 0 }}>
-            A written, dated baseline snapshot of these same numbers is recorded at{' '}
+            Een geschreven, gedateerde nulmeting van dezelfde cijfers staat in{' '}
             <code>docs/coverage/breda-baseline-2026-08-30.md</code>.
           </p>
+
         </div>
       </details>
+
+      {/* Criterium 5: de bronvermelding van de kaartgegevens staat zichtbaar op
+          de pagina waar OSM-gegevens verschijnen. */}
+      <p className="cov-stamp" style={{ marginTop: 18 }}>
+        Kaartgegevens: © OpenStreetMap-bijdragers. Voorstellen zijn voorstellen; niets wordt automatisch toegevoegd.
+      </p>
     </main>
   )
 }
