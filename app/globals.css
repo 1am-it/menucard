@@ -3853,6 +3853,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   font-size: 13px;
   font-weight: 700;
 }
+/* BE-38 (#90) — de terugval is nog niet open: hetzelfde label, maar neutraal
+   (dezelfde tokenparen als `.tonight-tag`), zodat groen "Nu open" blijft
+   betekenen wat het zegt. */
+.open-label--later { background: var(--surface-soft); color: var(--text-secondary); }
 /* ── Ronde kaarten (licht: zachte schaduw; donker: rand) ── */
 .menu-card, .lrc-card, .restaurant-card, .menu-overview-card, .rc-card, .dish-group-card {
   background: var(--card-surface);

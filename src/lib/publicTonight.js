@@ -15,12 +15,20 @@
 // laden met de browserklok. Zo staat er nooit een "Nu open" of een daghap in
 // de server-HTML.
 //
+// BE-38 (#90) — de sectie blijft staan als het huidige moment te weinig
+// gerechten heeft: eerst het eerstvolgende moment van vandaag waarop er wél
+// genoeg is ("Straks op de kaart · vanaf HH:MM"), daarna de lunch van morgen
+// ("Morgen op de kaart"). Pas als ook dat niets oplevert, verdwijnt de sectie.
+// Nog steeds één selectiepad: dezelfde regels (echte prijs, bestelbaar
+// gerecht, één per restaurant, prijsspreiding, vaste dagselectie) gelden voor
+// het huidige moment én voor de terugval.
+//
 // Bewust CommonJS, zoals src/lib/openingStatus.js en src/lib/dishDeepLink.js.
 
-const { zonedParts, DEFAULT_TIME_ZONE } = require('./localTime');
+const { zonedParts, DEFAULT_TIME_ZONE, DAY_KEYS } = require('./localTime');
 const { cuisineFamily } = require('./cuisineStyle');
 const { dutchDateLabel } = require('./dailyDish');
-const { isOpenDuring } = require('./openingStatus');
+const { isOpenDuring, parseOpeningRange } = require('./openingStatus');
 const { honestPriceLabel } = require('./menuPrice');
 
 const MAX_DISHES = 3;
@@ -34,6 +42,17 @@ const MEAL_TITLES = {
   borrel: 'Borrel',
   diner: 'Vanavond op de kaart',
 };
+
+// BE-38 (#90) — de titels van de terugval. "Straks" krijgt het vroegste
+// moment waarop de getoonde gerechten er echt zijn; "Morgen" noemt bewust
+// geen tijd, want dat is de lunch van de volgende dag.
+const LATER_ON_THE_MENU = 'Straks op de kaart';
+const TOMORROW_ON_THE_MENU = 'Morgen op de kaart';
+
+// De volgorde van de momenten binnen één dag. `mealMoment` noemt het kwartier
+// tussen 15:00 en 16:00 al diner (eigenaarsbesluit BE-29); de terugval loopt
+// daarom alleen verder in deze volgorde en nooit terug.
+const MOMENT_SEQUENCE = ['lunch', 'borrel', 'diner'];
 
 // Het deel van de dag waarin het restaurant open moet zijn. Bewust een
 // venster en niet "nu open": de keuze moet per dag vast en cachebaar zijn.
@@ -117,16 +136,50 @@ function isMainDishCategory(categoryName) {
 // ─── Openingstijden ─────────────────────────────────────────────────────────
 
 /**
+ * BE-38 (#90) — vanaf welk moment op deze weekdag zijn de gerechten van dit
+ * menutype er echt? Dat is het latere van de openingstijd van het restaurant
+ * en de start van het menumoment: een zaak die om 12:00 opengaat en tot 23:00
+ * open blijft is om 16:30 al open, maar de dinerkeuze begint om 17:00. Zo
+ * blijft "vanaf HH:MM" een tijd die nog moet komen in plaats van een
+ * openingstijd van vanochtend.
+ *
+ * Een restaurant telt mee als zijn openingstijd het venster van het menutype
+ * overlapt; de leesregel komt uit src/lib/openingStatus.js (dezelfde als
+ * "Nu open"), niet uit een tweede interpretatie hier.
+ *
+ * `closes` is de sluitingstijd van die weekdag. Daarmee kan de selectie een
+ * restaurant overslaan waarvan de dag er echt op zit (criterium 2 van BE-38:
+ * na sluitingstijd toont de home morgen, geen "Vanavond op de kaart" meer).
+ *
+ * @returns {{opens:number, closes:number}|null} `opens` is het moment waarop de
+ *   gerechten van dit menutype er echt zijn, `closes` het moment waarop het
+ *   restaurant die dag sluit; null als het restaurant niet meedoet.
+ */
+function momentAvailability(openingHours, dayKey, mealType) {
+  const window = MEAL_OPEN_WINDOWS[mealType];
+  if (!window) return null;
+  if (!isOpenDuring(openingHours, dayKey, window.from, window.to)) return null;
+  const range = parseOpeningRange(openingHours && openingHours[dayKey]);
+  if (!range) return null;
+  return { opens: Math.max(range.open, window.from), closes: range.close };
+}
+
+/**
+ * BE-38 (#90) — alleen het "vanaf"-moment van {@link momentAvailability}.
+ * @returns {number|null} minuten na middernacht, of null als het niet meedoet
+ */
+function availableFrom(openingHours, dayKey, mealType) {
+  const availability = momentAvailability(openingHours, dayKey, mealType);
+  return availability ? availability.opens : null;
+}
+
+/**
  * Is het restaurant op deze weekdag open in het deel van de dag van dit
  * menutype? Een overlap is genoeg: een dinerkaart bij een zaak die om 17:00
- * opent telt mee, ook al is het nu 12:00. De leesregel komt uit
- * src/lib/openingStatus.js (dezelfde als "Nu open"), niet uit een tweede
- * interpretatie hier.
+ * opent telt mee, ook al is het nu 12:00.
  */
 function isOpenForMoment(openingHours, dayKey, mealType) {
-  const window = MEAL_OPEN_WINDOWS[mealType];
-  if (!window) return false;
-  return isOpenDuring(openingHours, dayKey, window.from, window.to);
+  return availableFrom(openingHours, dayKey, mealType) !== null;
 }
 
 // ─── Dagkeuze ───────────────────────────────────────────────────────────────
@@ -150,6 +203,31 @@ function isoDayNumber(iso) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
   if (!match) return null;
   return Math.round(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86400000);
+}
+
+/**
+ * BE-38 (#90) — minuten na middernacht als "HH:MM", de notatie van de
+ * openingstijden in data/restaurants.json.
+ */
+function clockLabel(minutes) {
+  const value = ((Math.round(Number(minutes)) % 1440) + 1440) % 1440;
+  return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+}
+
+/**
+ * BE-38 (#90) — de kalenderdag ná `dateKey`, met dezelfde tweeletterige
+ * weekdagsleutel als data/restaurants.json. Berekend in UTC, dus onafhankelijk
+ * van de tijdzone van de server of de machine.
+ * @returns {{dateKey:string, dayKey:string}|null}
+ */
+function dayAfter(dateKey) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(dateKey || ''));
+  if (!match) return null;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1));
+  return {
+    dateKey: `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`,
+    dayKey: DAY_KEYS[date.getUTCDay()],
+  };
 }
 
 /** Is de menukaart in de laatste `maxDays` dagen bijgewerkt? */
@@ -213,36 +291,43 @@ function preferInSameBucket(selected, ranked, predicate) {
 }
 
 /**
- * De ene, pure selectiefunctie.
+ * BE-29 (#70) / BE-38 (#90) — de ene, pure keuze voor één moment op één
+ * kalenderdag. De terugval gebruikt exact deze functie, zodat er geen tweede
+ * selectiepad ontstaat.
  *
+ * @param {Array<object>} candidates
  * @param {object} options
- * @param {Array<object>} options.candidates  compacte kandidaten uit
- *   src/lib/publicTonightData.js (geen volledig menu-archief)
- * @param {Date|number|string} [options.now]
- * @param {string} [options.timeZone]  standaard `Europe/Amsterdam`
- * @param {number} [options.maxDishes] standaard 3
- * @returns {{mealType:string,title:string,dateKey:string,dishes:Array<object>,hidden:boolean}}
+ * @param {string} options.dayKey   weekdag van die dag (zo..za)
+ * @param {string} options.dateKey  kalenderdag (YYYY-MM-DD) voor de dagkeuze
+ * @param {string} options.mealType 'lunch' | 'borrel' | 'diner'
+ * @param {number} options.limit    hoeveel gerechten er hoogstens gekozen worden
+ * @param {boolean} [options.withOpenTime]  geef elk gerecht zijn "vanaf"-tijd
+ * @param {number|null} [options.afterMinutes]  sla restaurants over die op
+ *   deze dag al gesloten zijn (minuten na middernacht); alleen het huidige
+ *   moment gebruikt dit, zodat "na sluitingstijd" morgen toont
+ * @returns {{dishes:Array<object>, opener:number|null}|null}
+ *   `opener` is het vroegste moment (minuten na middernacht) waarop de
+ *   gekozen gerechten er echt zijn.
  */
-function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_TIME_ZONE, maxDishes = MAX_DISHES } = {}) {
-  const limit = Number.isInteger(maxDishes) && maxDishes > 0 ? maxDishes : MAX_DISHES;
-  const parts = zonedParts(now, timeZone);
-  const mealType = mealMoment(parts.minutes);
-  const title = mealTitle(mealType);
-
+function selectMomentDishes(candidates, { dayKey, dateKey, mealType, limit, withOpenTime = false, afterMinutes = null }) {
   const pool = [];
+  const opensAt = new Map();
   for (const candidate of Array.isArray(candidates) ? candidates : []) {
     if (!candidate || candidate.mealType !== mealType) continue;
     if (!candidate.priceDisplay || candidate.priceValue == null || !(candidate.priceValue > 0)) continue;
-    if (!isOpenForMoment(candidate.openingHours, parts.dayKey, mealType)) continue;
+    const availability = momentAvailability(candidate.openingHours, dayKey, mealType);
+    if (!availability) continue;
+    // Criterium 2: een restaurant waarvan de deur vandaag al dicht is, hoort
+    // niet meer bij "dit moment"; de terugval zoekt dan verder (morgen).
+    if (afterMinutes != null && availability.closes <= afterMinutes) continue;
     // Een verlopen daghap blijft op de menukaart staan, maar hoort niet meer
-    // in "Vanavond op de kaart".
-    if (candidate.daily && candidate.daily.sourceDate !== parts.dateKey) continue;
+    // in deze sectie.
+    if (candidate.daily && candidate.daily.sourceDate !== dateKey) continue;
+    opensAt.set(candidate, availability.opens);
     pool.push(candidate);
   }
 
-  if (pool.length === 0) {
-    return { mealType, title, dateKey: parts.dateKey, dishes: [], hidden: true };
-  }
+  if (pool.length === 0) return null;
 
   // Eén rangorde voor alle kandidaten. Seizoenskaart en hoofdgerecht krijgen
   // een kleine voorkeur, "nieuw op de kaart" een lichte voorrang; de rest is
@@ -250,13 +335,16 @@ function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_T
   // kiezen vervolgens per restaurant hooguit één gerecht.
   const ranked = pool
     .map((candidate) => {
-      const newOnMenu = isNewlyUpdated(candidate.sourceDate, parts.dateKey);
+      const newOnMenu = isNewlyUpdated(candidate.sourceDate, dateKey);
       return {
         ...candidate,
         newOnMenu,
         cuisineFamily: cuisineFamily(candidate.cuisine),
+        // De "vanaf"-tijd van dit gerecht, ook na de sortering nog bij het
+        // juiste gerecht.
+        opensMinutes: opensAt.get(candidate),
         rank:
-          dayRank(parts.dateKey, candidate) -
+          dayRank(dateKey, candidate) -
           (newOnMenu ? NEW_ON_MENU_BOOST : 0) -
           (candidate.seasonal ? 0.3 : 0) -
           (candidate.isMainCourse ? 0.1 : 0),
@@ -326,16 +414,109 @@ function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_T
           ? { label: 'Daghap', emoji: '📅', sourceDate: dailyDate, dateLabel, dateLine: `volgens de kaart van ${dateLabel}` }
           : null,
         openingHours: candidate.openingHours || null,
+        // Alleen bij de terugval: vanaf wanneer dit gerecht er echt is, zodat
+        // de browser "🕒 Opent om HH:MM" kan tonen in plaats van "Nu open".
+        opensAt: withOpenTime ? clockLabel(candidate.opensMinutes) : null,
       };
     });
 
   return {
-    mealType,
-    title,
-    dateKey: parts.dateKey,
     dishes,
-    hidden: dishes.length < limit,
+    opener: Math.min(...finalSelection.map((candidate) => candidate.opensMinutes)),
   };
+}
+
+/**
+ * De ene, pure selectiefunctie voor de moment-sectie op de home.
+ *
+ * @param {object} options
+ * @param {Array<object>} options.candidates  compacte kandidaten uit
+ *   src/lib/publicTonightData.js (geen volledig menu-archief)
+ * @param {Date|number|string} [options.now]
+ * @param {string} [options.timeZone]  standaard `Europe/Amsterdam`
+ * @param {number} [options.maxDishes] standaard 3
+ * @returns {{mealType:string,title:string,dateKey:string,mode:'now'|'later'|'tomorrow',
+ *   opensFrom:string|null,dishes:Array<object>,hidden:boolean}}
+ */
+function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_TIME_ZONE, maxDishes = MAX_DISHES } = {}) {
+  const limit = Number.isInteger(maxDishes) && maxDishes > 0 ? maxDishes : MAX_DISHES;
+  const parts = zonedParts(now, timeZone);
+  const list = Array.isArray(candidates) ? candidates : [];
+  const mealType = mealMoment(parts.minutes);
+  const nothing = {
+    mealType,
+    title: mealTitle(mealType),
+    dateKey: parts.dateKey,
+    mode: 'now',
+    opensFrom: null,
+    dishes: [],
+    hidden: true,
+  };
+
+  // 1. Het huidige moment van vandaag. `afterMinutes` slaat restaurants over
+  //    waarvan de deur vandaag al dicht is: na sluitingstijd is er vandaag
+  //    niets meer (criterium 2), in plaats van een dinerkaart van een zaak die
+  //    om 22:00 sloot.
+  const current = selectMomentDishes(list, {
+    dayKey: parts.dayKey,
+    dateKey: parts.dateKey,
+    mealType,
+    limit,
+    afterMinutes: parts.minutes,
+  });
+  if (current && current.dishes.length >= limit) {
+    return { ...nothing, dishes: current.dishes, hidden: false };
+  }
+
+  // 2. BE-38 — het eerstvolgende moment van vandaag waarop er wél genoeg is.
+  //    Elk gerecht draagt zijn eigen "vanaf"-tijd; de titel noemt het vroegste
+  //    daarvan. Zo blijft "Nu open" voor wat nu echt open is.
+  for (const laterType of MOMENT_SEQUENCE.slice(MOMENT_SEQUENCE.indexOf(mealType) + 1)) {
+    const later = selectMomentDishes(list, {
+      dayKey: parts.dayKey,
+      dateKey: parts.dateKey,
+      mealType: laterType,
+      limit,
+      withOpenTime: true,
+    });
+    if (!later || later.dishes.length < limit) continue;
+    const opensFrom = clockLabel(later.opener);
+    return {
+      mealType: laterType,
+      title: `${LATER_ON_THE_MENU} · vanaf ${opensFrom}`,
+      dateKey: parts.dateKey,
+      mode: 'later',
+      opensFrom,
+      dishes: later.dishes,
+      hidden: false,
+    };
+  }
+
+  // 3. BE-38 — niets meer vandaag: de lunch van morgen. Pas als ook die er
+  //    niet is, verdwijnt de sectie.
+  const tomorrow = dayAfter(parts.dateKey);
+  if (tomorrow) {
+    const nextDay = selectMomentDishes(list, {
+      dayKey: tomorrow.dayKey,
+      dateKey: tomorrow.dateKey,
+      mealType: 'lunch',
+      limit,
+      withOpenTime: true,
+    });
+    if (nextDay && nextDay.dishes.length >= limit) {
+      return {
+        mealType: 'lunch',
+        title: TOMORROW_ON_THE_MENU,
+        dateKey: tomorrow.dateKey,
+        mode: 'tomorrow',
+        opensFrom: null,
+        dishes: nextDay.dishes,
+        hidden: false,
+      };
+    }
+  }
+
+  return nothing;
 }
 
 module.exports = {
@@ -343,6 +524,9 @@ module.exports = {
   NEW_ON_MENU_DAYS,
   MEAL_TITLES,
   MEAL_OPEN_WINDOWS,
+  LATER_ON_THE_MENU,
+  TOMORROW_ON_THE_MENU,
+  MOMENT_SEQUENCE,
   PRICE_BUCKETS,
   EMOJI_RULES,
   dishEmoji,
@@ -350,10 +534,15 @@ module.exports = {
   mealTitle,
   isMainDishCategory,
   honestPriceLabel,
+  availableFrom,
+  momentAvailability,
   isOpenForMoment,
   isNewlyUpdated,
   buildDishHref,
   dayRank,
+  dayAfter,
+  clockLabel,
+  selectMomentDishes,
   selectTonight,
 };
 

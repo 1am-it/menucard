@@ -1,0 +1,705 @@
+{
+  "generatedAt": "2026-10-28T01:09:37.719Z",
+  "kind": "developer evidence — local production build, fixed browser clock, no production data or credentials",
+  "contract": "#90 BE-38 (Straks op de kaart / Morgen op de kaart)",
+  "app": "http://localhost:3148",
+  "fixedDay": "2026-10-23 (vrijdag, Europe/Amsterdam, UTC+2)",
+  "serverHtml": {
+    "bytes": 78595
+  },
+  "moments": [
+    {
+      "id": "16-30-terugval",
+      "clock": "16:30 Europe/Amsterdam",
+      "iso": "2026-10-23T14:30:00Z",
+      "mode": "later",
+      "screens": [
+        {
+          "theme": "light",
+          "width": 1280
+        },
+        {
+          "theme": "light",
+          "width": 390
+        },
+        {
+          "theme": "dark",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 390
+        }
+      ],
+      "state": {
+        "theme": "light",
+        "present": true,
+        "mode": "later",
+        "meal": "diner",
+        "title": "Straks op de kaart · vanaf 17:00 🔥",
+        "allLink": "/search?meal=diner",
+        "cards": [
+          {
+            "name": "Romesco & Veg",
+            "restaurant": "T-Huis",
+            "price": "€13,75",
+            "href": "/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4",
+            "labels": [
+              "🌱 Vegetarisch",
+              "🕒Opent om 17:00"
+            ]
+          },
+          {
+            "name": "Jamon Iberico Bellota",
+            "restaurant": "Restaurant Zuyd",
+            "price": "€19,50",
+            "href": "/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2",
+            "labels": [
+              "🕒Opent om 17:00"
+            ]
+          },
+          {
+            "name": "Ree",
+            "restaurant": "Restaurant Wolfslaar",
+            "price": "€58",
+            "href": "/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4",
+            "labels": [
+              "🕒Opent om 18:00"
+            ]
+          }
+        ],
+        "openLabels": [
+          "🕒Opent om 17:00",
+          "🕒Opent om 17:00",
+          "🕒Opent om 18:00"
+        ],
+        "laterLabels": [
+          "🕒Opent om 17:00",
+          "🕒Opent om 17:00",
+          "🕒Opent om 18:00"
+        ],
+        "overflow": -6,
+        "tabbar": false
+      }
+    },
+    {
+      "id": "20-00-nu",
+      "clock": "20:00 Europe/Amsterdam",
+      "iso": "2026-10-23T18:00:00Z",
+      "mode": "now",
+      "screens": [
+        {
+          "theme": "light",
+          "width": 1280
+        },
+        {
+          "theme": "light",
+          "width": 390
+        },
+        {
+          "theme": "dark",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 390
+        }
+      ],
+      "state": {
+        "theme": "light",
+        "present": true,
+        "mode": "now",
+        "meal": "diner",
+        "title": "Vanavond op de kaart 🔥",
+        "allLink": "/search?meal=diner",
+        "cards": [
+          {
+            "name": "Romesco & Veg",
+            "restaurant": "T-Huis",
+            "price": "€13,75",
+            "href": "/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4",
+            "labels": [
+              "🌱 Vegetarisch",
+              "🟢Nu open"
+            ]
+          },
+          {
+            "name": "Jamon Iberico Bellota",
+            "restaurant": "Restaurant Zuyd",
+            "price": "€19,50",
+            "href": "/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2",
+            "labels": [
+              "🟢Nu open"
+            ]
+          },
+          {
+            "name": "Ree",
+            "restaurant": "Restaurant Wolfslaar",
+            "price": "€58",
+            "href": "/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4",
+            "labels": [
+              "🟢Nu open"
+            ]
+          }
+        ],
+        "openLabels": [
+          "🟢Nu open",
+          "🟢Nu open",
+          "🟢Nu open"
+        ],
+        "laterLabels": [],
+        "overflow": -6,
+        "tabbar": false
+      }
+    },
+    {
+      "id": "23-30-morgen",
+      "clock": "23:30 Europe/Amsterdam",
+      "iso": "2026-10-23T21:30:00Z",
+      "mode": "tomorrow",
+      "screens": [
+        {
+          "theme": "light",
+          "width": 1280
+        },
+        {
+          "theme": "light",
+          "width": 390
+        },
+        {
+          "theme": "dark",
+          "width": 1280
+        },
+        {
+          "theme": "dark",
+          "width": 390
+        }
+      ],
+      "state": {
+        "theme": "light",
+        "present": true,
+        "mode": "tomorrow",
+        "meal": "lunch",
+        "title": "Morgen op de kaart 🔥",
+        "allLink": "/search?meal=lunch",
+        "cards": [
+          {
+            "name": "Zuurdesembrood",
+            "restaurant": "Restaurant Zuyd",
+            "price": "€5,50",
+            "href": "/menu/19-lunch?dish=19-lunch-0-5&name=Zuurdesembrood&cat=Bites#gerecht-19-lunch-0-5",
+            "labels": [
+              "🕒Opent om 12:00"
+            ]
+          },
+          {
+            "name": "Veggie Romesco Sandwich",
+            "restaurant": "T-Huis",
+            "price": "€15,75",
+            "href": "/menu/23-lunch?dish=23-lunch-0-6&name=Veggie+Romesco+Sandwich&cat=Breakfast+%26+Lunch#gerecht-23-lunch-0-6",
+            "labels": [
+              "🌱 Vegetarisch",
+              "🕒Opent om 11:00"
+            ]
+          },
+          {
+            "name": "Runderentrecôte (220 gr.)",
+            "restaurant": "Brasserie Bardot",
+            "price": "€37,95",
+            "href": "/menu/6-lunch?dish=6-lunch-2-6&name=Runderentrec%C3%B4te+%28220+gr.%29&cat=Lunchgerechten+%2812%3A00%E2%80%9315%3A00%29#gerecht-6-lunch-2-6",
+            "labels": [
+              "🕒Opent om 12:00"
+            ]
+          }
+        ],
+        "openLabels": [
+          "🕒Opent om 12:00",
+          "🕒Opent om 11:00",
+          "🕒Opent om 12:00"
+        ],
+        "laterLabels": [
+          "🕒Opent om 12:00",
+          "🕒Opent om 11:00",
+          "🕒Opent om 12:00"
+        ],
+        "overflow": -6,
+        "tabbar": false
+      }
+    }
+  ],
+  "checks": {
+    "total": 74,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "BE-38 server-HTML: geen \"Nu open\"",
+        "passed": true,
+        "detail": "78595 bytes"
+      },
+      {
+        "name": "BE-38 server-HTML: geen een daghap",
+        "passed": true,
+        "detail": "78595 bytes"
+      },
+      {
+        "name": "BE-38 server-HTML: geen de moment-sectie",
+        "passed": true,
+        "detail": "78595 bytes"
+      },
+      {
+        "name": "BE-38 server-HTML: geen de terugvaltitel \"Straks op de kaart\"",
+        "passed": true,
+        "detail": "78595 bytes"
+      },
+      {
+        "name": "BE-38 server-HTML: geen de terugvaltitel \"Morgen op de kaart\"",
+        "passed": true,
+        "detail": "78595 bytes"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 1280px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 390px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 16-30-terugval light 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 1280px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 390px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 16-30-terugval dark 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 16-30-terugval: de sectie staat er",
+        "passed": true,
+        "detail": "{\"mode\":\"later\",\"title\":\"Straks op de kaart · vanaf 17:00 🔥\"}"
+      },
+      {
+        "name": "BE-38 16-30-terugval: modus \"later\"",
+        "passed": true,
+        "detail": "later"
+      },
+      {
+        "name": "BE-38 16-30-terugval: menutype \"diner\"",
+        "passed": true,
+        "detail": "diner"
+      },
+      {
+        "name": "BE-38 16-30-terugval: titel /^Straks op de kaart · vanaf \\d{2}:\\d{2}(?: 🔥)?$/",
+        "passed": true,
+        "detail": "Straks op de kaart · vanaf 17:00 🔥"
+      },
+      {
+        "name": "BE-38 16-30-terugval: de \"Alles\"-link volgt het getoonde menutype",
+        "passed": true,
+        "detail": "/search?meal=diner"
+      },
+      {
+        "name": "BE-38 16-30-terugval: precies drie gerechten met een echte prijs",
+        "passed": true,
+        "detail": "[\"€13,75\",\"€19,50\",\"€58\"]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"T-Huis\",\"Restaurant Zuyd\",\"Restaurant Wolfslaar\"]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4\",\"/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2\",\"/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4\"]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: elk gerecht noemt \"Opent om HH:MM\"",
+        "passed": true,
+        "detail": "[[\"🌱 Vegetarisch\",\"🕒Opent om 17:00\"],[\"🕒Opent om 17:00\"],[\"🕒Opent om 18:00\"]]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: geen \"Nu open\" bij de terugval",
+        "passed": true,
+        "detail": "[\"🕒Opent om 17:00\",\"🕒Opent om 17:00\",\"🕒Opent om 18:00\"]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: elk gerecht draagt het labelpaar van de terugval",
+        "passed": true,
+        "detail": "[\"🕒Opent om 17:00\",\"🕒Opent om 17:00\",\"🕒Opent om 18:00\"]"
+      },
+      {
+        "name": "BE-38 16-30-terugval: \"vanaf\" in de titel is het vroegste moment van de getoonde gerechten",
+        "passed": true,
+        "detail": "titel 17:00 vs gerechten [\"17:00\",\"17:00\",\"18:00\"]"
+      },
+      {
+        "name": "BE-38 20-00-nu light 1280px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 20-00-nu light 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 20-00-nu light 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 20-00-nu light 390px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 20-00-nu light 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 20-00-nu light 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 1280px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 390px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 20-00-nu dark 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 20-00-nu: de sectie staat er",
+        "passed": true,
+        "detail": "{\"mode\":\"now\",\"title\":\"Vanavond op de kaart 🔥\"}"
+      },
+      {
+        "name": "BE-38 20-00-nu: modus \"now\"",
+        "passed": true,
+        "detail": "now"
+      },
+      {
+        "name": "BE-38 20-00-nu: menutype \"diner\"",
+        "passed": true,
+        "detail": "diner"
+      },
+      {
+        "name": "BE-38 20-00-nu: titel /^Vanavond op de kaart(?: 🔥)?$/",
+        "passed": true,
+        "detail": "Vanavond op de kaart 🔥"
+      },
+      {
+        "name": "BE-38 20-00-nu: de \"Alles\"-link volgt het getoonde menutype",
+        "passed": true,
+        "detail": "/search?meal=diner"
+      },
+      {
+        "name": "BE-38 20-00-nu: precies drie gerechten met een echte prijs",
+        "passed": true,
+        "detail": "[\"€13,75\",\"€19,50\",\"€58\"]"
+      },
+      {
+        "name": "BE-38 20-00-nu: één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"T-Huis\",\"Restaurant Zuyd\",\"Restaurant Wolfslaar\"]"
+      },
+      {
+        "name": "BE-38 20-00-nu: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4\",\"/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2\",\"/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4\"]"
+      },
+      {
+        "name": "BE-38 20-00-nu: \"Nu open\" alleen bij wat nu echt open is",
+        "passed": true,
+        "detail": "[\"🟢Nu open\",\"🟢Nu open\",\"🟢Nu open\"]"
+      },
+      {
+        "name": "BE-38 20-00-nu: geen enkel gerecht noemt een openingstijd",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 1280px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 390px: thema toegepast",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 23-30-morgen light 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 1280px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 1280px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=-6"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 1280px: tabbar verborgen",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 390px: thema toegepast",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 390px: geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "BE-38 23-30-morgen dark 390px: tabbar zichtbaar",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "BE-38 23-30-morgen: de sectie staat er",
+        "passed": true,
+        "detail": "{\"mode\":\"tomorrow\",\"title\":\"Morgen op de kaart 🔥\"}"
+      },
+      {
+        "name": "BE-38 23-30-morgen: modus \"tomorrow\"",
+        "passed": true,
+        "detail": "tomorrow"
+      },
+      {
+        "name": "BE-38 23-30-morgen: menutype \"lunch\"",
+        "passed": true,
+        "detail": "lunch"
+      },
+      {
+        "name": "BE-38 23-30-morgen: titel /^Morgen op de kaart(?: 🔥)?$/",
+        "passed": true,
+        "detail": "Morgen op de kaart 🔥"
+      },
+      {
+        "name": "BE-38 23-30-morgen: de \"Alles\"-link volgt het getoonde menutype",
+        "passed": true,
+        "detail": "/search?meal=lunch"
+      },
+      {
+        "name": "BE-38 23-30-morgen: precies drie gerechten met een echte prijs",
+        "passed": true,
+        "detail": "[\"€5,50\",\"€15,75\",\"€37,95\"]"
+      },
+      {
+        "name": "BE-38 23-30-morgen: één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"Restaurant Zuyd\",\"T-Huis\",\"Brasserie Bardot\"]"
+      },
+      {
+        "name": "BE-38 23-30-morgen: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/19-lunch?dish=19-lunch-0-5&name=Zuurdesembrood&cat=Bites#gerecht-19-lunch-0-5\",\"/menu/23-lunch?dish=23-lunch-0-6&name=Veggie+Romesco+Sandwich&cat=Breakfast+%26+Lunch#gerecht-23-lunch-0-6\",\"/menu/6-lunch?dish=6-lunch-2-6&name=Runderentrec%C3%B4te+%28220+gr.%29&cat=Lunchgerechten+%2812%3A00%E2%80%9315%3A00%29#gerecht-6-lunch-2-6\"]"
+      },
+      {
+        "name": "BE-38 23-30-morgen: elk gerecht noemt \"Opent om HH:MM\"",
+        "passed": true,
+        "detail": "[[\"🕒Opent om 12:00\"],[\"🌱 Vegetarisch\",\"🕒Opent om 11:00\"],[\"🕒Opent om 12:00\"]]"
+      },
+      {
+        "name": "BE-38 23-30-morgen: geen \"Nu open\" bij de terugval",
+        "passed": true,
+        "detail": "[\"🕒Opent om 12:00\",\"🕒Opent om 11:00\",\"🕒Opent om 12:00\"]"
+      },
+      {
+        "name": "BE-38 23-30-morgen: elk gerecht draagt het labelpaar van de terugval",
+        "passed": true,
+        "detail": "[\"🕒Opent om 12:00\",\"🕒Opent om 11:00\",\"🕒Opent om 12:00\"]"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "file": "ops/browser/evidence/be-38/be38-16-30-terugval-1280-light.png",
+      "bytes": 120461,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-16-30-terugval-390-light.png",
+      "bytes": 54755,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-16-30-terugval-1280-dark.png",
+      "bytes": 109362,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-16-30-terugval-390-dark.png",
+      "bytes": 51412,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-20-00-nu-1280-light.png",
+      "bytes": 117696,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-20-00-nu-390-light.png",
+      "bytes": 53554,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-20-00-nu-1280-dark.png",
+      "bytes": 106490,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-20-00-nu-390-dark.png",
+      "bytes": 50003,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-23-30-morgen-1280-light.png",
+      "bytes": 120537,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-23-30-morgen-390-light.png",
+      "bytes": 56726,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-23-30-morgen-1280-dark.png",
+      "bytes": 109467,
+      "width": 1274,
+      "height": 1324,
+      "focus": "page",
+      "viewport": "1280x900"
+    },
+    {
+      "file": "ops/browser/evidence/be-38/be38-23-30-morgen-390-dark.png",
+      "bytes": 53370,
+      "width": 390,
+      "height": 844,
+      "focus": ".tonight-section",
+      "viewport": "390x844"
+    }
+  ],
+  "result": "passed"
+}
