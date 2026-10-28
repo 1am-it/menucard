@@ -1,10 +1,253 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "07ba4ea0fe3b93ef0ac42754ee08e74d76d50611",
+  "head": "461417d0cf68eb8bbe4a261129a2b95fd2bbd333",
   "worktreeDirty": false,
-  "generatedAt": "2026-10-28T18:02:30.991Z",
+  "generatedAt": "2026-10-28T21:45:26.152Z",
   "command": "npm run test:browser:menu-review",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "review",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 6714,
+      "error": null
+    },
+    {
+      "name": "read-only",
+      "checks": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 3257,
+      "error": null
+    },
+    {
+      "name": "empty",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 2055,
+      "error": null
+    },
+    {
+      "name": "partial",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 2178,
+      "error": null
+    },
+    {
+      "name": "image-only",
+      "checks": 29,
+      "passed": 29,
+      "failed": 0,
+      "durationMs": 10377,
+      "error": null
+    },
+    {
+      "name": "structure",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "durationMs": 11357,
+      "error": null
+    },
+    {
+      "name": "be30",
+      "checks": 84,
+      "passed": 84,
+      "failed": 0,
+      "durationMs": 20582,
+      "error": null
+    },
+    {
+      "name": "manual-import",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 4811,
+      "error": null
+    },
+    {
+      "name": "manual-review-steps",
+      "checks": 35,
+      "passed": 35,
+      "failed": 0,
+      "durationMs": 12083,
+      "error": null
+    },
+    {
+      "name": "manual-rejected",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 4641,
+      "error": null
+    },
+    {
+      "name": "manual-normalized",
+      "checks": 16,
+      "passed": 16,
+      "failed": 0,
+      "durationMs": 4645,
+      "error": null
+    },
+    {
+      "name": "manual-uncovered",
+      "checks": 29,
+      "passed": 29,
+      "failed": 0,
+      "durationMs": 7828,
+      "error": null
+    },
+    {
+      "name": "manual-card",
+      "checks": 99,
+      "passed": 99,
+      "failed": 0,
+      "durationMs": 13089,
+      "error": null
+    },
+    {
+      "name": "manual-card-keyboard",
+      "checks": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 2637,
+      "error": null
+    },
+    {
+      "name": "ai-read",
+      "checks": 60,
+      "passed": 60,
+      "failed": 0,
+      "durationMs": 14453,
+      "error": null
+    },
+    {
+      "name": "ai-read-batch",
+      "checks": 10,
+      "passed": 10,
+      "failed": 0,
+      "durationMs": 4391,
+      "error": null
+    },
+    {
+      "name": "ai-read-keyboard",
+      "checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "durationMs": 2479,
+      "error": null
+    },
+    {
+      "name": "v2",
+      "checks": 28,
+      "passed": 28,
+      "failed": 0,
+      "durationMs": 5208,
+      "error": null
+    },
+    {
+      "name": "error",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 2024,
+      "error": null
+    },
+    {
+      "name": "responsive",
+      "checks": 31,
+      "passed": 31,
+      "failed": 0,
+      "durationMs": 10820,
+      "error": null
+    },
+    {
+      "name": "keyboard",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 2472,
+      "error": null
+    },
+    {
+      "name": "concept-list-clickpath",
+      "checks": 22,
+      "passed": 22,
+      "failed": 0,
+      "durationMs": 22610,
+      "error": null
+    },
+    {
+      "name": "concept-product-read-only",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 5003,
+      "error": null
+    },
+    {
+      "name": "concept-list-states",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 8227,
+      "error": null
+    },
+    {
+      "name": "concept-forced-write",
+      "checks": 9,
+      "passed": 9,
+      "failed": 0,
+      "durationMs": 1375,
+      "error": null
+    },
+    {
+      "name": "concept-responsive",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 6908,
+      "error": null
+    },
+    {
+      "name": "concept-list-responsive",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 4227,
+      "error": null
+    },
+    {
+      "name": "concept-keyboard",
+      "checks": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 4560,
+      "error": null
+    },
+    {
+      "name": "concept-publication",
+      "checks": 47,
+      "passed": 47,
+      "failed": 0,
+      "durationMs": 10586,
+      "error": null
+    },
+    {
+      "name": "netwerk",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 731,
+      "error": null
+    }
+  ],
   "summary": {
     "total": 729,
     "passed": 729,
@@ -1045,7 +1288,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 19:28. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 23:11. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -3675,7 +3918,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T18:02:29.322Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T18:02:29.322Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T21:45:25.316Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T21:45:25.316Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -3997,7 +4240,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "555fea5c412dadd15ee17e9ba76c79278a6bdf0491391eac98055e267a5c142e",
+      "sha256": "f921457b5050b57980e5e2a027d1392564ecb56393e0a2ecb1547809b91318c6",
       "width": 1024,
       "height": 900
     },
@@ -4009,79 +4252,79 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "91c2c2933e5c0ad4abb9fb562cf6fb63b86e705b2897dc5b7b3880f2ade008a9",
+      "sha256": "a10b76a7233e827e18125ff61bf472c28dbd0710c76f38899bb9a5973e4c173f",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "9216e0d0dd3dd338e560be05c1f1f6258ba970642e6e9046f17312d006764dab",
+      "sha256": "c2fcb2cd587be8cfc3c2e8e72b6cc32cb0d6e7130c19642a541d52a736729b2e",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "8fa5a2c998d94cbd3b7c3edd579b87f181bd687afda738fc237bb6dad9c6de1a",
+      "sha256": "35945dff5bad713b8f54c3a2b8d574e82d2f1d1b70aa8793480418e871547b49",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-image-only-follow-up-390-light.png",
-      "sha256": "3864817ef6026dfcc6ee5565fb2193ec5907145270119b99c9802e190160f637",
+      "sha256": "706d19c51382f4239ac1f6077d4778b4b611fa075c67109601d585ddd2155c40",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "75bb9fba831b9f0630394d51c94a8683cb50bfc5ea175a0a23f354932fbe1682",
+      "sha256": "6ec109fc45da376e65527022b684b6ca841e3c3c4594e2981f4b8b06502cc33f",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "b21efc0a9ba7067b85f00ddbee1ffb23fab59af04c875365dae70774e7df2c75",
+      "sha256": "d660a1f0f473a464cbecc5d1f1e372fd2915b5beaca054a149b7b86aafbfa441",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "631f6891d67431546a8538e47663ba6c620a7ad71c38a695d517ef2893cde06f",
+      "sha256": "2f2ad419be56a9c6f52a439136e5318c8eff85a9f56e2f063dca817aa7023938",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "41e134fe31db789ade73c294582c42e3b95597ad6308f02f7a1c8f5589048cf3",
+      "sha256": "b5bd3bc94196863d39bc6e3fee0987e9bf73873caaf2d03fe7a8498361da9991",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "4022945e28eaeccfa84374e3a6eedb2453726b500959ebc8ca6950b9c350285c",
+      "sha256": "2ea273fa2de6791a08790928f9e119439ecaa740e592cc35fcb0f9e107074956",
       "width": 1024,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-1280-light.png",
-      "sha256": "a95948a8ab48a26d6478bc6acb6796594ce93b39225395b8b165930bbd8c6438",
+      "sha256": "e16316745fc3e454182f0eeaa02e86b45b38d6420849e9b85b73da135d9a0f3b",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-light.png",
-      "sha256": "387fbcf49abfdce00a3d11b172fa2fa04563b793a94e86fc6f39c7956469d2ab",
+      "sha256": "2147308ea3a683f141bb9c55031dd4507043ee231e24c2696c545c5101f0956c",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-light.png",
-      "sha256": "1fa290c0ef828899743fe126128db78f9d5337f1cb567be60a04a92096d62ece",
+      "sha256": "dc91b65754e438de484ee2eab318da2676fe88d062453c389ba20d051c53d62e",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-1280-light.png",
-      "sha256": "28b668402b1ba05042e4efffba826ca385fb3e9b29517f14647139d5162cdbe1",
+      "sha256": "64418d20c33232eb1c90893df1d527a328e96e310e65cfaea1cfe167cb6d2a2c",
       "width": 1280,
       "height": 900
     },
@@ -4093,19 +4336,19 @@
     },
     {
       "file": "be-30-structure-collapsed-1280-dark.png",
-      "sha256": "a909a5f03b2b953b32c7acdbf3f4d74f28dc288b98a95b9148f69c9b2cf4618d",
+      "sha256": "f17b5b888e6cf3e477710129eb2eb36c5b81909c38b357d75e58f86ad18ed8d1",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-dark.png",
-      "sha256": "9f0e3a1a352c50086535b0812fd775e29481dd6c030760680a176c0655483dac",
+      "sha256": "b4251bb87bf43e7e5962738a4af208bd41d60b7cc1468026ddd11620668a3699",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-dark.png",
-      "sha256": "dcc33e5f2e3c77e3d1f157a36cb80fb793f914a31fc2617d2f3d25165afcd279",
+      "sha256": "20e956bf6ba55172cb317c6e3e37d999f88871b0cccd0843f5e68432577a899c",
       "width": 1280,
       "height": 900
     },
@@ -4123,55 +4366,55 @@
     },
     {
       "file": "be-30-structure-collapsed-390-light.png",
-      "sha256": "a1d385ee1efba9a88d12d05d93b537f090db6cea990de53d8b2394e1f69be638",
+      "sha256": "3e9296e1c0a32e74146212eb9313a32ceeb98c30492522cf17bf77288b439242",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-light.png",
-      "sha256": "6a66c74a25aaa13310eda62cc83d2f8f6b6e6d2b5216dcb3440ac012a59750dc",
+      "sha256": "073cd691d97c31161a1e45745a02d468961f40d268ace008eb60f80ac40f2e03",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-light.png",
-      "sha256": "34dc04bd6f735948df48db91a2e0cef191e9d1cf6e4584981411f254349ab23e",
+      "sha256": "b6111b28da8488a685d7d89187b36ec6a41dee7ee600bc4da32002fff458867f",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-390-light.png",
-      "sha256": "dc8da99d63916246ba153b58e4cbc94b216f8555d5cd291eba37a667f2e20dd2",
+      "sha256": "5c8d85cc651d0af33de118ff9049a8e0f16673e9f464d44601f0ce431ffe8dca",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-390-light.png",
-      "sha256": "335a9d0c60587ff381d6794547d7505c44b181af01d397a809a7a0ec8097178e",
+      "sha256": "980cd36280edff65f26e8c90b15cba67bb997df116c3a18e20a3de94d65b2679",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-390-dark.png",
-      "sha256": "d4965410f7df696f57efe78041ce37d73dfee0af81e4a8c0f346a4438b3a089f",
+      "sha256": "ec9d31bf0dcba52e477299dd9f6ffce60a172c487438353079fca4fbde300a87",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-dark.png",
-      "sha256": "3045e334721087e8c7a7933b67c695cea074b0eae3d91e647f4627f0d152da83",
+      "sha256": "114c24db018a5af190b5500db5ce1c3bc1560c1f98bb6f0bd58e76193ee22830",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-dark.png",
-      "sha256": "a1e0a28cefe94e5052cb2d8595c95351a93605842363a0216d1e442dc6444dc3",
+      "sha256": "a9bdd1353ba8639cb3de774889bd88b4ea347b440f71723acc22bc8240440229",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-390-dark.png",
-      "sha256": "e2b90b4fbba8dbbfe6ed4c7939ddb249e15e5e70ce731a04158bb2ebce6d114b",
+      "sha256": "edfcd22971e6a483ca864f2b53c9975a2c0c61bc2a7979b9fe03d9df80f87d9a",
       "width": 390,
       "height": 900
     },
@@ -4189,7 +4432,7 @@
     },
     {
       "file": "manual-ai-import-320-light.png",
-      "sha256": "79e00bbd1efc6b0e4ad5d4c34c3a56e6b5b003d916937adaff52e3ba0103b8ff",
+      "sha256": "23558f31c080aa5f71287507913c00d3ab557cb4157474c2ef842ed7f8390603",
       "width": 320,
       "height": 900
     },
@@ -4357,7 +4600,7 @@
     },
     {
       "file": "ai-map-keyboard-390-light.png",
-      "sha256": "ef6b4416db29133d6878bcd700564951fceb25c70d5daf6f7fd8a2ff45c4bf05",
+      "sha256": "651065cf6986a04b23df895f227bb51061dd32d161dfa6c921658f49ef1fdcbb",
       "width": 390,
       "height": 900
     },
@@ -4387,13 +4630,13 @@
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "19ab4ca38d7e98b3ed6e0341a86a53267abd5d0ef37f7d8b1a149b6b2cc58491",
+      "sha256": "7f80eba473d6b76d389e6b3248c46df18e8610f546c1b0254cc680ef5db30a28",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-off-390-light.png",
-      "sha256": "25eea5eda7d67fc5067a866a5e629e60d8cc4c3b7054e794901983894ac1a77d",
+      "sha256": "a3ebda3aaa531b3661cd66af84ea8af922371244231031885e7590c7ef6546f7",
       "width": 390,
       "height": 900
     },
@@ -4423,25 +4666,25 @@
     },
     {
       "file": "ai-read-review-390-dark.png",
-      "sha256": "74fcfc979b7ee1ff970e1c4dcb8f6dab903a3258ee9bb5536004f19b75ef529e",
+      "sha256": "96dd14c097c1d10153fade51a117ab7703568c8f8c3e02e9ab0cc73f06a29acf",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-off-390-dark.png",
-      "sha256": "9e4bbfb52792c7a930c8b784a01744349f049675cb21f242833f846c24b722ed",
+      "sha256": "1a9230ff622018bb55bcce7b6e3c32cab20b6702f3b6ac7c9d6a5d74795b0725",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "61d98dabc7acc68bf1017e082510047935588b2b7cdf50c9155c07abe6103084",
+      "sha256": "43e7e4f3e62cfc114f72029b9b675de1c825bcd0c73857ef13576c447bd79bfe",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "b230f228d957fcfb22135d7fd6ef8befddce7ad7b3f415ff965e392a19ace5a8",
+      "sha256": "32125a0621f269d46fa438d699cd1383dc5a643f6ac82e12fbbb6b23b7cb1666",
       "width": 390,
       "height": 900
     },
@@ -4459,43 +4702,43 @@
     },
     {
       "file": "menu-review-error-390-light.png",
-      "sha256": "35a3e13e44758587a1c7b9546104f87f4d354817b90738a8389b7939dabdce30",
+      "sha256": "72ae6ee3608ea77cb46276731102e0eae08ecefd5835fdcf8117327de4ef3518",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "3e6f89540a1d5d52d28290fb18292d13cfa8021cd31ff5b5916450112d11e1af",
+      "sha256": "df5cc4fe453a2b3b60ca30af89a6b62ce638d2c75ab25ee3a09adcc6fa763915",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "2d8045770c5a3df19999aaa98ced2acada9ab4b8f5eea4562512a7f8c05f8ec5",
+      "sha256": "634d5211ae8236eadde9ef758fcdc5426377f44f5b14471fb0d09b06d3ed3be0",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "653aa860147b8ac01f8c502efa1f7114b266edfdbb29bd60b48d0540b0cbea85",
+      "sha256": "99c1c22b42f569ae1e7848a1df0d8cebc77da3575e4f706ecb180a46816942e6",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "192f4b7941d295f9f5e756c761345488ac41965571e4c2e30dec7a953f3ae062",
+      "sha256": "38e09b5a49f7da1413feff95946b60379aae199d7ad6ad65f91a7c6f9fe31ecd",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "228abdb60860e78785f9543911350bfec79b389c1641b1d1959b67c47c741d9d",
+      "sha256": "1026374c91020ef7ab25ad4d494911e4496337c39e913410441a46a19e1c46a8",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "9a61384872221530be79ec1443075459e768403128bc4d094aa7ccb9f47c4434",
+      "sha256": "e6c69e62ba33713404f06429532252ac54122c6c1ccfa2020a3ae15cfa304466",
       "width": 390,
       "height": 900
     },
@@ -4507,7 +4750,7 @@
     },
     {
       "file": "concept-detail-v1-1024-clickpath.png",
-      "sha256": "b231a815fc34ede399994c8a7176f6474d908862cd98eac7645eaacaa3078794",
+      "sha256": "b5c707d8d3905609b904607424ed4f7a73bbba143ec3ab50e2e0a74bf76d6f8a",
       "width": 1024,
       "height": 900
     },
@@ -4645,7 +4888,7 @@
     },
     {
       "file": "be39-detail-1280-light.png",
-      "sha256": "5f78677078845a6177d054f76f73e3f6347021fc63d1d6c5cc8373c6a686a5ab",
+      "sha256": "5c978978e0f2d14e8e4ec54c73004abbb4aa01e24dcf4c352e5e7509527017f8",
       "width": 1280,
       "height": 900
     }
@@ -4661,7 +4904,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.322Z",
+        "at": "2026-10-28T21:45:25.316Z",
         "resourceType": "Image"
       },
       {
@@ -4671,7 +4914,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.322Z",
+        "at": "2026-10-28T21:45:25.316Z",
         "resourceType": "Document"
       }
     ],
@@ -4683,7 +4926,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.292Z"
+        "at": "2026-10-28T21:45:25.297Z"
       },
       {
         "phase": "negative-probe",
@@ -4692,7 +4935,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-28T18:02:29.293Z"
+        "at": "2026-10-28T21:45:25.297Z"
       },
       {
         "phase": "negative-probe",
@@ -4701,7 +4944,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.293Z"
+        "at": "2026-10-28T21:45:25.297Z"
       },
       {
         "phase": "negative-probe",
@@ -4710,7 +4953,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.293Z"
+        "at": "2026-10-28T21:45:25.297Z"
       },
       {
         "phase": "negative-probe",
@@ -4719,7 +4962,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.293Z"
+        "at": "2026-10-28T21:45:25.298Z"
       },
       {
         "phase": "negative-probe",
@@ -4728,7 +4971,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T18:02:29.293Z"
+        "at": "2026-10-28T21:45:25.298Z"
       }
     ]
   },
