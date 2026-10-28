@@ -1,0 +1,1685 @@
+{
+  "generatedAt": "2026-10-28T21:05:16.492Z",
+  "ticket": "#98 BE-42 deel 1 (1A + 3B) en deel 2 (2A)",
+  "kind": "developer evidence — local production build, no production data or credentials",
+  "app": "http://localhost:3152",
+  "checks": {
+    "total": 85,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "overdracht: /alle-restaurants blijft onder 250 KB",
+        "passed": true,
+        "detail": "163.5 KB"
+      },
+      {
+        "name": "2A overdracht: /restaurant/6 blijft ná 2A onder 250 KB",
+        "passed": true,
+        "detail": "176 KB"
+      },
+      {
+        "name": "2A overdracht: de eerste overdracht groeit hooguit met één kaart (max. +25 KB op 169,9 KB)",
+        "passed": true,
+        "detail": "voor 169.9 KB, na 176 KB"
+      },
+      {
+        "name": "2A server-HTML: /restaurant/6 antwoordt met 200",
+        "passed": true,
+        "detail": "200"
+      },
+      {
+        "name": "2A server-HTML: de sectie heet \"Menukaarten\"",
+        "passed": true,
+        "detail": "heading in the server HTML"
+      },
+      {
+        "name": "2A server-HTML: elke kaart is een echte link (?kaart=<id>)",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "2A server-HTML: de standaardkaart is lunch, de eerste in de vaste volgorde (geen klok)",
+        "passed": true,
+        "detail": "{\"activeTab\":\"Lunchkaart\",\"panelTitle\":\"Lunchkaart · 36 gerechten\"}"
+      },
+      {
+        "name": "2A server-HTML: precies één tabblad is actief",
+        "passed": true,
+        "detail": "1 aria-current"
+      },
+      {
+        "name": "2A server-HTML: regressie — maar één kaart in de HTML (de lunch)",
+        "passed": true,
+        "detail": "36 kaarten (verwacht 36)"
+      },
+      {
+        "name": "2A server-HTML: regressie — geen gerechten van de andere kaarten, ook niet in de RSC-payload",
+        "passed": true,
+        "detail": "{\"borrelOnly\":\"Oesters naturel\",\"borrelFound\":false,\"dinerOnly\":\"Klassieke steak tartaar (90 gr.)\",\"dinerFound\":false}"
+      },
+      {
+        "name": "2A server-HTML: ?kaart=6-borrel rendert de borrelkaart zonder JavaScript",
+        "passed": true,
+        "detail": "{\"cards\":43,\"expected\":43,\"borrelDish\":true,\"lunchDish\":false,\"dinerDish\":false}"
+      },
+      {
+        "name": "2A server-HTML: een onbekende ?kaart= valt terug op de standaardkaart",
+        "passed": true,
+        "detail": "36 kaarten (verwacht 36)"
+      },
+      {
+        "name": "2A server-HTML: /restaurant/1 (twee kaarten) toont er ook maar één",
+        "passed": true,
+        "detail": "{\"tabs\":2,\"current\":1,\"dinerDish\":false}"
+      },
+      {
+        "name": "1A light: de kaart is geen grote link meer, de naam is de link",
+        "passed": true,
+        "detail": "{\"nameHref\":\"/restaurant/6\",\"cardIsLink\":false}"
+      },
+      {
+        "name": "1A light: de grote knop \"Bekijk N menukaarten\" is weg",
+        "passed": true,
+        "detail": "0 .ar-cta"
+      },
+      {
+        "name": "1A light: elke menukaart is een eigen knop naar /menu/<id>",
+        "passed": true,
+        "detail": "[\"/menu/6-lunch\",\"/menu/6-diner\",\"/menu/6-borrel\",\"/menu/6-specialiteiten\"]"
+      },
+      {
+        "name": "1A light: de knoppen dragen de echte kaartnamen",
+        "passed": true,
+        "detail": "[\"🥗\\nLunchkaart\",\"🍽\\nDinerkaart\",\"🍸\\nBorrelkaart\",\"⭐\\nSpecialiteiten\"]"
+      },
+      {
+        "name": "1A light: tabvolgorde is naam → kaartknoppen",
+        "passed": true,
+        "detail": "[\"/restaurant/6\",\"/menu/6-lunch\",\"/menu/6-diner\",\"/menu/6-borrel\",\"/menu/6-specialiteiten\"]"
+      },
+      {
+        "name": "1A light: alle aanraakvlakken zijn ≥ 44 px",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "1A light: menuknoppen gebruiken de zachte tokenparen (≥ 4,5:1)",
+        "passed": true,
+        "detail": "{\"ratio\":16.16}"
+      },
+      {
+        "name": "1A light: geen horizontale overflow op 1280 px",
+        "passed": true,
+        "detail": "-6px"
+      },
+      {
+        "name": "1A light: een restaurant zonder menukaart blijft zoals het was",
+        "passed": true,
+        "detail": "{\"isWholeLink\":true,\"href\":\"/restaurant/8\",\"label\":\"Nog geen menukaart\",\"restaurantLink\":\"Bekijk restaurant →\",\"extraActions\":0}"
+      },
+      {
+        "name": "1A light: de focus op een menuknop is zichtbaar",
+        "passed": true,
+        "detail": "{\"active\":true,\"outlineWidth\":\"2px\",\"outlineStyle\":\"solid\",\"outlineColor\":\"rgb(122, 78, 0)\"}"
+      },
+      {
+        "name": "1A light 390px: knoppen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"overflow\":0,\"heights\":[44,44,44,44,44,44,44,44,44,44,44]}"
+      },
+      {
+        "name": "1A light 320px: knoppen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"overflow\":0,\"heights\":[44,44,44,44,44,44,44,44,44,44,44]}"
+      },
+      {
+        "name": "3B light restaurant: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(243, 241, 236)\",\"fg\":\"rgb(26, 20, 16)\",\"ratio\":16.16,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B light restaurant: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":325,\"container\":325}"
+      },
+      {
+        "name": "3B light menu: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(243, 241, 236)\",\"fg\":\"rgb(26, 20, 16)\",\"ratio\":16.16,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B light menu: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":325,\"container\":325}"
+      },
+      {
+        "name": "3B light search: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(243, 241, 236)\",\"fg\":\"rgb(26, 20, 16)\",\"ratio\":16.16,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B light search: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":1183,\"container\":1183}"
+      },
+      {
+        "name": "3B light search: \"op aanvraag\" blijft gedempt op het zachte vlak (≥ 4,5:1)",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(243, 241, 236)\",\"fg\":\"rgb(92, 86, 80)\",\"ratio\":6.41}"
+      },
+      {
+        "name": "3B light home: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(243, 241, 236)\",\"fg\":\"rgb(26, 20, 16)\",\"ratio\":16.16,\"weight\":\"800\"}"
+      },
+      {
+        "name": "2A light: de sectie heet \"Menukaarten\" met één tabblad per kaart",
+        "passed": true,
+        "detail": "{\"heading\":\"Menukaarten\",\"nav\":\"Menukaarten\",\"tabs\":[\"Lunchkaart\",\"Dinerkaart\",\"Borrelkaart\",\"Specialiteiten\"]}"
+      },
+      {
+        "name": "2A light: de tabbladen staan in de vaste volgorde (lunch, diner, borrel, overige)",
+        "passed": true,
+        "detail": "[\"Lunchkaart\",\"Dinerkaart\",\"Borrelkaart\",\"Specialiteiten\"]"
+      },
+      {
+        "name": "2A light: elk tabblad toont het echte aantal gerechten",
+        "passed": true,
+        "detail": "gemeten 36,29,43,3 / verwacht 36,29,43,3"
+      },
+      {
+        "name": "2A light: elk tabblad is een echte link naar die kaart (?kaart=<id>)",
+        "passed": true,
+        "detail": "[\"/restaurant/6?kaart=6-lunch\",\"/restaurant/6?kaart=6-diner\",\"/restaurant/6?kaart=6-borrel\",\"/restaurant/6?kaart=6-specialiteiten\"]"
+      },
+      {
+        "name": "2A light: de standaardkaart is de eerste in de vaste volgorde, dus lunch",
+        "passed": true,
+        "detail": "{\"active\":\"Lunchkaart\",\"activeTabs\":1,\"panel\":\"Lunchkaart · 36 gerechten\"}"
+      },
+      {
+        "name": "2A light: onder het tabblad staat de hele kaart van die kaart",
+        "passed": true,
+        "detail": "{\"cards\":36,\"expected\":36,\"sections\":5,\"prices\":36}"
+      },
+      {
+        "name": "2A light: de prijs is ook hier het zachte vlak met primaire tekst",
+        "passed": true,
+        "detail": "[\"€4,75\",\"€4,75\",\"€5,75\"]"
+      },
+      {
+        "name": "2A light: de bronregel en de originele kaart blijven staan",
+        "passed": true,
+        "detail": "{\"source\":\"Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24\",\"href\":\"https://www.brasseriebardot.nl/brasserie-bardot/\"}"
+      },
+      {
+        "name": "2A light: de aparte menupagina /menu/<id> blijft bereikbaar",
+        "passed": true,
+        "detail": "/menu/6-lunch"
+      },
+      {
+        "name": "2A light: de tabbladen zijn tikvlakken van ≥ 44 px",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "2A light: geen horizontale overflow op 1280 px",
+        "passed": true,
+        "detail": "-6px"
+      },
+      {
+        "name": "2A light: wisselen met JavaScript zonder volledige herlaadbeurt",
+        "passed": true,
+        "detail": "{\"before\":1,\"after\":1,\"url\":\"/restaurant/6?kaart=6-borrel\"}"
+      },
+      {
+        "name": "2A light: na het wisselen staat alleen de borrelkaart in het paneel",
+        "passed": true,
+        "detail": "{\"cards\":43,\"expected\":43,\"active\":\"Borrelkaart\",\"panel\":\"Borrelkaart · 43 gerechten\"}"
+      },
+      {
+        "name": "2A light: de bronregel volgt de gekozen kaart",
+        "passed": true,
+        "detail": "\"Bron: brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf · 2026-03-25\""
+      },
+      {
+        "name": "2A light 390px: tabbladen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"heights\":[44,44,44,44],\"overflow\":0}"
+      },
+      {
+        "name": "2A light 320px: tabbladen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"heights\":[44,44,44,44],\"overflow\":0}"
+      },
+      {
+        "name": "1A dark: de kaart is geen grote link meer, de naam is de link",
+        "passed": true,
+        "detail": "{\"nameHref\":\"/restaurant/6\",\"cardIsLink\":false}"
+      },
+      {
+        "name": "1A dark: de grote knop \"Bekijk N menukaarten\" is weg",
+        "passed": true,
+        "detail": "0 .ar-cta"
+      },
+      {
+        "name": "1A dark: elke menukaart is een eigen knop naar /menu/<id>",
+        "passed": true,
+        "detail": "[\"/menu/6-lunch\",\"/menu/6-diner\",\"/menu/6-borrel\",\"/menu/6-specialiteiten\"]"
+      },
+      {
+        "name": "1A dark: de knoppen dragen de echte kaartnamen",
+        "passed": true,
+        "detail": "[\"🥗\\nLunchkaart\",\"🍽\\nDinerkaart\",\"🍸\\nBorrelkaart\",\"⭐\\nSpecialiteiten\"]"
+      },
+      {
+        "name": "1A dark: tabvolgorde is naam → kaartknoppen",
+        "passed": true,
+        "detail": "[\"/restaurant/6\",\"/menu/6-lunch\",\"/menu/6-diner\",\"/menu/6-borrel\",\"/menu/6-specialiteiten\"]"
+      },
+      {
+        "name": "1A dark: alle aanraakvlakken zijn ≥ 44 px",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "1A dark: menuknoppen gebruiken de zachte tokenparen (≥ 4,5:1)",
+        "passed": true,
+        "detail": "{\"ratio\":10.31}"
+      },
+      {
+        "name": "1A dark: geen horizontale overflow op 1280 px",
+        "passed": true,
+        "detail": "-6px"
+      },
+      {
+        "name": "1A dark: een restaurant zonder menukaart blijft zoals het was",
+        "passed": true,
+        "detail": "{\"isWholeLink\":true,\"href\":\"/restaurant/8\",\"label\":\"Nog geen menukaart\",\"restaurantLink\":\"Bekijk restaurant →\",\"extraActions\":0}"
+      },
+      {
+        "name": "1A dark: de focus op een menuknop is zichtbaar",
+        "passed": true,
+        "detail": "{\"active\":true,\"outlineWidth\":\"2px\",\"outlineStyle\":\"solid\",\"outlineColor\":\"rgb(242, 195, 91)\"}"
+      },
+      {
+        "name": "1A dark 390px: knoppen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"overflow\":0,\"heights\":[44,44,44,44,44,44,44,44,44,44,44]}"
+      },
+      {
+        "name": "1A dark 320px: knoppen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"overflow\":0,\"heights\":[44,44,44,44,44,44,44,44,44,44,44]}"
+      },
+      {
+        "name": "3B dark restaurant: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(53, 58, 65)\",\"fg\":\"rgb(242, 243, 244)\",\"ratio\":10.31,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B dark restaurant: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":325,\"container\":325}"
+      },
+      {
+        "name": "3B dark menu: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(53, 58, 65)\",\"fg\":\"rgb(242, 243, 244)\",\"ratio\":10.31,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B dark menu: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":325,\"container\":325}"
+      },
+      {
+        "name": "3B dark search: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(53, 58, 65)\",\"fg\":\"rgb(242, 243, 244)\",\"ratio\":10.31,\"weight\":\"800\"}"
+      },
+      {
+        "name": "3B dark search: de prijs staat rechts in zijn rij",
+        "passed": true,
+        "detail": "{\"right\":1183,\"container\":1183}"
+      },
+      {
+        "name": "3B dark search: \"op aanvraag\" blijft gedempt op het zachte vlak (≥ 4,5:1)",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(53, 58, 65)\",\"fg\":\"rgb(182, 188, 195)\",\"ratio\":5.99}"
+      },
+      {
+        "name": "3B dark home: zacht vlak, primaire tekst, vet, ≥ 4,5:1",
+        "passed": true,
+        "detail": "{\"bg\":\"rgb(53, 58, 65)\",\"fg\":\"rgb(242, 243, 244)\",\"ratio\":10.31,\"weight\":\"800\"}"
+      },
+      {
+        "name": "2A dark: de sectie heet \"Menukaarten\" met één tabblad per kaart",
+        "passed": true,
+        "detail": "{\"heading\":\"Menukaarten\",\"nav\":\"Menukaarten\",\"tabs\":[\"Lunchkaart\",\"Dinerkaart\",\"Borrelkaart\",\"Specialiteiten\"]}"
+      },
+      {
+        "name": "2A dark: de tabbladen staan in de vaste volgorde (lunch, diner, borrel, overige)",
+        "passed": true,
+        "detail": "[\"Lunchkaart\",\"Dinerkaart\",\"Borrelkaart\",\"Specialiteiten\"]"
+      },
+      {
+        "name": "2A dark: elk tabblad toont het echte aantal gerechten",
+        "passed": true,
+        "detail": "gemeten 36,29,43,3 / verwacht 36,29,43,3"
+      },
+      {
+        "name": "2A dark: elk tabblad is een echte link naar die kaart (?kaart=<id>)",
+        "passed": true,
+        "detail": "[\"/restaurant/6?kaart=6-lunch\",\"/restaurant/6?kaart=6-diner\",\"/restaurant/6?kaart=6-borrel\",\"/restaurant/6?kaart=6-specialiteiten\"]"
+      },
+      {
+        "name": "2A dark: de standaardkaart is de eerste in de vaste volgorde, dus lunch",
+        "passed": true,
+        "detail": "{\"active\":\"Lunchkaart\",\"activeTabs\":1,\"panel\":\"Lunchkaart · 36 gerechten\"}"
+      },
+      {
+        "name": "2A dark: onder het tabblad staat de hele kaart van die kaart",
+        "passed": true,
+        "detail": "{\"cards\":36,\"expected\":36,\"sections\":5,\"prices\":36}"
+      },
+      {
+        "name": "2A dark: de prijs is ook hier het zachte vlak met primaire tekst",
+        "passed": true,
+        "detail": "[\"€4,75\",\"€4,75\",\"€5,75\"]"
+      },
+      {
+        "name": "2A dark: de bronregel en de originele kaart blijven staan",
+        "passed": true,
+        "detail": "{\"source\":\"Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24\",\"href\":\"https://www.brasseriebardot.nl/brasserie-bardot/\"}"
+      },
+      {
+        "name": "2A dark: de aparte menupagina /menu/<id> blijft bereikbaar",
+        "passed": true,
+        "detail": "/menu/6-lunch"
+      },
+      {
+        "name": "2A dark: de tabbladen zijn tikvlakken van ≥ 44 px",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "2A dark: geen horizontale overflow op 1280 px",
+        "passed": true,
+        "detail": "-6px"
+      },
+      {
+        "name": "2A dark: wisselen met JavaScript zonder volledige herlaadbeurt",
+        "passed": true,
+        "detail": "{\"before\":1,\"after\":1,\"url\":\"/restaurant/6?kaart=6-borrel\"}"
+      },
+      {
+        "name": "2A dark: na het wisselen staat alleen de borrelkaart in het paneel",
+        "passed": true,
+        "detail": "{\"cards\":43,\"expected\":43,\"active\":\"Borrelkaart\",\"panel\":\"Borrelkaart · 43 gerechten\"}"
+      },
+      {
+        "name": "2A dark: de bronregel volgt de gekozen kaart",
+        "passed": true,
+        "detail": "\"Bron: brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf · 2026-03-25\""
+      },
+      {
+        "name": "2A dark 390px: tabbladen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"heights\":[44,44,44,44],\"overflow\":0}"
+      },
+      {
+        "name": "2A dark 320px: tabbladen ≥ 44 px en geen horizontale overflow",
+        "passed": true,
+        "detail": "{\"heights\":[44,44,44,44],\"overflow\":0}"
+      }
+    ]
+  },
+  "measurements": {
+    "server-html": {
+      "standard": {
+        "bytes": 47969,
+        "markupKb": 28
+      },
+      "borrel": {
+        "bytes": 40013,
+        "markupKb": 20.4
+      },
+      "single": {
+        "bytes": 21497,
+        "markupKb": 11.7
+      }
+    },
+    "alle-restaurants-light": {
+      "theme": "light",
+      "cards": 25,
+      "menuCards": 4,
+      "noMenuCards": 21,
+      "bigCtas": 0,
+      "cardIsLink": false,
+      "nameIsLink": true,
+      "nameText": "Brasserie Bardot",
+      "nameHref": "/restaurant/6",
+      "ariaLabel": "Menukaarten van Brasserie Bardot",
+      "buttons": [
+        {
+          "label": "🥗\nLunchkaart",
+          "href": "/menu/6-lunch",
+          "height": 44
+        },
+        {
+          "label": "🍽\nDinerkaart",
+          "href": "/menu/6-diner",
+          "height": 44
+        },
+        {
+          "label": "🍸\nBorrelkaart",
+          "href": "/menu/6-borrel",
+          "height": 44
+        },
+        {
+          "label": "⭐\nSpecialiteiten",
+          "href": "/menu/6-specialiteiten",
+          "height": 44
+        }
+      ],
+      "focusOrder": [
+        "/restaurant/6",
+        "/menu/6-lunch",
+        "/menu/6-diner",
+        "/menu/6-borrel",
+        "/menu/6-specialiteiten"
+      ],
+      "noMenu": {
+        "isWholeLink": true,
+        "href": "/restaurant/8",
+        "label": "Nog geen menukaart",
+        "restaurantLink": "Bekijk restaurant →",
+        "extraActions": 0
+      },
+      "buttonColors": {
+        "fg": "rgb(26, 20, 16)",
+        "bg": "rgb(243, 241, 236)",
+        "soft": "rgb(243, 241, 236)",
+        "primary": "rgb(26, 20, 16)",
+        "ratio": 16.16,
+        "fontWeight": "700"
+      },
+      "text": "🥂 Brasserie Bardot Franse Brasserie · Wijnbar · €€ 📍 Van Coothplein 12, 4811 NE Breda 🥗 Lunchkaart 🍽 Dinerkaart 🍸 Borrelkaart ⭐ Specialiteiten",
+      "overflow": -6
+    },
+    "alle-restaurants-light-390": {
+      "overflow": 0,
+      "heights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    "alle-restaurants-light-320": {
+      "overflow": 0,
+      "heights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    "price-restaurant-light": {
+      "selector": ".td-price",
+      "theme": "light",
+      "text": "€4,75",
+      "fg": "rgb(26, 20, 16)",
+      "bg": "rgb(243, 241, 236)",
+      "soft": "rgb(243, 241, 236)",
+      "primary": "rgb(26, 20, 16)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 16.16,
+      "fontWeight": "800",
+      "rightEdge": 325,
+      "containerRight": 325
+    },
+    "price-menu-light": {
+      "selector": ".td-price",
+      "theme": "light",
+      "text": "€20,95",
+      "fg": "rgb(26, 20, 16)",
+      "bg": "rgb(243, 241, 236)",
+      "soft": "rgb(243, 241, 236)",
+      "primary": "rgb(26, 20, 16)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 16.16,
+      "fontWeight": "800",
+      "rightEdge": 325,
+      "containerRight": 325
+    },
+    "price-search-light": {
+      "selector": ".price-label:not(.price-label--soft)",
+      "theme": "light",
+      "text": "€27,95",
+      "fg": "rgb(26, 20, 16)",
+      "bg": "rgb(243, 241, 236)",
+      "soft": "rgb(243, 241, 236)",
+      "primary": "rgb(26, 20, 16)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 16.16,
+      "fontWeight": "800",
+      "rightEdge": 1183,
+      "containerRight": 1183
+    },
+    "price-on-request-light": {
+      "selector": ".price-label--soft",
+      "theme": "light",
+      "text": "op aanvraag",
+      "fg": "rgb(92, 86, 80)",
+      "bg": "rgb(243, 241, 236)",
+      "soft": "rgb(243, 241, 236)",
+      "primary": "rgb(26, 20, 16)",
+      "usesSoft": true,
+      "usesPrimary": false,
+      "ratio": 6.41,
+      "fontWeight": "700",
+      "rightEdge": 1186,
+      "containerRight": 1186
+    },
+    "price-home-light": {
+      "selector": ".tonight-price",
+      "theme": "light",
+      "text": "€13,75",
+      "fg": "rgb(26, 20, 16)",
+      "bg": "rgb(243, 241, 236)",
+      "soft": "rgb(243, 241, 236)",
+      "primary": "rgb(26, 20, 16)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 16.16,
+      "fontWeight": "800",
+      "rightEdge": 1198,
+      "containerRight": 1198
+    },
+    "tabs-light": {
+      "theme": "light",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": -6
+    },
+    "tabs-switch-light": {
+      "navigationBefore": 1,
+      "navigationEntries": 1,
+      "urlBefore": "/restaurant/6",
+      "url": "/restaurant/6?kaart=6-borrel",
+      "panelTitle": "Borrelkaart · 43 gerechten",
+      "cards": 43,
+      "firstDish": "Oesters naturel",
+      "activeName": "Borrelkaart",
+      "source": "Bron: brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf · 2026-03-25"
+    },
+    "tabs-light-390": {
+      "theme": "light",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": 0
+    },
+    "tabs-light-320": {
+      "theme": "light",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": 0
+    },
+    "alle-restaurants-dark": {
+      "theme": "dark",
+      "cards": 25,
+      "menuCards": 4,
+      "noMenuCards": 21,
+      "bigCtas": 0,
+      "cardIsLink": false,
+      "nameIsLink": true,
+      "nameText": "Brasserie Bardot",
+      "nameHref": "/restaurant/6",
+      "ariaLabel": "Menukaarten van Brasserie Bardot",
+      "buttons": [
+        {
+          "label": "🥗\nLunchkaart",
+          "href": "/menu/6-lunch",
+          "height": 44
+        },
+        {
+          "label": "🍽\nDinerkaart",
+          "href": "/menu/6-diner",
+          "height": 44
+        },
+        {
+          "label": "🍸\nBorrelkaart",
+          "href": "/menu/6-borrel",
+          "height": 44
+        },
+        {
+          "label": "⭐\nSpecialiteiten",
+          "href": "/menu/6-specialiteiten",
+          "height": 44
+        }
+      ],
+      "focusOrder": [
+        "/restaurant/6",
+        "/menu/6-lunch",
+        "/menu/6-diner",
+        "/menu/6-borrel",
+        "/menu/6-specialiteiten"
+      ],
+      "noMenu": {
+        "isWholeLink": true,
+        "href": "/restaurant/8",
+        "label": "Nog geen menukaart",
+        "restaurantLink": "Bekijk restaurant →",
+        "extraActions": 0
+      },
+      "buttonColors": {
+        "fg": "rgb(242, 243, 244)",
+        "bg": "rgb(53, 58, 65)",
+        "soft": "rgb(53, 58, 65)",
+        "primary": "rgb(242, 243, 244)",
+        "ratio": 10.31,
+        "fontWeight": "700"
+      },
+      "text": "🥂 Brasserie Bardot Franse Brasserie · Wijnbar · €€ 📍 Van Coothplein 12, 4811 NE Breda 🥗 Lunchkaart 🍽 Dinerkaart 🍸 Borrelkaart ⭐ Specialiteiten",
+      "overflow": -6
+    },
+    "alle-restaurants-dark-390": {
+      "overflow": 0,
+      "heights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    "alle-restaurants-dark-320": {
+      "overflow": 0,
+      "heights": [
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44,
+        44
+      ]
+    },
+    "price-restaurant-dark": {
+      "selector": ".td-price",
+      "theme": "dark",
+      "text": "€4,75",
+      "fg": "rgb(242, 243, 244)",
+      "bg": "rgb(53, 58, 65)",
+      "soft": "rgb(53, 58, 65)",
+      "primary": "rgb(242, 243, 244)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 10.31,
+      "fontWeight": "800",
+      "rightEdge": 325,
+      "containerRight": 325
+    },
+    "price-menu-dark": {
+      "selector": ".td-price",
+      "theme": "dark",
+      "text": "€20,95",
+      "fg": "rgb(242, 243, 244)",
+      "bg": "rgb(53, 58, 65)",
+      "soft": "rgb(53, 58, 65)",
+      "primary": "rgb(242, 243, 244)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 10.31,
+      "fontWeight": "800",
+      "rightEdge": 325,
+      "containerRight": 325
+    },
+    "price-search-dark": {
+      "selector": ".price-label:not(.price-label--soft)",
+      "theme": "dark",
+      "text": "€27,95",
+      "fg": "rgb(242, 243, 244)",
+      "bg": "rgb(53, 58, 65)",
+      "soft": "rgb(53, 58, 65)",
+      "primary": "rgb(242, 243, 244)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 10.31,
+      "fontWeight": "800",
+      "rightEdge": 1183,
+      "containerRight": 1183
+    },
+    "price-on-request-dark": {
+      "selector": ".price-label--soft",
+      "theme": "dark",
+      "text": "op aanvraag",
+      "fg": "rgb(182, 188, 195)",
+      "bg": "rgb(53, 58, 65)",
+      "soft": "rgb(53, 58, 65)",
+      "primary": "rgb(242, 243, 244)",
+      "usesSoft": true,
+      "usesPrimary": false,
+      "ratio": 5.99,
+      "fontWeight": "700",
+      "rightEdge": 1186,
+      "containerRight": 1186
+    },
+    "price-home-dark": {
+      "selector": ".tonight-price",
+      "theme": "dark",
+      "text": "€13,75",
+      "fg": "rgb(242, 243, 244)",
+      "bg": "rgb(53, 58, 65)",
+      "soft": "rgb(53, 58, 65)",
+      "primary": "rgb(242, 243, 244)",
+      "usesSoft": true,
+      "usesPrimary": true,
+      "ratio": 10.31,
+      "fontWeight": "800",
+      "rightEdge": 1198,
+      "containerRight": 1198
+    },
+    "tabs-dark": {
+      "theme": "dark",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": -6
+    },
+    "tabs-switch-dark": {
+      "navigationBefore": 1,
+      "navigationEntries": 1,
+      "urlBefore": "/restaurant/6",
+      "url": "/restaurant/6?kaart=6-borrel",
+      "panelTitle": "Borrelkaart · 43 gerechten",
+      "cards": 43,
+      "firstDish": "Oesters naturel",
+      "activeName": "Borrelkaart",
+      "source": "Bron: brasseriebardot.nl/wp-content/uploads/2025/11/DEF-Dinerkaart-Bardot-5-nov.-2025-.pdf · 2026-03-25"
+    },
+    "tabs-dark-390": {
+      "theme": "dark",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": 0
+    },
+    "tabs-dark-320": {
+      "theme": "dark",
+      "heading": "Menukaarten",
+      "navLabel": "Menukaarten",
+      "tabs": [
+        {
+          "name": "Lunchkaart",
+          "count": "36",
+          "href": "/restaurant/6?kaart=6-lunch",
+          "active": true,
+          "height": 44
+        },
+        {
+          "name": "Dinerkaart",
+          "count": "29",
+          "href": "/restaurant/6?kaart=6-diner",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Borrelkaart",
+          "count": "43",
+          "href": "/restaurant/6?kaart=6-borrel",
+          "active": false,
+          "height": 44
+        },
+        {
+          "name": "Specialiteiten",
+          "count": "3",
+          "href": "/restaurant/6?kaart=6-specialiteiten",
+          "active": false,
+          "height": 44
+        }
+      ],
+      "activeTabs": 1,
+      "activeName": "Lunchkaart",
+      "panelTitle": "Lunchkaart · 36 gerechten",
+      "cards": 36,
+      "sections": 5,
+      "dishNames": [
+        "Croissant met jam en boter",
+        "Pain au chocolat",
+        "Appelkruimeltaart (Holkamp)",
+        "Cheesecake (Holtkamp)",
+        "Hazelnoot karameltaart (Holtkamp)",
+        "Verse slagroom",
+        "Menu du Midi",
+        "Croque Madame",
+        "Club Classic",
+        "Club Coppa di Parma",
+        "Steak tartaar (90 gr.)",
+        "Steak tartaar (150 gr.)",
+        "Vol au vent",
+        "Runderentrecôte (220 gr.)",
+        "Bisque de homard",
+        "Vistrio",
+        "Omelette zalm met truffel",
+        "Garnalenkroketten (2 st.)",
+        "Stracciatella",
+        "Tartelette roquefort",
+        "Caesar salade",
+        "Kreeft (500/600 gr.)",
+        "Zeetong à la meunière",
+        "Gnocchi",
+        "Desem stokbrood",
+        "Verse frites",
+        "Verse frites (truffel)",
+        "Frisse botersalade",
+        "Seizoensgroenten",
+        "Café complet",
+        "Crème brûlée",
+        "Plateau de fromage (3)",
+        "Plateau de fromage (5)",
+        "Chocolade truffels (2)",
+        "Café Spécial",
+        "Espresso Martini"
+      ],
+      "prices": [
+        "€4,75",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€5,75",
+        "€0,75",
+        "€38,50",
+        "€10,95",
+        "€16,95",
+        "€16,95",
+        "€15,95",
+        "€24,95",
+        "€16,95",
+        "€37,95",
+        "€13,95",
+        "€17,95",
+        "€16,95",
+        "€21,95",
+        "€16,95",
+        "€17,95",
+        "€16,95",
+        "op aanvraag",
+        "op aanvraag",
+        "€22,95",
+        "€5,95",
+        "€4,75",
+        "€5,75",
+        "€5,75",
+        "€6,75",
+        "€13,95",
+        "€9,95",
+        "€10,95",
+        "€15,95",
+        "€3,75",
+        "€9,95",
+        "€11,95"
+      ],
+      "source": "Bron: www.brasseriebardot.nl/brasserie-bardot/ · 2026-03-24",
+      "sourceHref": "https://www.brasseriebardot.nl/brasserie-bardot/",
+      "menuPageHref": "/menu/6-lunch",
+      "overflow": 0
+    }
+  },
+  "transfer": [
+    {
+      "label": "voor 2A (Bardot, 4 kaarten)",
+      "page": "/restaurant/6",
+      "source": "BE-42 deel 1-bewijs (zelfde productiebuild, zelfde meetmethode)",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalKb": 169.9,
+      "documentKb": null,
+      "resourceCount": null
+    },
+    {
+      "label": "na 1A",
+      "page": "/alle-restaurants",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 167439,
+      "totalKb": 163.5,
+      "documentKb": 3,
+      "resourceCount": 14
+    },
+    {
+      "label": "na 2A (Bardot, 4 kaarten)",
+      "page": "/restaurant/6",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 180256,
+      "totalKb": 176,
+      "documentKb": 11.4,
+      "resourceCount": 18
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-1280.png",
+      "bytes": 249360,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-390.png",
+      "bytes": 58787,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-320.png",
+      "bytes": 47708,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-1280.png",
+      "bytes": 313000,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-390.png",
+      "bytes": 45141,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-320.png",
+      "bytes": 43304,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-1280.png",
+      "bytes": 241313,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-390.png",
+      "bytes": 54487,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-320.png",
+      "bytes": 52178,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-1280.png",
+      "bytes": 114318,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-390.png",
+      "bytes": 38113,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-320.png",
+      "bytes": 37300,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-1280.png",
+      "bytes": 243423,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-390.png",
+      "bytes": 60030,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-320.png",
+      "bytes": 49528,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-1280.png",
+      "bytes": 296176,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-390.png",
+      "bytes": 43419,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-320.png",
+      "bytes": 41605,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-1280.png",
+      "bytes": 225996,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-390.png",
+      "bytes": 53754,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-320.png",
+      "bytes": 51373,
+      "viewport": "320x720"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-1280.png",
+      "bytes": 112303,
+      "viewport": "1280x900"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-390.png",
+      "bytes": 37089,
+      "viewport": "390x844"
+    },
+    {
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-320.png",
+      "bytes": 36260,
+      "viewport": "320x720"
+    }
+  ],
+  "gaps": [
+    "Geen restaurant met precies één menukaart in de lokale data; /restaurant/1 (Wolfslaar, twee kaarten) is het kleinste echte geval (geen data toegevoegd).",
+    "De \"voor\"-meting van /restaurant/6 (169,9 KB) komt uit het deel 1-bewijs: dit script draait altijd op de huidige code en kan de oude toestand niet opnieuw meten.",
+    "Dit is developer-evidence op een lokale productiebuild: geen productie, geen echte Supabase-credentials, geen merge of publicatie."
+  ],
+  "result": "passed"
+}

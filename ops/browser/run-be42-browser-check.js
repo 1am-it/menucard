@@ -376,17 +376,37 @@ async function setViewport(cdp, width, height) {
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
 }
 
-async function shot(cdp, name) {
+async function shot(cdp, name, { fromSelector = null } = {}) {
   const metrics = await cdp.send('Page.getLayoutMetrics');
   const content = metrics.cssContentSize || metrics.contentSize;
   const width = Math.min(viewport.width, Math.ceil(content.width));
   const wholePage = viewport.width >= 720;
-  const height = wholePage ? Math.min(5000, Math.ceil(content.height)) : viewport.height;
+  const pageHeight = Math.min(5000, Math.ceil(content.height));
+  let clip = { x: 0, y: 0, width, height: wholePage ? pageHeight : viewport.height };
+
+  // BE-42 2A — op de telefoon is één viewport te weinig: de tabbladen en de
+  // kaart staan onder de hero. Met `fromSelector` begint de opname bij dat
+  // element (in paginacoördinaten) en loopt hij door tot ± 1600 px, zodat de
+  // sectie "Menukaarten" echt in het bewijs staat.
+  if (fromSelector) {
+    const box = await evalJs(cdp, `(() => {
+      const el = document.querySelector('${fromSelector}');
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return { top: Math.round(rect.top + window.scrollY), height: Math.round(rect.height) };
+    })()`);
+    if (box && box.height > 0) {
+      const top = Math.max(0, box.top - 20);
+      const height = Math.max(viewport.height, Math.min(1600, box.height + 900));
+      clip = { x: 0, y: top, width, height: Math.min(height, Math.max(0, pageHeight - top)) };
+    }
+  }
+
   const result = await cdp.send('Page.captureScreenshot', {
     format: 'png',
     fromSurface: true,
-    captureBeyondViewport: wholePage,
-    clip: { x: 0, y: 0, width, height, scale: 1 },
+    captureBeyondViewport: wholePage || Boolean(fromSelector),
+    clip: { ...clip, scale: 1 },
   });
   const buffer = Buffer.from(result.data, 'base64');
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -667,33 +687,23 @@ async function main() {
       await setViewport(cdp, 1280, 900);
 
       // Screenshots: /alle-restaurants en /restaurant/6 op 1280, 390 en 320 px.
-      // Op 1280 staat de hele pagina in beeld. Op de telefoon schuift de
-      // opname naar de tabbladen, zodat de sectie "Menukaarten" en de kaart
-      // eronder echt in het bewijs staan; de zwevende menubalk blijft dan op
-      // zijn eigen plek (geen beyond-viewport-opname).
-      for (const [name, url, ready, toMenu] of [
-        ['alle-restaurants', `${APP}/alle-restaurants`, 'document.querySelector(".ar-card") !== null', false],
-        ['restaurant-6', `${APP}/restaurant/6`, 'document.querySelector(".td-price") !== null', true],
+      // Op 1280 staat de hele pagina in beeld. Op de telefoon begint de opname
+      // bij de tabbladen (`fromSelector`), zodat de sectie "Menukaarten" en de
+      // kaart eronder echt in het bewijs staan.
+      for (const [name, url, ready, phoneSelector] of [
+        ['alle-restaurants', `${APP}/alle-restaurants`, 'document.querySelector(".ar-card") !== null', null],
+        ['restaurant-6', `${APP}/restaurant/6`, 'document.querySelector(".td-price") !== null', '.rpm-tabs'],
         // 2A — Bardot met een gewisseld tabblad (de borrelkaart, de grootste).
-        ['restaurant-6-borrel', `${APP}/restaurant/6?kaart=6-borrel`, 'document.querySelector(".rpm-panel") !== null', true],
+        ['restaurant-6-borrel', `${APP}/restaurant/6?kaart=6-borrel`, 'document.querySelector(".rpm-panel") !== null', '.rpm-tabs'],
         // De lokale data heeft geen restaurant met precies één kaart; met twee
         // kaarten is /restaurant/1 (Wolfslaar) het kleinste echte geval.
-        ['restaurant-1', `${APP}/restaurant/1`, 'document.querySelector(".td-price") !== null', true],
+        ['restaurant-1', `${APP}/restaurant/1`, 'document.querySelector(".td-price") !== null', '.rpm-tabs'],
       ]) {
         for (const [width, height] of [[1280, 900], [390, 844], [320, 720]]) {
           await setViewport(cdp, width, height);
           await navigate(cdp, url, ready);
           await new Promise((resolve) => setTimeout(resolve, 250));
-          if (toMenu && width < 720) {
-            await evalJs(cdp, `(() => {
-              const el = document.querySelector('.rpm-tabs');
-              if (!el) return false;
-              window.scrollTo(0, Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY) - 16));
-              return true;
-            })()`);
-            await new Promise((resolve) => setTimeout(resolve, 250));
-          }
-          await shot(cdp, `${name}-${theme}-${width}.png`);
+          await shot(cdp, `${name}-${theme}-${width}.png`, { fromSelector: width < 720 ? phoneSelector : null });
         }
       }
     }
