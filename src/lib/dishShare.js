@@ -210,6 +210,16 @@ function dishShareMetadata({
   if (image) openGraph.images = [{ url: image, width: 1200, height: 630, alt: title }];
   const metadata = { title };
   if (ogDescription) metadata.description = ogDescription;
+  // De basis voor alle relatieve metadata: NEXT_PUBLIC_SITE_URL, anders de
+  // host van dit verzoek (zie siteBaseUrl). Alleen als die basis echt een URL
+  // is; anders laat deze pagina de algemene waarde staan.
+  if (baseUrl && /^https?:\/\//i.test(String(baseUrl))) {
+    try {
+      metadata.metadataBase = new URL(String(baseUrl));
+    } catch (error) {
+      // Geen geldige basis: dan geen metadataBase, geen gok.
+    }
+  }
   metadata.openGraph = openGraph;
   return metadata;
 }

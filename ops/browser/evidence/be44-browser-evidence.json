@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T23:36:19.931Z",
+  "generatedAt": "2026-10-28T23:43:52.391Z",
   "ticket": "#105 BE-44 deel 1 — een gerecht delen met voorvertoning",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
@@ -10,7 +10,7 @@
       "checks": 70,
       "passed": 70,
       "failed": 0,
-      "durationMs": 30592,
+      "durationMs": 28993,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 22610,
+      "durationMs": 22535,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 14,
       "passed": 14,
       "failed": 0,
-      "durationMs": 4977,
+      "durationMs": 5468,
       "error": null
     }
   ],
@@ -640,7 +640,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-light.png",
-        "sha256": "562f14ac428e892fff85cd1aa2de2b5c49a29dd41a2e53df46e41d53fea74e58",
+        "sha256": "588e4389acc57961bc15a8019ec03626d8c3d87faeee506cd8191d3a0c922cce",
         "width": 1280,
         "height": 950
       },
@@ -652,7 +652,7 @@
     {
       "file": {
         "file": "be44-melding-1280-light.png",
-        "sha256": "86527bb49c6ecf189f504166b9db0205a802783af18911e655b96fea08774efb",
+        "sha256": "633a8944adc5f4027736ef183e976ed05ba38fe646fd63b1855261c466171f5c",
         "width": 1280,
         "height": 950
       },
@@ -715,7 +715,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-dark.png",
-        "sha256": "c585a776e65844bd86f2a408ed07fe5562ed653fc9f0bc5db69fd83cf2709dad",
+        "sha256": "ebe3be408788c73e649911bb705f2806713d6f6eca13008d27b5efd579310243",
         "width": 1280,
         "height": 950
       },
@@ -765,7 +765,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "2f3588bd9466864eb84254e29dac5b0663e3d4432362224aef9e5fcd9ae1b8f6",
+        "sha256": "2a56ebfb4ae9f0ec4652f2871bdff5f22a7e6c1f1641f01808a93a46a2109f7c",
         "width": 320,
         "height": 844
       },
@@ -777,7 +777,7 @@
     {
       "file": {
         "file": "be44-melding-320-dark.png",
-        "sha256": "be99fba81978882441181a6997f3a781aa317639341870694174220c8725fc03",
+        "sha256": "63f638a73cd03b8cab3a80a0f021765c06ecf53c0189028782649c00aae57c2b",
         "width": 320,
         "height": 844
       },
@@ -803,7 +803,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "8932bdd27a1230ceee8e3943ded89ec698134f5b3118ffe6f47c4d181cc49843",
+        "sha256": "be75c798d91722a227e324b881db38632015d991df25ce939b303c48616fe079",
         "width": 390,
         "height": 844
       },
@@ -816,7 +816,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "30da7501f03b005adee8268f05335cffd799fd03978aa6c549d008af37e409a5",
+        "sha256": "302dd7cd36dfc8c74c5e41341326536afccdc30a6768d85c64de27ef325cd9e8",
         "width": 320,
         "height": 844
       },
@@ -842,7 +842,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-dark.png",
-        "sha256": "3f41c5fba4f7aad65b6c66d76bb2cb2216c088209089e882ae9116d3e7ae0a23",
+        "sha256": "632b0114430d159d32ba5c239410af10d041de13c160081e4984c92d302bc8aa",
         "width": 390,
         "height": 844
       },
@@ -855,7 +855,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "e6bbfabf3475980c1dfe309faa79144d09296c14cfce19ff9eee3e23f183199c",
+        "sha256": "7269d5f6cad60befe22a056f6461abdf9b50a105f026ca45f63b16fbe6141871",
         "width": 320,
         "height": 844
       },

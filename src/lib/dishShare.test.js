@@ -184,6 +184,8 @@ test('de metadata van een gedeeld gerecht: og:title "<gerecht> · <prijs>", og:u
   assert.equal(metadata.openGraph.images[0].height, 630);
   assert.match(metadata.openGraph.images[0].url, /^https:\/\/onzemenukaarten\.nl\/menu\/6-diner\/share-image\?/);
   assert.match(metadata.openGraph.images[0].url, /stand=licht/);
+  // De basis voor relatieve metadata komt uit dezelfde bron.
+  assert.equal(metadata.metadataBase.href, 'https://onzemenukaarten.nl/');
   // Geen foto en geen berichttekst in de metadata.
   assert.equal('text' in metadata.openGraph, false);
 });
@@ -210,6 +212,12 @@ test('de metadata zonder gerechtnaam of prijs verzint niets en valt terug', () =
   assert.equal('description' in metadata.openGraph, false);
   assert.equal('url' in metadata.openGraph, false);
   assert.equal('images' in metadata.openGraph, false);
+});
+
+test('zonder geldige basis-URL komt er geen metadataBase en geen gok', () => {
+  assert.equal('metadataBase' in dishShareMetadata({ dishName: 'Poussin', priceLabel: '€20,95' }), false);
+  assert.equal('metadataBase' in dishShareMetadata({ dishName: 'Poussin', baseUrl: 'niet-een-url' }), false);
+  assert.equal('metadataBase' in dishShareMetadata({ dishName: 'Poussin', baseUrl: 'http://localhost:3157' }), true);
 });
 
 test('het adres van de voorvertoningsafbeelding draagt dezelfde stand als de link', () => {
