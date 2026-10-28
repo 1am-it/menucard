@@ -246,7 +246,9 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
     const productByReceipt = new Map(receipts.map((r) => [r.id, readReceiptProjection(r)]));
     // Every fetched version, not just the latest: the rejection gate compares
     // the whole lineage ("dezelfde inhoud nooit eerder afgewezen") and that
-    // must still stay one query (BE-39, criterion 5).
+    // must still stay one query (BE-39, criterion 5). The lineage is the part
+    // within this list window (LIST_LIMIT newest rows); the detail route always
+    // re-reads the full lineage, so a refusal there is never weakened by this.
     let reviews = [];
     if (allRows.length > 0) {
       const { data, error: reviewError } = await supabase.from('menu_snapshot_reviews').select('id, snapshot_id, decided_at, decision').in('snapshot_id', allRows.map((r) => r.id));
