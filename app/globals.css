@@ -3068,7 +3068,19 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 
 /* Menuconcepten beoordelen (BE-17) — list and review page. */
 .mcr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.mcr-item { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
+.mcr-item { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; position: relative; }
+/* BE-41: the whole card is one link. The title link stretches over the card
+   (one tab stop, one destination); the visible next step is styling inside that
+   link, not a second <a>. Only "PR bekijken ↗" is a real second link and sits
+   above the overlay. */
+.mcr-item-link::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-md); }
+.mcr-item-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
+.mcr-item-next { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.mcr-next { min-height: 44px; }
+.mcr-next--external { position: relative; z-index: 1; }
+/* BE-41 (criterion 4): "Originele menukaart openen ↗" right of the title. */
+.mcr-origin { display: grid; gap: 4px; justify-items: end; margin-left: auto; min-width: 0; }
+.mcr-origin-note { margin: 0; font-size: 12px; color: var(--text-secondary); text-align: right; }
 .mcr-item-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
 /* BE-39: two badges on an approved card (status + publication), existing tokens only. */
 .mcr-item-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: flex-start; min-width: 0; }
@@ -3110,6 +3122,13 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
   .bta-bulk .bta-btn, .bta-card-head .bta-btn { width: 100%; min-height: 44px; }
   .bta-start { position: sticky; bottom: 0; z-index: 5; justify-items: stretch; margin: 0 -14px -14px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: var(--bg-card); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
   .bta-start .bta-btn { width: 100%; min-height: 44px; }
+  /* BE-41 (criterion 5): on the phone the next step is full width under the
+     labels, with a 44 px touch target and no horizontal scroll. */
+  .mcr-item-next { display: grid; justify-content: stretch; }
+  .mcr-item-next .mcr-next { width: 100%; min-height: 44px; }
+  .mcr-origin { margin-left: 0; justify-items: stretch; width: 100%; }
+  .mcr-origin .bta-btn { width: 100%; min-height: 44px; }
+  .mcr-origin-note { text-align: left; }
 }
 
 /* Menuconcept — Publicatievoorbeeld (tabs, toggle, preview frame). The menu

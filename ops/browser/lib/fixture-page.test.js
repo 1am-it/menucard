@@ -190,6 +190,42 @@ test('the concept pages are chosen by path when a real click drops the fixture q
   assert.equal(fixture.context.__FIXTURE_ACTIVE__, 'concepts');
 });
 
+test('BE-41: a detail id picks the concept dataset that really contains it', async () => {
+  // Two concept datasets exist, so a card that links straight to its own
+  // detail must land on the dataset that has that id — not on a 404.
+  const scenarios = {
+    concepts: { list: { items: [] }, detail: { 'concept-v1-0001': { concept: { id: 'concept-v1-0001' } } } },
+    'concepts-publication': { list: { items: [] }, detail: { 'publicatie-klaar-0101': { concept: { id: 'publicatie-klaar-0101' } } } },
+  };
+  const publication = loadFixture({
+    scenarios,
+    url: 'http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101',
+    search: '',
+  });
+  assert.equal(publication.context.__FIXTURE_ACTIVE__, 'concepts-publication');
+  const detail = await publication.context.fetch('/api/internal/v1/menu-concepts/publicatie-klaar-0101');
+  assert.equal(detail.status, 200);
+  assert.equal((await detail.json()).concept.id, 'publicatie-klaar-0101');
+
+  const own = loadFixture({
+    scenarios,
+    url: 'http://localhost:3137/internal/menu-concepts/concept-v1-0001',
+    search: '',
+  });
+  assert.equal(own.context.__FIXTURE_ACTIVE__, 'concepts');
+
+  // An unknown id still answers from the default dataset, so the screen's own
+  // "not found" state is what the check sees.
+  const unknown = loadFixture({
+    scenarios,
+    url: 'http://localhost:3137/internal/menu-concepts/concept-missing-9999',
+    search: '',
+  });
+  assert.equal(unknown.context.__FIXTURE_ACTIVE__, 'concepts');
+  const missing = await unknown.context.fetch('/api/internal/v1/menu-concepts/concept-missing-9999');
+  assert.equal(missing.status, 404);
+});
+
 test('concept writes stay blocked even though the read routes are allowed', async () => {
   const scenarios = { concepts: { list: { items: [] }, detail: {} } };
   const fixture = loadFixture({ scenarios });

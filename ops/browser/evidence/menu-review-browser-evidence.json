@@ -1,256 +1,13 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "461417d0cf68eb8bbe4a261129a2b95fd2bbd333",
+  "head": "af52b0a6ecca58685bbcbbfa9ecb6f0a6d2d9209",
   "worktreeDirty": false,
-  "generatedAt": "2026-10-28T21:45:26.152Z",
+  "generatedAt": "2026-10-28T19:27:07.574Z",
   "command": "npm run test:browser:menu-review",
-  "filter": null,
-  "scenarios": [
-    {
-      "name": "review",
-      "checks": 24,
-      "passed": 24,
-      "failed": 0,
-      "durationMs": 6714,
-      "error": null
-    },
-    {
-      "name": "read-only",
-      "checks": 7,
-      "passed": 7,
-      "failed": 0,
-      "durationMs": 3257,
-      "error": null
-    },
-    {
-      "name": "empty",
-      "checks": 6,
-      "passed": 6,
-      "failed": 0,
-      "durationMs": 2055,
-      "error": null
-    },
-    {
-      "name": "partial",
-      "checks": 6,
-      "passed": 6,
-      "failed": 0,
-      "durationMs": 2178,
-      "error": null
-    },
-    {
-      "name": "image-only",
-      "checks": 29,
-      "passed": 29,
-      "failed": 0,
-      "durationMs": 10377,
-      "error": null
-    },
-    {
-      "name": "structure",
-      "checks": 33,
-      "passed": 33,
-      "failed": 0,
-      "durationMs": 11357,
-      "error": null
-    },
-    {
-      "name": "be30",
-      "checks": 84,
-      "passed": 84,
-      "failed": 0,
-      "durationMs": 20582,
-      "error": null
-    },
-    {
-      "name": "manual-import",
-      "checks": 18,
-      "passed": 18,
-      "failed": 0,
-      "durationMs": 4811,
-      "error": null
-    },
-    {
-      "name": "manual-review-steps",
-      "checks": 35,
-      "passed": 35,
-      "failed": 0,
-      "durationMs": 12083,
-      "error": null
-    },
-    {
-      "name": "manual-rejected",
-      "checks": 18,
-      "passed": 18,
-      "failed": 0,
-      "durationMs": 4641,
-      "error": null
-    },
-    {
-      "name": "manual-normalized",
-      "checks": 16,
-      "passed": 16,
-      "failed": 0,
-      "durationMs": 4645,
-      "error": null
-    },
-    {
-      "name": "manual-uncovered",
-      "checks": 29,
-      "passed": 29,
-      "failed": 0,
-      "durationMs": 7828,
-      "error": null
-    },
-    {
-      "name": "manual-card",
-      "checks": 99,
-      "passed": 99,
-      "failed": 0,
-      "durationMs": 13089,
-      "error": null
-    },
-    {
-      "name": "manual-card-keyboard",
-      "checks": 7,
-      "passed": 7,
-      "failed": 0,
-      "durationMs": 2637,
-      "error": null
-    },
-    {
-      "name": "ai-read",
-      "checks": 60,
-      "passed": 60,
-      "failed": 0,
-      "durationMs": 14453,
-      "error": null
-    },
-    {
-      "name": "ai-read-batch",
-      "checks": 10,
-      "passed": 10,
-      "failed": 0,
-      "durationMs": 4391,
-      "error": null
-    },
-    {
-      "name": "ai-read-keyboard",
-      "checks": 3,
-      "passed": 3,
-      "failed": 0,
-      "durationMs": 2479,
-      "error": null
-    },
-    {
-      "name": "v2",
-      "checks": 28,
-      "passed": 28,
-      "failed": 0,
-      "durationMs": 5208,
-      "error": null
-    },
-    {
-      "name": "error",
-      "checks": 6,
-      "passed": 6,
-      "failed": 0,
-      "durationMs": 2024,
-      "error": null
-    },
-    {
-      "name": "responsive",
-      "checks": 31,
-      "passed": 31,
-      "failed": 0,
-      "durationMs": 10820,
-      "error": null
-    },
-    {
-      "name": "keyboard",
-      "checks": 6,
-      "passed": 6,
-      "failed": 0,
-      "durationMs": 2472,
-      "error": null
-    },
-    {
-      "name": "concept-list-clickpath",
-      "checks": 22,
-      "passed": 22,
-      "failed": 0,
-      "durationMs": 22610,
-      "error": null
-    },
-    {
-      "name": "concept-product-read-only",
-      "checks": 24,
-      "passed": 24,
-      "failed": 0,
-      "durationMs": 5003,
-      "error": null
-    },
-    {
-      "name": "concept-list-states",
-      "checks": 20,
-      "passed": 20,
-      "failed": 0,
-      "durationMs": 8227,
-      "error": null
-    },
-    {
-      "name": "concept-forced-write",
-      "checks": 9,
-      "passed": 9,
-      "failed": 0,
-      "durationMs": 1375,
-      "error": null
-    },
-    {
-      "name": "concept-responsive",
-      "checks": 20,
-      "passed": 20,
-      "failed": 0,
-      "durationMs": 6908,
-      "error": null
-    },
-    {
-      "name": "concept-list-responsive",
-      "checks": 11,
-      "passed": 11,
-      "failed": 0,
-      "durationMs": 4227,
-      "error": null
-    },
-    {
-      "name": "concept-keyboard",
-      "checks": 7,
-      "passed": 7,
-      "failed": 0,
-      "durationMs": 4560,
-      "error": null
-    },
-    {
-      "name": "concept-publication",
-      "checks": 47,
-      "passed": 47,
-      "failed": 0,
-      "durationMs": 10586,
-      "error": null
-    },
-    {
-      "name": "netwerk",
-      "checks": 11,
-      "passed": 11,
-      "failed": 0,
-      "durationMs": 731,
-      "error": null
-    }
-  ],
   "summary": {
-    "total": 729,
-    "passed": 729,
+    "total": 838,
+    "passed": 838,
     "failed": 0
   },
   "environment": {
@@ -647,6 +404,11 @@
     },
     {
       "name": "image-only follow-up: the page names the reason and the next step in its own words",
+      "passed": true,
+      "detail": "Vervolg van de batchanalyse:\nMenu alleen als afbeelding of scan: lees het met AI of met de hand. Lees de afbeelding met AI, kies een andere tekst- of pdf-bron o"
+    },
+    {
+      "name": "image-only follow-up: the batch banner announces itself when the banner is what shows it",
       "passed": true,
       "detail": "Vervolg van de batchanalyse:\nMenu alleen als afbeelding of scan: lees het met AI of met de hand. Lees de afbeelding met AI, kies een andere tekst- of pdf-bron o"
     },
@@ -1288,7 +1050,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 23:11. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 20:53. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -3243,7 +3005,7 @@
     {
       "name": "concept v2 read-only: the exact source link is kept",
       "passed": true,
-      "detail": "[{\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\"}]"
+      "detail": "[{\"text\":\"Originele menukaart openen ↗\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\"},{\"text\":\"Open originele menukaart\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\"}]"
     },
     {
       "name": "concept v2 read-only: light theme and no horizontal overflow",
@@ -3653,27 +3415,27 @@
     {
       "name": "be39 1280-light: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84}]"
     },
     {
       "name": "be39 1280-light: a missing source gives the first reason in plain language",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11}]"
     },
     {
       "name": "be39 1280-light: an existing export shows its real status, never \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11}]]"
     },
     {
       "name": "be39 1280-light: merged is not live, the next deploy is",
       "passed": true,
-      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
     },
     {
       "name": "be39 1280-light: a waiting card keeps its single status badge",
       "passed": true,
-      "detail": "[\"Wacht op beoordeling\"]"
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
     },
     {
       "name": "be39 1280-light: the header counts only the ready cards",
@@ -3691,6 +3453,46 @@
       "detail": "overflow=-6"
     },
     {
+      "name": "be41 1280-light: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 1280-light: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 1280-light: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 1280-light: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 1280-light: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-light: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-light: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-light: no horizontal overflow with the next step",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
       "passed": true,
       "detail": "ok"
@@ -3703,27 +3505,27 @@
     {
       "name": "be39 1280-dark: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42}]"
     },
     {
       "name": "be39 1280-dark: a missing source gives the first reason in plain language",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28}]"
     },
     {
       "name": "be39 1280-dark: an existing export shows its real status, never \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28}]]"
     },
     {
       "name": "be39 1280-dark: merged is not live, the next deploy is",
       "passed": true,
-      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
     },
     {
       "name": "be39 1280-dark: a waiting card keeps its single status badge",
       "passed": true,
-      "detail": "[\"Wacht op beoordeling\"]"
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
     },
     {
       "name": "be39 1280-dark: the header counts only the ready cards",
@@ -3741,6 +3543,46 @@
       "detail": "overflow=-6"
     },
     {
+      "name": "be41 1280-dark: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 1280-dark: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 1280-dark: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 1280-dark: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 1280-dark: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-dark: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-dark: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 1280-dark: no horizontal overflow with the next step",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
       "passed": true,
       "detail": "ok"
@@ -3753,27 +3595,27 @@
     {
       "name": "be39 390-light: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84}]"
     },
     {
       "name": "be39 390-light: a missing source gives the first reason in plain language",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11}]"
     },
     {
       "name": "be39 390-light: an existing export shows its real status, never \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11}]]"
     },
     {
       "name": "be39 390-light: merged is not live, the next deploy is",
       "passed": true,
-      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
     },
     {
       "name": "be39 390-light: a waiting card keeps its single status badge",
       "passed": true,
-      "detail": "[\"Wacht op beoordeling\"]"
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
     },
     {
       "name": "be39 390-light: the header counts only the ready cards",
@@ -3791,6 +3633,51 @@
       "detail": "overflow=0"
     },
     {
+      "name": "be41 390-light: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 390-light: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 390-light: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 390-light: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 390-light: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-light: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-light: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-light: the next step is full width and at least 44 px high",
+      "passed": true,
+      "detail": "[{\"card\":\"Fictief Wacht\",\"tag\":\"SPAN\",\"text\":\"Beoordelen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Klaar\",\"tag\":\"SPAN\",\"text\":\"Maak review-PR →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Nog Niet Klaar\",\"tag\":\"SPAN\",\"text\":\"Bron controleren →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Gemerged\",\"tag\":\"A\",\"text\":\"PR bekijken ↗\",\"href\":\"https://github.invalid/fictief/menucard/pull/91\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Mislukt\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Blokkades\",\"tag\":\"SPAN\",\"text\":\"2 blokkades oplossen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Gesloten\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Afgewezen\",\"tag\":\"SPAN\",\"text\":\"Bekijken →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332}]"
+    },
+    {
+      "name": "be41 390-light: no horizontal overflow with the next step",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
       "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
       "passed": true,
       "detail": "ok"
@@ -3803,27 +3690,27 @@
     {
       "name": "be39 390-dark: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42}]"
     },
     {
       "name": "be39 390-dark: a missing source gives the first reason in plain language",
       "passed": true,
-      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28}]"
     },
     {
       "name": "be39 390-dark: an existing export shows its real status, never \"Klaar voor publicatie\"",
       "passed": true,
-      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28}]]"
     },
     {
       "name": "be39 390-dark: merged is not live, the next deploy is",
       "passed": true,
-      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
     },
     {
       "name": "be39 390-dark: a waiting card keeps its single status badge",
       "passed": true,
-      "detail": "[\"Wacht op beoordeling\"]"
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
     },
     {
       "name": "be39 390-dark: the header counts only the ready cards",
@@ -3837,6 +3724,241 @@
     },
     {
       "name": "be39 390-dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "be41 390-dark: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 390-dark: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 390-dark: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 390-dark: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 390-dark: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-dark: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-dark: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 390-dark: the next step is full width and at least 44 px high",
+      "passed": true,
+      "detail": "[{\"card\":\"Fictief Wacht\",\"tag\":\"SPAN\",\"text\":\"Beoordelen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Klaar\",\"tag\":\"SPAN\",\"text\":\"Maak review-PR →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Nog Niet Klaar\",\"tag\":\"SPAN\",\"text\":\"Bron controleren →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Gemerged\",\"tag\":\"A\",\"text\":\"PR bekijken ↗\",\"href\":\"https://github.invalid/fictief/menucard/pull/91\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Mislukt\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Blokkades\",\"tag\":\"SPAN\",\"text\":\"2 blokkades oplossen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Gesloten\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332},{\"card\":\"Fictief Afgewezen\",\"tag\":\"SPAN\",\"text\":\"Bekijken →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":302,\"height\":44,\"cardWidth\":332}]"
+    },
+    {
+      "name": "be41 390-dark: no horizontal overflow with the next step",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 320-light: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be39 320-light: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11}]"
+    },
+    {
+      "name": "be39 320-light: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11}]]"
+    },
+    {
+      "name": "be39 320-light: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
+    },
+    {
+      "name": "be39 320-light: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be39 320-light: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 320-light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "be39 320-light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "be41 320-light: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 320-light: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 320-light: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":9.11},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":11.84},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":11.84},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":11.84}]"
+    },
+    {
+      "name": "be41 320-light: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 320-light: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-light: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-light: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-light: the next step is full width and at least 44 px high",
+      "passed": true,
+      "detail": "[{\"card\":\"Fictief Wacht\",\"tag\":\"SPAN\",\"text\":\"Beoordelen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Klaar\",\"tag\":\"SPAN\",\"text\":\"Maak review-PR →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Nog Niet Klaar\",\"tag\":\"SPAN\",\"text\":\"Bron controleren →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Gemerged\",\"tag\":\"A\",\"text\":\"PR bekijken ↗\",\"href\":\"https://github.invalid/fictief/menucard/pull/91\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Mislukt\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Blokkades\",\"tag\":\"SPAN\",\"text\":\"2 blokkades oplossen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Gesloten\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Afgewezen\",\"tag\":\"SPAN\",\"text\":\"Bekijken →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262}]"
+    },
+    {
+      "name": "be41 320-light: no horizontal overflow with the next step",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 320-dark: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42}]"
+    },
+    {
+      "name": "be39 320-dark: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28}]"
+    },
+    {
+      "name": "be39 320-dark: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42}],[{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28}]]"
+    },
+    {
+      "name": "be39 320-dark: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt\nPR bekijken ↗\n("
+    },
+    {
+      "name": "be39 320-dark: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be39 320-dark: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 320-dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "be39 320-dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "be41 320-dark: \"Nog niet klaar\" and \"Vorige poging mislukt\" use the existing attention role",
+      "passed": true,
+      "detail": "[[\"status-badge--positive\",\"status-badge--old\"],[\"status-badge--positive\",\"status-badge--old\"]]"
+    },
+    {
+      "name": "be41 320-dark: a ready card keeps the positive role and the neutral cards stay neutral",
+      "passed": true,
+      "detail": "[{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 320-dark: every badge label keeps contrast ≥ 4.5:1",
+      "passed": true,
+      "detail": "[{\"text\":\"Wacht op beoordeling\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Klaar voor publicatie\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Bron nog niet bevestigd.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gemerged\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Vorige poging mislukt\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: Los eerst 2 blokkades op.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Nog niet klaar: GitHub-koppeling ontbreekt.\",\"role\":\"status-badge--old\",\"contrast\":6.28},{\"text\":\"Intern goedgekeurd\",\"role\":\"status-badge--positive\",\"contrast\":6.42},{\"text\":\"Review-PR gesloten zonder merge\",\"role\":\"status-badge--neutral\",\"contrast\":6.72},{\"text\":\"Afgewezen\",\"role\":\"status-badge--neutral\",\"contrast\":6.72}]"
+    },
+    {
+      "name": "be41 320-dark: every card is one link, except the review-PR link",
+      "passed": true,
+      "detail": "[1,1,1,2,1,1,1,1,1]"
+    },
+    {
+      "name": "be41 320-dark: the whole card opens that link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-dark: each card shows the next step of its own publication state",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-dark: the card link names its next step for a screen reader",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 320-dark: the next step is full width and at least 44 px high",
+      "passed": true,
+      "detail": "[{\"card\":\"Fictief Wacht\",\"tag\":\"SPAN\",\"text\":\"Beoordelen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Klaar\",\"tag\":\"SPAN\",\"text\":\"Maak review-PR →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Nog Niet Klaar\",\"tag\":\"SPAN\",\"text\":\"Bron controleren →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Gemerged\",\"tag\":\"A\",\"text\":\"PR bekijken ↗\",\"href\":\"https://github.invalid/fictief/menucard/pull/91\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Mislukt\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Blokkades\",\"tag\":\"SPAN\",\"text\":\"2 blokkades oplossen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Gesloten\",\"tag\":\"SPAN\",\"text\":\"Opnieuw proberen →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262},{\"card\":\"Fictief Afgewezen\",\"tag\":\"SPAN\",\"text\":\"Bekijken →\",\"href\":null,\"target\":null,\"rel\":null,\"width\":232,\"height\":44,\"cardWidth\":262}]"
+    },
+    {
+      "name": "be41 320-dark: no horizontal overflow with the next step",
       "passed": true,
       "detail": "overflow=0"
     },
@@ -3873,7 +3995,187 @@
     {
       "name": "be39 concept detail: a merged review-PR is not presented as live",
       "passed": true,
-      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nMenuconcepten beoordelen\n/\nFictief Gemerged\nBeoordeel menuconcept\nAlleen intern\n\nControleer alleen de wijzigingen voordat je het concept goedkeurt.\n\n3\ngerechten\n2\nmenukopjes\n0\naandachtspun"
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nMenuconcepten beoordelen\n/\nFictief Gemerged\nBeoordeel menuconcept\nAlleen intern\nOriginele menukaart openen ↗\n(opent in een nieuw tabblad)\n\nOpent in een nieuw tabblad · fictief-brasserie.in"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 keyboard: the card is one tab stop and shows a visible focus ring",
+      "passed": true,
+      "detail": "{\"focused\":{\"tag\":\"A\",\"text\":\"Fictief Klaar\",\"href\":\"/internal/menu-concepts/publicatie-klaar-0101#mcr-publication\",\"expanded\":null},\"ring\":{\"focusVisible\":true,\"style\":\"solid\",\"width\":\"2px\",\"color\":\"rgb(122, 78, 0)\"}}"
+    },
+    {
+      "name": "be41 click: \"2 blokkades oplossen →\" opens the Wijzigingen tab of that concept",
+      "passed": true,
+      "detail": "{\"tab\":\"Wijzigingen\",\"panel\":\"mcr-publicatie-blokkades-0106-panel-changes\",\"path\":\"/internal/menu-concepts/publicatie-blokkades-0106\",\"search\":\"?tab=changes\",\"hash\":\"\"}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 click: \"Bron controleren →\" opens the Bron tab of that concept",
+      "passed": true,
+      "detail": "{\"tab\":\"Bron\",\"panel\":\"mcr-publicatie-bron-0102-panel-source\",\"path\":\"/internal/menu-concepts/publicatie-bron-0102\",\"search\":\"?tab=source\",\"hash\":\"\"}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 click: \"Maak review-PR →\" opens the Publicatie block and starts no export",
+      "passed": true,
+      "detail": "{\"readyArrived\":true,\"publicationView\":{\"hash\":\"#mcr-publication\",\"visible\":true,\"violations\":0,\"texts\":[]},\"violationsBefore\":0}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail: the original menu opens in a new tab, right of the title, with the small line",
+      "passed": true,
+      "detail": "{\"text\":\"Originele menukaart openen ↗\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · webpagina\",\"rightOfTitle\":true,\"height\":44,\"width\":231}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail 390: the original-menu button is full width and at least 44 px",
+      "passed": true,
+      "detail": "{\"mobileLink\":{\"text\":\"Originele menukaart openen ↗\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · webpagina\",\"rightOfTitle\":false,\"height\":44,\"width\":362},\"mobileOverflow\":0}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail 390px/dark: the original-menu button keeps 44 px, its note and no overflow",
+      "passed": true,
+      "detail": "{\"href\":\"https://fictief-brasserie.invalid/menu\",\"height\":44,\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · webpagina\",\"overflow\":0}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail 320px/light: the original-menu button keeps 44 px, its note and no overflow",
+      "passed": true,
+      "detail": "{\"href\":\"https://fictief-brasserie.invalid/menu\",\"height\":44,\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · webpagina\",\"overflow\":0}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail 320px/dark: the original-menu button keeps 44 px, its note and no overflow",
+      "passed": true,
+      "detail": "{\"href\":\"https://fictief-brasserie.invalid/menu\",\"height\":44,\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · webpagina\",\"overflow\":0}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-bron-pdf-0112?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-bron-pdf-0112?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail: a pdf source says so in the small line",
+      "passed": true,
+      "detail": "{\"text\":\"Originele menukaart openen ↗\\n(opent in een nieuw tabblad)\",\"href\":\"https://fictief-brasserie.invalid/menu/menukaart.pdf\",\"target\":\"_blank\",\"rel\":\"noopener noreferrer\",\"note\":\"Opent in een nieuw tabblad · fictief-brasserie.invalid · pdf\",\"rightOfTitle\":true,\"height\":44,\"width\":231}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-bron-gevaarlijk-0110?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-bron-gevaarlijk-0110?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail: unsafeSource gets no original-menu button",
+      "passed": true,
+      "detail": "{\"text\":null,\"note\":null}"
+    },
+    {
+      "name": "be41 detail: unsafeSource still shows the concept itself",
+      "passed": true,
+      "detail": "Fictief Rare Bron"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-bron-leeg-0111?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-bron-leeg-0111?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be41 detail: emptySource gets no original-menu button",
+      "passed": true,
+      "detail": "{\"text\":null,\"note\":null}"
+    },
+    {
+      "name": "be41 detail: emptySource still shows the concept itself",
+      "passed": true,
+      "detail": "Fictief Lege Bron"
     },
     {
       "name": "network guard: external fetch is blocked before native fetch",
@@ -3918,7 +4220,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T21:45:25.316Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T21:45:25.316Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T19:27:06.754Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T19:27:06.755Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -3961,12 +4263,13 @@
           "arrived": true
         },
         {
-          "action": "batch follow-up banner rendered",
-          "reached": true
+          "action": "batch follow-up shown (banner or task block)",
+          "reached": true,
+          "detail": "Vervolg van de batchanalyse:\nMenu alleen als afbeelding of scan: lees het met AI of met de hand. Lees de afbeelding met "
         }
       ],
       "passed": true,
-      "detail": "[{\"action\":\"open batch result\",\"reached\":true},{\"action\":\"click Bronnen beoordelen\",\"href\":\"/internal/bronnen?restaurant=9001&reason=image_only\",\"reached\":true,\"arrived\":true},{\"action\":\"batch follow-up banner rendered\",\"reached\":true}]"
+      "detail": "[{\"action\":\"open batch result\",\"reached\":true},{\"action\":\"click Bronnen beoordelen\",\"href\":\"/internal/bronnen?restaurant=9001&reason=image_only\",\"reached\":true,\"arrived\":true},{\"action\":\"batch follow-up shown (banner or task block)\",\"reached\":true,\"detail\":\"Vervolg van de batchanalyse:\\nMenu alleen als afbeelding of scan: lees het met AI of met de hand. Lees de afbeelding met \"}]"
     },
     {
       "name": "batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)",
@@ -4219,7 +4522,7 @@
           "action": "Tab to return link",
           "target": "Terug naar Menuconcepten beoordelen",
           "reached": true,
-          "tabs": 9
+          "tabs": 10
         },
         {
           "action": "Enter on return link",
@@ -4228,7 +4531,7 @@
         }
       ],
       "passed": true,
-      "detail": "[{\"action\":\"Tab to list row\",\"target\":\"Fictief Concept Diner\",\"reached\":true,\"tabs\":6},{\"action\":\"Enter on list row\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"Tab to return link\",\"target\":\"Terug naar Menuconcepten beoordelen\",\"reached\":true,\"tabs\":9},{\"action\":\"Enter on return link\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true}]"
+      "detail": "[{\"action\":\"Tab to list row\",\"target\":\"Fictief Concept Diner\",\"reached\":true,\"tabs\":6},{\"action\":\"Enter on list row\",\"pathname\":\"/internal/menu-concepts/concept-v2-0002\",\"arrived\":true},{\"action\":\"Tab to return link\",\"target\":\"Terug naar Menuconcepten beoordelen\",\"reached\":true,\"tabs\":10},{\"action\":\"Enter on return link\",\"pathname\":\"/internal/menu-concepts\",\"arrived\":true}]"
     }
   ],
   "screenshots": [
@@ -4240,7 +4543,7 @@
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "f921457b5050b57980e5e2a027d1392564ecb56393e0a2ecb1547809b91318c6",
+      "sha256": "ba7d52e52901f6a51576229504ef5b6b6547018713dfae08813ba672869d0dc0",
       "width": 1024,
       "height": 900
     },
@@ -4252,109 +4555,109 @@
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "a10b76a7233e827e18125ff61bf472c28dbd0710c76f38899bb9a5973e4c173f",
+      "sha256": "78225446be24b4a3de3499548af1c4975e02578fa6542e0ee751fe91ddbf47cc",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "c2fcb2cd587be8cfc3c2e8e72b6cc32cb0d6e7130c19642a541d52a736729b2e",
+      "sha256": "00988ddfe38a6bdfa4b0d5922e18a6d60a3ae4afb1683f25deb5c36f4f992843",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "35945dff5bad713b8f54c3a2b8d574e82d2f1d1b70aa8793480418e871547b49",
+      "sha256": "1346af42acba8961fd7ca14c1e2246b3f215fd7b8076c2c006f1b0111d4485d0",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-image-only-follow-up-390-light.png",
-      "sha256": "706d19c51382f4239ac1f6077d4778b4b611fa075c67109601d585ddd2155c40",
+      "sha256": "3864817ef6026dfcc6ee5565fb2193ec5907145270119b99c9802e190160f637",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "6ec109fc45da376e65527022b684b6ca841e3c3c4594e2981f4b8b06502cc33f",
+      "sha256": "07fcd65b34016f9914859d9c7adeba28367f0857963c2f29e863734f0ff4a817",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "d660a1f0f473a464cbecc5d1f1e372fd2915b5beaca054a149b7b86aafbfa441",
+      "sha256": "0d3c8b156f1519608436810a97b92d0f521fe86ce8a7a4c7dce50ec2ef19ab23",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "2f2ad419be56a9c6f52a439136e5318c8eff85a9f56e2f063dca817aa7023938",
+      "sha256": "15816fe68b611646059f21b4d2f2a1e65d391daae57df6abdd9a47db56acc0ba",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "b5bd3bc94196863d39bc6e3fee0987e9bf73873caaf2d03fe7a8498361da9991",
+      "sha256": "8654ad5939bf82e8c547676abb57d38d83425800c4cebeed226edfa82da8c24d",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "2ea273fa2de6791a08790928f9e119439ecaa740e592cc35fcb0f9e107074956",
+      "sha256": "66296a1d81708d8678a41ff8a059c5fd54e775937dee031aec7154d4150fd7a0",
       "width": 1024,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-1280-light.png",
-      "sha256": "e16316745fc3e454182f0eeaa02e86b45b38d6420849e9b85b73da135d9a0f3b",
+      "sha256": "90c9b646d12d17fcc7167d83e77c7cf92283458bec5e4343422cbdabc966f184",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-light.png",
-      "sha256": "2147308ea3a683f141bb9c55031dd4507043ee231e24c2696c545c5101f0956c",
+      "sha256": "1c59b0681296c543d5af4ea2ab0cdbce6036e5d62f257f61bc5588dc19064135",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-light.png",
-      "sha256": "dc91b65754e438de484ee2eab318da2676fe88d062453c389ba20d051c53d62e",
+      "sha256": "282d8e8c6ba9e3e53426960e57937f2004bcede1195c6473f6b80a65da39cee1",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-1280-light.png",
-      "sha256": "64418d20c33232eb1c90893df1d527a328e96e310e65cfaea1cfe167cb6d2a2c",
+      "sha256": "85902a7f799c68686be75df70c90b07d6ba4089873c1b9e8cd47a7d9c82615fd",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-1280-light.png",
-      "sha256": "f7727080fa5f33ea5cb613cdd264efba0bb4028d4cdadade3f8e63fa03592f34",
+      "sha256": "c9a6db0635d05081af12a607c468b17720b2eeccb0f26d3da8ae9d51c7b9e63f",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-1280-dark.png",
-      "sha256": "f17b5b888e6cf3e477710129eb2eb36c5b81909c38b357d75e58f86ad18ed8d1",
+      "sha256": "a626f9745146f78d2654ce702d21e51b64bc19b9c514dcd37cf72ca27c5c5723",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-dark.png",
-      "sha256": "b4251bb87bf43e7e5962738a4af208bd41d60b7cc1468026ddd11620668a3699",
+      "sha256": "9501ea28400e96907d2fd9b54ca747f332841dc1abc1886576bdd2cccffe74a6",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-dark.png",
-      "sha256": "20e956bf6ba55172cb317c6e3e37d999f88871b0cccd0843f5e68432577a899c",
+      "sha256": "339e8393c56f1574543e79a0b49e6c16d4afa01281d532c2214a4bceeea8b0b3",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-1280-dark.png",
-      "sha256": "bd926b53280df92fcee8774748a3debc929d6150d614dd90f94004cbb7ae59c2",
+      "sha256": "b42bd554389deca56c7c0ca02de2d62b3cddd959cbcf80ff6f41a01580164dc5",
       "width": 1280,
       "height": 900
     },
@@ -4366,25 +4669,25 @@
     },
     {
       "file": "be-30-structure-collapsed-390-light.png",
-      "sha256": "3e9296e1c0a32e74146212eb9313a32ceeb98c30492522cf17bf77288b439242",
+      "sha256": "6e7d9dd65be1568567845c5b11741b1f852c4464a52f1a5fd5017faaf4bcfb19",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-light.png",
-      "sha256": "073cd691d97c31161a1e45745a02d468961f40d268ace008eb60f80ac40f2e03",
+      "sha256": "0471d8f07fad623d143b6920a1d2879e4cc61d44bf45fb3c0be06d6793ce4191",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-light.png",
-      "sha256": "b6111b28da8488a685d7d89187b36ec6a41dee7ee600bc4da32002fff458867f",
+      "sha256": "8bbd7eae76be9c3df8dc9167c5ad9f46261fd9c8a0cf51c7a9dd3ac2c9ac80a7",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-390-light.png",
-      "sha256": "5c8d85cc651d0af33de118ff9049a8e0f16673e9f464d44601f0ce431ffe8dca",
+      "sha256": "f69efc4d632021cff715a1f812d08789e3a11200d171a5cb64701efa28962f34",
       "width": 390,
       "height": 900
     },
@@ -4396,19 +4699,19 @@
     },
     {
       "file": "be-30-structure-collapsed-390-dark.png",
-      "sha256": "ec9d31bf0dcba52e477299dd9f6ffce60a172c487438353079fca4fbde300a87",
+      "sha256": "8a4d84d43adc2ef85cc75b3280ee1ab3bbdedb2cc4f816b9af5c1e9361517b36",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-dark.png",
-      "sha256": "114c24db018a5af190b5500db5ce1c3bc1560c1f98bb6f0bd58e76193ee22830",
+      "sha256": "cf391c07d8c9643e49e5ec040eb7a0055913878a72c3737aa2465d2afc5a551c",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-dark.png",
-      "sha256": "a9bdd1353ba8639cb3de774889bd88b4ea347b440f71723acc22bc8240440229",
+      "sha256": "2feddfbacda260d2345e5c8c365bbc4d463397f911e476fca4086f530b62a581",
       "width": 390,
       "height": 900
     },
@@ -4600,7 +4903,7 @@
     },
     {
       "file": "ai-map-keyboard-390-light.png",
-      "sha256": "651065cf6986a04b23df895f227bb51061dd32d161dfa6c921658f49ef1fdcbb",
+      "sha256": "396b7493bdfe693175495ba58d4b4bd28b9e2577fb5d510dddf92f20ebc494fe",
       "width": 390,
       "height": 900
     },
@@ -4630,7 +4933,7 @@
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "7f80eba473d6b76d389e6b3248c46df18e8610f546c1b0254cc680ef5db30a28",
+      "sha256": "19ab4ca38d7e98b3ed6e0341a86a53267abd5d0ef37f7d8b1a149b6b2cc58491",
       "width": 390,
       "height": 900
     },
@@ -4678,13 +4981,13 @@
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "43e7e4f3e62cfc114f72029b9b675de1c825bcd0c73857ef13576c447bd79bfe",
+      "sha256": "d2f2b2b7a9ff284683bfef379266d54a4fff8e925f63deb9dda36640b127573e",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "32125a0621f269d46fa438d699cd1383dc5a643f6ac82e12fbbb6b23b7cb1666",
+      "sha256": "8b8afa7c8a4103385e8e864798251e65fe8e9c9f1f23c18be604091333fbc255",
       "width": 390,
       "height": 900
     },
@@ -4708,85 +5011,85 @@
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "df5cc4fe453a2b3b60ca30af89a6b62ce638d2c75ab25ee3a09adcc6fa763915",
+      "sha256": "85af439b4c74102513c82f5743ed72226fa4a0c1fc16a4df5c94eaf8d12d63f2",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "634d5211ae8236eadde9ef758fcdc5426377f44f5b14471fb0d09b06d3ed3be0",
+      "sha256": "173ce8f6ce246ab777c4ada2f9baa5f1df72deb0f4af2d44b0556070e10e5940",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "99c1c22b42f569ae1e7848a1df0d8cebc77da3575e4f706ecb180a46816942e6",
+      "sha256": "d752d24408180f5f7345abc9c9f519ecfc8bf44391d9a14a99e48dac0c7afca2",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "38e09b5a49f7da1413feff95946b60379aae199d7ad6ad65f91a7c6f9fe31ecd",
+      "sha256": "8ab8c5ca75d3c318bb0da01091cb15520a1a286a2e8a7cf9ba00d42ddb950c51",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "1026374c91020ef7ab25ad4d494911e4496337c39e913410441a46a19e1c46a8",
+      "sha256": "84384be48285d8a0f489002f0fac454f821492646a96803fe67097011dbf146d",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "e6c69e62ba33713404f06429532252ac54122c6c1ccfa2020a3ae15cfa304466",
+      "sha256": "60395047ba6eb84e22e242836a5427ca86d409919727eb3ae0ce5e7453698411",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-list-1024-light.png",
-      "sha256": "7df6de856660142167fd72e10344826df9c6abc4de86ebcfaa624d9dd8d1a03d",
+      "sha256": "ef2c84c8f555ee70131b58b7996be9b8a652ea75be74a5437f2223b68d852958",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v1-1024-clickpath.png",
-      "sha256": "b5c707d8d3905609b904607424ed4f7a73bbba143ec3ab50e2e0a74bf76d6f8a",
+      "sha256": "518ee0e29196234776aee1443c9287e5a087f612b35c1072c4f601b25abe55b5",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v2-1024-clickpath.png",
-      "sha256": "75442e4dfd252764bc38c39c39a9a80f1d9e86f6dd75139372ab927e7a6f5a30",
+      "sha256": "f8b564e5e2a0ed62765b280fa3e9eff74d10312b4220df61c68d91c3e7428709",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "c04f541ac4dd9ca1d9c7e9f22dacce12e94aeca53662be1417f1e23195599b5b",
+      "sha256": "29cc05e82d347e42d64e78107551dda04dff02bee3b155ae187443210f36cf50",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-empty-1024-clickpath.png",
-      "sha256": "fac1376e978d7d3e94751bdd2d269f74dc5e51076cfa007633a3cfea265ddd1e",
+      "sha256": "8b0b86fd93ba17e84e45c9187023061f3c4d573f285ff1c53aaffdbc624cf564",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v2-readonly-1024-light.png",
-      "sha256": "69cd66ee831bd91ac7ea1880ad5358b0992c70e3315df0eeb3c5a893a8c3821b",
+      "sha256": "c730d43c6eb7d97a621c1307c452bbc04818cb53e2b0188debd93bbf87ab26fc",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-invalid-1024-light.png",
-      "sha256": "c48ca308e94bf5f3671ab16b38a6cafadacac76166ce15a9b0294fbc3c6079b3",
+      "sha256": "1625d48a46e4c78e15e17e35f9b4fa32f56c1b0afd09ecf60db62d66e778ff56",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-empty-1024-dark.png",
-      "sha256": "fac1376e978d7d3e94751bdd2d269f74dc5e51076cfa007633a3cfea265ddd1e",
+      "sha256": "8b0b86fd93ba17e84e45c9187023061f3c4d573f285ff1c53aaffdbc624cf564",
       "width": 1024,
       "height": 900
     },
@@ -4822,73 +5125,175 @@
     },
     {
       "file": "concept-detail-v2-320-light.png",
-      "sha256": "ec17dee76ba8ac58651c0b8ce309871159c167b707d530ef937f7f959077a4d6",
+      "sha256": "02460c734b98689f0dbbe7814aac13eaaf99b77cbb9b6d043475208ff8d4f63e",
       "width": 320,
       "height": 900
     },
     {
       "file": "concept-detail-v2-390-light.png",
-      "sha256": "90456e4fa323afb7994a85108b44e39a4dbfbccf12dd434cb4468e4df9b8cbcb",
+      "sha256": "10517d8e3624f48031d901eed09ff13a4ad629999cb8cc648f11f7571412eae7",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-v2-390-dark.png",
-      "sha256": "07930129ab481d088510fefb06842d563e926cdae55544cabb00d02c44794134",
+      "sha256": "fcdb464c45cf05be55ea27cd7d1f6f0b2b23f53be5d111940c3d8ca007fc8cb9",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-v2-1024-dark.png",
-      "sha256": "75442e4dfd252764bc38c39c39a9a80f1d9e86f6dd75139372ab927e7a6f5a30",
+      "sha256": "f8b564e5e2a0ed62765b280fa3e9eff74d10312b4220df61c68d91c3e7428709",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-list-320-light.png",
-      "sha256": "a1850d537f8c7da9bd0a05f9bbe8103fa935a02afcbddd2d6891bbc679c41225",
+      "sha256": "f5e43b574831789bf5d5da8bcbe865df49c703035406f47a2906cb2629434491",
       "width": 320,
       "height": 900
     },
     {
       "file": "concept-list-390-dark.png",
-      "sha256": "6b74fe94d08a4b0f7f5bf58284a94dda07f9f685b88a5b0f0fa8bb26d84a7b7c",
+      "sha256": "6d9958f4981bef4749b92eecd7f74aa1344aa0287144c1fdcbc0f38068206d01",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-keyboard-390-clickpath.png",
-      "sha256": "6b74fe94d08a4b0f7f5bf58284a94dda07f9f685b88a5b0f0fa8bb26d84a7b7c",
+      "sha256": "6d9958f4981bef4749b92eecd7f74aa1344aa0287144c1fdcbc0f38068206d01",
       "width": 390,
       "height": 900
     },
     {
       "file": "be39-publicatie-1280-light.png",
-      "sha256": "7d4a1a2bc99a043d4945a71ef2d619b7bd75405de7ef94a3fe52d2c3bcc43baf",
+      "sha256": "865c854ca37c43833a818522a3e15cbde9457413639bce8b5ee21e4083dcca5c",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be41-vervolgstap-1280-light.png",
+      "sha256": "2bd5ab8601588b4eff4e9acaa08191f8ed8f23d3146ff8ba2dae7f8420c458e9",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be39-publicatie-1280-dark.png",
-      "sha256": "147b0b84bccb1d918caa4ab1ccdf4f0be561c5f7cf014bf9222ea1eacf7cbb72",
+      "sha256": "afb0bdf99b45c6b34233245b653d66449a6d20226f082fe82b8164b844ea4970",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be41-vervolgstap-1280-dark.png",
+      "sha256": "43e04e63fcbe0f8784d5e25a37dad7b57518a2a02a68853e149ef9bf8f380343",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be39-publicatie-390-light.png",
-      "sha256": "1e3ad1694ecd37750be2b810498decc7583a094ac4223a914f471726c3420343",
+      "sha256": "2d4b093cfe4dc0b585f5cc5b62a1e9013dc77d80c1dca2bcaab3f6f7faf837fd",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-vervolgstap-390-light.png",
+      "sha256": "bbd1f05159422f72e5356e2eab0b47dfa83a931da93d9591328a4a2ed37c5a69",
       "width": 390,
       "height": 900
     },
     {
       "file": "be39-publicatie-390-dark.png",
-      "sha256": "17f1f5010b693fc5e0e2fca7c28aa2352661f993722a93dc2e263ecd38c7606f",
+      "sha256": "1ec531380a9bf7fedc85280a15587337ed0849334778feaab24dc8231dc2775e",
       "width": 390,
       "height": 900
     },
     {
+      "file": "be41-vervolgstap-390-dark.png",
+      "sha256": "4e666834df305c233965b14e217b1cccd22cffc81d259132c70c31632175cdc0",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-320-light.png",
+      "sha256": "af1a974f8aa12a888ee296e43c1ef4baba2db378f4d451de2cb1f3bb66b768be",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "be41-vervolgstap-320-light.png",
+      "sha256": "21e653e776e6b0d9438401f7fc1cb7f8454d79531c6c48118b94ccfc39357d52",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-320-dark.png",
+      "sha256": "170786aa714ccb4507112c4bc998e02f08d86900b9dd620079b43f5eebc77f93",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "be41-vervolgstap-320-dark.png",
+      "sha256": "4e4fcca746614a4b9581ca1ccabd04f7d1d3c6bf6232cf7e4723bfb005ffb3db",
+      "width": 320,
+      "height": 900
+    },
+    {
       "file": "be39-detail-1280-light.png",
-      "sha256": "5c978978e0f2d14e8e4ec54c73004abbb4aa01e24dcf4c352e5e7509527017f8",
+      "sha256": "afbe9c88faf8dcd32f06c6b9eb2011188dc289ed4eab1689d7fe8e3264f8367f",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be41-focus-390-light.png",
+      "sha256": "fd139b4e1a7da0fc0d8eab704d0ca20722fdc13c4b80ea62e6872626fa76d881",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-wijzigingen-390-light.png",
+      "sha256": "90bc9f39d883f3bc77d18fe204b1a438d1a02741bdcb46d1ae2826682b2bdeaf",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-publicatie-390-light.png",
+      "sha256": "8c8617e00f12f5055d29fea7ffc6eb05cdc6a76cb0143661172a58490f0e63b2",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-1280-light.png",
+      "sha256": "afbe9c88faf8dcd32f06c6b9eb2011188dc289ed4eab1689d7fe8e3264f8367f",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-390-light.png",
+      "sha256": "c18d1c4414fec0cf2c3561fcaef3235f6c895612653211ce82017e47d6ffaaa2",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-390-dark.png",
+      "sha256": "14782e24b1e90482d2c34bbdf5c61059c5e0ffec450a9b91f0e2557820c5f6fe",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-320-light.png",
+      "sha256": "fa429b837d4adc2b6ab0c7b95350b5b6349b17af51033b0164e600ceec5ee88b",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-320-dark.png",
+      "sha256": "6e006fdd7201fbbabd35aee6ef674fb602d72010d759bf174825134aad38e99a",
+      "width": 320,
+      "height": 900
+    },
+    {
+      "file": "be41-detail-origineel-1280-dark.png",
+      "sha256": "27c20a6e355a697027e51e6f198072a5de1aaf1f0106006d7829643970b74fed",
       "width": 1280,
       "height": 900
     }
@@ -4904,7 +5309,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.316Z",
+        "at": "2026-10-28T19:27:06.754Z",
         "resourceType": "Image"
       },
       {
@@ -4914,7 +5319,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.316Z",
+        "at": "2026-10-28T19:27:06.755Z",
         "resourceType": "Document"
       }
     ],
@@ -4926,7 +5331,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.297Z"
+        "at": "2026-10-28T19:27:06.717Z"
       },
       {
         "phase": "negative-probe",
@@ -4935,7 +5340,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-28T21:45:25.297Z"
+        "at": "2026-10-28T19:27:06.718Z"
       },
       {
         "phase": "negative-probe",
@@ -4944,7 +5349,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.297Z"
+        "at": "2026-10-28T19:27:06.719Z"
       },
       {
         "phase": "negative-probe",
@@ -4953,7 +5358,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.297Z"
+        "at": "2026-10-28T19:27:06.719Z"
       },
       {
         "phase": "negative-probe",
@@ -4962,7 +5367,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.298Z"
+        "at": "2026-10-28T19:27:06.720Z"
       },
       {
         "phase": "negative-probe",
@@ -4971,7 +5376,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-28T21:45:25.298Z"
+        "at": "2026-10-28T19:27:06.722Z"
       }
     ]
   },

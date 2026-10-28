@@ -23,6 +23,8 @@ const path = require('node:path');
 const { STATUSES } = require('../../src/lib/batchAnalysis');
 const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');
 const { PDF_SCAN_NOTICE } = require('../../src/lib/menuSourceMap');
+// BE-41: the next step is checked against the product's own rule.
+const { deriveNextStep, NEXT_STEP_LABELS } = require('../../src/lib/menuConceptPublication');
 const fixtures = require('./fixtures/menuReviewFixtures');
 
 const SCRIPT = fs.readFileSync(path.join(__dirname, 'run-menu-review-browser-check.js'), 'utf8').replace(/\r\n/g, '\n');
@@ -64,18 +66,41 @@ test('image-only: the fixture row shows exactly that label', () => {
 });
 
 test('image-only follow-up: the check expects the product\'s own reason and next step', () => {
-  assert.equal(SCRIPT.includes(FOLLOW_UP.reason), true, `missing literal: ${FOLLOW_UP.reason}`);
-  assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true, `missing literal: ${FOLLOW_UP.nextStep}`);
+  // The check compares with the product constants instead of restating the copy.
+  assert.equal(SCRIPT.includes('followUpText.includes(FOLLOW_UP.reason)'), true, 'the check no longer reads the product reason');
+  assert.equal(SCRIPT.includes('followUpText.includes(FOLLOW_UP.nextStep)'), true, 'the check no longer reads the product next step');
+  assert.equal(FOLLOW_UP.reason.length > 0, true);
+  assert.equal(FOLLOW_UP.nextStep.length > 0, true);
+});
+
+test('image-only follow-up: the check declares FOLLOW_UP before a browser run can crash', () => {
+  // Regression for the BE-41 round whose full run stopped with
+  // "ReferenceError: FOLLOW_UP is not defined" in imageOnlyScenario: the two
+  // assertions above matched the literal text, so the drift guard stayed green
+  // while the check itself could not run. The identifier, not only the text, is
+  // part of the expectation: it must be required from the product module and
+  // declared before its first use.
+  const requirement = "const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');";
+  const declaration = 'const FOLLOW_UP = FOLLOW_UPS.image_only;';
+  assert.equal(SCRIPT.includes(requirement), true, 'FOLLOW_UPS is not required from src/lib/sourceTriage');
+  assert.equal(SCRIPT.includes(declaration), true, 'FOLLOW_UP is not declared in run-menu-review-browser-check.js');
+  const declaredAt = SCRIPT.indexOf(declaration);
+  const firstUse = SCRIPT.indexOf('FOLLOW_UP.');
+  assert.ok(firstUse > declaredAt, 'FOLLOW_UP is used before the line that declares it');
 });
 
 test('image-only follow-up: the batch banner the check reads is the screen\'s own wording', () => {
   // Since BE-31 the same reason and next step also reach the screen as the
   // batch banner (app/internal/bronnen/BronnenView.js), which is what the
-  // check reads on the current screen.
+  // check reads on the current screen. Once a task is selected the screen moves
+  // that copy into the task's own follow-up block, so the check accepts either
+  // state and reads both from the same product copy.
   const BRONNEN_VIEW = READ_TEXT('app/internal/bronnen/BronnenView.js');
+  const PROPOSAL_DETAIL = READ_TEXT('app/internal/bronnen/ProposalDetail.js');
   assert.equal(BRONNEN_VIEW.includes('Vervolg van de batchanalyse:'), true);
   assert.equal(SCRIPT.includes('Vervolg van de batchanalyse:'), true);
-  assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true);
+  assert.equal(PROPOSAL_DETAIL.includes('stg-followup'), true);
+  assert.equal(SCRIPT.includes("querySelector('.stg-followup')"), true);
 });
 
 test('image-only: the row\'s own next step is the one the check reads', () => {
@@ -147,4 +172,33 @@ test('kaart: the scan notice the check waits for is the product\'s own PDF notic
   assert.equal(SCRIPT.includes('PDF zonder tekstlaag'), true);
   assert.equal(SCRIPT.includes(PDF_SCAN_NOTICE.slice(0, 40)), true, 'the check no longer names the PDF notice');
   assert.equal(SCRIPT.includes('Deze kaart is een afbeelding; vergelijken kan nog niet.'), false, 'the image notice does not apply to a PDF');
+});
+
+test('be41: the check reads the next step from the product rule and covers every row', () => {
+  // The label of a card is not restated in the check: it comes from
+  // src/lib/menuConceptPublication.js, exactly as the screen receives it.
+  assert.equal(SCRIPT.includes("const { deriveNextStep } = require('../../src/lib/menuConceptPublication')"), true);
+  for (const [id, label] of Object.entries(NEXT_STEP_LABELS)) {
+    assert.equal(SCRIPT.includes(`${label} →`), false, `the check hardcodes the ${id} label`);
+    assert.equal(SCRIPT.includes(`${label} ↗`), false, `the check hardcodes the ${id} label`);
+  }
+  // One fictional card per row of the contract's table, and no more rows.
+  const ids = fixtures.publicationList.items.map((item) => deriveNextStep({
+    status: item.status,
+    publication: item.publication,
+    blockerCount: item.blockerCount,
+    prUrl: item.exportPrUrl,
+  }).id);
+  assert.deepEqual([...new Set(ids)].sort(), ['blockers', 'export', 'none', 'pr', 'rejected', 'retry', 'review', 'source']);
+});
+
+test('be41: every card with a next step has its own detail, so a click really lands', () => {
+  const details = fixtures.scenarios['concepts-publication'].detail;
+  for (const item of fixtures.publicationList.items) {
+    assert.equal(Boolean(details[item.id]), true, `no detail fixture for ${item.id}`);
+  }
+  // The two sources the URL rule must refuse, and the pdf it must name.
+  assert.equal(details[fixtures.PUBLICATION_IDS.unsafeSource].concept.sourceUrl, 'javascript:alert(1)');
+  assert.equal(details[fixtures.PUBLICATION_IDS.emptySource].concept.sourceUrl, '');
+  assert.equal(details[fixtures.PUBLICATION_IDS.pdfSource].concept.sourceUrl.endsWith('.pdf'), true);
 });

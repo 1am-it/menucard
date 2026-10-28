@@ -8,11 +8,12 @@
 // Visual direction: docs/mockups/menu-concept-review-v1.png (text and
 // Kleurtaal v2 win). Approval stays internal: nothing is published.
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
 import { buildMenuConcept, storedConceptInput, mergeEdits, conceptSectionCount } from '@/src/lib/menuConcept'
-import { derivePublicationReadiness, EXPORT_STATUS_LABELS } from '@/src/lib/menuConceptPublication'
+import { deriveNextStep, derivePublicationReadiness, EXPORT_STATUS_LABELS } from '@/src/lib/menuConceptPublication'
+import { menuSourceLink } from '@/src/lib/menuConceptUrls'
 import {
   plural,
   LineEditor,
@@ -36,11 +37,14 @@ const STATUS_VIEW = {
 // BE-39: the export texts stay exactly as they were; their single source is
 // src/lib/menuConceptPublication.js, so the list, the detail card and the
 // pure rule can never drift apart.
+// BE-41 (criterion 3): "Vorige poging mislukt" is attention, not a neutral
+// note, so it takes the existing oker attention role (`old`); every other
+// export state keeps its neutral role.
 const EXPORT_VIEW = {
   opened: { role: 'neutral', icon: 'clock', label: EXPORT_STATUS_LABELS.opened },
   merged: { role: 'positive', icon: 'check', label: EXPORT_STATUS_LABELS.merged },
   closed: { role: 'neutral', icon: 'cross', label: EXPORT_STATUS_LABELS.closed },
-  failed: { role: 'neutral', icon: 'cross', label: EXPORT_STATUS_LABELS.failed },
+  failed: { role: 'old', icon: 'cross', label: EXPORT_STATUS_LABELS.failed },
   pending: { role: 'neutral', icon: 'progress', label: EXPORT_STATUS_LABELS.pending },
 }
 
@@ -66,9 +70,12 @@ export function StatusBadge({ status }) {
 // server (one rule, src/lib/menuConceptPublication.js); this map only picks the
 // existing badge role and icon. Export states reuse the existing EXPORT_VIEW
 // colours and icons, so nothing new is introduced visually.
+// BE-41 (criterion 3): "Nog niet klaar" is an attention state, so it uses the
+// existing oker attention role (`old`) instead of the neutral grey it had; a
+// ready card keeps the positive role. No new colour is added.
 const PUBLICATION_VIEW = {
   ready: { role: 'positive', icon: 'check' },
-  not_ready: { role: 'neutral', icon: 'clock' },
+  not_ready: { role: 'old', icon: 'alert' },
 }
 
 function publicationView(state) {
@@ -86,6 +93,26 @@ function PublicationBadge({ publication }) {
       <StatusIcon name={view.icon} />
       <span>{publication.label}</span>
     </span>
+  )
+}
+
+/**
+ * BE-41 (criterion 4): one click from the review screen to the original menu,
+ * right next to the title, with the small line that says what opens. Only an
+ * http(s) source gets the button; any other or empty URL gets nothing at all
+ * (src/lib/menuConceptUrls.js owns that rule).
+ */
+function OriginalMenuLink({ sourceUrl }) {
+  const link = menuSourceLink(sourceUrl)
+  if (!link) return null
+  return (
+    <div className="mcr-origin">
+      <a className="stg-btn-secondary bta-btn" href={link.href} target="_blank" rel="noopener noreferrer">
+        Originele menukaart openen ↗
+        <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
+      </a>
+      <p className="mcr-origin-note">{link.note}</p>
+    </div>
   )
 }
 
@@ -111,12 +138,70 @@ function InternalOnlyNote() {
   )
 }
 
+/**
+ * BE-41: where the next step of a card goes. The list never starts an export,
+ * so "Maak review-PR →" is only a link to the block where that action lives.
+ * One destination per card: the whole card is a single link (criterion 1).
+ */
+function nextStepHref(step, detailHref) {
+  if (!step || step.id === 'none') return detailHref
+  if (step.target === 'changes') return `${detailHref}?tab=changes`
+  if (step.target === 'source') return `${detailHref}?tab=source`
+  if (step.target === 'publication') return `${detailHref}#mcr-publication`
+  // 'pr' keeps its own second link; the card itself still opens the review.
+  return detailHref
+}
+
+/**
+ * The visible next step of a card. An internal step is part of the card link
+ * (styling only, never a second `<a>` and never a second tab stop); only the
+ * review-PR link is a real second link, because it goes to GitHub.
+ */
+function NextStepButton({ step }) {
+  if (!step || !step.label) return null
+  const classes = `mcr-next bta-btn ${step.variant === 'outlined' ? 'stg-btn-secondary' : 'di-btn-primary'}`
+  if (step.id === 'pr') {
+    return (
+      <a className={`${classes} mcr-next--external`} href={step.externalUrl} target="_blank" rel="noopener noreferrer">
+        {step.label}
+        <span className="bta-sr-only"> (opent in een nieuw tabblad)</span>
+      </a>
+    )
+  }
+  // Inside the card link: the label says the same thing as the link it belongs
+  // to, so it is not announced twice.
+  return (
+    <span className={classes} aria-hidden="true">
+      {step.label}
+    </span>
+  )
+}
+
 function ConceptItem({ item }) {
+  // BE-41: the button comes from the same publication rule as the label above
+  // it, so the two can never disagree. Nothing here posts or exports.
+  const step = deriveNextStep({
+    status: item.status,
+    publication: item.publication,
+    blockerCount: item.blockerCount,
+    prUrl: item.exportPrUrl,
+  })
+  const detailHref = `/internal/menu-concepts/${item.id}`
+  const href = nextStepHref(step, detailHref)
   return (
     <li className="mcr-item">
       <div className="mcr-item-head">
         <h3 className="mcr-item-title">
-          <a href={`/internal/menu-concepts/${item.id}`}>{item.restaurantName}</a>
+          {/* The card is one link. Its accessible name names the step as well
+              ("Fictief Klaar — Beoordelen"), so a screen reader hears where the
+              card goes; the visible text stays the restaurant name. */}
+          <a
+            className="mcr-item-link"
+            href={href}
+            aria-label={step && step.plainLabel ? `${item.restaurantName} — ${step.plainLabel}` : undefined}
+          >
+            {item.restaurantName}
+          </a>
         </h3>
         <div className="mcr-item-badges">
           <StatusBadge status={item.status} />
@@ -139,6 +224,11 @@ function ConceptItem({ item }) {
           </li>
         )}
       </ul>
+      {step && step.label && (
+        <div className="mcr-item-next">
+          <NextStepButton step={step} />
+        </div>
+      )}
     </li>
   )
 }
@@ -455,6 +545,7 @@ function ProductConceptReview({ data, crumbs, loadError, message }) {
         <div className="bta-title-row">
           <h1 className="di-title">Beoordeel menuconcept</h1>
           <span className="bta-tag">Alleen intern</span>
+          <OriginalMenuLink sourceUrl={c.sourceUrl} />
         </div>
         <p className="bta-muted">Versiegebonden kaart. Alleen lezen: opslaan, goedkeuren en exporteren zijn in deze ronde geblokkeerd.</p>
       </div>
@@ -534,6 +625,17 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
   const { edits, touched, setLineEdit, decideRemoved, reset, dirty } = useConceptEdits()
   const [rejecting, setRejecting] = useState(false)
   const [tab, setTab] = useState(() => (data && data.concept.status === 'approved' && data.preview && data.preview.concept ? 'preview' : 'changes'))
+  // BE-41: the list links straight to what needs attention — `?tab=changes`
+  // (Wijzigingen), `?tab=source` (Bron) or `#mcr-publication` (Publicatie).
+  // Read after mount from the real URL: no fixture-only link, no second route.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab')
+    if (requested && TABS.some((t) => t.id === requested)) setTab(requested)
+    if (window.location.hash === '#mcr-publication') {
+      const block = document.getElementById('mcr-publication')
+      if (block) block.scrollIntoView({ block: 'start' })
+    }
+  }, [])
   const blockedContent = Boolean(data && (data.product || data.concept.blocked))
   const stored = useMemo(() => (data && !blockedContent ? storedConceptInput(data.concept.captured) : null), [data, blockedContent])
   const concept = useMemo(
@@ -616,6 +718,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
         <div className="bta-title-row">
           <h1 className="di-title">Beoordeel menuconcept</h1>
           <span className="bta-tag">Alleen intern</span>
+          <OriginalMenuLink sourceUrl={c.sourceUrl} />
         </div>
         <p className="bta-muted">Controleer alleen de wijzigingen voordat je het concept goedkeurt.</p>
       </div>
