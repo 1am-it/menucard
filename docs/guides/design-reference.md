@@ -601,9 +601,9 @@ control. No new colour was introduced.
 | route | before | after |
 | --- | --- | --- |
 | `/` | 164.7 KB | 164.8 KB |
-| `/alle-restaurants` | 162.6 KB | 165.2 KB |
+| `/alle-restaurants` | 162.6 KB | 163.2 KB |
 | `/restaurant/[id]` | 168.3 KB | 169.2 KB |
-| `/menu/[id]` | 168.6 KB | 169.4 KB |
+| `/menu/[id]` | 168.6 KB | 170.5 KB |
 
 None of the four routes was above the target, so there was nothing to trim:
 the largest single cause is the shared framework chunk (~128 KB of script on
