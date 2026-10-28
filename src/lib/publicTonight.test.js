@@ -18,6 +18,7 @@ const {
   isOpenForMoment,
   isNewlyUpdated,
   availableFrom,
+  momentAvailability,
   clockLabel,
   dayAfter,
   selectTonight,
@@ -523,4 +524,79 @@ test('BE-38: de terugval hoeft geen nieuwe data, AI of willekeur', () => {
     .replace(/^\s*\/\/.*$/gm, '');
   assert.doesNotMatch(source, /Math\.random/);
   assert.doesNotMatch(source, /\bfetch\(|anthropic|openai/i);
+});
+
+// ─── BE-38 (#90): na sluitingstijd is er vandaag niets meer ────────────────
+
+const DINER_HOURS_CLOSE_2300 = { vr: '17:30-23:00' };
+
+test('BE-38: na sluitingstijd telt een restaurant dat vandaag al dicht is niet meer mee', () => {
+  // Drie dinergerechten van zaken die om 23:00 sluiten: om 22:59 is het nog
+  // "Vanavond op de kaart", om 23:30 is die dag voorbij en toont de home de
+  // lunch van morgen in plaats van een kaart van gesloten keukens.
+  const candidates = [...dinerCandidates(DINER_HOURS_CLOSE_2300), ...tomorrowLunchCandidates()];
+
+  const beforeClosing = selectTonight({ candidates, now: new Date('2026-10-23T20:59:00Z') }); // 22:59 lokaal
+  assert.equal(beforeClosing.mode, 'now');
+  assert.equal(beforeClosing.title, 'Vanavond op de kaart');
+  assert.equal(beforeClosing.dishes.length, MAX_DISHES);
+  assert.equal(beforeClosing.dishes.every((dish) => dish.opensAt === null), true);
+
+  const afterClosing = selectTonight({ candidates, now: new Date(LATE_EVENING) }); // 23:30 lokaal
+  assert.equal(afterClosing.mode, 'tomorrow');
+  assert.equal(afterClosing.title, 'Morgen op de kaart');
+  assert.equal(afterClosing.dateKey, '2026-10-24');
+  assert.equal(afterClosing.dishes.length, MAX_DISHES);
+  assert.equal(afterClosing.dishes.every((dish) => dish.mealType === 'lunch'), true);
+});
+
+test('BE-38: na sluitingstijd zonder lunch van morgen verdwijnt de sectie', () => {
+  const selection = selectTonight({
+    candidates: dinerCandidates(DINER_HOURS_CLOSE_2300),
+    now: new Date(LATE_EVENING),
+  });
+  assert.equal(selection.hidden, true, 'een gesloten keuken is geen reden om de sectie te tonen');
+  assert.deepEqual(selection.dishes, []);
+});
+
+test('BE-38: momentAvailability geeft het "vanaf"-moment én de sluitingstijd van die dag', () => {
+  assert.deepEqual(momentAvailability({ vr: '17:30-22:00' }, 'vr', 'diner'), { opens: 17 * 60 + 30, closes: 22 * 60 });
+  assert.deepEqual(momentAvailability({ vr: '12:00-23:00' }, 'vr', 'diner'), { opens: 17 * 60, closes: 23 * 60 });
+  assert.equal(momentAvailability({ vr: '18:00-22:00' }, 'vr', 'borrel'), null);
+  assert.equal(momentAvailability({ za: '17:30-22:00' }, 'vr', 'diner'), null);
+  assert.equal(momentAvailability(null, 'vr', 'diner'), null);
+  // De "vanaf"-tijd blijft precies wat availableFrom al beloofde.
+  for (const hours of [{ vr: '17:30-22:00' }, { vr: '12:00-23:00' }, { vr: '18:00-22:00' }, null]) {
+    const availability = momentAvailability(hours, 'vr', 'diner');
+    assert.equal(availableFrom(hours, 'vr', 'diner'), availability ? availability.opens : null);
+  }
+});
+
+test('BE-38: met de echte data geeft 23:30 de lunch van morgen, uit dezelfde bron', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const { buildTonightCandidates } = require('./publicTonightData');
+  const root = path.join(__dirname, '..', '..');
+  const menus = JSON.parse(fs.readFileSync(path.join(root, 'data/menus.json'), 'utf8'));
+
+  const selection = selectTonight({ candidates: buildTonightCandidates(), now: new Date(LATE_EVENING) });
+  assert.equal(selection.mode, 'tomorrow', 'na sluitingstijd toont de home morgen');
+  assert.equal(selection.title, 'Morgen op de kaart');
+  assert.equal(selection.mealType, 'lunch');
+  assert.equal(selection.dateKey, '2026-10-24', 'zaterdag 24 oktober');
+  assert.equal(selection.hidden, false);
+  assert.equal(selection.dishes.length, MAX_DISHES);
+  assert.equal(new Set(selection.dishes.map((dish) => dish.restaurantId)).size, MAX_DISHES);
+
+  for (const dish of selection.dishes) {
+    const idParts = dish.dishId.split('-');
+    const itemIndex = Number(idParts.pop());
+    const categoryIndex = Number(idParts.pop());
+    const menuKey = idParts.join('-');
+    assert.equal(dish.menuLink, `/menu/${menuKey}`);
+    const sourceItem = menus[menuKey].categories[categoryIndex].items[itemIndex];
+    assert.equal(sourceItem.name, dish.name, 'de getoonde naam bestaat letterlijk in de bron');
+    assert.equal(sourceItem.price, dish.priceDisplay, 'de getoonde prijs is de bronprijs');
+    assert.match(dish.opensAt, /^\d{2}:\d{2}$/, 'ook de lunch van morgen noemt zijn openingstijd');
+  }
 });

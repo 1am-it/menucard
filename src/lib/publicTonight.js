@@ -147,15 +147,30 @@ function isMainDishCategory(categoryName) {
  * overlapt; de leesregel komt uit src/lib/openingStatus.js (dezelfde als
  * "Nu open"), niet uit een tweede interpretatie hier.
  *
- * @returns {number|null} minuten na middernacht, of null als het niet meedoet
+ * `closes` is de sluitingstijd van die weekdag. Daarmee kan de selectie een
+ * restaurant overslaan waarvan de dag er echt op zit (criterium 2 van BE-38:
+ * na sluitingstijd toont de home morgen, geen "Vanavond op de kaart" meer).
+ *
+ * @returns {{opens:number, closes:number}|null} `opens` is het moment waarop de
+ *   gerechten van dit menutype er echt zijn, `closes` het moment waarop het
+ *   restaurant die dag sluit; null als het restaurant niet meedoet.
  */
-function availableFrom(openingHours, dayKey, mealType) {
+function momentAvailability(openingHours, dayKey, mealType) {
   const window = MEAL_OPEN_WINDOWS[mealType];
   if (!window) return null;
   if (!isOpenDuring(openingHours, dayKey, window.from, window.to)) return null;
   const range = parseOpeningRange(openingHours && openingHours[dayKey]);
   if (!range) return null;
-  return Math.max(range.open, window.from);
+  return { opens: Math.max(range.open, window.from), closes: range.close };
+}
+
+/**
+ * BE-38 (#90) — alleen het "vanaf"-moment van {@link momentAvailability}.
+ * @returns {number|null} minuten na middernacht, of null als het niet meedoet
+ */
+function availableFrom(openingHours, dayKey, mealType) {
+  const availability = momentAvailability(openingHours, dayKey, mealType);
+  return availability ? availability.opens : null;
 }
 
 /**
@@ -287,22 +302,28 @@ function preferInSameBucket(selected, ranked, predicate) {
  * @param {string} options.mealType 'lunch' | 'borrel' | 'diner'
  * @param {number} options.limit    hoeveel gerechten er hoogstens gekozen worden
  * @param {boolean} [options.withOpenTime]  geef elk gerecht zijn "vanaf"-tijd
+ * @param {number|null} [options.afterMinutes]  sla restaurants over die op
+ *   deze dag al gesloten zijn (minuten na middernacht); alleen het huidige
+ *   moment gebruikt dit, zodat "na sluitingstijd" morgen toont
  * @returns {{dishes:Array<object>, opener:number|null}|null}
  *   `opener` is het vroegste moment (minuten na middernacht) waarop de
  *   gekozen gerechten er echt zijn.
  */
-function selectMomentDishes(candidates, { dayKey, dateKey, mealType, limit, withOpenTime = false }) {
+function selectMomentDishes(candidates, { dayKey, dateKey, mealType, limit, withOpenTime = false, afterMinutes = null }) {
   const pool = [];
   const opensAt = new Map();
   for (const candidate of Array.isArray(candidates) ? candidates : []) {
     if (!candidate || candidate.mealType !== mealType) continue;
     if (!candidate.priceDisplay || candidate.priceValue == null || !(candidate.priceValue > 0)) continue;
-    const opens = availableFrom(candidate.openingHours, dayKey, mealType);
-    if (opens == null) continue;
+    const availability = momentAvailability(candidate.openingHours, dayKey, mealType);
+    if (!availability) continue;
+    // Criterium 2: een restaurant waarvan de deur vandaag al dicht is, hoort
+    // niet meer bij "dit moment"; de terugval zoekt dan verder (morgen).
+    if (afterMinutes != null && availability.closes <= afterMinutes) continue;
     // Een verlopen daghap blijft op de menukaart staan, maar hoort niet meer
     // in deze sectie.
     if (candidate.daily && candidate.daily.sourceDate !== dateKey) continue;
-    opensAt.set(candidate, opens);
+    opensAt.set(candidate, availability.opens);
     pool.push(candidate);
   }
 
@@ -432,12 +453,16 @@ function selectTonight({ candidates = [], now = new Date(), timeZone = DEFAULT_T
     hidden: true,
   };
 
-  // 1. Het huidige moment van vandaag.
+  // 1. Het huidige moment van vandaag. `afterMinutes` slaat restaurants over
+  //    waarvan de deur vandaag al dicht is: na sluitingstijd is er vandaag
+  //    niets meer (criterium 2), in plaats van een dinerkaart van een zaak die
+  //    om 22:00 sloot.
   const current = selectMomentDishes(list, {
     dayKey: parts.dayKey,
     dateKey: parts.dateKey,
     mealType,
     limit,
+    afterMinutes: parts.minutes,
   });
   if (current && current.dishes.length >= limit) {
     return { ...nothing, dishes: current.dishes, hidden: false };
@@ -510,6 +535,7 @@ module.exports = {
   isMainDishCategory,
   honestPriceLabel,
   availableFrom,
+  momentAvailability,
   isOpenForMoment,
   isNewlyUpdated,
   buildDishHref,
