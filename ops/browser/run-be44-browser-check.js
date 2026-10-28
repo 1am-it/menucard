@@ -272,6 +272,19 @@ async function delenScenario(cdp) {
         check(`delen (${label}): de payload is alleen url en title`, JSON.stringify(keys) === JSON.stringify(['title', 'url']), JSON.stringify(keys));
         check(`delen (${label}): de link is de deeplink met de stand van dit moment`, Boolean(payload) && payload.url === expectedShareUrl(theme), payload && payload.url);
         check(`delen (${label}): de titel is gerecht en restaurant`, Boolean(payload) && payload.title === `${DISH_NAME} · ${RESTAURANT_NAME}`, payload && payload.title);
+
+        // De opdracht vraagt de melding "Link gekopieerd" op alle drie de
+        // breedtes: ook op de telefoon, waar het systeemmenu de normale route
+        // is, forceren we hier het klembord-alternatief voor de opname.
+        await evalJs(cdp, CLIPBOARD_STUB);
+        const { observed: copiedReady } = await clickUntil(cdp, DISH_NAME, COPIED_OBSERVED);
+        const copiedAfter = await evalJs(cdp, readCardJs(DISH_NAME));
+        const mobileCopied = await evalJs(cdp, 'window.__copied');
+        check(`delen (${label}): ook zonder systeemmenu verschijnt "Link gekopieerd"`, copiedReady && copiedAfter.statusText === 'Link gekopieerd', JSON.stringify({ status: copiedAfter.statusText }));
+        check(`delen (${label}): dat klembord kreeg dezelfde link`, mobileCopied === expectedShareUrl(theme), mobileCopied);
+        await evalJs(cdp, focusCardJs(DISH_NAME));
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await shot(cdp, `be44-melding-${width}-${theme}.png`, { scenario: 'delen', state: 'melding', theme, width });
       }
     }
   }

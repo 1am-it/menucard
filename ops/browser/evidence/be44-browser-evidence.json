@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T23:33:56.418Z",
+  "generatedAt": "2026-10-28T23:36:19.931Z",
   "ticket": "#105 BE-44 deel 1 — een gerecht delen met voorvertoning",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
@@ -7,10 +7,10 @@
   "scenarios": [
     {
       "name": "delen",
-      "checks": 62,
-      "passed": 62,
+      "checks": 70,
+      "passed": 70,
       "failed": 0,
-      "durationMs": 25956,
+      "durationMs": 30592,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 24449,
+      "durationMs": 22610,
       "error": null
     },
     {
@@ -26,12 +26,12 @@
       "checks": 14,
       "passed": 14,
       "failed": 0,
-      "durationMs": 4623,
+      "durationMs": 4977,
       "error": null
     }
   ],
   "checks": {
-    "total": 112,
+    "total": 120,
     "failed": 0,
     "entries": [
       {
@@ -135,6 +135,16 @@
         "detail": "Poussin · Brasserie Bardot"
       },
       {
+        "name": "delen (390/light): ook zonder systeemmenu verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (390/light): dat klembord kreeg dezelfde link",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+      },
+      {
         "name": "delen (320/light): de knop \"Delen\" staat op de gerechtkaart",
         "passed": true,
         "detail": "{\"button\":\"Delen\",\"missing\":false}"
@@ -188,6 +198,16 @@
         "name": "delen (320/light): de titel is gerecht en restaurant",
         "passed": true,
         "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "delen (320/light): ook zonder systeemmenu verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (320/light): dat klembord kreeg dezelfde link",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
       },
       {
         "name": "delen (1280/dark): de knop \"Delen\" staat op de gerechtkaart",
@@ -290,6 +310,16 @@
         "detail": "Poussin · Brasserie Bardot"
       },
       {
+        "name": "delen (390/dark): ook zonder systeemmenu verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (390/dark): dat klembord kreeg dezelfde link",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
         "name": "delen (320/dark): de knop \"Delen\" staat op de gerechtkaart",
         "passed": true,
         "detail": "{\"button\":\"Delen\",\"missing\":false}"
@@ -343,6 +373,16 @@
         "name": "delen (320/dark): de titel is gerecht en restaurant",
         "passed": true,
         "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "delen (320/dark): ook zonder systeemmenu verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (320/dark): dat klembord kreeg dezelfde link",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
       },
       {
         "name": "ontvanger (1280/light): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
@@ -600,7 +640,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-light.png",
-        "sha256": "588e4389acc57961bc15a8019ec03626d8c3d87faeee506cd8191d3a0c922cce",
+        "sha256": "562f14ac428e892fff85cd1aa2de2b5c49a29dd41a2e53df46e41d53fea74e58",
         "width": 1280,
         "height": 950
       },
@@ -612,7 +652,7 @@
     {
       "file": {
         "file": "be44-melding-1280-light.png",
-        "sha256": "633a8944adc5f4027736ef183e976ed05ba38fe646fd63b1855261c466171f5c",
+        "sha256": "86527bb49c6ecf189f504166b9db0205a802783af18911e655b96fea08774efb",
         "width": 1280,
         "height": 950
       },
@@ -636,8 +676,21 @@
     },
     {
       "file": {
+        "file": "be44-melding-390-light.png",
+        "sha256": "eb7061bd39197a5071aba841dcccaefe35eafdcc9b58fd170454648f7d30359c",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "delen",
+      "state": "melding",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "file": {
         "file": "be44-deelknop-320-light.png",
-        "sha256": "7caa297124972e4a5193aa32665644b60d40a459dd2e049db22518017c6277d1",
+        "sha256": "daefa6804fe37235fac6400794e4f7cd52d5180894d3ae28255e9985dbc8083f",
         "width": 320,
         "height": 844
       },
@@ -648,8 +701,21 @@
     },
     {
       "file": {
+        "file": "be44-melding-320-light.png",
+        "sha256": "5cafb53148b56c009a0cde1f53a929fdd78e04781203a1abca797e5a49ca1477",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "delen",
+      "state": "melding",
+      "theme": "light",
+      "width": 320
+    },
+    {
+      "file": {
         "file": "be44-deelknop-1280-dark.png",
-        "sha256": "470d347f37edbe1dbc036e41371b1541d65492179d2bced5355e9664bfab4172",
+        "sha256": "c585a776e65844bd86f2a408ed07fe5562ed653fc9f0bc5db69fd83cf2709dad",
         "width": 1280,
         "height": 950
       },
@@ -674,7 +740,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-dark.png",
-        "sha256": "9ca75e7474f32142dcbe12443e18c1ac9e795e1dd742da49a1f2b336b7994191",
+        "sha256": "47eb9e644415b49619da58e8232ee5e7fa6d7cc3266a70cb1e974ddd7584ab82",
         "width": 390,
         "height": 844
       },
@@ -685,13 +751,39 @@
     },
     {
       "file": {
+        "file": "be44-melding-390-dark.png",
+        "sha256": "31aa047ead055303fd995c239b3dda7da3df01b76983fde65afe5c551ece8007",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "delen",
+      "state": "melding",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "99ee682a81cbf591aabb1c47df09eda9fab988dd65b0f02d88972a58059f15e7",
+        "sha256": "2f3588bd9466864eb84254e29dac5b0663e3d4432362224aef9e5fcd9ae1b8f6",
         "width": 320,
         "height": 844
       },
       "viewport": "320x844",
       "scenario": "delen",
+      "theme": "dark",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-melding-320-dark.png",
+        "sha256": "be99fba81978882441181a6997f3a781aa317639341870694174220c8725fc03",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "delen",
+      "state": "melding",
       "theme": "dark",
       "width": 320
     },
@@ -711,7 +803,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "3076fc79838355a115eb1563c5010694f847cc023f0061596456ac45e25249d8",
+        "sha256": "8932bdd27a1230ceee8e3943ded89ec698134f5b3118ffe6f47c4d181cc49843",
         "width": 390,
         "height": 844
       },
@@ -724,7 +816,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "13c4763bb789060c88c8c35fac402f27fff766516bb3c2724c03be941fbe18c3",
+        "sha256": "30da7501f03b005adee8268f05335cffd799fd03978aa6c549d008af37e409a5",
         "width": 320,
         "height": 844
       },
@@ -750,7 +842,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-dark.png",
-        "sha256": "66db3cb71e92e579cd2921f272e45d8c942d615a443b825b937f04fa594f3dea",
+        "sha256": "3f41c5fba4f7aad65b6c66d76bb2cb2216c088209089e882ae9116d3e7ae0a23",
         "width": 390,
         "height": 844
       },
@@ -763,7 +855,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "07d93c6da358073c94d48ead6486406a5047a6356393f9e689d4b5417304db5f",
+        "sha256": "e6bbfabf3475980c1dfe309faa79144d09296c14cfce19ff9eee3e23f183199c",
         "width": 320,
         "height": 844
       },

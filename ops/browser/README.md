@@ -651,7 +651,8 @@ records three scenarios (`--lijst`, `--alleen=<naam>`):
   and 320 px in light and dark. At 1280 px (no `navigator.share`) the clipboard
   receives the existing BE-12 deep link with `?stand=` for the current theme and
   "Link gekopieerd" appears in a `role="status"`; at 390 and 320 px exactly
-  `{ url, title }` goes to `navigator.share` — never `text`.
+  `{ url, title }` goes to `navigator.share` — never `text` — and the clipboard
+  alternative is forced there as well so the message is recorded at every width.
 - **ontvanger** — opening the shared link shows "Iemand deelde dit gerecht met
   je" above the highlighted card, and the `?stand=` in the link does not change
   the page's theme for the receiver.
