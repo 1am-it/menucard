@@ -293,6 +293,10 @@ async function reviewScenario(cdp, width, theme) {
   );
   check(`review (${width}/${theme}): het bestaande controlescherm opent met het resultaat geladen`, ready);
   if (!ready) return;
+  // De pagina bouwt de AI-kaart en de ingeklapte handmatige import in stappen
+  // op. Lees de toestand pas als de handmatige import echt dicht is; anders
+  // meet de controle een tussenstand in plaats van het eindbeeld.
+  await waitFor(cdp, `!document.body.innerText.includes('Prompt maken')`, 3000);
   const page = await readReview(cdp);
   check(`review (${width}/${theme}): de tussenstap is de bestaande pagina`, page.url.startsWith('/internal/menu-import?ai='), page.url);
   check(
@@ -465,7 +469,15 @@ const CHECK_SCENARIOS = [
   {
     name: 'controlescherm',
     run: async (cdp) => {
-      for (const { width, theme } of MATRIX) await reviewScenario(cdp, width, theme);
+      for (const { width, theme } of MATRIX) {
+        // BE-43 split the original row → review loop into separate scenarios.
+        // The review step opens the row's own done state ("Bekijk en
+        // controleer" only exists there), so it brings that state with it for
+        // the same viewport and theme. No app change; only the check's own
+        // starting point.
+        await rowScenario(cdp, width, theme);
+        await reviewScenario(cdp, width, theme);
+      }
     },
   },
   {

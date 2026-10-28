@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T16:36:59.394Z",
+  "generatedAt": "2026-10-28T23:28:31.271Z",
   "kind": "fixture-browser-check",
   "task": "BE-34 (#81) Lees met AI met één klik en een nieuw restaurant zoeken op naam",
   "port": 3142,
@@ -7,7 +7,7 @@
   "screenshots": [
     {
       "file": "be34-rij-voor-1280-light.png",
-      "sha256": "4d82194249d6a075933337df0f820cd43c873a624203117ceb1481b25e917c74",
+      "sha256": "5e2df04060c46fd697b92392f96c679840dd96aed187e7f80fb4869c7598e4b1",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -17,7 +17,7 @@
     },
     {
       "file": "be34-rij-tijdens-1280-light.png",
-      "sha256": "793cb59f9f6b2af0f5a6d018693a30283f29b1b3223c704bbd50dd579e4e703b",
+      "sha256": "0d65c9c7ed96d764b4b08aa5a3530373c8d901c3f877b4e1e4107021f53f5062",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -27,7 +27,7 @@
     },
     {
       "file": "be34-rij-na-1280-light.png",
-      "sha256": "07f5c92ef17ec7906b179add92679cfc308246f0c800c6da283651cb8065f9b7",
+      "sha256": "5421c5f80a6faf078197be630bb785a504e2883009a3879cdf816788d003ad62",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -36,47 +36,8 @@
       "theme": "light"
     },
     {
-      "file": "be34-review-1280-light.png",
-      "sha256": "69d20d86fdedb4b6edfd4deec3aad41ba030b6b1e1e240f38e282182d4f93013",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "review",
-      "theme": "light"
-    },
-    {
-      "file": "be34-rij-fout-1280-light.png",
-      "sha256": "ab5b34199b92525e50883985a135f828e91ff0fdb0e286235eb52b277ff4fddc",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "rij",
-      "state": "fout",
-      "theme": "light"
-    },
-    {
-      "file": "be34-naam-zoeken-1280-light.png",
-      "sha256": "7485635773c22ece012635577f5c90b74b3609a810c8f52d504aa3d1adbcddae",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "naam",
-      "state": "voor",
-      "theme": "light"
-    },
-    {
-      "file": "be34-naam-voorstel-1280-light.png",
-      "sha256": "82f8d7258e423e5817b5862054c5f3e02444b47a3dd234b045822518b590ef24",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "naam",
-      "state": "gevonden",
-      "theme": "light"
-    },
-    {
       "file": "be34-rij-voor-1280-dark.png",
-      "sha256": "fd2eed1f046272845fdf5195c81951a7707bc64d39536b6f1972a550b3667cd3",
+      "sha256": "dccbe0b2569381d78267aa19a6a975abc6c2957a1fb8eb29c2e73e70ebb1e067",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -86,7 +47,7 @@
     },
     {
       "file": "be34-rij-tijdens-1280-dark.png",
-      "sha256": "7f587c79046750e0bc95dcce43a874277a1378136191feb9f72f6bc6190ca579",
+      "sha256": "4a9da9ec615039e47a014e0bdda492937b1f0da56f8bd32ffbc171673ba24f47",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -96,7 +57,7 @@
     },
     {
       "file": "be34-rij-na-1280-dark.png",
-      "sha256": "8185a4072c282ea532c1406df0091c3b68efa303389899bf71af95cb7764a7a1",
+      "sha256": "16fc563cfc9562858bf30a98edaf1c11a0b43685af82558246e96cd4dd100137",
       "width": 1280,
       "height": 950,
       "viewport": "1280x950",
@@ -105,47 +66,8 @@
       "theme": "dark"
     },
     {
-      "file": "be34-review-1280-dark.png",
-      "sha256": "d46f3edd94095f79dd2a25f744e90ce7930f546b62b692ee3bf9466e1c9c9cdb",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "review",
-      "theme": "dark"
-    },
-    {
-      "file": "be34-rij-fout-1280-dark.png",
-      "sha256": "7a51deb1532dbc5ac23aac42a7fd568fba032ce48b6ea453da3d2d7df631cc15",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "rij",
-      "state": "fout",
-      "theme": "dark"
-    },
-    {
-      "file": "be34-naam-zoeken-1280-dark.png",
-      "sha256": "12cccfc0c26cef8c0f0c21568ad8dbe5f57cd9b3e0dd36e3a0d90c624988a8c7",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "naam",
-      "state": "voor",
-      "theme": "dark"
-    },
-    {
-      "file": "be34-naam-voorstel-1280-dark.png",
-      "sha256": "0bcf271effc3efec30adfa4e971700d522ca5d31b5aa243885345a007228632c",
-      "width": 1280,
-      "height": 950,
-      "viewport": "1280x950",
-      "scenario": "naam",
-      "state": "gevonden",
-      "theme": "dark"
-    },
-    {
       "file": "be34-rij-voor-390-light.png",
-      "sha256": "845470b7e60bddcb6d7dcc04d4088b1024fe0dd02714a9874ef52708670d6ee8",
+      "sha256": "8c7df5bb64186746ae11f4319232a66769382a1f2b23efbe237093777ffbf74d",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -155,7 +77,7 @@
     },
     {
       "file": "be34-rij-tijdens-390-light.png",
-      "sha256": "2283dbbecf4a56f91762f6aa4645d95b4c7618256569e981baf1ba91eaa967ee",
+      "sha256": "08440a102bc0a49bbd7b1b52680c9db365b2b341ab6e30d1a62988540d9ba61c",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -165,7 +87,7 @@
     },
     {
       "file": "be34-rij-na-390-light.png",
-      "sha256": "12ef36c739b222b7c90f426ead6cdaa21ced37e7bc22297143bf791d76fac003",
+      "sha256": "253793b8c2b4ef3d977d2f176f718e92c7504b85ff8bd92cab9074e2eadcbe88",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -174,47 +96,8 @@
       "theme": "light"
     },
     {
-      "file": "be34-review-390-light.png",
-      "sha256": "2a391112315000a47a65972da8e92c26c82bb1f25d7352521da0b0c2319986b8",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "review",
-      "theme": "light"
-    },
-    {
-      "file": "be34-rij-fout-390-light.png",
-      "sha256": "9a50f30385f0effda08ec643cd2e980738cf1545bfe4659a207951553f191512",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "rij",
-      "state": "fout",
-      "theme": "light"
-    },
-    {
-      "file": "be34-naam-zoeken-390-light.png",
-      "sha256": "bce952b1f353e61197b19c6e226177a0275a9613068b79d69aa5c91fd6b311b6",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "naam",
-      "state": "voor",
-      "theme": "light"
-    },
-    {
-      "file": "be34-naam-voorstel-390-light.png",
-      "sha256": "6196fa7efce36d3f19a07853d7768f865163ace8aaf53cf5b980720a47700695",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "naam",
-      "state": "gevonden",
-      "theme": "light"
-    },
-    {
       "file": "be34-rij-voor-390-dark.png",
-      "sha256": "d1d7b4a81ec7e755fed78346995e0f2049609427fc672a52804b659ed456d0a8",
+      "sha256": "0329d936f4df6137cf1d4b3923696f55606ccb532a274672e8071fa0436667b7",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -224,7 +107,7 @@
     },
     {
       "file": "be34-rij-tijdens-390-dark.png",
-      "sha256": "cc103f7cd079dcfbc75b2787a7efda71bab68015243cb30da46ef423cec74bde",
+      "sha256": "e94fec743794818619def3fcafa40fa697dd4b877ffaf1a08c5ea46c210c3c4f",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -234,7 +117,154 @@
     },
     {
       "file": "be34-rij-na-390-dark.png",
-      "sha256": "94b46775113a2b5a6ee583556faf083cd3246c7653088ebb4e5a000eea6323b3",
+      "sha256": "1132e65f655dfb0117e6fbf2388e71c3691c2adf6dabfb7902363a9cfc3d9c12",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-voor-1280-light.png",
+      "sha256": "5e2df04060c46fd697b92392f96c679840dd96aed187e7f80fb4869c7598e4b1",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-tijdens-1280-light.png",
+      "sha256": "0d65c9c7ed96d764b4b08aa5a3530373c8d901c3f877b4e1e4107021f53f5062",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-na-1280-light.png",
+      "sha256": "5421c5f80a6faf078197be630bb785a504e2883009a3879cdf816788d003ad62",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "light"
+    },
+    {
+      "file": "be34-review-1280-light.png",
+      "sha256": "12de92db21d01423c1fb9837d077a90d1e94bcdfa8c4264171ff093083ebf748",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "review",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-voor-1280-dark.png",
+      "sha256": "dccbe0b2569381d78267aa19a6a975abc6c2957a1fb8eb29c2e73e70ebb1e067",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-tijdens-1280-dark.png",
+      "sha256": "4a9da9ec615039e47a014e0bdda492937b1f0da56f8bd32ffbc171673ba24f47",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-na-1280-dark.png",
+      "sha256": "16fc563cfc9562858bf30a98edaf1c11a0b43685af82558246e96cd4dd100137",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-review-1280-dark.png",
+      "sha256": "1916c4e312e3419d9f3d0cb67a6d04beddf601832af9000ec061cfaae0713fe7",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "review",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-voor-390-light.png",
+      "sha256": "8c7df5bb64186746ae11f4319232a66769382a1f2b23efbe237093777ffbf74d",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-tijdens-390-light.png",
+      "sha256": "08440a102bc0a49bbd7b1b52680c9db365b2b341ab6e30d1a62988540d9ba61c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-na-390-light.png",
+      "sha256": "253793b8c2b4ef3d977d2f176f718e92c7504b85ff8bd92cab9074e2eadcbe88",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "na",
+      "theme": "light"
+    },
+    {
+      "file": "be34-review-390-light.png",
+      "sha256": "67b138d56e302a6bbd58c125b38775e2ab50ecd5177a30fded2927d768d804ff",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "review",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-voor-390-dark.png",
+      "sha256": "0329d936f4df6137cf1d4b3923696f55606ccb532a274672e8071fa0436667b7",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-tijdens-390-dark.png",
+      "sha256": "e94fec743794818619def3fcafa40fa697dd4b877ffaf1a08c5ea46c210c3c4f",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "tijdens",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-na-390-dark.png",
+      "sha256": "1132e65f655dfb0117e6fbf2388e71c3691c2adf6dabfb7902363a9cfc3d9c12",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -244,7 +274,7 @@
     },
     {
       "file": "be34-review-390-dark.png",
-      "sha256": "68c0fe9f6597317525528840884b0effa0a0489d4612806738895d3181019798",
+      "sha256": "f7a7699c28ea6709f2460b55ed02a1e3e4a8fd3b371998d2e277432cad2e7543",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -252,8 +282,38 @@
       "theme": "dark"
     },
     {
+      "file": "be34-rij-fout-1280-light.png",
+      "sha256": "5dd064faff767693ac851b3e7737e9ddf7edaa0265e166d468359f186736b668",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "light"
+    },
+    {
+      "file": "be34-rij-fout-1280-dark.png",
+      "sha256": "f49d623bc7eee072c62cde99450ecd2d0c6c40803f540ba766a805f27e1ec779",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-rij-fout-390-light.png",
+      "sha256": "880e263a7de79d25b622e33d9cc7786ae5af0ba11361092ef21f2f8c3dad037e",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "rij",
+      "state": "fout",
+      "theme": "light"
+    },
+    {
       "file": "be34-rij-fout-390-dark.png",
-      "sha256": "1663e0696c7450ad3d6ed6168ac5747f6dfb451a806358330253744cd1ede245",
+      "sha256": "0b6eb21d77c9365bf706846711fe456f749514b2e01023a7d7e142e1469a3ab2",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -262,8 +322,68 @@
       "theme": "dark"
     },
     {
+      "file": "be34-naam-zoeken-1280-light.png",
+      "sha256": "76cd68bdba63f887aecac5c2e0267dd84807bc829b14b019b1b4245d34958a0e",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-voorstel-1280-light.png",
+      "sha256": "44cc7f36bf6204624319f487eee41fffabd0eede501b1c0a1a9cf7be454e861b",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-zoeken-1280-dark.png",
+      "sha256": "f8b0abde5349df3a6f03dee799a14712cac7611625d715a61e8ef99cd826d190",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-voorstel-1280-dark.png",
+      "sha256": "c2aa32c57968ac8140cc82bd31732743062e39e5236b8fee612b4d1fd727d13a",
+      "width": 1280,
+      "height": 950,
+      "viewport": "1280x950",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "dark"
+    },
+    {
+      "file": "be34-naam-zoeken-390-light.png",
+      "sha256": "f05524a4a4f617c1465502f19b4860d9e82417e641b02a81a1954987b8580806",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "voor",
+      "theme": "light"
+    },
+    {
+      "file": "be34-naam-voorstel-390-light.png",
+      "sha256": "398510f44558f7fe91a2dadaa6531a5adb7b6ffd7be05ff761a2411c9a4b07b0",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "naam",
+      "state": "gevonden",
+      "theme": "light"
+    },
+    {
       "file": "be34-naam-zoeken-390-dark.png",
-      "sha256": "e45cce2a797605d54130ab7af06e859e59895d7e9ad78ce7b2d7b8e4c13c2464",
+      "sha256": "1665778ae52696acd43f7b08b75513ca5390fbd8a9e6ac9a53467a5b563d0178",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -273,7 +393,7 @@
     },
     {
       "file": "be34-naam-voorstel-390-dark.png",
-      "sha256": "20d877211a3bf9503b670694983f3e888732d6b442d2a4ae0ec8b6832acbdb1c",
+      "sha256": "a9588f4bd957069274b3d0c169e0b8d6d5b19aa4090ffca257ec64d994d21556",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -282,11 +402,326 @@
       "theme": "dark"
     }
   ],
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "rij",
+      "checks": 56,
+      "passed": 56,
+      "failed": 0,
+      "durationMs": 20628,
+      "error": null
+    },
+    {
+      "name": "controlescherm",
+      "checks": 92,
+      "passed": 92,
+      "failed": 0,
+      "durationMs": 27760,
+      "error": null
+    },
+    {
+      "name": "mislukte-lezing",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 9820,
+      "error": null
+    },
+    {
+      "name": "zoeken-op-naam",
+      "checks": 68,
+      "passed": 68,
+      "failed": 0,
+      "durationMs": 10749,
+      "error": null
+    }
+  ],
   "checks": [
     {
       "name": "warm-up: the three routes compile",
       "passed": true,
       "detail": null
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/light): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (1280/light): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/light): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (1280/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/light): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/light): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (1280/light): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (1280/light): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (1280/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (1280/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (1280/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (1280/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/light): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/light): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/light): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/light): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/light): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/light): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
     },
     {
       "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
@@ -371,7 +806,7 @@
     {
       "name": "review (1280/light): de tussenstap is de bestaande pagina",
       "passed": true,
-      "detail": "/internal/menu-import?ai=7cfc78b9-064d-4136-b0a6-32a5579c3bca&fixture=eenKlik&theme=light"
+      "detail": "/internal/menu-import?ai=9704c5ab-0ba7-4d32-b9d1-71af698aadaa&fixture=eenKlik&theme=light"
     },
     {
       "name": "review (1280/light): de samenvatting van de lezing staat er al",
@@ -404,6 +839,351 @@
       "detail": "overflow=0"
     },
     {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (1280/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (1280/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (1280/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (1280/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (1280/dark): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=a383963c-ff21-41e9-9a1a-b50a4c8fdc64&fixture=eenKlik&theme=dark"
+    },
+    {
+      "name": "review (1280/dark): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (1280/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (1280/dark): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (1280/dark): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (1280/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "review (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/light): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/light): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/light): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/light): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/light): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/light): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (390/light): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=e31b7363-974d-4ce6-bb0f-eef1fbc7ff9b&fixture=eenKlik&theme=light"
+    },
+    {
+      "name": "review (390/light): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (390/light): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (390/light): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (390/light): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/light): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "review (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/dark): de rij met de AI-stap staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "📷 Lees met AI (afbeelding)"
+    },
+    {
+      "name": "rij (390/dark): de knop is een knop, geen link",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/dark): de kostenschatting staat erbij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "rij (390/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/dark): de knop start de lezing met één klik",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): daarna staat de uitkomst in de rij",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
+      "passed": true,
+      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
+    },
+    {
+      "name": "rij (390/dark): \"Bekijk en controleer\" opent het controlescherm",
+      "passed": true,
+      "detail": "Bekijk en controleer"
+    },
+    {
+      "name": "rij (390/dark): de gemeten kosten staan erbij",
+      "passed": true,
+      "detail": "Kosten AI: 1 cent van je maandbudget."
+    },
+    {
+      "name": "review (390/dark): \"Bekijk en controleer\" is geklikt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): het bestaande controlescherm opent met het resultaat geladen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): de tussenstap is de bestaande pagina",
+      "passed": true,
+      "detail": "/internal/menu-import?ai=562a9216-2023-4c27-a7b2-e8999fd9fa6f&fixture=eenKlik&theme=dark"
+    },
+    {
+      "name": "review (390/dark): de samenvatting van de lezing staat er al",
+      "passed": true,
+      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
+    },
+    {
+      "name": "review (390/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
+      "passed": true,
+      "detail": "🖐 Alles nagelopen (2)"
+    },
+    {
+      "name": "review (390/dark): de schakelaar Lijst | Kaart staat er",
+      "passed": true,
+      "detail": "[\"Lijst\",\"Kaart\"]"
+    },
+    {
+      "name": "review (390/dark): de handmatige import blijft ingeklapt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "review (390/dark): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "review (390/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
       "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlikFout&navCounts=bronnen)",
       "passed": true,
       "detail": "ok"
@@ -430,6 +1210,96 @@
     },
     {
       "name": "fout (1280/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (1280/dark): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/dark): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (1280/dark): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (1280/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (1280/dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (390/light): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/light): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/light): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (390/light): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (390/light): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout (390/dark): de rij staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/dark): de mislukte lezing zegt het eerlijk",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout (390/dark): de reden staat in gewone taal",
+      "passed": true,
+      "detail": "De AI is nu niet bereikbaar (server bezet)."
+    },
+    {
+      "name": "fout (390/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
+    },
+    {
+      "name": "fout (390/dark): geen horizontale overloop",
       "passed": true,
       "detail": "overflow=0"
     },
@@ -519,151 +1389,6 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (1280/dark): de rij met de AI-stap staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "📷 Lees met AI (afbeelding)"
-    },
-    {
-      "name": "rij (1280/dark): de knop is een knop, geen link",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (1280/dark): de kostenschatting staat erbij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "rij (1280/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (1280/dark): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (1280/dark): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (1280/dark): de knop start de lezing met één klik",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark): daarna staat de uitkomst in de rij",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
-      "passed": true,
-      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
-    },
-    {
-      "name": "rij (1280/dark): \"Bekijk en controleer\" opent het controlescherm",
-      "passed": true,
-      "detail": "Bekijk en controleer"
-    },
-    {
-      "name": "rij (1280/dark): de gemeten kosten staan erbij",
-      "passed": true,
-      "detail": "Kosten AI: 1 cent van je maandbudget."
-    },
-    {
-      "name": "review (1280/dark): \"Bekijk en controleer\" is geklikt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (1280/dark): het bestaande controlescherm opent met het resultaat geladen",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (1280/dark): de tussenstap is de bestaande pagina",
-      "passed": true,
-      "detail": "/internal/menu-import?ai=de356019-ec06-4524-a45e-ed263f5abebb&fixture=eenKlik&theme=dark"
-    },
-    {
-      "name": "review (1280/dark): de samenvatting van de lezing staat er al",
-      "passed": true,
-      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
-    },
-    {
-      "name": "review (1280/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
-      "passed": true,
-      "detail": "🖐 Alles nagelopen (2)"
-    },
-    {
-      "name": "review (1280/dark): de schakelaar Lijst | Kaart staat er",
-      "passed": true,
-      "detail": "[\"Lijst\",\"Kaart\"]"
-    },
-    {
-      "name": "review (1280/dark): de handmatige import blijft ingeklapt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (1280/dark): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "review (1280/dark): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "fout (1280/dark): de rij staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (1280/dark): de mislukte lezing zegt het eerlijk",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (1280/dark): de reden staat in gewone taal",
-      "passed": true,
-      "detail": "De AI is nu niet bereikbaar (server bezet)."
-    },
-    {
-      "name": "fout (1280/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
-    },
-    {
-      "name": "fout (1280/dark): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
       "name": "fixture bootstrap without error (/internal/toevoegen?theme=dark&fixture=eenKlik)",
       "passed": true,
       "detail": "ok"
@@ -749,151 +1474,6 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/light): de rij met de AI-stap staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light): de knop is \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "📷 Lees met AI (afbeelding)"
-    },
-    {
-      "name": "rij (390/light): de knop is een knop, geen link",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (390/light): de kostenschatting staat erbij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "rij (390/light): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (390/light): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "light"
-    },
-    {
-      "name": "rij (390/light): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/light): de knop start de lezing met één klik",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light): daarna staat de uitkomst in de rij",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light): de uitkomst noemt de aantallen en \"controle nodig\"",
-      "passed": true,
-      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
-    },
-    {
-      "name": "rij (390/light): \"Bekijk en controleer\" opent het controlescherm",
-      "passed": true,
-      "detail": "Bekijk en controleer"
-    },
-    {
-      "name": "rij (390/light): de gemeten kosten staan erbij",
-      "passed": true,
-      "detail": "Kosten AI: 1 cent van je maandbudget."
-    },
-    {
-      "name": "review (390/light): \"Bekijk en controleer\" is geklikt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/light): het bestaande controlescherm opent met het resultaat geladen",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/light): de tussenstap is de bestaande pagina",
-      "passed": true,
-      "detail": "/internal/menu-import?ai=2a027875-8edd-4c7f-a0ac-f3437005fb03&fixture=eenKlik&theme=light"
-    },
-    {
-      "name": "review (390/light): de samenvatting van de lezing staat er al",
-      "passed": true,
-      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
-    },
-    {
-      "name": "review (390/light): \"🖐 Alles nagelopen (2)\" staat klaar",
-      "passed": true,
-      "detail": "🖐 Alles nagelopen (2)"
-    },
-    {
-      "name": "review (390/light): de schakelaar Lijst | Kaart staat er",
-      "passed": true,
-      "detail": "[\"Lijst\",\"Kaart\"]"
-    },
-    {
-      "name": "review (390/light): de handmatige import blijft ingeklapt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/light): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "light"
-    },
-    {
-      "name": "review (390/light): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=eenKlikFout&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "fout (390/light): de rij staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (390/light): de mislukte lezing zegt het eerlijk",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (390/light): de reden staat in gewone taal",
-      "passed": true,
-      "detail": "De AI is nu niet bereikbaar (server bezet)."
-    },
-    {
-      "name": "fout (390/light): de volgende stap is \"✍️ Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
-    },
-    {
-      "name": "fout (390/light): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
       "name": "fixture bootstrap without error (/internal/toevoegen?theme=light&fixture=eenKlik)",
       "passed": true,
       "detail": "ok"
@@ -975,151 +1555,6 @@
     },
     {
       "name": "naam (390/light): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlik&navCounts=bronnen&aiState=slow)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/dark): de rij met de AI-stap staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark): de knop is \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "📷 Lees met AI (afbeelding)"
-    },
-    {
-      "name": "rij (390/dark): de knop is een knop, geen link",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (390/dark): de kostenschatting staat erbij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "rij (390/dark): de handmatige import is alleen de kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (390/dark): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (390/dark): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/dark): de knop start de lezing met één klik",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark): tijdens de lezing staat \"⏳ AI leest de kaart… ± 1 minuut\"",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark): daarna staat de uitkomst in de rij",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark): de uitkomst noemt de aantallen en \"controle nodig\"",
-      "passed": true,
-      "detail": "✅ 2 gerechten gelezen · 2 controle nodig"
-    },
-    {
-      "name": "rij (390/dark): \"Bekijk en controleer\" opent het controlescherm",
-      "passed": true,
-      "detail": "Bekijk en controleer"
-    },
-    {
-      "name": "rij (390/dark): de gemeten kosten staan erbij",
-      "passed": true,
-      "detail": "Kosten AI: 1 cent van je maandbudget."
-    },
-    {
-      "name": "review (390/dark): \"Bekijk en controleer\" is geklikt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/dark): het bestaande controlescherm opent met het resultaat geladen",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/dark): de tussenstap is de bestaande pagina",
-      "passed": true,
-      "detail": "/internal/menu-import?ai=aaab1b9e-1c07-4df1-a8a2-eec868d6b68b&fixture=eenKlik&theme=dark"
-    },
-    {
-      "name": "review (390/dark): de samenvatting van de lezing staat er al",
-      "passed": true,
-      "detail": "[\"Concept klaar: 2 gerechten · 0 in orde, 2 nalopen\",\"2 gerechten · 0 in orde · 2 nalopen\"]"
-    },
-    {
-      "name": "review (390/dark): \"🖐 Alles nagelopen (2)\" staat klaar",
-      "passed": true,
-      "detail": "🖐 Alles nagelopen (2)"
-    },
-    {
-      "name": "review (390/dark): de schakelaar Lijst | Kaart staat er",
-      "passed": true,
-      "detail": "[\"Lijst\",\"Kaart\"]"
-    },
-    {
-      "name": "review (390/dark): de handmatige import blijft ingeklapt",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "review (390/dark): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "review (390/dark): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=eenKlikFout&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "fout (390/dark): de rij staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (390/dark): de mislukte lezing zegt het eerlijk",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fout (390/dark): de reden staat in gewone taal",
-      "passed": true,
-      "detail": "De AI is nu niet bereikbaar (server bezet)."
-    },
-    {
-      "name": "fout (390/dark): de volgende stap is \"✍️ Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"next\":\"✍️ Handmatig toevoegen\",\"href\":\"/internal/menu-import\"}"
-    },
-    {
-      "name": "fout (390/dark): geen horizontale overloop",
       "passed": true,
       "detail": "overflow=0"
     },

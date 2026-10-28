@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T23:00:34.652Z",
+  "generatedAt": "2026-10-28T23:32:38.184Z",
   "kind": "fixture-browser-check",
   "task": "BE-33 (#79) Menukaarten die alleen als afbeelding of scan bestaan",
   "port": 3140,
@@ -125,7 +125,7 @@
     },
     {
       "file": "be33-kaart-1280-dark.png",
-      "sha256": "f0bb7e35efa35743aa89964a266f7d0a959d846646e8b1f956264b504582ed63",
+      "sha256": "ca2ad1e60fd9c63905d1e0dd202cd3a4cdfef45c07bb7f6fb38b5e94b100f0ae",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -134,7 +134,7 @@
     },
     {
       "file": "be33-kaart-1280-dark-afbeelding-2.png",
-      "sha256": "86eaf554fd92cf768dce159a0b2a01b0cc1024b1a689b449dd8b790e87edc0d1",
+      "sha256": "0f3cac8154b52fd9248d9d19e636ccd41575085fe31d621b3d5fb48f73aceba3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -167,7 +167,7 @@
       "checks": 40,
       "passed": 40,
       "failed": 0,
-      "durationMs": 12904,
+      "durationMs": 12434,
       "error": null
     },
     {
@@ -175,7 +175,7 @@
       "checks": 40,
       "passed": 40,
       "failed": 0,
-      "durationMs": 9015,
+      "durationMs": 10141,
       "error": null
     },
     {
@@ -183,7 +183,7 @@
       "checks": 52,
       "passed": 52,
       "failed": 0,
-      "durationMs": 77049,
+      "durationMs": 77327,
       "error": null
     }
   ],
