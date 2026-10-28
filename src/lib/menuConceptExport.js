@@ -110,11 +110,39 @@ async function activeExports(supabase, { snapshotId, restaurantId }) {
   return { rows: [...(data || [])].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)) || b.id - a.id) };
 }
 
+/**
+ * The latest stored export per concept version, one rule for the detail card
+ * and the list: newest `created_at`, then highest id. A stored export is only
+ * ever shown with its real status; it is never proof that a version is ready
+ * for publication.
+ */
+function latestExportBySnapshot(rows) {
+  const bySnapshot = new Map();
+  const ordered = [...(rows || [])].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)) || b.id - a.id);
+  for (const row of ordered) {
+    if (!bySnapshot.has(row.snapshot_id)) bySnapshot.set(row.snapshot_id, row);
+  }
+  return bySnapshot;
+}
+
+/**
+ * BE-39: the stored exports of the versions currently on screen, in one query
+ * (`.in('snapshot_id', …)`), without any GitHub call and without a query per
+ * card. Used by the concept list only for display.
+ */
+async function storedExportsForSnapshots(supabase, snapshotIds) {
+  const ids = [...new Set((snapshotIds || []).filter((id) => id !== null && id !== undefined))];
+  if (ids.length === 0) return { bySnapshot: new Map() };
+  const { data, error } = await supabase.from('menu_snapshot_exports').select(EXPORT_COLUMNS).in('snapshot_id', ids);
+  if (error) return { error };
+  return { bySnapshot: latestExportBySnapshot(data) };
+}
+
 /** The latest export of a version, refreshed against GitHub, for the review page. */
 async function exportForSnapshot(supabase, github, snapshotId, now) {
   const { rows, error } = await activeExports(supabase, { snapshotId });
   if (error) return { error };
-  return { export: exportView(await refreshExport(supabase, github, rows[0] || null, now)) };
+  return { export: exportView(await refreshExport(supabase, github, latestExportBySnapshot(rows).get(snapshotId) || null, now)) };
 }
 
 /**
@@ -328,4 +356,14 @@ function createMenuConceptExportHandler({ authenticate, getSupabase, restaurants
   return { exportToReviewPr };
 }
 
-module.exports = { createMenuConceptExportHandler, exportForSnapshot, storedExportForSnapshot, exportMenuEntry, exportView, marker, NOT_PUBLISHED };
+module.exports = {
+  createMenuConceptExportHandler,
+  exportForSnapshot,
+  storedExportForSnapshot,
+  storedExportsForSnapshots,
+  latestExportBySnapshot,
+  exportMenuEntry,
+  exportView,
+  marker,
+  NOT_PUBLISHED,
+};
