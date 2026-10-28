@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T19:00:49.348Z",
+  "generatedAt": "2026-10-28T23:00:34.652Z",
   "kind": "fixture-browser-check",
   "task": "BE-33 (#79) Menukaarten die alleen als afbeelding of scan bestaan",
   "port": 3140,
@@ -7,7 +7,7 @@
   "screenshots": [
     {
       "file": "be33-rij-1280-light-on.png",
-      "sha256": "372bcd2719f1f6c355324d8139336e770c5789237538731377e78055775af942",
+      "sha256": "829295b73afdeb85c22dba93d2ac71cbf49cd15e7d1c626c88c443a4dcf9ee48",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -15,8 +15,35 @@
       "aiState": "on"
     },
     {
+      "file": "be33-rij-390-light-on.png",
+      "sha256": "b1d744d6079ff36f6644b3062a416ee6ea1bea17565ea4a49a9d7b2251b9b68f",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "row",
+      "aiState": "on"
+    },
+    {
+      "file": "be33-rij-1280-dark-on.png",
+      "sha256": "d1e2d848fa666183c3177e6100cf8e25f272eadf4d3a21e5632870004cc6bce6",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "scenario": "row",
+      "aiState": "on"
+    },
+    {
+      "file": "be33-rij-390-dark-on.png",
+      "sha256": "6356f46e4bc2101d497ef33b2d272ca73765f4ef24d4a23a9b06beedd8d70152",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "row",
+      "aiState": "on"
+    },
+    {
       "file": "be33-rij-1280-light-off.png",
-      "sha256": "5762194c6c48b0d337b70f0bcd7e4589cb269bab02e41f5be70aac3e26d54e6f",
+      "sha256": "2e889957ee5622683a006d2962013402640e9f47c3f939ffe66113aa3cd1ec76",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -25,7 +52,7 @@
     },
     {
       "file": "be35-rij-1280-light-ai-uit.png",
-      "sha256": "5762194c6c48b0d337b70f0bcd7e4589cb269bab02e41f5be70aac3e26d54e6f",
+      "sha256": "2e889957ee5622683a006d2962013402640e9f47c3f939ffe66113aa3cd1ec76",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -34,8 +61,35 @@
       "dir": "ops/browser/evidence/be-35"
     },
     {
+      "file": "be33-rij-390-light-off.png",
+      "sha256": "a76e22fe741cacccff6d5e18a495c73eda76b22f313b25ff860110608784f718",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "row",
+      "aiState": "off"
+    },
+    {
+      "file": "be33-rij-1280-dark-off.png",
+      "sha256": "39d99e792a7ff226e4c14e65e344398a2e8392ba851e2d23d0732941b0be4792",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "scenario": "row",
+      "aiState": "off"
+    },
+    {
+      "file": "be33-rij-390-dark-off.png",
+      "sha256": "3dc45511c39d1f04c2307d485aa7e2d612e74b2b3529ee58ae5783f4637ca55e",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "scenario": "row",
+      "aiState": "off"
+    },
+    {
       "file": "be33-kaart-1280-light.png",
-      "sha256": "0ebba14a09b00fbf6b6df7c1cfc1c6f574923e7f686d7043e9daac47f6da716a",
+      "sha256": "bc1a3b42cd3551f5965ab73c2c50cef00ebb358da3eb5637532b24605f2654c5",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -44,7 +98,7 @@
     },
     {
       "file": "be33-kaart-1280-light-afbeelding-2.png",
-      "sha256": "c37693f8d9551a077b11441436bb944f7aec532bb6201113e86eea4b6702c687",
+      "sha256": "ef42483c9562e322bfd890d0a13ec987196e5289e7b9ae4e5d42d2a761a17113",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -52,26 +106,8 @@
       "page": 2
     },
     {
-      "file": "be33-rij-390-light-on.png",
-      "sha256": "b5f1a7f5c06527e29ed4d2c1e0891c92ab8df47ff29d3b15deac7a5268e99c6d",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "row",
-      "aiState": "on"
-    },
-    {
-      "file": "be33-rij-390-light-off.png",
-      "sha256": "c589d1168b30f59089d98bcc53cd9196e6f334cadb3e251387724bdef30de52a",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "row",
-      "aiState": "off"
-    },
-    {
       "file": "be33-kaart-390-light.png",
-      "sha256": "924cf69a2da7b1676b95d665d30cb211891f8c3bd79eadbb2630b631218f9db5",
+      "sha256": "e1b65959256e39f9565b6902590c4d30ef49a27bbec96f142882a5131988fc83",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -80,7 +116,7 @@
     },
     {
       "file": "be33-kaart-390-light-afbeelding-2.png",
-      "sha256": "6dac4abec9c753270058b80f5aa0777297cb841003bfd3b8e849dc7da92a446e",
+      "sha256": "24206dfcb2b164cb66f4980d5bb04a3cf1292a9f6d6ea4dc8221c334ea5297b4",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -88,26 +124,8 @@
       "page": 2
     },
     {
-      "file": "be33-rij-1280-dark-on.png",
-      "sha256": "1dcc07f9efaa03ef8a33db0d9ff40af46a1f6cc2707a0624cc2f42d81ef7b8f0",
-      "width": 1280,
-      "height": 900,
-      "viewport": "1280x900",
-      "scenario": "row",
-      "aiState": "on"
-    },
-    {
-      "file": "be33-rij-1280-dark-off.png",
-      "sha256": "5ec450fc97bb6968dce11a84832f90e190d504fb32cdcd309bda88371734626e",
-      "width": 1280,
-      "height": 900,
-      "viewport": "1280x900",
-      "scenario": "row",
-      "aiState": "off"
-    },
-    {
       "file": "be33-kaart-1280-dark.png",
-      "sha256": "342b61ada300e82314930b2639d5821329ed7098a1489b015533118234d31de7",
+      "sha256": "f0bb7e35efa35743aa89964a266f7d0a959d846646e8b1f956264b504582ed63",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -116,7 +134,7 @@
     },
     {
       "file": "be33-kaart-1280-dark-afbeelding-2.png",
-      "sha256": "1c8a2b9df19f902275ec8797ca90007840c5daa7c13e389dfea566a51155cc69",
+      "sha256": "86eaf554fd92cf768dce159a0b2a01b0cc1024b1a689b449dd8b790e87edc0d1",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -124,26 +142,8 @@
       "page": 2
     },
     {
-      "file": "be33-rij-390-dark-on.png",
-      "sha256": "c14e46ad88355fd306c6639e0bbb6720cf9c85d684a950cffd5b20f6ed5be549",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "row",
-      "aiState": "on"
-    },
-    {
-      "file": "be33-rij-390-dark-off.png",
-      "sha256": "321c05de2070a1f7358b28b6fd58682dd18b528321115088d004b3ea3e654db9",
-      "width": 390,
-      "height": 844,
-      "viewport": "390x844",
-      "scenario": "row",
-      "aiState": "off"
-    },
-    {
       "file": "be33-kaart-390-dark.png",
-      "sha256": "c60fc7ffa711ef6de92421cb9a751831a6854607799030c0703ae9bed725cc0c",
+      "sha256": "8f012e54d5c701f6fc8b72a79964bf1cc84ec76cdc1dd625cf5055b30df4f94a",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -152,12 +152,39 @@
     },
     {
       "file": "be33-kaart-390-dark-afbeelding-2.png",
-      "sha256": "4e4328a6486b1cdf7b6ddafae49320d7f69b08dd20792b28899809d622ddc6a4",
+      "sha256": "c3a890cfbd46a15078cb85882b35039c1453ed623da7175108840fca96538a08",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
       "scenario": "image-card",
       "page": 2
+    }
+  ],
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "rij-ai-aan",
+      "checks": 40,
+      "passed": 40,
+      "failed": 0,
+      "durationMs": 12904,
+      "error": null
+    },
+    {
+      "name": "rij-ai-uit",
+      "checks": 40,
+      "passed": 40,
+      "failed": 0,
+      "durationMs": 9015,
+      "error": null
+    },
+    {
+      "name": "kaart",
+      "checks": 52,
+      "passed": 52,
+      "failed": 0,
+      "durationMs": 77049,
+      "error": null
     }
   ],
   "checks": [
@@ -212,6 +239,156 @@
       "detail": "± 1 minuut · ± 1 cent"
     },
     {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/light/on): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light/on): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (390/light/on): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/light/on): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light/on): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/light/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (390/light/on): de stap is een knop die de bestaande lezing start",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/light/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/light/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/dark/on): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark/on): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (1280/dark/on): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/dark/on): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark/on): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (1280/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (1280/dark/on): de stap is een knop die de bestaande lezing start",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (1280/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (1280/dark/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/dark/on): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark/on): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (390/dark/on): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/dark/on): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark/on): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (390/dark/on): de stap is een knop die de bestaande lezing start",
+      "passed": true,
+      "detail": "button"
+    },
+    {
+      "name": "rij (390/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
+      "passed": true,
+      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
+    },
+    {
+      "name": "rij (390/dark/on): de kostenschatting staat vooraf in de rij",
+      "passed": true,
+      "detail": "± 1 minuut · ± 1 cent"
+    },
+    {
       "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
       "passed": true,
       "detail": "ok"
@@ -258,6 +435,156 @@
     },
     {
       "name": "rij (1280/light/off): er is geen \"Lees met AI\" die niets kan",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/light/off): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light/off): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "rij (390/light/off): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/light/off): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/light/off): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/light/off): zonder AI is de stap \"Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (390/light/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/light/off): die stap opent de bestaande handmatige import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
+    },
+    {
+      "name": "rij (390/light/off): er is geen \"Lees met AI\" die niets kan",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (1280/dark/off): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark/off): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (1280/dark/off): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (1280/dark/off): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (1280/dark/off): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (1280/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (1280/dark/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (1280/dark/off): die stap opent de bestaande handmatige import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
+    },
+    {
+      "name": "rij (1280/dark/off): er is geen \"Lees met AI\" die niets kan",
+      "passed": true,
+      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
+    },
+    {
+      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "rij (390/dark/off): de rij van het beeld-restaurant staat er",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark/off): de gevraagde theme is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "rij (390/dark/off): geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "rij (390/dark/off): de oude tekst \"leest geen beeld\" staat er niet meer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "rij (390/dark/off): de reden en de eerlijke uitleg staan in de rij",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
+      "passed": true,
+      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
+    },
+    {
+      "name": "rij (390/dark/off): de rij zegt waarom de AI niet beschikbaar is",
+      "passed": true,
+      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
+    },
+    {
+      "name": "rij (390/dark/off): die stap opent de bestaande handmatige import",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
+    },
+    {
+      "name": "rij (390/dark/off): er is geen \"Lees met AI\" die niets kan",
       "passed": true,
       "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
@@ -327,106 +654,6 @@
       "detail": "{\"list\":[\"true\",\"false\"],\"text\":\"Fictieve soep 6,50\\nControle nodig\\n\\nFictieve Kaart › Klassiekers · afbeelding 2\\n\\ngelezen van afbeelding 2\\n\\n“Fictieve soep 6,50”\\n\\nKlopt\\nWijzig\\nWeglaten\\nVraag"
     },
     {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/light/on): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light/on): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "light"
-    },
-    {
-      "name": "rij (390/light/on): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/light/on): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light/on): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/light/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (390/light/on): de stap is een knop die de bestaande lezing start",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (390/light/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (390/light/on): de kostenschatting staat vooraf in de rij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=light&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/light/off): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light/off): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "light"
-    },
-    {
-      "name": "rij (390/light/off): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/light/off): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/light/off): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/light/off): zonder AI is de stap \"Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (390/light/off): de rij zegt waarom de AI niet beschikbaar is",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/light/off): die stap opent de bestaande handmatige import",
-      "passed": true,
-      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
-    },
-    {
-      "name": "rij (390/light/off): er is geen \"Lees met AI\" die niets kan",
-      "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
-    },
-    {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=light)",
       "passed": true,
       "detail": "ok"
@@ -492,106 +719,6 @@
       "detail": "{\"list\":[\"true\",\"false\"],\"text\":\"Fictieve soep 6,50\\nControle nodig\\n\\nFictieve Kaart › Klassiekers · afbeelding 2\\n\\ngelezen van afbeelding 2\\n\\n“Fictieve soep 6,50”\\n\\nKlopt\\nWijzig\\nWeglaten\\nVraag"
     },
     {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (1280/dark/on): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark/on): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (1280/dark/on): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (1280/dark/on): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark/on): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (1280/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (1280/dark/on): de stap is een knop die de bestaande lezing start",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (1280/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (1280/dark/on): de kostenschatting staat vooraf in de rij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (1280/dark/off): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark/off): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (1280/dark/off): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (1280/dark/off): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (1280/dark/off): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (1280/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (1280/dark/off): de rij zegt waarom de AI niet beschikbaar is",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (1280/dark/off): die stap opent de bestaande handmatige import",
-      "passed": true,
-      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
-    },
-    {
-      "name": "rij (1280/dark/off): er is geen \"Lees met AI\" die niets kan",
-      "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
-    },
-    {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=dark)",
       "passed": true,
       "detail": "ok"
@@ -655,106 +782,6 @@
       "name": "kaart (1280/dark): \"Nalopen in de lijst\" gaat terug naar die regel in de lijst",
       "passed": true,
       "detail": "{\"list\":[\"true\",\"false\"],\"text\":\"Fictieve soep 6,50\\nControle nodig\\n\\nFictieve Kaart › Klassiekers · afbeelding 2\\n\\ngelezen van afbeelding 2\\n\\n“Fictieve soep 6,50”\\n\\nKlopt\\nWijzig\\nWeglaten\\nVraag"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/dark/on): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark/on): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (390/dark/on): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/dark/on): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark/on): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/dark/on): met AI en budget is de stap \"📷 Lees met AI (afbeelding)\"",
-      "passed": true,
-      "detail": "{\"action\":\"📷 Lees met AI (afbeelding)\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"📷 Lees met AI (afbeelding)\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (390/dark/on): de stap is een knop die de bestaande lezing start",
-      "passed": true,
-      "detail": "button"
-    },
-    {
-      "name": "rij (390/dark/on): de handmatige import staat er alleen als kleine link \"Liever zelf plakken\"",
-      "passed": true,
-      "detail": "{\"paste\":\"Liever zelf plakken\",\"href\":\"/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente\"}"
-    },
-    {
-      "name": "rij (390/dark/on): de kostenschatting staat vooraf in de rij",
-      "passed": true,
-      "detail": "± 1 minuut · ± 1 cent"
-    },
-    {
-      "name": "fixture bootstrap without error (/internal/coverage?theme=dark&fixture=beeldLezen&navCounts=bronnen&aiState=off)",
-      "passed": true,
-      "detail": "ok"
-    },
-    {
-      "name": "rij (390/dark/off): de rij van het beeld-restaurant staat er",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark/off): de gevraagde theme is actief",
-      "passed": true,
-      "detail": "dark"
-    },
-    {
-      "name": "rij (390/dark/off): geen horizontale overloop",
-      "passed": true,
-      "detail": "overflow=0"
-    },
-    {
-      "name": "rij (390/dark/off): de oude tekst \"leest geen beeld\" staat er niet meer",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "rij (390/dark/off): de reden en de eerlijke uitleg staan in de rij",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/dark/off): zonder AI is de stap \"Handmatig toevoegen\"",
-      "passed": true,
-      "detail": "{\"action\":\"✍️ Handmatig toevoegen\",\"labels\":[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]}"
-    },
-    {
-      "name": "rij (390/dark/off): de rij zegt waarom de AI niet beschikbaar is",
-      "passed": true,
-      "detail": "Fictief Al Dente https://fictief-aldente.invalid/menukaart Laatste controle gaf geen bruikbaar resultaat Geen menukaart gevonden De menukaart is alleen als afbeelding beschikbaar. Automatisch is er niets als gerecht opgeslagen. Lees de afbe"
-    },
-    {
-      "name": "rij (390/dark/off): die stap opent de bestaande handmatige import",
-      "passed": true,
-      "detail": "/internal/menu-import?restaurant=9010&name=Fictief+Al+Dente"
-    },
-    {
-      "name": "rij (390/dark/off): er is geen \"Lees met AI\" die niets kan",
-      "passed": true,
-      "detail": "[\"✨ Vind bronnen (1)\",\"🔎 Controleer 0 geselecteerde\",\"✍️ Handmatig toevoegen\",\"Opnieuw proberen\"]"
     },
     {
       "name": "fixture bootstrap without error (/internal/menu-import?fixture=manual-image&restaurant=9001&name=Fictief+Brasserie+Noord&url=https%3A%2F%2Ffictief-brasserie.invalid%2Fmenukaart&aiState=off&theme=dark)",

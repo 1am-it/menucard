@@ -66,6 +66,12 @@ function flatText(value) {
   return String(value === undefined || value === null ? '' : value).split(/\s+/).filter(Boolean).join(' ');
 }
 
+// BE-42 restpunt (#105): een knop die zijn emoji in een eigen span tekent
+// (BE-37's EmojiText) leest de browser als twee blokken — "📷\nLees met AI
+// (afbeelding)". Het label is één regel; daarom vergelijken de controles hier
+// de platte tekst van dat ene label. Alleen de verwachting, geen appwijziging.
+const PAGE_FLAT_TEXT = "const flat = (value) => String(value || '').replace(/\\s+/g, ' ').trim();";
+
 async function setViewport(cdp, width, height) {
   viewport = { width, height };
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
@@ -150,19 +156,20 @@ async function readAiRow(cdp) {
   return evalJs(
     cdp,
     `(() => {
+      ${PAGE_FLAT_TEXT}
       const box = document.querySelector('.srr-ai');
       const button = box ? box.querySelector('.srr-action') : null;
       const paste = box ? box.querySelector('.srr-paste-link') : null;
       const next = box ? box.querySelector('a.stg-btn-secondary') : null;
       return {
         present: Boolean(box),
-        line: box && box.querySelector('.srr-ai-line') ? box.querySelector('.srr-ai-line').innerText.trim() : '',
-        hint: box && box.querySelector('.srr-ai-hint') ? box.querySelector('.srr-ai-hint').innerText.trim() : '',
-        action: button ? button.innerText.trim() : '',
+        line: box && box.querySelector('.srr-ai-line') ? flat(box.querySelector('.srr-ai-line').innerText) : '',
+        hint: box && box.querySelector('.srr-ai-hint') ? flat(box.querySelector('.srr-ai-hint').innerText) : '',
+        action: button ? flat(button.innerText) : '',
         actionTag: button ? button.tagName.toLowerCase() : '',
-        paste: paste ? paste.innerText.trim() : '',
+        paste: paste ? flat(paste.innerText) : '',
         pasteHref: paste ? paste.getAttribute('href') : null,
-        next: next ? next.innerText.trim() : '',
+        next: next ? flat(next.innerText) : '',
         nextHref: next ? next.getAttribute('href') : null,
         rowText: box && box.closest('tr, li') ? box.closest('tr, li').innerText : '',
         theme: document.documentElement.getAttribute('data-theme'),
@@ -255,13 +262,14 @@ async function readReview(cdp) {
   return evalJs(
     cdp,
     `(() => {
-      const summaries = [...document.querySelectorAll('.mai-summary')].map((el) => el.innerText.trim());
+      ${PAGE_FLAT_TEXT}
+      const summaries = [...document.querySelectorAll('.mai-summary')].map((el) => flat(el.innerText));
       const bulk = [...document.querySelectorAll('button')].find((b) => (b.innerText || '').includes('Alles nagelopen'));
-      const toggle = [...document.querySelectorAll('.mai-view-btn')].map((b) => b.innerText.trim());
+      const toggle = [...document.querySelectorAll('.mai-view-btn')].map((b) => flat(b.innerText));
       return {
         ready: summaries.length > 0,
         summaries,
-        bulk: bulk ? bulk.innerText.trim() : '',
+        bulk: bulk ? flat(bulk.innerText) : '',
         toggle,
         aiCard: (document.querySelector('.mai-ai') || {}).innerText || '',
         manualVisible: Boolean(document.querySelector('.mai-prompt')) || document.body.innerText.includes('Prompt maken'),
@@ -347,12 +355,13 @@ async function readNameProposal(cdp) {
   return evalJs(
     cdp,
     `(() => {
+      ${PAGE_FLAT_TEXT}
       const section = document.getElementById('add-name-proposal');
       const card = section ? section.closest('section') : null;
       const link = card ? [...card.querySelectorAll('a')].find((a) => (a.innerText || '').includes('Toevoegen als nieuw restaurant')) : null;
       const offered = [...document.querySelectorAll('.mai-discovery button')].find((b) => (b.innerText || '').includes('Zoek op internet'));
       return {
-        offered: offered ? offered.innerText.trim() : '',
+        offered: offered ? flat(offered.innerText) : '',
         card: card ? card.innerText.replace(/\\n/g, ' | ') : '',
         href: link ? link.getAttribute('href') : null,
         theme: document.documentElement.getAttribute('data-theme'),
