@@ -7,3 +7,7 @@
 # artifact; see ops/benchmark/run.js.
 ops/benchmark/output/
 ops/browser/output/
+
+# BE-43 (#101) — a filtered browser run (`--alleen`) writes its own record and
+# must never replace the full evidence file that belongs with the delivery.
+ops/browser/evidence/*.filtered.json
