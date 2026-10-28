@@ -1475,6 +1475,23 @@ async function conceptPublicationScenario(cdp) {
   );
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-origineel-390-light.png'));
 
+  // Criterion 6 asks for 1280, 390 and 320 px in light and dark. The list covers
+  // all six; the review screen adds the remaining combinations of the same
+  // button, so the set is complete for both changed screens.
+  for (const [width, theme] of [[390, 'dark'], [320, 'light'], [320, 'dark']]) {
+    await setViewport(cdp, width, 900);
+    await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme, id: ids.ready }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+    const link = await evalJs(cdp, sourceLinkState);
+    const overflow = await evalJs(cdp, 'document.documentElement.scrollWidth - window.innerWidth');
+    check(
+      `be41 detail ${width}px/${theme}: the original-menu button keeps 44 px, its note and no overflow`,
+      link.href === readySource.href && link.height >= 44 && link.note === readySource.note && overflow <= 0,
+      JSON.stringify({ href: link.href, height: link.height, note: link.note, overflow }),
+    );
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be41-detail-origineel-${width}-${theme}.png`));
+  }
+
+  await setViewport(cdp, 1280, 900);
   await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'dark', id: ids.pdfSource }), `document.body.innerText.includes('Beoordeel menuconcept')`);
   const pdfLink = await evalJs(cdp, sourceLinkState);
   check(
