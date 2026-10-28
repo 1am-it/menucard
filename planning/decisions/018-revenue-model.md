@@ -30,19 +30,29 @@ and send to each other.
 1. **Neutrality is never for sale.** Payment never changes search order,
    ranking, "Tonight on the menu" or any listing. Nothing is labelled
    "sponsored" because nothing is.
-2. **A free basic listing for every restaurant**, including claiming the profile
-   and correcting the menu and opening hours. A complete guide is what makes it
-   valuable for diners, and so for paying restaurants.
+2. **A restaurant never pays for its own menu** (owner, 2026-10-28). The
+   listing, claiming the profile, editing the menu and opening hours, and
+   showing that menu everywhere (on Menucard, as a widget on the restaurant's
+   own website, as a QR menu at the table, as a printable PDF) are free. A
+   complete guide is what makes it valuable for diners, and every website
+   widget carries "menu via onze menukaarten": free reach for Menucard.
 3. **No advertising and no tracking of people.** Insights are aggregated counts.
+
+## Free for every restaurant: its own menu, everywhere
+
+Edit the menu once; it updates on Menucard, as a widget on the restaurant's own
+website, as a QR menu at the table and as a printable PDF. This replaces web
+designer edits, separate QR-menu tools and reprinting, at no cost to the
+restaurant. It is the reason to claim a profile and keep it current, which keeps
+the guide complete and correct.
 
 ## What restaurants can pay for
 
-All of these come from data Menucard already maintains, so they cost us little
-and can be priced well below separate tools.
+Optional extras on top of the free menu. They come from data Menucard already
+maintains, so they cost us little and can be priced well below separate tools.
 
 | Service | What the restaurant gets | Replaces today | Our cost |
 | --- | --- | --- | --- |
-| Menu everywhere | Edit the menu once; it updates on Menucard, as a widget on the restaurant's own website, as a QR menu at the table and as a printable PDF | Web designer edits, a separate QR-menu tool, reprinting | Low: same data, extra output formats |
 | Translations | English and German menu (tourists, students, expats), checked by the restaurant before it goes live | Translation agency or none | Pennies per menu with the existing AI budget |
 | Allergens and diets | Structured allergen and diet labels per dish, shown consistently | Paper allergen lists | Low |
 | Insights | Per dish: views, saves and shares per week; anonymous comparison with the neighbourhood | Nothing comparable | Low: from the step-0 counters |
@@ -51,9 +61,10 @@ and can be priced well below separate tools.
 **Proposed packages** (amounts are a starting point, to be checked against
 current competitor prices before launch):
 
-- **Free:** listing, claim, menu corrections, daily special on Menucard.
-- **Pro, ±€9–19 per month:** the menu everywhere (widget, QR, PDF),
-  translations, allergen labels, insights.
+- **Free:** listing, claim, editing the menu, the menu everywhere (website
+  widget, QR menu, PDF), daily special on Menucard.
+- **Pro, ±€9–19 per month:** insights, translations, allergen labels, the daily
+  special also on the website widget.
 - **Chain, by arrangement:** several locations under one account.
 
 **Launch offer:** the first 10–20 Breda restaurants get Pro free for six months
@@ -85,11 +96,12 @@ instead (see the affiliate option below).
    link clicked). No identity, no cookies.
 1. **Product first:** claiming a profile and editing the menu must be easy and
    free. That is the foundation for every paid service.
-2. **Pro pilot** with 10–20 Breda restaurants: the menu everywhere (website
-   widget and QR menu) plus insights, free for six months.
+2. **Free menu everywhere** for Breda restaurants (website widget and QR menu),
+   with 10–20 of them in a pilot that also gets Pro free for six months.
 3. **In parallel:** an offer to Breda city marketing and the business fund,
    based on the counters.
-4. **Then:** Pro at its launch price, translations, allergen labels.
+4. **Then:** Pro at its launch price: insights (once there are a few months of
+   counts), translations, allergen labels.
 5. **Later:** reservation affiliate, data products, other cities.
 
 ## What this asks of the owner and the organisation
@@ -105,7 +117,7 @@ instead (see the affiliate option below).
 ## Decisions needed from the owner
 
 1. Agree with the three rules that stay and with the rejected list.
-2. Agree with the direction: free basic listing, a Pro package priced below the
-   competition, and the six-month pilot.
-3. Choose the first paid service for the pilot: the menu everywhere (advice) or
-   insights.
+2. Agree with the direction: the restaurant's own menu is free everywhere, a
+   Pro package of extras priced below the competition, and the six-month pilot.
+3. Choose the first paid extra: insights (advice: unique, and the counters
+   start with BE-44) or translations.
