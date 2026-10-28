@@ -540,6 +540,18 @@ const imageOnlyAiStatus = {
     monthly: { spentEurCents: 12, limitEurCents: 1000, remainingEurCents: 988, unknownConcepts: 0 },
     budget: { allowed: true, reason: null },
   },
+  // The same row with the AI off: no key, no budget. The row then offers the
+  // manual route and says why (BE-35).
+  statusOff: {
+    enabled: false,
+    reason: 'ai_not_configured',
+    message: 'AI is niet ingesteld.',
+    label: 'Gelezen door AI',
+    aiName: 'Claude (Haiku 5.5)',
+    perCallMaxEurCents: 30,
+    monthly: { spentEurCents: null, limitEurCents: 1000, remainingEurCents: null, unknownConcepts: 0 },
+    budget: { allowed: false, reason: 'budget_unavailable' },
+  },
 };
 
 // The existing Bronnen beoordelen page, built through the same view builder the

@@ -263,7 +263,7 @@ async function imageOnlyScenario(cdp) {
   await setViewport(cdp, 390, 900);
   await openRoute(
     cdp,
-    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=light`,
+    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=light&aiState=off`,
     `document.body.innerText.includes('Menu alleen als afbeelding · lees met AI of met de hand')`,
   );
   const snapshot = await evalJs(cdp, `(() => {
@@ -294,7 +294,7 @@ async function imageOnlyScenario(cdp) {
   await setViewport(cdp, 320, 900);
   await openRoute(
     cdp,
-    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=dark`,
+    `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=dark&aiState=off`,
     `document.body.innerText.includes('Menu alleen als afbeelding · lees met AI of met de hand')`,
   );
   const small = await evalJs(cdp, `(() => ({

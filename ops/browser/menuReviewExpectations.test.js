@@ -100,7 +100,12 @@ test('image-only: both AI states of the same row are covered by the fixture', ()
   const scenario = fixtures.scenarios.image_only;
   assert.equal(scenario.ai.status.enabled, true);
   assert.equal(scenario.ai.status.budget.allowed, true);
+  assert.equal(scenario.ai.statusOff.enabled, false);
   assert.equal(Boolean(imageOnlyItems()[0].jobId), true, 'the AI reading needs the existing job');
+  // The check names both states in the address bar, so each screenshot belongs
+  // to exactly one of them.
+  assert.equal(SCRIPT.includes('&aiState=off`'), true);
+  assert.equal(SCRIPT.includes('&aiState=ready`'), true);
 });
 
 test('image-only follow-up: the fixture keeps the known URL and the next step the check names', () => {
