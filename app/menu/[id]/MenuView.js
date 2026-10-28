@@ -5,7 +5,8 @@ import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
-import { resolveDishTarget } from '@/src/lib/dishDeepLink'
+import { resolveDishTarget, buildDishDeepLink } from '@/src/lib/dishDeepLink'
+import { hasShareTheme, dishShareTitle } from '@/src/lib/dishShare'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import EmojiText from '@/src/components/EmojiText'
@@ -81,6 +82,12 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   const nameParam      = searchParams.get('name')
   const catParam       = searchParams.get('cat')
   const fromQueryParam = searchParams.get('fromQuery')
+  // BE-44 (#105) — de stand van een gedeelde link. Hij kiest alleen de kleuren
+  // van de voorvertoningsafbeelding (og:image) en verandert het thema van deze
+  // pagina niet; de pagina leest hem nergens anders voor. De aanwezigheid van
+  // een geldige stand is tegelijk het teken dat iemand deze link deelde, en
+  // dus wanneer de regel "Iemand deelde dit gerecht met je" hoort te staan.
+  const standParam = searchParams.get('stand')
 
   // Filter state — initialiseer vanuit URL
   const [query,           setQuery]           = useState(urlQuery)
@@ -537,6 +544,19 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                     // gehaald; een actief filter verandert die niet.
                     const originalItemIndex = r.categories[origIdx] ? r.categories[origIdx].items.indexOf(item) : -1
                     const domId = originalItemIndex >= 0 ? `gerecht-${id}-${origIdx}-${originalItemIndex}` : undefined
+                    // BE-44 (#105, criterium 1) — de deellink van dit gerecht is
+                    // dezelfde BE-12-deeplink (`buildDishDeepLink`), zonder
+                    // `fromQuery`: een ontvanger hoeft geen zoekopdracht van
+                    // iemand anders te erven. De knop maakt hem bij de klik
+                    // absoluut en zet de stand van dit moment erbij.
+                    const shareHref = originalItemIndex >= 0 && origIdx >= 0
+                      ? buildDishDeepLink({
+                        menuLink: `/menu/${id}`,
+                        dishId: `${id}-${origIdx}-${originalItemIndex}`,
+                        name: item.name,
+                        category: cat.name,
+                      })
+                      : null
                     return (
                       <MenuItem
                         key={j}
@@ -551,6 +571,9 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         category={cat.name}
                         menuTitle={subtitle}
                         sourceDate={r.scraped}
+                        shareHref={shareHref}
+                        shareTitle={dishShareTitle({ name: item.name, restaurantName: r.name })}
+                        shareNote={isResolvedTarget && hasShareTheme(standParam)}
                       />
                     )
                   })}

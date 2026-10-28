@@ -28,6 +28,26 @@
 // or a category mismatch each independently invalidate the whole result —
 // there is no partial match, only "valid" or "the caller falls back to
 // the plain, unfiltered, unhighlighted menu."
+// BE-44 (#105) — de ene plek waar een gerechtlink gebouwd wordt. Tot nu toe
+// stond die opbouw in app/search/page.js (`buildDishMenuHref`); de deelknop
+// heeft exact dezelfde vorm nodig. Eén bouwer, geen tweede vorm ernaast: de
+// zoekresultaten en de deelknop leveren daarom teken voor teken dezelfde link
+// op, en `resolveDishTarget()` hierboven blijft de enige lezer.
+//
+// Bewust dezelfde velden als BE-12 zelf: `dish` (positie), `name` en `cat`
+// (de twee controles), plus `fromQuery` alleen als er echt een zoekopdracht
+// is. Geen enkel ander veld: de ontvanger valt altijd terug op de gewone,
+// ongefilterde menukaart als iets niet klopt.
+function buildDishDeepLink({ menuLink, dishId, name, category, fromQuery } = {}) {
+  if (!menuLink || !dishId || !name || !category) return null;
+  const params = new URLSearchParams();
+  params.set('dish', String(dishId));
+  params.set('name', String(name));
+  params.set('cat', String(category));
+  if (fromQuery) params.set('fromQuery', String(fromQuery));
+  return `${menuLink}?${params.toString()}`;
+}
+
 function resolveDishTarget(rawDish, expectedName, expectedCat, routeId, categories) {
   if (!rawDish || !expectedName || !expectedCat) return null;
   if (typeof rawDish !== 'string' || !rawDish.startsWith(`${routeId}-`)) return null;
@@ -51,5 +71,6 @@ function resolveDishTarget(rawDish, expectedName, expectedCat, routeId, categori
 }
 
 module.exports = {
+  buildDishDeepLink,
   resolveDishTarget,
 };

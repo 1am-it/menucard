@@ -6,6 +6,8 @@
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
 import Emoji from '@/src/components/Emoji'
+import DishShareButton from '@/src/components/DishShareButton'
+import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
 import { honestPriceLabel } from '@/src/lib/menuPrice'
@@ -100,7 +102,7 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
   // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
@@ -126,6 +128,9 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       tabIndex={isResolvedTarget ? -1 : undefined}
       className={`menu-card ${hasAllergenFilter && unknown ? 'mc-unknown' : ''} ${hasAllergenFilter && !safe ? 'mc-unsafe' : ''} ${showPulse ? 'menu-card-highlighted' : ''}`}
     >
+      {/* BE-44 (#105, criterium 2) — de ontvanger van een gedeelde link ziet
+          deze regel boven de hele kaart van het opgelichte gerecht. */}
+      {shareNote && <div className="dish-share-note">{SHARED_DISH_NOTE}</div>}
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
@@ -136,6 +141,12 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       {item.desc && (
         <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
       )}
+
+      {/* BE-44 (#105, criterium 1) — "Delen" onder de beschrijving, niet naast
+          de prijs. Alleen de publieke menukaart geeft een link mee; het
+          Publicatievoorbeeld (StaticMenu) blijft ongewijzigd. */}
+      {shareHref && <DishShareButton href={shareHref} title={shareTitle} />}
+
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
       {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}
 
