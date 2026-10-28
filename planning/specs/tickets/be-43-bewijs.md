@@ -24,6 +24,29 @@ De volledige run houdt dezelfde 729 controles als vóór BE-43; alleen de uitvoe
 korter (één regel per scenario, details alleen bij een fout). De gefilterde run
 heeft het volledige bewijsbestand niet aangeraakt (SHA-256 gelijk vóór en na).
 
+## Na het samenvoegen van main met BE-41 (#99)
+
+De tabel hierboven hoort bij de branch van vóór de samenvoeging. De Lead heeft
+`main` (met BE-41, #99) in `feat/scenariofilter-101` gemerged; daarna is de
+volledige run opnieuw gedaan op head `8d60472`:
+
+| run | scenario's | controles | duur | bewijs |
+| --- | --- | --- | --- | --- |
+| volledig (geen vlag), head `8d60472` | 30 van 30 | 838/838 geslaagd, 0 fouten | 3 min 0 s (179,8 s; 169,2 s in de scenario's) | `ops/browser/evidence/menu-review-browser-evidence.json`, `filter: null`, `worktreeDirty: false` |
+| `--alleen=concept-publication`, head `9c95b82` | 1 van 30 | 158/158 (155 scenariocontroles + 3 afsluitende controles) | 43,4 s (34,2 s in het scenario) | `ops/browser/evidence/menu-review-browser-evidence.filtered.json`, `filter: ["concept-publication"]` (gitignored) |
+
+- Dezelfde 838 controles als BE-41 op `main` (commit `9a25a29`, 838/838), dus de
+  samenvoeging heeft geen controle verloren: alle 237 unieke controlenamen van
+  `main` zitten in de samengevoegde versie, inclusief de twee namen die BE-41
+  toevoegde (`be41 keyboard: …`, `be41 detail: …`).
+- `--lijst` noemt op de samengevoegde branch 30 scenario's, met daarin
+  `concept-publication`: dat is het scenario waarin alle 66 controles met `be41`
+  in de naam zitten, en die zijn in de volledige run groen.
+- Het gefilterde bewijs is naar een eigen bestand geschreven; het volledige
+  bewijsbestand is na die run ongewijzigd (`git status` schoon).
+- Een onbekende naam stopt met exitcode 2 en de lijst van 30 geldige namen; er
+  start dan niets.
+
 ## Andere checks met meer scenario's (elk minstens één scenario gedraaid)
 
 | check | run | uitkomst |
@@ -37,6 +60,11 @@ heeft het volledige bewijsbestand niet aangeraakt (SHA-256 gelijk vóór en na).
 | `run-klaar-voor-publicatie-browser-check.js` | volledig | 39/39 (lijst 33/33, detail 2/2) |
 
 ## Bestaande fout buiten BE-43 (niet gerepareerd, geen appwijziging toegestaan)
+
+Deze ronde (na de samenvoeging) heeft alleen de menu-reviewcheck gedraaid; de
+twee andere browserchecks hieronder zijn niet opnieuw gedraaid, dus dit restpunt
+staat nog open en is niet stilzwijgend opgelost. De volledige menu-reviewrun
+zelf is met 838/838 volledig groen.
 
 De controles van BE-33/BE-34 die een knoptekst letterlijk vergelijken, zakken
 sinds de CSS-wijziging van BE-42 (af5b0b5) op de emoji: `innerText` geeft
