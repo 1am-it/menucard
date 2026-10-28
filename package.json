@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "test": "node --test \"src/**/*.test.js\" \"app/**/*.test.js\" \"ops/**/*.test.js\"",
+    "test:stil": "node --test --test-reporter=dot \"src/**/*.test.js\" \"app/**/*.test.js\" \"ops/**/*.test.js\"",
     "test:menu-structure": "node --test ops/benchmark/structureCorpus.test.js",
     "test:browser:menu-review": "node ops/browser/run-menu-review-browser-check.js",
     "test:browser:bronnen": "node ops/browser/run-bronnen-browser-check.js",
