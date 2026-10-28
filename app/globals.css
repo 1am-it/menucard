@@ -3070,6 +3070,10 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mcr-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .mcr-item { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-card); min-width: 0; }
 .mcr-item-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+/* BE-39: two badges on an approved card (status + publication), existing tokens only. */
+.mcr-item-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: flex-start; min-width: 0; }
+/* The "N klaar voor publicatie" line in the list header. */
+.mcr-ready-count { margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .mcr-item-title { margin: 0; font-size: 16px; font-weight: 700; }
 .mcr-item-title a { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
 .mcr-item-title a:hover { color: var(--accent); }

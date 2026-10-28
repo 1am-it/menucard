@@ -1,0 +1,369 @@
+{
+  "issue": "#93",
+  "ticket": "BE-39 — Klaar voor publicatie",
+  "fixtureOnly": true,
+  "passed": true,
+  "error": null,
+  "head": "51690c400ea9fd1b724db7fff1efde0548b04978",
+  "worktreeDirty": false,
+  "worktreeChanges": [],
+  "generatedAt": "2026-10-28T07:45:45.527Z",
+  "environment": {
+    "node": "v22.22.3",
+    "loopback": "http://localhost:3149 (own next dev) + own local browser over CDP",
+    "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "fixture": "concepts-publication"
+  },
+  "covered": [
+    "list: one second badge per approved card (ready, plain-language reason, real export status)",
+    "list: waiting cards keep their single status badge",
+    "list: \"N klaar voor publicatie\" in the header, only counting cards that are ready now",
+    "list: merged says \"live na de volgende deploy\"",
+    "detail: ready card may start the review-PR, merged card names the deploy",
+    "1280 px and 390 px, light and dark"
+  ],
+  "checks": [
+    {
+      "name": "BE-39 1280px/light: een goedgekeurde kaart krijgt precies een tweede badge \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "BE-39 1280px/light: een ontbrekende bron geeft de eerste reden in gewone taal",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "BE-39 1280px/light: een bestaande export toont de echte status, nooit \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "BE-39 1280px/light: gemerged is niet live; de volgende deploy wel",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachts"
+    },
+    {
+      "name": "BE-39 1280px/light: een wachtende kaart houdt een badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "BE-39 1280px/light: de kop telt alleen de kaarten die nu klaar zijn",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "BE-39 1280px/light: gevraagd thema actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "BE-39 1280px/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "BE-39 390px/light: een goedgekeurde kaart krijgt precies een tweede badge \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "BE-39 390px/light: een ontbrekende bron geeft de eerste reden in gewone taal",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "BE-39 390px/light: een bestaande export toont de echte status, nooit \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "BE-39 390px/light: gemerged is niet live; de volgende deploy wel",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachts"
+    },
+    {
+      "name": "BE-39 390px/light: een wachtende kaart houdt een badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "BE-39 390px/light: de kop telt alleen de kaarten die nu klaar zijn",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "BE-39 390px/light: gevraagd thema actief",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "BE-39 390px/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "BE-39 1280px/dark: een goedgekeurde kaart krijgt precies een tweede badge \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "BE-39 1280px/dark: een ontbrekende bron geeft de eerste reden in gewone taal",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "BE-39 1280px/dark: een bestaande export toont de echte status, nooit \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "BE-39 1280px/dark: gemerged is niet live; de volgende deploy wel",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachts"
+    },
+    {
+      "name": "BE-39 1280px/dark: een wachtende kaart houdt een badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "BE-39 1280px/dark: de kop telt alleen de kaarten die nu klaar zijn",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "BE-39 1280px/dark: gevraagd thema actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "BE-39 1280px/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "BE-39 390px/dark: een goedgekeurde kaart krijgt precies een tweede badge \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "BE-39 390px/dark: een ontbrekende bron geeft de eerste reden in gewone taal",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "BE-39 390px/dark: een bestaande export toont de echte status, nooit \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "BE-39 390px/dark: gemerged is niet live; de volgende deploy wel",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachts"
+    },
+    {
+      "name": "BE-39 390px/dark: een wachtende kaart houdt een badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "BE-39 390px/dark: de kop telt alleen de kaarten die nu klaar zijn",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "BE-39 390px/dark: gevraagd thema actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "BE-39 390px/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "BE-39 licht en donker gebruiken verschillende achtergrondtokens",
+      "passed": true,
+      "detail": "#ffffff / #1f2328"
+    },
+    {
+      "name": "BE-39 detail: de ready-kaart kan de review-PR starten op dezelfde regel",
+      "passed": true,
+      "detail": "{\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-39 detail: een gemergede review-PR wordt niet als live gebracht",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nMenuconcepten beoordelen\n/\nFictief Gemerged\nBeoordeel menuconcept\nAlleen intern\n\nControleer alleen de wijzigingen voordat je het"
+    },
+    {
+      "name": "BE-39 netwerk: geen onverwacht verkeer vanuit de app",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "BE-39: geen onafgevangen browser-exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "BE-39: de fixture is zonder fout gestart",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "BE-39: elke pagina gebruikte de fictieve fixture",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "be-39/be39-publicatie-1280-light.png",
+      "sha256": "a4d9bf77441bd70d843a08358689639771d7ae1207e6b42b14038a82444b6ec7",
+      "width": 1274,
+      "height": 1186
+    },
+    {
+      "file": "be-39/be39-publicatie-390-light.png",
+      "sha256": "674af8e4bc753480f7d5e825a815c8ce38244a9160f9e7b4674c81bbde1c6ed6",
+      "width": 390,
+      "height": 1436
+    },
+    {
+      "file": "be-39/be39-publicatie-1280-dark.png",
+      "sha256": "a8b28753df76e25fb5ce7c38e0e3df159f69259752cc0c7422a185079fc47f0e",
+      "width": 1274,
+      "height": 1186
+    },
+    {
+      "file": "be-39/be39-publicatie-390-dark.png",
+      "sha256": "a0b56dfbcbce4c063ec4e0489cb7c82c62988fb7c929b1c92b8bd75853a9bbfb",
+      "width": 390,
+      "height": 1436
+    },
+    {
+      "file": "be-39/be39-detail-1280-light.png",
+      "sha256": "781385c33c42a4907c96e9e0c5d2ba2b6029b6a4d068d1e7f476cb6b7d56e65d",
+      "width": 1274,
+      "height": 1024
+    }
+  ],
+  "list": [
+    {
+      "theme": "light",
+      "width": 1280,
+      "readyCount": "1 klaar voor publicatie",
+      "badges": [
+        [
+          "Wacht op beoordeling"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Klaar voor publicatie"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Nog niet klaar: Bron nog niet bevestigd."
+        ],
+        [
+          "Intern goedgekeurd",
+          "Review-PR gemerged"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Vorige poging mislukt"
+        ]
+      ],
+      "screenshot": "be-39/be39-publicatie-1280-light.png"
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "readyCount": "1 klaar voor publicatie",
+      "badges": [
+        [
+          "Wacht op beoordeling"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Klaar voor publicatie"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Nog niet klaar: Bron nog niet bevestigd."
+        ],
+        [
+          "Intern goedgekeurd",
+          "Review-PR gemerged"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Vorige poging mislukt"
+        ]
+      ],
+      "screenshot": "be-39/be39-publicatie-390-light.png"
+    },
+    {
+      "theme": "dark",
+      "width": 1280,
+      "readyCount": "1 klaar voor publicatie",
+      "badges": [
+        [
+          "Wacht op beoordeling"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Klaar voor publicatie"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Nog niet klaar: Bron nog niet bevestigd."
+        ],
+        [
+          "Intern goedgekeurd",
+          "Review-PR gemerged"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Vorige poging mislukt"
+        ]
+      ],
+      "screenshot": "be-39/be39-publicatie-1280-dark.png"
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "readyCount": "1 klaar voor publicatie",
+      "badges": [
+        [
+          "Wacht op beoordeling"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Klaar voor publicatie"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Nog niet klaar: Bron nog niet bevestigd."
+        ],
+        [
+          "Intern goedgekeurd",
+          "Review-PR gemerged"
+        ],
+        [
+          "Intern goedgekeurd",
+          "Vorige poging mislukt"
+        ]
+      ],
+      "screenshot": "be-39/be39-publicatie-390-dark.png"
+    }
+  ],
+  "network": {
+    "guard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown",
+    "appViolations": [],
+    "deliberateViolations": []
+  }
+}

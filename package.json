@@ -20,6 +20,7 @@
     "test:browser:straks": "node ops/browser/run-straks-browser-check.js",
     "test:browser:beeld-lezen": "node ops/browser/run-beeld-lezen-browser-check.js",
     "test:browser:een-klik": "node ops/browser/run-een-klik-browser-check.js",
+    "test:browser:publicatie": "node ops/browser/run-klaar-voor-publicatie-browser-check.js",
     "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
     "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },

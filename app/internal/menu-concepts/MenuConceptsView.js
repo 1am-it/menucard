@@ -12,6 +12,7 @@ import { useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
 import { buildMenuConcept, storedConceptInput, mergeEdits, conceptSectionCount } from '@/src/lib/menuConcept'
+import { derivePublicationReadiness, EXPORT_STATUS_LABELS } from '@/src/lib/menuConceptPublication'
 import {
   plural,
   LineEditor,
@@ -32,6 +33,17 @@ const STATUS_VIEW = {
   rejected: { role: 'neutral', icon: 'cross', label: 'Afgewezen' },
 }
 
+// BE-39: the export texts stay exactly as they were; their single source is
+// src/lib/menuConceptPublication.js, so the list, the detail card and the
+// pure rule can never drift apart.
+const EXPORT_VIEW = {
+  opened: { role: 'neutral', icon: 'clock', label: EXPORT_STATUS_LABELS.opened },
+  merged: { role: 'positive', icon: 'check', label: EXPORT_STATUS_LABELS.merged },
+  closed: { role: 'neutral', icon: 'cross', label: EXPORT_STATUS_LABELS.closed },
+  failed: { role: 'neutral', icon: 'cross', label: EXPORT_STATUS_LABELS.failed },
+  pending: { role: 'neutral', icon: 'progress', label: EXPORT_STATUS_LABELS.pending },
+}
+
 const NOTHING_PUBLISHED = 'Goedkeuren blijft intern: er wordt niets gepubliceerd en de publieke menukaart blijft ongewijzigd.'
 
 function formatMoment(value) {
@@ -46,6 +58,33 @@ export function StatusBadge({ status }) {
     <span className={`status-badge status-badge--${view.role} bta-badge`}>
       <StatusIcon name={view.icon} />
       <span>{view.label}</span>
+    </span>
+  )
+}
+
+// BE-39: the second badge of an approved card. The text always comes from the
+// server (one rule, src/lib/menuConceptPublication.js); this map only picks the
+// existing badge role and icon. Export states reuse the existing EXPORT_VIEW
+// colours and icons, so nothing new is introduced visually.
+const PUBLICATION_VIEW = {
+  ready: { role: 'positive', icon: 'check' },
+  not_ready: { role: 'neutral', icon: 'clock' },
+}
+
+function publicationView(state) {
+  if (typeof state !== 'string') return null
+  if (state.startsWith('export_')) return EXPORT_VIEW[state.slice('export_'.length)] || null
+  return PUBLICATION_VIEW[state] || null
+}
+
+/** BE-39: "Klaar voor publicatie", the real export status, or the first reason. */
+function PublicationBadge({ publication }) {
+  const view = publicationView(publication && publication.state)
+  if (!view) return null
+  return (
+    <span className={`status-badge status-badge--${view.role} bta-badge`}>
+      <StatusIcon name={view.icon} />
+      <span>{publication.label}</span>
     </span>
   )
 }
@@ -79,12 +118,17 @@ function ConceptItem({ item }) {
         <h3 className="mcr-item-title">
           <a href={`/internal/menu-concepts/${item.id}`}>{item.restaurantName}</a>
         </h3>
-        <StatusBadge status={item.status} />
+        <div className="mcr-item-badges">
+          <StatusBadge status={item.status} />
+          <PublicationBadge publication={item.publication} />
+        </div>
       </div>
       <p className="mcr-meta">
         Conceptversie {item.version} · aangemaakt {formatMoment(item.createdAt)} {item.createdBySelf ? 'door jou' : 'door een collega'}
       </p>
       <p className="mcr-meta bta-url">{item.sourceUrl}</p>
+      {/* BE-39: a merged review-PR is not a live menu until the next deploy. */}
+      {item.publication && item.publication.liveNote && <p className="mcr-meta">{item.publication.liveNote}</p>}
       <ul className="bta-chips" aria-label="Aantallen">
         <li className="bta-chip">{plural(item.dishCount, 'gerecht', 'gerechten')}</li>
         <li className="bta-chip">{plural(item.attentionCount, 'aandachtspunt', 'aandachtspunten')}</li>
@@ -104,6 +148,9 @@ export function ConceptList({ data, loadError }) {
   const items = (data && data.items) || []
   const waiting = items.filter((i) => i.status === 'waiting')
   const decided = items.filter((i) => i.status !== 'waiting')
+  // BE-39: only cards that can go now. A card with an existing export is
+  // already on its way and is not counted; N = 0 hides the line entirely.
+  const readyCount = items.filter((i) => i.publication && i.publication.ready).length
   return (
     <>
       <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -117,6 +164,7 @@ export function ConceptList({ data, loadError }) {
           <span className="bta-tag">Alleen intern</span>
         </div>
         <p className="bta-muted">Controleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.</p>
+        {readyCount > 0 && <p className="mcr-ready-count">{readyCount} klaar voor publicatie</p>}
       </div>
       <InternalOnlyNote />
       <Messages loadError={loadError} />
@@ -332,18 +380,15 @@ function PublicationPreview({ preview, restaurantName, version, dirty }) {
 }
 
 /** /internal/menu-concepts/[id] */
-const EXPORT_VIEW = {
-  opened: { role: 'neutral', icon: 'clock', label: 'Review-PR open' },
-  merged: { role: 'positive', icon: 'check', label: 'Review-PR gemerged' },
-  closed: { role: 'neutral', icon: 'cross', label: 'Review-PR gesloten zonder merge' },
-  failed: { role: 'neutral', icon: 'cross', label: 'Vorige poging mislukt' },
-  pending: { role: 'neutral', icon: 'progress', label: 'Review-PR wordt gemaakt' },
-}
 
 /** BE-27: "Maak review-PR" for an approved concept, then its pull request and status. Never publishes. */
-function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exportBlockers, busy, onExport }) {
+function PublicationCard({ concept, exportInfo, publication, busy, onExport }) {
   const view = exportInfo ? EXPORT_VIEW[exportInfo.status] : null
   const active = exportInfo && (exportInfo.status === 'opened' || exportInfo.status === 'merged' || exportInfo.status === 'pending')
+  // BE-39: the gates and their texts come from the one publication rule; the
+  // screen only adds the browser's unsaved corrections through `dirty`.
+  const canExport = Boolean(publication && publication.canExport)
+  const hints = (publication && publication.hints) || []
   return (
     <section className="bta-side-card" aria-labelledby="mcr-publication">
       <h2 id="mcr-publication" className="bta-side-title">
@@ -362,7 +407,7 @@ function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exp
         </a>
       )}
       {exportInfo && exportInfo.status === 'merged' ? (
-        <p className="bta-side-text">Gemerged op GitHub. De menukaart wordt zichtbaar na de normale productie-deploy.</p>
+        <p className="bta-side-text">Gemerged op GitHub. De menukaart is live na de volgende deploy.</p>
       ) : (
         <p className="bta-side-text">
           <strong>Nog niet gepubliceerd. Handmatig mergen vereist.</strong>
@@ -388,11 +433,9 @@ function PublicationCard({ concept, exportInfo, githubConfigured, canExport, exp
             Maak review-PR
           </button>
           <p id="mcr-export-hint" className="bta-muted">
-            {!githubConfigured
-              ? 'De GitHub-koppeling ontbreekt op de server. Er kan nog geen review-PR worden gemaakt; er is niets gewijzigd.'
-              : exportBlockers.length > 0
-                ? exportBlockers.join(' ')
-                : 'Maakt één gewone GitHub-PR met alleen deze volledige menukaart. Er wordt niets automatisch gemerged of gepubliceerd.'}
+            {hints.length > 0
+              ? hints.join(' ')
+              : 'Maakt één gewone GitHub-PR met alleen deze volledige menukaart. Er wordt niets automatisch gemerged of gepubliceerd.'}
           </p>
         </div>
       )}
@@ -552,13 +595,19 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
   if (c.rejectedBefore) approveBlockers.push('Deze menukaart is eerder afgewezen.')
   if (c.status === 'approved') approveBlockers.push('Deze versie is al intern goedgekeurd.')
   const canApprove = c.isLatest && !dirty && approveBlockers.length === 0
-  const exportBlockers = []
-  if (!c.isLatest) exportBlockers.push('Alleen de nieuwste versie kan een review-PR krijgen.')
-  if (c.status !== 'approved') exportBlockers.push('Keur het concept eerst intern goed.')
-  if (concept.blockers.length > 0) exportBlockers.push('Een menukaart met blokkades wordt nooit geëxporteerd.')
-  if (!sourceOk) exportBlockers.push('De bron moet bevestigd en niet geblokkeerd zijn.')
-  if (dirty) exportBlockers.push('Sla eerst je correcties op of maak ze ongedaan.')
-  const canExport = Boolean(data.githubConfigured) && exportBlockers.length === 0
+  // BE-39: one rule for the publication gates, shared with the list. Every
+  // input is the server's answer; the only browser-only gate is `dirty`
+  // (not-opgeslagen correcties), which the server cannot know.
+  const publication = derivePublicationReadiness({
+    isLatest: c.isLatest,
+    status: c.status,
+    blockers: concept.blockers,
+    source: data.source,
+    rejectedBefore: c.rejectedBefore,
+    githubConfigured: data.githubConfigured,
+    dirty,
+    exportStatus: data.export ? data.export.status : null,
+  })
 
   return (
     <>
@@ -766,9 +815,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             <PublicationCard
               concept={c}
               exportInfo={data.export}
-              githubConfigured={data.githubConfigured}
-              canExport={canExport}
-              exportBlockers={exportBlockers}
+              publication={publication}
               busy={busy}
               onExport={onExport}
             />

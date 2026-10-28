@@ -23,7 +23,8 @@ const { isInternalOnly } = require('./importInbox');
 const { validateSnapshotReviewInput, snapshotReviewValidationMessage, groupReviewsBySnapshotId, deriveEffectiveSnapshotStatus } = require('./menuSnapshotProposals');
 const { liveMenuLines, recognisedLines, buildMenuConcept, storedConceptInput, sanitizeEdits, mergeEdits, REJECT_REASONS } = require('./menuConcept');
 const { loadLineage, wasRejectedBefore, createConceptVersion } = require('./menuConceptStore');
-const { exportForSnapshot, storedExportForSnapshot, exportMenuEntry } = require('./menuConceptExport');
+const { exportForSnapshot, storedExportForSnapshot, storedExportsForSnapshots, exportMenuEntry } = require('./menuConceptExport');
+const { derivePublicationReadiness } = require('./menuConceptPublication');
 const { menuKeyFor, restaurantMenuEntries } = require('./menuExport');
 const { loadOriginReceipt, originReceiptBlock } = require('./menuOriginReceiptGuard');
 const {
@@ -69,7 +70,29 @@ function conceptSummary(captured, liveLines) {
  * Is the concept's source still a confirmed source of the restaurant, and is
  * it free of a block? Derived from the BE-24 proposals (the latest accepted
  * decision about this URL) and the latest BE-20/BE-25 analysis of the URL.
+ *
+ * The rule itself is pure and shared: the single lookup below and the one
+ * batched lookup the concept list uses both feed this function, so a card can
+ * never get a different source verdict in the list than on its detail page.
  */
+function deriveSourceStatus({ proposals, jobs, restaurantId, sourceUrl, receiptUrl }) {
+  const about = (proposals || [])
+    .filter((p) => restaurantId === undefined || restaurantId === null || p.restaurant_id === restaurantId)
+    .filter((p) => p.proposed_url === sourceUrl || p.current_url === sourceUrl)
+    .sort((a, b) => String(b.decided_at).localeCompare(String(a.decided_at)));
+  const last = about[0] || null;
+  const confirmed = Boolean(last && (last.kind === 'add_candidate' || last.kind === 'replace_source') && last.proposed_url === sourceUrl);
+
+  const urls = [...new Set([sourceUrl, receiptUrl].filter(Boolean))];
+  const latestJob = [...(jobs || [])]
+    .filter((j) => urls.includes(j.canonical_source_url))
+    .filter((j) => j.status === 'succeeded' || j.status === 'failed')
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+  const blocked = latestJob && latestJob.status === 'failed' ? { reason: latestJob.error_reason, label: SOURCE_BLOCK_LABELS[latestJob.error_reason] || 'Laatste analyse mislukt' } : null;
+  return { confirmed, blocked };
+}
+
+/** One card's source status: two reads, then the shared rule above. */
 async function sourceStatus(supabase, { restaurantId, sourceUrl, receiptUrl }) {
   const { data: proposals, error } = await supabase
     .from('source_triage_proposals')
@@ -77,11 +100,6 @@ async function sourceStatus(supabase, { restaurantId, sourceUrl, receiptUrl }) {
     .eq('restaurant_id', restaurantId)
     .eq('status', 'accepted');
   if (error) return { error };
-  const about = (proposals || [])
-    .filter((p) => p.proposed_url === sourceUrl || p.current_url === sourceUrl)
-    .sort((a, b) => String(b.decided_at).localeCompare(String(a.decided_at)));
-  const last = about[0] || null;
-  const confirmed = Boolean(last && (last.kind === 'add_candidate' || last.kind === 'replace_source') && last.proposed_url === sourceUrl);
 
   const urls = [...new Set([sourceUrl, receiptUrl].filter(Boolean))];
   const { data: jobs, error: jobError } = await supabase
@@ -89,9 +107,57 @@ async function sourceStatus(supabase, { restaurantId, sourceUrl, receiptUrl }) {
     .select('id, status, error_reason, created_at')
     .in('canonical_source_url', urls);
   if (jobError) return { error: jobError };
-  const latestJob = [...(jobs || [])].filter((j) => j.status === 'succeeded' || j.status === 'failed').sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
-  const blocked = latestJob && latestJob.status === 'failed' ? { reason: latestJob.error_reason, label: SOURCE_BLOCK_LABELS[latestJob.error_reason] || 'Laatste analyse mislukt' } : null;
-  return { confirmed, blocked };
+  return deriveSourceStatus({ proposals, jobs, restaurantId, sourceUrl, receiptUrl });
+}
+
+/** The receipt's canonical URL for one concept version, if it recorded one. */
+function receiptUrlFor(row, receiptById) {
+  const receipt = row && row.origin_receipt_id ? receiptById.get(row.origin_receipt_id) : null;
+  return receipt && receipt.canonical_source_url ? receipt.canonical_source_url : null;
+}
+
+/** One lookup key per source question, so identical sources share one answer. */
+function sourceKeyFor({ restaurantId, sourceUrl, receiptUrl }) {
+  return `${restaurantId}|${sourceUrl || ''}|${receiptUrl || ''}`;
+}
+
+/**
+ * BE-39: the source status for many cards with at most two reads for the whole
+ * list (both `.in(…)`), never one query per card, and no GitHub call. The
+ * verdict itself comes from the same `deriveSourceStatus` the detail page and
+ * the export handler use.
+ */
+async function loadSourceStatuses(supabase, cards) {
+  const bySource = new Map();
+  for (const card of cards) {
+    bySource.set(sourceKeyFor(card), card);
+  }
+  const questions = [...bySource.entries()];
+  const restaurantIds = [...new Set(questions.map(([, card]) => card.restaurantId))];
+  const urls = [...new Set(questions.flatMap(([, card]) => [card.sourceUrl, card.receiptUrl]).filter(Boolean))];
+
+  const { data: proposals, error: proposalError } = await supabase
+    .from('source_triage_proposals')
+    .select('id, restaurant_id, kind, proposed_url, current_url, status, decided_at')
+    .in('restaurant_id', restaurantIds)
+    .eq('status', 'accepted');
+  if (proposalError) return { error: proposalError };
+
+  let jobs = [];
+  if (urls.length > 0) {
+    const { data: jobRows, error: jobError } = await supabase
+      .from('restaurant_source_analysis_jobs')
+      .select('id, status, error_reason, created_at, canonical_source_url')
+      .in('canonical_source_url', urls);
+    if (jobError) return { error: jobError };
+    jobs = jobRows || [];
+  }
+
+  const byKey = new Map();
+  for (const [key, card] of questions) {
+    byKey.set(key, deriveSourceStatus({ proposals, jobs, restaurantId: card.restaurantId, sourceUrl: card.sourceUrl, receiptUrl: card.receiptUrl }));
+  }
+  return { byKey };
 }
 
 function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurants, liveMenus, computeMenuHash, github = null, now = () => new Date() }) {
@@ -156,8 +222,9 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       .limit(LIST_LIMIT);
     if (error) return reply(500, { error: LOAD_ERROR });
 
+    const allRows = rows || [];
     const latestByLineage = new Map();
-    for (const row of rows || []) {
+    for (const row of allRows) {
       const key = `${row.restaurant_id}/${row.menu_context}`;
       const seen = latestByLineage.get(key);
       if (!seen || row.version > seen.version) latestByLineage.set(key, row);
@@ -169,20 +236,51 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       if (ids.length > 0) {
         const { data: receiptRows, error: receiptError } = await supabase
           .from('url_intake_analysis_receipts')
-          .select('id, product:candidate_summary->menuExtractionV2')
+          .select('id, canonical_source_url, product:candidate_summary->menuExtractionV2')
           .in('id', ids);
         if (receiptError) return reply(500, { error: LOAD_ERROR });
         receipts = receiptRows || [];
       }
     }
+    const receiptById = new Map(receipts.map((r) => [r.id, r]));
     const productByReceipt = new Map(receipts.map((r) => [r.id, readReceiptProjection(r)]));
+    // Every fetched version, not just the latest: the rejection gate compares
+    // the whole lineage ("dezelfde inhoud nooit eerder afgewezen") and that
+    // must still stay one query (BE-39, criterion 5). The lineage is the part
+    // within this list window (LIST_LIMIT newest rows); the detail route always
+    // re-reads the full lineage, so a refusal there is never weakened by this.
     let reviews = [];
-    if (latest.length > 0) {
-      const { data, error: reviewError } = await supabase.from('menu_snapshot_reviews').select('id, snapshot_id, decided_at, decision').in('snapshot_id', latest.map((r) => r.id));
+    if (allRows.length > 0) {
+      const { data, error: reviewError } = await supabase.from('menu_snapshot_reviews').select('id, snapshot_id, decided_at, decision').in('snapshot_id', allRows.map((r) => r.id));
       if (reviewError) return reply(500, { error: LOAD_ERROR });
       reviews = data || [];
     }
     const bySnapshot = groupReviewsBySnapshotId(reviews);
+    const statusOf = (id) => viewStatus(deriveEffectiveSnapshotStatus(bySnapshot[id] || []));
+    const lineageByKey = new Map();
+    for (const row of allRows) {
+      const key = `${row.restaurant_id}/${row.menu_context}`;
+      if (!lineageByKey.has(key)) lineageByKey.set(key, []);
+      lineageByKey.get(key).push({ ...row, status: statusOf(row.id) });
+    }
+    // BE-39: the stored exports of the shown versions in exactly one query and
+    // without any GitHub call. They are displayed, never used as proof.
+    const storedExports = await storedExportsForSnapshots(supabase, latest.map((r) => r.id));
+    if (storedExports.error) return reply(500, { error: LOAD_ERROR });
+    // BE-39: the source gate for the approved cards, batched: at most two
+    // queries for the whole list, never one per card, and skipped entirely
+    // when no card is approved.
+    const sourceByKey = new Map();
+    const approved = latest.filter((row) => statusOf(row.id) === 'approved');
+    if (approved.length > 0) {
+      const loaded = await loadSourceStatuses(supabase, approved.map((row) => ({
+        restaurantId: row.restaurant_id,
+        sourceUrl: row.source_url,
+        receiptUrl: receiptUrlFor(row, receiptById),
+      })));
+      if (loaded.error) return reply(500, { error: LOAD_ERROR });
+      for (const [key, value] of loaded.byKey) sourceByKey.set(key, value);
+    }
     const order = { waiting: 0, approved: 1, rejected: 2 };
     const items = latest
       .map((row) => {
@@ -203,6 +301,23 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
               attentionCount: summary.concept.attentionLines.length + summary.concept.removed.length,
               blockerCount: summary.concept.blockers.length,
             };
+        const status = statusOf(row.id);
+        const key = `${row.restaurant_id}/${row.menu_context}`;
+        const exportRow = storedExports.bySnapshot.get(row.id) || null;
+        // BE-39: exactly one second badge, and only for an internally approved
+        // card. Waiting and rejected cards keep their current presentation.
+        const publication =
+          status === 'approved'
+            ? derivePublicationReadiness({
+                isLatest: true,
+                status,
+                blockerCount: counts.blockerCount,
+                source: sourceByKey.get(sourceKeyFor({ restaurantId: row.restaurant_id, sourceUrl: row.source_url, receiptUrl: receiptUrlFor(row, receiptById) })),
+                rejectedBefore: blocked ? false : wasRejectedBefore(lineageByKey.get(key) || [], row.captured_content, computeMenuHash, row.id),
+                githubConfigured: Boolean(github),
+                exportStatus: exportRow ? exportRow.status : null,
+              })
+            : null;
         return {
           id: row.id,
           restaurantId: row.restaurant_id,
@@ -212,7 +327,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
           sourceUrl: row.source_url,
           createdAt: row.created_at,
           createdBySelf: row.created_by === auth.userId,
-          status: viewStatus(deriveEffectiveSnapshotStatus(bySnapshot[row.id] || [])),
+          status,
           dishCount: counts.dishCount,
           attentionCount: counts.attentionCount,
           blockerCount: counts.blockerCount,
@@ -221,6 +336,7 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
           blockedReason: blocked
             ? (productBlocked ? summary.product.reason : 'receipt_product_v2_authoritative')
             : null,
+          publication,
         };
       })
       .sort((a, b) => order[a.status] - order[b.status] || String(b.createdAt).localeCompare(String(a.createdAt)));
@@ -271,6 +387,9 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       for (const line of recognisedLines((receipt && receipt.menus) || [])) originLines[line.id] = { name: line.name, desc: line.desc, price: line.price, category: line.category };
     }
     const byId = new Map(lineage.versions.map((v) => [v.id, v]));
+    const rejectedBefore = blocked ? false : wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id);
+    const status = viewStatus(current.status);
+    const blockerCount = blocked ? Math.max(1, (block.blockers || []).length) : summary.concept ? summary.concept.blockers.length : 1;
     return reply(200, {
       concept: {
         id: snapshot.id,
@@ -285,8 +404,8 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
         createdAt: snapshot.created_at,
         createdBySelf: snapshot.created_by === auth.userId,
         originRecorded: Boolean(receipt),
-        status: viewStatus(current.status),
-        rejectedBefore: blocked ? false : wasRejectedBefore(lineage.versions, snapshot.captured_content, computeMenuHash, snapshot.id),
+        status,
+        rejectedBefore,
         captured: blocked ? null : snapshot.captured_content,
         readOnly: blocked,
         schemaVersion: block ? block.schemaVersion || null : null,
@@ -315,6 +434,18 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
       })),
       rejectReasons: REJECT_REASONS,
       export: exported.export,
+      // BE-39: the same pure rule the list uses. The detail screen derives its
+      // canExport from this instead of its own copy of the gates; only the
+      // "niet-opgeslagen correcties" check stays in the browser (dirty).
+      publication: derivePublicationReadiness({
+        isLatest: !latest || latest.id === snapshot.id,
+        status,
+        blockerCount,
+        source,
+        rejectedBefore,
+        githubConfigured: Boolean(github),
+        exportStatus: exported.export ? exported.export.status : null,
+      }),
       // Publicatievoorbeeld: built on the server only. "concept" is exactly
       // the entry "Maak review-PR" would write; "current" is the restaurant's
       // unchanged published menus. Nothing is written or exported here.
@@ -436,4 +567,4 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
   return { list, detail, saveVersion, decide };
 }
 
-module.exports = { createMenuConceptReviewHandlers, sourceStatus };
+module.exports = { createMenuConceptReviewHandlers, sourceStatus, deriveSourceStatus };
