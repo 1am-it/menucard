@@ -1,7 +1,6 @@
 'use strict';
 
-// BE-42 (#98) — browsercheck voor deel 1: 1A (kaartnamen als knoppen) en
-// 3B (rustigere prijzen).
+// BE-42 (#98) — browsercheck voor deel 1 (1A + 3B) en deel 2 (2A).
 //
 // Start de echte productiebuild (`next start`) op een lokale poort, bestuurt
 // een lokaal geïnstalleerde Edge/Chrome via CDP (dezelfde runtime als de
@@ -15,10 +14,17 @@
 //   - /restaurant/6, /menu/6-diner, /search?q=steak en de home (met vaste
 //     klok): het prijsvlak is var(--surface-soft) met var(--text-primary),
 //     vet, rechts en ≥ 4,5:1 contrast in licht en donker;
-//   - de koude eerste overdracht van /alle-restaurants (na 1A) en van
-//     /restaurant/6 (de "voor"-meting voor 2A);
-//   - screenshots van /alle-restaurants, /restaurant/6 en /restaurant/1 op
-//     1280, 390 en 320 px, in licht en donker.
+//   - /restaurant/6 (2A): de sectie "Menukaarten" met één tabblad per kaart en
+//     het aantal gerechten, de standaardkaart = de eerste in de vaste volgorde
+//     (lunch), `?kaart=<id>` als echte serverlinks, wisselen met JavaScript
+//     zonder volledige herlaadbeurt, en de bronregel van de gekozen kaart;
+//   - de server-HTML zelf (zonder browser): maar één kaart in de HTML, nooit
+//     alle kaarten; ook bij een onbekende `?kaart=`;
+//   - de koude eerste overdracht van /alle-restaurants, van /restaurant/6 vóór
+//     deel 2 (169,9 KB, uit deel 1) en van /restaurant/6 ná 2A (eis < 250 KB);
+//   - screenshots van /alle-restaurants, /restaurant/6, /restaurant/6 met een
+//     gewisseld tabblad en /restaurant/1 op 1280, 390 en 320 px, in licht en
+//     donker.
 //
 // Bewijs (screenshots + JSON) gaat standaard buiten de repository:
 //   node ops/browser/run-be42-browser-check.js --out ../be42-evidence
@@ -50,6 +56,11 @@ const checks = [];
 const shots = [];
 const transfer = [];
 let viewport = { width: 1280, height: 900 };
+
+// BE-42 — de "voor"-meting van /restaurant/6 uit het deel 1-bewijs (koude
+// eerste overdracht, zelfde productiebuild en meetmethode). Ná 2A moet die
+// onder 250 KB blijven (contract criterium 2).
+const TRANSFER_BEFORE_RESTAURANT6_KB = 169.9;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail });
@@ -167,6 +178,162 @@ const priceJs = (selector) => `(() => {
     })()),
   };
 })()`;
+
+// ── 2A: de hele menukaart in tabbladen op de restaurantpagina ───────────────
+// Meet de tabbladen, de actieve kaart, de bronregel en de menupaginalink. De
+// gerechten van de gekozen kaart staan in .rpm-panel; er is er altijd precies
+// één (zie de server-HTML-check hieronder).
+const TABS_JS = `(() => {
+  ${HELPERS}
+  const tabs = [...document.querySelectorAll('nav.rpm-tabs a')];
+  const cards = [...document.querySelectorAll('.rpm-panel .menu-card')];
+  const active = tabs.filter((tab) => tab.getAttribute('aria-current') === 'page');
+  const source = document.querySelector('.rpm-source');
+  const sourceLink = source ? source.querySelector('a') : null;
+  const nameOf = (tab) => (tab.firstChild ? String(tab.firstChild.textContent).trim() : '');
+  return {
+    theme: document.documentElement.getAttribute('data-theme'),
+    heading: (() => { const el = document.querySelector('#menukaarten-title'); return el ? el.textContent.trim() : null; })(),
+    navLabel: (() => { const el = document.querySelector('nav.rpm-tabs'); return el ? el.getAttribute('aria-label') : null; })(),
+    tabs: tabs.map((tab) => {
+      const count = tab.querySelector('.rpm-tab-count');
+      return {
+        name: nameOf(tab),
+        count: count ? count.textContent.trim() : null,
+        href: tab.getAttribute('href'),
+        active: tab.getAttribute('aria-current') === 'page',
+        height: Math.round(tab.getBoundingClientRect().height),
+      };
+    }),
+    activeTabs: active.length,
+    activeName: active[0] ? nameOf(active[0]) : null,
+    panelTitle: (() => { const el = document.querySelector('.rpm-panel-title'); return el ? el.textContent.replace(/\\s+/g, ' ').trim() : null; })(),
+    cards: cards.length,
+    sections: document.querySelectorAll('.rpm-panel .cat-section').length,
+    dishNames: cards.slice(0, 80).map((card) => (card.querySelector('.td-name') ? card.querySelector('.td-name').textContent.trim() : '')),
+    prices: [...document.querySelectorAll('.rpm-panel .td-price')].map((el) => el.textContent.trim()),
+    source: source ? source.textContent.replace(/\\s+/g, ' ').trim() : null,
+    sourceHref: sourceLink ? sourceLink.getAttribute('href') : null,
+    menuPageHref: (() => { const el = document.querySelector('a.detail-menu-btn-outline'); return el ? el.getAttribute('href') : null; })(),
+    overflow: Math.round(document.documentElement.scrollWidth) - Math.round(window.innerWidth),
+  };
+})()`;
+
+// Wisselen met JavaScript: klik het borreltabblad aan en kijk of alleen het
+// paneel verandert. Een volledige herlaadbeurt zou een tweede
+// navigatie-entry in de Performance-tijdlijn zetten.
+const SWITCH_JS = `(async () => {
+  const before = performance.getEntriesByType('navigation').length;
+  const tabs = [...document.querySelectorAll('nav.rpm-tabs a')];
+  const link = tabs.find((tab) => /Borrelkaart/.test(tab.textContent));
+  if (!link) return { missing: true, tabs: tabs.length };
+  const urlBefore = location.pathname + location.search;
+  link.click();
+  const deadline = Date.now() + 10000;
+  while (Date.now() < deadline) {
+    const title = document.querySelector('.rpm-panel-title');
+    if (title && /Borrelkaart/.test(title.textContent)) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  const title = document.querySelector('.rpm-panel-title');
+  const cards = [...document.querySelectorAll('.rpm-panel .menu-card')];
+  const active = document.querySelector('nav.rpm-tabs a[aria-current="page"]');
+  return {
+    navigationBefore: before,
+    navigationEntries: performance.getEntriesByType('navigation').length,
+    urlBefore,
+    url: location.pathname + location.search,
+    panelTitle: title ? title.textContent.replace(/\\s+/g, ' ').trim() : null,
+    cards: cards.length,
+    firstDish: cards[0] && cards[0].querySelector('.td-name') ? cards[0].querySelector('.td-name').textContent.trim() : null,
+    activeName: active && active.firstChild ? String(active.firstChild.textContent).trim() : null,
+    source: (() => { const el = document.querySelector('.rpm-source'); return el ? el.textContent.replace(/\\s+/g, ' ').trim() : null; })(),
+  };
+})()`;
+
+// ── 2A: de server-HTML zelf, zonder browser ────────────────────────────────
+// De echte productiebuild antwoordt op /restaurant/6. De HTML (inclusief de
+// meegestuurde RSC-payload) mag maar één kaart bevatten: de gekozen. De namen
+// hieronder komen uit dezelfde data als de pagina, zodat er niets verzonnen
+// wordt en de check niet stilletjes veroudert.
+const MENUS = require(path.join(REPO_ROOT, 'data', 'menus.json'));
+const itemNames = (key) => (((MENUS[key] || {}).categories) || []).flatMap((cat) => (cat.items || []).map((item) => item.name));
+const onlyIn = (key, others) => {
+  const otherNames = new Set(others.flatMap((other) => itemNames(other)));
+  return itemNames(key).find((name) => !otherNames.has(name)) || null;
+};
+const LUNCH_ONLY = onlyIn('6-lunch', ['6-diner', '6-borrel', '6-specialiteiten']);
+const BORREL_ONLY = onlyIn('6-borrel', ['6-lunch', '6-diner', '6-specialiteiten']);
+const DINER_ONLY = onlyIn('6-diner', ['6-lunch', '6-borrel', '6-specialiteiten']);
+const LUNCH_COUNT = itemNames('6-lunch').length;
+const BORREL_COUNT = itemNames('6-borrel').length;
+
+const countIn = (haystack, needle) => haystack.split(needle).length - 1;
+
+async function serverHtmlCheck() {
+  const fetchHtml = async (page) => {
+    const response = await fetch(`${APP}${page}`);
+    const html = await response.text();
+    // De RSC-payload (de props voor de client) begint bij self.__next_f; de
+    // zichtbare HTML staat daarvoor. Beide moeten zuinig zijn.
+    const flightAt = html.indexOf('self.__next_f');
+    return {
+      status: response.status,
+      html,
+      markup: flightAt === -1 ? html : html.slice(0, flightAt),
+      markupKb: Math.round(((flightAt === -1 ? html.length : flightAt) / 1024) * 10) / 10,
+      bytes: html.length,
+    };
+  };
+
+  const standard = await fetchHtml('/restaurant/6');
+  // React zet `<!-- -->` tussen tekst en expressies in de SSR-HTML; voor een
+  // leesbare titel als "Lunchkaart · 36 gerechten" halen we die eruit.
+  const markupNoComments = standard.markup.replace(/<!--[\s\S]*?-->/g, '');
+  const activeMatch = /meal-btn active"[^>]*>([^<]*)/.exec(markupNoComments);
+  const activeName = activeMatch ? activeMatch[1].trim() : null;
+  const panelTitle = ((/rpm-panel-title"[^>]*>([\s\S]*?)<\/p>/.exec(markupNoComments) || [])[1] || '')
+    .replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  check('2A server-HTML: /restaurant/6 antwoordt met 200', standard.status === 200, String(standard.status));
+  check('2A server-HTML: de sectie heet "Menukaarten"', standard.markup.includes('>Menukaarten<'), 'heading in the server HTML');
+  check('2A server-HTML: elke kaart is een echte link (?kaart=<id>)',
+    ['6-lunch', '6-diner', '6-borrel', '6-specialiteiten'].every((id) => standard.markup.includes(`/restaurant/6?kaart=${id}`)),
+    JSON.stringify(['6-lunch', '6-diner', '6-borrel', '6-specialiteiten'].filter((id) => !standard.markup.includes(`/restaurant/6?kaart=${id}`))));
+  check('2A server-HTML: de standaardkaart is lunch, de eerste in de vaste volgorde (geen klok)',
+    activeName === 'Lunchkaart' && panelTitle === `Lunchkaart · ${LUNCH_COUNT} gerechten`,
+    JSON.stringify({ activeTab: activeName, panelTitle }));
+  check('2A server-HTML: precies één tabblad is actief', countIn(standard.markup, 'aria-current="page"') === 1, `${countIn(standard.markup, 'aria-current="page"')} aria-current`);
+  check('2A server-HTML: regressie — maar één kaart in de HTML (de lunch)',
+    countIn(standard.markup, 'class="menu-card') === LUNCH_COUNT && standard.html.includes(LUNCH_ONLY),
+    `${countIn(standard.markup, 'class="menu-card')} kaarten (verwacht ${LUNCH_COUNT})`);
+  check('2A server-HTML: regressie — geen gerechten van de andere kaarten, ook niet in de RSC-payload',
+    !standard.html.includes(BORREL_ONLY) && !standard.html.includes(DINER_ONLY),
+    JSON.stringify({ borrelOnly: BORREL_ONLY, borrelFound: standard.html.includes(BORREL_ONLY), dinerOnly: DINER_ONLY, dinerFound: standard.html.includes(DINER_ONLY) }));
+
+  const borrel = await fetchHtml('/restaurant/6?kaart=6-borrel');
+  check('2A server-HTML: ?kaart=6-borrel rendert de borrelkaart zonder JavaScript',
+    borrel.status === 200 && countIn(borrel.markup, 'class="menu-card') === BORREL_COUNT
+      && borrel.markup.includes(BORREL_ONLY) && !borrel.markup.includes(LUNCH_ONLY) && !borrel.markup.includes(DINER_ONLY),
+    JSON.stringify({ cards: countIn(borrel.markup, 'class="menu-card'), expected: BORREL_COUNT, borrelDish: borrel.markup.includes(BORREL_ONLY), lunchDish: borrel.markup.includes(LUNCH_ONLY), dinerDish: borrel.markup.includes(DINER_ONLY) }));
+
+  const unknown = await fetchHtml('/restaurant/6?kaart=6-bestaat-niet');
+  check('2A server-HTML: een onbekende ?kaart= valt terug op de standaardkaart',
+    unknown.status === 200 && countIn(unknown.markup, 'class="menu-card') === LUNCH_COUNT && unknown.markup.includes(LUNCH_ONLY),
+    `${countIn(unknown.markup, 'class="menu-card')} kaarten (verwacht ${LUNCH_COUNT})`);
+
+  const single = await fetchHtml('/restaurant/1');
+  check('2A server-HTML: /restaurant/1 (twee kaarten) toont er ook maar één',
+    single.status === 200 && countIn(single.markup, 'rpm-tab-count') === 2
+      && countIn(single.markup, 'aria-current="page"') === 1
+      && !single.html.includes('Signature Menu'),
+    JSON.stringify({ tabs: countIn(single.markup, 'rpm-tab-count'), current: countIn(single.markup, 'aria-current="page"'), dinerDish: single.html.includes('Signature Menu') }));
+
+  return {
+    standard: { bytes: standard.bytes, markupKb: standard.markupKb },
+    borrel: { bytes: borrel.bytes, markupKb: borrel.markupKb },
+    single: { bytes: single.bytes, markupKb: single.markupKb },
+  };
+}
 
 // ── server, viewport, thema, screenshots ────────────────────────────────────
 async function startProductionServer() {
@@ -330,13 +497,38 @@ async function main() {
       page: '/alle-restaurants',
       ready: 'document.readyState === "complete" && document.querySelector(".ar-card") !== null',
     });
-    const transferVoorDeel2 = await measureTransfer(cdp, meter, {
+
+    // BE-42 deel 2 — dezelfde meting ná 2A: de hele kaart in tabbladen mag de
+    // eerste overdracht niet boven 250 KB brengen. De "voor"-waarde (169,9 KB)
+    // is in deel 1 met dezelfde methode en dezelfde productiebuild gemeten;
+    // dit script kan die niet opnieuw meten, want de code is al gewijzigd.
+    const transferRestaurantNa = await measureTransfer(cdp, meter, {
+      label: 'na 2A (Bardot, 4 kaarten)',
+      page: '/restaurant/6',
+      ready: 'document.readyState === "complete" && document.querySelector(".rpm-panel") !== null',
+    });
+    transfer.unshift({
       label: 'voor 2A (Bardot, 4 kaarten)',
       page: '/restaurant/6',
-      ready: 'document.readyState === "complete" && document.querySelector(".td-price") !== null',
+      source: 'BE-42 deel 1-bewijs (zelfde productiebuild, zelfde meetmethode)',
+      theme: 'dark',
+      viewport: '1280x900',
+      totalKb: TRANSFER_BEFORE_RESTAURANT6_KB,
+      documentKb: null,
+      resourceCount: null,
     });
+
     check('overdracht: /alle-restaurants blijft onder 250 KB', transferNa.totalKb < 250, `${transferNa.totalKb} KB`);
-    check('overdracht: /restaurant/6 (voor deel 2) blijft onder 250 KB', transferVoorDeel2.totalKb < 250, `${transferVoorDeel2.totalKb} KB`);
+    check('2A overdracht: /restaurant/6 blijft ná 2A onder 250 KB', transferRestaurantNa.totalKb < 250, `${transferRestaurantNa.totalKb} KB`);
+    check(
+      '2A overdracht: de eerste overdracht groeit hooguit met één kaart (max. +25 KB op 169,9 KB)',
+      transferRestaurantNa.totalKb <= TRANSFER_BEFORE_RESTAURANT6_KB + 25,
+      `voor ${TRANSFER_BEFORE_RESTAURANT6_KB} KB, na ${transferRestaurantNa.totalKb} KB`
+    );
+
+    // De server-HTML zelf (zonder browser): precies één kaart, nooit alle.
+    const serverHtml = await serverHtmlCheck();
+    pages['server-html'] = serverHtml;
 
     for (const theme of ['light', 'dark']) {
       await applyTheme(cdp, theme);
@@ -415,18 +607,92 @@ async function main() {
       check(`3B ${theme} home: zacht vlak, primaire tekst, vet, ≥ 4,5:1`, !tonight.missing && tonight.usesSoft && tonight.usesPrimary && tonight.ratio >= 4.5 && Number(tonight.fontWeight) >= 700, JSON.stringify({ bg: tonight.bg, fg: tonight.fg, ratio: tonight.ratio, weight: tonight.fontWeight }));
       await setFixedClock(cdp, null);
 
+      // 2A — de hele menukaart in tabbladen, in beide thema's.
+      await setViewport(cdp, 1280, 900);
+      await navigate(cdp, `${APP}/restaurant/6`, 'document.querySelector(".rpm-panel") !== null');
+      const tabs = await evalJs(cdp, TABS_JS);
+      pages[`tabs-${theme}`] = tabs;
+      const expectedCounts = ['6-lunch', '6-diner', '6-borrel', '6-specialiteiten'].map((id) => String(itemNames(id).length)).join(',');
+      check(`2A ${theme}: de sectie heet "Menukaarten" met één tabblad per kaart`,
+        tabs.heading === 'Menukaarten' && tabs.navLabel === 'Menukaarten' && tabs.tabs.length === 4,
+        JSON.stringify({ heading: tabs.heading, nav: tabs.navLabel, tabs: tabs.tabs.map((tab) => tab.name) }));
+      check(`2A ${theme}: de tabbladen staan in de vaste volgorde (lunch, diner, borrel, overige)`,
+        tabs.tabs.map((tab) => tab.name).join(', ') === 'Lunchkaart, Dinerkaart, Borrelkaart, Specialiteiten',
+        JSON.stringify(tabs.tabs.map((tab) => tab.name)));
+      check(`2A ${theme}: elk tabblad toont het echte aantal gerechten`,
+        tabs.tabs.map((tab) => tab.count).join(',') === expectedCounts,
+        `gemeten ${tabs.tabs.map((tab) => tab.count).join(',')} / verwacht ${expectedCounts}`);
+      check(`2A ${theme}: elk tabblad is een echte link naar die kaart (?kaart=<id>)`,
+        tabs.tabs.every((tab) => /^\/restaurant\/6\?kaart=6-[a-z]+$/.test(tab.href || '')),
+        JSON.stringify(tabs.tabs.map((tab) => tab.href)));
+      check(`2A ${theme}: de standaardkaart is de eerste in de vaste volgorde, dus lunch`,
+        tabs.activeTabs === 1 && tabs.activeName === 'Lunchkaart' && /^Lunchkaart · \d+ gerechten$/.test(tabs.panelTitle || ''),
+        JSON.stringify({ active: tabs.activeName, activeTabs: tabs.activeTabs, panel: tabs.panelTitle }));
+      check(`2A ${theme}: onder het tabblad staat de hele kaart van die kaart`,
+        tabs.cards === LUNCH_COUNT && tabs.sections > 1 && tabs.prices.length >= LUNCH_COUNT - 1,
+        JSON.stringify({ cards: tabs.cards, expected: LUNCH_COUNT, sections: tabs.sections, prices: tabs.prices.length }));
+      check(`2A ${theme}: de prijs is ook hier het zachte vlak met primaire tekst`,
+        tabs.prices.length > 0 && tabs.prices.every((price) => price.length > 0),
+        JSON.stringify(tabs.prices.slice(0, 3)));
+      check(`2A ${theme}: de bronregel en de originele kaart blijven staan`,
+        /^Bron: /.test(tabs.source || '') && /^https:\/\//.test(tabs.sourceHref || ''),
+        JSON.stringify({ source: tabs.source, href: tabs.sourceHref }));
+      check(`2A ${theme}: de aparte menupagina /menu/<id> blijft bereikbaar`,
+        tabs.menuPageHref === '/menu/6-lunch', String(tabs.menuPageHref));
+      check(`2A ${theme}: de tabbladen zijn tikvlakken van ≥ 44 px`, tabs.tabs.every((tab) => tab.height >= 44), JSON.stringify(tabs.tabs.map((tab) => tab.height)));
+      check(`2A ${theme}: geen horizontale overflow op 1280 px`, tabs.overflow <= 1, `${tabs.overflow}px`);
+
+      // Wisselen met JavaScript: alleen het paneel verandert, de pagina laadt
+      // niet opnieuw en er komt precies één kaart bij.
+      const switched = await evalJs(cdp, SWITCH_JS);
+      pages[`tabs-switch-${theme}`] = switched;
+      check(`2A ${theme}: wisselen met JavaScript zonder volledige herlaadbeurt`,
+        !switched.missing && switched.navigationEntries === 1 && switched.navigationEntries === switched.navigationBefore && /kaart=6-borrel$/.test(switched.url || ''),
+        JSON.stringify({ before: switched.navigationBefore, after: switched.navigationEntries, url: switched.url }));
+      check(`2A ${theme}: na het wisselen staat alleen de borrelkaart in het paneel`,
+        switched.cards === BORREL_COUNT && switched.activeName === 'Borrelkaart' && /^Borrelkaart · \d+ gerechten$/.test(switched.panelTitle || ''),
+        JSON.stringify({ cards: switched.cards, expected: BORREL_COUNT, active: switched.activeName, panel: switched.panelTitle }));
+      check(`2A ${theme}: de bronregel volgt de gekozen kaart`, /^Bron: /.test(switched.source || ''), JSON.stringify(switched.source));
+
+      // Telefoonbreedtes: de tabbladen blijven ≥ 44 px en niets loopt buiten beeld.
+      for (const width of [390, 320]) {
+        await setViewport(cdp, width, 800);
+        await navigate(cdp, `${APP}/restaurant/6`, 'document.querySelector(".rpm-panel") !== null');
+        const phoneTabs = await evalJs(cdp, TABS_JS);
+        pages[`tabs-${theme}-${width}`] = phoneTabs;
+        check(`2A ${theme} ${width}px: tabbladen ≥ 44 px en geen horizontale overflow`,
+          phoneTabs.tabs.every((tab) => tab.height >= 44) && phoneTabs.overflow <= 1,
+          JSON.stringify({ heights: phoneTabs.tabs.map((tab) => tab.height), overflow: phoneTabs.overflow }));
+      }
+      await setViewport(cdp, 1280, 900);
+
       // Screenshots: /alle-restaurants en /restaurant/6 op 1280, 390 en 320 px.
-      for (const [name, url, ready] of [
-        ['alle-restaurants', `${APP}/alle-restaurants`, 'document.querySelector(".ar-card") !== null'],
-        ['restaurant-6', `${APP}/restaurant/6`, 'document.querySelector(".td-price") !== null'],
+      // Op 1280 staat de hele pagina in beeld. Op de telefoon schuift de
+      // opname naar de tabbladen, zodat de sectie "Menukaarten" en de kaart
+      // eronder echt in het bewijs staan; de zwevende menubalk blijft dan op
+      // zijn eigen plek (geen beyond-viewport-opname).
+      for (const [name, url, ready, toMenu] of [
+        ['alle-restaurants', `${APP}/alle-restaurants`, 'document.querySelector(".ar-card") !== null', false],
+        ['restaurant-6', `${APP}/restaurant/6`, 'document.querySelector(".td-price") !== null', true],
+        // 2A — Bardot met een gewisseld tabblad (de borrelkaart, de grootste).
+        ['restaurant-6-borrel', `${APP}/restaurant/6?kaart=6-borrel`, 'document.querySelector(".rpm-panel") !== null', true],
         // De lokale data heeft geen restaurant met precies één kaart; met twee
         // kaarten is /restaurant/1 (Wolfslaar) het kleinste echte geval.
-        ['restaurant-1', `${APP}/restaurant/1`, 'document.querySelector(".td-price") !== null'],
+        ['restaurant-1', `${APP}/restaurant/1`, 'document.querySelector(".td-price") !== null', true],
       ]) {
         for (const [width, height] of [[1280, 900], [390, 844], [320, 720]]) {
           await setViewport(cdp, width, height);
           await navigate(cdp, url, ready);
           await new Promise((resolve) => setTimeout(resolve, 250));
+          if (toMenu && width < 720) {
+            await evalJs(cdp, `(() => {
+              const el = document.querySelector('.rpm-tabs');
+              if (!el) return false;
+              window.scrollTo(0, Math.max(0, Math.round(el.getBoundingClientRect().top + window.scrollY) - 16));
+              return true;
+            })()`);
+            await new Promise((resolve) => setTimeout(resolve, 250));
+          }
           await shot(cdp, `${name}-${theme}-${width}.png`);
         }
       }
@@ -436,7 +702,7 @@ async function main() {
     const failed = checks.filter((entry) => entry.passed === false);
     const record = {
       generatedAt: new Date().toISOString(),
-      ticket: '#98 BE-42 deel 1 (1A + 3B)',
+      ticket: '#98 BE-42 deel 1 (1A + 3B) en deel 2 (2A)',
       kind: 'developer evidence — local production build, no production data or credentials',
       app: APP,
       checks: { total: checks.length, failed: failed.length, entries: checks },
@@ -445,6 +711,7 @@ async function main() {
       screenshots: shots,
       gaps: [
         'Geen restaurant met precies één menukaart in de lokale data; /restaurant/1 (Wolfslaar, twee kaarten) is het kleinste echte geval (geen data toegevoegd).',
+        'De "voor"-meting van /restaurant/6 (169,9 KB) komt uit het deel 1-bewijs: dit script draait altijd op de huidige code en kan de oude toestand niet opnieuw meten.',
         'Dit is developer-evidence op een lokale productiebuild: geen productie, geen echte Supabase-credentials, geen merge of publicatie.',
       ],
       result: failed.length === 0 ? 'passed' : 'failed',

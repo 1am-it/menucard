@@ -8,7 +8,10 @@
 //   1. home, "Vanavond/Straks op de kaart"  → app/HomeView.js, .tonight-price
 //   2. zoekresultaten                       → app/search/page.js, .price-label
 //   3. menupagina /menu/<id>                → src/components/MenuBody.js, .td-price
-//   4. restaurantpagina /restaurant/<id>    → app/restaurant/[id]/RestaurantDetailView.js, .td-price
+//   4. restaurantpagina /restaurant/<id>    → src/components/MenuBody.js, .td-price
+//      (sinds BE-42 2A rendert de restaurantpagina de hele kaart via dezelfde
+//      MenuBody-opbouw, dus met exact dezelfde .td-price; de eigen, tweede
+//      prijsmarkup van de oude preview bestaat niet meer)
 //
 // Zelfde conventie als src/lib/publicStyle.test.js: fs.readFileSync + regex,
 // geen gerenderde DOM-harness.
@@ -100,7 +103,9 @@ test('3B: de vier prijsplekken bestaan nog en gebruiken deze klassen', () => {
     ['app/HomeView.js', /<span className="tonight-price">\{dish\.priceDisplay\}<\/span>/],
     ['app/search/page.js', /<span className="price-label">\{example\.priceDisplay\}<\/span>/],
     ['src/components/MenuBody.js', /className=\{`td-price \$\{!item\.price \? 'no-price' : ''\}`\}/],
-    ['app/restaurant/[id]/RestaurantDetailView.js', /<div className="td-price">\{item\.price\}<\/div>/],
+    // BE-42 2A: de restaurantpagina gebruikt dezelfde hele-kaart-opbouw, dus
+    // dezelfde .td-price en hetzelfde zachte vlak — geen eigen prijsmarkup.
+    ['app/restaurant/[id]/RestaurantDetailView.js', /<StaticMenu[\s\S]*?categories=\{menus\.activeMenu\.categories\}/],
   ];
   for (const [file, pattern] of places) {
     assert.match(read(file), pattern, `${file} must still render the price with its own class`);

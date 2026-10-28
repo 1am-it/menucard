@@ -68,6 +68,44 @@ test('BE-42: de publieke stijlcheck eist de oude hele-kaart-link niet meer', () 
   assert.match(source, /a\.ar-menu-button/, 'the menu buttons are measured instead');
 });
 
+// ─── BE-42 deel 2 (#98) — de hele menukaart in tabbladen (2A) ────────────────
+
+test('BE-42 2A: de check meet de tabbladen, de standaardkaart en het wisselen', () => {
+  const source = read(BE42_CHECK);
+  assert.match(source, /nav\.rpm-tabs a/, 'the tabs are measured as real links');
+  assert.match(source, /aria-current/, 'the active tab is measured');
+  assert.match(source, /meal-btn active/, 'the server HTML names the default tab');
+  assert.match(source, /Lunchkaart · \$\{LUNCH_COUNT\} gerechten/, 'the default tab is the first in the fixed order (lunch)');
+  assert.match(source, /rpm-tab-count/, 'the dish count per tab is measured');
+  assert.match(source, /performance\.getEntriesByType\('navigation'\)/, 'switching must not reload the whole page');
+  assert.match(source, /rpm-source/, 'the source line per menu is measured');
+  assert.match(source, /\/menu\/6-lunch|menuPageHref/, 'the separate menu page stays reachable');
+});
+
+test('BE-42 2A: de check bewijst op de server-HTML dat er maar één kaart in zit', () => {
+  const source = read(BE42_CHECK);
+  assert.match(source, /async function serverHtmlCheck/, 'the server response itself is inspected');
+  assert.match(source, /self\.__next_f/, 'both the markup and the RSC payload are inspected');
+  assert.match(source, /maar één kaart in de HTML/, 'one menu only is asserted');
+  assert.match(source, /ook niet in de RSC-payload/, 'no dishes of the other menus travel along');
+  assert.match(source, /onbekende \?kaart=/, 'an unknown ?kaart= falls back to the default menu');
+  assert.match(source, /zonder JavaScript/, 'the no-JavaScript path is asserted too');
+});
+
+test('BE-42 2A: de overdracht vóór en na staat in hetzelfde bewijs', () => {
+  const source = read(BE42_CHECK);
+  assert.match(source, /TRANSFER_BEFORE_RESTAURANT6_KB = 169\.9/, 'the part 1 measurement is pinned');
+  assert.match(source, /na 2A \(Bardot, 4 kaarten\)/, 'the after-measurement is taken on the same page');
+  assert.match(source, /groei[t]* hooguit met één kaart/, 'the growth bound is asserted');
+  assert.match(source, /< 250/, 'the 250 KB bound is still asserted');
+});
+
+test('BE-42 2A: de screenshots dekken het gewisselde tabblad', () => {
+  const source = read(BE42_CHECK);
+  assert.match(source, /restaurant-6-borrel/, 'Bardot is captured with the borrel tab active');
+  assert.match(source, /\/restaurant\/6\?kaart=6-borrel/, 'the switched tab is the real URL');
+});
+
 test('BE-42: de browser-README beschrijft de check en de gap', () => {
   const readme = read('ops/browser/README.md');
   assert.match(readme, /BE-42 part 1/, 'the README has a BE-42 section');

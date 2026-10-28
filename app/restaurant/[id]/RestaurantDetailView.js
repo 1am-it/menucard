@@ -11,6 +11,10 @@ import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
+// BE-42 (#98) 2A — de hele kaart van het actieve tabblad is exact dezelfde
+// opbouw als op /menu/<id> (src/components/MenuBody.js). Geen tweede
+// weergave van gerechten.
+import { StaticMenu } from '@/src/components/MenuBody'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -24,7 +28,7 @@ function getTodayKey() {
   return map[new Date().getDay()]
 }
 
-export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
+export default function RestaurantDetailView({ id, restaurant, menus }) {
   const todayKey = getTodayKey()
   const [activeDay, setActiveDay] = useState(todayKey)
   // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
@@ -199,50 +203,65 @@ export default function RestaurantDetailView({ id, restaurant, menuPreview }) {
         </div>
       </div>
 
-      {/* ── Menu preview ── */}
+      {/* ── Menukaarten (BE-42 2A) ── */}
       <main className="page-main page-with-tabbar">
-        {menuPreview ? (
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>
-                Menukaart preview — {menuPreview.menu.subtitle}
-              </h2>
-              <Link href={`/menu/${menuPreview.key}`} className="detail-menu-btn-outline">
+        {menus ? (
+          <section aria-labelledby="menukaarten-title">
+            <div className="rpm-head">
+              <h2 className="rpm-title" id="menukaarten-title">Menukaarten</h2>
+              <Link href={`/menu/${menus.activeMenu.id}`} className="detail-menu-btn-outline">
                 Bekijk menu →
               </Link>
             </div>
 
-            {menuPreview.menu.notes && (
-              <div className="rp-note" style={{ marginBottom: 20 }}>
-                {menuPreview.menu.notes}
-              </div>
-            )}
-
-            <div className="menu-grid">
-              {menuPreview.items.map((item, i) => (
-                <div key={i} className="menu-card">
-                  <div className="card-top">
-                    <div className="td-name">{item.name}</div>
-                    {item.price && (
-                      <div className="td-price">{item.price}</div>
-                    )}
-                  </div>
-                  {item.desc && <div className="td-desc">{item.desc}</div>}
-                  {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 6 }}>{item.category}</div>
-                </div>
+            {/* Echte links: de server rendert `?kaart=<id>` al, dus zonder
+                JavaScript werkt hetzelfde. Met JavaScript wisselt Next.js
+                alleen dit deel van de pagina (geen volledige herlaadbeurt) en
+                laadt het precies één kaart. Geen prefetch: de andere kaarten
+                blijven ongeladen. */}
+            <nav className="meal-switch rpm-tabs" aria-label="Menukaarten">
+              {menus.tabs.map(tab => (
+                <Link
+                  key={tab.id}
+                  href={tab.href}
+                  prefetch={false}
+                  scroll={false}
+                  className={`meal-btn ${tab.active ? 'active' : ''}`}
+                  aria-current={tab.active ? 'page' : undefined}
+                >
+                  {tab.label}
+                  <span className="rpm-tab-count" aria-hidden="true">{tab.dishCount}</span>
+                  <span className="visually-hidden">, {tab.dishCount} gerechten</span>
+                </Link>
               ))}
-            </div>
+            </nav>
 
-            {menuLinks.length > 0 && (
-              <div style={{ marginTop: 24, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {menuLinks.map(link => (
-                  <Link key={link.id} href={`/menu/${link.id}`} className="detail-menu-btn">
-                    <EmojiText value={link.label} />
-                  </Link>
-                ))}
-              </div>
-            )}
+            <div className="rpm-panel">
+              <p className="rpm-panel-title">
+                {menus.activeMenu.label} · {menus.activeMenu.dishCount} gerechten
+              </p>
+
+              {menus.activeMenu.notes && (
+                <div className="rp-note" style={{ marginBottom: 20 }}>
+                  {menus.activeMenu.notes}
+                </div>
+              )}
+
+              <StaticMenu
+                categories={menus.activeMenu.categories}
+                idPrefix={`rpm-${menus.activeMenu.id}`}
+                sourceDate={menus.activeMenu.scraped}
+              />
+
+              {menus.activeMenu.source && (
+                <div className="rp-source rpm-source">
+                  Bron: <a href={menus.activeMenu.source} target="_blank" rel="noopener noreferrer">
+                    {menus.activeMenu.source.replace('https://', '').replace('http://', '')}
+                  </a>
+                  {menus.activeMenu.scraped ? ` · ${menus.activeMenu.scraped}` : ''}
+                </div>
+              )}
+            </div>
           </section>
         ) : (
           <section style={{ textAlign: 'center', padding: '60px 0' }}>

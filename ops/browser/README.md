@@ -20,12 +20,35 @@ Supabase credentials) through CDP and records 1A and 3B of BE-42:
 - screenshots of `/alle-restaurants`, `/restaurant/6` and `/restaurant/1` at
   1280, 390 and 320 px in light and dark.
 
-`--out <dir>` decides where the 18 screenshots and
-`be42-browser-evidence.json` land; by default that is outside the repository
-(`../be42-evidence`). No restaurant in the local data has exactly one menu card,
-so `/restaurant/1` (Wolfslaar, two cards) is the smallest real case; no data was
-added for it. Developer evidence on a local machine — not production, not
-independent acceptance.
+`--out <dir>` decides where the screenshots and `be42-browser-evidence.json`
+land; by default that is outside the repository (`../be42-evidence`). No
+restaurant in the local data has exactly one menu card, so `/restaurant/1`
+(Wolfslaar, two cards) is the smallest real case; no data was added for it.
+Developer evidence on a local machine — not production, not independent
+acceptance.
+
+## BE-42 part 2: the whole menu in tabs (#98)
+
+The same script also records 2A:
+
+- `/restaurant/6`: the section "Menukaarten" with one tab per menu card and the
+  real dish count, in the fixed order lunch → diner → borrel → overige;
+- the default tab is the first card in that order (lunch), never the clock, so
+  the server HTML is the same at any time of day;
+- every tab is a real link (`/restaurant/6?kaart=<id>`) that the server
+  renders, so the tabs work without JavaScript; clicking one switches only the
+  panel (one navigation entry in the performance timeline, no full reload);
+- the source line and the link to the original menu stay, and `/menu/<id>` is
+  still reachable;
+- the raw server response (markup *and* the RSC payload) is fetched outside the
+  browser: exactly one menu card is in it, an unknown `?kaart=` falls back to
+  the default, and `/restaurant/1` shows one card out of two;
+- the cold first transfer of `/restaurant/6` stays under 250 KB; the "before"
+  value (169.9 KB) comes from the part 1 evidence, because this script always
+  runs on the current code;
+- screenshots of `/restaurant/6`, `/restaurant/6?kaart=6-borrel` (a switched
+  tab) and `/restaurant/1` at 1280, 390 and 320 px in light and dark.
+
 
 ## BE-34 one-click AI reading and name search (#81)
 

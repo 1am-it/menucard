@@ -4915,3 +4915,43 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 .now-open-btn,
 .chip { transition-property: background-color, border-color, color; }
 
+
+/* ── BE-42 (#98) 2A: de hele menukaart in tabbladen ────────────────────────
+   De tabbladen hergebruiken de bestaande menukaart-chips (.meal-switch /
+   .meal-btn, inclusief het 44 px-tikvlak en de zichtbare focusring) en krijgen
+   alleen hun eigen kop, telling en paneel. Alles met de bestaande tokens; geen
+   nieuwe kleur, geen nieuwe maat. */
+.rpm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.rpm-title { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+.rpm-tabs { margin-bottom: 20px; }
+
+/* De telling hoort bij de kaartnaam maar is geen tweede knop: hetzelfde
+   tekstblok, iets lichter, en de knop houdt zijn 44 px-tikvlak. */
+.rpm-tab-count {
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.rpm-panel-title {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* De bronregel van de gekozen kaart staat onder de kaart zelf; dezelfde
+   bestaande .rp-source-stijl, alleen met ruimte erboven. */
+.rpm-source { margin-top: 18px; }
+
