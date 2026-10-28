@@ -390,14 +390,31 @@ async function imageOnlyScenario(cdp) {
   const clicked = await clickLink(cdp, 'Bronnen beoordelen');
   const arrived = await waitForPath(cdp, '/internal/bronnen', 'Bronnen beoordelen', 30000);
   steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
-  const bannerReady = await waitFor(cdp, `Boolean(document.querySelector('.di-banner-neutral[role="note"]'))`, 20000);
-  // The screen shows the follow-up in its batch banner while no task is chosen
-  // yet, and moves the same words into the chosen task's own follow-up block
-  // once a task is selected. Both are the product's own copy. The check waits
-  // for whichever state the page settles in instead of reading the banner
-  // halfway through that hand-over — that race made this check flaky.
-  const followUpReady = bannerReady || (await waitFor(cdp, `Boolean(document.querySelector('.stg-followup'))`, 20000));
-  steps.push({ action: 'batch follow-up shown (banner or task block)', reached: Boolean(followUpReady) });
+  // The screen shows the follow-up in the chosen task's own follow-up block
+  // while that task is selected, and in the page banner once nothing is
+  // selected. Both are the product's own copy, and between the two states there
+  // is a short window in which neither element exists (the page even shows
+  // "Laden…" and then "Niets te doen" for a moment). Two separate reads could
+  // therefore both come back empty — that is the race this check kept hitting —
+  // so the copy is polled and captured in one page evaluation instead.
+  const followUpText = await evalJs(cdp, `(async () => {
+    const read = () => {
+      const banner = document.querySelector('.di-banner-neutral[role="note"]');
+      const detail = document.querySelector('.stg-followup');
+      return [banner, detail].filter(Boolean).map((el) => el.innerText || '').join('\\n').trim();
+    };
+    const reason = ${JSON.stringify(FOLLOW_UP.reason)};
+    const nextStep = ${JSON.stringify(FOLLOW_UP.nextStep)};
+    const deadline = Date.now() + 20000;
+    let text = read();
+    while (!(text.includes(reason) && text.includes(nextStep)) && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      text = read();
+    }
+    return text;
+  })()`);
+  const followUpReady = followUpText.includes(FOLLOW_UP.reason) && followUpText.includes(FOLLOW_UP.nextStep);
+  steps.push({ action: 'batch follow-up shown (banner or task block)', reached: followUpReady, detail: followUpText.slice(0, 120) });
   const triage = await evalJs(cdp, `(() => ({
     pathname: location.pathname,
     search: location.search,
@@ -405,12 +422,6 @@ async function imageOnlyScenario(cdp) {
     banner: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   }))()`);
-  // The same follow-up, read from the task block when a task is already chosen.
-  const followUpDetail = await evalJs(cdp, `(() => {
-    const el = document.querySelector('.stg-followup');
-    return el ? el.innerText : '';
-  })()`);
-  const followUpText = triage.banner || followUpDetail;
   check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/bronnen');
   check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
   check(
