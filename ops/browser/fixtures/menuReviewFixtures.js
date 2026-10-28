@@ -699,7 +699,7 @@ function blockedReason(info) {
   };
 }
 
-function conceptDetail({ id, key, name, captured, info, product, status, githubConfigured = false, publication = null, exportInfo = null }) {
+function conceptDetail({ id, key, name, captured, info, product, status, githubConfigured = false, publication = null, exportInfo = null, sourceUrl = SOURCE_URL, source = { confirmed: true, blocked: null } }) {
   const blocked = Boolean(info && info.kind !== 'v1');
   const createdAt = CONCEPT_CREATED[key];
   return {
@@ -712,7 +712,7 @@ function conceptDetail({ id, key, name, captured, info, product, status, githubC
       restaurantId: '9002',
       restaurantName: name,
       menuContext: 'lunch',
-      sourceUrl: SOURCE_URL,
+      sourceUrl,
       createdAt,
       createdBySelf: true,
       originRecorded: true,
@@ -726,7 +726,7 @@ function conceptDetail({ id, key, name, captured, info, product, status, githubC
     product: blocked && product ? product : null,
     liveLines: [],
     originLines: blocked ? {} : v1OriginLines,
-    source: { confirmed: true, blocked: null },
+    source,
     history: [{ id, version: 1, createdAt, createdBySelf: true, basedOnVersion: null, status, reviews: [] }],
     rejectReasons: { wrong_menu: 'Verkeerde menukaart', broken_source: 'Bron onbruikbaar', other: 'Anders' },
     export: exportInfo,
@@ -821,6 +821,16 @@ const PUBLICATION_IDS = {
   merged: 'publicatie-gemerged-0103',
   failed: 'publicatie-mislukt-0104',
   waiting: 'publicatie-wacht-0105',
+  // BE-41: the remaining rows of the next-step table, so every button the
+  // contract names can really be seen and clicked.
+  blockers: 'publicatie-blokkades-0106',
+  noGithub: 'publicatie-github-0107',
+  closed: 'publicatie-gesloten-0108',
+  rejected: 'publicatie-afgewezen-0109',
+  // BE-41 criterion 4: a source that may not be opened, and two that may.
+  unsafeSource: 'publicatie-bron-gevaarlijk-0110',
+  emptySource: 'publicatie-bron-leeg-0111',
+  pdfSource: 'publicatie-bron-pdf-0112',
 };
 const PUBLICATION_RESTAURANTS = {
   ready: 'Fictief Klaar',
@@ -828,6 +838,13 @@ const PUBLICATION_RESTAURANTS = {
   merged: 'Fictief Gemerged',
   failed: 'Fictief Mislukt',
   waiting: 'Fictief Wacht',
+  blockers: 'Fictief Blokkades',
+  noGithub: 'Fictief Zonder GitHub',
+  closed: 'Fictief Gesloten',
+  rejected: 'Fictief Afgewezen',
+  unsafeSource: 'Fictief Rare Bron',
+  emptySource: 'Fictief Lege Bron',
+  pdfSource: 'Fictief Pdf Bron',
 };
 
 const publicationInput = {
@@ -841,7 +858,9 @@ const publicationInput = {
 };
 const publishable = (overrides = {}) => derivePublicationReadiness({ ...publicationInput, ...overrides });
 
-function publicationRow({ id, name, createdAt, publication }) {
+const PR_URL = 'https://github.invalid/fictief/menucard/pull/91';
+
+function publicationRow({ id, name, createdAt, publication, status = 'approved', blockerCount = 0, exportPrUrl = null }) {
   return {
     id,
     restaurantId: '9002',
@@ -851,14 +870,15 @@ function publicationRow({ id, name, createdAt, publication }) {
     sourceUrl: SOURCE_URL,
     createdAt,
     createdBySelf: true,
-    status: publication ? 'approved' : 'waiting',
+    status,
     dishCount: 3,
     attentionCount: 1,
-    blockerCount: 0,
+    blockerCount,
     readOnly: false,
     schemaVersion: null,
     blockedReason: null,
     publication,
+    exportPrUrl,
   };
 }
 
@@ -866,9 +886,13 @@ const publicationList = {
   items: [
     publicationRow({ id: PUBLICATION_IDS.ready, name: PUBLICATION_RESTAURANTS.ready, createdAt: '2026-10-28T09:00:00.000Z', publication: publishable() }),
     publicationRow({ id: PUBLICATION_IDS.missingSource, name: PUBLICATION_RESTAURANTS.missingSource, createdAt: '2026-10-28T09:05:00.000Z', publication: publishable({ source: { confirmed: false, blocked: null } }) }),
-    publicationRow({ id: PUBLICATION_IDS.merged, name: PUBLICATION_RESTAURANTS.merged, createdAt: '2026-10-28T09:10:00.000Z', publication: publishable({ exportStatus: 'merged' }) }),
+    publicationRow({ id: PUBLICATION_IDS.merged, name: PUBLICATION_RESTAURANTS.merged, createdAt: '2026-10-28T09:10:00.000Z', publication: publishable({ exportStatus: 'merged' }), exportPrUrl: PR_URL }),
     publicationRow({ id: PUBLICATION_IDS.failed, name: PUBLICATION_RESTAURANTS.failed, createdAt: '2026-10-28T09:15:00.000Z', publication: publishable({ exportStatus: 'failed' }) }),
-    publicationRow({ id: PUBLICATION_IDS.waiting, name: PUBLICATION_RESTAURANTS.waiting, createdAt: '2026-10-28T09:20:00.000Z', publication: null }),
+    publicationRow({ id: PUBLICATION_IDS.waiting, name: PUBLICATION_RESTAURANTS.waiting, createdAt: '2026-10-28T09:20:00.000Z', publication: null, status: 'waiting' }),
+    publicationRow({ id: PUBLICATION_IDS.blockers, name: PUBLICATION_RESTAURANTS.blockers, createdAt: '2026-10-28T09:25:00.000Z', publication: publishable({ blockerCount: 2 }), blockerCount: 2 }),
+    publicationRow({ id: PUBLICATION_IDS.noGithub, name: PUBLICATION_RESTAURANTS.noGithub, createdAt: '2026-10-28T09:30:00.000Z', publication: publishable({ githubConfigured: false }) }),
+    publicationRow({ id: PUBLICATION_IDS.closed, name: PUBLICATION_RESTAURANTS.closed, createdAt: '2026-10-28T09:35:00.000Z', publication: publishable({ exportStatus: 'closed' }) }),
+    publicationRow({ id: PUBLICATION_IDS.rejected, name: PUBLICATION_RESTAURANTS.rejected, createdAt: '2026-10-28T09:40:00.000Z', publication: null, status: 'rejected' }),
   ],
 };
 
@@ -908,6 +932,116 @@ const publicationDetails = {
     githubConfigured: true,
     publication: publishable({ exportStatus: 'merged' }),
     exportInfo: mergedExport,
+  }),
+  // BE-41: the cards whose next step opens a specific tab or block. Their
+  // detail exists so a real click from the list lands on the real screen.
+  [PUBLICATION_IDS.blockers]: conceptDetail({
+    id: PUBLICATION_IDS.blockers,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.blockers,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    publication: publishable({ blockerCount: 2 }),
+  }),
+  [PUBLICATION_IDS.failed]: conceptDetail({
+    id: PUBLICATION_IDS.failed,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.failed,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    publication: publishable({ exportStatus: 'failed' }),
+    exportInfo: { ...mergedExport, id: 92, status: 'failed', prUrl: null, prNumber: null },
+  }),
+  [PUBLICATION_IDS.closed]: conceptDetail({
+    id: PUBLICATION_IDS.closed,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.closed,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    publication: publishable({ exportStatus: 'closed' }),
+    exportInfo: { ...mergedExport, id: 93, status: 'closed', prNumber: 93, prUrl: 'https://github.invalid/fictief/pull/93' },
+  }),
+  [PUBLICATION_IDS.rejected]: conceptDetail({
+    id: PUBLICATION_IDS.rejected,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.rejected,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'rejected',
+  }),
+  [PUBLICATION_IDS.waiting]: conceptDetail({
+    id: PUBLICATION_IDS.waiting,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.waiting,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+  }),
+  [PUBLICATION_IDS.noGithub]: conceptDetail({
+    id: PUBLICATION_IDS.noGithub,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.noGithub,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: false,
+    publication: publishable({ githubConfigured: false }),
+  }),
+  [PUBLICATION_IDS.missingSource]: conceptDetail({
+    id: PUBLICATION_IDS.missingSource,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.missingSource,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    source: { confirmed: false, blocked: null },
+    publication: publishable({ source: { confirmed: false, blocked: null } }),
+  }),
+  // BE-41 criterion 4: what the "Originele menukaart openen" rule must refuse,
+  // and the two shapes it must name correctly.
+  [PUBLICATION_IDS.unsafeSource]: conceptDetail({
+    id: PUBLICATION_IDS.unsafeSource,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.unsafeSource,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+    sourceUrl: 'javascript:alert(1)',
+  }),
+  [PUBLICATION_IDS.emptySource]: conceptDetail({
+    id: PUBLICATION_IDS.emptySource,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.emptySource,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+    sourceUrl: '',
+  }),
+  [PUBLICATION_IDS.pdfSource]: conceptDetail({
+    id: PUBLICATION_IDS.pdfSource,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.pdfSource,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+    sourceUrl: 'https://fictief-brasserie.invalid/menu/menukaart.pdf',
   }),
 };
 
@@ -955,6 +1089,7 @@ module.exports = {
   PUBLICATION_RESTAURANTS,
   publicationList,
   publicationDetails,
+  PR_URL,
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),

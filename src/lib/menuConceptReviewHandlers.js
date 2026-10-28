@@ -337,6 +337,10 @@ function createMenuConceptReviewHandlers({ authenticate, getSupabase, restaurant
             ? (productBlocked ? summary.product.reason : 'receipt_product_v2_authoritative')
             : null,
           publication,
+          // BE-41: the stored review-PR link, so a card with an open or merged
+          // export can offer "PR bekijken ↗". Read from the export row that was
+          // already fetched above: no extra query and no GitHub call.
+          exportPrUrl: exportRow && exportRow.pr_url ? exportRow.pr_url : null,
         };
       })
       .sort((a, b) => order[a.status] - order[b.status] || String(b.createdAt).localeCompare(String(a.createdAt)));

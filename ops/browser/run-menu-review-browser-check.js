@@ -14,6 +14,11 @@ const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 
 const fixtures = require('./fixtures/menuReviewFixtures');
+// BE-41: the browser check compares the rendered cards with the product's own
+// rule instead of a second copy of the table, and with the URL rule behind
+// "Originele menukaart openen".
+const { deriveNextStep } = require('../../src/lib/menuConceptPublication');
+const { menuSourceLink } = require('../../src/lib/menuConceptUrls');
 const { fixtureBootstrap } = require('./lib/fixture-page');
 const { createNetworkGuard, enableFetchGuard, defaultAppOrigins } = require('./lib/network-policy');
 const {
@@ -1082,14 +1087,71 @@ const publicationThemes = {};
 async function conceptPublicationScenario(cdp) {
   const names = fixtures.PUBLICATION_RESTAURANTS;
   const ids = fixtures.PUBLICATION_IDS;
-  for (const [width, theme] of [[1280, 'light'], [1280, 'dark'], [390, 'light'], [390, 'dark']]) {
+  // BE-41: the expected card comes from the product's own rule and the same
+  // fixture data the screen receives — never from a second copy of the table.
+  const expected = fixtures.publicationList.items.map((item) => ({
+    item,
+    step: deriveNextStep({ status: item.status, publication: item.publication, blockerCount: item.blockerCount, prUrl: item.exportPrUrl }),
+  }));
+  /** The destination of the contract's "Gaat naar" column. */
+  const destinationFor = (step, id) => {
+    if (step.id === 'pr') return step.externalUrl;
+    if (step.target === 'changes') return `/internal/menu-concepts/${id}?tab=changes`;
+    if (step.target === 'source') return `/internal/menu-concepts/${id}?tab=source`;
+    if (step.target === 'publication') return `/internal/menu-concepts/${id}#mcr-publication`;
+    return `/internal/menu-concepts/${id}`;
+  };
+  /** The visible label of one card, from the rule (never restated here). */
+  const labelOf = (name) => (expected.find((entry) => entry.item.restaurantName === name) || { step: null }).step.label;
+  for (const [width, theme] of [[1280, 'light'], [1280, 'dark'], [390, 'light'], [390, 'dark'], [320, 'light'], [320, 'dark']]) {
     await setViewport(cdp, width, 900);
     await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme }), `document.body.innerText.includes(${JSON.stringify(names.ready)})`);
     const snapshot = await evalJs(cdp, `(() => {
-      const items = [...document.querySelectorAll('.mcr-item')].map((item) => ({
-        text: item.innerText,
-        badges: [...item.querySelectorAll('.status-badge')].map((badge) => (badge.innerText || '').trim()),
-      }));
+      const parseColor = (value) => {
+        const m = /rgba?\\(([^)]+)\\)/.exec(value || '');
+        if (!m) return null;
+        const p = m[1].split(',').map((x) => parseFloat(x.trim()));
+        return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+      };
+      const over = (fg, bg) => ({ r: fg.r * fg.a + bg.r * (1 - fg.a), g: fg.g * fg.a + bg.g * (1 - fg.a), b: fg.b * fg.a + bg.b * (1 - fg.a), a: 1 });
+      const channel = (v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4); };
+      const luminance = (c) => 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
+      const ratio = (a, b) => { const la = luminance(a); const lb = luminance(b); const hi = Math.max(la, lb); const lo = Math.min(la, lb); return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100; };
+      const items = [...document.querySelectorAll('.mcr-item')].map((item) => {
+        const rect = item.getBoundingClientRect();
+        const next = item.querySelector('.mcr-next');
+        const cardLink = item.querySelector('.mcr-item-link');
+        const nextRect = next ? next.getBoundingClientRect() : null;
+        const hitTarget = document.elementFromPoint(rect.left + 8, rect.top + 8);
+        const cardBackground = parseColor(getComputedStyle(item).backgroundColor);
+        const badges = [...item.querySelectorAll('.status-badge')].map((badge) => {
+          const style = getComputedStyle(badge);
+          const text = parseColor(style.color);
+          const background = parseColor(style.backgroundColor);
+          return {
+            text: (badge.innerText || '').trim(),
+            role: [...badge.classList].filter((name) => name.indexOf('status-badge--') === 0)[0] || null,
+            contrast: text && background ? ratio(text, over(background, cardBackground)) : null,
+          };
+        });
+        return {
+          text: item.innerText,
+          badges,
+          linkCount: item.querySelectorAll('a').length,
+          cardHref: cardLink ? cardLink.getAttribute('href') : null,
+          cardWidth: Math.round(rect.width),
+          wholeCardHitsLink: Boolean(cardLink) && Boolean(hitTarget) && (hitTarget === cardLink || cardLink.contains(hitTarget) || (hitTarget.closest && hitTarget.closest('.mcr-item-link') === cardLink)),
+          next: next ? {
+            tag: next.tagName,
+            text: (next.innerText || '').trim(),
+            href: next.getAttribute('href'),
+            target: next.getAttribute('target'),
+            rel: next.getAttribute('rel'),
+            width: nextRect ? Math.round(nextRect.width) : 0,
+            height: nextRect ? Math.round(nextRect.height) : 0,
+          } : null,
+        };
+      });
       return {
         items,
         readyCount: (document.querySelector('.mcr-ready-count') || {}).innerText || '',
@@ -1099,7 +1161,8 @@ async function conceptPublicationScenario(cdp) {
       };
     })()`);
     publicationThemes[theme] = snapshot.bg;
-    const card = (name) => snapshot.items.find((item) => item.text.includes(name)) || { badges: [], text: '' };
+    const card = (name) => snapshot.items.find((item) => item.text.includes(name)) || { badges: [], text: '', next: null, linkCount: 0 };
+    const badgeText = (badges, index) => (badges[index] ? badges[index].text : null);
     const ready = card(names.ready);
     const missing = card(names.missingSource);
     const merged = card(names.merged);
@@ -1107,29 +1170,106 @@ async function conceptPublicationScenario(cdp) {
     const waiting = card(names.waiting);
     check(
       `be39 ${width}-${theme}: an approved card gets exactly one second badge, "Klaar voor publicatie"`,
-      ready.badges.length === 2 && ready.badges[0] === 'Intern goedgekeurd' && ready.badges[1] === 'Klaar voor publicatie',
+      ready.badges.length === 2 && badgeText(ready.badges, 0) === 'Intern goedgekeurd' && badgeText(ready.badges, 1) === 'Klaar voor publicatie',
       JSON.stringify(ready.badges),
     );
     check(
       `be39 ${width}-${theme}: a missing source gives the first reason in plain language`,
-      missing.badges.length === 2 && missing.badges[1] === 'Nog niet klaar: Bron nog niet bevestigd.',
+      missing.badges.length === 2 && badgeText(missing.badges, 1) === 'Nog niet klaar: Bron nog niet bevestigd.',
       JSON.stringify(missing.badges),
     );
     check(
       `be39 ${width}-${theme}: an existing export shows its real status, never "Klaar voor publicatie"`,
-      merged.badges[1] === 'Review-PR gemerged' && failed.badges[1] === 'Vorige poging mislukt' && !merged.text.includes('Klaar voor publicatie') && !failed.text.includes('Klaar voor publicatie'),
+      badgeText(merged.badges, 1) === 'Review-PR gemerged' && badgeText(failed.badges, 1) === 'Vorige poging mislukt' && !merged.text.includes('Klaar voor publicatie') && !failed.text.includes('Klaar voor publicatie'),
       JSON.stringify([merged.badges, failed.badges]),
     );
     check(`be39 ${width}-${theme}: merged is not live, the next deploy is`, merged.text.includes('live na de volgende deploy'), merged.text.slice(0, 220));
     check(
       `be39 ${width}-${theme}: a waiting card keeps its single status badge`,
-      waiting.badges.length === 1 && waiting.badges[0] === 'Wacht op beoordeling',
+      waiting.badges.length === 1 && badgeText(waiting.badges, 0) === 'Wacht op beoordeling',
       JSON.stringify(waiting.badges),
     );
     check(`be39 ${width}-${theme}: the header counts only the ready cards`, snapshot.readyCount === '1 klaar voor publicatie', snapshot.readyCount);
     check(`be39 ${width}-${theme}: requested theme is active`, snapshot.theme === theme, snapshot.theme);
     check(`be39 ${width}-${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+    // BE-41 (criterion 3): the second label is yellow (attention) when the card
+    // is not ready or its last attempt failed, green (positive) when it is ready,
+    // and neutral otherwise — with AA contrast in both themes.
+    const attention = [card(names.missingSource), card(names.failed)];
+    check(
+      `be41 ${width}-${theme}: "Nog niet klaar" and "Vorige poging mislukt" use the existing attention role`,
+      attention.every((entry) => entry.badges.length === 2 && entry.badges[1].role === 'status-badge--old'),
+      JSON.stringify(attention.map((entry) => entry.badges.map((badge) => badge.role))),
+    );
+    check(
+      `be41 ${width}-${theme}: a ready card keeps the positive role and the neutral cards stay neutral`,
+      ready.badges[1] && ready.badges[1].role === 'status-badge--positive'
+        && card(names.merged).badges[1].role === 'status-badge--positive'
+        && card(names.closed).badges[1].role === 'status-badge--neutral',
+      JSON.stringify([ready.badges[1], card(names.merged).badges[1], card(names.closed).badges[1]]),
+    );
+    const badgeContrast = snapshot.items.flatMap((item) => item.badges).filter((badge) => badge.contrast !== null);
+    check(
+      `be41 ${width}-${theme}: every badge label keeps contrast ≥ 4.5:1`,
+      badgeContrast.length > 0 && badgeContrast.every((badge) => badge.contrast >= 4.5),
+      JSON.stringify(badgeContrast),
+    );
     screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be39-publicatie-${width}-${theme}.png`));
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be41-vervolgstap-${width}-${theme}.png`));
+
+    // BE-41 (criterion 1): one link per card, the whole card is that link, and
+    // only the review-PR card carries the one allowed second link.
+    const links = snapshot.items.map((item) => item.linkCount);
+    check(
+      `be41 ${width}-${theme}: every card is one link, except the review-PR link`,
+      snapshot.items.every((item) => (item.text.includes(names.merged) ? item.linkCount === 2 : item.linkCount === 1)),
+      JSON.stringify(links),
+    );
+    check(
+      `be41 ${width}-${theme}: the whole card opens that link`,
+      snapshot.items.every((item) => item.wholeCardHitsLink),
+      JSON.stringify(snapshot.items.filter((item) => !item.wholeCardHitsLink).map((item) => item.text.slice(0, 40))),
+    );
+
+    // BE-41 (criterion 2): exactly the next step the contract names, at the
+    // destination the contract names, and no button where the table says none.
+    const wrongStep = [];
+    for (const entry of expected) {
+      const rendered = card(entry.item.restaurantName);
+      const want = entry.step;
+      if (!want.label) {
+        if (rendered.next) wrongStep.push({ card: entry.item.restaurantName, want: 'geen knop', got: rendered.next.text });
+        continue;
+      }
+      if (!rendered.next || rendered.next.text !== want.label) {
+        wrongStep.push({ card: entry.item.restaurantName, want: want.label, got: rendered.next && rendered.next.text });
+        continue;
+      }
+      if (want.id === 'pr') {
+        if (rendered.next.tag !== 'A' || rendered.next.href !== want.externalUrl || rendered.next.target !== '_blank' || !String(rendered.next.rel).includes('noopener') || !String(rendered.next.rel).includes('noreferrer')) {
+          wrongStep.push({ card: entry.item.restaurantName, want: `nieuw tabblad ${want.externalUrl}`, got: rendered.next });
+        }
+      } else if (rendered.next.tag !== 'SPAN' || rendered.cardHref !== destinationFor(want, entry.item.id)) {
+        wrongStep.push({ card: entry.item.restaurantName, want: destinationFor(want, entry.item.id), got: { tag: rendered.next.tag, href: rendered.cardHref } });
+      }
+    }
+    check(
+      `be41 ${width}-${theme}: each card shows the next step of its own publication state`,
+      wrongStep.length === 0,
+      JSON.stringify(wrongStep),
+    );
+
+    // BE-41 (criterion 5): on the phone the button is full width under the
+    // labels and at least 44 px high; nothing scrolls sideways.
+    if (width <= 720) {
+      const sized = snapshot.items.filter((item) => item.next).map((item) => ({ card: item.text.split('\n')[0], ...item.next, cardWidth: item.cardWidth }));
+      check(
+        `be41 ${width}-${theme}: the next step is full width and at least 44 px high`,
+        sized.length > 0 && sized.every((entry) => entry.height >= 44 && entry.width >= entry.cardWidth - 28),
+        JSON.stringify(sized),
+      );
+    }
+    check(`be41 ${width}-${theme}: no horizontal overflow with the next step`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
   }
   check(
     'be39 light and dark resolve to different background tokens',
@@ -1159,6 +1299,145 @@ async function conceptPublicationScenario(cdp) {
     mergedDetail.includes('Review-PR gemerged') && mergedDetail.includes('live na de volgende deploy'),
     mergedDetail.slice(0, 300),
   );
+
+  // ─── BE-41: the card is one tab stop with a visible focus ring ────────────
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light' }), `document.body.innerText.includes(${JSON.stringify(names.ready)})`);
+  const focused = await tabUntil(cdp, names.ready, 90);
+  const ring = await evalJs(cdp, `(() => {
+    const el = document.activeElement;
+    if (!el || !el.classList.contains('mcr-item-link')) return null;
+    const style = getComputedStyle(el);
+    return { focusVisible: el.matches(':focus-visible'), style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor };
+  })()`);
+  check(
+    'be41 keyboard: the card is one tab stop and shows a visible focus ring',
+    Boolean(focused.info) && focused.info.tag === 'A' && focused.info.href === `/internal/menu-concepts/${ids.ready}#mcr-publication`
+      && Boolean(ring) && ring.focusVisible && ring.style === 'solid' && parseFloat(ring.width) >= 2,
+    JSON.stringify({ focused: focused.info, ring }),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-focus-390-light.png'));
+
+  // ─── BE-41: the next step opens the right tab or block, never an export ───
+  const clickCard = async (name) => {
+    const clicked = await evalJs(cdp, `(() => {
+      const card = [...document.querySelectorAll('.mcr-item')].find((el) => el.innerText.includes(${JSON.stringify(name)}));
+      const link = card && card.querySelector('.mcr-item-link');
+      if (!link) return null;
+      const href = link.getAttribute('href');
+      link.click();
+      return href;
+    })()`);
+    return clicked;
+  };
+  const tabState = `(() => {
+    const tab = [...document.querySelectorAll('[role="tab"]')].find((el) => el.getAttribute('aria-selected') === 'true');
+    const panel = document.querySelector('[role="tabpanel"]:not([hidden])');
+    return { tab: tab ? tab.innerText.trim() : null, panel: panel ? panel.id : null, path: location.pathname, search: location.search, hash: location.hash };
+  })()`;
+
+  await clickCard(names.blockers);
+  const blockersArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.blockers}`)} && Boolean(document.querySelector('[role="tab"][aria-selected="true"]'))`, 30000);
+  const blockersTab = await evalJs(cdp, tabState);
+  check(
+    `be41 click: "${labelOf(names.blockers)}" opens the Wijzigingen tab of that concept`,
+    blockersArrived && blockersTab.tab === 'Wijzigingen' && blockersTab.panel === `mcr-${ids.blockers}-panel-changes`,
+    JSON.stringify(blockersTab),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-wijzigingen-390-light.png'));
+
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light' }), `document.body.innerText.includes(${JSON.stringify(names.missingSource)})`);
+  await clickCard(names.missingSource);
+  const sourceArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.missingSource}`)} && Boolean(document.querySelector('[role="tab"][aria-selected="true"]'))`, 30000);
+  const sourceTab = await evalJs(cdp, tabState);
+  check(
+    `be41 click: "${labelOf(names.missingSource)}" opens the Bron tab of that concept`,
+    sourceArrived && sourceTab.tab === 'Bron' && sourceTab.panel === `mcr-${ids.missingSource}-panel-source`,
+    JSON.stringify(sourceTab),
+  );
+
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light' }), `document.body.innerText.includes(${JSON.stringify(names.ready)})`);
+  const violationsBefore = await evalJs(cdp, `(window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app').length`);
+  await clickCard(names.ready);
+  const readyArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.ready}`)} && location.hash === '#mcr-publication'`, 30000);
+  const publicationView = await evalJs(cdp, `(() => {
+    const block = document.getElementById('mcr-publication');
+    if (!block) return null;
+    const rect = block.getBoundingClientRect();
+    const violations = (window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app');
+    return { hash: location.hash, visible: rect.top < window.innerHeight && rect.bottom > 0, violations: violations.length, texts: violations.map((entry) => entry.url) };
+  })()`);
+  check(
+    `be41 click: "${labelOf(names.ready)}" opens the Publicatie block and starts no export`,
+    readyArrived && Boolean(publicationView) && publicationView.visible && publicationView.violations === violationsBefore && publicationView.violations === 0,
+    JSON.stringify({ readyArrived, publicationView, violationsBefore }),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-publicatie-390-light.png'));
+
+  // ─── BE-41 (criterion 4): "Originele menukaart openen ↗" next to the title ─
+  const sourceLinkState = `(() => {
+    const link = [...document.querySelectorAll('a')].find((el) => (el.innerText || '').includes('Originele menukaart openen'));
+    const note = document.querySelector('.mcr-origin-note');
+    const title = document.querySelector('h1');
+    const rect = link ? link.getBoundingClientRect() : null;
+    const titleRect = title ? title.getBoundingClientRect() : null;
+    return link ? {
+      text: (link.innerText || '').trim(),
+      href: link.getAttribute('href'),
+      target: link.getAttribute('target'),
+      rel: link.getAttribute('rel'),
+      note: note ? note.innerText.trim() : null,
+      rightOfTitle: Boolean(rect && titleRect) && rect.left >= titleRect.right - 1,
+      height: Math.round(rect.height),
+      width: Math.round(rect.width),
+    } : { text: null, note: note ? note.innerText.trim() : null };
+  })()`;
+
+  const readySource = menuSourceLink(fixtures.SOURCE_URL);
+  await setViewport(cdp, 1280, 900);
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light', id: ids.ready }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+  const readyLink = await evalJs(cdp, sourceLinkState);
+  check(
+    'be41 detail: the original menu opens in a new tab, right of the title, with the small line',
+    readyLink.href === readySource.href && readyLink.target === '_blank'
+      && String(readyLink.rel).includes('noopener') && String(readyLink.rel).includes('noreferrer')
+      && readyLink.note === readySource.note && readyLink.rightOfTitle && readyLink.height >= 44,
+    JSON.stringify(readyLink),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-origineel-1280-light.png'));
+
+  // On the phone the same button is full width under the title, still 44 px.
+  await setViewport(cdp, 390, 900);
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light', id: ids.ready }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+  const mobileLink = await evalJs(cdp, sourceLinkState);
+  const mobileOverflow = await evalJs(cdp, 'document.documentElement.scrollWidth - window.innerWidth');
+  check(
+    'be41 detail 390: the original-menu button is full width and at least 44 px',
+    mobileLink.height >= 44 && mobileLink.width >= 300 && mobileOverflow <= 0,
+    JSON.stringify({ mobileLink, mobileOverflow }),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-origineel-390-light.png'));
+
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'dark', id: ids.pdfSource }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+  const pdfLink = await evalJs(cdp, sourceLinkState);
+  check(
+    'be41 detail: a pdf source says so in the small line',
+    pdfLink.href === menuSourceLink('https://fictief-brasserie.invalid/menu/menukaart.pdf').href && pdfLink.note === 'Opent in een nieuw tabblad · fictief-brasserie.invalid · pdf',
+    JSON.stringify(pdfLink),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be41-detail-origineel-1280-dark.png'));
+
+  for (const [key, name] of [['unsafeSource', names.unsafeSource], ['emptySource', names.emptySource]]) {
+    await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light', id: ids[key] }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+    const refused = await evalJs(cdp, sourceLinkState);
+    // A javascript: or empty source gets no button at all — and no dead anchor.
+    check(`be41 detail: ${key} gets no original-menu button`, refused.text === null, JSON.stringify(refused));
+    check(
+      `be41 detail: ${key} still shows the concept itself`,
+      (await bodyText(cdp)).includes(name),
+      name,
+    );
+  }
 }
 
 async function conceptKeyboardScenario(cdp) {

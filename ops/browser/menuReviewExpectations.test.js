@@ -23,6 +23,8 @@ const path = require('node:path');
 const { STATUSES } = require('../../src/lib/batchAnalysis');
 const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');
 const { PDF_SCAN_NOTICE } = require('../../src/lib/menuSourceMap');
+// BE-41: the next step is checked against the product's own rule.
+const { deriveNextStep, NEXT_STEP_LABELS } = require('../../src/lib/menuConceptPublication');
 const fixtures = require('./fixtures/menuReviewFixtures');
 
 const SCRIPT = fs.readFileSync(path.join(__dirname, 'run-menu-review-browser-check.js'), 'utf8').replace(/\r\n/g, '\n');
@@ -147,4 +149,33 @@ test('kaart: the scan notice the check waits for is the product\'s own PDF notic
   assert.equal(SCRIPT.includes('PDF zonder tekstlaag'), true);
   assert.equal(SCRIPT.includes(PDF_SCAN_NOTICE.slice(0, 40)), true, 'the check no longer names the PDF notice');
   assert.equal(SCRIPT.includes('Deze kaart is een afbeelding; vergelijken kan nog niet.'), false, 'the image notice does not apply to a PDF');
+});
+
+test('be41: the check reads the next step from the product rule and covers every row', () => {
+  // The label of a card is not restated in the check: it comes from
+  // src/lib/menuConceptPublication.js, exactly as the screen receives it.
+  assert.equal(SCRIPT.includes("const { deriveNextStep } = require('../../src/lib/menuConceptPublication')"), true);
+  for (const [id, label] of Object.entries(NEXT_STEP_LABELS)) {
+    assert.equal(SCRIPT.includes(`${label} →`), false, `the check hardcodes the ${id} label`);
+    assert.equal(SCRIPT.includes(`${label} ↗`), false, `the check hardcodes the ${id} label`);
+  }
+  // One fictional card per row of the contract's table, and no more rows.
+  const ids = fixtures.publicationList.items.map((item) => deriveNextStep({
+    status: item.status,
+    publication: item.publication,
+    blockerCount: item.blockerCount,
+    prUrl: item.exportPrUrl,
+  }).id);
+  assert.deepEqual([...new Set(ids)].sort(), ['blockers', 'export', 'none', 'pr', 'rejected', 'retry', 'review', 'source']);
+});
+
+test('be41: every card with a next step has its own detail, so a click really lands', () => {
+  const details = fixtures.scenarios['concepts-publication'].detail;
+  for (const item of fixtures.publicationList.items) {
+    assert.equal(Boolean(details[item.id]), true, `no detail fixture for ${item.id}`);
+  }
+  // The two sources the URL rule must refuse, and the pdf it must name.
+  assert.equal(details[fixtures.PUBLICATION_IDS.unsafeSource].concept.sourceUrl, 'javascript:alert(1)');
+  assert.equal(details[fixtures.PUBLICATION_IDS.emptySource].concept.sourceUrl, '');
+  assert.equal(details[fixtures.PUBLICATION_IDS.pdfSource].concept.sourceUrl.endsWith('.pdf'), true);
 });
