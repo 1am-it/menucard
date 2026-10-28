@@ -508,6 +508,34 @@ The evidence lands in
 model, key, provider or real restaurant is involved, and a green run is not
 independent review or production acceptance.
 
+## BE-38 (#90) — "Straks op de kaart" and "Morgen op de kaart"
+
+`run-straks-browser-check.js` (also `npm run test:browser:straks`) drives the
+real production build with a fixed browser clock (`2026-10-23`, a Friday,
+Europe/Amsterdam) and screenshots the home section at 1280 and 390 px in light
+and dark:
+
+- **16:30** — the real data has only two borrel dishes, so the section falls
+  back to "Straks op de kaart · vanaf HH:MM" with the dinner dishes of the next
+  moment, each labelled "🕒 Opent om HH:MM" instead of "Nu open"; the "vanaf"
+  time in the title is the earliest of those labels;
+- **20:00** — enough for the current moment: the normal title "Vanavond op de
+  kaart", "Nu open" only on dishes that are really open, and no opening time
+  anywhere;
+- **23:30** — after closing time: "Morgen op de kaart" with tomorrow's lunch.
+
+The check also asserts three real dishes with a real price, one per restaurant,
+the dish deep link of every card, the "Alles" link of the shown meal type, no
+horizontal overflow, and that the server HTML of `/` contains no "Nu open", no
+daghap, no moment section and neither fallback title.
+
+The fixed clock is a test instrument only (`Date` override before navigation);
+the product code always uses the browser clock and `Europe/Amsterdam`. The
+record lands in `ops/browser/evidence/straks-browser-evidence.json`, the
+screenshots in `ops/browser/evidence/be-38/`. This remains developer evidence
+on a local build: not production, not independent review.
+
+Build first (`node node_modules/next/dist/bin/next build`, or `npm run build`).
 
 ## Limits
 
