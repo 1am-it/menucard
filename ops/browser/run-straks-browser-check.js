@@ -34,10 +34,17 @@ const { spawn, spawnSync } = require('node:child_process');
 
 const { REPO_ROOT, findBrowser, killTree, startBrowser, evalJs, navigate } = require('./lib/runtime');
 const { CdpClient, waitForHttp } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-straks-browser-check.js';
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
 const SHOTS_DIR = path.join(EVIDENCE_DIR, 'be-38');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'straks-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'straks-browser-evidence.json');
 const OUT_DIR = path.join(__dirname, 'output', 'be-38');
 const PORT = Number(process.env.BE38_PORT || 3148);
 const APP = `http://localhost:${PORT}`;
@@ -89,11 +96,15 @@ const checks = [];
 const shots = [];
 const moments = [];
 let viewport = { width: 1280, height: 900 };
+let scenarioRuns = null;
+let serverHtmlEvidence = null;
 
 function check(name, passed, detail) {
   const entry = { name, passed: Boolean(passed), detail: detail === undefined || detail === null ? null : String(detail) };
   checks.push(entry);
-  console.log(`${entry.passed ? 'ok  ' : 'FAIL'} ${name}${entry.detail ? ` — ${entry.detail}` : ''}`);
+  // BE-43 (#101): de uitvoer is één regel per scenario, met de details alleen
+  // bij een fout; het volledige bewijs staat in het JSON-bestand.
+  if (!entry.passed) console.log(`FAIL ${name}${entry.detail ? ` — ${entry.detail}` : ''}`);
   return entry.passed;
 }
 
@@ -370,7 +381,31 @@ async function serverHtmlScenario() {
   return { bytes: html.length };
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles in deze volgorde, precies zoals voorheen.
+const CHECK_SCENARIOS = [
+  {
+    name: 'server-html',
+    run: async () => {
+      serverHtmlEvidence = await serverHtmlScenario();
+    },
+  },
+  ...MOMENTS.map((moment) => ({ name: `moment-${moment.id}`, run: (cdp) => momentScenario(cdp, moment) })),
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), CHECK_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: CHECK_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const browserPath = findBrowser();
   if (!browserPath) throw new Error('browser_unavailable: set BROWSER_PATH to an installed Edge/Chrome');
   if (!fs.existsSync(PRODUCTION_BUILD)) {
@@ -391,12 +426,9 @@ async function main() {
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
 
-    serverHtml = await serverHtmlScenario();
-
-    for (const moment of MOMENTS) {
-      console.log(`BE-38 ${moment.id} (${moment.clock} Europe/Amsterdam)`);
-      await momentScenario(cdp, moment);
-    }
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: CHECK_SCENARIOS, checks, cdp, filter: SELECTION.filter });
+    serverHtml = serverHtmlEvidence;
 
     await setFixedClock(cdp, null);
 
@@ -406,6 +438,9 @@ async function main() {
       kind: 'developer evidence — local production build, fixed browser clock, no production data or credentials',
       contract: '#90 BE-38 (Straks op de kaart / Morgen op de kaart)',
       app: APP,
+      // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+      filter: SELECTION.filter,
+      scenarios: scenarioRuns,
       fixedDay: '2026-10-23 (vrijdag, Europe/Amsterdam, UTC+2)',
       serverHtml,
       moments,

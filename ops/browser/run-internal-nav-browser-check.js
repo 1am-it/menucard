@@ -39,11 +39,18 @@ const {
   tabUntil,
 } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const OUT_DIR = path.join(__dirname, 'output');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'internal-nav-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'internal-nav-browser-evidence.json');
+const SCRIPT_NAME = 'run-internal-nav-browser-check.js';
 const PORT = Number(process.env.NAV_FIXTURE_PORT || 3138);
 const APP = `http://localhost:${PORT}`;
 const ADD_URL = `${APP}/internal/toevoegen`;
@@ -56,6 +63,7 @@ const shots = [];
 const clickpaths = [];
 let networkEvidence = null;
 let viewport = { width: 1280, height: 900 };
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -377,6 +385,9 @@ function writeEvidence(extra) {
       'not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots are saved for the Lead/human visual comparison',
     fixtureNote:
       'the nav counts are one fixed fictional API answer; every fixture page keeps its own fictional list, so a row number is not derived from that page here. The real agreement (same definitions as the pages) is unit-tested in src/lib/workqueueCounts.test.js.',
+    // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     checks,
     clickpaths,
     screenshots: shots,
@@ -388,7 +399,36 @@ function writeEvidence(extra) {
   return record;
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles, in dezelfde volgorde en met dezelfde controles.
+const NAV_SCENARIOS = [
+  { name: 'desktop', run: (cdp) => desktopScenario(cdp) },
+  {
+    name: 'mobiel',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        for (const width of [390, 320]) await mobileScenario(cdp, width, theme);
+      }
+    },
+  },
+  { name: 'counts', run: (cdp) => countsScenario(cdp) },
+  { name: 'landing', run: (cdp) => landingScenario(cdp) },
+  { name: 'keyboard', run: (cdp) => keyboardScenario(cdp) },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), NAV_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: NAV_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const watchdog = setTimeout(() => {
     try {
       writeEvidence({ error: 'run_timeout (8 min)' });
@@ -422,20 +462,8 @@ async function main() {
 
     console.log('warm-up: compiling the route and the counts API');
     await warmUp(cdp);
-    console.log('scenario: desktop 1280 light/dark');
-    await desktopScenario(cdp);
-    for (const theme of ['light', 'dark']) {
-      for (const width of [390, 320]) {
-        console.log('scenario: ' + width + ' ' + theme);
-        await mobileScenario(cdp, width, theme);
-      }
-    }
-    console.log('scenario: counts failed/partial');
-    await countsScenario(cdp);
-    console.log('scenario: landing rule');
-    await landingScenario(cdp);
-    console.log('scenario: keyboard');
-    await keyboardScenario(cdp);
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: NAV_SCENARIOS, checks, cdp, filter: SELECTION.filter });
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
     check('network guard: the page recorded no blocked app traffic', pageViolations.length === 0, JSON.stringify(pageViolations.slice(0, 3)));

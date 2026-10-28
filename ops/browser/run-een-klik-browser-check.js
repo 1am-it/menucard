@@ -35,10 +35,17 @@ const { SCENARIOS } = require('./fixtures/eenKlikFixtures');
 const { createNetworkGuard, enableFetchGuard, defaultAppOrigins } = require('./lib/network-policy');
 const { findBrowser, killTree, startServer, startBrowser, evalJs, waitFor, navigate, screenshot } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-een-klik-browser-check.js';
 const OUT_DIR = path.join(__dirname, 'output', 'be-34');
 const SHOTS_DIR = path.join(__dirname, 'evidence', 'be-34');
-const EVIDENCE_PATH = path.join(__dirname, 'evidence', 'een-klik-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(__dirname, 'evidence', 'een-klik-browser-evidence.json');
 const PORT = Number(process.env.EEN_KLIK_FIXTURE_PORT || 3142);
 const APP = `http://localhost:${PORT}`;
 const START_URL = `${APP}/internal/coverage`;
@@ -49,6 +56,7 @@ const WATCHDOG_MIN = Number(process.env.EEN_KLIK_WATCHDOG_MIN || 35);
 const checks = [];
 const shots = [];
 let viewport = { width: 1280, height: 900 };
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -86,6 +94,9 @@ function writeEvidence(extra) {
     port: PORT,
     screenshotsDir: 'ops/browser/evidence/be-34',
     screenshots: shots,
+    // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     checks,
     passed: checks.length > 0 && checks.every((entry) => entry.passed),
     ...extra,
@@ -414,7 +425,66 @@ async function warmUp(cdp) {
   check('warm-up: the three routes compile', true);
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles over de volledige matrix.
+// For a quick smoke run: EEN_KLIK_MATRIX="1280:light" limits the matrix. The
+// default is the full contract matrix (two widths, light and dark).
+const MATRIX = (() => {
+  const requested = String(process.env.EEN_KLIK_MATRIX || '').trim();
+  return requested
+    ? requested
+        .split(',')
+        .map((entry) => entry.split(':'))
+        .filter((parts) => parts.length === 2)
+        .map(([width, theme]) => ({ width: Number(width), theme }))
+        .filter((entry) => Number.isInteger(entry.width) && entry.width > 0 && (entry.theme === 'light' || entry.theme === 'dark'))
+    : [
+        { width: 1280, theme: 'light' },
+        { width: 1280, theme: 'dark' },
+        { width: 390, theme: 'light' },
+        { width: 390, theme: 'dark' },
+      ];
+})();
+const CHECK_SCENARIOS = [
+  {
+    name: 'rij',
+    run: async (cdp) => {
+      for (const { width, theme } of MATRIX) await rowScenario(cdp, width, theme);
+    },
+  },
+  {
+    name: 'controlescherm',
+    run: async (cdp) => {
+      for (const { width, theme } of MATRIX) await reviewScenario(cdp, width, theme);
+    },
+  },
+  {
+    name: 'mislukte-lezing',
+    run: async (cdp) => {
+      for (const { width, theme } of MATRIX) await failureScenario(cdp, width, theme);
+    },
+  },
+  {
+    name: 'zoeken-op-naam',
+    run: async (cdp) => {
+      for (const { width, theme } of MATRIX) await nameScenario(cdp, width, theme);
+    },
+  },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), CHECK_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: CHECK_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const watchdog = setTimeout(() => {
     try {
       writeEvidence({ error: `run_timeout (${WATCHDOG_MIN} min)` });
@@ -452,34 +522,8 @@ async function main() {
 
     console.log('warm-up: compiling the routes and the APIs');
     await warmUp(cdp);
-    // For a quick smoke run: EEN_KLIK_MATRIX="1280:light" limits the matrix. The
-    // default is the full contract matrix (two widths, light and dark).
-    const requested = String(process.env.EEN_KLIK_MATRIX || '').trim();
-    const matrix = requested
-      ? requested
-          .split(',')
-          .map((entry) => entry.split(':'))
-          .filter((parts) => parts.length === 2)
-          .map(([width, theme]) => ({ width: Number(width), theme }))
-          .filter((entry) => Number.isInteger(entry.width) && entry.width > 0 && (entry.theme === 'light' || entry.theme === 'dark'))
-      : [
-          { width: 1280, theme: 'light' },
-          { width: 1280, theme: 'dark' },
-          { width: 390, theme: 'light' },
-          { width: 390, theme: 'dark' },
-        ];
-    for (const { width, theme } of matrix) {
-      {
-        console.log(`scenario: rij met één klik ${width} ${theme}`);
-        await rowScenario(cdp, width, theme);
-        console.log(`scenario: controlescherm met het resultaat ${width} ${theme}`);
-        await reviewScenario(cdp, width, theme);
-        console.log(`scenario: mislukte lezing ${width} ${theme}`);
-        await failureScenario(cdp, width, theme);
-        console.log(`scenario: zoeken op naam ${width} ${theme}`);
-        await nameScenario(cdp, width, theme);
-      }
-    }
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: CHECK_SCENARIOS, checks, cdp, filter: SELECTION.filter });
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
     check('network guard: the page recorded no blocked app traffic', pageViolations.length === 0, JSON.stringify(pageViolations.slice(0, 3)));

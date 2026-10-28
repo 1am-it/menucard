@@ -33,7 +33,15 @@ const { spawn, spawnSync } = require('node:child_process');
 
 const { findBrowser, killTree, startBrowser, evalJs, navigate, pressKey } = require('./lib/runtime');
 const { CdpClient, waitForHttp } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-public-style-browser-check.js';
+const BASE_EVIDENCE_PATH = path.join(__dirname, 'evidence', 'public-style-browser-evidence.json');
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const OUT_DIR = path.join(__dirname, 'output', 'be-28');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
@@ -47,7 +55,6 @@ const option = (name, fallback) => {
 };
 const LABEL = option('label', 'after');
 const TRANSFER_ONLY = args.includes('--transfer-only');
-const OUT_PATH = path.resolve(option('out', path.join(EVIDENCE_DIR, 'public-style-browser-evidence.json')));
 // Optioneel: meet een andere checkout (bijvoorbeeld de base voor de
 // "voor"-meting) met exact ditzelfde script. Standaard de eigen checkout.
 const APP_ROOT = path.resolve(REPO_ROOT, option('root', '.'));
@@ -56,10 +63,14 @@ const checks = [];
 const shots = [];
 const transfer = [];
 let viewport = { width: 1280, height: 900 };
+let contrast = null;
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail });
-  console.log(`${passed ? 'ok  ' : 'FAIL'} ${name}${detail ? ` â€” ${detail}` : ''}`);
+  // BE-43 (#101): de uitvoer is één regel per scenario, met de details
+  // alleen bij een fout; het volledige bewijs staat in het JSON-bestand.
+  if (!passed) console.log(`FAIL ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
 // â”€â”€ contrast, measured from the live computed styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -784,14 +795,95 @@ async function be29Scenario(cdp) {
 }
 
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles in deze volgorde, precies zoals voorheen.
+const PAGE_WIDTHS = [1280, 390, 320];
+const SCENARIOS = [
+  {
+    name: 'contrast',
+    run: async (cdp) => {
+      contrast = await contrastScenario(cdp);
+      contrast.alleRestaurants = await alleRestaurantsContrastScenario(cdp);
+    },
+  },
+  { name: 'page-home', run: (cdp) => pageScenario(cdp, { name: 'home', url: `${APP}/`, ready: `document.querySelector('.home-hero') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-search-results', run: (cdp) => pageScenario(cdp, { name: 'search-results', url: `${APP}/search?q=pasta`, ready: `document.querySelectorAll('.dish-result-card-row').length > 0`, widths: PAGE_WIDTHS }) },
+  { name: 'page-alle-restaurants', run: (cdp) => pageScenario(cdp, { name: 'alle-restaurants', url: `${APP}/alle-restaurants`, ready: `document.querySelector('.ar-card') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-restaurant-with-menu', run: (cdp) => pageScenario(cdp, { name: 'restaurant-with-menu', url: `${APP}/restaurant/6`, ready: `document.querySelector('.detail-name') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-restaurant-without-menu', run: (cdp) => pageScenario(cdp, { name: 'restaurant-without-menu', url: `${APP}/restaurant/2`, ready: `document.querySelector('.detail-name') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-menu', run: (cdp) => pageScenario(cdp, { name: 'menu', url: `${APP}/menu/6-diner`, ready: `document.querySelector('.td-price') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-claim', run: (cdp) => pageScenario(cdp, { name: 'claim', url: `${APP}/claim/6`, ready: `document.querySelector('.claim-title') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'page-nvwa', run: (cdp) => pageScenario(cdp, { name: 'nvwa', url: `${APP}/nvwa/6`, ready: `document.querySelector('.nvwa-title') !== null`, widths: PAGE_WIDTHS }) },
+  { name: 'search-card', run: (cdp) => searchCardScenario(cdp) },
+  { name: 'alle-restaurants', run: (cdp) => alleRestaurantsScenario(cdp) },
+  { name: 'nvwa-layout', run: (cdp) => nvwaLayoutScenario(cdp) },
+  { name: 'be29', run: (cdp) => be29Scenario(cdp) },
+  { name: 'tap-target', run: (cdp) => tapTargetScenario(cdp) },
+  { name: 'keyboard', run: (cdp) => keyboardScenario(cdp) },
+  // /internal/coverage — zonder productiecredentials. Het script legt vast wat
+  // er dan werkelijk staat; dit is geen interne acceptatie.
+  {
+    name: 'internal-coverage',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        await applyTheme(cdp, theme);
+        await setViewport(cdp, 1280, 900);
+        await open(cdp, `${APP}/internal/coverage`, `document.readyState === 'complete'`);
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        const state = await evalJs(cdp, `(() => ({
+          path: location.pathname,
+          text: document.body.innerText.trim().slice(0, 160),
+          theme: document.documentElement.getAttribute('data-theme'),
+        }))()`);
+        await shot(cdp, `internal-coverage-${theme}-1280.png`);
+        check(`internal/coverage ${theme}: captured without production credentials`, true, JSON.stringify(state));
+      }
+    },
+  },
+  // /internal/login is the one internal screen that renders without any Supabase
+  // data, so it is the honest local proof that the new tokens keep an internal
+  // page readable in both themes.
+  {
+    name: 'internal-login',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        await applyTheme(cdp, theme);
+        await setViewport(cdp, 1280, 900);
+        await open(cdp, `${APP}/internal/login`, `document.readyState === 'complete' && document.body.innerText.length > 0`);
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        const state = await evalJs(cdp, `(() => ({
+          path: location.pathname,
+          theme: document.documentElement.getAttribute('data-theme'),
+          bodyBackground: getComputedStyle(document.body).backgroundColor,
+          textColor: getComputedStyle(document.body).color,
+          heading: document.querySelector('h1, h2') ? document.querySelector('h1, h2').innerText : null,
+        }))()`);
+        await shot(cdp, `internal-login-${theme}-1280.png`);
+        check(`internal/login ${theme}: renders with the new tokens`, state.theme === theme && state.heading !== null, JSON.stringify(state));
+      }
+    },
+  },
+];
+const SELECTION = parseScenarioArgs(args, SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const OUT_PATH = path.resolve(option('out', filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter)));
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const browserPath = findBrowser();
   if (!browserPath) throw new Error('browser_unavailable: set BROWSER_PATH to an installed Edge/Chrome');
 
   let server = null;
   let browser = null;
   let cdp = null;
-  let contrast = null;
   try {
     console.log('starting the production build on ' + APP);
     server = await startProductionServer();
@@ -811,57 +903,8 @@ async function main() {
     console.log(`/alle-restaurants transfer (${LABEL}): ${alle.totalKb} KB over ${alle.resourceCount} requests`);
 
     if (!TRANSFER_ONLY) {
-      contrast = await contrastScenario(cdp);
-      contrast.alleRestaurants = await alleRestaurantsContrastScenario(cdp);
-      await pageScenario(cdp, { name: 'home', url: `${APP}/`, ready: `document.querySelector('.home-hero') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'search-results', url: `${APP}/search?q=pasta`, ready: `document.querySelectorAll('.dish-result-card-row').length > 0`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'alle-restaurants', url: `${APP}/alle-restaurants`, ready: `document.querySelector('.ar-card') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'restaurant-with-menu', url: `${APP}/restaurant/6`, ready: `document.querySelector('.detail-name') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'restaurant-without-menu', url: `${APP}/restaurant/2`, ready: `document.querySelector('.detail-name') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'menu', url: `${APP}/menu/6-diner`, ready: `document.querySelector('.td-price') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'claim', url: `${APP}/claim/6`, ready: `document.querySelector('.claim-title') !== null`, widths: [1280, 390, 320] });
-      await pageScenario(cdp, { name: 'nvwa', url: `${APP}/nvwa/6`, ready: `document.querySelector('.nvwa-title') !== null`, widths: [1280, 390, 320] });
-      await searchCardScenario(cdp);
-      await alleRestaurantsScenario(cdp);
-      await nvwaLayoutScenario(cdp);
-      await be29Scenario(cdp);
-      await tapTargetScenario(cdp);
-      await keyboardScenario(cdp);
-
-      // /internal/coverage â€” zonder productiecredentials. Het script legt
-      // vast wat er dan werkelijk staat; dit is geen interne acceptatie.
-      for (const theme of ['light', 'dark']) {
-        await applyTheme(cdp, theme);
-        await setViewport(cdp, 1280, 900);
-        await open(cdp, `${APP}/internal/coverage`, `document.readyState === 'complete'`);
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-        const state = await evalJs(cdp, `(() => ({
-          path: location.pathname,
-          text: document.body.innerText.trim().slice(0, 160),
-          theme: document.documentElement.getAttribute('data-theme'),
-        }))()`);
-        await shot(cdp, `internal-coverage-${theme}-1280.png`);
-        check(`internal/coverage ${theme}: captured without production credentials`, true, JSON.stringify(state));
-      }
-
-      // /internal/login is the one internal screen that renders without any
-      // Supabase data, so it is the honest local proof that the new tokens
-      // keep an internal page readable in both themes.
-      for (const theme of ['light', 'dark']) {
-        await applyTheme(cdp, theme);
-        await setViewport(cdp, 1280, 900);
-        await open(cdp, `${APP}/internal/login`, `document.readyState === 'complete' && document.body.innerText.length > 0`);
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        const state = await evalJs(cdp, `(() => ({
-          path: location.pathname,
-          theme: document.documentElement.getAttribute('data-theme'),
-          bodyBackground: getComputedStyle(document.body).backgroundColor,
-          textColor: getComputedStyle(document.body).color,
-          heading: document.querySelector('h1, h2') ? document.querySelector('h1, h2').innerText : null,
-        }))()`);
-        await shot(cdp, `internal-login-${theme}-1280.png`);
-        check(`internal/login ${theme}: renders with the new tokens`, state.theme === theme && state.heading !== null, JSON.stringify(state));
-      }
+      // BE-43 (#101): alleen de gekozen scenario's, elk met een eigen regel.
+      scenarioRuns = await runScenarioSelection({ entries: SCENARIOS, checks, cdp, filter: SELECTION.filter });
     }
 
     const failed = checks.filter((entry) => entry.passed === false);
@@ -870,6 +913,10 @@ async function main() {
       label: LABEL,
       kind: 'developer evidence â€” local production build, no production data or credentials',
       app: APP,
+      // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het
+      // volledige bewijs; de telling gaat dan alleen over die scenario's.
+      filter: SELECTION.filter,
+      scenarios: scenarioRuns,
       transfer,
       contrast,
       checks: { total: checks.length, failed: failed.length, entries: checks },

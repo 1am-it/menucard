@@ -69,3 +69,8 @@ stappen en stopte met `aborted`. Daarom, in elke ronde:
    geheel. Dat geldt zeker voor `ops/browser/run-*-browser-check.js`.
 5. **Lange uitvoer inkorten.** Een build, een browsercheck of een log altijd met
    `2>&1 | tail -30`, tenzij je een fout zoekt. Zoek dan met `grep`.
+6. **Eén scenario per ronde.** Elke browsercheck met meerdere scenario's leest
+   `--alleen=<naam>[,<naam>]` en `--lijst` (BE-43, #101): tijdens het werk
+   `--alleen`, aan het eind één volledige run. Een gefilterde run schrijft naar
+   een eigen, gitignored bewijsbestand en noemt zijn keuze in `filter: [...]`;
+   alleen de volledige run vervangt het bewijs dat bij de levering hoort.

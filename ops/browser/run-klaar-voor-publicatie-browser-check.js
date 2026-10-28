@@ -27,9 +27,16 @@ const { fixtureBootstrap } = require('./lib/fixture-page');
 const { createNetworkGuard, enableFetchGuard, defaultAppOrigins } = require('./lib/network-policy');
 const { REPO_ROOT, findBrowser, killTree, startServer, startBrowser, evalJs, navigate } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-klaar-voor-publicatie-browser-check.js';
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'klaar-voor-publicatie-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'klaar-voor-publicatie-browser-evidence.json');
 const OUT_DIR = path.join(__dirname, 'output', 'be-39');
 const PORT = Number(process.env.BROWSER_FIXTURE_PORT || 3149);
 const APP_ORIGINS = defaultAppOrigins(PORT);
@@ -41,11 +48,15 @@ const WIDTHS = [1280, 390];
 
 const checks = [];
 const screenshots = [];
+let scenarioRuns = null;
+let publicationList = [];
 
 function check(name, passed, detail) {
   const entry = { name, passed: Boolean(passed), detail: detail === undefined || detail === null ? null : String(detail) };
   checks.push(entry);
-  console.log(`${entry.passed ? 'ok  ' : 'FAIL'} ${name}${entry.detail ? ` — ${entry.detail}` : ''}`);
+  // BE-43 (#101): de uitvoer is één regel per scenario, met de details alleen
+  // bij een fout; het volledige bewijs staat in het JSON-bestand.
+  if (!entry.passed) console.log(`FAIL ${name}${entry.detail ? ` — ${entry.detail}` : ''}`);
   return entry.passed;
 }
 
@@ -201,6 +212,9 @@ function writeEvidence({ passed, error = null, network = null, list = [] }) {
     fixtureOnly: true,
     passed,
     error,
+    // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     head: head(),
     worktreeDirty: status.dirty,
     worktreeChanges: status.lines,
@@ -229,7 +243,31 @@ function writeEvidence({ passed, error = null, network = null, list = [] }) {
   return evidence;
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles in deze volgorde, precies zoals voorheen.
+const CHECK_SCENARIOS = [
+  {
+    name: 'lijst',
+    run: async (cdp) => {
+      publicationList = await listScenario(cdp);
+    },
+  },
+  { name: 'detail', run: (cdp) => detailScenario(cdp) },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), CHECK_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: CHECK_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const browserPath = findBrowser();
   if (!browserPath) {
     writeEvidence({ passed: false, error: 'browser_unavailable: set BROWSER_PATH to an installed Edge/Chrome' });
@@ -254,8 +292,9 @@ async function main() {
       source: fixtureBootstrap({ [FIXTURE]: fixtures.scenarios[FIXTURE] }, { appOrigins: APP_ORIGINS, baseUrl: CONCEPTS_URL }),
     });
 
-    list = await listScenario(cdp);
-    await detailScenario(cdp);
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: CHECK_SCENARIOS, checks, cdp, filter: SELECTION.filter });
+    list = publicationList;
 
     network = {
       guard: 'in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown',

@@ -206,11 +206,32 @@ this boundary under `environment.loopback` and marks the run `fixtureOnly`.
 
 ```bash
 npm run test:browser:menu-review
+npm run test:browser:menu-review -- --lijst
+npm run test:browser:menu-review -- --alleen=concept-publication
 ```
 
 Requirements: Node 22, the repository's installed dependencies, and an
 installed Edge or Chrome. Override the browser with `BROWSER_PATH`; override the
 app port with `BROWSER_FIXTURE_PORT` (default 3137).
+
+### One scenario instead of all of them (BE-43, #101)
+
+Every `run-*-browser-check.js` with more than one scenario reads the same two
+flags:
+
+- `--lijst` prints the scenario names and starts nothing;
+- `--alleen=<naam>[,<naam>]` runs only the named scenarios, in the script's own
+  order. An unknown name prints the error with every valid name and starts
+  nothing (exit code 2).
+
+Without a flag the check runs everything, exactly as before. The output is one
+line per scenario with its passed/failed counts and duration; the details of a
+check are printed only when it fails. A filtered run writes its record to
+`evidence/<naam>.filtered.json` (gitignored) instead of the full evidence file,
+and the record names its selection in `filter: [...]`. Only the full run may
+replace the committed evidence.
+
+During work use `--alleen`; at the end run the whole check once.
 
 Generated artifacts (gitignored):
 
