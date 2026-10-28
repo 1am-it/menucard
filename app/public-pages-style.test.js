@@ -51,7 +51,7 @@ test('globals.css: BE-28b gebruikt alleen tokens voor kaarten, chips en claim/nv
   const block = css.slice(css.indexOf('/* ── BE-28b (#68): Alle restaurants'), css.indexOf('/* ── Telefoon: zwevende menubalk'));
   assert.ok(block.length > 1000, 'expected the BE-28b style block');
   assert.match(block, /\.ar-card \{[^}]*background: var\(--card-surface\)/);
-  assert.match(block, /\.ar-cta \{[^}]*background: var\(--button-primary-bg\)/);
+  assert.match(block, /\.ar-menu-button \{[^}]*background: var\(--surface-soft\)/);
   assert.match(block, /\.filter-chip \{[^}]*background: var\(--chip-bg\)/);
   assert.match(block, /\.claim-submit \{[^}]*background: var\(--button-primary-bg\)/);
   assert.match(block, /\.nvwa-export-btn \{[^}]*background: var\(--button-primary-bg\)/);
