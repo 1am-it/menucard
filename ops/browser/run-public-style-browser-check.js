@@ -254,11 +254,19 @@ async function applyTheme(cdp, theme) {
 // BE-29 (#70) — de drie momenten van de dag met een vaste browserklok. De
 // productiecode rekent zelf in Europe/Amsterdam; deze override laat de echte
 // clientselectie op een vast moment draaien zonder de systeemklok te wijzigen.
+//
+// BE-42 deel 2 (#98) — de borrelverwachting was verouderd. Sinds BE-38 (#90)
+// laat de home de sectie niet meer weg als het huidige moment te weinig echte
+// gerechten heeft: om 17:00 is de borrel te klein en valt de selectie terug op
+// het eerstvolgende moment, de diner, met de titel "Straks op de kaart ·
+// vanaf HH:MM" en `data-mode="later"`. Alleen deze verwachting is bijgewerkt;
+// het gedrag van de app is niet veranderd.
 const BE29_MOMENTS = [
-  { id: 'lunch', iso: '2026-10-23T10:30:00Z', meal: 'lunch', title: 'Nu op de lunchkaart', expectSection: true },
-  { id: 'borrel', iso: '2026-10-23T15:00:00Z', meal: 'borrel', title: 'Borrel', expectSection: false },
-  { id: 'diner', iso: '2026-10-23T18:00:00Z', meal: 'diner', title: 'Vanavond op de kaart', expectSection: true },
+  { id: 'lunch', iso: '2026-10-23T10:30:00Z', meal: 'lunch', mode: 'now', title: 'Nu op de lunchkaart' },
+  { id: 'borrel', iso: '2026-10-23T15:00:00Z', meal: 'diner', mode: 'later', title: 'Straks op de kaart' },
+  { id: 'diner', iso: '2026-10-23T18:00:00Z', meal: 'diner', mode: 'now', title: 'Vanavond op de kaart' },
 ];
+
 
 let clockScriptId = null;
 async function setFixedClock(cdp, iso) {
@@ -663,7 +671,7 @@ async function be29Scenario(cdp) {
       url: `${APP}/`,
       ready:
         `document.readyState === 'complete' && document.querySelector('.home-hero') !== null && document.querySelectorAll('[data-season]').length === 3` +
-        (moment.expectSection ? ` && document.querySelector('.tonight-section') !== null` : ''),
+        ` && document.querySelector('.tonight-section') !== null`,
       widths: [1280, 390, 320],
       fullPage: true,
     });
@@ -676,6 +684,7 @@ async function be29Scenario(cdp) {
       const section = document.querySelector('.tonight-section');
       return {
         meal: section ? section.getAttribute('data-meal') : null,
+        mode: section ? section.getAttribute('data-mode') : null,
         title: section ? section.querySelector('.home-section-title').textContent.trim() : null,
         cards: [...document.querySelectorAll('.tonight-card')].map((link) => ({
           name: link.querySelector('.tonight-name') ? link.querySelector('.tonight-name').textContent.trim() : null,
@@ -690,26 +699,23 @@ async function be29Scenario(cdp) {
     homeState[moment.id] = state;
 
     check(
-      `BE-29 ${moment.id}: de sectie ${moment.expectSection ? 'staat er met de juiste titel' : 'blijft weg bij minder dan drie gerechten'}`,
-      moment.expectSection
-        ? Boolean(state.meal) && state.title.includes(moment.title) && state.meal === moment.meal
-        : state.meal === null && state.cards.length === 0,
-      JSON.stringify({ meal: state.meal, title: state.title, cards: state.cards.length })
+      `BE-29 ${moment.id}: de sectie staat er met de juiste titel en het juiste moment`,
+      Boolean(state.meal) && state.meal === moment.meal && state.mode === moment.mode
+        && (state.title || '').includes(moment.title),
+      JSON.stringify({ meal: state.meal, mode: state.mode, title: state.title, cards: state.cards.length })
     );
 
-    if (moment.expectSection) {
-      check(`BE-29 ${moment.id}: precies drie echte gerechten met prijs`, state.cards.length === 3 && state.cards.every((card) => card.price && !/op aanvraag/i.test(card.price)), JSON.stringify(state.cards.map((card) => card.price)));
-      check(
-        `BE-29 ${moment.id}: hooguit één gerecht per restaurant`,
-        new Set(state.cards.map((card) => card.restaurant)).size === state.cards.length,
-        JSON.stringify(state.cards.map((card) => card.restaurant))
-      );
-      check(
-        `BE-29 ${moment.id}: de klik opent de menukaart op het gerecht`,
-        state.cards.every((card) => /\/menu\/[^?]+\?dish=.*#gerecht-/.test(card.href || '')),
-        JSON.stringify(state.cards.map((card) => card.href))
-      );
-    }
+    check(`BE-29 ${moment.id}: precies drie echte gerechten met prijs`, state.cards.length === 3 && state.cards.every((card) => card.price && !/op aanvraag/i.test(card.price)), JSON.stringify(state.cards.map((card) => card.price)));
+    check(
+      `BE-29 ${moment.id}: hooguit één gerecht per restaurant`,
+      new Set(state.cards.map((card) => card.restaurant)).size === state.cards.length,
+      JSON.stringify(state.cards.map((card) => card.restaurant))
+    );
+    check(
+      `BE-29 ${moment.id}: de klik opent de menukaart op het gerecht`,
+      state.cards.every((card) => /\/menu\/[^?]+\?dish=.*#gerecht-/.test(card.href || '')),
+      JSON.stringify(state.cards.map((card) => card.href))
+    );
 
     check(
       `BE-29 ${moment.id}: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)`,

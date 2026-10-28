@@ -106,6 +106,15 @@ test('BE-42 2A: de screenshots dekken het gewisselde tabblad', () => {
   assert.match(source, /\/restaurant\/6\?kaart=6-borrel/, 'the switched tab is the real URL');
 });
 
+// BE-42 deel 2 (Lead-besluit): de ene falende controle van de publieke
+// stijlcheck was een verouderde verwachting, geen appfout — zie de commit.
+test('BE-42: de publieke stijlcheck volgt sinds BE-38 het terugvalgedrag van de borrel', () => {
+  const source = read(PUBLIC_STYLE_CHECK);
+  assert.doesNotMatch(source, /blijft weg bij minder dan drie gerechten/, 'the outdated BE-29 expectation is gone');
+  assert.match(source, /id: 'borrel'[^}]*mode: 'later'[^}]*Straks op de kaart/, 'the borrel falls back to "Straks op de kaart" (BE-38)');
+  assert.match(source, /data-mode/, 'the fallback mode is measured');
+});
+
 test('BE-42: de browser-README beschrijft de check en de gap', () => {
   const readme = read('ops/browser/README.md');
   assert.match(readme, /BE-42 part 1/, 'the README has a BE-42 section');
