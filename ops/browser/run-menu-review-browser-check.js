@@ -341,7 +341,7 @@ async function imageOnlyScenario(cdp) {
   );
   check(
     'image-only follow-up: the detail names the fitting next step',
-    triage.detailText.includes('Lees de afbeelding met AI, kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar'),
+    triage.detailText.includes('Lees de afbeelding met AI, kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar.'),
     triage.detailText.slice(0, 200),
   );
   check(
@@ -367,36 +367,55 @@ async function imageOnlyScenario(cdp) {
 
   // R5: a fitting "unusable" reason exists. The human still chooses the action;
   // the existing `other` reason is preselected with its fixed, required note.
+  //
+  // BE-40 (#95): since BE-31 the follow-up screen is /internal/bronnen and the
+  // proposal form lives in its detail pane. A control that is not there must be
+  // reported as a failed check, never as an uncaught TypeError that ends the
+  // whole run before the later scenarios (including BE-39's) are reached.
   const suggestion = await evalJs(cdp, `(async () => {
+    const text = (el) => (el ? el.innerText : '');
+    const card = document.querySelector('.stg-detail-card');
+    const base = {
+      crash: /Application error: a client-side exception/i.test(document.body.innerText),
+      detail: Boolean(card),
+      cardText: text(card),
+      kinds: [...document.querySelectorAll('input[type="radio"]')].filter((r) => /-kind$/.test(r.name || '')).map((r) => r.value),
+    };
     const radio = document.querySelector('input[type="radio"][value="mark_unusable"]');
-    if (!radio) return { found: false };
+    if (!radio) return { ...base, found: false };
     radio.click();
     await new Promise((resolve) => setTimeout(resolve, 150));
     const select = document.querySelector('select[id$="-reason"]');
     const note = document.querySelector('textarea[id$="-note"]');
     const hint = document.querySelector('p[id$="-reason-help"]');
     return {
+      ...base,
       found: Boolean(select),
       reason: select ? select.value : null,
       note: note ? note.value : null,
       required: note ? note.getAttribute('aria-required') : null,
       describedBy: select ? (select.getAttribute('aria-describedby') || '') : '',
-      hint: hint ? hint.innerText : '',
-      text: (document.querySelector('.stg-detail-card') || {}).innerText || '',
+      hint: text(hint),
     };
   })()`);
-  check('image-only follow-up: an unusable proposal can be prepared', suggestion.found);
+  check(
+    'image-only follow-up: the detail pane renders without a client-side error',
+    suggestion.detail && !suggestion.crash,
+    `detail=${suggestion.detail} crash=${suggestion.crash}`,
+  );
+  check('image-only follow-up: an unusable proposal can be prepared', suggestion.found, `kinds=${(suggestion.kinds || []).join(',')}`);
   check('image-only follow-up: a fitting reason is preselected', suggestion.reason === 'other', String(suggestion.reason));
   check(
     'image-only follow-up: the fixed explanation is visible and filled in',
-    (suggestion.note || '').includes('alleen als afbeelding of scan') && suggestion.hint.length > 0,
+    (suggestion.note || '').includes('alleen als afbeelding of scan') && String(suggestion.hint || '').length > 0,
     `${suggestion.note} | ${suggestion.hint}`,
   );
   check('image-only follow-up: the preselected reason is described to assistive tech', String(suggestion.describedBy || '').includes('-reason-help'), suggestion.describedBy);
   check('image-only follow-up: the note stays required', suggestion.required === 'true', String(suggestion.required));
   check(
     'image-only follow-up: choosing the reason saves nothing by itself',
-    suggestion.text.includes('Voorstel opslaan') && !suggestion.text.includes('Voorstel opgeslagen'),
+    String(suggestion.cardText || '').includes('Voorstel opslaan') && !String(suggestion.cardText || '').includes('Voorstel opgeslagen'),
+    suggestion.cardText ? 'card' : 'no detail card',
   );
   await evalJs(cdp, `(() => {
     const select = document.querySelector('select[id$="-reason"]');
@@ -657,7 +676,9 @@ async function be30Scenario(cdp) {
     })()`);
     check(
       `be30 ${width}-${theme}: an opened section shows its dishes with prices`,
-      expanded.dishes === 2 && expanded.text.includes('Fictieve burrata') && expanded.text.includes('13.00'),
+      // MenuReview.js prints a price through its own `dutchPrice`: a Dutch
+      // decimal comma, so the fixture's "13.00" is visible as "13,00".
+      expanded.dishes === 2 && expanded.text.includes('Fictieve burrata') && expanded.text.includes('13,00'),
       JSON.stringify({ dishes: expanded.dishes }),
     );
     check(`be30 ${width}-${theme}: the doubt is explained in plain language`, expanded.text.includes(sections[0].reason), expanded.text.slice(0, 200));
@@ -1351,6 +1372,13 @@ function writeEvidence({ passed, head, dirty, error, browser }) {
     worktreeDirty: Boolean(dirty),
     generatedAt: new Date().toISOString(),
     command: 'npm run test:browser:menu-review',
+    // BE-40 (#95): the number of successful checks of a full run, explicitly in
+    // the record instead of only in the console line.
+    summary: {
+      total: checks.length,
+      passed: checks.filter((entry) => entry.passed).length,
+      failed: checks.filter((entry) => !entry.passed).length,
+    },
     environment: environment(browser),
     fixtures: Object.keys(fixtures.scenarios),
     conceptFixtures: fixtures.CONCEPT_IDS,
@@ -1816,7 +1844,12 @@ async function aiReadScenario(cdp, theme) {
   );
   check(
     'ai read: title, button and cost line are the agreed text',
-    Boolean(block) && block.title === 'Laat AI de kaart lezen' && block.buttons.includes('Lees met AI') && block.text.includes('Kost ongeveer 1 cent · duurt ± 1 minuut'),
+    Boolean(block) &&
+      block.title === 'Laat AI de kaart lezen' &&
+      block.buttons.includes('Lees met AI') &&
+      // BE-35 (#84): the estimate is per page, because an image or PDF source
+      // is read page by page (src/components/AiMenuReadBlock.js).
+      block.text.includes('Kost ongeveer 1 cent per pagina · duurt ± 1 minuut'),
     block ? JSON.stringify({ title: block.title, buttons: block.buttons }) : 'no block',
   );
   check(
@@ -2410,10 +2443,12 @@ async function manualCardScenario(cdp, theme, width = 390) {
   );
   check(
     `kaart ${width}px/${theme}: de bronnen staan in volgorde met hun weergave`,
+    // BE-35 (#84): the third fixture source is a PDF without a text layer, so
+    // the existing source list names exactly that (src/lib/menuSourceMap.js).
     map.sources.length === 3 &&
       map.sources[0].text.includes('Website') &&
       map.sources[1].text.includes('PDF') &&
-      map.sources[2].text.includes('Afbeelding zonder tekst'),
+      map.sources[2].text.includes('PDF zonder tekstlaag'),
     JSON.stringify(map.sources.map((entry) => entry.text)),
   );
   check(
@@ -2551,13 +2586,15 @@ async function manualCardScenario(cdp, theme, width = 390) {
     JSON.stringify({ calls: second.cardCalls, lines: second.lines.map((line) => line.text) }),
   );
 
-  // Scan zonder tekst: geen verzonnen pagina.
+  // Scan zonder tekst: geen verzonnen pagina. De fixturebron is een PDF zonder
+  // tekstlaag, dus de kaart zegt dat met de bestaande melding
+  // (src/lib/menuSourceMap.js PDF_SCAN_NOTICE) en toont geen regels.
   await evalJs(cdp, `(() => { const el = [...document.querySelectorAll('.mai-map-source')].find((b) => b.innerText.includes('source-3')); if (el) el.click(); return true; })()`);
-  const imageShown = await waitFor(cdp, `document.body.innerText.includes('Deze kaart is een afbeelding; vergelijken kan nog niet.')`, 15000);
+  const imageShown = await waitFor(cdp, `document.body.innerText.includes('Deze PDF heeft geen tekstlaag; de pagina zelf wordt niet bewaard.')`, 15000);
   const image = await readMap(cdp);
   check(
     `kaart ${width}px/${theme}: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan`,
-    imageShown && image.lines.length === 0,
+    imageShown && image.lines.length === 0 && String(image.notice).includes('Deze PDF heeft geen tekstlaag'),
     JSON.stringify({ notice: image.notice, lines: image.lines.length }),
   );
 
