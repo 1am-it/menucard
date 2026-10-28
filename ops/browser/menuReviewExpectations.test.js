@@ -73,6 +73,22 @@ test('image-only follow-up: the check expects the product\'s own reason and next
   assert.equal(FOLLOW_UP.nextStep.length > 0, true);
 });
 
+test('image-only follow-up: the check declares FOLLOW_UP before a browser run can crash', () => {
+  // Regression for the BE-41 round whose full run stopped with
+  // "ReferenceError: FOLLOW_UP is not defined" in imageOnlyScenario: the two
+  // assertions above matched the literal text, so the drift guard stayed green
+  // while the check itself could not run. The identifier, not only the text, is
+  // part of the expectation: it must be required from the product module and
+  // declared before its first use.
+  const requirement = "const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');";
+  const declaration = 'const FOLLOW_UP = FOLLOW_UPS.image_only;';
+  assert.equal(SCRIPT.includes(requirement), true, 'FOLLOW_UPS is not required from src/lib/sourceTriage');
+  assert.equal(SCRIPT.includes(declaration), true, 'FOLLOW_UP is not declared in run-menu-review-browser-check.js');
+  const declaredAt = SCRIPT.indexOf(declaration);
+  const firstUse = SCRIPT.indexOf('FOLLOW_UP.');
+  assert.ok(firstUse > declaredAt, 'FOLLOW_UP is used before the line that declares it');
+});
+
 test('image-only follow-up: the batch banner the check reads is the screen\'s own wording', () => {
   // Since BE-31 the same reason and next step also reach the screen as the
   // batch banner (app/internal/bronnen/BronnenView.js), which is what the

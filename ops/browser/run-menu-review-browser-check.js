@@ -19,6 +19,12 @@ const fixtures = require('./fixtures/menuReviewFixtures');
 // "Originele menukaart openen".
 const { deriveNextStep } = require('../../src/lib/menuConceptPublication');
 const { menuSourceLink } = require('../../src/lib/menuConceptUrls');
+// BE-40/BE-33: the follow-up reason and next step on /internal/bronnen are
+// product copy (src/lib/sourceTriage.js). The check compares with those
+// constants instead of restating them; `FOLLOW_UP` must be declared here too,
+// otherwise the scenario crashes with a ReferenceError half way through the run.
+const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');
+const FOLLOW_UP = FOLLOW_UPS.image_only;
 const { fixtureBootstrap } = require('./lib/fixture-page');
 const { createNetworkGuard, enableFetchGuard, defaultAppOrigins } = require('./lib/network-policy');
 const {
