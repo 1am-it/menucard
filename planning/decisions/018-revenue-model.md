@@ -46,6 +46,11 @@ designer edits, separate QR-menu tools and reprinting, at no cost to the
 restaurant. It is the reason to claim a profile and keep it current, which keeps
 the guide complete and correct.
 
+**Allergen and diet labels are free too** (owner, 2026-10-28). They make it
+worthwhile for restaurants to supply complete, current menus, and that keeps
+Menucard's own data supply good; diners with an allergy or a diet benefit
+directly.
+
 ## What restaurants can pay for
 
 Optional extras on top of the free menu. They come from data Menucard already
@@ -54,7 +59,6 @@ maintains, so they cost us little and can be priced well below separate tools.
 | Service | What the restaurant gets | Replaces today | Our cost |
 | --- | --- | --- | --- |
 | Translations | English and German menu (tourists, students, expats), checked by the restaurant before it goes live | Translation agency or none | Pennies per menu with the existing AI budget |
-| Allergens and diets | Structured allergen and diet labels per dish, shown consistently | Paper allergen lists | Low |
 | Insights | Per dish: views, saves and shares per week; anonymous comparison with the neighbourhood | Nothing comparable | Low: from the step-0 counters |
 | Daily special | Daghap or dagkaart published in seconds, also on the website widget | Social media posts by hand | Low |
 
@@ -62,9 +66,9 @@ maintains, so they cost us little and can be priced well below separate tools.
 current competitor prices before launch):
 
 - **Free:** listing, claim, editing the menu, the menu everywhere (website
-  widget, QR menu, PDF), daily special on Menucard.
-- **Pro, ±€9–19 per month:** insights, translations, allergen labels, the daily
-  special also on the website widget.
+  widget, QR menu, PDF), allergen and diet labels, daily special on Menucard.
+- **Pro, ±€9–19 per month:** insights, translations, the daily special also on
+  the website widget.
 - **Chain, by arrangement:** several locations under one account.
 
 **Launch offer:** the first 10–20 Breda restaurants get Pro free for six months
@@ -101,7 +105,7 @@ instead (see the affiliate option below).
 3. **In parallel:** an offer to Breda city marketing and the business fund,
    based on the counters.
 4. **Then:** Pro at its launch price: insights (once there are a few months of
-   counts), translations, allergen labels.
+   counts) and translations.
 5. **Later:** reservation affiliate, data products, other cities.
 
 ## What this asks of the owner and the organisation
