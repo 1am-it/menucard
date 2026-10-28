@@ -130,7 +130,7 @@ test('BE-37 phone: the measured controls have a 44px tap target and the checkbox
   }
   // Een native selectievakje negeert padding; het label eromheen is het
   // tikvlak van 44 px en de box zelf houdt zijn eigen maat.
-  assert.match(source, /\.cov-check-hit,\s*\n\.brn-pick-hit \{ display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; \}/);
+  assert.match(source, /\.cov-check-hit,\s*\n\.brn-pick-hit \{ display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; \}/);
   assert.match(source, /\.brn-pick-spacer \{ width: 44px; \}/);
   assert.match(read('app/internal/coverage/CoverageCheckSection.js'), /<label className="cov-check-hit">\s*\n\s*<input\s*\n\s*type="checkbox"/);
   assert.match(read('app/internal/bronnen/BronnenView.js'), /<label className="brn-pick-hit">\s*\n\s*<input\s*\n\s*type="checkbox"/);

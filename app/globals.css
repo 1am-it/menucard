@@ -4860,7 +4860,7 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 /* Een native selectievakje van 20 px negeert padding en blijft dus 20 px.
    Het label eromheen is het tikvlak van 44 px; de box zelf houdt zijn maat. */
 .cov-check-hit,
-.brn-pick-hit { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+.brn-pick-hit { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 44px; height: 44px; }
 .brn-pick-hit { margin-top: 6px; }
 .brn-pick-hit .brn-pick { margin-top: 0; }
 .brn-pick-spacer { width: 44px; }
