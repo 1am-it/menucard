@@ -525,6 +525,23 @@ const imageOnlyItem = item({
   notes: [],
 });
 
+// BE-40 (#95): the other real state of the same row — the existing AI status
+// route answering "available" — so the row may offer "Lees met AI
+// (afbeelding)" (BE-33 criterion 1). Fictional values only; no provider is
+// contacted and the reading itself is never started here.
+const imageOnlyAiStatus = {
+  status: {
+    enabled: true,
+    reason: null,
+    message: null,
+    label: 'Gelezen door AI',
+    aiName: 'Claude (Haiku 5.5)',
+    perCallMaxEurCents: 30,
+    monthly: { spentEurCents: 12, limitEurCents: 1000, remainingEurCents: 988, unknownConcepts: 0 },
+    budget: { allowed: true, reason: null },
+  },
+};
+
 // The existing Bronnen beoordelen page, built through the same view builder the
 // server uses. One known restaurant is enough to prove the follow-up route and
 // the preselection; no proposal is pre-filled.
@@ -937,7 +954,7 @@ module.exports = {
     'structure8-advice': overview(structure8AdviceDetail),
     empty: overview(null),
     partial: overview(detailWith([partialItem])),
-    image_only: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
+    image_only: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload, ai: imageOnlyAiStatus },
     triage: { batch: overview(detailWith([imageOnlyItem])), triage: triagePayload },
     v2: overview(detailWith([v2Item])),
     error: null,

@@ -21,7 +21,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { STATUSES } = require('../../src/lib/batchAnalysis');
-const { FOLLOW_UPS, PROPOSAL_KINDS, NEXT_STEP_LABELS } = require('../../src/lib/sourceTriage');
+const { FOLLOW_UPS } = require('../../src/lib/sourceTriage');
 const { PDF_SCAN_NOTICE } = require('../../src/lib/menuSourceMap');
 const fixtures = require('./fixtures/menuReviewFixtures');
 
@@ -66,19 +66,41 @@ test('image-only: the fixture row shows exactly that label', () => {
 test('image-only follow-up: the check expects the product\'s own reason and next step', () => {
   assert.equal(SCRIPT.includes(FOLLOW_UP.reason), true, `missing literal: ${FOLLOW_UP.reason}`);
   assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true, `missing literal: ${FOLLOW_UP.nextStep}`);
-  assert.equal(SCRIPT.includes(`Algemene route: ${NEXT_STEP_LABELS.check_via_onboarding}`), true);
 });
 
-test('image-only follow-up: the mark_unusable suggestion the check prepares still exists', () => {
-  // The check clicks the `mark_unusable` kind and then reads the preselected
-  // `other` reason. Both are product vocabulary; deleting one without updating
-  // the other is drift, not a browser failure.
-  assert.equal(PROPOSAL_KINDS.includes(FOLLOW_UP.suggestion.kind), true);
-  assert.equal(FOLLOW_UP.suggestion.kind, 'mark_unusable');
-  assert.equal(FOLLOW_UP.suggestion.unusableReason, 'other');
-  assert.equal(SCRIPT.includes('input[type="radio"][value="mark_unusable"]'), true);
-  assert.equal(SCRIPT.includes('alleen als afbeelding of scan'), true);
-  assert.equal(FOLLOW_UP.suggestion.note.includes('alleen als afbeelding of scan'), true);
+test('image-only follow-up: the batch banner the check reads is the screen\'s own wording', () => {
+  // Since BE-31 the same reason and next step also reach the screen as the
+  // batch banner (app/internal/bronnen/BronnenView.js), which is what the
+  // check reads on the current screen.
+  const BRONNEN_VIEW = READ_TEXT('app/internal/bronnen/BronnenView.js');
+  assert.equal(BRONNEN_VIEW.includes('Vervolg van de batchanalyse:'), true);
+  assert.equal(SCRIPT.includes('Vervolg van de batchanalyse:'), true);
+  assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true);
+});
+
+test('image-only: the row\'s own next step is the one the check reads', () => {
+  // BE-33 (#79) / BE-35 (#84): the row itself offers the AI reading when the AI
+  // may read an image, and otherwise the honest reason plus the manual import.
+  // Both literals live in the batch screen, not in this test.
+  const BATCH_VIEW = READ_TEXT('app/internal/bronnen/batch/BatchAnalysisView.js');
+  const offReason = 'AI is nu niet beschikbaar, dus een afbeelding kan nu niet gelezen worden.';
+  assert.equal(BATCH_VIEW.includes(offReason), true);
+  assert.equal(SCRIPT.includes(offReason), true);
+  assert.equal(BATCH_VIEW.includes('Voeg de gerechten handmatig toe'), true);
+  assert.equal(SCRIPT.includes('Voeg de gerechten handmatig toe'), true);
+  assert.equal(BATCH_VIEW.includes('📷 Lees met AI (afbeelding)'), true);
+  assert.equal(SCRIPT.includes('📷 Lees met AI (afbeelding)'), true);
+  assert.equal(BATCH_VIEW.includes('Kost ongeveer 1 cent per afbeelding of pagina \u00B7 duurt \u00B1 1 minuut'), true);
+  assert.equal(SCRIPT.includes('Kost ongeveer 1 cent per afbeelding of pagina \u00B7 duurt \u00B1 1 minuut'), true);
+});
+
+test('image-only: both AI states of the same row are covered by the fixture', () => {
+  // The fixture answers the existing AI status route, so the row can really be
+  // seen with the AI off (manual route) and on ("Lees met AI (afbeelding)").
+  const scenario = fixtures.scenarios.image_only;
+  assert.equal(scenario.ai.status.enabled, true);
+  assert.equal(scenario.ai.status.budget.allowed, true);
+  assert.equal(Boolean(imageOnlyItems()[0].jobId), true, 'the AI reading needs the existing job');
 });
 
 test('image-only follow-up: the fixture keeps the known URL and the next step the check names', () => {
