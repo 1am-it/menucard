@@ -29,6 +29,7 @@ const MULTI_SCENARIO_CHECKS = [
   { file: 'ops/browser/run-beeld-lezen-browser-check.js', list: 'CHECK_SCENARIOS' },
   { file: 'ops/browser/run-straks-browser-check.js', list: 'CHECK_SCENARIOS' },
   { file: 'ops/browser/run-klaar-voor-publicatie-browser-check.js', list: 'CHECK_SCENARIOS' },
+  { file: 'ops/browser/run-be44-browser-check.js', list: 'SCENARIOS' },
 ];
 
 test('BE-43: elke check met meerdere scenario\'s gebruikt de gedeelde helper', () => {

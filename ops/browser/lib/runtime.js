@@ -210,6 +210,7 @@ module.exports = {
   waitFor,
   navigate,
   screenshot,
+  pngSize,
   pressKey,
   tabUntil,
 };

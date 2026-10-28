@@ -1,0 +1,794 @@
+{
+  "generatedAt": "2026-10-28T23:13:03.855Z",
+  "ticket": "#105 BE-44 deel 1 — een gerecht delen met voorvertoning",
+  "kind": "developer evidence — local build, no production data or credentials",
+  "app": "http://localhost:3157",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "delen",
+      "checks": 62,
+      "passed": 62,
+      "failed": 0,
+      "durationMs": 30011,
+      "error": null
+    },
+    {
+      "name": "ontvanger",
+      "checks": 36,
+      "passed": 36,
+      "failed": 0,
+      "durationMs": 24710,
+      "error": null
+    },
+    {
+      "name": "server",
+      "checks": 14,
+      "passed": 14,
+      "failed": 0,
+      "durationMs": 5284,
+      "error": null
+    }
+  ],
+  "checks": {
+    "total": 112,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "delen (1280/light): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (1280/light): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":774.6875,\"left\":78,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (1280/light): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (1280/light): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (1280/light): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (1280/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "delen (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (1280/light): zonder navigator.share verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (1280/light): het klembord kreeg de deeplink met de stand",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+      },
+      {
+        "name": "delen (390/light): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (390/light): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1304.6875,\"left\":33,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (390/light): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (390/light): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (390/light): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (390/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "delen (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (390/light): de knop gebruikt navigator.share",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"payload\":{\"url\":\"http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+      },
+      {
+        "name": "delen (390/light): de payload is alleen url en title",
+        "passed": true,
+        "detail": "[\"title\",\"url\"]"
+      },
+      {
+        "name": "delen (390/light): de link is de deeplink met de stand van dit moment",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+      },
+      {
+        "name": "delen (390/light): de titel is gerecht en restaurant",
+        "passed": true,
+        "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "delen (320/light): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (320/light): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1408.6875,\"left\":33,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (320/light): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (320/light): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (320/light): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (320/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "delen (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (320/light): de knop gebruikt navigator.share",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"payload\":{\"url\":\"http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+      },
+      {
+        "name": "delen (320/light): de payload is alleen url en title",
+        "passed": true,
+        "detail": "[\"title\",\"url\"]"
+      },
+      {
+        "name": "delen (320/light): de link is de deeplink met de stand van dit moment",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+      },
+      {
+        "name": "delen (320/light): de titel is gerecht en restaurant",
+        "passed": true,
+        "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "delen (1280/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (1280/dark): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":774.6875,\"left\":78,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (1280/dark): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (1280/dark): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (1280/dark): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (1280/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "delen (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (1280/dark): zonder navigator.share verschijnt \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"status\":\"Link gekopieerd\"}"
+      },
+      {
+        "name": "delen (1280/dark): het klembord kreeg de deeplink met de stand",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
+        "name": "delen (390/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (390/dark): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1304.6875,\"left\":33,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (390/dark): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (390/dark): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (390/dark): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (390/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "delen (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (390/dark): de knop gebruikt navigator.share",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"payload\":{\"url\":\"http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+      },
+      {
+        "name": "delen (390/dark): de payload is alleen url en title",
+        "passed": true,
+        "detail": "[\"title\",\"url\"]"
+      },
+      {
+        "name": "delen (390/dark): de link is de deeplink met de stand van dit moment",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
+        "name": "delen (390/dark): de titel is gerecht en restaurant",
+        "passed": true,
+        "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "delen (320/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "passed": true,
+        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+      },
+      {
+        "name": "delen (320/dark): het aanraakvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1408.6875,\"left\":33,\"width\":97,\"height\":44}"
+      },
+      {
+        "name": "delen (320/dark): de knop staat onder de beschrijving, niet naast de prijs",
+        "passed": true,
+        "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
+      },
+      {
+        "name": "delen (320/dark): de knop heeft het deelicoon",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (320/dark): de melding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "delen (320/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "delen (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "delen (320/dark): de knop gebruikt navigator.share",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"payload\":{\"url\":\"http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+      },
+      {
+        "name": "delen (320/dark): de payload is alleen url en title",
+        "passed": true,
+        "detail": "[\"title\",\"url\"]"
+      },
+      {
+        "name": "delen (320/dark): de link is de deeplink met de stand van dit moment",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
+        "name": "delen (320/dark): de titel is gerecht en restaurant",
+        "passed": true,
+        "detail": "Poussin · Brasserie Bardot"
+      },
+      {
+        "name": "ontvanger (1280/light): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (1280/light): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (1280/light): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (1280/light): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (1280/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "ontvanger (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "ontvanger (390/light): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (390/light): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (390/light): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (390/light): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (390/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "ontvanger (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "ontvanger (320/light): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (320/light): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (320/light): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (320/light): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (320/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "ontvanger (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "ontvanger (1280/dark): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (1280/dark): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (1280/dark): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (1280/dark): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (1280/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "ontvanger (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "ontvanger (390/dark): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (390/dark): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (390/dark): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (390/dark): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (390/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "ontvanger (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "ontvanger (320/dark): de regel \"Iemand deelde dit gerecht met je\" staat bij de kaart",
+        "passed": true,
+        "detail": "Iemand deelde dit gerecht met je"
+      },
+      {
+        "name": "ontvanger (320/dark): de regel staat boven de kaart",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "ontvanger (320/dark): het gerecht is opgelicht",
+        "passed": true,
+        "detail": "{\"lit\":true,\"highlighted\":true}"
+      },
+      {
+        "name": "ontvanger (320/dark): de deelknop staat ook op deze kaart",
+        "passed": true,
+        "detail": "Delen"
+      },
+      {
+        "name": "ontvanger (320/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "ontvanger (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "server: de gedeelde link antwoordt met 200",
+        "passed": true,
+        "detail": "200"
+      },
+      {
+        "name": "server: og:title is \"<gerecht> · <prijs>\"",
+        "passed": true,
+        "detail": "Poussin · €20,95"
+      },
+      {
+        "name": "server: og:description noemt het restaurant en het adres",
+        "passed": true,
+        "detail": "Brasserie Bardot · Van Coothplein 12, 4811 NE Breda — Krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote"
+      },
+      {
+        "name": "server: og:url is de gedeelde link",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
+        "name": "server: og:image wijst naar de eigen afbeelding van dit gerecht",
+        "passed": true,
+        "detail": "http://localhost:3157/menu/6-diner/share-image?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+      },
+      {
+        "name": "server: er is een apple-touch-icon",
+        "passed": true,
+        "detail": "<link rel=\"apple-touch-icon\" href=\"/apple-icon?95401cd77149d5f1\" type=\"image/png\" sizes=\"180x180\"/>"
+      },
+      {
+        "name": "server: zonder gerecht-deeplink blijft de algemene titel staan",
+        "passed": true,
+        "detail": "BredaEats"
+      },
+      {
+        "name": "server: zonder gerecht-deeplink geen gerecht-og:title",
+        "passed": true,
+        "detail": "BredaEats"
+      },
+      {
+        "name": "server: zonder gerecht-deeplink geen og:image van een gerecht",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "og:image (licht): PNG van 1200 × 630",
+        "passed": true,
+        "detail": "{\"status\":200,\"type\":\"image/png\",\"size\":{\"width\":1200,\"height\":630}}"
+      },
+      {
+        "name": "og:image (donker): PNG van 1200 × 630",
+        "passed": true,
+        "detail": "{\"status\":200,\"type\":\"image/png\",\"size\":{\"width\":1200,\"height\":630}}"
+      },
+      {
+        "name": "og:image: licht en donker zijn echt twee verschillende afbeeldingen",
+        "passed": true,
+        "detail": "{\"licht\":39411,\"donker\":39517}"
+      },
+      {
+        "name": "og:image: een ongeldige positie geeft 404 in plaats van een verzonnen kaart",
+        "passed": true,
+        "detail": "404"
+      },
+      {
+        "name": "app-icoon: PNG van 180 × 180",
+        "passed": true,
+        "detail": "{\"status\":200,\"size\":{\"width\":180,\"height\":180},\"type\":\"image/png\"}"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "file": {
+        "file": "be44-deelknop-1280-light.png",
+        "sha256": "562f14ac428e892fff85cd1aa2de2b5c49a29dd41a2e53df46e41d53fea74e58",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "delen",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-melding-1280-light.png",
+        "sha256": "86527bb49c6ecf189f504166b9db0205a802783af18911e655b96fea08774efb",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "delen",
+      "state": "melding",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-deelknop-390-light.png",
+        "sha256": "4c530ee061f018114aae2a83fff6c8199ecab4d8536f9fe200c3db891693a46a",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "delen",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-deelknop-320-light.png",
+        "sha256": "7caa297124972e4a5193aa32665644b60d40a459dd2e049db22518017c6277d1",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "delen",
+      "theme": "light",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-deelknop-1280-dark.png",
+        "sha256": "470d347f37edbe1dbc036e41371b1541d65492179d2bced5355e9664bfab4172",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "delen",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-melding-1280-dark.png",
+        "sha256": "d45731670019db8a94cf9213cfec9ae3ab2371961633929b77f9c098b58c0ee9",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "delen",
+      "state": "melding",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-deelknop-390-dark.png",
+        "sha256": "8a11c6250fe9521c92728764bec82a47885535cce6db69fde7b4735e267b36b3",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "delen",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-deelknop-320-dark.png",
+        "sha256": "81780e4708a2966b63fe49bfbd06dc62025659390b7c731df4e5e6625cf8bd38",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "delen",
+      "theme": "dark",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-1280-light.png",
+        "sha256": "452767cdafa92643d03301297dc7c4a4dc488589581ec6a61dcaa6c3c44c2b3b",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "ontvanger",
+      "theme": "light",
+      "width": 1280,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-390-light.png",
+        "sha256": "ec9448de546dc8e9211b202c5211004f0b856b21ab11d034498dc14a1470d503",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "ontvanger",
+      "theme": "light",
+      "width": 390,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-320-light.png",
+        "sha256": "568994ab63c61be367dd618850b9fb9005629d968492e07b15111591ed6cc146",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "ontvanger",
+      "theme": "light",
+      "width": 320,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-1280-dark.png",
+        "sha256": "da65df802f96e6813e3dbff37473a1a42ac08f1e210988fb3106f60483e99930",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "ontvanger",
+      "theme": "dark",
+      "width": 1280,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-390-dark.png",
+        "sha256": "6e5c85b493dac6e4a14be1b0bd48edfd1835f91c02a27be1c3266b8b10407b0a",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "ontvanger",
+      "theme": "dark",
+      "width": 390,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+    },
+    {
+      "file": {
+        "file": "be44-ontvanger-320-dark.png",
+        "sha256": "e6bbfabf3475980c1dfe309faa79144d09296c14cfce19ff9eee3e23f183199c",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "ontvanger",
+      "theme": "dark",
+      "width": 320,
+      "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+    }
+  ],
+  "fixture": {
+    "menu": "6-diner",
+    "dish": "6-diner-0-0",
+    "name": "Poussin",
+    "category": "Specialiteiten van Bardot",
+    "price": "€20,95",
+    "restaurant": "Brasserie Bardot",
+    "address": "Van Coothplein 12, 4811 NE Breda",
+    "deepLink": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot"
+  },
+  "gaps": [
+    "Het systeemdeelmenu zelf is van de telefoon: navigator.share is in deze check een stub die de payload vastlegt, geen echte share-sheet.",
+    "Het klembord is een stub: de check bewijst welke link gekopieerd wordt en dat de melding verschijnt, niet het echte systeemklembord.",
+    "Dit is developer-evidence op een lokale build: geen productie, geen echte Supabase-credentials, geen merge of publicatie.",
+    "De app-brede AI-activering valt buiten deze opdracht; er is hier niets aan AI of Supabase geactiveerd."
+  ],
+  "result": "passed"
+}

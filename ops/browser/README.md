@@ -639,6 +639,36 @@ light and dark, plus the ready/merged detail card. Screenshots
 This is fixture evidence on a local machine: not real acceptance and not
 independent review.
 
+## BE-44 (#105) — sharing one dish and its preview
+
+`run-be44-browser-check.js` (also `npm run test:browser:be44`) starts its own
+local dev server and browser through the same runtime as the other checks and
+records three scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **delen** — on `/menu/6-diner` the card of the real dish "Poussin" (€20,95)
+  has the button "Delen" with the share icon, under the description and not in
+  the row with the price, with a tap target of at least 44 × 44 px, at 1280, 390
+  and 320 px in light and dark. At 1280 px (no `navigator.share`) the clipboard
+  receives the existing BE-12 deep link with `?stand=` for the current theme and
+  "Link gekopieerd" appears in a `role="status"`; at 390 and 320 px exactly
+  `{ url, title }` goes to `navigator.share` — never `text`.
+- **ontvanger** — opening the shared link shows "Iemand deelde dit gerecht met
+  je" above the highlighted card, and the `?stand=` in the link does not change
+  the page's theme for the receiver.
+- **server** — the server HTML of a shared link has `og:title`
+  "Poussin · €20,95", `og:description` with the restaurant and the address,
+  `og:url`, and an `og:image` of 1200 × 630 for both stands (two different
+  PNGs); an invalid dish position answers 404 instead of inventing a card; the
+  apple-touch-icon is 180 × 180; `/menu/6-diner` without a dish deep link keeps
+  the general metadata.
+
+The record lands in `ops/browser/evidence/be44-browser-evidence.json` (in git);
+the screenshots and the two `og:image` PNGs plus the apple icon stay outside git
+in the ignored `ops/browser/output/be-44/`. `navigator.share` and the clipboard
+are stubbed in the page: the check proves the payload and the message, not the
+real share sheet or the real system clipboard. Developer evidence on a local
+build — not production, not independent review.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real
