@@ -39,7 +39,7 @@ export default function AiReadAction({ row, state, onRead, onOpen, disabled = fa
     const summary = state.summary && typeof state.summary === 'object' ? state.summary : {}
     return (
       <span className="srr-ai" role="status">
-        <span className="srr-ai-line">{aiReadOutcomeLine({ items: summary.items, needsReview: summary.needsReview })}</span>
+        <span className="srr-ai-line">{aiReadOutcomeLine({ items: summary.items, needsReview: summary.needsReview, pagesFailed: state.pagesFailed })}</span>
         <span className="srr-ai-hint">{aiReadCostLine(state.cost)}</span>
         <button type="button" className="di-btn-primary srr-action" disabled={disabled} onClick={() => onOpen && onOpen(row)}>
           {REVIEW_LABEL}

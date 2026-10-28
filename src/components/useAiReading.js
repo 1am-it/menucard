@@ -60,7 +60,16 @@ export default function useAiReading({ token, onDone = null } = {}) {
               ? data.import.summary
               : {}
         setReadings((prev) => ({ ...prev, [key]: data }))
-        setStates((prev) => ({ ...prev, [key]: { phase: 'done', summary, cost: data.cost || null } }))
+        setStates((prev) => ({
+          ...prev,
+          [key]: {
+            phase: 'done',
+            summary,
+            cost: data.cost || null,
+            // BE-36 (#87): a partial reading never looks complete in the row.
+            pagesFailed: data.pages && Array.isArray(data.pages.failed) ? data.pages.failed.length : 0,
+          },
+        }))
         if (typeof onDone === 'function') onDone(data, row)
         return data
       } catch {
@@ -68,7 +77,7 @@ export default function useAiReading({ token, onDone = null } = {}) {
           ...prev,
           [key]: {
             phase: 'error',
-            ...aiReadFailure({ error: 'De AI-lezing lukte niet. Ga verder met de handmatige import.' }),
+            ...aiReadFailure({ error: 'De AI-lezing lukte niet. Probeer het opnieuw.' }),
           },
         }))
         return null

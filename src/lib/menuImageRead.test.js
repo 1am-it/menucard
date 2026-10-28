@@ -204,7 +204,12 @@ test('BE-33: a text source wins; images and a scan are planned within the fixed 
   assert.equal(images.mode, 'image');
   assert.equal(images.imageCount, 2);
   assert.match(images.estimate.label, /2 afbeeldingen/);
-  assert.equal(images.estimate.maxEurCents, 30);
+  // BE-36 (#87, criterion 5): the estimate and the maximum follow the pages —
+  // two pages cost about two cents and reserve at most six.
+  assert.match(images.estimate.label, /geschat ± 2 cent/);
+  assert.match(images.estimate.label, /maximaal 6 cent per lezing/);
+  assert.equal(images.estimate.estimatedEurCents, 2);
+  assert.equal(images.estimate.maxEurCents, 6);
 
   const scan = planImageRead({ sources: [{ id: 'source-1', kind: 'pdf', documentBase64: TINY_PNG, pageCount: 3, hasText: false }] });
   assert.equal(scan.ok, true);

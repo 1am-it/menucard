@@ -276,7 +276,11 @@ test('W8: een schemafout is een leesbare weigering, geen concept', async () => {
   const result = await h.handlers.read(requestOf({ state: tokenOf() }));
   assert.equal(result.status, 422);
   assert.equal(result.body.reason, 'schema_violation');
-  assert.match(result.body.error, /handmatige import/);
+  // BE-36 (#87, criterion 4): its own sentence with a next step, never only
+  // "ga verder met de handmatige import".
+  assert.match(result.body.error, /past niet bij de afspraken/);
+  assert.match(result.body.error, /probeer het opnieuw/i);
+  assert.doesNotMatch(result.body.error, /handmatige import/);
   assert.equal(h.saved.length, 0);
 });
 
@@ -305,7 +309,10 @@ test('W8: een time-out is een gewone melding, geen concept', async () => {
   const h = harness({ client });
   const result = await h.handlers.read(requestOf({ state: tokenOf() }));
   assert.equal(result.status, 422);
-  assert.match(result.body.error, /handmatige import/);
+  assert.equal(result.body.reason, 'provider_unavailable');
+  assert.match(result.body.error, /niet bereikbaar/);
+  assert.match(result.body.error, /opnieuw/);
+  assert.doesNotMatch(result.body.error, /handmatige import/);
   assert.equal(h.saved.length, 0);
   // A failed paid call is reported as unknown, never as a free call.
   assert.equal(result.body.cost.known, false);
@@ -327,7 +334,7 @@ test('W4: het maandbudget weigert vóór de aanroep', async () => {
   const read = await h.handlers.read(requestOf({ state: tokenOf() }));
   assert.equal(read.status, 429);
   assert.equal(read.body.reason, 'budget_exhausted');
-  assert.match(read.body.error, /handmatige import/);
+  assert.equal(read.body.error, 'Het budget van deze maand is op.');
   assert.equal(client.calls.length, 0);
   assert.equal(h.saved.length, 0);
 });

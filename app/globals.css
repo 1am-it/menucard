@@ -3257,6 +3257,12 @@ details.bta-side-card > summary:focus-visible { outline: 2px solid var(--border-
 .mai-notices { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--accent-border); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
 .mai-notices-title { margin: 0; font-size: 13px; font-weight: 800; color: var(--text-primary); }
 .mai-notice-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-secondary); overflow-wrap: anywhere; }
+/* BE-36 (#87, criterium 2 en 4): een pagina die niet gelezen kon worden staat
+   per pagina in de kaart, met de eigen zin en "Opnieuw proberen". Neutraal van
+   toon (--status-old is de aandachtrol), geen tweede primaire knop. */
+.mai-failed-pages { margin: 10px 0 0; padding: 10px 12px; list-style: none; display: grid; gap: 8px; border: 1px solid var(--border); border-left: 3px solid var(--status-old); border-radius: var(--radius-md); background: var(--bg-elevated); min-width: 0; }
+.mai-failed-pages li { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--text-primary); overflow-wrap: anywhere; }
+.mai-failed-pages .mai-link { flex: 0 0 auto; }
 /* Variant 1 (Lead order 6382189724): source lines with a price that no dish in
    the concept covers. Orange (the attention role, --status-old; --warning is
    retired), above the nalopen list, and free: no AI call. */

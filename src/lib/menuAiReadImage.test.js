@@ -155,16 +155,23 @@ test('BE-33: menu images of this website are read as images by the same model', 
   const h = harness({ client, sources: [imageSource(2)] });
   const result = await h.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(result.status, 200, JSON.stringify(result.body));
-  assert.equal(client.calls.length, 1);
+  // BE-36 (#87, criterion 1): each image is its own page and its own call.
+  assert.equal(client.calls.length, 2);
+  assert.equal(result.body.pages.total, 2);
+  assert.equal(result.body.pages.read, 2);
 
-  // Criterion 2: the provider request carries two real image blocks, each with
-  // its own origin line, and no text source.
-  const content = client.calls[0].body.messages[0].content;
-  const images = content.filter((block) => block.type === 'image');
-  assert.equal(images.length, 2);
-  assert.deepEqual(images[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
-  assert.ok(content.some((block) => block.type === 'text' && block.text.startsWith('afbeelding 1')));
-  assert.ok(content.some((block) => block.type === 'text' && block.text.includes('"afbeelding N" of "pagina N"')));
+  // Criterion 2: every call carries exactly one real image block with its own
+  // origin line, and no text source.
+  for (const [index, call] of client.calls.entries()) {
+    const content = call.body.messages[0].content;
+    const images = content.filter((block) => block.type === 'image');
+    assert.equal(images.length, 1);
+    assert.deepEqual(images[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
+    assert.ok(content.some((block) => block.type === 'text' && block.text.startsWith(`afbeelding ${index + 1}`)));
+    assert.ok(content.some((block) => block.type === 'text' && block.text.includes('"afbeelding N" of "pagina N"')));
+    // Criterion 2: the output ceiling fits one page, not a whole card.
+    assert.equal(call.body.max_tokens, 8000);
+  }
 
   // The plan and the estimate are visible, and the notice is honest.
   assert.equal(result.body.plan.mode, 'image');
@@ -213,9 +220,14 @@ test('BE-33: too many pages, and a missing origin, are refused before or by the 
   const tooManyImages = harness({ client: tooManyClient, sources: [imageSource(MAX_MENU_IMAGES + 1)] });
   const tooMany = await tooManyImages.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(tooMany.status, 200, JSON.stringify(tooMany.body));
-  assert.equal(tooManyClient.calls.length, 1);
-  const imageBlocks = tooManyClient.calls[0].body.messages[0].content.filter((block) => block.type === 'image');
-  assert.equal(imageBlocks.length, MAX_MENU_IMAGES);
+  // BE-36 (#87): ten pages, one image block per call.
+  assert.equal(tooManyClient.calls.length, MAX_MENU_IMAGES);
+  const imageBlocks = tooManyClient.calls.reduce(
+    (total, call) => total + call.body.messages[0].content.filter((block) => block.type === 'image').length,
+    0,
+  );
+  assert.equal(imageBlocks, MAX_MENU_IMAGES);
+  assert.equal(tooMany.body.pages.total, MAX_MENU_IMAGES);
   assert.equal(tooMany.body.plan.imageCount, MAX_MENU_IMAGES);
   assert.equal(tooMany.body.plan.availableImageCount, MAX_MENU_IMAGES + 1);
   assert.match(tooMany.body.plan.limitation, /Deze lezing heeft 11 menu-afbeeldingen; de eerste 10 zijn gelezen\./);
@@ -231,14 +243,24 @@ test('BE-33: too many pages, and a missing origin, are refused before or by the 
   assert.equal(tooManyPages.body.reason, 'too_many_pages');
   assert.equal(elevenClient.calls.length, 0);
 
-  // A dish without the origin of its image is rejected by the same validator,
-  // before anything is stored: no concept, no approval.
+  // A dish without the origin of its image is no longer a refusal of the whole
+  // page (BE-36 / #87, criterion 3): the page it was read from is known, so the
+  // origin is filled in and only that dish goes to "Controle nodig".
   const missing = harness({ client: fakeClient(() => responseOf(answerFor(['regel 4']))), sources: [imageSource(1)] });
-  const refused = await missing.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  const repaired = await missing.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
+  assert.equal(repaired.status, 200, JSON.stringify(repaired.body));
+  assert.deepEqual(repaired.body.review.rows.map((row) => row.provenance), ['gelezen van afbeelding 1']);
+  assert.deepEqual(repaired.body.review.rows.map((row) => row.label), ['Controle nodig']);
+  assert.equal(missing.saved.length, 1);
+
+  // What is really unusable is still refused: an item without a name.
+  const nameless = answerFor(['afbeelding 1']);
+  nameless.menus[0].categories[0].items[0].name = '';
+  const broken = harness({ client: fakeClient(() => responseOf(nameless)), sources: [imageSource(1)] });
+  const refused = await broken.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(refused.status, 422, JSON.stringify(refused.body));
   assert.equal(refused.body.reason, 'schema_violation');
-  assert.deepEqual(refused.body.problems, ['menus[0].categories[0].items[0].evidence.locator must name "afbeelding N" or "pagina N" for an image or scan source']);
-  assert.equal(missing.saved.length, 0);
+  assert.equal(broken.saved.length, 0);
 });
 
 test('BE-33: budget out and AI off stop an image reading before the model is called', async () => {
@@ -300,11 +322,12 @@ test('BE-35: the real menu-image pages reach the model as image blocks, ten at m
   const bigRun = harness({ client: bigClient, sources: [bigSource] });
   const bigResult = await bigRun.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(bigResult.status, 200, JSON.stringify(bigResult.body));
-  const bigContent = bigClient.calls[0].body.messages[0].content;
-  const bigImages = bigContent.filter((block) => block.type === 'image');
+  // BE-36 (#87): ten pages in page order, one image per call.
+  assert.equal(bigClient.calls.length, 10);
+  const bigImages = bigClient.calls.flatMap((call) => call.body.messages[0].content.filter((block) => block.type === 'image'));
   assert.equal(bigImages.length, 10);
   assert.deepEqual(bigImages[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
-  assert.ok(bigContent.some((block) => block.type === 'text' && block.text.startsWith('afbeelding 10')));
+  assert.ok(bigClient.calls[9].body.messages[0].content.some((block) => block.type === 'text' && block.text.startsWith('afbeelding 10')));
   assert.equal(bigResult.body.plan.mode, 'image');
   assert.equal(bigResult.body.plan.imageCount, 10);
   assert.match(bigResult.body.estimate.label, /10 afbeeldingen/);
@@ -317,8 +340,9 @@ test('BE-35: the real menu-image pages reach the model as image blocks, ten at m
   const classicoRun = harness({ client: classicoClient, sources: [classicoSource] });
   const classicoResult = await classicoRun.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(classicoResult.status, 200, JSON.stringify(classicoResult.body));
-  const classicoContent = classicoClient.calls[0].body.messages[0].content;
-  assert.equal(classicoContent.filter((block) => block.type === 'image').length, 2);
+  assert.equal(classicoClient.calls.length, 2);
+  const classicoImages = classicoClient.calls.flatMap((call) => call.body.messages[0].content.filter((block) => block.type === 'image'));
+  assert.equal(classicoImages.length, 2);
   assert.deepEqual(classicoResult.body.review.rows.map((row) => row.provenance), ['gelezen van afbeelding 1', 'gelezen van afbeelding 2']);
   assert.deepEqual(classicoResult.body.review.rows.map((row) => row.label), ['Controle nodig', 'Controle nodig']);
 });
@@ -384,7 +408,11 @@ test('BE-35 ronde 3: negen menu-afbeeldingen bereiken de AI via job_id én via d
   assert.equal(job.status, 200, JSON.stringify(job.body));
   assert.equal(job.body.plan.imageCount, 9);
   assert.equal(job.body.plan.mode, 'image');
-  const jobImages = jobClient.calls[0].body.messages[0].content.filter((block) => block.type === 'image');
+  // BE-36 (#87): nine pages, nine calls, one image block each.
+  assert.equal(jobClient.calls.length, 9);
+  assert.equal(job.body.pages.total, 9);
+  assert.equal(job.body.pages.read, 9);
+  const jobImages = jobClient.calls.flatMap((call) => call.body.messages[0].content.filter((block) => block.type === 'image'));
   assert.equal(jobImages.length, 9);
   assert.deepEqual(jobImages[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
   assert.deepEqual(job.body.review.rows.map((row) => row.provenance), [
@@ -413,10 +441,12 @@ test('BE-35 ronde 3: negen menu-afbeeldingen bereiken de AI via job_id én via d
   assert.equal(state.body.plan.imageCount, 9);
   assert.equal(state.body.plan.mode, 'image');
   assert.equal(state.body.imageRead, true);
-  const stateImages = stateClient.calls[0].body.messages[0].content.filter((block) => block.type === 'image');
+  // The menu-import page sends the same nine images, again one page per call.
+  assert.equal(stateClient.calls.length, 9);
+  const stateImages = stateClient.calls.flatMap((call) => call.body.messages[0].content.filter((block) => block.type === 'image'));
   assert.equal(stateImages.length, 9, 'the menu-import page sends the same nine image blocks');
   assert.deepEqual(stateImages[0].source, { type: 'base64', media_type: 'image/jpeg', data: TINY_PNG });
-  const stateLabels = stateClient.calls[0].body.messages[0].content.filter((block) => block.type === 'text' && /^afbeelding \d+/.test(block.text));
+  const stateLabels = stateClient.calls.flatMap((call) => call.body.messages[0].content.filter((block) => block.type === 'text' && /^afbeelding \d+/.test(block.text)));
   assert.equal(stateLabels.length, 9, 'every image carries its own origin line');
   assert.ok(stateLabels.some((block) => block.text.startsWith('afbeelding 7')));
   assert.equal(stateRun.saved.length, 1);
@@ -488,14 +518,43 @@ test('BE-35 ronde 3: een tekstbron en een beeldbron gaan samen naar de AI', asyn
     sha256: sourceHashForText('Huiswijn 5,00\nKraanwater\nKoffie 2,50'),
   };
   const imagePart = imageSource(2);
-  const client = fakeClient(() => responseOf(answerFor(['afbeelding 1'], { sourcesRead: 2, sourceId: 'source-2' })));
+  // The fake answers the text page with a quote from its own text and the image
+  // pages with their own origin, exactly as the instruction asks.
+  const client = fakeClient((body) => {
+    const content = body.messages[0].content;
+    if (content.some((block) => block.type === 'text' && block.text.includes('Huiswijn 5,00'))) {
+      return responseOf({
+        menus: [{
+          title: 'Dranken',
+          sourceId: 'source-1',
+          categories: [{
+            name: 'Dranken',
+            items: [{
+              name: 'Huiswijn',
+              priceStatus: 'known',
+              amountMinorUnits: 500,
+              currency: 'EUR',
+              priceText: '5,00',
+              evidence: { sourceId: 'source-1', locator: 'regel 1', quote: 'Huiswijn 5,00' },
+            }],
+          }],
+        }],
+        rejected: [],
+        coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, itemsExtracted: 1, unreadSources: [], limitations: [] },
+      });
+    }
+    return responseOf(answerFor(['afbeelding 2'], { sourcesRead: 1, sourceId: 'source-2' }));
+  });
   const h = harness({ client, sources: [textSource, { ...imagePart, id: 'source-2', url: 'https://bistro-voorbeeld.example/beeldkaart' }] });
   const result = await h.handlers.read(requestOf({ job_id: 'job-1', restaurant_id: '23' }));
   assert.equal(result.status, 200, JSON.stringify(result.body));
   assert.equal(result.body.plan.mode, 'mixed');
   assert.equal(result.body.plan.imageCount, 2);
   assert.match(result.body.notice, /tekstbronnen en 2 menu-afbeeldingen/);
-  const content = client.calls[0].body.messages[0].content;
+  // BE-36 (#87): the text is one page and each image is one page — three calls,
+  // and the text really goes as text.
+  assert.equal(client.calls.length, 3);
+  const content = client.calls.flatMap((call) => call.body.messages[0].content);
   assert.equal(content.filter((block) => block.type === 'image').length, 2);
   assert.ok(content.some((block) => block.type === 'text' && block.text.includes('Huiswijn 5,00')));
 });
@@ -512,7 +571,9 @@ test('BE-35 ronde 3: een pagina zonder leesbare afbeeldingen valt uit de lezing 
   assert.equal(result.status, 200, JSON.stringify(result.body));
   assert.equal(result.body.plan.imageCount, 2);
   assert.equal(result.body.plan.sources.length, 1);
-  const content = client.calls[0].body.messages[0].content;
+  // BE-36 (#87): two images are two pages, each with its own call and block.
+  const content = client.calls.flatMap((call) => call.body.messages[0].content);
   assert.equal(content.filter((block) => block.type === 'image').length, 2);
+  assert.equal(result.body.pages.total, 2);
   assert.equal(h.saved.length, 1);
 });

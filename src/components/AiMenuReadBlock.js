@@ -36,6 +36,7 @@ export default function AiMenuReadBlock({
   onManual = null,
   onRead,
   onReview,
+  onRetryPage = null,
   title = 'Laat AI de kaart lezen',
   step = null,
 }) {
@@ -44,6 +45,10 @@ export default function AiMenuReadBlock({
   const budgetBlocked = Boolean(status && status.budget && status.budget.allowed === false)
   const done = phase === 'done' && result
   const failed = phase === 'error'
+  // BE-36 (#87, criterion 2): a page that could not be read is named per page,
+  // with one next step for that page only. The rest of the reading stays.
+  const failedPages = done && result.pages && Array.isArray(result.pages.failed) ? result.pages.failed : []
+  const partial = Boolean(done && result.partial)
 
   return (
     <section className="bta-card mai-ai-card mai-ai" aria-labelledby="mai-ai-title">
@@ -113,6 +118,36 @@ export default function AiMenuReadBlock({
                 Concept klaar: {result.summary.items} {result.summary.items === 1 ? 'gerecht' : 'gerechten'} ·{' '}
                 {result.summary.valid} in orde, {result.summary.needsReview} nalopen
               </p>
+              {/* BE-36 (#87, criteria 2 and 4): a partial reading says which page
+                  failed, in its own sentence, with a retry for that page only. */}
+              {partial ? (
+                <div className="di-banner di-banner-neutral mai-image-notice">
+                  <span>
+                    {result.pages && result.pages.total
+                      ? `${result.pages.read} van ${result.pages.total} pagina's gelezen.`
+                      : 'Een deel van de kaart is gelezen.'}
+                  </span>
+                </div>
+              ) : null}
+              {failedPages.length > 0 ? (
+                <ul className="mai-failed-pages">
+                  {failedPages.map((page) => (
+                    <li key={`page-${page.page}`}>
+                      <span>{page.message}</span>
+                      {page.retryable && onRetryPage ? (
+                        <button
+                          type="button"
+                          className="mai-link mai-linkbtn"
+                          disabled={busy}
+                          onClick={() => onRetryPage(page.page)}
+                        >
+                          Opnieuw proberen
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <p className="mai-why">
                 Kosten:{' '}
                 {result.cost && result.cost.known
@@ -147,14 +182,14 @@ export default function AiMenuReadBlock({
                 Lees met AI
               </button>
               <span id="mai-ai-cost" className="bta-muted">
-                Kost ongeveer 1 cent · duurt ± 1 minuut
+                Kost ongeveer 1 cent per pagina · duurt ± 1 minuut
               </span>
             </div>
           ) : null}
 
           {budgetBlocked && !done ? (
             <p className="mai-why" role="status">
-              Het AI-budget van deze maand is op. Ga verder met de handmatige import.
+              Het budget van deze maand is op.
             </p>
           ) : null}
 

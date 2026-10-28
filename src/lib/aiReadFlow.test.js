@@ -88,6 +88,15 @@ test('progress and outcome are the agreed words, with the real counts', () => {
   assert.deepEqual(aiReadEstimate(), { durationLabel: '± 1 minuut', costLabel: '± 1 cent', label: '± 1 minuut · ± 1 cent' });
   assert.equal(aiReadOutcomeLine({ items: 42, needsReview: 3 }), '✅ 42 gerechten gelezen · 3 controle nodig');
   assert.equal(aiReadOutcomeLine({ items: 1, needsReview: 0 }), '✅ 1 gerecht gelezen · 0 controle nodig');
+  // BE-36 (#87, criterion 2): a partial reading says so in the same line.
+  assert.equal(
+    aiReadOutcomeLine({ items: 16, needsReview: 16, pagesFailed: 1 }),
+    '✅ 16 gerechten gelezen · 16 controle nodig · 1 pagina niet gelezen',
+  );
+  assert.equal(
+    aiReadOutcomeLine({ items: 4, needsReview: 1, pagesFailed: 2 }),
+    '✅ 4 gerechten gelezen · 1 controle nodig · 2 pagina\'s niet gelezen',
+  );
   // Missing or nonsense counts never invent a number.
   assert.equal(aiReadOutcomeLine({}), '✅ 0 gerechten gelezen · 0 controle nodig');
 });

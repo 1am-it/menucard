@@ -17,7 +17,26 @@ const { buildImportReport, publicImportReport } = require('./manualMenuImportImp
 const { reviewView, menuContextFor } = require('./manualMenuImportReview');
 const { mapStructuredOutputToMenuContexts } = require('./menuExtractionMapping');
 const { buildMenuConcept } = require('./menuConcept');
-const { MAX_SCAN_PAGES, imageReadNotice, planImageRead } = require('./menuImageRead');
+const { MAX_COST_PER_PAGE_EUR_CENTS, MAX_SCAN_PAGES, imageReadNotice, planImageRead } = require('./menuImageRead');
+const {
+  MAX_CONCURRENT_PAGES,
+  PAGE_ATTEMPTS,
+  PAGE_CALL_TIMEOUT_MS,
+  READING_DEADLINE_MS,
+  RETRY_DELAY_MS,
+  mergeReadingOutputs,
+  mergedCoverage,
+  pageFailure,
+  publicUnit,
+  readingCostPlan,
+  readingUnits,
+  repairPageOutput,
+  retryUnits,
+  retryableReason,
+  unitLimits,
+  unitSource,
+} = require('./menuReadingPages');
+const { validateStructuredOutput } = require('./menuExtractionSchema');
 const {
   createStructuredExtractionAdapter,
   runStructuredExtraction,
@@ -74,6 +93,75 @@ function publicCost(guard) {
   return { eurCents: measured, known: measured !== null, maxEurCents: AI_MAX_COST_EUR_CENTS };
 }
 
+/**
+ * BE-36 (#87, criterion 5): one reading is several calls, so its budget is a
+ * ledger, not one reservation. Every page reserves its own maximum before the
+ * call and books its own measured cost after it; an unknown cost keeps the
+ * whole reservation charged. Nothing is ever booked as free, and the sum of the
+ * pages can never pass the planned maximum of the reading (which follows the
+ * number of pages).
+ */
+function createReadingBudget(maxEurCents) {
+  const total = Number.isInteger(maxEurCents) && maxEurCents >= 0 ? maxEurCents : 0;
+  const state = { spentEurCents: 0, reservedEurCents: 0, calls: 0, unknownCalls: 0, refused: 0 };
+  /** What is still available for one page, so a retry can always fit. */
+  function grant(perPageMax) {
+    const left = total - state.spentEurCents - state.reservedEurCents;
+    if (left <= 0) return 0;
+    return Math.min(Number.isInteger(perPageMax) && perPageMax > 0 ? perPageMax : 0, left);
+  }
+  function attempt(limit) {
+    const max = Number.isInteger(limit) && limit >= 0 ? limit : 0;
+    let reserved = 0;
+    let settled = false;
+    return {
+      costEurCents: undefined,
+      reserve(maxCost) {
+        if (settled) return false;
+        if (!Number.isInteger(maxCost) || maxCost < 0 || maxCost > max) {
+          state.refused += 1;
+          return false;
+        }
+        if (state.spentEurCents + state.reservedEurCents + maxCost > total) {
+          state.refused += 1;
+          return false;
+        }
+        reserved = maxCost;
+        state.reservedEurCents += maxCost;
+        return true;
+      },
+      settle(amount) {
+        if (settled) return true;
+        settled = true;
+        state.reservedEurCents = Math.max(0, state.reservedEurCents - reserved);
+        if (Number.isInteger(amount) && amount >= 0) {
+          state.spentEurCents += amount;
+        } else {
+          // A paid failure with no measured cost is not free.
+          state.spentEurCents += reserved;
+          state.unknownCalls += 1;
+        }
+        state.calls += 1;
+        return true;
+      },
+    };
+  }
+  return { state, attempt, grant, totalEurCents: total };
+}
+
+/** The reading's cost for the screen: measured only when every call reported it. */
+function publicReadingCost(ledger) {
+  if (!ledger || !ledger.state) return { eurCents: null, known: false, maxEurCents: AI_MAX_COST_EUR_CENTS, calls: 0 };
+  const state = ledger.state;
+  const known = state.calls > 0 && state.unknownCalls === 0;
+  return {
+    eurCents: known ? state.spentEurCents : null,
+    known,
+    maxEurCents: ledger.totalEurCents,
+    calls: state.calls,
+  };
+}
+
 async function readJson(request) {
   let text;
   try {
@@ -105,6 +193,9 @@ function createMenuAiReadHandlers({
   createCall,
   generateId,
   runExtraction = runStructuredExtraction,
+  // A retry waits a moment before the second attempt; injectable so a test
+  // never waits for real time.
+  sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 } = {}) {
   function stamp() {
     const value = now();
@@ -177,6 +268,49 @@ function createMenuAiReadHandlers({
   }
 
   /**
+   * BE-36 (#87, criterion 2): the pages of an earlier reading that failed, read
+   * again — only those pages. The earlier validated menus travel with the sealed
+   * state, so the retry completes that same reading instead of replacing it with
+   * one page. The bytes are fetched again from the sealed source URLs.
+   */
+  async function resolveRetry({ state, retryPages, bundle }) {
+    const prior = state.report && state.report.validated ? state.report.validated : null;
+    const descriptors = state.imageRead && Array.isArray(state.imageRead.units) ? state.imageRead.units : [];
+    const wanted = descriptors.filter((unit) => unit && retryPages.includes(unit.number));
+    if (!prior || !Array.isArray(prior.menus) || wanted.length === 0) {
+      return { ok: false, status: 409, reason: 'state_invalid', message: 'Deze lezing heeft geen pagina om opnieuw te lezen.' };
+    }
+    if (typeof readSources !== 'function') return { ok: false, status: 503, reason: 'source_unknown' };
+    const urls = [...new Set(wanted.map((unit) => unit.sourceUrl).filter((url) => typeof url === 'string' && url !== ''))].slice(0, MAX_SOURCES);
+    let read;
+    try {
+      read = urls.length > 0 ? await readSources({ urls, now: stamp() }) : [];
+    } catch {
+      read = null;
+    }
+    const fetched = (Array.isArray(read) ? read : []).filter(
+      (source) => source && (source.status === 'read' || source.status === undefined) && typeof source.sha256 === 'string',
+    );
+    const { units, missing } = retryUnits(wanted, retryPages, fetched);
+    return {
+      ok: true,
+      restaurantId: state.restaurantId,
+      bundle,
+      plan: state.plan || null,
+      sources: [],
+      retry: {
+        descriptors,
+        prior,
+        units,
+        missing,
+        read: Array.isArray(state.imageRead && state.imageRead.read) ? state.imageRead.read : [],
+        failedUnits: Array.isArray(state.imageRead && state.imageRead.failedUnits) ? state.imageRead.failedUnits : [],
+        requested: retryPages,
+      },
+    };
+  }
+
+  /**
    * W2: the only two accepted handles. `state` is a capture this server sealed
    * itself; `job_id` is resolved from the database. A URL in the body is never
    * used: no code path reads one.
@@ -192,6 +326,11 @@ function createMenuAiReadHandlers({
       if (!state || state.userId !== auth.userId) return { ok: false, status: 403, reason: 'forbidden' };
       const bundle = state.bundle;
       if (!bundle || !Array.isArray(bundle.sources)) return { ok: false, status: 409, reason: 'source_unknown' };
+      // BE-36 (#87, criterion 2): "Opnieuw proberen" for the pages that failed.
+      // The request names only page numbers; the source URLs come from the
+      // sealed state of that same reading, never from the client.
+      const retryPages = Array.isArray(body.retry_pages) ? body.retry_pages.filter((page) => Number.isInteger(page) && page > 0).slice(0, 20) : [];
+      if (state.imageRead && retryPages.length > 0) return resolveRetry({ state, retryPages, bundle });
       const sealedText = (source) => Boolean(source) && source.hasText === true && typeof source.text === 'string' && source.text.trim() !== '';
       const textSources = bundle.sources.filter(sealedText);
       // BE-35 ronde 3 (#84): the sealed bundle keeps metadata only, so the menu
@@ -233,7 +372,7 @@ function createMenuAiReadHandlers({
             ok: false,
             status: 422,
             reason: 'source_empty',
-            message: 'De beeldbronnen van deze import konden niet opnieuw worden gelezen. Ga verder met de handmatige import.',
+            message: 'De beeldbronnen van deze import konden niet opnieuw worden gelezen. Kies de bron opnieuw of probeer het later.',
           };
         }
       }
@@ -358,6 +497,96 @@ function createMenuAiReadHandlers({
     };
   }
 
+  /**
+   * BE-36 (#87, criterion 1 and 2): one page per call, at most two at the same
+   * time, one automatic retry per page, and never past the reading's time. The
+   * same adapter, provider call, validator and budget guard as before — the loop
+   * is the only new thing, so there is no second AI path.
+   */
+  async function readUnitPages({ units, protocol, ledger, startedAt, delay }) {
+    const results = new Array(units.length);
+    const calls = [];
+    let cursor = 0;
+    async function readOne(unit) {
+      let failure = null;
+      let attempts = 0;
+      for (let attempt = 1; attempt <= PAGE_ATTEMPTS; attempt += 1) {
+        attempts = attempt;
+        if (Date.now() - startedAt > READING_DEADLINE_MS) {
+          return { ok: false, unit, reason: 'timeout', attempts: attempts - 1, deadline: true };
+        }
+        // What is still available decides this attempt, so a retry after a paid
+        // failure always fits inside the reading's own maximum.
+        const grant = ledger.grant(MAX_COST_PER_PAGE_EUR_CENTS);
+        if (grant <= 0) {
+          return { ok: false, unit, reason: failure ? failure.reason : 'budget_exceeded', attempts: attempts - 1, budgetStopped: true };
+        }
+        const guard = ledger.attempt(grant);
+        const callModule = typeof createCall === 'function' ? createCall({ budget: guard }) : null;
+        if (!callModule || callModule.enabled !== true || typeof callModule.call !== 'function') {
+          return { ok: false, unit, reason: 'ai_not_configured', attempts: attempts - 1 };
+        }
+        const adapter = createStructuredExtractionAdapter({
+          provider: callModule.provider || AI_PROVIDER,
+          model: callModule.model || AI_MODEL,
+          call: callModule.call,
+          cancel: callModule.cancel,
+        });
+        const extraction = await runExtraction({
+          adapter,
+          protocol,
+          sources: unitSource(unit),
+          limits: { ...unitLimits(unit, { ...AI_LIMITS, maxPages: MAX_SCAN_PAGES }), maxCostEurCents: grant },
+          budget: guard,
+          repairOutput: (raw) => repairPageOutput(raw, unit),
+        });
+        if (callModule.lastCall) calls.push({ page: unit.number, ...callModule.lastCall });
+        if (extraction && extraction.ok === true) {
+          return {
+            ok: true,
+            unit,
+            output: extraction.output,
+            normalizations: [...(Array.isArray(extraction.repairs) ? extraction.repairs : []), ...(Array.isArray(extraction.normalizations) ? extraction.normalizations : [])],
+            callModule,
+          };
+        }
+        failure = {
+          reason: (extraction && extraction.reason) || 'model_unavailable',
+          problems: Array.isArray(extraction && extraction.problems) ? extraction.problems.slice(0, 20) : [],
+        };
+        if (!retryableReason(failure.reason) || attempt >= PAGE_ATTEMPTS) break;
+        await delay(RETRY_DELAY_MS);
+      }
+      return { ok: false, unit, attempts, ...failure };
+    }
+    async function worker() {
+      for (;;) {
+        const index = cursor;
+        cursor += 1;
+        if (index >= units.length) return;
+        results[index] = await readOne(units[index]);
+      }
+    }
+    const workers = Array.from({ length: Math.max(1, Math.min(MAX_CONCURRENT_PAGES, units.length)) }, () => worker());
+    await Promise.all(workers);
+    return { results: results.filter(Boolean), calls };
+  }
+
+  /** A validator source list from the sealed bundle: metadata only, never bytes. */
+  function validatorSourcesFromBundle(bundle) {
+    return (bundle && Array.isArray(bundle.sources) ? bundle.sources : []).map((source) => ({
+      id: source.id,
+      url: source.url,
+      kind: source.kind,
+      status: source.status,
+      sha256: source.sha256,
+      imageRead: source.imageRead === true,
+      images: source.imageRead === true ? [{}] : [],
+      pageCount: Number.isInteger(source.pageCount) ? source.pageCount : null,
+      ...(typeof source.text === 'string' && source.text !== '' ? { text: source.text } : {}),
+    }));
+  }
+
   /** GET — W1/W3/W4: may the block offer the button, and what has been spent? */
   async function status(request) {
     const { denied } = await authorize(request);
@@ -393,14 +622,25 @@ function createMenuAiReadHandlers({
 
     const source = await resolveSource(parsed.body, auth);
     if (!source.ok) {
-      return reply(source.status || 422, { error: source.message || messageFor(source.reason), reason: source.reason });
+      // BE-36 (#87, criterion 4): a retry whose sealed reading expired asks for a
+      // new reading, not for a new prompt.
+      const retryExpired = source.reason === 'state_expired' && Array.isArray(parsed.body && parsed.body.retry_pages);
+      return reply(source.status || 422, {
+        error: retryExpired ? 'Deze lezing is verlopen. Lees de kaart opnieuw.' : source.message || messageFor(source.reason),
+        reason: source.reason,
+      });
     }
 
     const spend = await readSpend();
     if (!spend.ok) {
       return reply(503, { error: messageFor('budget_unavailable'), reason: 'budget_unavailable', monthly: publicMonthly(null) });
     }
-    const decision = budgetDecision(spend.spend);
+    // BE-36 (#87, criterion 1): a reading of images or a scan is a list of pages,
+    // not one blob. The plan already says which images and pages may be read;
+    // this only numbers them and keeps their origin.
+    const units = source.retry ? source.retry.units : readingUnits(source.plan, source.sources);
+    const costPlan = readingCostPlan(units);
+    const decision = budgetDecision(spend.spend, { maxEurCents: costPlan.maxEurCents });
     // BE-33 (#79, criterion 2): the estimate of an image or scan reading is
     // available before the click. A dry run resolves the source and the plan,
     // but never creates a provider call and never spends anything.
@@ -418,39 +658,133 @@ function createMenuAiReadHandlers({
     if (!decision.allowed) {
       return reply(429, { error: messageFor(decision.reason), reason: decision.reason, monthly: publicMonthly(spend.spend) });
     }
+    if (units.length === 0) {
+      if (source.retry) {
+        // Criterion 2: the page is gone from the source. Say so per page; the
+        // earlier reading stays saved and untouched.
+        const missing = (source.retry.missing || []).map((unit) => pageFailure(unit, { reason: 'source_missing', attempts: 1 }));
+        return reply(422, {
+          error: messageFor('source_missing'),
+          reason: 'source_missing',
+          pages: {
+            total: source.retry.descriptors.length,
+            read: Array.isArray(source.retry.read) ? source.retry.read.length : 0,
+            failed: missing,
+            retryable: [],
+            duplicates: 0,
+            partial: true,
+          },
+          partial: true,
+          monthly: publicMonthly(spend.spend),
+        });
+      }
+      return reply(422, {
+        error: messageFor('source_empty'),
+        reason: 'source_empty',
+        monthly: publicMonthly(spend.spend),
+      });
+    }
 
-    const guard = createCallBudget(AI_MAX_COST_EUR_CENTS);
-    const callModule = typeof createCall === 'function' ? createCall({ budget: guard }) : null;
-    if (!callModule || callModule.enabled !== true || typeof callModule.call !== 'function') {
+    // One cheap check that the provider is configured, before any page is read.
+    const probe = typeof createCall === 'function' ? createCall({}) : null;
+    if (!probe || probe.enabled !== true || typeof probe.call !== 'function') {
       return reply(503, { error: messageFor('ai_not_configured'), reason: 'ai_not_configured', enabled: false });
     }
 
     const protocol = (source.bundle && source.bundle.protocol) || null;
-    const adapter = createStructuredExtractionAdapter({
-      provider: callModule.provider || AI_PROVIDER,
-      model: callModule.model || AI_MODEL,
-      call: callModule.call,
-      cancel: callModule.cancel,
-    });
+    const ledger = createReadingBudget(costPlan.maxEurCents);
     const startedAt = Date.now();
-    const extraction = await runExtraction({
-      adapter,
-      protocol,
-      sources: source.sources,
-      // Criterion 2: at most 10 pages per reading, also for the model's own
-      // coverage claim. The adapter keeps the existing validator authoritative.
-      limits: { ...AI_LIMITS, maxPages: MAX_SCAN_PAGES },
-      budget: guard,
-    });
-    const cost = publicCost(guard);
+    const read = await readUnitPages({ units, protocol, ledger, startedAt, delay: sleep });
+    const cost = publicReadingCost(ledger);
     const durationMs = Math.max(0, Date.now() - startedAt);
+    const readOk = read.results.filter((entry) => entry.ok === true);
+    const readFailed = read.results.filter((entry) => entry.ok !== true);
+    const failures = readFailed.map((entry) => pageFailure(entry.unit, entry));
+    // A page that could not be fetched again on a retry is a failed page too.
+    const missingFailures = (source.retry && Array.isArray(source.retry.missing) ? source.retry.missing : [])
+      .map((unit) => pageFailure(unit, { reason: 'source_missing', attempts: 1 }));
+    // Criterion 2: a retry only reads the pages it was asked for; a page that was
+    // already missing stays in the list with the message of that earlier round.
+    const requested = new Set(source.retry ? source.retry.requested : []);
+    const priorFailures = source.retry && Array.isArray(source.retry.failedUnits)
+      ? source.retry.failedUnits
+        .filter((unit) => !requested.has(unit.number))
+        .map((unit) => ({
+          page: unit.number,
+          kind: unit.kind || null,
+          sourceId: unit.sourceId || null,
+          locator: unit.locator || null,
+          label: unit.label || `Pagina ${unit.number}`,
+          reason: unit.reason || 'model_unavailable',
+          attempts: Number.isInteger(unit.attempts) ? unit.attempts : 0,
+          retryable: retryableReason(unit.reason || 'model_unavailable'),
+          message: unit.message || `${unit.label || `Pagina ${unit.number}`} kon niet gelezen worden.`,
+          nextStep: 'Opnieuw proberen',
+        }))
+      : [];
+    const allFailures = [...failures, ...missingFailures, ...priorFailures]
+      .sort((a, b) => (a.page || 0) - (b.page || 0));
+    const allUnits = source.retry ? source.retry.descriptors : units;
+    const readNumbers = new Set([
+      ...(source.retry ? source.retry.read : []),
+      ...readOk.map((entry) => entry.unit.number),
+    ]);
+    const pages = {
+      total: allUnits.length,
+      read: readNumbers.size,
+      failed: allFailures,
+      retryable: allFailures.filter((failure) => failure.retryable).map((failure) => failure.page),
+      duplicates: 0,
+      partial: false,
+    };
+    const provider = (readOk[0] && readOk[0].callModule && readOk[0].callModule.provider) || probe.provider || AI_PROVIDER;
+    const model = (readOk[0] && readOk[0].callModule && readOk[0].callModule.model) || probe.model || AI_MODEL;
+    const requestIds = read.calls.map((call) => call && call.requestId).filter((id) => typeof id === 'string' && id !== '');
 
-    if (!extraction || extraction.ok !== true) {
-      const reason = (extraction && extraction.reason) || 'model_unavailable';
+    if (readOk.length === 0) {
+      const reason = readFailed.length > 0 ? (readFailed[0].reason || 'model_unavailable') : 'model_unavailable';
       return reply(422, {
         error: messageFor(reason),
         reason,
-        problems: Array.isArray(extraction && extraction.problems) ? extraction.problems.slice(0, 20) : [],
+        problems: readFailed.length > 0 && Array.isArray(readFailed[0].problems) ? readFailed[0].problems : [],
+        pages,
+        partial: false,
+        cost,
+        durationMs,
+        monthly: publicMonthly(spend.spend),
+      });
+    }
+
+    // Criterion 1: the pages become one reading again. The earlier reading of a
+    // retry travels as one extra source of the same merge, so its dishes stay.
+    const entries = source.retry
+      ? [{ unit: { number: 0, sourceId: null }, output: source.retry.prior }, ...readOk.map((entry) => ({ unit: entry.unit, output: entry.output }))]
+      : readOk.map((entry) => ({ unit: entry.unit, output: entry.output }));
+    const merged = mergeReadingOutputs(entries);
+    const readRefs = allUnits.filter((unit) => readNumbers.has(unit.number));
+    // The pages that still need a human: every page that was not read, whether
+    // it failed now or in an earlier round.
+    const failedRefs = [
+      ...allUnits.filter((unit) => !readNumbers.has(unit.number)),
+    ];
+    const sourceCount = source.retry ? (source.bundle.sources || []).length : source.sources.length;
+    const coverage = mergedCoverage({
+      readUnits: readRefs,
+      failedUnits: failedRefs,
+      itemCount: merged.menus.reduce((sum, menu) => sum + menu.categories.reduce((inner, category) => inner + category.items.length, 0), 0),
+      sourceCount,
+    });
+    const output = { menus: merged.menus, rejected: merged.rejected, coverage };
+    // The existing strict validator decides; a repaired page only reaches it
+    // after the repairs of criterion 3.
+    const problems = validateStructuredOutput(output, source.retry ? validatorSourcesFromBundle(source.bundle) : source.sources);
+    if (problems.length > 0) {
+      return reply(422, {
+        error: messageFor('schema_violation'),
+        reason: 'schema_violation',
+        problems: problems.slice(0, 20),
+        pages: { ...pages, partial: allFailures.length > 0 },
+        partial: allFailures.length > 0,
         cost,
         durationMs,
         monthly: publicMonthly(spend.spend),
@@ -459,13 +793,14 @@ function createMenuAiReadHandlers({
 
     const importId = generateId ? generateId() : `ai-${Date.now()}`;
     const at = stamp();
+    const carried = readOk.flatMap((entry) => (Array.isArray(entry.normalizations) ? entry.normalizations : []));
     const result = buildImportReport({
       importId,
       bundle: source.bundle,
-      output: extraction.output,
+      output,
       aiName: AI_READ_AI_NAME,
       now: at,
-      carriedNormalizations: extraction.normalizations,
+      carriedNormalizations: carried,
     });
     if (!result.ok) {
       return reply(422, {
@@ -474,6 +809,8 @@ function createMenuAiReadHandlers({
         problems: result.problems,
         problemSummary: result.problemSummary,
         recoveryQuestion: result.recoveryQuestion,
+        pages: { ...pages, duplicates: merged.duplicates.length, partial: allFailures.length > 0 },
+        partial: allFailures.length > 0,
         cost,
         durationMs,
         monthly: publicMonthly(spend.spend),
@@ -481,14 +818,15 @@ function createMenuAiReadHandlers({
     }
 
     const ai = {
-      provider: callModule.provider || AI_PROVIDER,
-      model: callModule.model || AI_MODEL,
+      provider,
+      model,
       readAt: at.toISOString(),
       protocolVersion: result.technical.protocolVersion,
       protocolHash: result.technical.protocolHash,
       schemaVersion: result.technical.schemaVersion,
       bundleHash: result.technical.bundleHash,
-      requestId: callModule.lastCall && callModule.lastCall.requestId,
+      requestId: requestIds.length > 0 ? requestIds[requestIds.length - 1] : null,
+      requestIds,
       cost,
       sources: result.technical.sources,
       restaurantId: source.restaurantId,
@@ -498,11 +836,11 @@ function createMenuAiReadHandlers({
         kind: AI_READ_PROVENANCE_KIND,
         label: AI_READ_LABEL,
         aiName: AI_READ_AI_NAME,
-        provider: callModule.provider || AI_PROVIDER,
-        model: callModule.model || AI_MODEL,
+        provider,
+        model,
         readId: importId,
         readAt: at.toISOString(),
-        requestId: (callModule.lastCall && callModule.lastCall.requestId) || null,
+        requestId: requestIds.length > 0 ? requestIds[requestIds.length - 1] : null,
         cost: { eurCents: cost.known ? cost.eurCents : null, known: cost.known },
       },
     };
@@ -547,10 +885,37 @@ function createMenuAiReadHandlers({
           // The existing review and save routes take the label, provider,
           // model, read id and measured cost from here — never from input.
           origin: ai.origin,
+          // BE-36 (#87, criterion 2): the page list and the pages that failed,
+          // so "Opnieuw proberen" can read exactly those pages again. Metadata
+          // only: the bytes are fetched again from the same sealed source URLs.
+          plan: source.plan || null,
+          imageRead: {
+            units: allUnits.map(publicUnit),
+            read: [...readNumbers].sort((a, b) => a - b),
+            failed: failedRefs.map((unit) => unit.number).sort((a, b) => a - b),
+            // The failed pages keep their own reason and sentence, so a later
+            // retry still says the same thing about a page it did not read.
+            failedUnits: [
+              ...failures.map((failure, index) => ({
+                ...publicUnit(readFailed[index].unit),
+                reason: failure.reason,
+                message: failure.message,
+                attempts: failure.attempts,
+              })),
+              ...missingFailures.map((failure) => ({
+                ...publicUnit({ number: failure.page, kind: failure.kind, sourceId: failure.sourceId, locator: failure.locator, label: failure.label }),
+                reason: failure.reason,
+                message: failure.message,
+                attempts: failure.attempts,
+              })),
+              ...(source.retry && Array.isArray(source.retry.failedUnits) ? source.retry.failedUnits.filter((unit) => !requested.has(unit.number)) : []),
+            ],
+          },
         })
       : null;
 
     const spendAfter = { ...spend.spend, spentEurCents: spend.spend.spentEurCents + (cost.known ? cost.eurCents : 0) };
+    const partial = allFailures.length > 0 || coverage.status === 'partial';
     return reply(200, {
       origin: { kind: AI_READ_PROVENANCE_KIND, label: AI_READ_LABEL, aiName: AI_READ_AI_NAME },
       // BE-33 (#79): what was read (text, N images or a document of N pages),
@@ -559,6 +924,12 @@ function createMenuAiReadHandlers({
       estimate: source.plan ? source.plan.estimate : null,
       notice: imageReadNotice(source.plan),
       imageRead: Boolean(source.plan && source.plan.mode !== 'text'),
+      // BE-36 (#87, criteria 1, 2 and 4): what was read page by page, which
+      // pages failed (with one sentence and one next step each), which dishes
+      // were deduplicated and whether this is a partial reading.
+      pages: { ...pages, duplicates: merged.duplicates.length, partial },
+      partial,
+      costPlan: { pages: costPlan.pages, estimatedEurCents: costPlan.estimatedEurCents, maxEurCents: costPlan.maxEurCents },
       ai: {
         provider: ai.provider,
         model: ai.model,

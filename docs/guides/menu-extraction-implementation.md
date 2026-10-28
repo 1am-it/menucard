@@ -1514,3 +1514,110 @@ allergenen-/beschikbaarheidsvermelding als "niet op te slaan", één modelaanroe
 in `ops/benchmark/` omdat productcode nooit `ops/benchmark/` importeert
 (`menuIsolation.test.js`); de richting ops → src is toegestaan.
 
+## BE-36 (#87) - betrouwbaar lezen van beeld per pagina
+
+Praktijktest 27 oktober (Al Dente, 9 menu-afbeeldingen): dezelfde kaart gaf vier
+keer een andere uitkomst - 13 gerechten, `page_limit`, 2 gerechten en
+`output_truncated` na 32 s. De oorzaken zaten in onze eigen instellingen: alle
+negen afbeeldingen in een aanroep, een antwoordplafond van 10.000 tokens voor de
+hele kaart, een validator die de hele lezing afkeurde bij een kleine afwijking en
+een algemene foutmelding. Dit is de reparatie.
+
+### Een pagina per aanroep (`src/lib/menuReadingPages.js`)
+
+- Een lezing wordt gesplitst in pagina's in leesvolgorde: elke menu-afbeelding is
+  een pagina, een tekstbron is een pagina, een scan-pdf blijft een document.
+- Elke pagina gaat in een eigen aanroep naar dezelfde keten
+  (`menuExtractionAnthropicCall` -> `menuExtractionAdapter` -> validator). Er is
+  geen tweede AI-pad.
+- Per aanroep: `maxOutputTokens` 8.000 voor een afbeelding (een document krijgt
+  8.000 per pagina, begrensd door het modelmaximum), een paginalimiet van
+  1 pagina, een time-out van 60 s. Een tekstbron houdt het bestaande plafond van
+  10.000 tokens: een lange tekstkaart is ook een pagina en mag niet worden
+  ingekort.
+- Maximaal 2 pagina's tegelijk; de lezing start geen nieuwe pagina meer na 240 s,
+  zodat validatie en de conceptopslag binnen de functieduur van 300 s blijven.
+- De paginanummers zijn de herkomst die het model moet herhalen
+  (`afbeelding N`), zodat een gerecht na het samenvoegen zijn pagina houdt.
+
+### Samenvoegen (`mergeReadingOutputs`)
+
+- Gelijke menukaarten (titel + variant) en gelijke menukopjes (naam + pad) worden
+  samengevoegd; de volgorde blijft die van de pagina's.
+- Een gerecht dat op een paginagrens twee keer staat met dezelfde naam en prijs,
+  komt er een keer in. De ontdubbeling telt per menukopje en alleen over
+  paginagrenzen; een herhaling binnen een pagina blijft staan.
+- Elk gerecht houdt zijn eigen bewijs, dus de review blijft
+  "gelezen van afbeelding N" tonen.
+- De dekking wordt opnieuw opgebouwd: `complete` als elke pagina is gelezen,
+  `partial` met een ongelezen pagina in `coverage.unreadSources` als een pagina
+  blijft mislukken of een bron buiten de lezing valt.
+
+### Opnieuw proberen (`pageFailure`, `retryUnits`)
+
+- Mislukt een pagina (afgekapt, tijdelijk niet bereikbaar, ongeldig antwoord), dan
+  probeert de app die pagina een keer opnieuw. Een budgetstop wordt niet herhaald.
+- Mislukt het daarna nog, dan gaat de rest van de lezing door en noemt het
+  antwoord per pagina: "Pagina N kon niet gelezen worden." met de reden en
+  "Opnieuw proberen".
+- De verzegelde staat van de lezing bewaart de paginalijst en de mislukte pagina's
+  (metadata, nooit bytes). Een verzoek met `{ state, retry_pages: [N] }` leest
+  alleen die pagina opnieuw, plakt het resultaat aan de eerdere lezing en schrijft
+  een nieuwe versie van hetzelfde concept. De bron-URL's komen uit de staat, nooit
+  uit het verzoek.
+
+### Milde validatie (`repairPageOutput`)
+
+- Een ontbrekende of afwijkende herkomst wordt aangevuld met de pagina die in
+  deze aanroep is gelezen; het gerecht blijft staan met "Controle nodig".
+- Een ontbrekende prijs wordt niet ingevuld: het gerecht gaat naar de bestaande
+  "prijs onbekend"-controle. Een onleesbare prijsvariant of een veld dat het
+  concept niet kan opslaan wordt weggelaten en gemeld.
+- De strikte validator blijft beslissen: een gerecht zonder naam, een onbekend
+  veld of een bron buiten de inventaris keurt de pagina nog steeds af.
+- `page_limit` geldt alleen voor pdf-pagina's. Losse menu-afbeeldingen zijn geen
+  documentpagina's, dus een model dat ze als pagina's telt kan de lezing niet meer
+  met `page_limit` weigeren.
+
+### Kosten
+
+- De schatting is ongeveer 1 cent per pagina; de reservering is 3 cent per pagina
+  met een maximum van 30 cent per lezing (`menuImageRead.estimateOf`,
+  `readingMaxCostEurCents`).
+- Voor de eerste aanroep wordt het geheel gecontroleerd tegen het maandplafond
+  (`budgetDecision(spend, { maxEurCents })`).
+- Elke aanroep reserveert en boekt zijn eigen kosten
+  (`createReadingBudget`); een onbekende prijs houdt de reservering bezet, en de
+  echte kosten van alle pagina's samen staan als een lezing in de maandteller.
+
+### Meldingen
+
+Elke reden heeft een eigen zin met een volgende stap (`MESSAGES` in
+`menuAiImport.js`), bijvoorbeeld "De AI is even niet bereikbaar. Probeer het over
+een minuut opnieuw." en "Het budget van deze maand is op." De handmatige import
+blijft een kleine link op het scherm en is nooit meer het enige dat een fout
+zegt.
+
+### Grenzen en restpunten
+
+- Een scan-pdf gaat nog als een document in een aanroep. Een pagina uit een scan
+  als losse afbeelding aanbieden zou de pagina moeten renderen; dat vereist een
+  nieuwe afhankelijkheid en valt buiten #87. Het document krijgt wel ruimte per
+  pagina (8.000 tokens per pagina) in plaats van een vast plafond.
+- `MENU-EXTRACTION.md` (protocol v0.4) is ongewijzigd: de paginering is
+  app-gedrag, niet een andere modelinstructie. De gepinde protocolhash blijft
+  daardoor geldig.
+- De acceptatie met een echte AI (Al Dente drie keer, plus Bardot) doet de
+  Delivery Lead; de developer bewijst met een nagebootste AI.
+
+### Bewijs
+
+- `src/lib/menuReadingPages.test.js` - pagina's, herstel, samenvoegen,
+  ontdubbelen, dekking, foutzinnen, kosten, retry-selectie.
+- `src/lib/menuAiReadPages.test.js` - 9 pagina's met een mislukte pagina die de
+  tweede keer lukt, een blijvend afgekapte pagina met "Opnieuw proberen",
+  `retry_pages` voor een pagina, `page_limit` dat niet meer geldt voor losse
+  afbeeldingen, het budget vooraf en per reden een eigen zin.
+- `src/lib/menuAiReadImage.test.js` en `src/lib/menuAiReadHandlers.test.js` zijn
+  bijgewerkt naar een aanroep per pagina en naar de nieuwe meldingen.
+- `npm test` en `npm run build` zijn de volledige controle.
