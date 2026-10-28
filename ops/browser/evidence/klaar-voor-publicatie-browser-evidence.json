@@ -4,14 +4,33 @@
   "fixtureOnly": true,
   "passed": true,
   "error": null,
-  "head": "51690c400ea9fd1b724db7fff1efde0548b04978",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "lijst",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "durationMs": 15994,
+      "error": null
+    },
+    {
+      "name": "detail",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 8565,
+      "error": null
+    }
+  ],
+  "head": "864bf75839325c0a7756976a543f42b435cc9217",
   "worktreeDirty": false,
   "worktreeChanges": [],
-  "generatedAt": "2026-10-28T07:45:45.527Z",
+  "generatedAt": "2026-10-28T21:47:26.336Z",
   "environment": {
     "node": "v22.22.3",
     "loopback": "http://localhost:3149 (own next dev) + own local browser over CDP",
-    "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "browser": "auto-detected Edge/Chrome",
     "fixture": "concepts-publication"
   },
   "covered": [
@@ -246,7 +265,7 @@
     },
     {
       "file": "be-39/be39-detail-1280-light.png",
-      "sha256": "781385c33c42a4907c96e9e0c5d2ba2b6029b6a4d068d1e7f476cb6b7d56e65d",
+      "sha256": "1c29fee7ba105921bd71c2a59dd21c4491b859c33f3b2f8e38eb343aab8393e2",
       "width": 1274,
       "height": 1024
     }
