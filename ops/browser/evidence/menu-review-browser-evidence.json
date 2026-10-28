@@ -1,14 +1,19 @@
 {
   "fixtureOnly": true,
   "passed": true,
-  "head": "8931c8d8bd53ad378bdd896850dbb1f05f0af6df",
-  "worktreeDirty": true,
-  "generatedAt": "2026-10-25T19:26:01.433Z",
+  "head": "07ba4ea0fe3b93ef0ac42754ee08e74d76d50611",
+  "worktreeDirty": false,
+  "generatedAt": "2026-10-28T18:02:30.991Z",
   "command": "npm run test:browser:menu-review",
+  "summary": {
+    "total": 729,
+    "passed": 729,
+    "failed": 0
+  },
   "environment": {
     "node": "v22.22.3",
     "platform": "win32",
-    "browser": "Edg/155.0.4283.45",
+    "browser": "Edg/156.0.4314.50",
     "viewportHeights": [
       900
     ],
@@ -38,7 +43,9 @@
     "manual-ai",
     "manual-coverage",
     "manual-map",
+    "manual-image",
     "concepts",
+    "concepts-publication",
     "concepts-empty",
     "concepts-error",
     "concepts-no-access"
@@ -51,12 +58,12 @@
   },
   "checks": [
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -148,7 +155,7 @@
     {
       "name": "review: \"handmatig beoordelen\" opens the same batch item",
       "passed": true,
-      "detail": "/internal/source-triage/batch?batch=batch-fictief-0001&item=1"
+      "detail": "/internal/bronnen/batch?batch=batch-fictief-0001&item=1"
     },
     {
       "name": "review: light theme is active",
@@ -158,7 +165,7 @@
     {
       "name": "review: address bar keeps the batch context",
       "passed": true,
-      "detail": "http://localhost:3137/internal/source-triage/batch?fixture=review&theme=light&batch=batch-fictief-0001"
+      "detail": "http://localhost:3137/internal/bronnen/batch?fixture=review&theme=light&batch=batch-fictief-0001"
     },
     {
       "name": "review: no horizontal overflow at 1024 px",
@@ -171,12 +178,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=readonly&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -206,12 +213,12 @@
       "detail": "overflow=-6"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=empty&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=empty&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=empty&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -236,12 +243,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -266,17 +273,17 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light&aiState=off)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light&aiState=off)",
       "passed": true,
       "detail": "[]"
     },
     {
-      "name": "image-only: the explicit non-supported status is shown",
+      "name": "image-only: the honest image/scan status is shown",
       "passed": true,
       "detail": null
     },
@@ -298,7 +305,7 @@
     {
       "name": "image-only: the human route is linked with restaurant and reason",
       "passed": true,
-      "detail": "/internal/source-triage?restaurant=9001&reason=image_only"
+      "detail": "/internal/bronnen?restaurant=9001&reason=image_only"
     },
     {
       "name": "image-only: no horizontal overflow at 390 px",
@@ -311,12 +318,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark&aiState=off)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=dark&aiState=off)",
       "passed": true,
       "detail": "[]"
     },
@@ -336,37 +343,57 @@
       "detail": null
     },
     {
+      "name": "image-only: without the AI the row names the real reason",
+      "passed": true,
+      "detail": "Dekking\nWerk\n(11)\n+\n← Bronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets "
+    },
+    {
+      "name": "image-only: the manual route opens the existing import screen with this restaurant",
+      "passed": true,
+      "detail": "/internal/menu-import?restaurant=9001&name=Fictief%20Brasserie%20Noord"
+    },
+    {
+      "name": "image-only: no AI reading is offered while the AI is off",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "image-only: the manual row still fits at 320 px",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light&aiState=ready)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=image_only&batch=batch-fictief-0001&item=1&theme=light&aiState=ready)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "image-only: with the AI available the row offers \"Lees met AI (afbeelding)\"",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F&image=1"
+    },
+    {
+      "name": "image-only: the AI reading keeps the restaurant and asks for the image",
+      "passed": true,
+      "detail": "/internal/menu-import?job=job-fictief-1&restaurant=9001&name=Fictief%20Brasserie%20Noord&url=https%3A%2F%2Ffictief-restaurant.invalid%2F&image=1"
+    },
+    {
+      "name": "image-only: the AI route states its per-page estimate",
+      "passed": true,
+      "detail": "Dekking\nWerk\n(11)\n+\n← Bronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets "
+    },
+    {
+      "name": "image-only: the manual alternative stays one click away",
+      "passed": true,
+      "detail": null
+    },
+    {
       "name": "image-only follow-up: the existing Bronnen beoordelen page opens",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "image-only follow-up: the restaurant is preselected",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "image-only follow-up: the detail names the real reason",
-      "passed": true,
-      "detail": "Aandachtspunt uit de batchanalyse\nReden\nMenu alleen als afbeelding of scan: niet ondersteund\nWat dit betekent\nDe menukaart is alleen als afbeelding of scan beschikbaar. Deze import leest geen beeld en gebruikt geen OCR, dus er is niets als gerecht opgeslagen."
-    },
-    {
-      "name": "image-only follow-up: the detail names the fitting next step",
-      "passed": true,
-      "detail": "Fictief Brasserie Noord\n\nCentrum\n\nBronstatus\nBron: Bereikbaar\nMenukaart: Niet beoordeeld\nWaarom aandacht\nMenukaart: Niet beoordeeld\nBekende bron-URL\nhttps://fictief-brasserie.example.com/\n(opent in ee"
-    },
-    {
-      "name": "image-only follow-up: the reason is not only a page banner",
-      "passed": true,
-      "detail": "followup=Aandachtspunt uit de batchanalyse\nReden\nMenu alleen als afbeelding of scan: niet banner="
-    },
-    {
-      "name": "image-only follow-up: the generic onboarding route stays visible as secondary context",
-      "passed": true,
-      "detail": "Fictief Brasserie Noord\n\nCentrum\n\nBronstatus\nBron: Bereikbaar\nMenukaart: Niet beoordeeld\nWaarom aandacht\nMenukaart: Niet beoordeeld\nBekende bron-URL\nhttps://fictief-brasserie.example.com/\n(opent in ee"
-    },
-    {
-      "name": "image-only follow-up: no menu status or confirmation is claimed",
       "passed": true,
       "detail": null
     },
@@ -376,47 +403,27 @@
       "detail": null
     },
     {
-      "name": "image-only follow-up: no proposal or publication happened",
+      "name": "image-only follow-up: the page names the reason and the next step in its own words",
+      "passed": true,
+      "detail": "Vervolg van de batchanalyse:\nMenu alleen als afbeelding of scan: lees het met AI of met de hand. Lees de afbeelding met AI, kies een andere tekst- of pdf-bron o"
+    },
+    {
+      "name": "image-only follow-up: no menu status or confirmation is claimed",
       "passed": true,
       "detail": null
     },
     {
-      "name": "image-only follow-up: an unusable proposal can be prepared",
+      "name": "image-only follow-up: the follow-up screen fits at 390 px",
       "passed": true,
-      "detail": null
+      "detail": "overflow=0"
     },
     {
-      "name": "image-only follow-up: a fitting reason is preselected",
-      "passed": true,
-      "detail": "other"
-    },
-    {
-      "name": "image-only follow-up: the fixed explanation is visible and filled in",
-      "passed": true,
-      "detail": "Menu alleen als afbeelding of scan; niet met OCR te lezen. | Voorgeselecteerd omdat de batchanalyse dit menu als afbeelding of scan meldde. De toelichting hieronder is verplicht en al ingevuld."
-    },
-    {
-      "name": "image-only follow-up: the preselected reason is described to assistive tech",
-      "passed": true,
-      "detail": "stg-new-9001-reason-help"
-    },
-    {
-      "name": "image-only follow-up: the note stays required",
-      "passed": true,
-      "detail": "true"
-    },
-    {
-      "name": "image-only follow-up: choosing the reason saves nothing by itself",
-      "passed": true,
-      "detail": null
-    },
-    {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -428,7 +435,7 @@
     {
       "name": "structure: each uncertain section carries its path, source route and locator",
       "passed": true,
-      "detail": "[\"Fictief Lunch › Koud\\n1 gerecht\\n\\nTwijfel: Kopje anders gelezen dan in de bron (\\\"LUNCH › KOUD\\\").\\n\\nGeen directe bronlink bekend · vindplaats: paneel Lunch, regel 1\\n\\nBronroute: LUNCH › KOUD\\n\\nFictieve salade\\n12.50\\nRubriek klopt zo\\nRubriek corrigeren\",\"Fictief Diner › Voor\\n1 gerecht\\n\\nTwijfel: Kopje anders gelezen dan in de bron (\\\"DINNER › VOOR\\\").\\n\\nGeen directe bronlink bekend · vindplaats: paneel Diner, regel 1\\n\\nBronroute: DINNER › VOOR\\n\\nFictieve burrata\\n13.00\\nRubriek klopt zo\\nRubriek corrigeren\"]"
+      "detail": "[\"Fictief Lunch › Koud\\n1 gerecht\\n\\nTwijfel: Kopje anders gelezen dan in de bron (\\\"LUNCH › KOUD\\\").\\n\\nGeen directe bronlink bekend · vindplaats: paneel Lunch, regel 1\\n\\nBronroute: LUNCH › KOUD\\n\\nFictieve salade\\n12,50\\nMenukopje klopt zo\\nMenukopje corrigeren\",\"Fictief Diner › Voor\\n1 gerecht\\n\\nTwijfel: Kopje anders gelezen dan in de bron (\\\"DINNER › VOOR\\\").\\n\\nGeen directe bronlink bekend · vindplaats: paneel Diner, regel 1\\n\\nBronroute: DINNER › VOOR\\n\\nFictieve burrata\\n13,00\\nMenukopje klopt zo\\nMenukopje corrigeren\"]"
     },
     {
       "name": "structure: nothing is treated before the human acts",
@@ -443,7 +450,7 @@
     {
       "name": "structure: no one-click confirmation is offered before handling",
       "passed": true,
-      "detail": "[\"Werkvoorraad\\n(11)\",\"Licht\",\"Donker\",\"Sign out\",\"Nieuwe batch\",\"Alles klopt zo\",\"Rubriekindeling controleren\",\"Controle sluiten\",\"18 okt 11:00\\n1 URL · klaar voor controle\"]"
+      "detail": "[\"Werkvoorraad\\n(11)\",\"Licht\",\"Donker\",\"Uitloggen\",\"Nieuwe batch\",\"Alles klopt zo\",\"Menukopjes controleren\",\"Controle sluiten\",\"18 okt 11:00\\n1 URL · klaar voor controle\"]"
     },
     {
       "name": "structure: the bulk action only fills choices, it never approves",
@@ -483,7 +490,7 @@
     {
       "name": "structure: the confirmation shows the handled decisions before writing",
       "passed": true,
-      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets wordt autom"
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 restaurant-URL's tegelijk. Elk resultaat blijft een voorstel voor menselijke controle.\n\nNiets wordt auto"
     },
     {
       "name": "structure: no write request leaves the browser in the fixture",
@@ -491,27 +498,27 @@
       "detail": "[]"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
     {
       "name": "structure keyboard: Enter opens a section and Space selects its decision",
       "passed": true,
-      "detail": "tabs=2 radioTabs=1"
+      "detail": "tabs=8 radioTabs=1"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -531,12 +538,12 @@
       "detail": "width=272"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -556,12 +563,12 @@
       "detail": "width=272"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure-readonly&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -576,12 +583,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -613,7 +620,7 @@
     {
       "name": "be30 1280-light: the doubt is explained in plain language",
       "passed": true,
-      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 resta"
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 rest"
     },
     {
       "name": "be30 1280-light: the pdf page link opens that page of the source",
@@ -626,12 +633,12 @@
       "detail": "overflow=-6"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -681,12 +688,12 @@
       "detail": "[]"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -718,7 +725,7 @@
     {
       "name": "be30 1280-dark: the doubt is explained in plain language",
       "passed": true,
-      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 resta"
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nBronnen beoordelen\n/\nBatchanalyse\nBatchanalyse\nAlleen intern\n\nAnalyseer maximaal 10 rest"
     },
     {
       "name": "be30 1280-dark: the pdf page link opens that page of the source",
@@ -731,12 +738,12 @@
       "detail": "overflow=-6"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -786,12 +793,12 @@
       "detail": "[]"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -836,12 +843,12 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -891,12 +898,12 @@
       "detail": "[]"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -941,12 +948,12 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=structure8-advice&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -1038,7 +1045,7 @@
     {
       "name": "manual import: step 1 shows \"Geldig tot\" with a clock time",
       "passed": true,
-      "detail": "Geldig tot 20:52. Daarna maak je gewoon een nieuwe prompt."
+      "detail": "Geldig tot 19:28. Daarna maak je gewoon een nieuwe prompt."
     },
     {
       "name": "manual import: technische details name the pinned instruction",
@@ -1478,7 +1485,7 @@
     {
       "name": "uncovered lines: the block is in view for the screenshot",
       "passed": true,
-      "detail": "{\"top\":55,\"height\":900}"
+      "detail": "{\"top\":34,\"height\":900}"
     },
     {
       "name": "uncovered lines: the Toevoegen button takes focus",
@@ -1613,7 +1620,7 @@
     {
       "name": "kaart 390px/light: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":1982,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":1982,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":1982,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":1982,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2017,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2017,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2017,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2017,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
     },
     {
       "name": "kaart 390px/light: de legenda-chips hebben ruimte tussen zich",
@@ -1638,7 +1645,7 @@
     {
       "name": "kaart 390px/light: de bronnen staan in volgorde met hun weergave",
       "passed": true,
-      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · PDF zonder tekstlaag\"]"
     },
     {
       "name": "kaart 390px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
@@ -1728,7 +1735,7 @@
     {
       "name": "kaart 390px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
       "passed": true,
-      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+      "detail": "{\"notice\":\"Deze PDF heeft geen tekstlaag; de pagina zelf wordt niet bewaard. Elk gerecht is met AI gelezen van een pagina en heeft daarom \\\"Controle nodig\\\".\",\"lines\":0}"
     },
     {
       "name": "kaart 390px/light: Lijst brengt de nalopen-lijst terug",
@@ -1778,7 +1785,7 @@
     {
       "name": "kaart 390px/dark: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":1982,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":1982,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":1982,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":1982,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2017,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2017,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2017,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2017,\"height\":14,\"left\":284,\"right\":356}],\"row\":14}"
     },
     {
       "name": "kaart 390px/dark: de legenda-chips hebben ruimte tussen zich",
@@ -1803,7 +1810,7 @@
     {
       "name": "kaart 390px/dark: de bronnen staan in volgorde met hun weergave",
       "passed": true,
-      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · PDF zonder tekstlaag\"]"
     },
     {
       "name": "kaart 390px/dark: de melding zegt dat dit de opgehaalde tekst van de website is",
@@ -1893,7 +1900,7 @@
     {
       "name": "kaart 390px/dark: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
       "passed": true,
-      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+      "detail": "{\"notice\":\"Deze PDF heeft geen tekstlaag; de pagina zelf wordt niet bewaard. Elk gerecht is met AI gelezen van een pagina en heeft daarom \\\"Controle nodig\\\".\",\"lines\":0}"
     },
     {
       "name": "kaart 390px/dark: Lijst brengt de nalopen-lijst terug",
@@ -1943,7 +1950,7 @@
     {
       "name": "kaart 320px/light: de legenda is één regel met vier kleine chips in volgorde",
       "passed": true,
-      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2138,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2138,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2138,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2158,\"height\":14,\"left\":29,\"right\":101}],\"row\":34}"
+      "detail": "{\"chips\":[{\"label\":\"Overgenomen\",\"glyph\":\"✓\",\"top\":2173,\"height\":14,\"left\":29,\"right\":105},{\"label\":\"Niet overgenomen\",\"glyph\":\"○\",\"top\":2173,\"height\":14,\"left\":111,\"right\":207},{\"label\":\"Prijs wijkt af\",\"glyph\":\"▲\",\"top\":2173,\"height\":14,\"left\":213,\"right\":278},{\"label\":\"Geen gerecht\",\"glyph\":\"–\",\"top\":2193,\"height\":14,\"left\":29,\"right\":101}],\"row\":34}"
     },
     {
       "name": "kaart 320px/light: de legenda-chips hebben ruimte tussen zich",
@@ -1968,7 +1975,7 @@
     {
       "name": "kaart 320px/light: de bronnen staan in volgorde met hun weergave",
       "passed": true,
-      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · Afbeelding zonder tekst · 0 niet overgenomen\"]"
+      "detail": "[\"source-1 · Website · 3 niet overgenomen\",\"source-2 · PDF · 2 pagina's · 1 niet overgenomen\",\"source-3 · PDF zonder tekstlaag\"]"
     },
     {
       "name": "kaart 320px/light: de melding zegt dat dit de opgehaalde tekst van de website is",
@@ -2058,7 +2065,7 @@
     {
       "name": "kaart 320px/light: een scan zonder tekst zegt eerlijk dat vergelijken nog niet kan",
       "passed": true,
-      "detail": "{\"notice\":\"Deze kaart is een afbeelding; vergelijken kan nog niet.\",\"lines\":0}"
+      "detail": "{\"notice\":\"Deze PDF heeft geen tekstlaag; de pagina zelf wordt niet bewaard. Elk gerecht is met AI gelezen van een pagina en heeft daarom \\\"Controle nodig\\\".\",\"lines\":0}"
     },
     {
       "name": "kaart 320px/light: Lijst brengt de nalopen-lijst terug",
@@ -2148,7 +2155,7 @@
     {
       "name": "ai read: the AI card is visible as its own card in the first screen",
       "passed": true,
-      "detail": "{\"top\":568,\"visible\":true}"
+      "detail": "{\"top\":572,\"visible\":true}"
     },
     {
       "name": "ai read: the manual route expands when it is chosen",
@@ -2298,7 +2305,7 @@
     {
       "name": "ai read: the AI card is visible as its own card in the first screen",
       "passed": true,
-      "detail": "{\"top\":568,\"visible\":true}"
+      "detail": "{\"top\":572,\"visible\":true}"
     },
     {
       "name": "ai read: the manual route expands when it is chosen",
@@ -2406,12 +2413,12 @@
       "detail": "{\"top\":234,\"visible\":true}"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -2431,12 +2438,12 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=partial&batch=batch-fictief-0001&item=1&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -2471,12 +2478,12 @@
       "detail": "{\"focused\":{\"info\":{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null},\"tabs\":7,\"seen\":[{\"tag\":\"A\",\"text\":\"\",\"href\":\"/internal\",\"expanded\":null},{\"tag\":\"A\",\"text\":\"Dekking\",\"href\":\"/internal/coverage\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Werk\\n(11)\",\"href\":null,\"expanded\":\"false\"},{\"tag\":\"A\",\"text\":\"+\",\"href\":\"/internal/toevoegen\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Wijzig\",\"href\":null,\"expanded\":null},{\"tag\":\"TEXTAREA\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Lees met AI\",\"href\":null,\"expanded\":null}]},\"keyboardDone\":true}"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=v2&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -2541,12 +2548,12 @@
       "detail": "overflow=-6"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=v2&batch=batch-fictief-0001&theme=dark)",
       "passed": true,
       "detail": "[]"
     },
@@ -2611,12 +2618,12 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=error&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=error&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=error&theme=light)",
       "passed": true,
       "detail": "[]"
     },
@@ -2641,12 +2648,12 @@
       "detail": "overflow=0"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "[]"
     },
@@ -2671,12 +2678,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "[]"
     },
@@ -2701,12 +2708,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light&item=1)",
       "passed": true,
       "detail": "[]"
     },
@@ -2731,12 +2738,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "[]"
     },
@@ -2761,12 +2768,12 @@
       "detail": null
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=dark&item=1)",
       "passed": true,
       "detail": "[]"
     },
@@ -2796,19 +2803,19 @@
       "detail": "#ffffff / #1f2328"
     },
     {
-      "name": "fixture bootstrap without error (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "ok"
     },
     {
-      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/source-triage/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/bronnen/batch?fixture=review&batch=batch-fictief-0001&theme=light)",
       "passed": true,
       "detail": "[]"
     },
     {
       "name": "keyboard: the review control is reachable with Tab",
       "passed": true,
-      "detail": "[{\"tag\":\"INPUT\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"2 gerechten zonder aandachtspunt · 2 nieuw, 0 ongewijzigd\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Concept opslaan\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Beoordeel handmatig\",\"href\":\"/internal/source-triage/batch?batch=batch-fictief-0001&item=1\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Menukaart controleren\",\"href\":null,\"expanded\":\"false\"}]"
+      "detail": "[{\"tag\":\"INPUT\",\"text\":\"\",\"href\":null,\"expanded\":null},{\"tag\":\"SUMMARY\",\"text\":\"2 gerechten zonder aandachtspunt · 2 nieuw, 0 ongewijzigd\",\"href\":null,\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Concept opslaan\",\"href\":null,\"expanded\":null},{\"tag\":\"A\",\"text\":\"Beoordeel handmatig\",\"href\":\"/internal/bronnen/batch?batch=batch-fictief-0001&item=1\",\"expanded\":null},{\"tag\":\"BUTTON\",\"text\":\"Menukaart controleren\",\"href\":null,\"expanded\":\"false\"}]"
     },
     {
       "name": "keyboard: Tab moves focus through the page",
@@ -2838,7 +2845,7 @@
     {
       "name": "concept list: all four fictional rows are shown",
       "passed": true,
-      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nSign out\nWerkvoorraad\n/\nMenuconcepten beoordelen\nMenuconcepten beoordelen\nAlleen intern\n\nControleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.\n\nGoedkeuren"
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nMenuconcepten beoordelen\nMenuconcepten beoordelen\nAlleen intern\n\nControleer menuconcepten uit Batchanalyse. Je ziet alleen de aandachtspunten; veilige gerechten zijn samengevat.\n\nGoedkeure"
     },
     {
       "name": "concept list: a valid v1 row is usable next to blocked rows",
@@ -2908,7 +2915,7 @@
     {
       "name": "concept v2: the raw stored v2 envelope is never shown as v1",
       "passed": true,
-      "detail": "/internal/menu-concepts/concept-v2-0002/Werkvoorraad\n(11)|Licht|Donker|Sign out"
+      "detail": "/internal/menu-concepts/concept-v2-0002/Werkvoorraad\n(11)|Licht|Donker|Uitloggen"
     },
     {
       "name": "concept click: v2 back returns to the real list",
@@ -2983,7 +2990,7 @@
     {
       "name": "concept v2 read-only: save, approve, reject and export are absent",
       "passed": true,
-      "detail": "Werkvoorraad\n(11)|Licht|Donker|Sign out"
+      "detail": "Werkvoorraad\n(11)|Licht|Donker|Uitloggen"
     },
     {
       "name": "concept v2 read-only: the blocked actions are named, not hidden",
@@ -3023,7 +3030,7 @@
     {
       "name": "concept invalid: no save, approve, reject or export action exists",
       "passed": true,
-      "detail": "Werkvoorraad\n(11)|Licht|Donker|Sign out"
+      "detail": "Werkvoorraad\n(11)|Licht|Donker|Uitloggen"
     },
     {
       "name": "concept invalid: the selected id did not jump to another row",
@@ -3048,7 +3055,7 @@
     {
       "name": "concept empty: it never becomes a usable v1 concept",
       "passed": true,
-      "detail": "Werkvoorraad\n(11)|Licht|Donker|Sign out"
+      "detail": "Werkvoorraad\n(11)|Licht|Donker|Uitloggen"
     },
     {
       "name": "concept empty: the selected id did not jump to another row",
@@ -3391,6 +3398,241 @@
       "detail": "/internal/menu-concepts"
     },
     {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 1280-light: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "be39 1280-light: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "be39 1280-light: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "be39 1280-light: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+    },
+    {
+      "name": "be39 1280-light: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "be39 1280-light: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 1280-light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "be39 1280-light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 1280-dark: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "be39 1280-dark: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "be39 1280-dark: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "be39 1280-dark: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+    },
+    {
+      "name": "be39 1280-dark: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "be39 1280-dark: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 1280-dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "be39 1280-dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=-6"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 390-light: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "be39 390-light: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "be39 390-light: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "be39 390-light: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+    },
+    {
+      "name": "be39 390-light: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "be39 390-light: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 390-light: requested theme is active",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "be39 390-light: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts?fixture=concepts-publication&theme=dark)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 390-dark: an approved card gets exactly one second badge, \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Klaar voor publicatie\"]"
+    },
+    {
+      "name": "be39 390-dark: a missing source gives the first reason in plain language",
+      "passed": true,
+      "detail": "[\"Intern goedgekeurd\",\"Nog niet klaar: Bron nog niet bevestigd.\"]"
+    },
+    {
+      "name": "be39 390-dark: an existing export shows its real status, never \"Klaar voor publicatie\"",
+      "passed": true,
+      "detail": "[[\"Intern goedgekeurd\",\"Review-PR gemerged\"],[\"Intern goedgekeurd\",\"Vorige poging mislukt\"]]"
+    },
+    {
+      "name": "be39 390-dark: merged is not live, the next deploy is",
+      "passed": true,
+      "detail": "Fictief Gemerged\nIntern goedgekeurd\nReview-PR gemerged\n\nConceptversie 4 · aangemaakt 28 okt, 10:10 door jou\n\nhttps://fictief-brasserie.invalid/menu\n\nlive na de volgende deploy\n\n3 gerechten\n1 aandachtspunt"
+    },
+    {
+      "name": "be39 390-dark: a waiting card keeps its single status badge",
+      "passed": true,
+      "detail": "[\"Wacht op beoordeling\"]"
+    },
+    {
+      "name": "be39 390-dark: the header counts only the ready cards",
+      "passed": true,
+      "detail": "1 klaar voor publicatie"
+    },
+    {
+      "name": "be39 390-dark: requested theme is active",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "be39 390-dark: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "be39 light and dark resolve to different background tokens",
+      "passed": true,
+      "detail": "#ffffff / #1f2328"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-klaar-0101?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 concept detail: the ready card can start the review-PR on the same rule",
+      "passed": true,
+      "detail": "{\"ariaDisabled\":null}"
+    },
+    {
+      "name": "fixture bootstrap without error (http://localhost:3137/internal/menu-concepts/publicatie-gemerged-0103?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fixture network: no blocked app traffic (http://localhost:3137/internal/menu-concepts/publicatie-gemerged-0103?fixture=concepts-publication&theme=light)",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "be39 concept detail: a merged review-PR is not presented as live",
+      "passed": true,
+      "detail": "onze\nmenukaarten\nDekking\nWerkvoorraad\n(11)\n+\nRestaurant of menu toevoegen\nLicht\nDonker\nUitloggen\nWerkvoorraad\n/\nMenuconcepten beoordelen\n/\nFictief Gemerged\nBeoordeel menuconcept\nAlleen intern\n\nControleer alleen de wijzigingen voordat je het concept goedkeurt.\n\n3\ngerechten\n2\nmenukopjes\n0\naandachtspun"
+    },
+    {
       "name": "network guard: external fetch is blocked before native fetch",
       "passed": true,
       "detail": "fixture_network_blocked: external_origin (GET https://unapproved.invalid/api/anything)"
@@ -3433,7 +3675,7 @@
     {
       "name": "network guard: CDP blocks external subresource and frame navigation",
       "passed": true,
-      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-25T19:26:00.338Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-25T19:26:00.339Z\",\"resourceType\":\"Document\"}]"
+      "detail": "[{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/pixel.png\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T18:02:29.322Z\",\"resourceType\":\"Image\"},{\"phase\":\"negative-probe\",\"kind\":\"cdp_fetch\",\"method\":\"GET\",\"url\":\"https://unapproved.invalid/frame\",\"reason\":\"external_origin\",\"protocolRelative\":false,\"at\":\"2026-10-28T18:02:29.322Z\",\"resourceType\":\"Document\"}]"
     },
     {
       "name": "network guard: no unexpected CDP traffic during app scenarios",
@@ -3471,17 +3713,17 @@
         },
         {
           "action": "click Bronnen beoordelen",
-          "href": "/internal/source-triage?restaurant=9001&reason=image_only",
+          "href": "/internal/bronnen?restaurant=9001&reason=image_only",
           "reached": true,
           "arrived": true
         },
         {
-          "action": "source detail rendered",
+          "action": "batch follow-up banner rendered",
           "reached": true
         }
       ],
       "passed": true,
-      "detail": "[{\"action\":\"open batch result\",\"reached\":true},{\"action\":\"click Bronnen beoordelen\",\"href\":\"/internal/source-triage?restaurant=9001&reason=image_only\",\"reached\":true,\"arrived\":true},{\"action\":\"source detail rendered\",\"reached\":true}]"
+      "detail": "[{\"action\":\"open batch result\",\"reached\":true},{\"action\":\"click Bronnen beoordelen\",\"href\":\"/internal/bronnen?restaurant=9001&reason=image_only\",\"reached\":true,\"arrived\":true},{\"action\":\"batch follow-up banner rendered\",\"reached\":true}]"
     },
     {
       "name": "batch result -> Menukaart controleren -> keep/correct each uncertain section -> Bevestig bron (panel only)",
@@ -3526,7 +3768,7 @@
           "arrived": true
         },
         {
-          "step": "one confirmation that names 8 rubrieken",
+          "step": "one confirmation that names 8 menukopjes",
           "arrived": true
         }
       ],
@@ -3549,7 +3791,7 @@
           "arrived": true
         },
         {
-          "step": "one confirmation that names 8 rubrieken",
+          "step": "one confirmation that names 8 menukopjes",
           "arrived": true
         }
       ],
@@ -3572,7 +3814,7 @@
           "arrived": true
         },
         {
-          "step": "one confirmation that names 8 rubrieken",
+          "step": "one confirmation that names 8 menukopjes",
           "arrived": true
         }
       ],
@@ -3595,7 +3837,7 @@
           "arrived": true
         },
         {
-          "step": "one confirmation that names 8 rubrieken",
+          "step": "one confirmation that names 8 menukopjes",
           "arrived": true
         }
       ],
@@ -3749,638 +3991,662 @@
   "screenshots": [
     {
       "file": "menu-review-desktop-light.png",
-      "sha256": "778e20e9953daf894d638d4fabc0171550aa99e34e43bdae185c8198184634d8",
+      "sha256": "efbb4ffc0469dea508a1e15ebb13353d8d97fd2313d26c01492e5ffd1b0a1416",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-readonly-1024-dark.png",
-      "sha256": "18e5096209047f4fc4f189cc6d49ee0ac6df1221f9e72a9c8a89f3f433e61724",
+      "sha256": "555fea5c412dadd15ee17e9ba76c79278a6bdf0491391eac98055e267a5c142e",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-empty-dark.png",
-      "sha256": "f0dcf84b06668948ce506f85498caba483a052a6907a7cbb7a365de8e4653912",
+      "sha256": "3d3b2f32a409e9234ce4df454330953b58021378ef218f781b0aeae655f16569",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-partial-390-dark.png",
-      "sha256": "752836eedb659a3dd76e2a7410865bc39ac65ec7eeda521336f80789ddbcf2e9",
+      "sha256": "91c2c2933e5c0ad4abb9fb562cf6fb63b86e705b2897dc5b7b3880f2ade008a9",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-390-light.png",
-      "sha256": "9d576ee46cbca8944ace39823df688baac332ac9b94ea9b1154f513200b73c64",
+      "sha256": "9216e0d0dd3dd338e560be05c1f1f6258ba970642e6e9046f17312d006764dab",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-image-only-320-dark.png",
-      "sha256": "474501e692f1c0b9e3dcb7734d8f69a795ce2aee73a4e2e2d71e5a7a54fca5d1",
+      "sha256": "8fa5a2c998d94cbd3b7c3edd579b87f181bd687afda738fc237bb6dad9c6de1a",
       "width": 320,
       "height": 900
     },
     {
-      "file": "menu-review-image-only-follow-up-320-dark.png",
-      "sha256": "84103e2e54d6363aa07244f04e1f91b3b9dcf131a21c53a477ce1f74a3e67892",
-      "width": 320,
-      "height": 900
-    },
-    {
-      "file": "menu-review-image-only-follow-up-reason-320-dark.png",
-      "sha256": "83a96b569508764ba6a15ab69dd6cebebb3c9d77d3ece6e287edbc2509efff89",
-      "width": 320,
+      "file": "menu-review-image-only-follow-up-390-light.png",
+      "sha256": "3864817ef6026dfcc6ee5565fb2193ec5907145270119b99c9802e190160f637",
+      "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-1024-light.png",
-      "sha256": "84ee10bf8ce560b092aaf71b4586174012553f64d9564f4c3fc2ec4727a48a83",
+      "sha256": "75bb9fba831b9f0630394d51c94a8683cb50bfc5ea175a0a23f354932fbe1682",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-structure-keyboard-390-light.png",
-      "sha256": "067278903aad73c31c40b29bfcc9bd73d0997de062cc62b9a88b1318e57447d2",
+      "sha256": "b21efc0a9ba7067b85f00ddbee1ffb23fab59af04c875365dae70774e7df2c75",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-light.png",
-      "sha256": "3cd2d943ce42825f02465f600a267873d4424eee226259cf456422bd21e4d904",
+      "sha256": "631f6891d67431546a8538e47663ba6c620a7ad71c38a695d517ef2893cde06f",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-390-dark.png",
-      "sha256": "1e080bfc079822cf8a71a0df7da8bb16e60537cf363f4fc86c9b2f1a136d4866",
+      "sha256": "41e134fe31db789ade73c294582c42e3b95597ad6308f02f7a1c8f5589048cf3",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-structure-readonly-1024-dark.png",
-      "sha256": "a2b896d83145edfab783e2b7c6e42a36a00671a5d79f34f5b358521a22e7ddb2",
+      "sha256": "4022945e28eaeccfa84374e3a6eedb2453726b500959ebc8ca6950b9c350285c",
       "width": 1024,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-1280-light.png",
-      "sha256": "a60aa2cde4c78b51741dbbda34f4a2dcd1742a2a17637c59ab119cc4fd88f03c",
+      "sha256": "a95948a8ab48a26d6478bc6acb6796594ce93b39225395b8b165930bbd8c6438",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-light.png",
-      "sha256": "cda108e33ddc27729f4a4309d0c7772cde7546af6c06f4b3372204f5e8828feb",
+      "sha256": "387fbcf49abfdce00a3d11b172fa2fa04563b793a94e86fc6f39c7956469d2ab",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-light.png",
-      "sha256": "f050d5eebc5cb37741491ee6b49eb5d32f49c2a4c3cffd0e13afc748faa990e0",
+      "sha256": "1fa290c0ef828899743fe126128db78f9d5337f1cb567be60a04a92096d62ece",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-1280-light.png",
-      "sha256": "51a534f7c96e462769c284c6fbad60049824892b5efdd94cc685dc785d65b706",
+      "sha256": "28b668402b1ba05042e4efffba826ca385fb3e9b29517f14647139d5162cdbe1",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-1280-light.png",
-      "sha256": "1dddf8a8ec33cece78070db83d66e46db13127449227518d423364350c3555a4",
+      "sha256": "f7727080fa5f33ea5cb613cdd264efba0bb4028d4cdadade3f8e63fa03592f34",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-1280-dark.png",
-      "sha256": "72ca200d5b2bab160207605f0b4fc3799a306a7e4638a90bc7f38bbeb0490746",
+      "sha256": "a909a5f03b2b953b32c7acdbf3f4d74f28dc288b98a95b9148f69c9b2cf4618d",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-1280-dark.png",
-      "sha256": "fae5e90df729911793e16a28f38a3adee54d4da7a7910dd269734c5a9fb6805e",
+      "sha256": "9f0e3a1a352c50086535b0812fd775e29481dd6c030760680a176c0655483dac",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-1280-dark.png",
-      "sha256": "ee8fa19f7015af8a500d060c2ef22128720c27b2f7ced23cfd9681a90d6db68f",
+      "sha256": "dcc33e5f2e3c77e3d1f157a36cb80fb793f914a31fc2617d2f3d25165afcd279",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-1280-dark.png",
-      "sha256": "657972517dcbbd77361bd82b528272d04fe042b2e8afece9f4bcb86129241f0e",
+      "sha256": "bd926b53280df92fcee8774748a3debc929d6150d614dd90f94004cbb7ae59c2",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-1280-dark.png",
-      "sha256": "089e374227c19daa6f1b1725a356c3cfd2278d66473c1b701e4c8f7125c60d2d",
+      "sha256": "c79c22a780c65f6807d996722ba258c185e69da577fee037bd79cc9ddcd28805",
       "width": 1280,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-390-light.png",
-      "sha256": "30e5602f1cbb7be9b334ec453ca76c16a44597d72869e6ea2b73a6075456a3a9",
+      "sha256": "a1d385ee1efba9a88d12d05d93b537f090db6cea990de53d8b2394e1f69be638",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-light.png",
-      "sha256": "ca95b11cdcccf2f26226b98e3479845c91c7acfb3e1802a59435af10d051f00b",
+      "sha256": "6a66c74a25aaa13310eda62cc83d2f8f6b6e6d2b5216dcb3440ac012a59750dc",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-light.png",
-      "sha256": "98da9966a8df0a235ea929339aec3e1717585e1b44b51ab1c965c1c5af472e7d",
+      "sha256": "34dc04bd6f735948df48db91a2e0cef191e9d1cf6e4584981411f254349ab23e",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-390-light.png",
-      "sha256": "bb0b0f358a1d66501d4d1f1ac09cb14da464351c049e00a7aa1a29925a0d348e",
+      "sha256": "dc8da99d63916246ba153b58e4cbc94b216f8555d5cd291eba37a667f2e20dd2",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-390-light.png",
-      "sha256": "8c71b4c4035d9d19052280f86b0a635f4ff01d42d9bac3b95b385cfb28ff7825",
+      "sha256": "335a9d0c60587ff381d6794547d7505c44b181af01d397a809a7a0ec8097178e",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-collapsed-390-dark.png",
-      "sha256": "4520cced122726a570ca4f2d3e1269db49bf48376d1de2c239b30e6b91899676",
+      "sha256": "d4965410f7df696f57efe78041ce37d73dfee0af81e4a8c0f346a4438b3a089f",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-expanded-390-dark.png",
-      "sha256": "6ace799a850a0fa5c2acf98789a643c7879f86eb54126cf2c4fcc2ed25f89307",
+      "sha256": "3045e334721087e8c7a7933b67c695cea074b0eae3d91e647f4627f0d152da83",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-390-dark.png",
-      "sha256": "9d6b09af24d0fb68b937221df0e7fcb6ad75ba2914f95b251811b0198b0584ab",
+      "sha256": "a1e0a28cefe94e5052cb2d8595c95351a93605842363a0216d1e442dc6444dc3",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-advice-expanded-390-dark.png",
-      "sha256": "2edf5082ff52c95bcc2fb3aa2d43628e17b0a5bcdb3b87082783272867ee9e5a",
+      "sha256": "e2b90b4fbba8dbbfe6ed4c7939ddb249e15e5e70ce731a04158bb2ebce6d114b",
       "width": 390,
       "height": 900
     },
     {
       "file": "be-30-structure-confirm-390-dark.png",
-      "sha256": "3b3acd2f3f96b0b74451d38faeb08e6a5a2b97aecbd2d84e8aba3142c8b9fcba",
+      "sha256": "1d571762cfa51ef76b6714dfaac34d6d182001345946b2ca7ab8073e16a1c934",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-390-light.png",
-      "sha256": "74c8e798301dd283064ba4745703f79bca2e98293cafd110cf20a179638b8347",
+      "sha256": "e19a6cdde79b506c7fe31e04cbdc50302c8a7a12fe2b58d3dd78a3cd82ba0219",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-320-light.png",
-      "sha256": "2da66243525644c094c594a5f0b68f6de87bc7ef98ec945d295b89f097ce4696",
+      "sha256": "79e00bbd1efc6b0e4ad5d4c34c3a56e6b5b003d916937adaff52e3ba0103b8ff",
       "width": 320,
       "height": 900
     },
     {
       "file": "manual-ai-import-390-dark.png",
-      "sha256": "ed67004b5f42741d015376bb863cee959ab71e4abf670f7e3704df3f7994d6bf",
+      "sha256": "1a9230ff622018bb55bcce7b6e3c32cab20b6702f3b6ac7c9d6a5d74795b0725",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-problems-390-dark.png",
-      "sha256": "59e713f166f12dcd19af1dff0645c253998aa9b8433291146ed02f31e192dc75",
+      "sha256": "1b7a8e45d7136532be447174a10b05bf9a5b670f54a021908999a90498663e89",
       "width": 390,
       "height": 900
     },
     {
       "file": "manual-ai-import-problems-320-light.png",
-      "sha256": "7a0ee26d123624bde6c4cf8beb96dc0644c5f022509b2d8da124faef32d54ee9",
+      "sha256": "0badc43650974a79fe32832120592dec7803d0c012e20ea6466e94ea86a9ee56",
       "width": 320,
       "height": 900
     },
     {
       "file": "manual-ai-import-normalized-390-dark.png",
-      "sha256": "e833e61daf3735247d4db20c33e4f7c0c6bf1264b29ed04c99daba9a9499326a",
+      "sha256": "ff7b1a451badfba7a287d31c2eba4e418d7ebc3dac62f3f8733601b6464d50c9",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-390-dark.png",
-      "sha256": "77041f0e44e882a2ae53716e432707d7689e285f597e8c55beb566ef2166f967",
+      "sha256": "cd0790e21beaa5c5dca6fd0ae6a7135d56380b236a4a616a3ae38025422092d5",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-after-add-390-dark.png",
-      "sha256": "a12da5953488260d236719654a7ea9da1afa0128bcfb7c5dece01b71f7d18a55",
+      "sha256": "fdf5943a2099a164c03a73c5fd4272e11933b9a690167b0c70858bdd6e160e04",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-empty-390-dark.png",
-      "sha256": "54d0366efc93ddb62d59b34411b7bb43d58e55863aa3663eb04de827ccd024d6",
+      "sha256": "f788576f28c90aafaab03c843d78e61ca230befefbdff86239b61f05831ea606",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-390-light.png",
-      "sha256": "5a2d6c0dd425063ae3308bf73064c838f9b995a3db915742e19d580f935a015e",
+      "sha256": "d716418a3310347a7a9e3a39f287463a0bf5ba7a271ee7d8a9fab4da8a65f1ee",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-uncovered-320-light.png",
-      "sha256": "2a121176ae448cc47f1ad3c1d5c1fe979c885a93c85a91a49a2933c5d5939736",
+      "sha256": "e74e5ff7b01182014b3b5c5d3605711e15d05075603db9f18834d4b154463481",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-legend-uitleg-390-light.png",
-      "sha256": "fdd0ea46ab501f778cf0ca8396808b6438cd51492bb48b76bf03e1e40b36ffdc",
+      "sha256": "422cc9e089506c7549efb83f205680f7adcd665126489ac0b94cb3ed77880ae2",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-390-light.png",
-      "sha256": "497af79da09d5e13e7e730f59db7899b9b8873ad4446f6630d4a242783ea4ab9",
+      "sha256": "c62724b7e58c9847cc819a2df44bba038222c243c0aab6ea043305918923b559",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-red-panel-390-light.png",
-      "sha256": "acd942b925156f1ab1c156e1b479f78ac164cbee3cb248a4eb8f22ef5c0fabad",
+      "sha256": "44a9a3c6c5eaf0a8faf629598b6388525c5d84de9a80418d1802bf0506a42af6",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-orange-panel-390-light.png",
-      "sha256": "523884c224370a28dff14065d8430e31def113fbaf01889d888ac6ae675f50a6",
+      "sha256": "5477d5df65bae63b5b91422f40529016b4fbd2eb1ddc61bea0d84ebab82fc276",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-pdf-390-light.png",
-      "sha256": "12f5848b29f116e47a3725a0959f846b34a2c9d05cf3cec3b3fa6e0c7bfa4cc0",
+      "sha256": "23774faa762dbf4245e4cb9e93054015e290d1ba5265cc506fdacee0dc13f5c6",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-from-list-390-light.png",
-      "sha256": "40b5539de619e04e9f9c681458dcadd8e4defafc5e9f95b121c8e3bdedf67607",
+      "sha256": "eb4da165f0cc8ff0d5822b4ed05798a6b15dab0f60106bb50e34be489c6db8f1",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-legend-uitleg-390-dark.png",
-      "sha256": "10e603be83793f53c23897451676eaaecf151b2bbdcd7f4c73741a9b0423c137",
+      "sha256": "ec1837810c6a1ea469e8a34ec8a9f3acbf03f3278b5c8af7d2ba93227d085f0f",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-390-dark.png",
-      "sha256": "746878e19a096d6e81968d87ebae70c4a231129de4c3eb033c2690d9444e82a3",
+      "sha256": "4e71e2e1dd809b9758aa32d128fd216991b2a987291b35a6a95f16798195e3a0",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-red-panel-390-dark.png",
-      "sha256": "28f2fe46e5f5772017d17e74bdccc6fe45134bc70b385e70afe306a8aced7a07",
+      "sha256": "cb8f986127b64ea56b9779284e47f3a0b6bcc00efc98c1a89495d958c832a800",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-orange-panel-390-dark.png",
-      "sha256": "2cf3a464592f077b01e226cfded4123b107cbca55a7564a75cb56ace7093a685",
+      "sha256": "97b7e6b9b64b1a4ebbddf6b5d0a27a510e7c067c796a579c1626d7d5dbf76b92",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-pdf-390-dark.png",
-      "sha256": "b321da5ec220c9f5f5b8f8e47388165a11f520e9334d3ce4a6daf95be4c54d33",
+      "sha256": "36965792eb5ff7e51e793636874c59d1a4cfa67d5d3971d4be812d4061b558ac",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-from-list-390-dark.png",
-      "sha256": "8581565a420daa83f36b37e05907b87ec6f4108a535141b2f825a65e20e7c16a",
+      "sha256": "35540b49953cc433c9a95063df88b6389d7e8962092f06c85856031e695bf93b",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-map-legend-uitleg-320-light.png",
-      "sha256": "bd2eb57d827e76f3d7606004fc4d8149a72fe6cc911f2c5d29c28c0c89180eea",
+      "sha256": "c6bc980ba0abacea4e05dab7b78ba1066fddf8ee452aba740975c93b87213d03",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-320-light.png",
-      "sha256": "b4207877936dd7a7527359f22d1984a9647325bd1aea0afae563f96f18c1c91b",
+      "sha256": "1f5b6fa203cd0a874891f30fee15e464380aafdfb5caaa51bec33cfe0a11f579",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-red-panel-320-light.png",
-      "sha256": "bd54247ec43916be7152bc4829b53775a6a644ffc14fe01a4cec86b7db9d981d",
+      "sha256": "7a68fc777fe2648fc0c1cf5b047dabbbf698d7b8c3410d32d6fba5510a42f621",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-orange-panel-320-light.png",
-      "sha256": "63b9376d2d0b14e9a71c5fde9e684f0468ea052f936b6c8231e9cfe602e83be1",
+      "sha256": "9f9485678b4f0fcc78b5b2b5ffa51778fba834c4b3d5e4cd859c3e4313cd99f3",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-pdf-320-light.png",
-      "sha256": "584dd7bca546b3b6864c5876aa7930f58a923250b9af8158955c981ed8a3a80c",
+      "sha256": "9afd870f2e93a31fb4ebb319be6d64b326f1ffaa700d5b7fe11564dbe4ae1bad",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-from-list-320-light.png",
-      "sha256": "0145e73c8b29ffb8915b4773a178912ec2eaab23534ee1f05065579d3d072c6a",
+      "sha256": "e922b6c903f5ee0e6fe0de1e3dd0e2b97c006de9a6f56a325cd112725d68112f",
       "width": 320,
       "height": 900
     },
     {
       "file": "ai-map-keyboard-390-light.png",
-      "sha256": "a89e1e0a3c17d04a92999eb01759b9575424ecf45d7c0d324f129d96edad6705",
+      "sha256": "ef6b4416db29133d6878bcd700564951fceb25c70d5daf6f7fd8a2ff45c4bf05",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-block-390-light.png",
-      "sha256": "4ead003a491dc0e4feb4e6d431ed531e6bd7dec31a330c8ec23b70e928174e12",
+      "sha256": "b6723f2096d4cdbff39cc82a5a938b88f2d42b34ac4a81fd3d6b969cae78a7d9",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-manual-390-light.png",
-      "sha256": "3ddf91896c284be176942c0cac6b1ee04c73721aa295c4965b31d49501eb2163",
+      "sha256": "a1ee29608e7363f265a6949f5e0f4abe441c47f373e281a1db31c0f5ddb583fb",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-busy-390-light.png",
-      "sha256": "dfc655adc6ffab9cc1bb3c8f1065942e2489806a5e0197ed83e69986ce6c4e6f",
+      "sha256": "7627bed8696c11f1d26991984a89faf3d621ae0ceb37f42be9961108cb71be3b",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-done-390-light.png",
-      "sha256": "3e1c0ad9888a3a1a6dd4f97efeeae12b1901e8be7531e19b321d54be14ea40d9",
+      "sha256": "5752fa18d6645476a7e846215c0b7ce6b192db2c6c5b66559177b80757eae62f",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-review-390-light.png",
-      "sha256": "c31f0611ac950cce2abcf4f97db1475d66b336168683aa1206c2f3a7c8eb9254",
+      "sha256": "19ab4ca38d7e98b3ed6e0341a86a53267abd5d0ef37f7d8b1a149b6b2cc58491",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-off-390-light.png",
-      "sha256": "950a796e0316f5c12a4fda2a113c77b3f7695a3dcc1d3c5f30db21e9a001fee7",
+      "sha256": "25eea5eda7d67fc5067a866a5e629e60d8cc4c3b7054e794901983894ac1a77d",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-block-390-dark.png",
-      "sha256": "092232e6fdade7e4966b9c834081492289e99868fc595abf832eccfa555fd722",
+      "sha256": "52147630ce8a7280f4534307cf2dcdae84c7d84204dffa1364aef4743d87d914",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-manual-390-dark.png",
-      "sha256": "6897c55ec7761123d9403a0be2c1546eaba21c00d67d2fe2306f64664e3b4a0d",
+      "sha256": "cf23b810b2f3077a0a7e492767fcb6e5fe8ba2850cad5039c86222aaf41811a2",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-busy-390-dark.png",
-      "sha256": "9a5d18ad583d6e0adb2c9a0ad3faf1f4cd17f71f84e3e1e2d981a5c30e4633de",
+      "sha256": "29ebe0ec254fb52d2e24bb3dc0a355021fa177f9b8a217d082ed78a4b8673088",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-done-390-dark.png",
-      "sha256": "76c49e894a42294f28658ecc8c10b0d759d571a60e220c923e9d949fee45d4bf",
+      "sha256": "f84f592a7f380b8736e0233be771d4e98bc94f3930ef98cd47fde9937d4b18d9",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-review-390-dark.png",
-      "sha256": "e3e9c3baf0a852de2f4c1e821b7a554d2c6a972efea048df167bd322e3d24672",
+      "sha256": "74fcfc979b7ee1ff970e1c4dcb8f6dab903a3258ee9bb5536004f19b75ef529e",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-off-390-dark.png",
-      "sha256": "ed67004b5f42741d015376bb863cee959ab71e4abf670f7e3704df3f7994d6bf",
+      "sha256": "9e4bbfb52792c7a930c8b784a01744349f049675cb21f242833f846c24b722ed",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-light.png",
-      "sha256": "1dcb33c8070d07f846ccda8e80f74a759c690112778f476b1b11a79368738c7f",
+      "sha256": "61d98dabc7acc68bf1017e082510047935588b2b7cdf50c9155c07abe6103084",
       "width": 390,
       "height": 900
     },
     {
       "file": "ai-read-batch-390-dark.png",
-      "sha256": "7b78c9f64b0ac55b3d5a5b29450cd5dad445891dec4defbfe547f1628c8713b1",
+      "sha256": "b230f228d957fcfb22135d7fd6ef8befddce7ad7b3f415ff965e392a19ace5a8",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-v2-1024-light.png",
-      "sha256": "c800046163f4cf23e7b2f20c5d7aef161420a4cc075e5a14c956ce996aa6ed8e",
+      "sha256": "8ec1ce9d024366f823ca3dca5f00280d394c59b812a3b77e39bf2714da88891b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-v2-390-dark.png",
-      "sha256": "3b67757d6b89970a90dc9135287ae6a2720a7bc8d336e7e2876acde6a89d0235",
+      "sha256": "a723760846cb58f8be4e1726aefd6d9140aa9e527a719e149f7819984d30b4f0",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-error-390-light.png",
-      "sha256": "90ec993c0761f33961ede8ed5eaeeedf1c778d5d3c9a727b42ec71ee17bf8e82",
+      "sha256": "35a3e13e44758587a1c7b9546104f87f4d354817b90738a8389b7939dabdce30",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-320-light.png",
-      "sha256": "c1450c812f63b3336e34fcda2f988da5744604f035891260fb748b7fbf6e8f79",
+      "sha256": "3e6f89540a1d5d52d28290fb18292d13cfa8021cd31ff5b5916450112d11e1af",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-320-dark.png",
-      "sha256": "aa0f819b2c6b1f95e7b9e09f2fe16ce477dded9c8468dbdb389e5fb47e36c20c",
+      "sha256": "2d8045770c5a3df19999aaa98ced2acada9ab4b8f5eea4562512a7f8c05f8ec5",
       "width": 320,
       "height": 900
     },
     {
       "file": "menu-review-390-light.png",
-      "sha256": "78bb4850eaed0aab2e0104d75b81d8c3169b918d729e2e67aac644fbecd20ad2",
+      "sha256": "653aa860147b8ac01f8c502efa1f7114b266edfdbb29bd60b48d0540b0cbea85",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-390-dark.png",
-      "sha256": "8f8d3dbbb05f207c2ca01f170bac82bdd7e151e8022cf14663590f6bf2dac772",
+      "sha256": "192f4b7941d295f9f5e756c761345488ac41965571e4c2e30dec7a953f3ae062",
       "width": 390,
       "height": 900
     },
     {
       "file": "menu-review-1024-dark.png",
-      "sha256": "ff68821644fa30dbc09d3b5dcd685531a30806890d9921fa0ca812d773145816",
+      "sha256": "228abdb60860e78785f9543911350bfec79b389c1641b1d1959b67c47c741d9d",
       "width": 1024,
       "height": 900
     },
     {
       "file": "menu-review-keyboard-390-light.png",
-      "sha256": "925b39987d53037a928192abb39e8063e9b45383a52eabfa516b24756c6b5ee5",
+      "sha256": "9a61384872221530be79ec1443075459e768403128bc4d094aa7ccb9f47c4434",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-list-1024-light.png",
-      "sha256": "7a4449cabafab018cd1e055c04577c6006f278428628ea3ea80e3f6e5ddbab28",
+      "sha256": "7df6de856660142167fd72e10344826df9c6abc4de86ebcfaa624d9dd8d1a03d",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v1-1024-clickpath.png",
-      "sha256": "91fdf5e4f62dd958a31ab73888c00af5a5777fe12792a8d40f1f89d2af698637",
+      "sha256": "b231a815fc34ede399994c8a7176f6474d908862cd98eac7645eaacaa3078794",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v2-1024-clickpath.png",
-      "sha256": "cdb324b818656bc65370b551767c64df4a23bb46c3c750de75ff21873ec1e4d9",
+      "sha256": "75442e4dfd252764bc38c39c39a9a80f1d9e86f6dd75139372ab927e7a6f5a30",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-invalid-1024-clickpath.png",
-      "sha256": "3244f1193d24fafc8743df6ab22d2a85ca8f4da50100d9f77e6b379eef21ffa0",
+      "sha256": "c04f541ac4dd9ca1d9c7e9f22dacce12e94aeca53662be1417f1e23195599b5b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-empty-1024-clickpath.png",
-      "sha256": "c6736931ef8f3b4b236882202aff0b0dd870b413417af3b8cc4d0f4bec1cf618",
+      "sha256": "fac1376e978d7d3e94751bdd2d269f74dc5e51076cfa007633a3cfea265ddd1e",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-v2-readonly-1024-light.png",
-      "sha256": "86865427e08cd0569b5b7a17db1547bcd4166f66f7294c226cd3843bb1c03616",
+      "sha256": "69cd66ee831bd91ac7ea1880ad5358b0992c70e3315df0eeb3c5a893a8c3821b",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-invalid-1024-light.png",
-      "sha256": "dac0eb06d5c848f7330371cb8731c08b0dd6e7e3fe2b67134620441de7889de4",
+      "sha256": "c48ca308e94bf5f3671ab16b38a6cafadacac76166ce15a9b0294fbc3c6079b3",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-detail-empty-1024-dark.png",
-      "sha256": "c6736931ef8f3b4b236882202aff0b0dd870b413417af3b8cc4d0f4bec1cf618",
+      "sha256": "fac1376e978d7d3e94751bdd2d269f74dc5e51076cfa007633a3cfea265ddd1e",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-list-empty-390-light.png",
-      "sha256": "ef5af6e1f4f07a2d1196ab8b7bc0d9e69c8ceab9f40e6f25856b7f2bb7668f8a",
+      "sha256": "15dccac9437bd1c9d30b62ef4c79aa3d88ab9105bdbb77d735e4492c4176eed5",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-list-error-390-light.png",
-      "sha256": "8d81a2955d7d57473559d5bae40ca2c7bf9f05361ad91ffa0963a1d1f7fba779",
+      "sha256": "5cc2962b2bf150b0b0f923f602ebc004269fe36a5f65184c42273a3fd1672a42",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-list-no-access-390-light.png",
-      "sha256": "cf0d58fc9b69136d1eb90103f3dcc2ad10fec8d4a47b5aae000b413ead53ee1b",
+      "sha256": "8483940e15977fb8c19c7933105e17254c6fcdb22605c403a55d38e39c2ed140",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-error-390-light.png",
-      "sha256": "6fc7c2a2c8df8b5f8c7b9d55de4878657439c35d5b1b1ef2408969952723d306",
+      "sha256": "1f47cdc307ddab6ca939a03ec8f811d5b57c825b5ba9e12a0668640814439e3d",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-missing-390-light.png",
-      "sha256": "fd86f4dd29b5e3b27ce25e46e3f83c633a69a24cd4d34156251b17d356ad7312",
+      "sha256": "d67be79eb370a3047c2d5c94e3bb8ee35fa544d5df5f6f5445932c5f65bc77c3",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-v2-320-light.png",
-      "sha256": "cc90ccd64a058476acece6a51151052445d79961c3f74655e3ce2f2e14251e7c",
+      "sha256": "ec17dee76ba8ac58651c0b8ce309871159c167b707d530ef937f7f959077a4d6",
       "width": 320,
       "height": 900
     },
     {
       "file": "concept-detail-v2-390-light.png",
-      "sha256": "1dccf9f1f054614ce39d273605f6a2f832de1af5d0b17393cd84d341b657caa7",
+      "sha256": "90456e4fa323afb7994a85108b44e39a4dbfbccf12dd434cb4468e4df9b8cbcb",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-v2-390-dark.png",
-      "sha256": "a71f9cc225a6beaf387319190c6fabd4094ddab7025abb58fcab122deddc250a",
+      "sha256": "07930129ab481d088510fefb06842d563e926cdae55544cabb00d02c44794134",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-detail-v2-1024-dark.png",
-      "sha256": "cdb324b818656bc65370b551767c64df4a23bb46c3c750de75ff21873ec1e4d9",
+      "sha256": "75442e4dfd252764bc38c39c39a9a80f1d9e86f6dd75139372ab927e7a6f5a30",
       "width": 1024,
       "height": 900
     },
     {
       "file": "concept-list-320-light.png",
-      "sha256": "415f7714985ada8429e73d99db93fca0b0e4310700579e717d698e291ef4a329",
+      "sha256": "a1850d537f8c7da9bd0a05f9bbe8103fa935a02afcbddd2d6891bbc679c41225",
       "width": 320,
       "height": 900
     },
     {
       "file": "concept-list-390-dark.png",
-      "sha256": "146bfa607acdbbb5c387a7b3884e5bff7a031ddf8ad8d39a62468f391948d727",
+      "sha256": "6b74fe94d08a4b0f7f5bf58284a94dda07f9f685b88a5b0f0fa8bb26d84a7b7c",
       "width": 390,
       "height": 900
     },
     {
       "file": "concept-keyboard-390-clickpath.png",
-      "sha256": "146bfa607acdbbb5c387a7b3884e5bff7a031ddf8ad8d39a62468f391948d727",
+      "sha256": "6b74fe94d08a4b0f7f5bf58284a94dda07f9f685b88a5b0f0fa8bb26d84a7b7c",
       "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-1280-light.png",
+      "sha256": "7d4a1a2bc99a043d4945a71ef2d619b7bd75405de7ef94a3fe52d2c3bcc43baf",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-1280-dark.png",
+      "sha256": "147b0b84bccb1d918caa4ab1ccdf4f0be561c5f7cf014bf9222ea1eacf7cbb72",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-390-light.png",
+      "sha256": "1e3ad1694ecd37750be2b810498decc7583a094ac4223a914f471726c3420343",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be39-publicatie-390-dark.png",
+      "sha256": "17f1f5010b693fc5e0e2fca7c28aa2352661f993722a93dc2e263ecd38c7606f",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "file": "be39-detail-1280-light.png",
+      "sha256": "5f78677078845a6177d054f76f73e3f6347021fc63d1d6c5cc8373c6a686a5ab",
+      "width": 1280,
       "height": 900
     }
   ],
@@ -4395,7 +4661,7 @@
         "url": "https://unapproved.invalid/pixel.png",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.338Z",
+        "at": "2026-10-28T18:02:29.322Z",
         "resourceType": "Image"
       },
       {
@@ -4405,7 +4671,7 @@
         "url": "https://unapproved.invalid/frame",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.339Z",
+        "at": "2026-10-28T18:02:29.322Z",
         "resourceType": "Document"
       }
     ],
@@ -4417,7 +4683,7 @@
         "url": "https://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.314Z"
+        "at": "2026-10-28T18:02:29.292Z"
       },
       {
         "phase": "negative-probe",
@@ -4426,7 +4692,7 @@
         "url": "http://unapproved.invalid/api/anything",
         "reason": "external_origin",
         "protocolRelative": true,
-        "at": "2026-10-25T19:26:00.314Z"
+        "at": "2026-10-28T18:02:29.293Z"
       },
       {
         "phase": "negative-probe",
@@ -4435,7 +4701,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.314Z"
+        "at": "2026-10-28T18:02:29.293Z"
       },
       {
         "phase": "negative-probe",
@@ -4444,7 +4710,7 @@
         "url": "http://localhost:3137/api/internal/v1/unrelated-write",
         "reason": "unknown_api_route",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.314Z"
+        "at": "2026-10-28T18:02:29.293Z"
       },
       {
         "phase": "negative-probe",
@@ -4453,7 +4719,7 @@
         "url": "http://localhost:3137/api/internal/v1/menu-concepts",
         "reason": "method_not_allowed",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.315Z"
+        "at": "2026-10-28T18:02:29.293Z"
       },
       {
         "phase": "negative-probe",
@@ -4462,7 +4728,7 @@
         "url": "ws://unapproved.invalid/socket",
         "reason": "external_origin",
         "protocolRelative": false,
-        "at": "2026-10-25T19:26:00.316Z"
+        "at": "2026-10-28T18:02:29.293Z"
       }
     ]
   },
@@ -4500,6 +4766,8 @@
     "Forced write probes prove the in-page guard, not the server. src/lib/menuConceptReviewHandlers.test.js remains the authority for server-side refusal.",
     "Unknown external URLs, protocol-relative external URLs and unknown API/write routes are fail-closed. The negative probe deliberately attempts them and proves they never reach the destination.",
     "The harness only exercises the local loopback next-dev process it starts and the local Edge/Chrome instance it starts over CDP; no remote host, real auth provider, database, GitHub or AI provider is contacted.",
-    "No source confirmation, concept save, decision, export, provider call or workflow activation is performed."
+    "No source confirmation, concept save, decision, export, provider call or workflow activation is performed.",
+    "BE-40 finding 1: the /internal/bronnen detail pane (app/internal/bronnen/ProposalDetail.js) throws ReferenceError: SOURCE_BADGES is not defined since BE-31 (the SOURCE_BADGES, MENU_BADGES, STATUS_LABELS and EVENT_LABELS imports are missing). No scenario here reaches that pane any more, so this record does not cover it.",
+    "BE-40 finding 2: since BE-31 an image-only batch result is a dead end and not a task on /internal/bronnen, so the \"Bronnen beoordelen\" action on the batch row shows the follow-up reason only as a page banner, on a screen without that restaurant; the per-restaurant follow-up detail of BE-24 R4/R5 is unreachable. The check therefore verifies the row's own next step (BE-33/BE-35) and that banner."
   ]
 }
