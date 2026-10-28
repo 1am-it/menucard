@@ -119,11 +119,28 @@ test('BE-29: the title and every label are driven by the selected moment and the
 test('BE-29: there is no server-rendered "Nu open" or daghap — both wait for the browser clock', () => {
   const view = readView();
   assert.match(view, /const isOpen = !!now && !!dish\.openingHours && todayOpening\(dish\.openingHours, now\)\.state === 'open'/);
-  assert.match(view, /\{isOpen && \(/);
+  // BE-38 (#90) — "Nu open" staat in de tak zonder terugvaltijd; een gerecht
+  // uit de terugval noemt zijn eigen "Opent om HH:MM".
+  assert.match(view, /\) : \(\s*isOpen && \(/);
   assert.doesNotMatch(view, /openStatus/, 'a stored or server-computed status is never used as "Nu open"');
   // De hele moment-sectie hangt achter `now`: zonder browserklok staat er
   // geen gerecht, geen daghap en geen "Nu open" in de server-HTML.
   assert.match(view, /\(now \? selectTonight\(\{ candidates, now \}\) : null\)/);
+});
+
+test('BE-38: the section keeps its place and labels a fallback dish with its own clock time', () => {
+  const view = readView();
+  // Dezelfde sectie, dezelfde kaart: alleen de titel en de inhoudsregel
+  // veranderen. De titel komt uit de pure selectie (inclusief "· vanaf HH:MM").
+  assert.match(view, /\{selection\.title\} <Emoji glyph="🔥" \/>/);
+  assert.match(view, /data-mode=\{selection\.mode\}/);
+  assert.match(view, /href=\{`\/search\?meal=\$\{selection\.mealType\}`\}/);
+  // Een gerecht uit de terugval: "🕒 Opent om HH:MM" in plaats van "Nu open".
+  assert.match(view, /\{dish\.opensAt \? \(/);
+  assert.match(view, /<span className="open-label open-label--later">/);
+  assert.match(view, /<Emoji glyph="🕒" \/>\s*Opent om \{dish\.opensAt\}/);
+  assert.match(view, /\{\(dish\.newOnMenu \|\| dish\.seasonal \|\| dish\.vegetarian \|\| dish\.daily \|\| dish\.opensAt \|\| isOpen\) && \(/);
+  assert.doesNotMatch(view, /Opent om \d{2}:\d{2}/, 'geen vaste tijd in de weergave');
 });
 
 test('BE-28: emoji are system characters via <Emoji/>, never an image, font or bare character', () => {

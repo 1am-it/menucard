@@ -18,6 +18,11 @@ import { zonedParts } from '@/src/lib/localTime'
 // compacte kandidatenlijst (props), met de browserklok en de kalender van
 // Europe/Amsterdam. De server rendert de sectie, de seizoenstegels en alle
 // labels daarom bewust niet: geen "Nu open" en geen daghap in de server-HTML.
+// BE-38 (#90) — is er voor dit moment minder dan drie gerechten, dan toont
+// dezelfde sectie de terugval uit src/lib/publicTonight.js: "Straks op de
+// kaart · vanaf HH:MM" (het eerstvolgende moment van vandaag) of "Morgen op
+// de kaart" (de lunch van morgen). Zulke gerechten krijgen "🕒 Opent om HH:MM";
+// "Nu open" blijft voor wat nu echt open is.
 // Referentie: docs/mockups/be-28-fresh-style-v1/home-licht.html en
 // home-antraciet.html (canvas v14). Opbouw: zoekpaneel met "📍 Breda · echte
 // menukaarten", emoji-titel, ronde zoekbalk en maaltijdchips; de tegelrij
@@ -196,13 +201,15 @@ export default function HomeView({ candidates = [] }) {
 
         {/* Alleen renderen als de browser (met zijn eigen klok) drie echte
             gerechten met een echte prijs vindt (src/lib/publicTonight.js).
-            Nooit een verzonnen gerecht of prijs, en geen lege sectie als de
-            data het niet toelaat. */}
+            BE-38: eerst het huidige moment, anders het eerstvolgende moment
+            van vandaag, anders de lunch van morgen. Nooit een verzonnen
+            gerecht of prijs, en geen lege sectie als de data het niet toelaat. */}
         {tonight.length > 0 && (
           <section
             className="home-section tonight-section"
             aria-labelledby="vanavond-title"
             data-meal={selection.mealType}
+            data-mode={selection.mode}
           >
             <div className="home-section-head">
               <h2 className="home-section-title" id="vanavond-title">
@@ -222,7 +229,7 @@ export default function HomeView({ candidates = [] }) {
                         <span className="tonight-meta">
                           <span>{dish.restaurantName}</span>
                         </span>
-                        {(dish.newOnMenu || dish.seasonal || dish.vegetarian || dish.daily || isOpen) && (
+                        {(dish.newOnMenu || dish.seasonal || dish.vegetarian || dish.daily || dish.opensAt || isOpen) && (
                           <span className="tonight-tags">
                             {dish.newOnMenu && (
                               <span className="tonight-tag tonight-tag--new">
@@ -244,11 +251,20 @@ export default function HomeView({ candidates = [] }) {
                                 <Emoji glyph="📅" /> Daghap · {dish.daily.dateLine}
                               </span>
                             )}
-                            {isOpen && (
-                              <span className="open-label">
-                                <Emoji glyph="🟢" />
-                                Nu open
+                            {dish.opensAt ? (
+                              // BE-38 — een gerecht uit de terugval is er nog
+                              // niet: het noemt het moment waarop het kan.
+                              <span className="open-label open-label--later">
+                                <Emoji glyph="🕒" />
+                                Opent om {dish.opensAt}
                               </span>
+                            ) : (
+                              isOpen && (
+                                <span className="open-label">
+                                  <Emoji glyph="🟢" />
+                                  Nu open
+                                </span>
+                              )
                             )}
                           </span>
                         )}
