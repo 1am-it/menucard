@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import { cardModel } from '@/src/lib/restaurantBrowse'
 
 // BE-28b (#68) — de kaart van /alle-restaurants volgens de goedgekeurde
@@ -63,7 +64,7 @@ export default function RestaurantListCard({ restaurant }) {
       )}
       <span className="ar-menu-labels">
         {card.menuLabels.map((label) => (
-          <span key={label} className="ar-menu-label">{label}</span>
+          <span key={label} className="ar-menu-label"><EmojiText value={label} /></span>
         ))}
       </span>
       <span className="ar-cta">

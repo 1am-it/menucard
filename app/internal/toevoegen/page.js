@@ -19,6 +19,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import SourceResultRow from '@/src/components/SourceResultRow'
 import useBatchProcessing from '@/src/components/useBatchProcessing'
 import useAiReading from '@/src/components/useAiReading'
@@ -563,7 +565,7 @@ export default function AddEntryPage() {
             </label>
             {selectedRestaurant ? (
               <div className="mai-chosen">
-                <span className="mai-chosen-name">{restaurantChoiceLabel(selectedRestaurant)}</span>
+                <span className="mai-chosen-name"><EmojiText value={restaurantChoiceLabel(selectedRestaurant)} /></span>
                 <button
                   type="button"
                   className="stg-btn-secondary mai-btn"
@@ -634,9 +636,10 @@ export default function AddEntryPage() {
                       disabled={nameSearch.busy}
                       onClick={searchNewRestaurant}
                     >
+                      <Emoji glyph="✨" />{' '}
                       {nameSearch.busy
-                        ? '✨ Bezig…'
-                        : `✨ Zoek op internet: ${restaurantQuery.trim().slice(0, 120)}, Breda`}
+                        ? 'Bezig…'
+                        : `Zoek op internet: ${restaurantQuery.trim().slice(0, 120)}, Breda`}
                     </button>
                     <p className="bta-muted" style={{ margin: 0 }}>
                       Dit gebruikt dezelfde AI-zoeklaag als &quot;Vind bronnen&quot;: bronvermelding verplicht, platforms
@@ -740,7 +743,7 @@ export default function AddEntryPage() {
               disabled={discoveryBusy || !selectedRestaurant}
               onClick={findSource}
             >
-              {discoveryBusy ? '✨ Bezig…' : '✨ Zoek de bron voor mij'}
+              {discoveryBusy ? <><Emoji glyph="✨" /> Bezig…</> : <><Emoji glyph="✨" /> Zoek de bron voor mij</>}
             </button>
             {/* BE-34 (#81, criterion 4): the app shows what it is doing, and a
                 failure keeps the reason in plain language plus one retry. */}

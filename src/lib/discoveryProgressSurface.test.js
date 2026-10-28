@@ -24,7 +24,8 @@ test('"Nieuw gevonden" waits with a spinner and the exact sentence instead of "(
   assert.match(section, /RETRY_LABEL/);
   assert.match(section, /setState\(\(prev\) => \(\{ \.\.\.prev, loading: true, error: null \}\)\)/);
   // The count only appears once the answer is in.
-  assert.match(section, /state\.loading \? '🆕 Nieuw gevonden' : `🆕 Nieuw gevonden \(\$\{state\.items\.length\}\)`/);
+  assert.match(section, /<Emoji glyph="🆕" \/> Nieuw gevonden/);
+  assert.match(section, /<Emoji glyph="🆕" \/> Nieuw gevonden \(\{state\.items\.length\}\)/);
 });
 
 test('"Vind bronnen" shows the running steps, a progress bar and one retry', () => {
@@ -47,7 +48,8 @@ test('the add form also says "Zoeken…" and offers one retry', () => {
   assert.match(page, /\{ROW_SEARCHING\}/);
   assert.match(page, /discoveryFailure\(\{/);
   assert.match(page, /Opnieuw proberen/);
-  assert.match(page, /'✨ Bezig…'/);
+  assert.match(page, /<Emoji glyph="✨" \/>/);
+  assert.match(page, /'Bezig…'/);
 });
 
 test('the busy styles reuse the existing tokens and respect reduced motion', () => {

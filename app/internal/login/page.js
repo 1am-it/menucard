@@ -32,14 +32,16 @@ export default function InternalLoginPage() {
       const supabase = getSupabaseBrowser()
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) {
-        setError(signInError.message)
+        // De reden komt van Supabase en blijft staan; alleen de inleiding is
+        // Nederlands (BE-37, criterium 5).
+        setError(`Inloggen lukte niet. ${signInError.message}`)
         return
       }
       const href = await resolveLandingAfterSignIn(data && data.session && data.session.access_token)
       // No visible module (or a failed lookup): the existing status page.
       router.replace(href || '/internal')
     } catch (err) {
-      setError(err.message)
+      setError(`Inloggen lukte niet. ${err.message}`)
     } finally {
       setLoading(false)
     }
@@ -55,11 +57,11 @@ export default function InternalLoginPage() {
         color: 'var(--text-primary)',
       }}
     >
-      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Internal sign-in</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Inloggen (intern)</h1>
       <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
         <input
           type="email"
-          placeholder="Email"
+          placeholder="E-mailadres"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -73,7 +75,7 @@ export default function InternalLoginPage() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Wachtwoord"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -99,7 +101,7 @@ export default function InternalLoginPage() {
             cursor: 'pointer',
           }}
         >
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? 'Bezig met inloggen…' : 'Inloggen'}
         </button>
       </form>
     </main>

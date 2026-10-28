@@ -163,7 +163,7 @@ function heroSource() {
 test('structural: the top is the three tiles of the mockup and reads exactly metrics.menuData for the menu figure', () => {
   const hero = heroSource();
   assert.equal((hero.match(/className="cov-tile-value"/g) || []).length, 3, 'exactly three tiles');
-  assert.match(pageSource(), /<h1 className="cov-title">Dekking 📊<\/h1>/);
+  assert.match(pageSource(), /<h1 className="cov-title">Dekking <Emoji glyph="📊" \/><\/h1>/);
   assert.match(hero, /\{data\.metrics\.menuData\.pct === null \? '—' : `\$\{data\.metrics\.menuData\.pct\}%`\}/);
   assert.match(hero, /\{data\.metrics\.menuData\.count\}/, 'tile 2: with a menu card');
   assert.match(hero, /\{data\.metrics\.menuData\.total\}/, 'tile 2: with the real total');

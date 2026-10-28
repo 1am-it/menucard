@@ -13,6 +13,7 @@
 // existing "Lees met AI" and the existing manual import).
 
 import StatusIcon from '@/src/components/StatusIcon'
+import EmojiText from '@/src/components/EmojiText'
 import AiReadAction from '@/src/components/AiReadAction'
 import { CHECK_COPY } from '@/src/lib/sourceReview'
 
@@ -96,7 +97,7 @@ export default function SourceResultRow({ row, href, onConfirm, onRecheck, onAiR
       <div className={`srr-step${row.aiReason ? ' srr-step--stack' : ''}`}>
         {confirmable ? (
           <button type="button" className="di-btn-primary srr-action" disabled={busy} onClick={() => onConfirm(row)}>
-            {step.label}
+            <EmojiText value={step.label} />
           </button>
         ) : aiReadable ? (
           <AiReadAction
@@ -109,7 +110,7 @@ export default function SourceResultRow({ row, href, onConfirm, onRecheck, onAiR
           />
         ) : step && href ? (
           <a className="stg-btn-secondary srr-action" href={href}>
-            {step.label}
+            <EmojiText value={step.label} />
           </a>
         ) : step && step.key === 'wait' ? (
           <span className="srr-wait" role="status">

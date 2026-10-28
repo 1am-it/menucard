@@ -10,8 +10,10 @@
 // plus the link to Dekking — no chips, no detail pane. On a telephone the list
 // is the screen and a task opens as its own screen with a back link.
 
-import { Fragment } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { Detail, FeedbackRegion } from './ProposalDetail'
+import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import SourceResultRow from '@/src/components/SourceResultRow'
 import useAiReading from '@/src/components/useAiReading'
 import {
@@ -108,6 +110,26 @@ export default function BronnenView({
 }) {
   const empty = Boolean(triage) && totalTasks === 0
   const pickedCount = picked ? picked.size : 0
+  // BE-37 (#89, criterium 3): de bevestiging is de enige dialoog van de app.
+  // Hij opent met de focus erin, sluit met Escape en geeft de focus terug aan
+  // de knop die hem opende. Geen nieuwe route, geen nieuwe bevestiging.
+  const cleanupTriggerRef = useRef(null)
+  const cleanupDialogRef = useRef(null)
+  useEffect(() => {
+    if (!cleanup) return undefined
+    const dialog = cleanupDialogRef.current
+    const first = dialog ? dialog.querySelector('button') : null
+    if (first) first.focus()
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      onCancelCleanup()
+      const trigger = cleanupTriggerRef.current
+      if (trigger) trigger.focus()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [cleanup, onCancelCleanup])
   // BE-34 (#81): "Lees met AI" starts the existing reading in the row itself.
   const aiRead = useAiReading({ token })
   // BE-32 (#75, criterion 7): the number of RESULTS the cleanup closes.
@@ -124,7 +146,7 @@ export default function BronnenView({
       </nav>
 
       <div className="brn-title-row">
-        <h1 className="di-title">Bronnen beoordelen 🔎</h1>
+        <h1 className="di-title">Bronnen beoordelen <Emoji glyph="🔎" /></h1>
         <span className="brn-subtitle">
           {empty ? 'Niets te doen' : `${totalTasks} ${totalTasks === 1 ? 'taak wacht' : 'taken wachten'} op jou`}
         </span>
@@ -161,7 +183,7 @@ export default function BronnenView({
             Er staan geen open voorstellen, aandachtspunten of batchresultaten met een volgende stap klaar.
           </p>
           <a className="di-btn-primary brn-action" href={COVERAGE_HREF}>
-            📊 Naar Dekking
+            <Emoji glyph="📊" /> Naar Dekking
           </a>
         </section>
       ) : null}
@@ -177,7 +199,7 @@ export default function BronnenView({
                 aria-pressed={filter === key}
                 onClick={() => onFilter(key)}
               >
-                {TASK_FILTER_LABELS[key]} {counts[key]}
+                {TASK_FILTER_LABELS[key] ? <><EmojiText value={TASK_FILTER_LABELS[key]} /> </> : null}{counts[key]}
               </button>
             ))}
           </div>
@@ -192,8 +214,8 @@ export default function BronnenView({
               </p>
               {pickableCount > 0 ? (
                 <div className="brn-toolbar">
-                  <button type="button" className="stg-btn-secondary" onClick={onStartCleanup} disabled={busy}>
-                    🗄️ {cleanupLabel(pickedCount, cleanupCount)}
+                  <button type="button" className="stg-btn-secondary" ref={cleanupTriggerRef} onClick={onStartCleanup} disabled={busy}>
+                    <Emoji glyph="🗄️" /> {cleanupLabel(pickedCount, cleanupCount)}
                   </button>
                   <button type="button" className="stg-btn-secondary" aria-pressed={pickedCount === pickableCount} onClick={onPickAll}>
                     {pickedCount === pickableCount ? 'Selectie wissen' : 'Alles selecteren'}
@@ -206,7 +228,7 @@ export default function BronnenView({
                 </div>
               ) : null}
               {cleanup ? (
-                <div className="brn-cleanup-confirm" role="alertdialog" aria-labelledby="brn-cleanup-title">
+                <div className="brn-cleanup-confirm" role="alertdialog" aria-labelledby="brn-cleanup-title" ref={cleanupDialogRef}>
                   <p id="brn-cleanup-title">
                     <b>{cleanupConfirmText(cleanup)}</b> {CHECK_COPY.cleanupHint}
                   </p>
@@ -227,13 +249,15 @@ export default function BronnenView({
                   {tasks.map((task) => (
                     <li key={task.id} className="brn-task-row">
                       {task.kind === 'batch' ? (
-                        <input
-                          type="checkbox"
-                          className="brn-pick"
-                          checked={Boolean(picked && picked.has(task.id))}
-                          onChange={() => onTogglePick(task.id)}
-                          aria-label={`Selecteer ${task.name} voor opruimen`}
-                        />
+                        <label className="brn-pick-hit">
+                          <input
+                            type="checkbox"
+                            className="brn-pick"
+                            checked={Boolean(picked && picked.has(task.id))}
+                            onChange={() => onTogglePick(task.id)}
+                            aria-label={`Selecteer ${task.name} voor opruimen`}
+                          />
+                        </label>
                       ) : (
                         <span className="brn-pick-spacer" aria-hidden="true" />
                       )}
@@ -250,8 +274,8 @@ export default function BronnenView({
                         <span className="brn-task-text">
                           <span className="brn-task-kind">{KIND_NAMES[task.kind]}</span>
                           <span className="brn-task-name">{task.name}</span>
-                          <span className="brn-task-what">{task.what}</span>
-                          <span className="brn-task-status">{task.status}</span>
+                          <span className="brn-task-what"><EmojiText value={task.what} /></span>
+                          <span className="brn-task-status"><EmojiText value={task.status} /></span>
                         </span>
                         <span className="brn-task-arrow" aria-hidden="true">
                           →
@@ -279,7 +303,7 @@ export default function BronnenView({
                     ← Terug naar de taken
                   </button>
                   <span className="brn-detail-kind">
-                    {selected.emoji} {KIND_NAMES[selected.kind]} · {selected.status}
+                    <Emoji glyph={selected.emoji} /> {KIND_NAMES[selected.kind]} · {selected.status}
                   </span>
                   {selected.kind === 'batch' ? (
                     <>

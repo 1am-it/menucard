@@ -49,6 +49,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import Emoji from '@/src/components/Emoji'
 import CoverageCheckSection from './CoverageCheckSection'
 import NewFoundSection from './NewFoundSection'
 import { PRIORITY_DEFAULT_VISIBLE, sortByMenuDataGap, visiblePriorityRows, metricState } from '@/src/lib/coveragePriority'
@@ -312,7 +313,7 @@ export default function CoverageDashboardPage() {
       {/* Kop (BE-32, criterium 6): Nederlands, drie tegels in de BE-28-stijl. */}
       <div className="cov-head">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <h1 className="cov-title">Dekking 📊</h1>
+          <h1 className="cov-title">Dekking <Emoji glyph="📊" /></h1>
           <span className="cov-badge">
             <span style={{ width: 13, height: 13, display: 'flex' }}>
               <IconLock />
@@ -332,12 +333,12 @@ export default function CoverageDashboardPage() {
       <div className="cov-tiles" role="group" aria-label="Dekking in drie cijfers">
         <div className="cov-tile">
           <span className="cov-tile-value">{data.totals.restaurants}</span>
-          <span className="cov-tile-label">🍽️ restaurants</span>
+          <span className="cov-tile-label"><Emoji glyph="🍽️" /> restaurants</span>
         </div>
         <div className={menuState === 'complete' ? 'cov-tile cov-tile--positive' : 'cov-tile'}>
           <span className="cov-tile-value">{data.metrics.menuData.count}</span>
           <span className="cov-tile-label">
-            📋 met menukaart
+            <Emoji glyph="📋" /> met menukaart
             <span className="cov-tile-note">
               {data.metrics.menuData.pct === null ? '—' : `${data.metrics.menuData.pct}%`} van{' '}
               {data.metrics.menuData.total}
@@ -346,7 +347,7 @@ export default function CoverageDashboardPage() {
         </div>
         <div className="cov-tile cov-tile--attention">
           <span className="cov-tile-value">{uncheckedCount === null ? '…' : uncheckedCount}</span>
-          <span className="cov-tile-label">🔎 nog niet gecontroleerd</span>
+          <span className="cov-tile-label"><Emoji glyph="🔎" /> nog niet gecontroleerd</span>
         </div>
       </div>
 

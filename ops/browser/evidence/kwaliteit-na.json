@@ -1,0 +1,5441 @@
+{
+  "generatedAt": "2026-10-28T00:07:22.314Z",
+  "kind": "browser-quality-check",
+  "task": "BE-37 (#89) kwaliteitscheck van de nieuwe stijl (contrast, snelheid, toetsenbord, telefoon, slordigheden)",
+  "contract": "planning/specs/tickets/be-37-quality-check.md + GitHub issue #89",
+  "label": "na",
+  "phase": "all",
+  "head": "2d909ed00c5ca1b2fc4a2e1a1eeb5459da485328",
+  "branch": "feat/kwaliteit-89",
+  "evidence": "developer evidence op een lokale build; de interne fase is fixture-evidence zonder productie-identiteit, -sessie of -data",
+  "screenshotsDir": "ops/browser/evidence/be-37/na",
+  "transferTargetKb": 250,
+  "screenshots": [
+    {
+      "file": "ops/browser/evidence/be-37/na/home-1280-light.png",
+      "bytes": 86361,
+      "width": 1280,
+      "height": 912,
+      "viewport": "1280x900",
+      "page": "home",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-1280-light.png",
+      "bytes": 37864,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "page": "zoeken",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-1280-light.png",
+      "bytes": 250604,
+      "width": 1280,
+      "height": 2396,
+      "viewport": "1280x900",
+      "page": "alle-restaurants",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-1280-light.png",
+      "bytes": 142608,
+      "width": 1280,
+      "height": 1670,
+      "viewport": "1280x900",
+      "page": "restaurant",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-1280-light.png",
+      "bytes": 284772,
+      "width": 1280,
+      "height": 2707,
+      "viewport": "1280x900",
+      "page": "menu",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/home-390-light.png",
+      "bytes": 54905,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "home",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-390-light.png",
+      "bytes": 32704,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "zoeken",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-390-light.png",
+      "bytes": 57030,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "alle-restaurants",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-390-light.png",
+      "bytes": 45232,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "restaurant",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-390-light.png",
+      "bytes": 44176,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "menu",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/home-320-light.png",
+      "bytes": 45770,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "home",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-320-light.png",
+      "bytes": 32535,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "zoeken",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-320-light.png",
+      "bytes": 54582,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "alle-restaurants",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-320-light.png",
+      "bytes": 39207,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "restaurant",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-320-light.png",
+      "bytes": 43085,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "menu",
+      "theme": "light",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/home-1280-dark.png",
+      "bytes": 77951,
+      "width": 1280,
+      "height": 912,
+      "viewport": "1280x900",
+      "page": "home",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-1280-dark.png",
+      "bytes": 38993,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "page": "zoeken",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-1280-dark.png",
+      "bytes": 245596,
+      "width": 1280,
+      "height": 2396,
+      "viewport": "1280x900",
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-1280-dark.png",
+      "bytes": 137569,
+      "width": 1280,
+      "height": 1670,
+      "viewport": "1280x900",
+      "page": "restaurant",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-1280-dark.png",
+      "bytes": 272130,
+      "width": 1280,
+      "height": 2707,
+      "viewport": "1280x900",
+      "page": "menu",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/home-390-dark.png",
+      "bytes": 48577,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "home",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-390-dark.png",
+      "bytes": 35562,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "zoeken",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-390-dark.png",
+      "bytes": 58508,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-390-dark.png",
+      "bytes": 45966,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "restaurant",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-390-dark.png",
+      "bytes": 47765,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "menu",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/home-320-dark.png",
+      "bytes": 41163,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "home",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/zoeken-320-dark.png",
+      "bytes": 35868,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "zoeken",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/alle-restaurants-320-dark.png",
+      "bytes": 55712,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/restaurant-320-dark.png",
+      "bytes": 39878,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "restaurant",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-320-dark.png",
+      "bytes": 46697,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "menu",
+      "theme": "dark",
+      "phase": "public"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-1280-light.png",
+      "bytes": 155717,
+      "width": 1280,
+      "height": 1699,
+      "viewport": "1280x900",
+      "page": "dekking",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-1280-light.png",
+      "bytes": 73170,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "page": "bronnen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-1280-light.png",
+      "bytes": 140269,
+      "width": 1280,
+      "height": 1546,
+      "viewport": "1280x900",
+      "page": "toevoegen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-1280-light.png",
+      "bytes": 79161,
+      "width": 1280,
+      "height": 1252,
+      "viewport": "1280x900",
+      "page": "menu-import",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-390-light.png",
+      "bytes": 46208,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "dekking",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-390-light.png",
+      "bytes": 56383,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "bronnen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-390-light.png",
+      "bytes": 50821,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "toevoegen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-390-light.png",
+      "bytes": 45707,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "menu-import",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-320-light.png",
+      "bytes": 39071,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "dekking",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-320-light.png",
+      "bytes": 45689,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "bronnen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-320-light.png",
+      "bytes": 46146,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "toevoegen",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-320-light.png",
+      "bytes": 39324,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "menu-import",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-1280-dark.png",
+      "bytes": 158114,
+      "width": 1280,
+      "height": 1699,
+      "viewport": "1280x900",
+      "page": "dekking",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-1280-dark.png",
+      "bytes": 73909,
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "page": "bronnen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-1280-dark.png",
+      "bytes": 141427,
+      "width": 1280,
+      "height": 1546,
+      "viewport": "1280x900",
+      "page": "toevoegen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-1280-dark.png",
+      "bytes": 79935,
+      "width": 1280,
+      "height": 1252,
+      "viewport": "1280x900",
+      "page": "menu-import",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-390-dark.png",
+      "bytes": 47926,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "dekking",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-390-dark.png",
+      "bytes": 57645,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "bronnen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-390-dark.png",
+      "bytes": 52365,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "toevoegen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-390-dark.png",
+      "bytes": 46556,
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "page": "menu-import",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dekking-320-dark.png",
+      "bytes": 40711,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "dekking",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/bronnen-320-dark.png",
+      "bytes": 46562,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "bronnen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/toevoegen-320-dark.png",
+      "bytes": 47850,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "toevoegen",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/menu-import-320-dark.png",
+      "bytes": 40068,
+      "width": 320,
+      "height": 844,
+      "viewport": "320x844",
+      "page": "menu-import",
+      "theme": "dark",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dialoog-light.png",
+      "bytes": 83725,
+      "width": 1280,
+      "height": 989,
+      "viewport": "1280x900",
+      "page": "bronnen-dialoog",
+      "theme": "light",
+      "phase": "internal"
+    },
+    {
+      "file": "ops/browser/evidence/be-37/na/dialoog-dark.png",
+      "bytes": 84684,
+      "width": 1280,
+      "height": 989,
+      "viewport": "1280x900",
+      "page": "bronnen-dialoog",
+      "theme": "dark",
+      "phase": "internal"
+    }
+  ],
+  "transfer": [
+    {
+      "label": "na",
+      "page": "/",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 168771,
+      "totalKb": 164.8,
+      "documentBytes": 8080,
+      "resourceCount": 16,
+      "byType": {
+        "Document": 8080,
+        "Script": 128639,
+        "Stylesheet": 24079,
+        "Fetch": 7311,
+        "Other": 662
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/c66f12ea6171e5e4.css",
+          "type": "Stylesheet",
+          "bytes": 24079
+        },
+        {
+          "url": "/_next/static/chunks/app/page-53e33779faeb5148.js",
+          "type": "Script",
+          "bytes": 8399
+        },
+        {
+          "url": "/",
+          "type": "Document",
+          "bytes": 8080
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
+          "type": "Script",
+          "bytes": 7100
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-340192427e740e7f.js",
+          "type": "Script",
+          "bytes": 4912
+        },
+        {
+          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "type": "Script",
+          "bytes": 3861
+        }
+      ]
+    },
+    {
+      "label": "na",
+      "page": "/alle-restaurants",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 167098,
+      "totalKb": 163.2,
+      "documentBytes": 3077,
+      "resourceCount": 15,
+      "byType": {
+        "Document": 3077,
+        "Script": 128639,
+        "Stylesheet": 24079,
+        "Fetch": 10641,
+        "Other": 662
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/c66f12ea6171e5e4.css",
+          "type": "Stylesheet",
+          "bytes": 24079
+        },
+        {
+          "url": "/_next/static/chunks/app/page-53e33779faeb5148.js",
+          "type": "Script",
+          "bytes": 8399
+        },
+        {
+          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
+          "type": "Script",
+          "bytes": 7100
+        },
+        {
+          "url": "/?_rsc=1tikd",
+          "type": "Fetch",
+          "bytes": 5964
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-340192427e740e7f.js",
+          "type": "Script",
+          "bytes": 4912
+        },
+        {
+          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "type": "Script",
+          "bytes": 3861
+        }
+      ]
+    },
+    {
+      "label": "na",
+      "page": "/restaurant/6",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 173225,
+      "totalKb": 169.2,
+      "documentBytes": 11951,
+      "resourceCount": 14,
+      "byType": {
+        "Document": 11951,
+        "Script": 128168,
+        "Stylesheet": 24079,
+        "Other": 662,
+        "Fetch": 8365
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/c66f12ea6171e5e4.css",
+          "type": "Stylesheet",
+          "bytes": 24079
+        },
+        {
+          "url": "/restaurant/6",
+          "type": "Document",
+          "bytes": 11951
+        },
+        {
+          "url": "/_next/static/chunks/app/page-53e33779faeb5148.js",
+          "type": "Script",
+          "bytes": 8399
+        },
+        {
+          "url": "/?_rsc=10qzd",
+          "type": "Fetch",
+          "bytes": 5964
+        },
+        {
+          "url": "/_next/static/chunks/app/alle-restaurants/page-340192427e740e7f.js",
+          "type": "Script",
+          "bytes": 4912
+        },
+        {
+          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "type": "Script",
+          "bytes": 3861
+        }
+      ]
+    },
+    {
+      "label": "na",
+      "page": "/menu/6-diner",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "totalBytes": 174541,
+      "totalKb": 170.5,
+      "documentBytes": 13297,
+      "resourceCount": 15,
+      "byType": {
+        "Document": 13297,
+        "Script": 129490,
+        "Stylesheet": 24079,
+        "Other": 662,
+        "Fetch": 7013
+      },
+      "biggest": [
+        {
+          "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "bytes": 54796
+        },
+        {
+          "url": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "bytes": 46499
+        },
+        {
+          "url": "/_next/static/css/c66f12ea6171e5e4.css",
+          "type": "Stylesheet",
+          "bytes": 24079
+        },
+        {
+          "url": "/menu/6-diner",
+          "type": "Document",
+          "bytes": 13297
+        },
+        {
+          "url": "/_next/static/chunks/app/page-53e33779faeb5148.js",
+          "type": "Script",
+          "bytes": 8399
+        },
+        {
+          "url": "/?_rsc=1db9s",
+          "type": "Fetch",
+          "bytes": 5964
+        },
+        {
+          "url": "/_next/static/chunks/app/menu/%5Bid%5D/page-691e6be5d8063b89.js",
+          "type": "Script",
+          "bytes": 5258
+        },
+        {
+          "url": "/_next/static/chunks/9936-3c78ab50b2553278.js",
+          "type": "Script",
+          "bytes": 3862
+        }
+      ]
+    }
+  ],
+  "contrast": [
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 29,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Zoeken",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 17,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Alle restaurants",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 155,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Zoeken",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 83,
+      "textMin": 6.28,
+      "textMinEntry": {
+        "selector": "div.td-wine",
+        "text": "Viognier / Chenin Blanc / Pinot Noir",
+        "fg": "#7A5A35",
+        "bg": "#FFFFFF",
+        "ratio": 6.28
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 169,
+      "textMin": 5.74,
+      "textMinEntry": {
+        "selector": "span.item-tag.tag-aanbevolen",
+        "text": "Aanbevolen",
+        "fg": "#735800",
+        "bg": "#F1EDE0",
+        "ratio": 5.74
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.24,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 28,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 16,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "button.search-clear",
+        "text": "×",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 133,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 84,
+      "textMin": 6.28,
+      "textMinEntry": {
+        "selector": "div.td-wine",
+        "text": "Viognier / Chenin Blanc / Pinot Noir",
+        "fg": "#7A5A35",
+        "bg": "#FFFFFF",
+        "ratio": 6.28
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 170,
+      "textMin": 5.74,
+      "textMinEntry": {
+        "selector": "span.item-tag.tag-aanbevolen",
+        "text": "Aanbevolen",
+        "fg": "#735800",
+        "bg": "#F1EDE0",
+        "ratio": 5.74
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.24,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 28,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 16,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "button.search-clear",
+        "text": "×",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 133,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 84,
+      "textMin": 6.28,
+      "textMinEntry": {
+        "selector": "div.td-wine",
+        "text": "Viognier / Chenin Blanc / Pinot Noir",
+        "fg": "#7A5A35",
+        "bg": "#FFFFFF",
+        "ratio": 6.28
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 170,
+      "textMin": 5.74,
+      "textMinEntry": {
+        "selector": "span.item-tag.tag-aanbevolen",
+        "text": "Aanbevolen",
+        "fg": "#735800",
+        "bg": "#F1EDE0",
+        "ratio": 5.74
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.24,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 29,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Zoeken",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 17,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Alle restaurants",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 155,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "a.primary-nav-link",
+        "text": "Zoeken",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 83,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 169,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 28,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 16,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 133,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 84,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 170,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 28,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 16,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 133,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 84,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 170,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 107,
+      "textMin": 6.29,
+      "textMinEntry": {
+        "selector": "div",
+        "text": "De gerechtzoekfunctie kan nu alleen resultaten geven uit dez",
+        "fg": "#5C5650",
+        "bg": "#EFEFEF",
+        "ratio": 6.29
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 37,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 59,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "span.srr-found",
+        "text": "Gevonden: https://fictief-smelt.invalid/menu.pdf",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 1280,
+      "measuredTheme": "light",
+      "texts": 33,
+      "textMin": 6.43,
+      "textMinEntry": {
+        "selector": "button.theme-btn.active",
+        "text": "Licht",
+        "fg": "#7A4E00",
+        "bg": "#FEF1D5",
+        "ratio": 6.43
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 96,
+      "textMin": 6.29,
+      "textMinEntry": {
+        "selector": "div",
+        "text": "De gerechtzoekfunctie kan nu alleen resultaten geven uit dez",
+        "fg": "#5C5650",
+        "bg": "#EFEFEF",
+        "ratio": 6.29
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 31,
+      "textMin": 6.55,
+      "textMinEntry": {
+        "selector": "a.stg-link",
+        "text": "Werkvoorraad",
+        "fg": "#7A4E00",
+        "bg": "#F6F4EF",
+        "ratio": 6.55
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 53,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "span.srr-found",
+        "text": "Gevonden: https://fictief-smelt.invalid/menu.pdf",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 390,
+      "measuredTheme": "light",
+      "texts": 27,
+      "textMin": 6.58,
+      "textMinEntry": {
+        "selector": "span",
+        "text": "Werkvoorraad",
+        "fg": "#5C5650",
+        "bg": "#F6F4EF",
+        "ratio": 6.58
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 96,
+      "textMin": 6.29,
+      "textMinEntry": {
+        "selector": "div",
+        "text": "De gerechtzoekfunctie kan nu alleen resultaten geven uit dez",
+        "fg": "#5C5650",
+        "bg": "#EFEFEF",
+        "ratio": 6.29
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 31,
+      "textMin": 6.55,
+      "textMinEntry": {
+        "selector": "a.stg-link",
+        "text": "Werkvoorraad",
+        "fg": "#7A4E00",
+        "bg": "#F6F4EF",
+        "ratio": 6.55
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 53,
+      "textMin": 6.41,
+      "textMinEntry": {
+        "selector": "span.srr-found",
+        "text": "Gevonden: https://fictief-smelt.invalid/menu.pdf",
+        "fg": "#5C5650",
+        "bg": "#F3F1EC",
+        "ratio": 6.41
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.15,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 320,
+      "measuredTheme": "light",
+      "texts": 27,
+      "textMin": 6.58,
+      "textMinEntry": {
+        "selector": "span",
+        "text": "Werkvoorraad",
+        "fg": "#5C5650",
+        "bg": "#F6F4EF",
+        "ratio": 6.58
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 107,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 37,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 59,
+      "textMin": 4.85,
+      "textMinEntry": {
+        "selector": "p.bta-muted",
+        "text": "Geen link bij de hand? OpenStreetMap, eigen website, daarna ",
+        "fg": "#B6BCC3",
+        "bg": "#494649",
+        "ratio": 4.85
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 1280,
+      "measuredTheme": "dark",
+      "texts": 33,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "button.theme-btn",
+        "text": "Licht",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 96,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "span.cov-badge",
+        "text": "Alleen intern · Alleen lezen",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 31,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "b",
+        "text": "Bronnen beoordelen",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 53,
+      "textMin": 4.85,
+      "textMinEntry": {
+        "selector": "p.bta-muted",
+        "text": "Geen link bij de hand? OpenStreetMap, eigen website, daarna ",
+        "fg": "#B6BCC3",
+        "bg": "#494649",
+        "ratio": 4.85
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 390,
+      "measuredTheme": "dark",
+      "texts": 27,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "span",
+        "text": "Werkvoorraad",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 96,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "span.cov-badge",
+        "text": "Alleen intern · Alleen lezen",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 31,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "b",
+        "text": "Bronnen beoordelen",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 53,
+      "textMin": 4.85,
+      "textMinEntry": {
+        "selector": "p.bta-muted",
+        "text": "Geen link bij de hand? OpenStreetMap, eigen website, daarna ",
+        "fg": "#B6BCC3",
+        "bg": "#494649",
+        "ratio": 4.85
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.02,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 320,
+      "measuredTheme": "dark",
+      "texts": 27,
+      "textMin": 5.99,
+      "textMinEntry": {
+        "selector": "span",
+        "text": "Werkvoorraad",
+        "fg": "#B6BCC3",
+        "bg": "#353A41",
+        "ratio": 5.99
+      },
+      "textFailures": [],
+      "textFailureCount": 0,
+      "borderMin": 3.56,
+      "borderFailures": [],
+      "borderFailureCount": 0,
+      "emoji": []
+    }
+  ],
+  "layout": [
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1280,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 399,
+          "width": 128
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 512,
+          "width": 106
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 440,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 624,
+          "width": 104
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 554,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 712,
+          "width": 79
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 666,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 818,
+          "width": 98
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 753,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 992,
+          "width": 166
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 859,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 1126,
+          "width": 126
+        }
+      ],
+      "wideCount": 19,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 399,
+          "width": 128
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 512,
+          "width": 106
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 440,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 624,
+          "width": 104
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 554,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 712,
+          "width": 79
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 666,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 818,
+          "width": 98
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 753,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 992,
+          "width": 166
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 859,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 1126,
+          "width": 126
+        }
+      ],
+      "wideCount": 19,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1280,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 399,
+          "width": 128
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 512,
+          "width": 106
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 440,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 624,
+          "width": 104
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 554,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 712,
+          "width": 79
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 666,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 818,
+          "width": 98
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 753,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 992,
+          "width": 166
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 859,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 1126,
+          "width": 126
+        }
+      ],
+      "wideCount": 19,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 399,
+          "width": 128
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 512,
+          "width": 106
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 440,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 624,
+          "width": 104
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 554,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 712,
+          "width": 79
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 666,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 818,
+          "width": 98
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 753,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 992,
+          "width": 166
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.chip",
+          "right": 859,
+          "width": 19
+        },
+        {
+          "selector": "button.chip",
+          "parent": "div.ar-chips",
+          "right": 1126,
+          "width": 126
+        }
+      ],
+      "wideCount": 19,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1280,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 494,
+          "width": 128
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.brn-chip",
+          "right": 401,
+          "width": 19
+        }
+      ],
+      "wideCount": 2,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "table",
+          "parent": "div",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "thead",
+          "parent": "table",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "tr",
+          "parent": "thead",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "th",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tbody#coverage-priority-rows",
+          "parent": "table",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        }
+      ],
+      "wideCount": 11,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 359,
+          "width": 139
+        },
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 494,
+          "width": 128
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.brn-chip",
+          "right": 401,
+          "width": 19
+        }
+      ],
+      "wideCount": 3,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1280,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 1280,
+      "clientWidth": 1274,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 494,
+          "width": 128
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.brn-chip",
+          "right": 401,
+          "width": 19
+        }
+      ],
+      "wideCount": 2,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 390,
+      "clientWidth": 390,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "table",
+          "parent": "div",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "thead",
+          "parent": "table",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "tr",
+          "parent": "thead",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "th",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tbody#coverage-priority-rows",
+          "parent": "table",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        },
+        {
+          "selector": "tr",
+          "parent": "tbody#coverage-priority-rows",
+          "right": 386,
+          "width": 345
+        },
+        {
+          "selector": "td",
+          "parent": "tr",
+          "right": 386,
+          "width": 76
+        }
+      ],
+      "wideCount": 11,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 359,
+          "width": 139
+        },
+        {
+          "selector": "button.brn-chip",
+          "parent": "div.brn-chips",
+          "right": 494,
+          "width": 128
+        },
+        {
+          "selector": "span.emoji",
+          "parent": "button.brn-chip",
+          "right": 401,
+          "width": 19
+        }
+      ],
+      "wideCount": 3,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 320,
+      "clientWidth": 320,
+      "overflow": 0,
+      "wide": [],
+      "wideCount": 0,
+      "tap": [],
+      "tapCount": 0
+    }
+  ],
+  "keyboard": [
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 20,
+      "steps": 20,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.38
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 13,
+      "steps": 13,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.38
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 44,
+      "steps": 44,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.38
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 19,
+      "steps": 19,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.43
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 25,
+      "steps": 25,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.43
+    },
+    {
+      "page": "home",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 20,
+      "steps": 20,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "zoeken",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 13,
+      "steps": 13,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 44,
+      "steps": 44,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "restaurant",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 21,
+      "steps": 21,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.43
+    },
+    {
+      "page": "menu",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 27,
+      "steps": 27,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.43
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 20,
+      "steps": 20,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 13,
+      "steps": 13,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 44,
+      "steps": 44,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 19,
+      "steps": 19,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 25,
+      "steps": 25,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "home",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 20,
+      "steps": 20,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "zoeken",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 13,
+      "steps": 13,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "alle-restaurants",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 44,
+      "steps": 44,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "restaurant",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 21,
+      "steps": 21,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "menu",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 27,
+      "steps": 27,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 18,
+      "steps": 18,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 19,
+      "steps": 19,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 25,
+      "steps": 25,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.38
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 1280,
+      "tabbable": 12,
+      "steps": 12,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "dekking",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 15,
+      "steps": 15,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "bronnen",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 16,
+      "steps": 16,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "toevoegen",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 22,
+      "steps": 22,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.38
+    },
+    {
+      "page": "menu-import",
+      "theme": "light",
+      "width": 320,
+      "tabbable": 9,
+      "steps": 9,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.55
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 18,
+      "steps": 18,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 19,
+      "steps": 19,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 25,
+      "steps": 25,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 1280,
+      "tabbable": 12,
+      "steps": 12,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "dekking",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 15,
+      "steps": 15,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "bronnen",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 16,
+      "steps": 16,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "toevoegen",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 22,
+      "steps": 22,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    },
+    {
+      "page": "menu-import",
+      "theme": "dark",
+      "width": 320,
+      "tabbable": 9,
+      "steps": 9,
+      "unreached": [],
+      "unreachedCount": 0,
+      "withoutRing": [],
+      "withoutRingCount": 0,
+      "dimRing": [],
+      "dimRingCount": 0,
+      "ringMin": 6.95
+    }
+  ],
+  "dialogs": [
+    {
+      "theme": "light",
+      "trigger": "🗄️ Alle 7 opruimen",
+      "closedWithEscape": true,
+      "focusReturned": true,
+      "focusAfterEscape": "🗄️ Alle 7 opruimen"
+    },
+    {
+      "theme": "dark",
+      "trigger": "🗄️ Alle 7 opruimen",
+      "closedWithEscape": true,
+      "focusReturned": true,
+      "focusAfterEscape": "🗄️ Alle 7 opruimen"
+    }
+  ],
+  "checks": [
+    {
+      "name": "transfer /: initial transfer < 250 KB",
+      "passed": true,
+      "detail": "164.8 KB (document 8 KB, 16 requests)"
+    },
+    {
+      "name": "transfer /alle-restaurants: initial transfer < 250 KB",
+      "passed": true,
+      "detail": "163.2 KB (document 3 KB, 15 requests)"
+    },
+    {
+      "name": "transfer /restaurant/6: initial transfer < 250 KB",
+      "passed": true,
+      "detail": "169.2 KB (document 12 KB, 14 requests)"
+    },
+    {
+      "name": "transfer /menu/6-diner: initial transfer < 250 KB",
+      "passed": true,
+      "detail": "170.5 KB (document 13 KB, 15 requests)"
+    },
+    {
+      "name": "contrast home light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast home light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast zoeken light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast zoeken light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast alle-restaurants light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast alle-restaurants light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast restaurant light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.28:1"
+    },
+    {
+      "name": "contrast restaurant light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast menu light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.74:1"
+    },
+    {
+      "name": "contrast menu light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast home light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast home light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap home light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast zoeken light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast zoeken light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap zoeken light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast alle-restaurants light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast alle-restaurants light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":399,\"width\":128},{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":512,\"width\":106},{\"selector\":\"span.emoji\",\"parent\":\"button.chip\",\"right\":440,\"width\":19}]"
+    },
+    {
+      "name": "tap alle-restaurants light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast restaurant light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.28:1"
+    },
+    {
+      "name": "contrast restaurant light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap restaurant light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.74:1"
+    },
+    {
+      "name": "contrast menu light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast home light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast home light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap home light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast zoeken light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast zoeken light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap zoeken light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast alle-restaurants light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast alle-restaurants light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":399,\"width\":128},{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":512,\"width\":106},{\"selector\":\"span.emoji\",\"parent\":\"button.chip\",\"right\":440,\"width\":19}]"
+    },
+    {
+      "name": "tap alle-restaurants light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast restaurant light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.28:1"
+    },
+    {
+      "name": "contrast restaurant light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap restaurant light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.74:1"
+    },
+    {
+      "name": "contrast menu light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast home dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast home dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast zoeken dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast zoeken dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast alle-restaurants dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast alle-restaurants dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast restaurant dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast restaurant dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast menu dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast home dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast home dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap home dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast zoeken dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast zoeken dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap zoeken dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast alle-restaurants dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast alle-restaurants dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":399,\"width\":128},{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":512,\"width\":106},{\"selector\":\"span.emoji\",\"parent\":\"button.chip\",\"right\":440,\"width\":19}]"
+    },
+    {
+      "name": "tap alle-restaurants dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast restaurant dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast restaurant dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap restaurant dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast home dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast home dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji home dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone home dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap home dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast zoeken dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast zoeken dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji zoeken dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone zoeken dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap zoeken dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast alle-restaurants dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast alle-restaurants dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji alle-restaurants dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone alle-restaurants dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":399,\"width\":128},{\"selector\":\"button.chip\",\"parent\":\"div.ar-chips\",\"right\":512,\"width\":106},{\"selector\":\"span.emoji\",\"parent\":\"button.chip\",\"right\":440,\"width\":19}]"
+    },
+    {
+      "name": "tap alle-restaurants dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast restaurant dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast restaurant dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji restaurant dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone restaurant dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap restaurant dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "keyboard home light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "20 controls"
+    },
+    {
+      "name": "keyboard home light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "20 stops"
+    },
+    {
+      "name": "keyboard home light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.38:1"
+    },
+    {
+      "name": "keyboard zoeken light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "13 controls"
+    },
+    {
+      "name": "keyboard zoeken light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "13 stops"
+    },
+    {
+      "name": "keyboard zoeken light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.38:1"
+    },
+    {
+      "name": "keyboard alle-restaurants light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "44 controls"
+    },
+    {
+      "name": "keyboard alle-restaurants light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "44 stops"
+    },
+    {
+      "name": "keyboard alle-restaurants light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.38:1"
+    },
+    {
+      "name": "keyboard restaurant light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "19 controls"
+    },
+    {
+      "name": "keyboard restaurant light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "19 stops"
+    },
+    {
+      "name": "keyboard restaurant light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "keyboard menu light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "25 controls"
+    },
+    {
+      "name": "keyboard menu light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "25 stops"
+    },
+    {
+      "name": "keyboard menu light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "keyboard home light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "20 controls"
+    },
+    {
+      "name": "keyboard home light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "20 stops"
+    },
+    {
+      "name": "keyboard home light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard zoeken light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "13 controls"
+    },
+    {
+      "name": "keyboard zoeken light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "13 stops"
+    },
+    {
+      "name": "keyboard zoeken light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard alle-restaurants light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "44 controls"
+    },
+    {
+      "name": "keyboard alle-restaurants light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "44 stops"
+    },
+    {
+      "name": "keyboard alle-restaurants light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard restaurant light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "21 controls"
+    },
+    {
+      "name": "keyboard restaurant light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "21 stops"
+    },
+    {
+      "name": "keyboard restaurant light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "keyboard menu light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "27 controls"
+    },
+    {
+      "name": "keyboard menu light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "27 stops"
+    },
+    {
+      "name": "keyboard menu light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "keyboard home dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "20 controls"
+    },
+    {
+      "name": "keyboard home dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "20 stops"
+    },
+    {
+      "name": "keyboard home dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard zoeken dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "13 controls"
+    },
+    {
+      "name": "keyboard zoeken dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "13 stops"
+    },
+    {
+      "name": "keyboard zoeken dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "44 controls"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "44 stops"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard restaurant dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "19 controls"
+    },
+    {
+      "name": "keyboard restaurant dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "19 stops"
+    },
+    {
+      "name": "keyboard restaurant dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard menu dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "25 controls"
+    },
+    {
+      "name": "keyboard menu dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "25 stops"
+    },
+    {
+      "name": "keyboard menu dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard home dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "20 controls"
+    },
+    {
+      "name": "keyboard home dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "20 stops"
+    },
+    {
+      "name": "keyboard home dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard zoeken dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "13 controls"
+    },
+    {
+      "name": "keyboard zoeken dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "13 stops"
+    },
+    {
+      "name": "keyboard zoeken dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "44 controls"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "44 stops"
+    },
+    {
+      "name": "keyboard alle-restaurants dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard restaurant dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "21 controls"
+    },
+    {
+      "name": "keyboard restaurant dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "21 stops"
+    },
+    {
+      "name": "keyboard restaurant dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard menu dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "27 controls"
+    },
+    {
+      "name": "keyboard menu dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "27 stops"
+    },
+    {
+      "name": "keyboard menu dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "contrast dekking light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.29:1"
+    },
+    {
+      "name": "contrast dekking light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast bronnen light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast bronnen light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast toevoegen light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast toevoegen light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast menu-import light 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.43:1"
+    },
+    {
+      "name": "contrast menu-import light 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import light 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import light 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast dekking light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.29:1"
+    },
+    {
+      "name": "contrast dekking light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap dekking light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast bronnen light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "contrast bronnen light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":494,\"width\":128},{\"selector\":\"span.emoji\",\"parent\":\"button.brn-chip\",\"right\":401,\"width\":19}]"
+    },
+    {
+      "name": "tap bronnen light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast toevoegen light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast toevoegen light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap toevoegen light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu-import light 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.58:1"
+    },
+    {
+      "name": "contrast menu-import light 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import light 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import light 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu-import light 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast dekking light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.29:1"
+    },
+    {
+      "name": "contrast dekking light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"table\",\"parent\":\"div\",\"right\":386,\"width\":345},{\"selector\":\"thead\",\"parent\":\"table\",\"right\":386,\"width\":345},{\"selector\":\"tr\",\"parent\":\"thead\",\"right\":386,\"width\":345}]"
+    },
+    {
+      "name": "tap dekking light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast bronnen light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "contrast bronnen light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":359,\"width\":139},{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":494,\"width\":128},{\"selector\":\"span.emoji\",\"parent\":\"button.brn-chip\",\"right\":401,\"width\":19}]"
+    },
+    {
+      "name": "tap bronnen light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast toevoegen light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.41:1"
+    },
+    {
+      "name": "contrast toevoegen light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap toevoegen light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu-import light 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 6.58:1"
+    },
+    {
+      "name": "contrast menu-import light 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import light 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import light 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu-import light 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast dekking dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast dekking dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast bronnen dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast bronnen dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast toevoegen dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 4.85:1"
+    },
+    {
+      "name": "contrast toevoegen dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast menu-import dark 1280px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu-import dark 1280px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import dark 1280px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import dark 1280px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "contrast dekking dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast dekking dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap dekking dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast bronnen dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast bronnen dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":494,\"width\":128},{\"selector\":\"span.emoji\",\"parent\":\"button.brn-chip\",\"right\":401,\"width\":19}]"
+    },
+    {
+      "name": "tap bronnen dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast toevoegen dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 4.85:1"
+    },
+    {
+      "name": "contrast toevoegen dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap toevoegen dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu-import dark 390px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu-import dark 390px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import dark 390px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import dark 390px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu-import dark 390px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast dekking dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast dekking dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji dekking dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone dekking dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"table\",\"parent\":\"div\",\"right\":386,\"width\":345},{\"selector\":\"thead\",\"parent\":\"table\",\"right\":386,\"width\":345},{\"selector\":\"tr\",\"parent\":\"thead\",\"right\":386,\"width\":345}]"
+    },
+    {
+      "name": "tap dekking dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast bronnen dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast bronnen dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji bronnen dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone bronnen dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0 e.g. [{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":359,\"width\":139},{\"selector\":\"button.brn-chip\",\"parent\":\"div.brn-chips\",\"right\":494,\"width\":128},{\"selector\":\"span.emoji\",\"parent\":\"button.brn-chip\",\"right\":401,\"width\":19}]"
+    },
+    {
+      "name": "tap bronnen dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast toevoegen dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 4.85:1"
+    },
+    {
+      "name": "contrast toevoegen dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji toevoegen dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone toevoegen dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap toevoegen dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "contrast menu-import dark 320px: every visible text >= 4.5:1",
+      "passed": true,
+      "detail": "minimum 5.99:1"
+    },
+    {
+      "name": "contrast menu-import dark 320px: control borders >= 3:1",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "emoji menu-import dark 320px: every decorative emoji is aria-hidden",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "phone menu-import dark 320px: no horizontal overflow",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "tap menu-import dark 320px: every tap target >= 44px",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "keyboard dekking light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "18 controls"
+    },
+    {
+      "name": "keyboard dekking light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "18 stops"
+    },
+    {
+      "name": "keyboard dekking light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard bronnen light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "19 controls"
+    },
+    {
+      "name": "keyboard bronnen light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "19 stops"
+    },
+    {
+      "name": "keyboard bronnen light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard toevoegen light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "25 controls"
+    },
+    {
+      "name": "keyboard toevoegen light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "25 stops"
+    },
+    {
+      "name": "keyboard toevoegen light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.38:1"
+    },
+    {
+      "name": "keyboard menu-import light 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "12 controls"
+    },
+    {
+      "name": "keyboard menu-import light 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "12 stops"
+    },
+    {
+      "name": "keyboard menu-import light 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard dekking light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "15 controls"
+    },
+    {
+      "name": "keyboard dekking light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "15 stops"
+    },
+    {
+      "name": "keyboard dekking light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard bronnen light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "16 controls"
+    },
+    {
+      "name": "keyboard bronnen light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "16 stops"
+    },
+    {
+      "name": "keyboard bronnen light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard toevoegen light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "22 controls"
+    },
+    {
+      "name": "keyboard toevoegen light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "22 stops"
+    },
+    {
+      "name": "keyboard toevoegen light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.38:1"
+    },
+    {
+      "name": "keyboard menu-import light 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "9 controls"
+    },
+    {
+      "name": "keyboard menu-import light 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "9 stops"
+    },
+    {
+      "name": "keyboard menu-import light 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.55:1"
+    },
+    {
+      "name": "keyboard dekking dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "18 controls"
+    },
+    {
+      "name": "keyboard dekking dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "18 stops"
+    },
+    {
+      "name": "keyboard dekking dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard bronnen dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "19 controls"
+    },
+    {
+      "name": "keyboard bronnen dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "19 stops"
+    },
+    {
+      "name": "keyboard bronnen dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard toevoegen dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "25 controls"
+    },
+    {
+      "name": "keyboard toevoegen dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "25 stops"
+    },
+    {
+      "name": "keyboard toevoegen dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard menu-import dark 1280px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "12 controls"
+    },
+    {
+      "name": "keyboard menu-import dark 1280px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "12 stops"
+    },
+    {
+      "name": "keyboard menu-import dark 1280px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard dekking dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "15 controls"
+    },
+    {
+      "name": "keyboard dekking dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "15 stops"
+    },
+    {
+      "name": "keyboard dekking dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard bronnen dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "16 controls"
+    },
+    {
+      "name": "keyboard bronnen dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "16 stops"
+    },
+    {
+      "name": "keyboard bronnen dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard toevoegen dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "22 controls"
+    },
+    {
+      "name": "keyboard toevoegen dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "22 stops"
+    },
+    {
+      "name": "keyboard toevoegen dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "keyboard menu-import dark 320px: every control is reachable with Tab",
+      "passed": true,
+      "detail": "9 controls"
+    },
+    {
+      "name": "keyboard menu-import dark 320px: every tab stop has a visible focus ring",
+      "passed": true,
+      "detail": "9 stops"
+    },
+    {
+      "name": "keyboard menu-import dark 320px: every focus ring >= 3:1",
+      "passed": true,
+      "detail": "minimum 6.95:1"
+    },
+    {
+      "name": "dialoog light: the cleanup confirmation asks before it closes results",
+      "passed": true,
+      "detail": "🗄️ Alle 7 opruimen"
+    },
+    {
+      "name": "dialoog light: focus starts inside the dialog",
+      "passed": true,
+      "detail": "{\"inDialog\":true,\"active\":\"Ja, alle 7 afhandelen\"}"
+    },
+    {
+      "name": "dialoog light: Escape closes the dialog",
+      "passed": true,
+      "detail": "active after Escape: 🗄️ Alle 7 opruimen"
+    },
+    {
+      "name": "dialoog light: Escape returns focus to the button that opened it",
+      "passed": true,
+      "detail": "{\"active\":\"🗄️ Alle 7 opruimen\",\"backOnTrigger\":true}"
+    },
+    {
+      "name": "dialoog dark: the cleanup confirmation asks before it closes results",
+      "passed": true,
+      "detail": "🗄️ Alle 7 opruimen"
+    },
+    {
+      "name": "dialoog dark: focus starts inside the dialog",
+      "passed": true,
+      "detail": "{\"inDialog\":true,\"active\":\"Ja, alle 7 afhandelen\"}"
+    },
+    {
+      "name": "dialoog dark: Escape closes the dialog",
+      "passed": true,
+      "detail": "active after Escape: 🗄️ Alle 7 opruimen"
+    },
+    {
+      "name": "dialoog dark: Escape returns focus to the button that opened it",
+      "passed": true,
+      "detail": "{\"active\":\"🗄️ Alle 7 opruimen\",\"backOnTrigger\":true}"
+    },
+    {
+      "name": "network guard: the page recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "network guard: the CDP layer recorded no blocked app traffic",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "no fixture bootstrap error at the end",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "no uncaught browser exception",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "passed": true,
+  "failed": []
+}

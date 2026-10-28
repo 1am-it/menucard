@@ -76,7 +76,7 @@ test('validateActivationForm: trims both fields before validating/returning them
 });
 
 test('activationValidationMessage: returns a distinct, non-empty message per reason', () => {
-  assert.match(activationValidationMessage('invalid-email'), /email/i);
+  assert.match(activationValidationMessage('invalid-email'), /e-mailadres/i);
   assert.match(activationValidationMessage('missing-code'), /code/i);
   assert.equal(activationValidationMessage('something-else'), '');
 });
@@ -95,7 +95,7 @@ test('resolveActivationOutcome: any error maps to exactly one generic, safe mess
     status: 403,
   });
   assert.equal(outcome.ok, false);
-  assert.equal(outcome.message, 'That code is invalid or has expired. Please request a new one.');
+  assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
   assert.equal(outcome.message.includes('developer@1am-it.com'), false);
   assert.equal(outcome.message.includes('123456'), false);
   assert.equal(outcome.message.includes('403'), false);
@@ -129,7 +129,7 @@ test('performActivation: an expired/invalid code maps to the safe generic messag
   };
   const outcome = await performActivation(fakeAuth, { email: 'developer@1am-it.com', token: '000000', type: 'recovery' });
   assert.equal(outcome.ok, false);
-  assert.equal(outcome.message, 'That code is invalid or has expired. Please request a new one.');
+  assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
 });
 
 test('performActivation: verifyOtp REJECTING (thrown inside the async function) never propagates — resolves safely instead', async () => {
@@ -141,7 +141,7 @@ test('performActivation: verifyOtp REJECTING (thrown inside the async function) 
   await assert.doesNotReject(async () => {
     const outcome = await performActivation(fakeAuth, { email: 'developer@1am-it.com', token: '123456', type: 'recovery' });
     assert.equal(outcome.ok, false);
-    assert.equal(outcome.message, 'That code is invalid or has expired. Please request a new one.');
+    assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
   });
 });
 
@@ -153,7 +153,7 @@ test('performActivation: verifyOtp throwing SYNCHRONOUSLY (not even returning a 
   };
   const outcome = await performActivation(fakeAuth, { email: 'developer@1am-it.com', token: '123456', type: 'recovery' });
   assert.equal(outcome.ok, false);
-  assert.equal(outcome.message, 'That code is invalid or has expired. Please request a new one.');
+  assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
 });
 
 test('performActivation: passes email, token, and type through to verifyOtp exactly as given', async () => {

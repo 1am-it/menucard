@@ -458,8 +458,9 @@ test('structural safety net: /internal keeps the existing no-access status and o
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
   assert.match(source, /hasAnyKnownRole/);
   assert.match(source, /isOwnerRole/);
-  assert.match(source, /No internal access for this account\./);
-  assert.match(source, /Nothing to open yet/);
+  // BE-37 (#89): de interne statuspagina is Nederlands, net als de navigatie.
+  assert.match(source, /Dit account heeft geen interne toegang\./);
+  assert.match(source, /Nog niets te openen/);
   assert.match(source, /signOut/);
   assert.doesNotMatch(source, /<a\s/, 'no clickable invented owner or module destination on the status page');
 });

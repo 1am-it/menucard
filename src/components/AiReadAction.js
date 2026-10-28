@@ -13,6 +13,7 @@
 //   error   → an honest message with "Handmatig toevoegen" as the next step.
 // It never starts anything by itself.
 
+import EmojiText from '@/src/components/EmojiText'
 import {
   PASTE_LABEL,
   REVIEW_LABEL,
@@ -29,7 +30,7 @@ export default function AiReadAction({ row, state, onRead, onOpen, disabled = fa
   if (phase === 'reading') {
     return (
       <span className="srr-ai" role="status" aria-live="polite">
-        <span className="srr-ai-line">{aiReadProgressLine()}</span>
+        <span className="srr-ai-line"><EmojiText value={aiReadProgressLine()} /></span>
         <span className="srr-ai-hint">{aiReadEstimateLine()}</span>
       </span>
     )
@@ -39,7 +40,7 @@ export default function AiReadAction({ row, state, onRead, onOpen, disabled = fa
     const summary = state.summary && typeof state.summary === 'object' ? state.summary : {}
     return (
       <span className="srr-ai" role="status">
-        <span className="srr-ai-line">{aiReadOutcomeLine({ items: summary.items, needsReview: summary.needsReview, pagesFailed: state.pagesFailed })}</span>
+        <span className="srr-ai-line"><EmojiText value={aiReadOutcomeLine({ items: summary.items, needsReview: summary.needsReview, pagesFailed: state.pagesFailed })} /></span>
         <span className="srr-ai-hint">{aiReadCostLine(state.cost)}</span>
         <button type="button" className="di-btn-primary srr-action" disabled={disabled} onClick={() => onOpen && onOpen(row)}>
           {REVIEW_LABEL}
@@ -54,7 +55,7 @@ export default function AiReadAction({ row, state, onRead, onOpen, disabled = fa
         <span className="srr-ai-line">{state.message}</span>
         {state.nextHref && state.nextLabel ? (
           <a className="stg-btn-secondary srr-action" href={state.nextHref}>
-            {state.nextLabel}
+            <EmojiText value={state.nextLabel} />
           </a>
         ) : null}
       </span>
@@ -64,7 +65,7 @@ export default function AiReadAction({ row, state, onRead, onOpen, disabled = fa
   return (
     <span className="srr-ai">
       <button type="button" className="di-btn-primary srr-action" disabled={disabled} onClick={() => onRead && onRead(row)}>
-        {label}
+        <EmojiText value={label} />
       </button>
       <span className="srr-ai-hint">{aiReadEstimateLine()}</span>
       <a className="srr-paste-link" href={manualPasteHref(row)}>

@@ -8,6 +8,7 @@ import { getReservationActions, getReservationNote, isExternalReservation, isVal
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
+import EmojiText from '@/src/components/EmojiText'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
@@ -300,7 +301,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                     href={`/menu/${baseId}-${m}`}
                     className={`meal-btn ${m === mealType ? 'active' : ''}`}
                   >
-                    {MEAL_CONFIG[m]?.label || m}
+                    <EmojiText value={MEAL_CONFIG[m]?.label || m} />
                   </Link>
                 ))}
               </div>
@@ -342,11 +343,11 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   target="_blank" rel="noopener noreferrer"
                   style={{ color: 'inherit', textDecoration: 'none' }}
                 >
-                  📍 {r.address || restaurant.address}
+                  <Emoji glyph="📍" /> {r.address || restaurant.address}
                 </a>
               </div>
               {(isValidPhone(r.phone) || isValidPhone(restaurant.phone)) && (
-                <div className="rp-line">📞 {isValidPhone(r.phone) ? r.phone : (restaurant.phoneDisplay || restaurant.phone)}</div>
+                <div className="rp-line"><Emoji glyph="📞" /> {isValidPhone(r.phone) ? r.phone : (restaurant.phoneDisplay || restaurant.phone)}</div>
               )}
             </div>
             <div className="rp-btns">
@@ -386,7 +387,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
           {/* Ingredient search */}
           <div className="mf-search-wrap">
-            <span className="mf-search-icon">🔍</span>
+            <span className="mf-search-icon" aria-hidden="true">🔍</span>
             <input
               type="text"
               className="mf-search"
@@ -405,7 +406,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
             className={`mf-btn ${allergenOpen || excludeAllergens.length > 0 ? 'active' : ''}`}
             onClick={() => setAllergenOpen(o => !o)}
           >
-            🛡 Allergie{excludeAllergens.length > 0 ? ` (${excludeAllergens.length})` : ''}
+            <Emoji glyph="🛡" /> Allergie{excludeAllergens.length > 0 ? ` (${excludeAllergens.length})` : ''}
           </button>
 
           {/* Diet toggles */}
@@ -415,7 +416,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               className={`mf-btn ${dietTags.includes(d.key) ? 'active' : ''}`}
               onClick={() => toggleDiet(d.key)}
             >
-              {d.icon} {d.label}
+              <Emoji glyph={d.icon} /> {d.label}
             </button>
           ))}
 
@@ -485,7 +486,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                 const d = DIET_TAGS.find(x => x.key === tag)
                 return d ? (
                   <span key={tag} className="mf-tag">
-                    {d.icon} {d.label}
+                    <Emoji glyph={d.icon} /> {d.label}
                     <button onClick={() => toggleDiet(tag)} className="mf-tag-x">×</button>
                   </span>
                 ) : null
@@ -505,7 +506,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
       <main className="page-main page-with-tabbar">
         {filteredCategories.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: 36, marginBottom: 12 }}>🔍</div>
+            <div style={{ fontSize: 36, marginBottom: 12 }}><Emoji glyph="🔍" /></div>
             <h3>Geen gerechten gevonden</h3>
             <p>Pas je filters aan of <button onClick={resetFilters} style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>reset alle filters</button>.</p>
           </div>
@@ -562,7 +563,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
         {/* NVWA link */}
         <div className="nvwa-teaser">
           <div>
-            <div className="nvwa-teaser-title">🛡 Allergeneninformatie (NVWA)</div>
+            <div className="nvwa-teaser-title"><Emoji glyph="🛡" /> Allergeneninformatie (NVWA)</div>
             <div className="nvwa-teaser-sub">Volledige EU-14 allergenenmatrix · EU Verordening 1169/2011</div>
           </div>
           <Link href={`/nvwa/${baseId}`} className="nvwa-teaser-btn">

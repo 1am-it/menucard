@@ -138,19 +138,19 @@ export default function SetPasswordPage() {
         color: 'var(--text-primary)',
       }}
     >
-      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Set your password</h1>
+      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Stel je wachtwoord in</h1>
 
       {viewState === 'checking' && (
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Checking your invitation link…</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Je uitnodiging wordt gecontroleerd…</p>
       )}
 
       {viewState === 'invalid' && (
         <div>
           <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 12 }}>
-            This invitation or password reset link is invalid or has expired.
+            Deze uitnodiging of deze herstellink is ongeldig of verlopen.
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Please ask whoever manages internal accounts to send a new link.
+            Vraag degene die de interne accounts beheert om een nieuwe link.
           </p>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function SetPasswordPage() {
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
           <input
             type="password"
-            placeholder="New password"
+            placeholder="Nieuw wachtwoord"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
@@ -168,7 +168,7 @@ export default function SetPasswordPage() {
           />
           <input
             type="password"
-            placeholder="Confirm new password"
+            placeholder="Herhaal het nieuwe wachtwoord"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
@@ -190,7 +190,7 @@ export default function SetPasswordPage() {
               cursor: 'pointer',
             }}
           >
-            {submitting ? 'Setting password…' : 'Set password'}
+            {submitting ? 'Bezig met opslaan…' : 'Wachtwoord opslaan'}
           </button>
         </form>
       )}
@@ -199,12 +199,12 @@ export default function SetPasswordPage() {
         <div>
           <p className="status-badge status-badge--positive" style={{ fontSize: 14, marginBottom: 12 }}>
             <StatusIcon name="check" size={14} />
-            Your password has been set.
+            Je wachtwoord is ingesteld.
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Redirecting you to sign in…{' '}
+            Je gaat naar inloggen…{' '}
             <a href="/internal/login" style={{ color: 'var(--accent)' }}>
-              Click here if nothing happens.
+              Klik hier als er niets gebeurt.
             </a>
           </p>
         </div>

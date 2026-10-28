@@ -10,6 +10,7 @@
 // and kind are shown, with the attribution.
 
 import { useCallback, useEffect, useState } from 'react'
+import Emoji from '@/src/components/Emoji'
 import { OSM_ATTRIBUTION } from '@/src/lib/osmSource'
 import { NEW_FOUND_LOADING, RETRY_LABEL, updatedLabel } from '@/src/lib/discoveryProgress'
 
@@ -83,7 +84,11 @@ export default function NewFoundSection({ token }) {
         <h2 id="cov-new-title" className="cov-check-title">
           {/* BE-34 (#81, criterion 4): no "(0)" while the first fetch of the day
               is still running. */}
-          {state.loading ? '🆕 Nieuw gevonden' : `🆕 Nieuw gevonden (${state.items.length})`}
+          {state.loading ? (
+            <><Emoji glyph="🆕" /> Nieuw gevonden</>
+          ) : (
+            <><Emoji glyph="🆕" /> Nieuw gevonden ({state.items.length})</>
+          )}
         </h2>
         <p className="cov-check-meta" style={{ margin: 0 }}>
           Restaurants in Breda die OpenStreetMap kent en wij nog niet. Dekking voegt nooit zelf iets toe.

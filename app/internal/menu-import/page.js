@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+import EmojiText from '@/src/components/EmojiText'
 import AiMenuReadBlock from '@/src/components/AiMenuReadBlock'
 import MenuSourceMap from '@/src/components/MenuSourceMap'
 import { aiHandoffKeyFromSearch, takeAiRead } from '@/src/lib/aiReadFlow'
@@ -952,7 +953,7 @@ export default function ManualMenuImportPage() {
         </label>
         {selectedRestaurant ? (
           <div className="mai-chosen">
-            <span className="mai-chosen-name">{restaurantChoiceLabel(selectedRestaurant)}</span>
+            <span className="mai-chosen-name"><EmojiText value={restaurantChoiceLabel(selectedRestaurant)} /></span>
             <button
               type="button"
               className="stg-btn-secondary mai-btn"
