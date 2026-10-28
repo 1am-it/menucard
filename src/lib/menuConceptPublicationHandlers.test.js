@@ -280,6 +280,24 @@ test('list: every stored export status is shown with its real text and never as 
   assert.equal(merged.publication.liveNote, 'live na de volgende deploy');
 });
 
+test('list (BE-41): the stored PR link travels with the card, without a GitHub call', async () => {
+  const github = githubSpy();
+  const supabase = world({ reviews: [approved(1)], exports: [exportRow(1, 'opened')] });
+  const item = (await handlersFor(supabase, { github }).list(request())).body.items[0];
+  // The link "PR bekijken ↗" needs, from the export row that was already read.
+  assert.equal(item.exportPrUrl, 'https://github.invalid/9');
+  assert.equal(github.calls.length, 0, 'the list still never calls GitHub');
+  assert.equal(queriesFor(supabase, 'menu_snapshot_exports').length, 1, 'still exactly one exports query');
+
+  // Without a stored export there is no link, and no invented one.
+  const none = (await handlersFor(world({ reviews: [approved(1)] }), { github: githubSpy() }).list(request())).body.items[0];
+  assert.equal(none.exportPrUrl, null);
+  // An export row without a stored url stays null: the list never builds one.
+  const noUrl = world({ reviews: [approved(1)], exports: [exportRow(1, 'failed', { pr_url: null })] });
+  const withoutUrl = (await handlersFor(noUrl, { github: githubSpy() }).list(request())).body.items[0];
+  assert.equal(withoutUrl.exportPrUrl, null);
+});
+
 test('list: one exports query for all shown cards and the same query count for one or many cards', async () => {
   const many = (count) => {
     const snapshots = [];

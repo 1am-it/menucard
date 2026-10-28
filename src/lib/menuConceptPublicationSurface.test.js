@@ -20,7 +20,8 @@ const VIEW_PATH = 'app/internal/menu-concepts/MenuConceptsView.js';
 const VIEW = readCode(VIEW_PATH);
 
 test('one rule: the view imports the pure publication rule and its export texts', () => {
-  assert.match(VIEW, /import \{ derivePublicationReadiness, EXPORT_STATUS_LABELS \} from '@\/src\/lib\/menuConceptPublication'/);
+  // BE-41 adds the next-step rule from the same module: one import, one rule.
+  assert.match(VIEW, /import \{ deriveNextStep, derivePublicationReadiness, EXPORT_STATUS_LABELS \} from '@\/src\/lib\/menuConceptPublication'/);
   // The detail derives canExport from that function, with only `dirty` coming
   // from the browser.
   assert.match(VIEW, /const publication = derivePublicationReadiness\(\{/);
@@ -40,7 +41,9 @@ test('the list shows exactly one second badge for an approved card and hides the
   assert.match(VIEW, /function PublicationBadge\(\{ publication \}\)/);
   assert.match(VIEW, /const view = publicationView\(publication && publication\.state\)/);
   assert.match(VIEW, /<span>\{publication\.label\}<\/span>/);
-  assert.match(VIEW, /const PUBLICATION_VIEW = \{\n  ready: \{ role: 'positive', icon: 'check' \},\n  not_ready: \{ role: 'neutral', icon: 'clock' \},\n\}/);
+  // BE-41 (criterion 3): "Nog niet klaar" is the existing oker attention role,
+  // a ready card keeps the positive role. No colour is written here.
+  assert.match(VIEW, /const PUBLICATION_VIEW = \{\n  ready: \{ role: 'positive', icon: 'check' \},\n  not_ready: \{ role: 'old', icon: 'alert' \},\n\}/);
   assert.match(VIEW, /<StatusBadge status=\{item\.status\} \/>\n          <PublicationBadge publication=\{item\.publication\} \/>/);
   // Criterion 3: "N klaar voor publicatie", and nothing at all when N = 0.
   assert.match(VIEW, /const readyCount = items\.filter\(\(i\) => i\.publication && i\.publication\.ready\)\.length/);

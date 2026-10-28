@@ -25,6 +25,8 @@
 
 const VALID_EXPORT_STATUSES = ['pending', 'opened', 'merged', 'failed', 'closed'];
 
+const { isHttpUrl } = require('./menuConceptUrls');
+
 /** The existing EXPORT_VIEW texts, in one place for server and screen. */
 const EXPORT_STATUS_LABELS = {
   pending: 'Review-PR wordt gemaakt',
@@ -169,8 +171,107 @@ function derivePublicationReadiness(input = {}) {
   };
 }
 
+// ─── BE-41 "wat is de volgende stap" ────────────────────────────────────────
+// One button per card, derived from the same rule above. This is deliberately
+// not a second interpretation: the readiness state and its failing gates decide
+// the step, so the list label ("Nog niet klaar: …") and the button can never
+// point in different directions.
+//
+//   state                        next step            goes to
+//   waiting (status)             Beoordelen →         the review screen
+//   rejected (status)            Bekijken →           the review screen (outlined)
+//   not_ready + blockers         N blokkades … →      the Wijzigingen tab
+//   not_ready + source           Bron controleren →   the Bron tab
+//   not_ready + github missing   no button, label only
+//   ready                        Maak review-PR →     the Publicatie block
+//   export_failed / _closed      Opnieuw proberen →   the Publicatie block
+//   export_pending/_opened/
+//   export_merged                PR bekijken ↗        the stored PR link (new tab)
+//
+// The list never starts an export itself: "Maak review-PR →" is a link to the
+// block where the real action lives (criterion 2). An active export without a
+// usable stored PR link shows no button instead of a dead one.
+const NEXT_STEP_LABELS = {
+  review: 'Beoordelen',
+  blockers: 'blokkades oplossen',
+  source: 'Bron controleren',
+  export: 'Maak review-PR',
+  retry: 'Opnieuw proberen',
+  pr: 'PR bekijken',
+  rejected: 'Bekijken',
+};
+
+const NEXT_STEP_TARGETS = {
+  review: 'detail',
+  blockers: 'changes',
+  source: 'source',
+  export: 'publication',
+  retry: 'publication',
+  pr: 'pr',
+  rejected: 'detail',
+};
+
+/** "N blokkades oplossen", with the real count; 1 stays singular. */
+function blockerStepLabel(count) {
+  const total = Number(count) || 0;
+  if (total === 0) return 'Blokkades oplossen';
+  return total === 1 ? '1 blokkade oplossen' : `${total} blokkades oplossen`;
+}
+
+const NEXT_STEP_ARROWS = { pr: '↗' };
+
+function nextStep(id, { label = NEXT_STEP_LABELS[id], externalUrl = null } = {}) {
+  const arrow = NEXT_STEP_ARROWS[id] || '→';
+  const fullLabel = label ? `${label} ${arrow}` : null;
+  return {
+    // 'none' means: only the existing label, no button (criterion 2).
+    id,
+    label: fullLabel,
+    // A screen reader hears the same step as the visible label, without the
+    // decorative arrow character ("Beoordelen", not "Beoordelen →").
+    plainLabel: label || null,
+    target: NEXT_STEP_TARGETS[id] || null,
+    // 'outlined' is the one outlined button in the table: a rejected card.
+    variant: id === 'rejected' ? 'outlined' : id === 'none' ? null : 'primary',
+    externalUrl,
+  };
+}
+
+/**
+ * The next step of one list card. `publication` is the object
+ * derivePublicationReadiness returned for that same card, `blockerCount` is the
+ * card's own count (already displayed as a chip) and `prUrl` is the stored
+ * review-PR link. Nothing here fetches, writes or exports.
+ */
+function deriveNextStep({ status = null, publication = null, blockerCount = null, prUrl = null } = {}) {
+  if (status === 'waiting') return nextStep('review');
+  if (status === 'rejected') return nextStep('rejected');
+  // An unknown or missing status never gets an invented action.
+  if (status !== 'approved') return nextStep('none');
+
+  const state = publication && typeof publication.state === 'string' ? publication.state : null;
+  // An export that already exists is a fact: BE-39 lets it win over the
+  // readiness state, so the button follows that badge instead of contradicting
+  // it. Without a stored, safe PR link there is nothing to open.
+  if (state === 'export_pending' || state === 'export_opened' || state === 'export_merged') {
+    return isHttpUrl(prUrl) ? nextStep('pr', { externalUrl: prUrl.trim() }) : nextStep('none');
+  }
+  if (state === 'export_failed' || state === 'export_closed') return nextStep('retry');
+  if (state === 'ready') return nextStep('export');
+
+  const failed = new Set(
+    (publication && Array.isArray(publication.checks) ? publication.checks : []).filter((check) => !check.ok).map((check) => check.id),
+  );
+  if (failed.has('blockers')) return nextStep('blockers', { label: blockerStepLabel(blockerCount) });
+  if (failed.has('source_confirmed') || failed.has('source_unblocked')) return nextStep('source');
+  // The GitHub link, an earlier rejection or any other gate has no destination
+  // of its own on the review screen: label only, no button.
+  return nextStep('none');
+}
+
 module.exports = {
   derivePublicationReadiness,
+  deriveNextStep,
   publicationChecks,
   VALID_EXPORT_STATUSES,
   EXPORT_STATUS_LABELS,
@@ -178,4 +279,5 @@ module.exports = {
   READY_LABEL,
   NOT_READY_LABEL,
   MERGED_LIVE_NOTE,
+  NEXT_STEP_LABELS,
 };

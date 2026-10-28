@@ -338,9 +338,14 @@ Meaning that must be kept:
   a page Onze Menukaarten tried to read is "Robots geblokkeerd": the
   **blocked** role (`--status-blocked`, icon + text,
   `robotsTxtRole()` in `src/lib/statusRoles.js`); an unconfirmed
-  robots.txt is uncertainty and stays neutral. `--status-old` is only
-  for Oude URL, Toegang beperkt, Identiteit gewijzigd and Structuur niet
-  herkend.
+  robots.txt is uncertainty and stays neutral. `--status-old` is for Oude URL,
+  Toegang beperkt, Identiteit gewijzigd and Structuur niet herkend, and — since
+  BE-41 (#97) — for the two attention labels of the concept list in
+  `/internal/menu-concepts`: "Nog niet klaar: …" and "Vorige poging mislukt".
+  Those two say an editor still has to act, exactly like "Controle nodig" in
+  the BE-25 batch vocabulary; a ready card keeps `--status-positive` and every
+  other state stays neutral. No new colour, token or role was introduced for
+  that (the contract asks for yellow with the existing roles only).
 
 BE-23 mapping (`app/internal/source-workqueue/page.js`): Bereikbaar →
 positive; Niet bereikbaar → blocked; Toegang beperkt, Identiteit

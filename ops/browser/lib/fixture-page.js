@@ -47,7 +47,27 @@ function fixtureBootstrap(scenarios, options = {}) {
     // therefore chooses the concept dataset, so the click path is exercised
     // without inventing a fixture-only link. The same applies to the image/
     // scan follow-up into Bronnen beoordelen.
+    //
+    // BE-41: a card with a next step can link straight to one detail id, and
+    // more than one concept dataset exists. The id in the path picks the
+    // dataset that really contains it (a publication card, for example), so a
+    // click from that list lands on its own screen instead of a 404.
+    const conceptPrefix = '/internal/menu-concepts/';
+    const conceptRest = pathname.indexOf(conceptPrefix) === 0 ? pathname.slice(conceptPrefix.length) : null;
+    const conceptIdInPath = conceptRest && conceptRest.length > 0 && conceptRest.indexOf('/') === -1
+      ? (() => {
+        try {
+          return decodeURIComponent(conceptRest);
+        } catch (ignored) {
+          return conceptRest;
+        }
+      })()
+      : null;
+    const conceptFixture = conceptIdInPath
+      ? Object.keys(fixtures).find((key) => fixtures[key] && fixtures[key].detail && fixtures[key].detail[conceptIdInPath])
+      : null;
     const fixture = requestedFixture
+      || conceptFixture
       || (pathname.indexOf('/internal/menu-concepts') === 0
         ? 'concepts'
         : pathname.indexOf('/internal/bronnen/batch') === 0 ? 'review'
