@@ -66,18 +66,25 @@ test('image-only: the fixture row shows exactly that label', () => {
 });
 
 test('image-only follow-up: the check expects the product\'s own reason and next step', () => {
-  assert.equal(SCRIPT.includes(FOLLOW_UP.reason), true, `missing literal: ${FOLLOW_UP.reason}`);
-  assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true, `missing literal: ${FOLLOW_UP.nextStep}`);
+  // The check compares with the product constants instead of restating the copy.
+  assert.equal(SCRIPT.includes('followUpText.includes(FOLLOW_UP.reason)'), true, 'the check no longer reads the product reason');
+  assert.equal(SCRIPT.includes('followUpText.includes(FOLLOW_UP.nextStep)'), true, 'the check no longer reads the product next step');
+  assert.equal(FOLLOW_UP.reason.length > 0, true);
+  assert.equal(FOLLOW_UP.nextStep.length > 0, true);
 });
 
 test('image-only follow-up: the batch banner the check reads is the screen\'s own wording', () => {
   // Since BE-31 the same reason and next step also reach the screen as the
   // batch banner (app/internal/bronnen/BronnenView.js), which is what the
-  // check reads on the current screen.
+  // check reads on the current screen. Once a task is selected the screen moves
+  // that copy into the task's own follow-up block, so the check accepts either
+  // state and reads both from the same product copy.
   const BRONNEN_VIEW = READ_TEXT('app/internal/bronnen/BronnenView.js');
+  const PROPOSAL_DETAIL = READ_TEXT('app/internal/bronnen/ProposalDetail.js');
   assert.equal(BRONNEN_VIEW.includes('Vervolg van de batchanalyse:'), true);
   assert.equal(SCRIPT.includes('Vervolg van de batchanalyse:'), true);
-  assert.equal(SCRIPT.includes(FOLLOW_UP.nextStep), true);
+  assert.equal(PROPOSAL_DETAIL.includes('stg-followup'), true);
+  assert.equal(SCRIPT.includes("querySelector('.stg-followup')"), true);
 });
 
 test('image-only: the row\'s own next step is the one the check reads', () => {

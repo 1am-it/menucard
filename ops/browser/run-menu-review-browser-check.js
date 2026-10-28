@@ -385,7 +385,13 @@ async function imageOnlyScenario(cdp) {
   const arrived = await waitForPath(cdp, '/internal/bronnen', 'Bronnen beoordelen', 30000);
   steps.push({ action: 'click Bronnen beoordelen', href: clicked, reached: Boolean(clicked), arrived });
   const bannerReady = await waitFor(cdp, `Boolean(document.querySelector('.di-banner-neutral[role="note"]'))`, 20000);
-  steps.push({ action: 'batch follow-up banner rendered', reached: Boolean(bannerReady) });
+  // The screen shows the follow-up in its batch banner while no task is chosen
+  // yet, and moves the same words into the chosen task's own follow-up block
+  // once a task is selected. Both are the product's own copy. The check waits
+  // for whichever state the page settles in instead of reading the banner
+  // halfway through that hand-over — that race made this check flaky.
+  const followUpReady = bannerReady || (await waitFor(cdp, `Boolean(document.querySelector('.stg-followup'))`, 20000));
+  steps.push({ action: 'batch follow-up shown (banner or task block)', reached: Boolean(followUpReady) });
   const triage = await evalJs(cdp, `(() => ({
     pathname: location.pathname,
     search: location.search,
@@ -393,13 +399,22 @@ async function imageOnlyScenario(cdp) {
     banner: (document.querySelector('.di-banner-neutral[role="note"]') || {}).innerText || '',
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   }))()`);
+  // The same follow-up, read from the task block when a task is already chosen.
+  const followUpDetail = await evalJs(cdp, `(() => {
+    const el = document.querySelector('.stg-followup');
+    return el ? el.innerText : '';
+  })()`);
+  const followUpText = triage.banner || followUpDetail;
   check('image-only follow-up: the existing Bronnen beoordelen page opens', arrived && triage.pathname === '/internal/bronnen');
   check('image-only follow-up: the context is kept in the address bar', triage.search.includes('restaurant=9001') && triage.search.includes('reason=image_only'));
   check(
     'image-only follow-up: the page names the reason and the next step in its own words',
-    triage.banner.includes('Vervolg van de batchanalyse:') &&
-      triage.banner.includes('Menu alleen als afbeelding of scan: lees het met AI of met de hand.') &&
-      triage.banner.includes('Lees de afbeelding met AI, kies een andere tekst- of pdf-bron of markeer deze bron als onbruikbaar.'),
+    followUpText.includes(FOLLOW_UP.reason) && followUpText.includes(FOLLOW_UP.nextStep),
+    followUpText.slice(0, 160),
+  );
+  check(
+    'image-only follow-up: the batch banner announces itself when the banner is what shows it',
+    triage.banner === '' || triage.banner.includes('Vervolg van de batchanalyse:'),
     triage.banner.slice(0, 160),
   );
   check('image-only follow-up: no menu status or confirmation is claimed', !triage.text.includes('Bron bevestigd') && !triage.text.includes('Menukaart gevonden'));
