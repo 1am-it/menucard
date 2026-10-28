@@ -45,3 +45,27 @@ the explicit relevant environment authorization; no automatic production use.
 The existing runner has a time/turn limit. This protocol does not raise it,
 resume it, or install a checkpoint hook. Save meaningful authorized work early
 and report actual preservation. Never switch to a paid API without approval.
+
+## Zuinig werken binnen een ronde (Lead-besluit 2026-10-28, eigenaar akkoord)
+
+Elke regel die een commando teruggeeft, gaat bij elke volgende stap opnieuw mee
+naar het model. Een ronde van BE-41 las daardoor 61,7 miljoen tokens in 294
+stappen en stopte met `aborted`. Daarom, in elke ronde:
+
+1. **Commit en push na elke commit** (`git push origin HEAD`). Een afgebroken
+   ronde of een netwerkfout kost dan niets. De runner pusht aan het eind ook
+   zelf, maar vertrouw daar niet op.
+2. **Stille tests.** Tijdens het werk alleen de tests van de bestanden die je
+   aanpast, bijvoorbeeld `node --test src/lib/<bestand>.test.js`. De volledige
+   set één keer aan het eind, stil: `node --test --test-reporter=dot "src/**/*.test.js" "app/**/*.test.js" "ops/**/*.test.js"`
+   (`npm run test:stil`). Die geeft alleen punten en de details van falende
+   tests. Voor de aantallen: dezelfde opdracht zonder `--test-reporter=dot`, met
+   `2>&1 | tail -12`.
+3. **Nooit een bewijsbestand helemaal lezen.** Van `ops/browser/evidence/*.json`
+   alleen de samenvatting, bijvoorbeeld:
+   `node -e "const e=require('./ops/browser/evidence/<bestand>.json');console.log(e.passed,e.error,(e.checks||[]).length)"`.
+4. **Eerst zoeken, dan gericht lezen.** Gebruik `grep -n` en lees daarna alleen
+   het relevante regelbereik. Lees geen bestand van meer dan ±300 regels in zijn
+   geheel. Dat geldt zeker voor `ops/browser/run-*-browser-check.js`.
+5. **Lange uitvoer inkorten.** Een build, een browsercheck of een log altijd met
+   `2>&1 | tail -30`, tenzij je een fout zoekt. Zoek dan met `grep`.
