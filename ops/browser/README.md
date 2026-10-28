@@ -537,6 +537,28 @@ on a local build: not production, not independent review.
 
 Build first (`node node_modules/next/dist/bin/next build`, or `npm run build`).
 
+## BE-39 (#93) — "Klaar voor publicatie" in the concept list
+
+`run-menu-review-browser-check.js` has one extra concept scenario
+(`?fixture=concepts-publication`): five fictional cards, one per publication
+state plus one waiting card. The publication objects in
+`fixtures/menuReviewFixtures.js` are produced by the product's own pure rule
+(`src/lib/menuConceptPublication.js`), never by a hand-written copy, so the
+screen shows what the server would return:
+
+- **Klaar voor publicatie** — every gate green;
+- **Nog niet klaar: Bron nog niet bevestigd.** — the first plain-language reason;
+- **Review-PR gemerged** — with the short line `live na de volgende deploy`;
+- **Vorige poging mislukt** — the real stored export status;
+- a waiting card with only its existing status badge.
+
+The check asserts the second badge, the header line `1 klaar voor publicatie`,
+the merged note and that waiting cards stay unchanged at 1280 and 390 px in
+light and dark, plus the ready/merged detail card. Screenshots
+(`be39-publicatie-*.png`, `be39-detail-1280-light.png`) stay in the git-ignored
+`ops/browser/output/`; only the JSON evidence is committed. This is fixture
+evidence on a local machine: not real acceptance and not independent review.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

@@ -264,7 +264,7 @@ async function imageOnlyScenario(cdp) {
   await openRoute(
     cdp,
     `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=light`,
-    `document.body.innerText.includes('Menu alleen als afbeelding � lees met AI of met de hand')`,
+    `document.body.innerText.includes('Menu alleen als afbeelding � lees met AI of met de hand')`,
   );
   const snapshot = await evalJs(cdp, `(() => {
     const text = document.body.innerText;
@@ -278,7 +278,7 @@ async function imageOnlyScenario(cdp) {
       theme: document.documentElement.getAttribute('data-theme'),
     };
   })()`);
-  check('image-only: the honest image/scan status is shown', snapshot.text.includes('Menu alleen als afbeelding � lees met AI of met de hand'));
+  check('image-only: the honest image/scan status is shown', snapshot.text.includes('Menu alleen als afbeelding � lees met AI of met de hand'));
   check('image-only: no successful extraction is claimed', !snapshot.text.includes('Menukaart gevonden') && !snapshot.text.includes('Bron bevestigd'));
   check('image-only: the reason stays visible', snapshot.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
   check('image-only: no confirm action is offered', !snapshot.hasConfirm);
@@ -295,14 +295,14 @@ async function imageOnlyScenario(cdp) {
   await openRoute(
     cdp,
     `${BATCH_URL}?fixture=image_only&${BATCH_QUERY}&item=1&theme=dark`,
-    `document.body.innerText.includes('Menu alleen als afbeelding � lees met AI of met de hand')`,
+    `document.body.innerText.includes('Menu alleen als afbeelding � lees met AI of met de hand')`,
   );
   const small = await evalJs(cdp, `(() => ({
     text: document.body.innerText,
     theme: document.documentElement.getAttribute('data-theme'),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   }))()`);
-  check('image-only: the status and reason also hold at 320 px/dark', small.text.includes('Menu alleen als afbeelding � lees met AI of met de hand') && small.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
+  check('image-only: the status and reason also hold at 320 px/dark', small.text.includes('Menu alleen als afbeelding � lees met AI of met de hand') && small.text.includes('beeldanalyse/OCR is niet geconfigureerd'));
   check('image-only: no horizontal overflow at 320 px', small.overflow <= 0, `overflow=${small.overflow}`);
   check('image-only: dark theme is active at 320 px', small.theme === 'dark');
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'menu-review-image-only-320-dark.png'));
@@ -1073,6 +1073,95 @@ async function conceptListResponsiveScenario(cdp, width, theme) {
   check(`concept list responsive ${width}px/${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
   check(`concept list responsive ${width}px/${theme}: all rows remain readable`, snapshot.text.includes(fixtures.CONCEPT_RESTAURANTS.v1) && snapshot.text.includes('v2 · alleen-lezen') && snapshot.text.includes('onbekende versie · alleen-lezen'));
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, `concept-list-${width}-${theme}.png`));
+}
+
+// ─── BE-39 "Klaar voor publicatie" in the concept list ──────────────────────
+// The fixture's publication objects are built by the same pure rule the server
+// uses. These checks assert the visible second badge, the header count, the
+// merged note and the responsive/theme behaviour at 1280 and 390 px. Fixture
+// evidence on a local machine, not real or independent acceptance.
+const publicationThemes = {};
+
+async function conceptPublicationScenario(cdp) {
+  const names = fixtures.PUBLICATION_RESTAURANTS;
+  const ids = fixtures.PUBLICATION_IDS;
+  for (const [width, theme] of [[1280, 'light'], [1280, 'dark'], [390, 'light'], [390, 'dark']]) {
+    await setViewport(cdp, width, 900);
+    await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme }), `document.body.innerText.includes(${JSON.stringify(names.ready)})`);
+    const snapshot = await evalJs(cdp, `(() => {
+      const items = [...document.querySelectorAll('.mcr-item')].map((item) => ({
+        text: item.innerText,
+        badges: [...item.querySelectorAll('.status-badge')].map((badge) => (badge.innerText || '').trim()),
+      }));
+      return {
+        items,
+        readyCount: (document.querySelector('.mcr-ready-count') || {}).innerText || '',
+        theme: document.documentElement.getAttribute('data-theme'),
+        bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim().toLowerCase(),
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    })()`);
+    publicationThemes[theme] = snapshot.bg;
+    const card = (name) => snapshot.items.find((item) => item.text.includes(name)) || { badges: [], text: '' };
+    const ready = card(names.ready);
+    const missing = card(names.missingSource);
+    const merged = card(names.merged);
+    const failed = card(names.failed);
+    const waiting = card(names.waiting);
+    check(
+      `be39 ${width}-${theme}: an approved card gets exactly one second badge, "Klaar voor publicatie"`,
+      ready.badges.length === 2 && ready.badges[0] === 'Intern goedgekeurd' && ready.badges[1] === 'Klaar voor publicatie',
+      JSON.stringify(ready.badges),
+    );
+    check(
+      `be39 ${width}-${theme}: a missing source gives the first reason in plain language`,
+      missing.badges.length === 2 && missing.badges[1] === 'Nog niet klaar: Bron nog niet bevestigd.',
+      JSON.stringify(missing.badges),
+    );
+    check(
+      `be39 ${width}-${theme}: an existing export shows its real status, never "Klaar voor publicatie"`,
+      merged.badges[1] === 'Review-PR gemerged' && failed.badges[1] === 'Vorige poging mislukt' && !merged.text.includes('Klaar voor publicatie') && !failed.text.includes('Klaar voor publicatie'),
+      JSON.stringify([merged.badges, failed.badges]),
+    );
+    check(`be39 ${width}-${theme}: merged is not live, the next deploy is`, merged.text.includes('live na de volgende deploy'), merged.text.slice(0, 220));
+    check(
+      `be39 ${width}-${theme}: a waiting card keeps its single status badge`,
+      waiting.badges.length === 1 && waiting.badges[0] === 'Wacht op beoordeling',
+      JSON.stringify(waiting.badges),
+    );
+    check(`be39 ${width}-${theme}: the header counts only the ready cards`, snapshot.readyCount === '1 klaar voor publicatie', snapshot.readyCount);
+    check(`be39 ${width}-${theme}: requested theme is active`, snapshot.theme === theme, snapshot.theme);
+    check(`be39 ${width}-${theme}: no horizontal overflow`, snapshot.overflow <= 0, `overflow=${snapshot.overflow}`);
+    screenshotFiles.push(await screenshot(cdp, OUT_DIR, `be39-publicatie-${width}-${theme}.png`));
+  }
+  check(
+    'be39 light and dark resolve to different background tokens',
+    publicationThemes.light !== publicationThemes.dark,
+    `${publicationThemes.light} / ${publicationThemes.dark}`,
+  );
+
+  // The detail of the same cards comes to the same conclusion: the ready card
+  // may start the review-PR, the merged card names the deploy instead of a live menu.
+  await setViewport(cdp, 1280, 900);
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light', id: ids.ready }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+  const detail = await evalJs(cdp, `(() => {
+    const button = [...document.querySelectorAll('button')].find((b) => (b.innerText || '').includes('Maak review-PR'));
+    return { text: document.body.innerText, button: button ? { ariaDisabled: button.getAttribute('aria-disabled') } : null };
+  })()`);
+  check(
+    'be39 concept detail: the ready card can start the review-PR on the same rule',
+    Boolean(detail.button) && detail.button.ariaDisabled !== 'true' && detail.text.includes('Klaar voor publicatie') === false,
+    JSON.stringify(detail.button),
+  );
+  screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'be39-detail-1280-light.png'));
+
+  await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light', id: ids.merged }), `document.body.innerText.includes('Beoordeel menuconcept')`);
+  const mergedDetail = await bodyText(cdp);
+  check(
+    'be39 concept detail: a merged review-PR is not presented as live',
+    mergedDetail.includes('Review-PR gemerged') && mergedDetail.includes('live na de volgende deploy'),
+    mergedDetail.slice(0, 300),
+  );
 }
 
 async function conceptKeyboardScenario(cdp) {
@@ -2605,6 +2694,8 @@ async function main() {
     }
     check('concept light and dark resolve to different background tokens', conceptThemeBackgrounds.light !== conceptThemeBackgrounds.dark, `${conceptThemeBackgrounds.light} / ${conceptThemeBackgrounds.dark}`);
     await conceptKeyboardScenario(cdp);
+    // BE-39 (#93): "Klaar voor publicatie" as the second badge in the list.
+    await conceptPublicationScenario(cdp);
     await networkGuardScenario(cdp, networkGuard);
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');

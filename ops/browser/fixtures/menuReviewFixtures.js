@@ -17,6 +17,8 @@ const {
 
 const { buildTriageView } = require('../../../src/lib/sourceTriage');
 const { buildExtractionResult } = require('../../../src/lib/menuExtractionResult');
+// BE-39: the publication fixtures use the product's own pure rule.
+const { derivePublicationReadiness } = require('../../../src/lib/menuConceptPublication');
 const {
   buildProductReviewView,
   summarizeProductMenu,
@@ -668,7 +670,7 @@ function blockedReason(info) {
   };
 }
 
-function conceptDetail({ id, key, name, captured, info, product, status }) {
+function conceptDetail({ id, key, name, captured, info, product, status, githubConfigured = false, publication = null, exportInfo = null }) {
   const blocked = Boolean(info && info.kind !== 'v1');
   const createdAt = CONCEPT_CREATED[key];
   return {
@@ -698,11 +700,12 @@ function conceptDetail({ id, key, name, captured, info, product, status }) {
     source: { confirmed: true, blocked: null },
     history: [{ id, version: 1, createdAt, createdBySelf: true, basedOnVersion: null, status, reviews: [] }],
     rejectReasons: { wrong_menu: 'Verkeerde menukaart', broken_source: 'Bron onbruikbaar', other: 'Anders' },
-    export: null,
+    export: exportInfo,
     preview: blocked
       ? { concept: null, current: [], blocked: info.reason, blockers: info.view ? info.view.blockers : [] }
       : v1Preview,
-    githubConfigured: false,
+    githubConfigured,
+    publication,
   };
 }
 
@@ -778,8 +781,113 @@ const conceptDetails = {
   [CONCEPT_IDS.empty]: conceptDetail({ id: CONCEPT_IDS.empty, key: 'empty', name: CONCEPT_RESTAURANTS.empty, captured: emptyCaptured, info: emptyInfo, product: emptyInfo.view, status: 'waiting' }),
 };
 
+// ─── BE-39 "Klaar voor publicatie" ──────────────────────────────────────────
+// Fictional approved cards, one per publication state, plus one waiting card
+// that must keep its single status badge. Every publication object is built by
+// the product's own pure rule (src/lib/menuConceptPublication.js); the fixture
+// never hand-writes a label the server would not return.
+const PUBLICATION_IDS = {
+  ready: 'publicatie-klaar-0101',
+  missingSource: 'publicatie-bron-0102',
+  merged: 'publicatie-gemerged-0103',
+  failed: 'publicatie-mislukt-0104',
+  waiting: 'publicatie-wacht-0105',
+};
+const PUBLICATION_RESTAURANTS = {
+  ready: 'Fictief Klaar',
+  missingSource: 'Fictief Nog Niet Klaar',
+  merged: 'Fictief Gemerged',
+  failed: 'Fictief Mislukt',
+  waiting: 'Fictief Wacht',
+};
+
+const publicationInput = {
+  isLatest: true,
+  status: 'approved',
+  blockers: [],
+  source: { confirmed: true, blocked: null },
+  rejectedBefore: false,
+  githubConfigured: true,
+  exportStatus: null,
+};
+const publishable = (overrides = {}) => derivePublicationReadiness({ ...publicationInput, ...overrides });
+
+function publicationRow({ id, name, createdAt, publication }) {
+  return {
+    id,
+    restaurantId: '9002',
+    restaurantName: name,
+    menuContext: 'lunch',
+    version: 4,
+    sourceUrl: SOURCE_URL,
+    createdAt,
+    createdBySelf: true,
+    status: publication ? 'approved' : 'waiting',
+    dishCount: 3,
+    attentionCount: 1,
+    blockerCount: 0,
+    readOnly: false,
+    schemaVersion: null,
+    blockedReason: null,
+    publication,
+  };
+}
+
+const publicationList = {
+  items: [
+    publicationRow({ id: PUBLICATION_IDS.ready, name: PUBLICATION_RESTAURANTS.ready, createdAt: '2026-10-28T09:00:00.000Z', publication: publishable() }),
+    publicationRow({ id: PUBLICATION_IDS.missingSource, name: PUBLICATION_RESTAURANTS.missingSource, createdAt: '2026-10-28T09:05:00.000Z', publication: publishable({ source: { confirmed: false, blocked: null } }) }),
+    publicationRow({ id: PUBLICATION_IDS.merged, name: PUBLICATION_RESTAURANTS.merged, createdAt: '2026-10-28T09:10:00.000Z', publication: publishable({ exportStatus: 'merged' }) }),
+    publicationRow({ id: PUBLICATION_IDS.failed, name: PUBLICATION_RESTAURANTS.failed, createdAt: '2026-10-28T09:15:00.000Z', publication: publishable({ exportStatus: 'failed' }) }),
+    publicationRow({ id: PUBLICATION_IDS.waiting, name: PUBLICATION_RESTAURANTS.waiting, createdAt: '2026-10-28T09:20:00.000Z', publication: null }),
+  ],
+};
+
+const mergedExport = {
+  id: 91,
+  status: 'merged',
+  prUrl: 'https://github.invalid/fictief/pull/91',
+  prNumber: 91,
+  branch: 'menu/fictief-gemerged',
+  commitSha: 'abcdef1234567890',
+  contentHash: 'fictief',
+  exportHash: 'fictief-export',
+  createdAt: '2026-10-28T09:30:00.000Z',
+  errorReason: null,
+};
+
+const publicationDetails = {
+  [PUBLICATION_IDS.ready]: conceptDetail({
+    id: PUBLICATION_IDS.ready,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.ready,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    publication: publishable(),
+  }),
+  [PUBLICATION_IDS.merged]: conceptDetail({
+    id: PUBLICATION_IDS.merged,
+    key: 'v1',
+    name: PUBLICATION_RESTAURANTS.merged,
+    captured: v1Captured,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'approved',
+    githubConfigured: true,
+    publication: publishable({ exportStatus: 'merged' }),
+    exportInfo: mergedExport,
+  }),
+};
+
 const conceptScenarios = {
   concepts: { list: conceptList, detail: conceptDetails },
+  // BE-39: one approved card per publication state plus a waiting card. The
+  // publication object comes from the product's own pure rule, so the
+  // screenshot shows exactly what the server would return.
+  'concepts-publication': { list: publicationList, detail: publicationDetails },
   'concepts-empty': { list: { items: [] }, detail: {} },
   'concepts-error': {
     listStatus: 500,
@@ -814,6 +922,10 @@ module.exports = {
   v2View,
   conceptList,
   conceptDetails,
+  PUBLICATION_IDS,
+  PUBLICATION_RESTAURANTS,
+  publicationList,
+  publicationDetails,
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),
