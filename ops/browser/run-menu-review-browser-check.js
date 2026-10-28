@@ -1118,11 +1118,22 @@ async function conceptPublicationScenario(cdp) {
       const luminance = (c) => 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
       const ratio = (a, b) => { const la = luminance(a); const lb = luminance(b); const hi = Math.max(la, lb); const lo = Math.min(la, lb); return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100; };
       const items = [...document.querySelectorAll('.mcr-item')].map((item) => {
-        const rect = item.getBoundingClientRect();
         const next = item.querySelector('.mcr-next');
         const cardLink = item.querySelector('.mcr-item-link');
         const nextRect = next ? next.getBoundingClientRect() : null;
+        // The whole card is measured in view: a card below the fold cannot be
+        // hit-tested with elementFromPoint, so it is scrolled into view first.
+        item.scrollIntoView({ block: 'center', behavior: 'instant' });
+        const rect = item.getBoundingClientRect();
         const hitTarget = document.elementFromPoint(rect.left + 8, rect.top + 8);
+        // A screen-reader-only suffix ("(opent in een nieuw tabblad)") is not
+        // part of the visible label.
+        const visibleText = (element) => {
+          if (!element) return '';
+          const clone = element.cloneNode(true);
+          for (const hidden of clone.querySelectorAll('.bta-sr-only')) hidden.remove();
+          return (clone.textContent || '').replace(/\\s+/g, ' ').trim();
+        };
         const cardBackground = parseColor(getComputedStyle(item).backgroundColor);
         const badges = [...item.querySelectorAll('.status-badge')].map((badge) => {
           const style = getComputedStyle(badge);
@@ -1139,11 +1150,12 @@ async function conceptPublicationScenario(cdp) {
           badges,
           linkCount: item.querySelectorAll('a').length,
           cardHref: cardLink ? cardLink.getAttribute('href') : null,
+          cardName: cardLink ? cardLink.getAttribute('aria-label') : null,
           cardWidth: Math.round(rect.width),
           wholeCardHitsLink: Boolean(cardLink) && Boolean(hitTarget) && (hitTarget === cardLink || cardLink.contains(hitTarget) || (hitTarget.closest && hitTarget.closest('.mcr-item-link') === cardLink)),
           next: next ? {
             tag: next.tagName,
-            text: (next.innerText || '').trim(),
+            text: visibleText(next),
             href: next.getAttribute('href'),
             target: next.getAttribute('target'),
             rel: next.getAttribute('rel'),
@@ -1152,6 +1164,7 @@ async function conceptPublicationScenario(cdp) {
           } : null,
         };
       });
+      window.scrollTo(0, 0);
       return {
         items,
         readyCount: (document.querySelector('.mcr-ready-count') || {}).innerText || '',
@@ -1259,13 +1272,25 @@ async function conceptPublicationScenario(cdp) {
       JSON.stringify(wrongStep),
     );
 
+    // The accessible name of the card link names the same step.
+    const wrongName = expected
+      .filter((entry) => {
+        const rendered = card(entry.item.restaurantName);
+        const got = rendered.cardName === null || rendered.cardName === undefined ? entry.item.restaurantName : rendered.cardName;
+        const wantName = entry.step.plainLabel ? `${entry.item.restaurantName} — ${entry.step.plainLabel}` : entry.item.restaurantName;
+        return got !== wantName;
+      })
+      .map((entry) => entry.item.restaurantName);
+    check(`be41 ${width}-${theme}: the card link names its next step for a screen reader`, wrongName.length === 0, JSON.stringify(wrongName));
+
     // BE-41 (criterion 5): on the phone the button is full width under the
     // labels and at least 44 px high; nothing scrolls sideways.
     if (width <= 720) {
       const sized = snapshot.items.filter((item) => item.next).map((item) => ({ card: item.text.split('\n')[0], ...item.next, cardWidth: item.cardWidth }));
       check(
         `be41 ${width}-${theme}: the next step is full width and at least 44 px high`,
-        sized.length > 0 && sized.every((entry) => entry.height >= 44 && entry.width >= entry.cardWidth - 28),
+        // Card width minus its own 14 px padding and 1 px border on both sides.
+        sized.length > 0 && sized.every((entry) => entry.height >= 44 && entry.width >= entry.cardWidth - 32),
         JSON.stringify(sized),
       );
     }
@@ -1337,7 +1362,7 @@ async function conceptPublicationScenario(cdp) {
   })()`;
 
   await clickCard(names.blockers);
-  const blockersArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.blockers}`)} && Boolean(document.querySelector('[role="tab"][aria-selected="true"]'))`, 30000);
+  const blockersArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.blockers}`)} && Boolean([...document.querySelectorAll('[role="tab"][aria-selected="true"]')].find((el) => el.innerText.trim() === 'Wijzigingen'))`, 30000);
   const blockersTab = await evalJs(cdp, tabState);
   check(
     `be41 click: "${labelOf(names.blockers)}" opens the Wijzigingen tab of that concept`,
@@ -1348,7 +1373,7 @@ async function conceptPublicationScenario(cdp) {
 
   await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light' }), `document.body.innerText.includes(${JSON.stringify(names.missingSource)})`);
   await clickCard(names.missingSource);
-  const sourceArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.missingSource}`)} && Boolean(document.querySelector('[role="tab"][aria-selected="true"]'))`, 30000);
+  const sourceArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.missingSource}`)} && Boolean([...document.querySelectorAll('[role="tab"][aria-selected="true"]')].find((el) => el.innerText.trim() === 'Bron'))`, 30000);
   const sourceTab = await evalJs(cdp, tabState);
   check(
     `be41 click: "${labelOf(names.missingSource)}" opens the Bron tab of that concept`,
@@ -1359,7 +1384,7 @@ async function conceptPublicationScenario(cdp) {
   await openRoute(cdp, conceptUrl({ fixture: 'concepts-publication', theme: 'light' }), `document.body.innerText.includes(${JSON.stringify(names.ready)})`);
   const violationsBefore = await evalJs(cdp, `(window.__FIXTURE_NETWORK_VIOLATIONS__ || []).filter((entry) => entry.phase === 'app').length`);
   await clickCard(names.ready);
-  const readyArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.ready}`)} && location.hash === '#mcr-publication'`, 30000);
+  const readyArrived = await waitFor(cdp, `location.pathname === ${JSON.stringify(`/internal/menu-concepts/${ids.ready}`)} && location.hash === '#mcr-publication' && (() => { const block = document.getElementById('mcr-publication'); if (!block) return false; const rect = block.getBoundingClientRect(); return rect.top < window.innerHeight && rect.bottom > 0; })()`, 30000);
   const publicationView = await evalJs(cdp, `(() => {
     const block = document.getElementById('mcr-publication');
     if (!block) return null;

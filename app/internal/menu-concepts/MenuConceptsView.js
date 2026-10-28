@@ -192,9 +192,15 @@ function ConceptItem({ item }) {
     <li className="mcr-item">
       <div className="mcr-item-head">
         <h3 className="mcr-item-title">
-          <a className="mcr-item-link" href={href}>
+          {/* The card is one link. Its accessible name names the step as well
+              ("Fictief Klaar — Beoordelen"), so a screen reader hears where the
+              card goes; the visible text stays the restaurant name. */}
+          <a
+            className="mcr-item-link"
+            href={href}
+            aria-label={step && step.plainLabel ? `${item.restaurantName} — ${step.plainLabel}` : undefined}
+          >
             {item.restaurantName}
-            {step && step.plainLabel && <span className="bta-sr-only"> — {step.plainLabel}</span>}
           </a>
         </h3>
         <div className="mcr-item-badges">

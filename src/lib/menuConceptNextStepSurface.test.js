@@ -52,7 +52,9 @@ test('every card is one link with a visible focus ring; only the review-PR is a 
   // NextStepButton and is the one allowed second link.
   assert.equal((CARD_VIEW.match(/<a\b/g) || []).length, 1, 'the card itself has exactly one <a>');
   assert.equal((BUTTON_VIEW.match(/<a\b/g) || []).length, 1, 'the button has at most one <a>');
-  assert.match(VIEW, /<a className="mcr-item-link" href=\{href\}>/);
+  // The link text stays the restaurant name (the card is one link, not a
+  // sentence); its accessible name adds the step the card really goes to.
+  assert.match(VIEW, /<a\n            className="mcr-item-link"\n            href=\{href\}\n            aria-label=\{step && step\.plainLabel \? `\$\{item\.restaurantName\} — \$\{step\.plainLabel\}` : undefined\}\n          >\n            \{item\.restaurantName\}/);
   assert.match(CSS, /\.mcr-item \{ display: grid; [^}]*position: relative; \}/);
   assert.match(CSS, /\.mcr-item-link::after \{ content: ""; position: absolute; inset: 0;/);
   assert.match(CSS, /\.mcr-item-link:focus-visible \{ outline: 2px solid var\(--border-focus\); outline-offset: 2px;/);
