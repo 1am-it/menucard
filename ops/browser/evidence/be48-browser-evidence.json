@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T21:09:21.553Z",
+  "generatedAt": "2026-10-29T21:19:33.894Z",
   "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
   "contract": "#112 BE-48 (inloggen met tweede stap, wachtwoord vergeten)",
   "app": "http://localhost:3141",
@@ -10,7 +10,7 @@
       "checks": 21,
       "passed": 21,
       "failed": 0,
-      "durationMs": 5117,
+      "durationMs": 5582,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 3199,
+      "durationMs": 3957,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 12,
       "passed": 12,
       "failed": 0,
-      "durationMs": 6950,
+      "durationMs": 8225,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 3964,
+      "durationMs": 4893,
       "error": null
     },
     {
@@ -42,7 +42,7 @@
       "checks": 2,
       "passed": 2,
       "failed": 0,
-      "durationMs": 3562,
+      "durationMs": 4323,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "checks": 17,
       "passed": 17,
       "failed": 0,
-      "durationMs": 4158,
+      "durationMs": 4507,
       "error": null
     },
     {
@@ -58,7 +58,7 @@
       "checks": 11,
       "passed": 11,
       "failed": 0,
-      "durationMs": 3967,
+      "durationMs": 4722,
       "error": null
     }
   ],
@@ -451,7 +451,7 @@
     {
       "name": "be48-login-licht-1280.png",
       "file": "be48-login-licht-1280.png",
-      "sha256": "3b8b53e05c558cd5d585c2fd1246d30d96b50a7605ea12294228dc1d79b08288",
+      "sha256": "ebc2e23675c7a83cc55c3cc616ba3594494e310ed791e67fb6220f45f430035c",
       "width": 756,
       "height": 488
     },
