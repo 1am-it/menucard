@@ -532,6 +532,11 @@ function cardClipJs() {
 
 const TRANSPARENT = ['rgba(0, 0, 0, 0)', 'transparent'];
 
+/** De korte openingsanimatie laten aflopen vóór een opname. */
+function settle(ms = 300) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ── 1. De kaart: rustiger, leesbaar, twee icoonknoppen rechtsonder ──────────
 async function kaartScenario(cdp) {
   for (const theme of THEMES) {
@@ -610,6 +615,7 @@ async function eersteKeerScenario(cdp) {
   check('eerste keer: "Liever altijd het telefoonmenu" is er ook, als checkbox', Boolean(phoneInput) && phoneInput.type === 'checkbox', JSON.stringify(phoneInput));
   check('eerste keer: de checkboxen zijn minstens 20 px', methodInputs.every((input) => input.box.width >= 20 && input.box.height >= 20), JSON.stringify(methodInputs.map((input) => input.box)));
   check('eerste keer: zonder keuze kan er niets bewaard worden', sheet.saveDisabled === true, JSON.stringify({ label: sheet.saveLabel, disabled: sheet.saveDisabled }));
+  await settle();
   await shot(cdp, OUT_DIR, `be49-blad-${width}-${theme}.png`, { scenario: 'eerste-keer', state: 'blad', theme, width });
 
   // Maximaal 3: na drie keuzes zijn de andere twee uitgeschakeld en telt een
@@ -636,6 +642,7 @@ async function eersteKeerScenario(cdp) {
   check('eerste keer: het menu zegt bij welk gerecht het hoort', menu.title === `Deel ${DISH_NAME}`, menu.title);
   const stored = await evalJs(cdp, PREFERENCE_READ);
   check('eerste keer: de voorkeur staat alleen in localStorage', JSON.stringify(stored) === JSON.stringify({ methods: ['whatsapp', 'copy'] }), JSON.stringify(stored));
+  await settle();
   await shot(cdp, OUT_DIR, `be49-menu-${width}-${theme}.png`, { scenario: 'eerste-keer', state: 'menu', theme, width });
 
   // Eén tik op WhatsApp: de juiste deellink, de teller, en het menu dicht.
@@ -847,6 +854,7 @@ async function instellingenScenario(cdp) {
     const checked = (sheet.inputs || []).filter((input) => input.name === 'deelmanier' && input.checked).map((input) => input.value);
     check(`instellingen (${label}): hetzelfde blad opent, met de huidige favorieten`, opened.observed && sheet.title === 'Delen via' && checked.join(',') === 'whatsapp,copy', JSON.stringify({ title: sheet.title, checked }));
     check(`instellingen (${label}): er is een knop "Wissen"`, (sheet.buttons || []).includes('Wissen'), JSON.stringify(sheet.buttons));
+    await settle();
     await shot(cdp, OUT_DIR, `be49-instellen-${width}-${theme}.png`, { scenario: 'instellingen', theme, width });
 
     // Wijzigen: "Link kopiëren" eraf, "E-mail" erbij.
