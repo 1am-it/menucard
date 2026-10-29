@@ -5429,7 +5429,7 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 .tellers-list { display: none; }
 .tellers-sort-choice { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .tellers-sort-choice label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
-.tellers-sort-choice .di-select { flex: 1 1 auto; }
+.tellers-sort-choice .di-select { flex: 1 1 auto; min-height: 44px; }
 .tellers-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .tellers-card {
   background: var(--bg-card);
