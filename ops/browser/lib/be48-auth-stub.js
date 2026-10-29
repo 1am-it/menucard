@@ -20,6 +20,9 @@ const DEFAULT_SETTINGS = {
   email: 'medewerker@example.invalid',
   password: 'goed-wachtwoord',
   totpCode: '123456',
+  // BE-48: the code the claim's e-mail contains. Deliberately different from
+  // `totpCode`, so a claim code can never pass for an authenticator code.
+  emailCode: '654321',
   factorId: 'factor-fixture',
   roles: [{ role: 'internal', restaurant_id: null }],
   theme: 'dark',
@@ -31,6 +34,7 @@ const DEFAULT_SETTINGS = {
  * The settings the stub runs with, merged over the defaults:
  * - `email` / `password` — the one fictional account that can sign in;
  * - `totpCode` — the one fictional code the authenticator app shows;
+ * - `emailCode` — the one fictional code an e-mail contains (claim, resend);
  * - `roles` — the fictional `staff_roles` rows (`[{ role: 'internal' }]`);
  * - `factors` — factors the account already has (empty = link an app first);
  * - `theme` — `'light'` or `'dark'`.
@@ -44,6 +48,7 @@ function be48Settings(options = {}) {
   settings.theme = settings.theme === 'light' ? 'light' : 'dark';
   if (!Array.isArray(settings.roles)) settings.roles = [];
   if (!Array.isArray(settings.factors)) settings.factors = [];
+  if (typeof settings.emailCode !== 'string' || !settings.emailCode) settings.emailCode = DEFAULT_SETTINGS.emailCode;
   return settings;
 }
 

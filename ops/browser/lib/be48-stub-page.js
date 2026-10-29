@@ -23,8 +23,12 @@
 function installBe48AuthStub(settings) {
   const calls = [];
   const violations = [];
+  const otpRequests = [];
   let assurance = 'aal1';
   let challengeCount = 0;
+  // The address whose e-mail code was just verified; the claim signs in with
+  // the address the visitor typed, not with the fictional staff account.
+  let verifiedEmail = null;
 
   function base64url(value) {
     return btoa(value).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -68,7 +72,7 @@ function installBe48AuthStub(settings) {
       id: 'fixture-user',
       aud: 'authenticated',
       role: 'authenticated',
-      email: settings.email,
+      email: verifiedEmail || settings.email,
       factors: settings.factors,
     };
   }
@@ -90,7 +94,7 @@ function installBe48AuthStub(settings) {
     });
   }
 
-  function appResponse(url, method) {
+  function appResponse(url, method, body) {
     const authorized = assurance === 'aal2' || !needsSecondStep();
     const known =
       url.pathname === '/api/internal/v1/me' ||
@@ -110,6 +114,31 @@ function installBe48AuthStub(settings) {
     }
     if (method === 'GET' && known) {
       return jsonResponse({ error: 'Tweede inlogstap vereist', reason: 'aal2_required' }, 403);
+    }
+    // PLATFORM-07 / BE-48: the public claim routes. Any signed-in visitor may use
+    // them (no staff role, no second step), so the claim scenario proves the
+    // claim flow and not the moderation guard.
+    if (method === 'GET' && url.pathname === '/api/claims/mine') {
+      return jsonResponse({ claims: [] });
+    }
+    if (method === 'POST' && url.pathname === '/api/claims') {
+      let restaurantId = null;
+      try {
+        restaurantId = (JSON.parse(body || '{}') || {}).restaurantId || null;
+      } catch (error) {
+        restaurantId = null;
+      }
+      return jsonResponse(
+        {
+          claim: {
+            id: 'claim-fixture',
+            restaurant_id: restaurantId,
+            status: 'pending',
+            created_at: '2026-10-29T10:00:00.000Z',
+          },
+        },
+        201,
+      );
     }
     violations.push({ kind: 'unknown_api_route', method: method, url: url.href });
     return jsonResponse({ error: 'fixture_unknown_api_route' }, 500);
@@ -170,11 +199,24 @@ function installBe48AuthStub(settings) {
       }
     }
     if (path === '/auth/v1/recover' && method === 'POST') return jsonResponse({});
+    // BE-48: `signInWithOtp` (the claim's code, and the resend) posts here.
+    // GoTrue answers 200 for a known and an unknown address alike, so this must
+    // not reveal whether the address exists either.
+    if (path === '/auth/v1/otp' && method === 'POST') {
+      const params = parseBody(body);
+      otpRequests.push(typeof params.email === 'string' ? params.email : null);
+      return jsonResponse({});
+    }
     if (path === '/auth/v1/verify' && method === 'POST') {
       const params = parseBody(body);
-      if (params.type !== 'recovery' || params.token !== settings.totpCode) {
+      // One endpoint, three token types: the app's claim uses 'email', its
+      // forgot-password screen 'recovery', and anything else is refused.
+      const expected =
+        params.type === 'email' ? settings.emailCode : params.type === 'recovery' ? settings.totpCode : null;
+      if (expected === null || params.token !== expected) {
         return jsonResponse({ error_code: 'otp_expired', msg: 'Token has expired or is invalid' }, 403);
       }
+      if (params.type === 'email' && typeof params.email === 'string') verifiedEmail = params.email;
       assurance = 'aal1';
       return jsonResponse(session());
     }
@@ -190,7 +232,7 @@ function installBe48AuthStub(settings) {
     const body = init && typeof init.body === 'string' ? init.body : null;
     calls.push({ method: method, path: url.pathname, url: url.href });
     if (url.origin === settings.authOrigin) return authResponse(url, method, body);
-    if (url.origin === window.location.origin) return appResponse(url, method);
+    if (url.origin === window.location.origin) return appResponse(url, method, body);
     violations.push({ kind: 'external_origin', method: method, url: url.href });
     throw new TypeError('fixture_network_blocked: ' + url.href);
   };
@@ -205,6 +247,7 @@ function installBe48AuthStub(settings) {
     settings: settings,
     calls: calls,
     violations: violations,
+    otpRequests: otpRequests,
     assurance: function () {
       return assurance;
     },

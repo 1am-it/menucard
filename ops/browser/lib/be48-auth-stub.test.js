@@ -40,6 +40,11 @@ test('be48Settings: the defaults are a verified internal account without a linke
   assert.equal(DEFAULT_SETTINGS.authOrigin, 'http://127.0.0.1:9');
   assert.deepEqual(DEFAULT_SETTINGS.roles, [{ role: 'internal', restaurant_id: null }]);
   assert.deepEqual(DEFAULT_SETTINGS.factors, []);
+  // BE-48: the claim's e-mail code is its own code, never the app's code.
+  assert.equal(DEFAULT_SETTINGS.emailCode, '654321');
+  assert.notEqual(DEFAULT_SETTINGS.emailCode, DEFAULT_SETTINGS.totpCode);
+  assert.equal(be48Settings({ emailCode: '' }).emailCode, DEFAULT_SETTINGS.emailCode);
+  assert.equal(be48Settings({ emailCode: '000111' }).emailCode, '000111');
 
   const light = be48Settings({ theme: 'light' });
   assert.equal(light.theme, 'light');
@@ -254,3 +259,92 @@ test('the stub: the theme is stored for the page and the calls are logged', asyn
     ['GET /api/internal/v1/me'],
   );
 });
+test('the stub: the claim code arrives through /otp and verifies as its own type', async () => {
+  const { fetch, api } = install();
+  const requested = await fetch('http://127.0.0.1:9/auth/v1/otp', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'eigenaar@example.invalid', create_user: true }),
+  });
+  assert.equal(requested.status, 200);
+  // A resend is the same call again; the check counts them.
+  await fetch('http://127.0.0.1:9/auth/v1/otp', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'eigenaar@example.invalid', create_user: true }),
+  });
+  assert.deepEqual(api.otpRequests, ['eigenaar@example.invalid', 'eigenaar@example.invalid']);
+
+  const wrong = await fetch('http://127.0.0.1:9/auth/v1/verify', {
+    method: 'POST',
+    body: 'type=email&token=000000&email=eigenaar%40example.invalid',
+  });
+  assert.equal(wrong.status, 403);
+  assert.equal((await wrong.json()).error_code, 'otp_expired');
+
+  // The authenticator code must never work as an e-mail code, and the other way
+  // round: the two codes are separate.
+  const crossed = await fetch('http://127.0.0.1:9/auth/v1/verify', {
+    method: 'POST',
+    body: 'type=email&token=123456&email=eigenaar%40example.invalid',
+  });
+  assert.equal(crossed.status, 403);
+
+  const right = await fetch('http://127.0.0.1:9/auth/v1/verify', {
+    method: 'POST',
+    body: 'type=email&token=654321&email=eigenaar%40example.invalid',
+  });
+  assert.equal(right.status, 200);
+  assert.equal(jwtPayload((await right.json()).access_token).aal, 'aal1');
+
+  const unknownType = await fetch('http://127.0.0.1:9/auth/v1/verify', {
+    method: 'POST',
+    body: 'type=magiclink&token=654321&email=eigenaar%40example.invalid',
+  });
+  assert.equal(unknownType.status, 403);
+});
+
+test('the stub: the claim routes answer a signed-in visitor without a second step', async () => {
+  const { fetch, api } = install({ roles: [{ role: 'owner', restaurant_id: '6' }] });
+  const mine = await fetch(`${APP}/api/claims/mine?restaurantId=6`, { method: 'GET' });
+  assert.equal(mine.status, 200);
+  assert.deepEqual(await mine.json(), { claims: [] });
+
+  const submitted = await fetch(`${APP}/api/claims`, {
+    method: 'POST',
+    body: JSON.stringify({ restaurantId: '6' }),
+  });
+  assert.equal(submitted.status, 201);
+  const claim = (await submitted.json()).claim;
+  assert.equal(claim.status, 'pending');
+  assert.equal(claim.restaurant_id, '6');
+  assert.deepEqual(api.violations, []);
+});
+
+test('the stub: the SDK sends and verifies a claim code exactly like the page does', async () => {
+  const { createClient } = require('@supabase/supabase-js');
+  const { fetch, api } = install({ roles: [{ role: 'owner', restaurant_id: '6' }] });
+  const supabase = createClient('http://127.0.0.1:9', 'fixture-anon-key-not-a-secret', {
+    global: { fetch },
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+
+  const sent = await supabase.auth.signInWithOtp({
+    email: 'eigenaar@example.invalid',
+    options: { emailRedirectTo: `${APP}/claim/6` },
+  });
+  assert.equal(sent.error, null);
+  assert.deepEqual(api.otpRequests, ['eigenaar@example.invalid']);
+
+  const bad = await supabase.auth.verifyOtp({ email: 'eigenaar@example.invalid', token: '111111', type: 'email' });
+  assert.equal(bad.error.code, 'otp_expired');
+  assert.equal(bad.error.status, 403);
+
+  const good = await supabase.auth.verifyOtp({
+    email: 'eigenaar@example.invalid',
+    token: DEFAULT_SETTINGS.emailCode,
+    type: 'email',
+  });
+  assert.equal(good.error, null);
+  assert.equal(good.data.session.user.email, 'eigenaar@example.invalid');
+  assert.equal(jwtPayload(good.data.session.access_token).aal, 'aal1');
+});
+
