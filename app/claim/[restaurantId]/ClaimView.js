@@ -1,14 +1,31 @@
 'use client'
 
 // PLATFORM-07 — public claim flow. Uses Supabase Auth in the browser
-// strictly for magic-link sign-in/session lookup (src/lib/supabaseBrowser.js)
-// — never for direct data access. All claim data goes through
-// /api/claims/* with the resulting session's access_token, exactly like
-// the internal moderation UI does for /api/internal/v1/....
+// strictly for signing in and looking up the session
+// (src/lib/supabaseBrowser.js) — never for direct data access. All claim data
+// goes through /api/claims/* with the resulting session's access_token, exactly
+// like the internal moderation UI does for /api/internal/v1/....
+//
+// BE-48 (#112) — the claim signs in with a six-digit code from the e-mail:
+//   1. the visitor enters the business e-mail address;
+//   2. Supabase mails a code (`signInWithOtp`); the link in that mail keeps
+//      working until the owner retires it (release plan, step 1);
+//   3. the visitor enters the code (`verifyOtp({ email, token, type: 'email' })`)
+//      — on this device or on another one, which is exactly what a magic link
+//      cannot do reliably (a virus scanner may open the link first);
+//   4. from there the claim is submitted exactly as before.
+// "Nieuwe code sturen" asks for a fresh code and "Ander e-mailadres" returns to
+// step 1. Every decision and every Supabase call lives in the tested
+// src/lib/claimEmailCodeFlow.js; every failure is Dutch through
+// src/lib/authErrors.js and Supabase's own `error.message` is never shown.
+// Each field has a real <label>, the code field is numeric with
+// `autocomplete="one-time-code"`, errors sit in role="alert" and every control
+// uses the shared auth style (>= 44 px, theme tokens only).
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
+import { CLAIM_MESSAGES, requestEmailCode, verifyEmailCode } from '@/src/lib/claimEmailCodeFlow'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
@@ -20,17 +37,23 @@ const STATUS_LABEL = {
   rejected: 'Afgewezen',
 }
 
+// Zonder Supabase-configuratie (bijvoorbeeld een lokale build zonder
+// .env.local) blijft de pagina eerlijk staan in plaats van eindeloos
+// "Laden…" te tonen. Geen credential, geen netwerkcall en geen nieuwe
+// configuratie: alleen een nette melding.
+const CONFIG_ERROR_TEXT =
+  'Inloggen is in deze omgeving niet geconfigureerd. Probeer het later opnieuw of open deze pagina op de echte site.'
+
 export default function ClaimView({ restaurantId, restaurant }) {
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
   const [email, setEmail] = useState('')
-  const [linkSent, setLinkSent] = useState(false)
+  const [code, setCode] = useState('')
+  // The address the code went to; only set while the code screen is showing.
+  const [codeSentTo, setCodeSentTo] = useState(null)
+  const [notice, setNotice] = useState(null)
   const [claim, setClaim] = useState(undefined) // undefined = loading, null = none yet
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  // Zonder Supabase-configuratie (bijvoorbeeld een lokale build zonder
-  // .env.local) blijft de pagina eerlijk staan in plaats van eindeloos
-  // "Laden…" te tonen. Geen credential, geen netwerkcall en geen nieuwe
-  // configuratie: alleen een nette melding.
   const [configError, setConfigError] = useState(false)
 
   useEffect(() => {
@@ -53,23 +76,71 @@ export default function ClaimView({ restaurantId, restaurant }) {
       .catch(() => setClaim(null))
   }, [session, restaurantId])
 
-  async function sendMagicLink(e) {
-    e.preventDefault()
+  // The only place that touches Supabase auth. A build without configuration
+  // throws exactly here, and only here.
+  function browserAuth() {
+    return getSupabaseBrowser().auth
+  }
+
+  // Steps 2 of the flow: ask for a code (first time or again).
+  async function sendCode(isResend) {
     setError(null)
+    setNotice(null)
     setLoading(true)
     try {
-      const supabase = getSupabaseBrowser()
-      const { error: signInError } = await supabase.auth.signInWithOtp({
+      const result = await requestEmailCode(browserAuth(), {
         email,
-        options: { emailRedirectTo: typeof window !== 'undefined' ? window.location.href : undefined },
+        redirectTo: typeof window === 'undefined' ? undefined : window.location.href,
       })
-      if (signInError) {
-        setError(signInError.message)
+      if (!result.ok) {
+        setError(result.message)
         return
       }
-      setLinkSent(true)
+      setCodeSentTo(result.email)
+      setCode('')
+      if (isResend) setNotice(`We hebben een nieuwe code gestuurd naar ${result.email}.`)
     } catch (err) {
-      setError(err.message)
+      // Only getSupabaseBrowser() can throw here; the flow itself never does.
+      setConfigError(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleEmailSubmit(e) {
+    e.preventDefault()
+    await sendCode(false)
+  }
+
+  async function handleResendCode() {
+    await sendCode(true)
+  }
+
+  function handleChangeEmail() {
+    setError(null)
+    setNotice(null)
+    setCode('')
+    setCodeSentTo(null)
+  }
+
+  // Step 3 of the flow: the code from the e-mail, on this device or another one.
+  async function handleCodeSubmit(e) {
+    e.preventDefault()
+    setError(null)
+    setNotice(null)
+    setLoading(true)
+    try {
+      const result = await verifyEmailCode(browserAuth(), { email: codeSentTo || email, code })
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+      // Exactly the same session shape the magic link produced, so the claim
+      // below is unchanged.
+      setSession(result.session)
+      setCode('')
+    } catch (err) {
+      setConfigError(true)
     } finally {
       setLoading(false)
     }
@@ -86,14 +157,29 @@ export default function ClaimView({ restaurantId, restaurant }) {
       })
       const data = await res.json()
       if (!res.ok && !data.alreadyExists) {
-        setError(data.error || 'Aanvraag mislukt')
+        // Our own API's error text is not visitor text: show Dutch, safe text.
+        setError(CLAIM_MESSAGES.submitFailed)
         return
       }
       setClaim(data.claim)
+    } catch (err) {
+      setError(CLAIM_MESSAGES.submitFailed)
     } finally {
       setLoading(false)
     }
   }
+
+  const errorAlert = error ? (
+    <p className="auth-error" id="claim-error" role="alert">
+      {error}
+    </p>
+  ) : null
+
+  const noticeAlert = notice ? (
+    <p className="auth-notice" role="status">
+      {notice}
+    </p>
+  ) : null
 
   return (
     <>
@@ -129,49 +215,110 @@ export default function ClaimView({ restaurantId, restaurant }) {
               {session === undefined && <p className="claim-note">Laden…</p>}
 
               {configError && (
-                <p className="claim-note">
-                  Inloggen is in deze omgeving niet geconfigureerd. Probeer het later opnieuw of open deze pagina op de echte site.
+                <p className="auth-error" id="claim-config-error" role="alert">
+                  {CONFIG_ERROR_TEXT}
                 </p>
               )}
 
-              {session === null && !linkSent && !configError && (
-                <form onSubmit={sendMagicLink} className="claim-form">
+              {session === null && !codeSentTo && !configError && (
+                <form onSubmit={handleEmailSubmit} className="auth-form" noValidate>
                   <p className="claim-note">
-                    Vul je zakelijke e-mailadres in. We sturen een inlogkoppeling — daarmee bevestig je dat je toegang hebt
-                    tot dit e-mailadres.
+                    Vul je zakelijke e-mailadres in. Je krijgt een code van zes cijfers per e-mail; daarmee bewijs je
+                    dat je toegang hebt tot dit e-mailadres.
                   </p>
-                  <input
-                    type="email"
-                    className="claim-input"
-                    placeholder="jij@jouwrestaurant.nl"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  {error && <div className="claim-error">{error}</div>}
-                  <button type="submit" disabled={loading} className="claim-submit">
-                    <Emoji glyph="📧" /> {loading ? 'Bezig…' : 'Stuur inlogkoppeling'}
+                  <div className="auth-field">
+                    <label className="auth-label" htmlFor="claim-email">
+                      E-mailadres
+                    </label>
+                    <input
+                      id="claim-email"
+                      className="auth-input"
+                      type="email"
+                      name="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                      aria-describedby={error ? 'claim-error' : undefined}
+                      aria-invalid={error ? 'true' : undefined}
+                      required
+                    />
+                  </div>
+                  {errorAlert}
+                  <button type="submit" className="auth-submit" disabled={loading}>
+                    {loading ? 'Bezig met versturen…' : 'Stuur code'}
                   </button>
                 </form>
               )}
 
-              {session === null && linkSent && (
-                <p className="claim-note">
-                  Check je inbox en klik op de koppeling om verder te gaan met je claim.
-                </p>
+              {session === null && codeSentTo && !configError && (
+                <>
+                  <p className="claim-note">
+                    We hebben een code van zes cijfers gestuurd naar <strong>{codeSentTo}</strong>. Je kunt de mail op
+                    dit apparaat openen of op een ander apparaat; de code werkt op beide.
+                  </p>
+                  {noticeAlert}
+                  <form onSubmit={handleCodeSubmit} className="auth-form" noValidate>
+                    <div className="auth-field">
+                      <label className="auth-label" htmlFor="claim-code">
+                        Code uit de e-mail
+                      </label>
+                      <input
+                        id="claim-code"
+                        className="auth-input auth-input--code"
+                        type="text"
+                        name="code"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        aria-describedby={error ? 'claim-error' : undefined}
+                        aria-invalid={error ? 'true' : undefined}
+                        required
+                      />
+                    </div>
+                    {errorAlert}
+                    <button type="submit" className="auth-submit" disabled={loading}>
+                      {loading ? 'Bezig met controleren…' : 'Code controleren'}
+                    </button>
+                  </form>
+                  <div className="auth-actions">
+                    <button
+                      type="button"
+                      className="auth-secondary"
+                      onClick={handleResendCode}
+                      disabled={loading}
+                    >
+                      Nieuwe code sturen
+                    </button>
+                    <button
+                      type="button"
+                      className="auth-secondary"
+                      onClick={handleChangeEmail}
+                      disabled={loading}
+                    >
+                      Ander e-mailadres
+                    </button>
+                  </div>
+                  <p className="auth-help">
+                    Geen code ontvangen? Kijk in je spam of stuur een nieuwe code. De koppeling in de e-mail werkt
+                    voorlopig ook nog.
+                  </p>
+                </>
               )}
 
               {session && claim === undefined && <p className="claim-note">Claimstatus laden…</p>}
 
               {session && claim === null && (
-                <div className="claim-form">
+                <div className="auth-form">
                   <p className="claim-note">
                     Ingelogd als {session.user?.email}. Klik hieronder om een claim in te dienen voor &quot;{restaurant.name}&quot;. Een
                     medewerker beoordeelt je aanvraag.
                   </p>
-                  {error && <div className="claim-error">{error}</div>}
-                  <button onClick={submitClaim} disabled={loading} className="claim-submit">
-                    <Emoji glyph="✅" /> {loading ? 'Bezig…' : 'Dien claim in'}
+                  {errorAlert}
+                  <button type="button" onClick={submitClaim} disabled={loading} className="auth-submit">
+                    {loading ? 'Bezig…' : 'Dien claim in'}
                   </button>
                 </div>
               )}
