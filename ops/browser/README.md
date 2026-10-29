@@ -643,7 +643,7 @@ independent review.
 
 `run-be44-browser-check.js` (also `npm run test:browser:be44`) starts its own
 local dev server and browser through the same runtime as the other checks and
-records six scenarios (`--lijst`, `--alleen=<naam>`):
+records seven scenarios (`--lijst`, `--alleen=<naam>`):
 
 - **delen** — on `/menu/6-diner` the card of the real dish "Poussin" (€20,95)
   has the button "Delen" with the share icon, under the description and not in
@@ -672,6 +672,14 @@ records six scenarios (`--lijst`, `--alleen=<naam>`):
   does not follow the stand for its own theme, and "Zet ze op mijn eigen
   lijstje" puts both dishes in the receiver's own storage with the message "Op
   je lijstje gezet".
+- **tellers** (deel 3, criterium 5) — a successful share, copy, save (only when
+  switching on, never when removing) and a click on "Reserveer" each send one
+  POST to `/api/v1/tellers` with exactly `{ dish, event }`, `keepalive` and
+  without a cookie; the page intercepts that route, and with the stub failing
+  the buttons, "Bewaard" and "Link gekopieerd" still work with no error on
+  screen. The real route in this build (no Supabase key) answers 204 without a
+  body to a valid request, an unknown dish, an unknown event and an empty
+  request, and there is no read route (GET → 405).
 - **server** — the server HTML of a shared dish link has `og:title`
   "Poussin · €20,95", `og:description` with the restaurant and the address,
   `og:url`, and an `og:image` of 1200 × 630 for both stands (two different
