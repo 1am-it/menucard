@@ -73,28 +73,76 @@ test('een onbekende keuken maakt een eigen chip met de neutrale 🍽️', () => 
   assert.deepEqual(chips, [{ family: 'Peruaans', count: 1, emoji: '🍽️' }]);
 });
 
-test('kaartmodel met menukaart: één CTA met het echte aantal en de bestaande labels', () => {
+test('kaartmodel met menukaart: elke menukaart is een eigen knop naar /menu/<id>', () => {
   const model = cardModel(fixture[1]);
-  assert.equal(model.href, '/restaurant/b');
+  assert.equal(model.href, '/restaurant/b', 'de restaurantnaam linkt naar de restaurantpagina');
   assert.equal(model.emoji, '🥂');
   assert.equal(model.kind, 'Franse Brasserie · Wijnbar · €€');
   assert.equal(model.address, 'Straat 2');
   assert.equal(model.hasMenu, true);
-  assert.equal(model.ctaLabel, 'Bekijk 2 menukaarten');
-  assert.deepEqual(model.menuLabels, ['🥗 Lunchkaart', '🍽 Dinerkaart']);
+  assert.equal(model.menuCount, 2);
+  assert.deepEqual(model.menuButtons, [
+    { id: 'b-lunch', href: '/menu/b-lunch', label: '🥗 Lunchkaart' },
+    { id: 'b-diner', href: '/menu/b-diner', label: '🍽 Dinerkaart' },
+  ]);
 });
 
-test('kaartmodel zonder menukaart: geen grote CTA, wel het neutrale label en de restaurantlink', () => {
+test('kaartmodel: de volgorde van de knoppen is de volgorde van de data en er is geen grote CTA meer', () => {
+  const model = cardModel({
+    restaurantId: 'f',
+    name: 'Vier',
+    cuisine: 'Frans',
+    hasMenu: true,
+    menuLinks: [
+      { id: 'f-lunch', label: '🥗 Lunchkaart' },
+      { id: 'f-diner', label: '🍽 Dinerkaart' },
+      { id: 'f-borrel', label: '🍷 Borrelkaart' },
+      { id: 'f-specialiteiten', label: '⭐ Specialiteiten' },
+    ],
+  });
+  assert.deepEqual(model.menuButtons.map((button) => button.href), [
+    '/menu/f-lunch',
+    '/menu/f-diner',
+    '/menu/f-borrel',
+    '/menu/f-specialiteiten',
+  ]);
+  assert.equal(model.menuCount, 4);
+  assert.equal('ctaLabel' in model, false, 'de grote knop "Bekijk N menukaarten" bestaat niet meer');
+  assert.equal('menuLabels' in model, false, 'de losse labels zijn knoppen geworden');
+});
+
+test('kaartmodel zonder menukaart: geen knoppen, wel het neutrale label en de restaurantlink', () => {
   const model = cardModel(fixture[0]);
   assert.equal(model.hasMenu, false);
-  assert.equal(model.ctaLabel, null);
+  assert.deepEqual(model.menuButtons, []);
+  assert.equal(model.menuCount, 0);
   assert.equal(model.noMenuLabel, 'Nog geen menukaart');
   assert.equal(model.restaurantLabel, 'Bekijk restaurant');
 });
 
-test('kaartmodel met één menukaart zegt "Bekijk menukaart" (enkelvoud)', () => {
+test('kaartmodel met één menukaart levert precies één knop naar die kaart', () => {
   const model = cardModel({ restaurantId: 'e', name: 'Een', cuisine: 'Frans', hasMenu: true, menuLinks: [{ id: 'e-diner', label: '🍽 Dinerkaart' }] });
-  assert.equal(model.ctaLabel, 'Bekijk menukaart');
+  assert.equal(model.menuCount, 1);
+  assert.deepEqual(model.menuButtons, [{ id: 'e-diner', href: '/menu/e-diner', label: '🍽 Dinerkaart' }]);
+});
+
+test('kaartmodel: een menukaart zonder id wordt nooit een dode knop', () => {
+  const model = cardModel({
+    restaurantId: 'g',
+    name: 'Zonder id',
+    cuisine: 'Frans',
+    hasMenu: true,
+    menuLinks: [{ label: '🍽 Dinerkaart' }, { id: 'g-lunch', label: '🥗 Lunchkaart' }],
+  });
+  assert.deepEqual(model.menuButtons, [{ id: 'g-lunch', href: '/menu/g-lunch', label: '🥗 Lunchkaart' }]);
+  assert.equal(model.menuCount, 1);
+});
+
+test('kaartmodel: hasMenu zonder bruikbare menukaart valt terug op de kaart zonder menu', () => {
+  const model = cardModel({ restaurantId: 'h', name: 'Leeg', cuisine: 'Frans', hasMenu: true, menuLinks: [] });
+  assert.equal(model.hasMenu, false);
+  assert.deepEqual(model.menuButtons, []);
+  assert.equal(model.noMenuLabel, 'Nog geen menukaart');
 });
 
 test('een ontbrekend adres valt terug op een expliciet "Buurt:"-label, nooit op een kale buurtnaam', () => {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-25T18:05:19.101Z",
+  "generatedAt": "2026-10-28T21:01:31.029Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
   "app": "http://localhost:3144",
@@ -9,15 +9,15 @@
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 166034,
-      "totalKb": 162.1,
-      "documentBytes": 8081,
+      "totalBytes": 169613,
+      "totalKb": 165.6,
+      "documentBytes": 8051,
       "resourceCount": 16,
       "byType": {
-        "Document": 8081,
-        "Script": 128474,
-        "Stylesheet": 21508,
-        "Fetch": 7309,
+        "Document": 8051,
+        "Script": 129329,
+        "Stylesheet": 24261,
+        "Fetch": 7310,
         "Other": 662
       },
       "biggest": [
@@ -32,19 +32,19 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/75659ac43a6cad5c.css",
+          "url": "/_next/static/css/421c3c629156c486.css",
           "type": "Stylesheet",
-          "bytes": 21508
+          "bytes": 24261
         },
         {
-          "url": "/_next/static/chunks/app/page-b86284c428f5dedc.js",
+          "url": "/_next/static/chunks/app/page-f2ec5af38927599a.js",
           "type": "Script",
-          "bytes": 8420
+          "bytes": 9032
         },
         {
           "url": "/",
           "type": "Document",
-          "bytes": 8081
+          "bytes": 8051
         },
         {
           "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
@@ -52,9 +52,9 @@
           "bytes": 7100
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-5980e1cefbc3c656.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-da927686ccd8f8fb.js",
           "type": "Script",
-          "bytes": 4726
+          "bytes": 4969
         },
         {
           "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
@@ -68,15 +68,15 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 163849,
-      "totalKb": 160,
-      "documentBytes": 3079,
+      "totalBytes": 167435,
+      "totalKb": 163.5,
+      "documentBytes": 3078,
       "resourceCount": 14,
       "byType": {
-        "Document": 3079,
-        "Stylesheet": 21508,
-        "Script": 128474,
-        "Fetch": 10126,
+        "Document": 3078,
+        "Script": 129329,
+        "Stylesheet": 24261,
+        "Fetch": 10105,
         "Other": 662
       },
       "biggest": [
@@ -91,14 +91,14 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/75659ac43a6cad5c.css",
+          "url": "/_next/static/css/421c3c629156c486.css",
           "type": "Stylesheet",
-          "bytes": 21508
+          "bytes": 24261
         },
         {
-          "url": "/_next/static/chunks/app/page-b86284c428f5dedc.js",
+          "url": "/_next/static/chunks/app/page-f2ec5af38927599a.js",
           "type": "Script",
-          "bytes": 8420
+          "bytes": 9032
         },
         {
           "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
@@ -108,12 +108,12 @@
         {
           "url": "/?_rsc=1tikd",
           "type": "Fetch",
-          "bytes": 5966
+          "bytes": 5942
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-5980e1cefbc3c656.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-da927686ccd8f8fb.js",
           "type": "Script",
-          "bytes": 4726
+          "bytes": 4969
         },
         {
           "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
@@ -142,9 +142,9 @@
         },
         {
           "label": "price label",
-          "fg": "#FFFFFF",
-          "bg": "#1A1410",
-          "ratio": 18.24
+          "fg": "#1A1410",
+          "bg": "#F3F1EC",
+          "ratio": 16.16
         },
         {
           "label": "primary button",
@@ -190,9 +190,9 @@
         },
         {
           "label": "price label",
-          "fg": "#F2C35B",
+          "fg": "#F2F3F4",
           "bg": "#353A41",
-          "ratio": 6.95
+          "ratio": 10.31
         },
         {
           "label": "primary button",
@@ -243,10 +243,10 @@
             "ratio": 7.24
           },
           {
-            "label": "card CTA",
-            "fg": "#1F1600",
-            "bg": "#F6C057",
-            "ratio": 10.74
+            "label": "card menu button",
+            "fg": "#1A1410",
+            "bg": "#F3F1EC",
+            "ratio": 16.16
           },
           {
             "label": "chip",
@@ -284,10 +284,10 @@
             "ratio": 7.05
           },
           {
-            "label": "card CTA",
-            "fg": "#1F2328",
-            "bg": "#F2F3F4",
-            "ratio": 14.22
+            "label": "card menu button",
+            "fg": "#F2F3F4",
+            "bg": "#353A41",
+            "ratio": 10.31
           },
           {
             "label": "chip",
@@ -306,7 +306,7 @@
     }
   },
   "checks": {
-    "total": 342,
+    "total": 347,
     "failed": 0,
     "entries": [
       {
@@ -322,7 +322,7 @@
       {
         "name": "contrast light: price label >= 4.5:1",
         "passed": true,
-        "detail": "18.24:1 (#FFFFFF on #1A1410)"
+        "detail": "16.16:1 (#1A1410 on #F3F1EC)"
       },
       {
         "name": "contrast light: primary button >= 4.5:1",
@@ -357,7 +357,7 @@
       {
         "name": "contrast dark: price label >= 4.5:1",
         "passed": true,
-        "detail": "6.95:1 (#F2C35B on #353A41)"
+        "detail": "10.31:1 (#F2F3F4 on #353A41)"
       },
       {
         "name": "contrast dark: primary button >= 4.5:1",
@@ -395,9 +395,9 @@
         "detail": "7.24:1 (#5C5650 on #FFFFFF)"
       },
       {
-        "name": "contrast alle-restaurants light: card CTA >= 4.5:1",
+        "name": "contrast alle-restaurants light: card menu button >= 4.5:1",
         "passed": true,
-        "detail": "10.74:1 (#1F1600 on #F6C057)"
+        "detail": "16.16:1 (#1A1410 on #F3F1EC)"
       },
       {
         "name": "contrast alle-restaurants light: chip >= 4.5:1",
@@ -425,9 +425,9 @@
         "detail": "7.05:1 (#B6BCC3 on #2A2F35)"
       },
       {
-        "name": "contrast alle-restaurants dark: card CTA >= 4.5:1",
+        "name": "contrast alle-restaurants dark: card menu button >= 4.5:1",
         "passed": true,
-        "detail": "14.22:1 (#1F2328 on #F2F3F4)"
+        "detail": "10.31:1 (#F2F3F4 on #353A41)"
       },
       {
         "name": "contrast alle-restaurants dark: chip >= 4.5:1",
@@ -941,7 +941,7 @@
       {
         "name": "restaurant-without-menu light 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
+        "detail": "scrollWidth 330 vs innerWidth 330"
       },
       {
         "name": "restaurant-without-menu light 320px: tab bar visible",
@@ -998,7 +998,7 @@
       {
         "name": "restaurant-without-menu dark 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
+        "detail": "scrollWidth 330 vs innerWidth 330"
       },
       {
         "name": "restaurant-without-menu dark 320px: tab bar visible",
@@ -1382,9 +1382,19 @@
         "detail": "25 restaurants · 4 met menukaart"
       },
       {
-        "name": "alle restaurants: the whole card is one link, with no nested link or button",
+        "name": "alle restaurants: no card with a menu is one big link any more",
         "passed": true,
-        "detail": "{\"allLinks\":true,\"nestedActions\":false}"
+        "detail": "[\"ARTICLE\",\"ARTICLE\",\"ARTICLE\",\"ARTICLE\"]"
+      },
+      {
+        "name": "alle restaurants: the restaurant name links to its own restaurant page",
+        "passed": true,
+        "detail": "[\"/restaurant/6\",\"/restaurant/1\",\"/restaurant/19\",\"/restaurant/23\"]"
+      },
+      {
+        "name": "alle restaurants: every menu card is its own button to /menu/<id>",
+        "passed": true,
+        "detail": "[\"/menu/6-lunch\",\"/menu/6-diner\",\"/menu/6-borrel\",\"/menu/6-specialiteiten\",\"/menu/1-lunch\",\"/menu/1-diner\",\"/menu/19-lunch\",\"/menu/19-diner\",\"/menu/23-lunch\",\"/menu/23-diner\",\"/menu/23-borrel\"]"
       },
       {
         "name": "alle restaurants: \"Met menukaart eerst\" is the default sort",
@@ -1397,14 +1407,14 @@
         "detail": "[\"📋\\nMet menukaart\",\"🥂\\nFrans\",\"🍜\\nIndonesisch\",\"🍝\\nItaliaans\",\"🍺\\nBiercafé\",\"🥩\\nGrill\",\"🍛\\nIndiaas\",\"🍴\\nModern Europees\"]"
       },
       {
-        "name": "alle restaurants: cards with a menu show the existing labels and one real CTA",
+        "name": "alle restaurants: the big \"Bekijk N menukaarten\" button is gone",
         "passed": true,
-        "detail": "[\"📋\\nBekijk 4 menukaarten\",\"📋\\nBekijk 2 menukaarten\",\"📋\\nBekijk 2 menukaarten\",\"📋\\nBekijk 3 menukaarten\"]"
+        "detail": "0 .ar-cta"
       },
       {
-        "name": "alle restaurants: cards without a menu never show the big CTA",
+        "name": "alle restaurants: cards without a menu keep \"Nog geen menukaart\" and get no menu button",
         "passed": true,
-        "detail": "{\"noMenuCtas\":0,\"labels\":21}"
+        "detail": "{\"noMenuButtons\":0,\"labels\":21}"
       },
       {
         "name": "alle restaurants: cards without a menu still offer \"Bekijk restaurant →\"",
@@ -1414,7 +1424,7 @@
       {
         "name": "alle restaurants: cards in the same row are equally high",
         "passed": true,
-        "detail": "[[224,224,224],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196]]"
+        "detail": "[[217,217,217],[217,217,217],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196,196,196],[196]]"
       },
       {
         "name": "alle restaurants: A–Z really sorts alphabetically",
@@ -1429,7 +1439,7 @@
       {
         "name": "alle restaurants: \"Met menukaart eerst\" puts a card with a menu first",
         "passed": true,
-        "detail": "{\"first\":\"Brasserie Bardot\",\"hasCta\":true,\"url\":\"\"}"
+        "detail": "{\"first\":\"Brasserie Bardot\",\"hasMenuButtons\":true,\"url\":\"\"}"
       },
       {
         "name": "alle restaurants: the default sort removes the sort parameter again",
@@ -1439,7 +1449,7 @@
       {
         "name": "alle restaurants: the \"Met menukaart\" chip filters to the four real menu cards",
         "passed": true,
-        "detail": "{\"cards\":4,\"ctas\":4,\"countText\":\"4 van 25 restaurants · 4 met menukaart\"}"
+        "detail": "{\"cards\":4,\"menuButtons\":11,\"countText\":\"4 van 25 restaurants · 4 met menukaart\"}"
       },
       {
         "name": "alle restaurants: a cuisine chip filters on the real cuisine labels",
@@ -1581,9 +1591,9 @@
         "detail": "0 img elements"
       },
       {
-        "name": "BE-29 lunch: de sectie staat er met de juiste titel",
+        "name": "BE-29 lunch: de sectie staat er met de juiste titel en het juiste moment",
         "passed": true,
-        "detail": "{\"meal\":\"lunch\",\"title\":\"Nu op de lunchkaart 🔥\",\"cards\":3}"
+        "detail": "{\"meal\":\"lunch\",\"mode\":\"now\",\"title\":\"Nu op de lunchkaart 🔥\",\"cards\":3}"
       },
       {
         "name": "BE-29 lunch: precies drie echte gerechten met prijs",
@@ -1720,9 +1730,24 @@
         "detail": "0 img elements"
       },
       {
-        "name": "BE-29 borrel: de sectie blijft weg bij minder dan drie gerechten",
+        "name": "BE-29 borrel: de sectie staat er met de juiste titel en het juiste moment",
         "passed": true,
-        "detail": "{\"meal\":null,\"title\":null,\"cards\":0}"
+        "detail": "{\"meal\":\"diner\",\"mode\":\"later\",\"title\":\"Straks op de kaart · vanaf 17:00 🔥\",\"cards\":3}"
+      },
+      {
+        "name": "BE-29 borrel: precies drie echte gerechten met prijs",
+        "passed": true,
+        "detail": "[\"€13,75\",\"€19,50\",\"€58\"]"
+      },
+      {
+        "name": "BE-29 borrel: hooguit één gerecht per restaurant",
+        "passed": true,
+        "detail": "[\"T-Huis\",\"Restaurant Zuyd\",\"Restaurant Wolfslaar\"]"
+      },
+      {
+        "name": "BE-29 borrel: de klik opent de menukaart op het gerecht",
+        "passed": true,
+        "detail": "[\"/menu/23-diner?dish=23-diner-0-4&name=Romesco+%26+Veg&cat=Voorgerechten#gerecht-23-diner-0-4\",\"/menu/19-diner?dish=19-diner-0-2&name=Jamon+Iberico+Bellota&cat=Bites#gerecht-19-diner-0-2\",\"/menu/1-diner?dish=1-diner-2-4&name=Ree&cat=Hoofdgerechten#gerecht-1-diner-2-4\"]"
       },
       {
         "name": "BE-29 borrel: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)",
@@ -1844,9 +1869,9 @@
         "detail": "0 img elements"
       },
       {
-        "name": "BE-29 diner: de sectie staat er met de juiste titel",
+        "name": "BE-29 diner: de sectie staat er met de juiste titel en het juiste moment",
         "passed": true,
-        "detail": "{\"meal\":\"diner\",\"title\":\"Vanavond op de kaart 🔥\",\"cards\":3}"
+        "detail": "{\"meal\":\"diner\",\"mode\":\"now\",\"title\":\"Vanavond op de kaart 🔥\",\"cards\":3}"
       },
       {
         "name": "BE-29 diner: precies drie echte gerechten met prijs",
@@ -1913,22 +1938,22 @@
       {
         "name": "320px: chip target \"🥪\nLunch\" >= 44px",
         "passed": true,
-        "detail": "91x40"
+        "detail": "91x44"
       },
       {
         "name": "320px: chip target \"🍝\nDiner\" >= 44px",
         "passed": true,
-        "detail": "88x40"
+        "detail": "88x44"
       },
       {
         "name": "320px: chip target \"🍻\nBorrel\" >= 44px",
         "passed": true,
-        "detail": "91x40"
+        "detail": "91x44"
       },
       {
         "name": "keyboard: Tab from the search field lands on the Zoeken button",
         "passed": true,
-        "detail": "{\"tag\":\"BUTTON\",\"text\":\"Zoeken\",\"outline\":\"1px\"}"
+        "detail": "{\"tag\":\"BUTTON\",\"text\":\"Zoeken\",\"outline\":\"2px\"}"
       },
       {
         "name": "internal/coverage light: captured without production credentials",
@@ -1943,504 +1968,504 @@
       {
         "name": "internal/login light: renders with the new tokens",
         "passed": true,
-        "detail": "{\"path\":\"/internal/login\",\"theme\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"textColor\":\"rgb(26, 20, 16)\",\"heading\":\"Internal sign-in\"}"
+        "detail": "{\"path\":\"/internal/login\",\"theme\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"textColor\":\"rgb(26, 20, 16)\",\"heading\":\"Inloggen (intern)\"}"
       },
       {
         "name": "internal/login dark: renders with the new tokens",
         "passed": true,
-        "detail": "{\"path\":\"/internal/login\",\"theme\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"textColor\":\"rgb(242, 243, 244)\",\"heading\":\"Internal sign-in\"}"
+        "detail": "{\"path\":\"/internal/login\",\"theme\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"textColor\":\"rgb(242, 243, 244)\",\"heading\":\"Inloggen (intern)\"}"
       }
     ]
   },
   "screenshots": [
     {
       "file": "ops/browser/output/be-28/home-light-1280.png",
-      "bytes": 85865,
+      "bytes": 118610,
       "width": 1274,
-      "height": 904,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-light-390.png",
-      "bytes": 56973,
+      "bytes": 54450,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/home-light-320.png",
-      "bytes": 45528,
+      "bytes": 46417,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-1280.png",
-      "bytes": 77500,
+      "bytes": 107888,
       "width": 1274,
-      "height": 904,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-390.png",
-      "bytes": 48212,
+      "bytes": 48933,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-320.png",
-      "bytes": 40842,
+      "bytes": 42442,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-1280.png",
-      "bytes": 62112,
+      "bytes": 62867,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390.png",
-      "bytes": 53013,
+      "bytes": 49249,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-320.png",
-      "bytes": 46135,
+      "bytes": 45217,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-1280.png",
-      "bytes": 59166,
+      "bytes": 60308,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-390.png",
-      "bytes": 53950,
+      "bytes": 50042,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-320.png",
-      "bytes": 47071,
+      "bytes": 47222,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-1280.png",
-      "bytes": 250267,
+      "bytes": 249360,
       "width": 1274,
-      "height": 2380,
+      "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-390.png",
-      "bytes": 56763,
+      "bytes": 55553,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-320.png",
-      "bytes": 54345,
+      "bytes": 52399,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-1280.png",
-      "bytes": 244688,
+      "bytes": 243423,
       "width": 1274,
-      "height": 2380,
+      "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-390.png",
-      "bytes": 58069,
+      "bytes": 56566,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-320.png",
-      "bytes": 55287,
+      "bytes": 53589,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-1280.png",
-      "bytes": 141114,
+      "bytes": 313000,
       "width": 1274,
-      "height": 1591,
+      "height": 3601,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-390.png",
-      "bytes": 43644,
+      "bytes": 44370,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-320.png",
-      "bytes": 38056,
+      "bytes": 38381,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-1280.png",
-      "bytes": 136151,
+      "bytes": 296176,
       "width": 1274,
-      "height": 1591,
+      "height": 3601,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-390.png",
-      "bytes": 44546,
+      "bytes": 45500,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-320.png",
-      "bytes": 38678,
+      "bytes": 39185,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-1280.png",
-      "bytes": 79480,
+      "bytes": 80932,
       "width": 1274,
-      "height": 1331,
+      "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-390.png",
-      "bytes": 40288,
+      "bytes": 39700,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-320.png",
-      "bytes": 39720,
+      "bytes": 37948,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-1280.png",
-      "bytes": 77415,
+      "bytes": 79433,
       "width": 1274,
-      "height": 1331,
+      "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-390.png",
-      "bytes": 41193,
+      "bytes": 40405,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-320.png",
-      "bytes": 40153,
+      "bytes": 38409,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-1280.png",
-      "bytes": 281313,
+      "bytes": 282367,
       "width": 1274,
-      "height": 2613,
+      "height": 2707,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-390.png",
-      "bytes": 47614,
+      "bytes": 43076,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-320.png",
-      "bytes": 49292,
+      "bytes": 42788,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-1280.png",
-      "bytes": 267461,
+      "bytes": 272096,
       "width": 1274,
-      "height": 2613,
+      "height": 2707,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-390.png",
-      "bytes": 50276,
+      "bytes": 46641,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-320.png",
-      "bytes": 52573,
+      "bytes": 46436,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-1280.png",
-      "bytes": 28489,
+      "bytes": 28793,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-390.png",
-      "bytes": 25969,
+      "bytes": 26427,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-320.png",
-      "bytes": 25457,
+      "bytes": 25935,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-1280.png",
-      "bytes": 27690,
+      "bytes": 27988,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-390.png",
-      "bytes": 26328,
+      "bytes": 26660,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-320.png",
-      "bytes": 25862,
+      "bytes": 26226,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-1280.png",
-      "bytes": 342325,
+      "bytes": 342615,
       "width": 1274,
       "height": 5000,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-390.png",
-      "bytes": 47052,
+      "bytes": 43527,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-320.png",
-      "bytes": 42911,
+      "bytes": 42554,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-1280.png",
-      "bytes": 350513,
+      "bytes": 350786,
       "width": 1274,
       "height": 5000,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-390.png",
-      "bytes": 49683,
+      "bytes": 45483,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-320.png",
-      "bytes": 45222,
+      "bytes": 44519,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390-detail.png",
-      "bytes": 53013,
+      "bytes": 49610,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-1280.png",
-      "bytes": 117109,
+      "bytes": 117258,
       "width": 1274,
-      "height": 1304,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-390.png",
-      "bytes": 95251,
+      "bytes": 95866,
       "width": 390,
-      "height": 1567,
+      "height": 1603,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-320.png",
-      "bytes": 99585,
+      "bytes": 101027,
       "width": 320,
-      "height": 1977,
+      "height": 2018,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-1280.png",
-      "bytes": 106022,
+      "bytes": 106631,
       "width": 1274,
-      "height": 1304,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-390.png",
-      "bytes": 86054,
+      "bytes": 87415,
       "width": 390,
-      "height": 1567,
+      "height": 1603,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-320.png",
-      "bytes": 89804,
+      "bytes": 92390,
       "width": 320,
-      "height": 1977,
+      "height": 2018,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-1280.png",
-      "bytes": 85865,
+      "bytes": 120026,
       "width": 1274,
-      "height": 904,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-390.png",
-      "bytes": 68083,
+      "bytes": 97016,
       "width": 390,
-      "height": 1128,
+      "height": 1597,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-320.png",
-      "bytes": 73963,
+      "bytes": 103370,
       "width": 320,
-      "height": 1539,
+      "height": 2066,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-1280.png",
-      "bytes": 77500,
+      "bytes": 109384,
       "width": 1274,
-      "height": 904,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-390.png",
-      "bytes": 61345,
+      "bytes": 88460,
       "width": 390,
-      "height": 1128,
+      "height": 1597,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-320.png",
-      "bytes": 66462,
+      "bytes": 94604,
       "width": 320,
-      "height": 1539,
+      "height": 2066,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-1280.png",
-      "bytes": 117096,
+      "bytes": 117228,
       "width": 1274,
-      "height": 1304,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-390.png",
-      "bytes": 94457,
+      "bytes": 95112,
       "width": 390,
-      "height": 1547,
+      "height": 1583,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-320.png",
-      "bytes": 99278,
+      "bytes": 100522,
       "width": 320,
-      "height": 2003,
+      "height": 2032,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-1280.png",
-      "bytes": 105941,
+      "bytes": 106515,
       "width": 1274,
-      "height": 1304,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-390.png",
-      "bytes": 85212,
+      "bytes": 86622,
       "width": 390,
-      "height": 1547,
+      "height": 1583,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-320.png",
-      "bytes": 89374,
+      "bytes": 91875,
       "width": 320,
-      "height": 2003,
+      "height": 2032,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-390.png",
-      "bytes": 260185,
+      "bytes": 250676,
       "width": 390,
-      "height": 4940,
+      "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-dark-390.png",
-      "bytes": 260206,
+      "bytes": 239802,
       "width": 390,
-      "height": 4940,
+      "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-1280.png",
-      "bytes": 221617,
+      "bytes": 223980,
       "width": 1274,
-      "height": 2412,
+      "height": 2506,
       "viewport": "1280x900"
     },
     {
@@ -2459,14 +2484,14 @@
     },
     {
       "file": "ops/browser/output/be-28/internal-login-light-1280.png",
-      "bytes": 10412,
+      "bytes": 11934,
       "width": 1274,
       "height": 980,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-login-dark-1280.png",
-      "bytes": 10740,
+      "bytes": 12412,
       "width": 1274,
       "height": 980,
       "viewport": "1280x900"

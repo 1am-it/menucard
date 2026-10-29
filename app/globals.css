@@ -3826,8 +3826,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   flex: none;
   padding: 6px 11px;
   border-radius: var(--radius-pill);
-  background: var(--price-bg);
-  color: var(--price-text);
+  /* BE-42 (#98) — 3B: een zacht vlak in plaats van het donkere prijsvlak;
+     vet en rechts blijft, het contrast blijft ≥ 4,5:1 in licht en donker. */
+  background: var(--surface-soft);
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -3857,8 +3859,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   align-items: center;
   padding: 5px 11px;
   border-radius: var(--radius-pill);
-  background: var(--price-bg);
-  color: var(--price-text);
+  /* BE-42 (#98) — 3B: hetzelfde zachte vlak als op de restaurant- en
+     menupagina, ook in de zoekresultaten. */
+  background: var(--surface-soft);
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -4121,8 +4125,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
   flex: none;
   padding: 5px 11px;
   border-radius: var(--radius-pill);
-  background: var(--price-bg);
-  color: var(--price-text);
+  /* BE-42 (#98) — 3B: de restaurantpagina, de menupagina en de home gebruiken
+     hetzelfde zachte prijsvlak; vet en rechts uitgelijnd blijft. */
+  background: var(--surface-soft);
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -4195,21 +4201,42 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .ar-kind { font-size: 13px; color: var(--text-secondary); }
 .ar-nomenu-inline { display: none; }
 .ar-address { font-size: 13px; color: var(--text-secondary); }
-.ar-menu-labels { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 700; }
-.ar-menu-label { padding: 4px 9px; border-radius: var(--radius-pill); background: var(--surface-soft); }
-.ar-cta {
+/* BE-42 (#98) — 1A: de kaart is geen link meer. De naam is de link naar de
+   restaurantpagina (eerste tabstop), elke menukaart is een eigen knop naar
+   /menu/<id> (daarna, in dezelfde volgorde als de data). Beide zijn echte
+   links met een zichtbare focusring; de knoppen zijn minimaal 44 px hoog. */
+.ar-name-link {
   align-self: flex-start;
-  margin-top: auto;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 6px;
+}
+.ar-name-link:hover { color: var(--accent); text-decoration: underline; }
+.ar-menu-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ar-menu-button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--card-border-color);
   border-radius: var(--radius-pill);
-  background: var(--button-primary-bg);
-  color: var(--button-primary-text);
+  background: var(--surface-soft);
+  color: var(--text-primary);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
+  text-decoration: none;
 }
+.ar-menu-button:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.ar-name-link:focus-visible,
+.ar-menu-button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .ar-footer { display: flex; align-items: center; gap: 10px; margin-top: auto; }
 .ar-nomenu-label {
   padding: 4px 10px;
@@ -4906,4 +4933,44 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 .home-meal-btn,
 .now-open-btn,
 .chip { transition-property: background-color, border-color, color; }
+
+
+/* ── BE-42 (#98) 2A: de hele menukaart in tabbladen ────────────────────────
+   De tabbladen hergebruiken de bestaande menukaart-chips (.meal-switch /
+   .meal-btn, inclusief het 44 px-tikvlak en de zichtbare focusring) en krijgen
+   alleen hun eigen kop, telling en paneel. Alles met de bestaande tokens; geen
+   nieuwe kleur, geen nieuwe maat. */
+.rpm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.rpm-title { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+
+.rpm-tabs { margin-bottom: 20px; }
+
+/* De telling hoort bij de kaartnaam maar is geen tweede knop: hetzelfde
+   tekstblok, iets lichter, en de knop houdt zijn 44 px-tikvlak. */
+.rpm-tab-count {
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.rpm-panel-title {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* De bronregel van de gekozen kaart staat onder de kaart zelf; dezelfde
+   bestaande .rp-source-stijl, alleen met ruimte erboven. */
+.rpm-source { margin-top: 18px; }
 

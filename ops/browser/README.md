@@ -1,5 +1,55 @@
 # Isolated browser fixture — #59 menu import/review
 
+## BE-42 part 1: menu names as buttons and softer prices (#98)
+
+`run-be42-browser-check.js` drives the real production build (`next start`, no
+Supabase credentials) through CDP and records 1A and 3B of BE-42:
+
+- `/alle-restaurants`: the card is no longer one big link, the restaurant name is
+  the link to `/restaurant/<id>`, each menu card is its own button to
+  `/menu/<id>`, the big "Bekijk N menukaarten" button is gone, a card without a
+  menu keeps "Nog geen menukaart" plus "Bekijk restaurant →", the tab order is
+  name → menu buttons, the focus ring is visible and every tap target is ≥ 44 px
+  (also at 390 and 320 px, without horizontal overflow);
+- the price surface on `/restaurant/6`, `/menu/6-diner`, `/search?q=steak`, the
+  "op aanvraag" label and the home "Vanavond op de kaart" with the fixed BE-29
+  clock: `var(--surface-soft)` background, `var(--text-primary)` text, bold,
+  right-aligned and ≥ 4.5:1 in light and dark;
+- the cold first transfer of `/alle-restaurants` and `/restaurant/6` (the
+  "before" measurement for part 2, which stays under 250 KB);
+- screenshots of `/alle-restaurants`, `/restaurant/6` and `/restaurant/1` at
+  1280, 390 and 320 px in light and dark.
+
+`--out <dir>` decides where the screenshots and `be42-browser-evidence.json`
+land; by default that is outside the repository (`../be42-evidence`). No
+restaurant in the local data has exactly one menu card, so `/restaurant/1`
+(Wolfslaar, two cards) is the smallest real case; no data was added for it.
+Developer evidence on a local machine — not production, not independent
+acceptance.
+
+## BE-42 part 2: the whole menu in tabs (#98)
+
+The same script also records 2A:
+
+- `/restaurant/6`: the section "Menukaarten" with one tab per menu card and the
+  real dish count, in the fixed order lunch → diner → borrel → overige;
+- the default tab is the first card in that order (lunch), never the clock, so
+  the server HTML is the same at any time of day;
+- every tab is a real link (`/restaurant/6?kaart=<id>`) that the server
+  renders, so the tabs work without JavaScript; clicking one switches only the
+  panel (one navigation entry in the performance timeline, no full reload);
+- the source line and the link to the original menu stay, and `/menu/<id>` is
+  still reachable;
+- the raw server response (markup *and* the RSC payload) is fetched outside the
+  browser: exactly one menu card is in it, an unknown `?kaart=` falls back to
+  the default, and `/restaurant/1` shows one card out of two;
+- the cold first transfer of `/restaurant/6` stays under 250 KB; the "before"
+  value (169.9 KB) comes from the part 1 evidence, because this script always
+  runs on the current code;
+- screenshots of `/restaurant/6`, `/restaurant/6?kaart=6-borrel` (a switched
+  tab) and `/restaurant/1` at 1280, 390 and 320 px in light and dark.
+
+
 ## BE-34 one-click AI reading and name search (#81)
 
 `run-een-klik-browser-check.js` (also `npm run test:browser:een-klik`) is the
@@ -51,10 +101,15 @@ readability of an internal screen:
   cards, CTA, chips and count), no horizontal overflow, the phone tab bar only
   at ≤720 px, tap targets ≥ 44 px and the keyboard path from the search field
   to the Zoeken button;
-- the BE-28b card rules: one whole-card link with no nested action, equal card
-  heights, real menu/cuisine chips, the default "Met menukaart eerst" sort
-  (`?sort=az` as the alternative), the real `25 restaurants · 4 met menukaart`
-  count and the compact menu-less phone row with an arrow.
+- the BE-28b card rules: equal card heights, real menu/cuisine chips, the
+  default "Met menukaart eerst" sort (`?sort=az` as the alternative), the real
+  `25 restaurants · 4 met menukaart` count and the compact menu-less phone row
+  with an arrow;
+- since BE-42 (#98) 1A the card itself is no longer one whole link: the
+  restaurant name is the link to `/restaurant/<id>`, every menu card is its own
+  button to `/menu/<id>` (11 buttons over the four real menu cards) and the big
+  "Bekijk N menukaarten" button is gone. A card without a menu keeps its own
+  whole-card link with "Nog geen menukaart" and "Bekijk restaurant →".
 
 Build first (`npm run build`), then run it. The evidence lands in
 `ops/browser/evidence/public-style-browser-evidence.json`; screenshots go to

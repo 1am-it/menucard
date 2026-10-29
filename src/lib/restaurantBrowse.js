@@ -67,12 +67,29 @@ function priceSummary(restaurant) {
   return { glyph, label };
 }
 
-// Eén kaartmodel voor de lijst. De CTA is opmaak binnen de ene kaartlink;
-// zonder menukaart is er nooit een grote knop (acceptatiecriterium 1).
+// BE-42 (#98) — 1A: elke menukaart is een eigen knop naar díe kaart
+// (/menu/<id>). Alleen links met een echt id worden een knop; de rest van de
+// kaart blijft ongewijzigd. Er wordt geen menukaart verzonnen of samengevoegd.
+const MENU_BUTTON_FALLBACK_LABEL = 'Menukaart';
+
+function menuButtonsOf(restaurant) {
+  const menuLinks = Array.isArray(restaurant.menuLinks) ? restaurant.menuLinks : [];
+  return menuLinks
+    .filter((link) => link && link.id)
+    .map((link) => ({
+      id: link.id,
+      href: `/menu/${link.id}`,
+      label: link.label || MENU_BUTTON_FALLBACK_LABEL,
+    }));
+}
+
+// Eén kaartmodel voor de lijst. De restaurantnaam is sinds BE-42 de link naar
+// de restaurantpagina; de menukaarten zijn losse knoppen met hun eigen href.
+// Zonder menukaart is er nooit een grote knop (acceptatiecriterium 1).
 function cardModel(restaurant) {
   const { glyph, label } = priceSummary(restaurant);
-  const menuLinks = Array.isArray(restaurant.menuLinks) ? restaurant.menuLinks : [];
-  const menuCount = menuLinks.length;
+  const menuButtons = menuButtonsOf(restaurant);
+  const menuCount = menuButtons.length;
   const hasMenu = Boolean(restaurant.hasMenu) && menuCount > 0;
   const kind = [restaurant.cuisine, glyph].filter(Boolean).join(' · ');
   const address = restaurant.address || (restaurant.buurt ? `Buurt: ${restaurant.buurt}` : null);
@@ -86,10 +103,7 @@ function cardModel(restaurant) {
     address,
     hasMenu,
     menuCount,
-    menuLabels: menuLinks.map((link) => link.label).filter(Boolean),
-    ctaLabel: hasMenu
-      ? (menuCount === 1 ? 'Bekijk menukaart' : `Bekijk ${menuCount} menukaarten`)
-      : null,
+    menuButtons,
     noMenuLabel: 'Nog geen menukaart',
     restaurantLabel: 'Bekijk restaurant',
   };

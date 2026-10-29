@@ -29,7 +29,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
+const { spawn, spawnSync } = require('node:child_process');
 
 const { findBrowser, killTree, startBrowser, evalJs, navigate, pressKey } = require('./lib/runtime');
 const { CdpClient, waitForHttp } = require('./lib/cdp');
@@ -172,7 +172,9 @@ const AR_CONTRAST_JS = `(() => {
       measure('card name', q('.ar-name')),
       measure('card kind', q('.ar-kind')),
       measure('card address', q('.ar-address')),
-      measure('card CTA', q('.ar-cta')),
+      // BE-42 (#98) — 1A: de grote kaartknop is vervallen; de menuknoppen
+      // dragen nu hetzelfde tokenpaar en worden hier gemeten.
+      measure('card menu button', q('.ar-menu-button')),
       measure('chip', q('.ar-chips .chip')),
       measure('count', q('.ar-count')),
     ],
@@ -185,18 +187,31 @@ async function startProductionServer() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const log = fs.createWriteStream(path.join(OUT_DIR, 'next-start.log'));
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const child = spawn(npm, ['run', 'start', '--', '-p', String(PORT)], {
-    cwd: APP_ROOT,
-    env: {
-      ...process.env,
-      NEXT_TELEMETRY_DISABLED: '1',
-      NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'local-check-placeholder',
-    },
-    stdio: ['ignore', 'pipe', 'pipe'],
-    shell: process.platform === 'win32',
-    detached: process.platform !== 'win32',
-  });
+  // Een geïsoleerde checkout heeft soms geen globale npm. Dan start dezelfde
+  // productiebuild rechtstreeks met node (zelfde commando, zelfde env).
+  const npmAvailable = spawnSync(npm, ['--version'], { stdio: 'ignore', shell: process.platform === 'win32' }).status === 0;
+  const nextBin = path.join(APP_ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
+  const serverEnv = {
+    ...process.env,
+    NEXT_TELEMETRY_DISABLED: '1',
+    NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'local-check-placeholder',
+  };
+  const child = npmAvailable
+    ? spawn(npm, ['run', 'start', '--', '-p', String(PORT)], {
+        cwd: APP_ROOT,
+        env: serverEnv,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: process.platform === 'win32',
+        detached: process.platform !== 'win32',
+      })
+    : spawn(process.execPath, [nextBin, 'start', '-p', String(PORT)], {
+        cwd: APP_ROOT,
+        env: serverEnv,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        shell: false,
+        detached: process.platform !== 'win32',
+      });
   child.stdout.pipe(log);
   child.stderr.pipe(log);
   await waitForHttp(`${APP}/`, 120000);
@@ -239,11 +254,19 @@ async function applyTheme(cdp, theme) {
 // BE-29 (#70) — de drie momenten van de dag met een vaste browserklok. De
 // productiecode rekent zelf in Europe/Amsterdam; deze override laat de echte
 // clientselectie op een vast moment draaien zonder de systeemklok te wijzigen.
+//
+// BE-42 deel 2 (#98) — de borrelverwachting was verouderd. Sinds BE-38 (#90)
+// laat de home de sectie niet meer weg als het huidige moment te weinig echte
+// gerechten heeft: om 17:00 is de borrel te klein en valt de selectie terug op
+// het eerstvolgende moment, de diner, met de titel "Straks op de kaart ·
+// vanaf HH:MM" en `data-mode="later"`. Alleen deze verwachting is bijgewerkt;
+// het gedrag van de app is niet veranderd.
 const BE29_MOMENTS = [
-  { id: 'lunch', iso: '2026-10-23T10:30:00Z', meal: 'lunch', title: 'Nu op de lunchkaart', expectSection: true },
-  { id: 'borrel', iso: '2026-10-23T15:00:00Z', meal: 'borrel', title: 'Borrel', expectSection: false },
-  { id: 'diner', iso: '2026-10-23T18:00:00Z', meal: 'diner', title: 'Vanavond op de kaart', expectSection: true },
+  { id: 'lunch', iso: '2026-10-23T10:30:00Z', meal: 'lunch', mode: 'now', title: 'Nu op de lunchkaart' },
+  { id: 'borrel', iso: '2026-10-23T15:00:00Z', meal: 'diner', mode: 'later', title: 'Straks op de kaart' },
+  { id: 'diner', iso: '2026-10-23T18:00:00Z', meal: 'diner', mode: 'now', title: 'Vanavond op de kaart' },
 ];
+
 
 let clockScriptId = null;
 async function setFixedClock(cdp, iso) {
@@ -489,14 +512,24 @@ async function alleRestaurantsScenario(cdp) {
     });
     return {
       count: cards.length,
-      allLinks: cards.every((el) => el.tagName === 'A'),
-      nestedActions: cards.some((el) => el.querySelector('a, button')),
+      // BE-42 (#98) — 1A: de kaart is geen grote link meer. De naam is de link
+      // naar de restaurantpagina, elke menukaart is een eigen knop naar
+      // /menu/<id> en de grote knop "Bekijk N menukaarten" is vervallen.
+      cardTags: cards.filter((el) => !el.classList.contains('ar-card--nomenu')).map((el) => el.tagName),
+      nameLinks: cards.filter((el) => !el.classList.contains('ar-card--nomenu')).map((el) => {
+        const link = el.querySelector('a.ar-name-link');
+        return link ? link.getAttribute('href') : null;
+      }),
+      menuButtons: [...document.querySelectorAll('.ar-card a.ar-menu-button')].map((el) => ({
+        label: el.innerText.trim(),
+        href: el.getAttribute('href'),
+      })),
       countText: document.querySelector('.ar-count') ? document.querySelector('.ar-count').innerText.trim() : null,
       sortValue: document.querySelector('.ar-sort') ? document.querySelector('.ar-sort').value : null,
       sortText: document.querySelector('.ar-sort') ? document.querySelector('.ar-sort').selectedOptions[0].textContent.trim() : null,
       chips: [...document.querySelectorAll('.ar-chips .chip')].map((el) => el.innerText.trim()),
-      ctas: [...document.querySelectorAll('.ar-cta')].map((el) => el.innerText.trim()),
-      noMenuCtas: [...document.querySelectorAll('.ar-card--nomenu')].filter((el) => el.querySelector('.ar-cta')).length,
+      ctas: [...document.querySelectorAll('.ar-cta')].length,
+      noMenuButtons: [...document.querySelectorAll('.ar-card--nomenu')].filter((el) => el.querySelector('.ar-menu-button, .ar-cta')).length,
       noMenuLabels: [...document.querySelectorAll('.ar-nomenu-label')].map((el) => el.innerText.trim()),
       restaurantLinks: [...document.querySelectorAll('.ar-restaurant-link')].map((el) => el.innerText.trim()),
       firstCard: cards[0] ? cards[0].querySelector('.ar-name').innerText : null,
@@ -506,11 +539,13 @@ async function alleRestaurantsScenario(cdp) {
 
   check('alle restaurants: every known restaurant is shown from the real API', initial.count === 25, `${initial.count} cards`);
   check('alle restaurants: the count line is computed from the real data', initial.countText === '25 restaurants · 4 met menukaart', initial.countText);
-  check('alle restaurants: the whole card is one link, with no nested link or button', initial.allLinks && !initial.nestedActions, JSON.stringify({ allLinks: initial.allLinks, nestedActions: initial.nestedActions }));
+  check('alle restaurants: no card with a menu is one big link any more', initial.cardTags.length === 4 && initial.cardTags.every((tag) => tag === 'ARTICLE'), JSON.stringify(initial.cardTags));
+  check('alle restaurants: the restaurant name links to its own restaurant page', initial.nameLinks.length === 4 && initial.nameLinks.every((href) => /^\/restaurant\/\d+$/.test(href || '')), JSON.stringify(initial.nameLinks));
+  check('alle restaurants: every menu card is its own button to /menu/<id>', initial.menuButtons.length === 11 && initial.menuButtons.every((button) => /^\/menu\/[^/]+$/.test(button.href || '') && button.label.length > 2), JSON.stringify(initial.menuButtons.map((button) => button.href)));
   check('alle restaurants: "Met menukaart eerst" is the default sort', initial.sortValue === 'menu-first' && /Met menukaart eerst/.test(initial.sortText || ''), JSON.stringify({ value: initial.sortValue, text: initial.sortText }));
   check('alle restaurants: the first chip is "📋 Met menukaart" and cuisine chips carry emoji', /Met menukaart/.test(initial.chips[0] || '') && initial.chips.length > 1 && initial.chips.some((chip) => /[🍝🥩🥘🍜🥡🍺🥂🍛🧆🥨🍴🥢🍽️]/.test(chip)), JSON.stringify(initial.chips.slice(0, 8)));
-  check('alle restaurants: cards with a menu show the existing labels and one real CTA', initial.ctas.length === 4 && initial.ctas.every((text) => /^📋\s+Bekijk /.test(text)), JSON.stringify(initial.ctas));
-  check('alle restaurants: cards without a menu never show the big CTA', initial.noMenuCtas === 0 && initial.noMenuLabels.every((text) => text === 'Nog geen menukaart'), JSON.stringify({ noMenuCtas: initial.noMenuCtas, labels: initial.noMenuLabels.length }));
+  check('alle restaurants: the big "Bekijk N menukaarten" button is gone', initial.ctas === 0, `${initial.ctas} .ar-cta`);
+  check('alle restaurants: cards without a menu keep "Nog geen menukaart" and get no menu button', initial.noMenuButtons === 0 && initial.noMenuLabels.length === 21 && initial.noMenuLabels.every((text) => text === 'Nog geen menukaart'), JSON.stringify({ noMenuButtons: initial.noMenuButtons, labels: initial.noMenuLabels.length }));
   check('alle restaurants: cards without a menu still offer "Bekijk restaurant →"', initial.restaurantLinks.length === 21 && initial.restaurantLinks.every((text) => text.startsWith('Bekijk restaurant')), JSON.stringify(initial.restaurantLinks.slice(0, 2)));
   const uneven = initial.rows.filter((heights) => heights.length > 1 && Math.max(...heights) - Math.min(...heights) > 1);
   check('alle restaurants: cards in the same row are equally high', uneven.length === 0, JSON.stringify(initial.rows));
@@ -540,10 +575,10 @@ async function alleRestaurantsScenario(cdp) {
   await new Promise((resolve) => setTimeout(resolve, 600));
   const restored = await evalJs(cdp, `(() => ({
     first: document.querySelector('.ar-card .ar-name') ? document.querySelector('.ar-card .ar-name').innerText : null,
-    hasCta: Boolean(document.querySelector('.ar-card .ar-cta')),
+    hasMenuButtons: Boolean(document.querySelector('.ar-card a.ar-menu-button')),
     url: location.search,
   }))()`);
-  check('alle restaurants: "Met menukaart eerst" puts a card with a menu first', restored.first === 'Brasserie Bardot' && restored.hasCta, JSON.stringify(restored));
+  check('alle restaurants: "Met menukaart eerst" puts a card with a menu first', restored.first === 'Brasserie Bardot' && restored.hasMenuButtons, JSON.stringify(restored));
   check('alle restaurants: the default sort removes the sort parameter again', !restored.url.includes('sort='), restored.url);
 
   // Filteren: de bestaande chipstijl, echte aantallen.
@@ -555,10 +590,10 @@ async function alleRestaurantsScenario(cdp) {
   await new Promise((resolve) => setTimeout(resolve, 300));
   const menuOnly = await evalJs(cdp, `(() => ({
     cards: document.querySelectorAll('.ar-card').length,
-    ctas: document.querySelectorAll('.ar-cta').length,
+    menuButtons: document.querySelectorAll('.ar-card a.ar-menu-button').length,
     countText: document.querySelector('.ar-count').innerText.trim(),
   }))()`);
-  check('alle restaurants: the "Met menukaart" chip filters to the four real menu cards', menuOnly.cards === 4 && menuOnly.ctas === 4 && menuOnly.countText.includes('4 van 25 restaurants'), JSON.stringify(menuOnly));
+  check('alle restaurants: the "Met menukaart" chip filters to the four real menu cards', menuOnly.cards === 4 && menuOnly.menuButtons === 11 && menuOnly.countText.includes('4 van 25 restaurants'), JSON.stringify(menuOnly));
 
   await evalJs(cdp, `(() => {
     const chip = [...document.querySelectorAll('.ar-chips .chip')].find((el) => el.innerText.includes('Met menukaart'));
@@ -636,7 +671,7 @@ async function be29Scenario(cdp) {
       url: `${APP}/`,
       ready:
         `document.readyState === 'complete' && document.querySelector('.home-hero') !== null && document.querySelectorAll('[data-season]').length === 3` +
-        (moment.expectSection ? ` && document.querySelector('.tonight-section') !== null` : ''),
+        ` && document.querySelector('.tonight-section') !== null`,
       widths: [1280, 390, 320],
       fullPage: true,
     });
@@ -649,6 +684,7 @@ async function be29Scenario(cdp) {
       const section = document.querySelector('.tonight-section');
       return {
         meal: section ? section.getAttribute('data-meal') : null,
+        mode: section ? section.getAttribute('data-mode') : null,
         title: section ? section.querySelector('.home-section-title').textContent.trim() : null,
         cards: [...document.querySelectorAll('.tonight-card')].map((link) => ({
           name: link.querySelector('.tonight-name') ? link.querySelector('.tonight-name').textContent.trim() : null,
@@ -663,26 +699,23 @@ async function be29Scenario(cdp) {
     homeState[moment.id] = state;
 
     check(
-      `BE-29 ${moment.id}: de sectie ${moment.expectSection ? 'staat er met de juiste titel' : 'blijft weg bij minder dan drie gerechten'}`,
-      moment.expectSection
-        ? Boolean(state.meal) && state.title.includes(moment.title) && state.meal === moment.meal
-        : state.meal === null && state.cards.length === 0,
-      JSON.stringify({ meal: state.meal, title: state.title, cards: state.cards.length })
+      `BE-29 ${moment.id}: de sectie staat er met de juiste titel en het juiste moment`,
+      Boolean(state.meal) && state.meal === moment.meal && state.mode === moment.mode
+        && (state.title || '').includes(moment.title),
+      JSON.stringify({ meal: state.meal, mode: state.mode, title: state.title, cards: state.cards.length })
     );
 
-    if (moment.expectSection) {
-      check(`BE-29 ${moment.id}: precies drie echte gerechten met prijs`, state.cards.length === 3 && state.cards.every((card) => card.price && !/op aanvraag/i.test(card.price)), JSON.stringify(state.cards.map((card) => card.price)));
-      check(
-        `BE-29 ${moment.id}: hooguit één gerecht per restaurant`,
-        new Set(state.cards.map((card) => card.restaurant)).size === state.cards.length,
-        JSON.stringify(state.cards.map((card) => card.restaurant))
-      );
-      check(
-        `BE-29 ${moment.id}: de klik opent de menukaart op het gerecht`,
-        state.cards.every((card) => /\/menu\/[^?]+\?dish=.*#gerecht-/.test(card.href || '')),
-        JSON.stringify(state.cards.map((card) => card.href))
-      );
-    }
+    check(`BE-29 ${moment.id}: precies drie echte gerechten met prijs`, state.cards.length === 3 && state.cards.every((card) => card.price && !/op aanvraag/i.test(card.price)), JSON.stringify(state.cards.map((card) => card.price)));
+    check(
+      `BE-29 ${moment.id}: hooguit één gerecht per restaurant`,
+      new Set(state.cards.map((card) => card.restaurant)).size === state.cards.length,
+      JSON.stringify(state.cards.map((card) => card.restaurant))
+    );
+    check(
+      `BE-29 ${moment.id}: de klik opent de menukaart op het gerecht`,
+      state.cards.every((card) => /\/menu\/[^?]+\?dish=.*#gerecht-/.test(card.href || '')),
+      JSON.stringify(state.cards.map((card) => card.href))
+    );
 
     check(
       `BE-29 ${moment.id}: seizoenstegels alleen met echte zoekresultaten (mosselen, wild, pompoen in oktober)`,

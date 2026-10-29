@@ -9,6 +9,10 @@ import Emoji from '@/src/components/Emoji'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
 import { honestPriceLabel } from '@/src/lib/menuPrice'
+// BE-42 (#98) 2A — de kaartnamen staan op één plek (src/lib/menuTabs.js), zodat
+// de tabbladen op de restaurantpagina en de menukaart zelf nooit uit elkaar
+// lopen. Alleen de titel komt daar vandaan; het label met emoji blijft hier.
+import { MENU_TITLES } from '@/src/lib/menuTabs'
 
 export const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -24,10 +28,10 @@ export const TAG_LABELS = {
 const NEUTRAL_DIET_TAG_KEYS = new Set(['vegetarisch', 'vegan'])
 
 export const MEAL_CONFIG = {
-  lunch:          { label: '🥗 Lunch',          title: 'Lunchkaart' },
-  diner:          { label: '🍽 Diner',          title: 'Dinerkaart' },
-  borrel:         { label: '🍸 Borrel',         title: 'Borrelkaart' },
-  specialiteiten: { label: '⭐ Specialiteiten', title: 'Specialiteiten' },
+  lunch:          { label: '🥗 Lunch',          title: MENU_TITLES.lunch },
+  diner:          { label: '🍽 Diner',          title: MENU_TITLES.diner },
+  borrel:         { label: '🍸 Borrel',         title: MENU_TITLES.borrel },
+  specialiteiten: { label: '⭐ Specialiteiten', title: MENU_TITLES.specialiteiten },
 }
 
 export const EU14 = [
