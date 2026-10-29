@@ -196,7 +196,11 @@ test('BE-37 slordigheden: the internal sign-in screens are Dutch', () => {
   assert.match(setPassword, /'Wachtwoord opslaan'/);
   assert.doesNotMatch(setPassword, /Set your password|'Set password'|Checking your invitation link|New password|Confirm new password/);
 
-  assert.match(read('src/lib/activationFlow.js'), /Deze code is ongeldig of verlopen\. Vraag een nieuwe code aan\./);
+  // BE-48 (#112): the Dutch auth texts now live in one shared translation
+  // (src/lib/authErrors.js); activationFlow.js only calls it. The behaviour
+  // itself is proven in activationFlow.test.js and authErrors.test.js.
+  assert.match(read('src/lib/activationFlow.js'), /require\('\.\/authErrors'\)/);
+  assert.match(read('src/lib/authErrors.js'), /Deze code is ongeldig of verlopen\. Vraag een nieuwe code aan\./);
   assert.match(read('src/lib/setPasswordFlow.js'), /De wachtwoorden zijn niet gelijk\./);
   assert.doesNotMatch(read('src/lib/setPasswordFlow.js'), /Passwords do not match|Password must be at least|Something went wrong setting/);
 
