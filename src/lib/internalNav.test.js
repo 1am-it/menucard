@@ -101,16 +101,19 @@ test('open work has the contract order and the contract labels, each with its re
   );
 });
 
-test('below the separating line: Stadsoverzicht (was Bronwerkvoorraad) and Restaurantgegevens (concept) (was Profielconcepten), routes and ids unchanged, never counted', () => {
+test('below the separating line: Stadsoverzicht (was Bronwerkvoorraad), Restaurantgegevens (concept) (was Profielconcepten) and Tellers (BE-45), routes and ids unchanged, never counted', () => {
   const secondary = INTERNAL_MODULES.filter((m) => m.placement === 'secondary');
   assert.deepEqual(
     secondary.map((m) => [m.id, m.label, m.href]),
     [
       ['source-workqueue', 'Stadsoverzicht', '/internal/source-workqueue'],
       ['profile-drafts', 'Restaurantgegevens (concept)', '/internal/profile-drafts'],
+      ['tellers', 'Tellers', '/internal/tellers'],
     ],
   );
   for (const module of secondary) assert.ok(!('countKey' in module), `${module.id} must never show a count`);
+  const tellers = secondary.find((m) => m.id === 'tellers');
+  assert.equal(tellers.requiredRole, 'internal', 'BE-45: only the internal role sees Tellers');
 });
 
 test('every module keeps an existing internal route, a non-empty label, a recognized role and a recognized placement', () => {
@@ -133,13 +136,17 @@ test('every open-work entry carries a subtitle for the menu; a module without a 
   assert.deepEqual([primary, openWork, secondary], [[], [], []]);
 });
 
-test('resolveVisibleModules: an internal-only account sees Dekking, the three internal open-work sections and the two secondary ones — not Beoordelen', () => {
+test('resolveVisibleModules: an internal-only account sees Dekking, the three internal open-work sections and the three secondary ones — not Beoordelen', () => {
   const ids = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'profile-drafts', 'source-triage', 'source-workqueue', 'tellers']);
 });
 
 test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation)', () => {
   assert.deepEqual(resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id), ['moderation']);
+  // BE-45 (#114): Tellers staat niet in de navigatie van een editor of owner.
+  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'tellers'));
+  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '6' }]).some((m) => m.id === 'tellers'));
+  assert.deepEqual(groupModulesByPlacement(resolveVisibleModules([{ role: 'owner' }])), { primary: [], openWork: [], secondary: [] });
 });
 
 test('resolveVisibleModules: an owner-only account and a role-less account see zero modules — no invented destination', () => {
@@ -150,7 +157,7 @@ test('resolveVisibleModules: an owner-only account and a role-less account see z
 
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not one role\'s subset', () => {
   const ids = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]).map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'moderation', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'moderation', 'profile-drafts', 'source-triage', 'source-workqueue', 'tellers']);
 });
 
 test('onboarding-menu stays out of the shared nav for every role (route and deep links untouched)', () => {
@@ -167,7 +174,7 @@ test('groupModulesByPlacement: splits the role-filtered list into primary, open 
   const { primary, openWork, secondary } = groupModulesByPlacement(modules);
   assert.deepEqual(primary.map((m) => m.id), ['coverage']);
   assert.deepEqual(openWork.map((m) => m.id), ['menu-concepts', 'source-triage', 'import-inbox', 'moderation']);
-  assert.deepEqual(secondary.map((m) => m.id), ['source-workqueue', 'profile-drafts']);
+  assert.deepEqual(secondary.map((m) => m.id), ['source-workqueue', 'profile-drafts', 'tellers']);
 });
 
 test('groupModulesByPlacement: never throws and returns empty groups for non-array input', () => {

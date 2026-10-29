@@ -72,6 +72,10 @@ const INTERNAL_MODULES = [
   { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'open-work', countKey: 'moderation', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'source-workqueue', label: 'Stadsoverzicht', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'secondary', subtitle: 'Bron en menukaart per restaurant' },
   { id: 'profile-drafts', label: 'Restaurantgegevens (concept)', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'secondary', subtitle: 'Klaarzetten' },
+  // BE-45 (#114, criterium 4): de anonieme tellers per gerecht. Alleen voor de
+  // rol `internal` — de pagina en de API weigeren een editor of owner ook zelf
+  // (403), dus dit item is hooguit de vindbaarheid, nooit de beveiliging.
+  { id: 'tellers', label: 'Tellers', href: '/internal/tellers', requiredRole: 'internal', placement: 'secondary', subtitle: 'Gedeeld, bewaard en reserveerkliks per gerecht' },
 ];
 
 
