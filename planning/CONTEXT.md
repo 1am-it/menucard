@@ -144,6 +144,20 @@ for `service_role`; both RPCs are `SECURITY INVOKER` with
 proposal or audit-event data. BE-24's app/API/UI branch remains unreleased, so
 this schema release exposes no new user-facing workflow by itself.
 
+**2026-10-29 — `0021` live.** Migration `0021_be44_dish_counters.sql`
+(BE-44 anonymous dish counters, #105, merged in PR #108) was applied alone
+through the same approval-gated pipeline after release preparation in PR #109:
+[run 40825047768](https://github.com/1am-it/menucard/actions/runs/40825047768),
+`success`, approved by the owner. The run's own read-only post-apply check
+confirmed live migration history `0001` through `0021`. The table holds only
+per-dish, per-UTC-day aggregate counts (shared, saved, reservation clicks): no
+identity, IP address, cookie or per-event timestamp. RLS is on with no policies;
+only `service_role` may use the table and the `increment_dish_counter` RPC.
+No counter data was written by the release itself. The app shipped first and
+failed safe (`204`, nothing counted) until this release; counting is live from
+here. Releases `0016` through `0020` predate this record and are not repeated
+here.
+
 ## Parallel track: PLATFORM-*
 
 A second, parallel ticket track (`PLATFORM-01` through `PLATFORM-10`) covers
