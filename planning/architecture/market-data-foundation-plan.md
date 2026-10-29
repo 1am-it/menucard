@@ -264,3 +264,33 @@ against that new market's real `MARKET-07` numbers. `MARKET-09` (the full
 snapshot/CDN-optimized layer) is not required to launch a second market —
 only to serve several simultaneously live markets without hand-maintaining
 parallel static files indefinitely.
+
+## Visitor-facing city selection (design rule, owner-approved 2026-10-29)
+
+Direction for when `MARKET-08` (or later) exposes more than one live city to
+visitors. Not scheduled; it fixes the UX so the second city does not reopen
+the question. Approved mockup:
+https://claude.ai/artifact/2TNFYCZUtDRF2oVtrro92o (4 screens, light and dark).
+
+- **One city at a time.** Search results never mix cities; prices and dishes
+  only mean something in one place.
+- **Always visible city button** next to the search, e.g. "Breda ⌄", and the
+  city in the search placeholder ("Zoek een gerecht in Breda"). Never hidden
+  in a hamburger menu.
+- **City in the URL** via the market `slug` (decision 011), e.g.
+  `/breda/menu/…`. A shared link always opens in the dish's city; when that
+  differs from the visitor's remembered city a small status line offers
+  "Je kijkt nu in X · Terug naar Y". The remembered choice only changes when
+  the visitor switches.
+- **Choosing a city:** a plain text list (bottom sheet), "Gebruik mijn
+  locatie" only on an explicit tap, a search field only beyond ~8 cities, and
+  one line "Jouw stad er nog niet bij? Laat het weten." No map as main
+  navigation, no automatic IP/geo redirect.
+- **First visit:** with a single live city, go straight there. With several,
+  remember the last city on the device (local storage, no account); only a
+  first-time visitor sees "In welke stad wil je eten?".
+- **Only ready cities are listed** (decision 012 thresholds). Regions stay
+  one entry ("Breda en omgeving") with nearby towns as filter chips inside.
+- **Performance:** only the chosen city's data loads; the selector itself is
+  static text.
+- Visitors see "stad"/"regio", never "market" (decision 011).
