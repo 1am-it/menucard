@@ -204,9 +204,15 @@ export default function TellersPage() {
           </p>
         )}
 
+        {!error && loading && report && (
+          <p className="tellers-status" role="status">
+            Bezig met bijwerken…
+          </p>
+        )}
+
         {!error && report && (
           <>
-            <h2 className="tellers-section-title">Totalen · {periodLabel(periode)}</h2>
+            <h2 className="tellers-section-title">Totalen · {periodLabel(report.periode || periode)}</h2>
             <Totals totalen={report.totalen} />
 
             {rijen.length === 0 ? (
