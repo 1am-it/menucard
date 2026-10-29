@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-28T23:43:52.391Z",
-  "ticket": "#105 BE-44 deel 1 — een gerecht delen met voorvertoning",
+  "generatedAt": "2026-10-29T00:43:30.519Z",
+  "ticket": "#105 BE-44 deel 2 — bewaren, het lijstje en de voorvertoning",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
   "filter": null,
@@ -10,7 +10,7 @@
       "checks": 70,
       "passed": 70,
       "failed": 0,
-      "durationMs": 28993,
+      "durationMs": 28362,
       "error": null
     },
     {
@@ -18,20 +18,44 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 22535,
+      "durationMs": 20149,
+      "error": null
+    },
+    {
+      "name": "bewaren",
+      "checks": 84,
+      "passed": 84,
+      "failed": 0,
+      "durationMs": 35359,
+      "error": null
+    },
+    {
+      "name": "mijn-lijstje",
+      "checks": 66,
+      "passed": 66,
+      "failed": 0,
+      "durationMs": 35269,
+      "error": null
+    },
+    {
+      "name": "gedeeld-lijstje",
+      "checks": 54,
+      "passed": 54,
+      "failed": 0,
+      "durationMs": 18408,
       "error": null
     },
     {
       "name": "server",
-      "checks": 14,
-      "passed": 14,
+      "checks": 24,
+      "passed": 24,
       "failed": 0,
-      "durationMs": 5468,
+      "durationMs": 5172,
       "error": null
     }
   ],
   "checks": {
-    "total": 120,
+    "total": 334,
     "failed": 0,
     "entries": [
       {
@@ -565,6 +589,1026 @@
         "detail": "overflow=0"
       },
       {
+        "name": "bewaren (1280/light): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (1280/light): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":774.6875,\"left\":184.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (1280/light): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (1280/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (1280/light): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (1280/light): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (1280/light): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (1280/light): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (1280/light): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":886,\"left\":519.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (1280/light): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (1280/light): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (1280/light): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (1280/light): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "bewaren (390/light): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (390/light): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1304.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (390/light): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (390/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (390/light): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (390/light): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (390/light): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (390/light): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (390/light): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":712,\"left\":77.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (390/light): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (390/light): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (390/light): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (390/light): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "bewaren (320/light): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (320/light): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1408.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (320/light): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (320/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (320/light): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (320/light): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (320/light): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (320/light): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (320/light): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":712,\"left\":42.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (320/light): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (320/light): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (320/light): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (320/light): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "bewaren (1280/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (1280/dark): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":774.6875,\"left\":184.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (1280/dark): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (1280/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (1280/dark): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (1280/dark): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (1280/dark): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (1280/dark): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (1280/dark): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":886,\"left\":519.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (1280/dark): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (1280/dark): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (1280/dark): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (1280/dark): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "bewaren (390/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (390/dark): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1304.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (390/dark): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (390/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (390/dark): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (390/dark): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (390/dark): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (390/dark): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (390/dark): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":712,\"left\":77.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (390/dark): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (390/dark): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (390/dark): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (390/dark): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "bewaren (320/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+      },
+      {
+        "name": "bewaren (320/dark): het tikvlak is minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"top\":1408.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+      },
+      {
+        "name": "bewaren (320/dark): zonder bewaard gerecht is er geen onderbalk",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "bewaren (320/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+      },
+      {
+        "name": "bewaren (320/dark): de bladwijzer is gevuld",
+        "passed": true,
+        "detail": "currentColor"
+      },
+      {
+        "name": "bewaren (320/dark): het gerecht staat in localStorage",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\"]"
+      },
+      {
+        "name": "bewaren (320/dark): de onderbalk zegt \"1 bewaard · Bekijken →\"",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (320/dark): de onderbalk linkt naar het lijstje",
+        "passed": true,
+        "detail": "/mijn-lijstje"
+      },
+      {
+        "name": "bewaren (320/dark): de onderbalk heeft een tikvlak van minstens 44 px",
+        "passed": true,
+        "detail": "{\"top\":712,\"left\":42.671875,\"width\":235,\"height\":48}"
+      },
+      {
+        "name": "bewaren (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "bewaren (320/dark): na een reload staat hij nog op \"Bewaard\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaard\"}"
+      },
+      {
+        "name": "bewaren (320/dark): de onderbalk staat er na de reload ook",
+        "passed": true,
+        "detail": "1 bewaard · Bekijken →"
+      },
+      {
+        "name": "bewaren (320/dark): uitgezet is hij weer \"Bewaren\"",
+        "passed": true,
+        "detail": "{\"label\":\"Bewaren\"}"
+      },
+      {
+        "name": "bewaren (320/dark): dan is er weer geen onderbalk en is de opslag leeg",
+        "passed": true,
+        "detail": "{\"bar\":null,\"stored\":[]}"
+      },
+      {
+        "name": "mijn lijstje (1280/light): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (1280/light): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (1280/light): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (1280/light): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (1280/light): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (1280/light): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (1280/light): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (1280/light): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\"}"
+      },
+      {
+        "name": "mijn lijstje (1280/light): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (1280/light): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "mijn lijstje (390/light): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (390/light): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (390/light): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (390/light): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (390/light): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (390/light): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (390/light): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (390/light): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\"}"
+      },
+      {
+        "name": "mijn lijstje (390/light): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (390/light): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "mijn lijstje (320/light): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (320/light): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (320/light): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (320/light): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (320/light): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (320/light): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (320/light): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (320/light): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=licht\"}"
+      },
+      {
+        "name": "mijn lijstje (320/light): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (320/light): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (1280/dark): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\"}"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (1280/dark): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "mijn lijstje (390/dark): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (390/dark): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (390/dark): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (390/dark): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (390/dark): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (390/dark): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (390/dark): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (390/dark): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\"}"
+      },
+      {
+        "name": "mijn lijstje (390/dark): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (390/dark): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "mijn lijstje (320/dark): de pagina heet \"Mijn lijstje\"",
+        "passed": true,
+        "detail": "Mijn lijstje"
+      },
+      {
+        "name": "mijn lijstje (320/dark): beide bewaarde gerechten staan erin",
+        "passed": true,
+        "detail": "[\"Poussin\",\"Kreeft (pasta)\"]"
+      },
+      {
+        "name": "mijn lijstje (320/dark): gerecht, restaurant en prijs staan per regel",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (320/dark): een gerecht zonder prijs zegt \"op aanvraag\"",
+        "passed": true,
+        "detail": "{\"name\":\"Kreeft (pasta)\",\"meta\":\"Brasserie Bardot\",\"price\":\"op aanvraag\",\"href\":\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":true}"
+      },
+      {
+        "name": "mijn lijstje (320/dark): elk gerecht is aan te tikken naar de menukaart",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "mijn lijstje (320/dark): elk gerecht heeft een verwijderknop",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "mijn lijstje (320/dark): \"Lijstje delen\" staat erbij",
+        "passed": true,
+        "detail": "Lijstje delen"
+      },
+      {
+        "name": "mijn lijstje (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "mijn lijstje (320/dark): \"Lijstje delen\" kopieert de lijstlink",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\",\"expectedListUrl\":\"http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker\"}"
+      },
+      {
+        "name": "mijn lijstje (320/dark): verwijderen haalt één gerecht weg",
+        "passed": true,
+        "detail": "{\"rows\":1}"
+      },
+      {
+        "name": "mijn lijstje (320/dark): de opslag houdt één gerecht over",
+        "passed": true,
+        "detail": "[\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=donker\"]"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/light): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=donker\"]"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (390/light): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=donker\"]"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"light\",\"stand\":\"donker\"}"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (320/light): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (1280/dark): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (390/dark): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): de kop is \"Gedeeld lijstje · 2 gerechten\"",
+        "passed": true,
+        "detail": "Gedeeld lijstje · 2 gerechten"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): de pagina zegt hoeveel er mist",
+        "passed": true,
+        "detail": "Niet meer beschikbaar: 1"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): elk gerecht is aan te tikken",
+        "passed": true,
+        "detail": "[\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"/menu/6-diner?dish=6-diner-0-1&name=Kreeft+%28pasta%29&cat=Specialiteiten+van+Bardot&stand=licht\"]"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): gerecht, restaurant en prijs staan erbij",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"meta\":\"Brasserie Bardot\",\"price\":\"€20,95\",\"href\":\"/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"remove\":false}"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): \"Zet ze op mijn eigen lijstje\" staat klaar",
+        "passed": true,
+        "detail": "Zet ze op mijn eigen lijstje"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): de stand in de link verandert het thema niet",
+        "passed": true,
+        "detail": "{\"theme\":\"dark\",\"stand\":\"licht\"}"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): overnemen meldt \"Op je lijstje gezet\"",
+        "passed": true,
+        "detail": "{\"status\":\"Op je lijstje gezet\"}"
+      },
+      {
+        "name": "gedeeld lijstje (320/dark): beide gerechten staan nu in de eigen opslag",
+        "passed": true,
+        "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
+      },
+      {
         "name": "server: de gedeelde link antwoordt met 200",
         "passed": true,
         "detail": "200"
@@ -622,10 +1666,60 @@
       {
         "name": "og:image: licht en donker zijn echt twee verschillende afbeeldingen",
         "passed": true,
-        "detail": "{\"licht\":39411,\"donker\":39517}"
+        "detail": "{\"licht\":44085,\"donker\":44194}"
       },
       {
         "name": "og:image: een ongeldige positie geeft 404 in plaats van een verzonnen kaart",
+        "passed": true,
+        "detail": "404"
+      },
+      {
+        "name": "lijstje: de gedeelde link antwoordt met 200",
+        "passed": true,
+        "detail": "200"
+      },
+      {
+        "name": "lijstje: og:title is \"<n> gerechten om uit te kiezen\"",
+        "passed": true,
+        "detail": "2 gerechten om uit te kiezen"
+      },
+      {
+        "name": "lijstje: og:description noemt de restaurants",
+        "passed": true,
+        "detail": "2 gerechten om uit te kiezen — Brasserie Bardot"
+      },
+      {
+        "name": "lijstje: og:url is precies de gedeelde lijstlink",
+        "passed": true,
+        "detail": "http://localhost:3157/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker"
+      },
+      {
+        "name": "lijstje: de kop \"Gedeeld lijstje · 2 gerechten\" staat in de HTML",
+        "passed": true,
+        "detail": "kop niet gevonden"
+      },
+      {
+        "name": "lijstje: og:image is de eigen afbeelding van het lijstje",
+        "passed": true,
+        "detail": "http://localhost:3157/mijn-lijstje/share-image?lijst=6-diner-0-0,6-diner-0-1&stand=donker"
+      },
+      {
+        "name": "lijstje og:image (licht): PNG van 1200 × 630",
+        "passed": true,
+        "detail": "{\"status\":200,\"type\":\"image/png\",\"size\":{\"width\":1200,\"height\":630}}"
+      },
+      {
+        "name": "lijstje og:image (donker): PNG van 1200 × 630",
+        "passed": true,
+        "detail": "{\"status\":200,\"type\":\"image/png\",\"size\":{\"width\":1200,\"height\":630}}"
+      },
+      {
+        "name": "lijstje og:image: licht en donker zijn echt twee verschillende afbeeldingen",
+        "passed": true,
+        "detail": "{\"licht\":39603,\"donker\":39380}"
+      },
+      {
+        "name": "lijstje og:image: een leeg of ongeldig lijstje geeft 404",
         "passed": true,
         "detail": "404"
       },
@@ -640,7 +1734,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-light.png",
-        "sha256": "588e4389acc57961bc15a8019ec03626d8c3d87faeee506cd8191d3a0c922cce",
+        "sha256": "e698fe4a943688e4397f5086b8906b8ef118df2624faa4841074059af880d5ce",
         "width": 1280,
         "height": 950
       },
@@ -652,7 +1746,7 @@
     {
       "file": {
         "file": "be44-melding-1280-light.png",
-        "sha256": "633a8944adc5f4027736ef183e976ed05ba38fe646fd63b1855261c466171f5c",
+        "sha256": "5f05dfe1e4ce87f6a91b906db96d4e58706833041dd34b72840447155fdfe817",
         "width": 1280,
         "height": 950
       },
@@ -665,7 +1759,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-light.png",
-        "sha256": "4c530ee061f018114aae2a83fff6c8199ecab4d8536f9fe200c3db891693a46a",
+        "sha256": "356f09fcd9a2b6825f8f823c0dc7134f51e0d42fdc9ab683a191af7397c378f8",
         "width": 390,
         "height": 844
       },
@@ -677,7 +1771,7 @@
     {
       "file": {
         "file": "be44-melding-390-light.png",
-        "sha256": "eb7061bd39197a5071aba841dcccaefe35eafdcc9b58fd170454648f7d30359c",
+        "sha256": "f336878e7bc444ed659572aff09bc30171a6dc74f9bdf2499241437f39f7cff4",
         "width": 390,
         "height": 844
       },
@@ -690,7 +1784,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-light.png",
-        "sha256": "daefa6804fe37235fac6400794e4f7cd52d5180894d3ae28255e9985dbc8083f",
+        "sha256": "d47bdae73122c014280b92be1f1b23384fe856672eb8ae8fbb7b373f7daf34e0",
         "width": 320,
         "height": 844
       },
@@ -702,7 +1796,7 @@
     {
       "file": {
         "file": "be44-melding-320-light.png",
-        "sha256": "5cafb53148b56c009a0cde1f53a929fdd78e04781203a1abca797e5a49ca1477",
+        "sha256": "f5c7897ad449824d904a64f865ecb8b6bf806a48b48eceed4b5db0db8d8707be",
         "width": 320,
         "height": 844
       },
@@ -715,7 +1809,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-dark.png",
-        "sha256": "ebe3be408788c73e649911bb705f2806713d6f6eca13008d27b5efd579310243",
+        "sha256": "e3f22415f6c0a279d0b6c33fc21c9e63d4d6082a1064541e712ad25b0c37c9e7",
         "width": 1280,
         "height": 950
       },
@@ -727,7 +1821,7 @@
     {
       "file": {
         "file": "be44-melding-1280-dark.png",
-        "sha256": "d45731670019db8a94cf9213cfec9ae3ab2371961633929b77f9c098b58c0ee9",
+        "sha256": "ec083f8f6ad54f5d6c46eb34ea54cdb2294b14ef97dd69db95c3d620006f97b2",
         "width": 1280,
         "height": 950
       },
@@ -740,7 +1834,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-dark.png",
-        "sha256": "47eb9e644415b49619da58e8232ee5e7fa6d7cc3266a70cb1e974ddd7584ab82",
+        "sha256": "ff35bd7d48e6af926e39ebdf035e7a68a41d48d65362d792d75014c5d53af879",
         "width": 390,
         "height": 844
       },
@@ -752,7 +1846,7 @@
     {
       "file": {
         "file": "be44-melding-390-dark.png",
-        "sha256": "31aa047ead055303fd995c239b3dda7da3df01b76983fde65afe5c551ece8007",
+        "sha256": "4b2818aa10c600e06371115565cfb6c267034cec180b390739fe95c05d64f0ae",
         "width": 390,
         "height": 844
       },
@@ -765,7 +1859,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "2a56ebfb4ae9f0ec4652f2871bdff5f22a7e6c1f1641f01808a93a46a2109f7c",
+        "sha256": "64dc6e413660d76d98923081509c70a9a87016eb8c72b0020bbb77f6f279a0ef",
         "width": 320,
         "height": 844
       },
@@ -777,7 +1871,7 @@
     {
       "file": {
         "file": "be44-melding-320-dark.png",
-        "sha256": "63f638a73cd03b8cab3a80a0f021765c06ecf53c0189028782649c00aae57c2b",
+        "sha256": "62ea9936f33275bb8f2b626ccee63aece77611dc6dff57106ff5980e74ed2d05",
         "width": 320,
         "height": 844
       },
@@ -790,7 +1884,7 @@
     {
       "file": {
         "file": "be44-ontvanger-1280-light.png",
-        "sha256": "452767cdafa92643d03301297dc7c4a4dc488589581ec6a61dcaa6c3c44c2b3b",
+        "sha256": "f2a85ba6208edba8789d453b499418a9c793a975c7442c1ec4af6b7d16366cbb",
         "width": 1280,
         "height": 950
       },
@@ -803,7 +1897,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "be75c798d91722a227e324b881db38632015d991df25ce939b303c48616fe079",
+        "sha256": "c4d48a7d0d0dfbdb47bb682c81608935b30c4d0c1dda1b28f81cce7e0db71b83",
         "width": 390,
         "height": 844
       },
@@ -816,7 +1910,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "302dd7cd36dfc8c74c5e41341326536afccdc30a6768d85c64de27ef325cd9e8",
+        "sha256": "9bf9a541fb681fee427192862dbc6ffa91e4706863bdb4a6b63e9dc05a2dbe6a",
         "width": 320,
         "height": 844
       },
@@ -829,7 +1923,7 @@
     {
       "file": {
         "file": "be44-ontvanger-1280-dark.png",
-        "sha256": "da65df802f96e6813e3dbff37473a1a42ac08f1e210988fb3106f60483e99930",
+        "sha256": "f72293b3f8a9a86f6cf92b47fb32ba73e99b8381b3b16adedfeb6219ac337097",
         "width": 1280,
         "height": 950
       },
@@ -842,7 +1936,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-dark.png",
-        "sha256": "632b0114430d159d32ba5c239410af10d041de13c160081e4984c92d302bc8aa",
+        "sha256": "6dce4c13a62253be6ddedddca6c9b46e4293b1b333e4a13e7ceca197b92c19ed",
         "width": 390,
         "height": 844
       },
@@ -855,7 +1949,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "7269d5f6cad60befe22a056f6461abdf9b50a105f026ca45f63b16fbe6141871",
+        "sha256": "cb52e1a34dac025b8e358aaf476e26e2db3cfa2d6ec306a79dc6afd2d2d8dd96",
         "width": 320,
         "height": 844
       },
@@ -864,6 +1958,300 @@
       "theme": "dark",
       "width": 320,
       "link": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-1280-light.png",
+        "sha256": "d3dd5308d77e29c0c2ac9198b0e3c980b405677b130ddbd8a157921e1f947fcf",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "bewaren",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-1280-light.png",
+        "sha256": "d3dd5308d77e29c0c2ac9198b0e3c980b405677b130ddbd8a157921e1f947fcf",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "onderbalk",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-390-light.png",
+        "sha256": "238acb3c635e56f8735bb482239bd64807c146662e4982cbc5f834ec0eda5f75",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "bewaren",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-390-light.png",
+        "sha256": "9a9f309fa78b14a8c1391508e878c2ceabe130bfbe250432a41dbcadd18aaa37",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "onderbalk",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-320-light.png",
+        "sha256": "0375f85dbeb085d10d918d2b5f13cbbd6786cbf4c30ba29d44966a465501bf4c",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "bewaren",
+      "theme": "light",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-320-light.png",
+        "sha256": "2b85974f1700d13a8bcfda3c017dc9fc70ae91229291f1fcd34285f5113865c4",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "onderbalk",
+      "theme": "light",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-1280-dark.png",
+        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "bewaren",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-1280-dark.png",
+        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "onderbalk",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-390-dark.png",
+        "sha256": "53a5a6acf2e3c08bf6e509ae9d5af43b9a7737c7a9480dc15e6ad12b5a3e80d8",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "bewaren",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-390-dark.png",
+        "sha256": "2f6970d8cf0bf346c5a528e28e012c7b26af99d08b833b4db505673e49d3636f",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "onderbalk",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-bewaard-320-dark.png",
+        "sha256": "272015b64b3590056b99a2a6dc6e0d0a32bdd4619521f2d090b1de005b743593",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "bewaren",
+      "theme": "dark",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-onderbalk-320-dark.png",
+        "sha256": "dfa62afe807cd806a073c72e5f921459da5141ebae7597085dfd4f42581862fd",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "onderbalk",
+      "theme": "dark",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-1280-light.png",
+        "sha256": "4f35dbd9502501e39a60de0d1408e165f858974e1f22c3d4c7cf0547d3570686",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "mijn-lijstje",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-390-light.png",
+        "sha256": "e67264859c9651414f1eb383c2e77e2f47e6fa242b8efde12bfff22e13da482e",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "mijn-lijstje",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-320-light.png",
+        "sha256": "b0eecb0a61289b18b390780189387a5786a7817eb28c498360ba4c261e7c0f58",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "mijn-lijstje",
+      "theme": "light",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-1280-dark.png",
+        "sha256": "97c75f47154bf3ad0fb86ddcce552f43a89c61396e02ed5bc7df8f00376c4db3",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "mijn-lijstje",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-390-dark.png",
+        "sha256": "24c8ec9011bf3de6d0606e576904954ea18a4af63479a713991ee3d67f21a611",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "mijn-lijstje",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "file": {
+        "file": "be44-mijn-lijstje-320-dark.png",
+        "sha256": "6ce8f9a8ce1687c14e81df6935ba1f111ebd1b00edd04a9dbb9d5d29f96d0d98",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "mijn-lijstje",
+      "theme": "dark",
+      "width": 320
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-1280-light.png",
+        "sha256": "b66e65034d937760ff744061ddf43cb31d8e645d6d43aa449b112760d039e248",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "gedeeld-lijstje",
+      "theme": "light",
+      "width": 1280,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-390-light.png",
+        "sha256": "000a9f495e13906b8a5e230eaeebc8e4f29c82d51702f872490ba3637fc6ec75",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "gedeeld-lijstje",
+      "theme": "light",
+      "width": 390,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-320-light.png",
+        "sha256": "b2ae2230c4d6ed49ccc8ddccf46648eeb2eba919e8adb2bb95a953d700566f96",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "gedeeld-lijstje",
+      "theme": "light",
+      "width": 320,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=donker"
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-1280-dark.png",
+        "sha256": "b1c8e00033ee376a5034733325185665d9d8b5066106a2fe3b104b390ee64223",
+        "width": 1280,
+        "height": 950
+      },
+      "viewport": "1280x950",
+      "scenario": "gedeeld-lijstje",
+      "theme": "dark",
+      "width": 1280,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=licht"
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-390-dark.png",
+        "sha256": "fd5ce112e5b248c6036697e1724d6acbda312329f00494d010475db74f29d80a",
+        "width": 390,
+        "height": 844
+      },
+      "viewport": "390x844",
+      "scenario": "gedeeld-lijstje",
+      "theme": "dark",
+      "width": 390,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=licht"
+    },
+    {
+      "file": {
+        "file": "be44-gedeeld-lijstje-320-dark.png",
+        "sha256": "7144fa2615e41fe9f28cf16bb0c033aa9c3a8545be4864d9e3b29e0e698eec63",
+        "width": 320,
+        "height": 844
+      },
+      "viewport": "320x844",
+      "scenario": "gedeeld-lijstje",
+      "theme": "dark",
+      "width": 320,
+      "link": "/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1,99-diner-0-0&stand=licht"
     }
   ],
   "fixture": {
@@ -879,6 +2267,8 @@
   "gaps": [
     "Het systeemdeelmenu zelf is van de telefoon: navigator.share is in deze check een stub die de payload vastlegt, geen echte share-sheet.",
     "Het klembord is een stub: de check bewijst welke link gekopieerd wordt en dat de melding verschijnt, niet het echte systeemklembord.",
+    "Het lijstje is localStorage in een tijdelijk browserprofiel: de check bewijst de opslag, de stand na een reload en het verwijderen, geen privémodus of volle schijf.",
+    "De voorvertoning van het lijstje is een PNG van deze build; of externe platforms hem precies zo tonen, is niet in een browsercheck te bewijzen.",
     "Dit is developer-evidence op een lokale build: geen productie, geen echte Supabase-credentials, geen merge of publicatie.",
     "De app-brede AI-activering valt buiten deze opdracht; er is hier niets aan AI of Supabase geactiveerd."
   ],

@@ -639,11 +639,11 @@ light and dark, plus the ready/merged detail card. Screenshots
 This is fixture evidence on a local machine: not real acceptance and not
 independent review.
 
-## BE-44 (#105) — sharing one dish and its preview
+## BE-44 (#105) — sharing one dish, saving and the list
 
 `run-be44-browser-check.js` (also `npm run test:browser:be44`) starts its own
 local dev server and browser through the same runtime as the other checks and
-records three scenarios (`--lijst`, `--alleen=<naam>`):
+records six scenarios (`--lijst`, `--alleen=<naam>`):
 
 - **delen** — on `/menu/6-diner` the card of the real dish "Poussin" (€20,95)
   has the button "Delen" with the share icon, under the description and not in
@@ -656,19 +656,39 @@ records three scenarios (`--lijst`, `--alleen=<naam>`):
 - **ontvanger** — opening the shared link shows "Iemand deelde dit gerecht met
   je" above the highlighted card, and the `?stand=` in the link does not change
   the page's theme for the receiver.
-- **server** — the server HTML of a shared link has `og:title`
+- **bewaren** (deel 2, criterium 4) — the button "Bewaren" next to "Delen"
+  becomes "Bewaard" with `aria-pressed="true"` and a filled bookmark, the dish
+  lands in `localStorage`, the bottom bar says "1 bewaard · Bekijken →" and
+  links to `/mijn-lijstje`, and that state survives a reload before it can be
+  switched off again.
+- **mijn-lijstje** (deel 2) — `/mijn-lijstje` lists both saved dishes with dish,
+  restaurant and price (including "op aanvraag" when the source has no price),
+  each row links to its menu deep link and has its own remove button; "Lijstje
+  delen" copies exactly the list link with the ids and the stand; removing one
+  dish leaves one in storage.
+- **gedeeld-lijstje** (deel 2) — opening
+  `/mijn-lijstje?lijst=<two ids>,<unknown id>&stand=` shows "Gedeeld lijstje ·
+  2 gerechten", says "Niet meer beschikbaar: 1", lets every dish be tapped,
+  does not follow the stand for its own theme, and "Zet ze op mijn eigen
+  lijstje" puts both dishes in the receiver's own storage with the message "Op
+  je lijstje gezet".
+- **server** — the server HTML of a shared dish link has `og:title`
   "Poussin · €20,95", `og:description` with the restaurant and the address,
   `og:url`, and an `og:image` of 1200 × 630 for both stands (two different
-  PNGs); an invalid dish position answers 404 instead of inventing a card; the
-  apple-touch-icon is 180 × 180; `/menu/6-diner` without a dish deep link keeps
-  the general metadata.
+  PNGs); an invalid dish position answers 404 instead of inventing a card; a
+  shared list link has its own `og:title` ("2 gerechten om uit te kiezen"),
+  `og:description`, `og:url` and list `og:image` (1200 × 630, two different
+  PNGs); an empty or invalid list answers 404; the apple-touch-icon is
+  180 × 180; `/menu/6-diner` without a dish deep link keeps the general
+  metadata.
 
 The record lands in `ops/browser/evidence/be44-browser-evidence.json` (in git);
-the screenshots and the two `og:image` PNGs plus the apple icon stay outside git
-in the ignored `ops/browser/output/be-44/`. `navigator.share` and the clipboard
-are stubbed in the page: the check proves the payload and the message, not the
-real share sheet or the real system clipboard. Developer evidence on a local
-build — not production, not independent review.
+the screenshots and the four `og:image` PNGs plus the apple icon stay outside git
+in the ignored `ops/browser/output/be-44/`. `navigator.share`, the clipboard and
+`localStorage` are real browser APIs inside a temporary headless profile: the
+check proves the payload, the message and the stored list, not the real share
+sheet, the real system clipboard or a private-mode failure. Developer evidence
+on a local build — not production, not independent review.
 
 ## Limits
 
