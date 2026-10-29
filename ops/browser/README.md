@@ -722,6 +722,9 @@ Scenarios (`--lijst`, `--alleen=<naam>`):
   Dutch, and the right code continuing to the existing `/internal/set-password`.
 - **bestaande-app** — an account that already linked an app goes straight to
   "Code uit je app", with no QR.
+- **eigenaar-zonder-app** — a restaurant owner (`owner` only) is not asked to
+  link anything and lands on the existing status page; the second step is for
+  `internal` and `editor` accounts (BE-47 owns the restaurant route).
 
 Screenshots (light and dark) of the password, code and link-an-app screens land
 in the ignored `ops/browser/output/be-48/`; the record is

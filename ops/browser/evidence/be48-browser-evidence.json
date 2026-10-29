@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T18:28:06.159Z",
+  "generatedAt": "2026-10-29T18:45:55.171Z",
   "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
   "contract": "#112 BE-48 (inloggen met tweede stap, wachtwoord vergeten)",
   "app": "http://localhost:3141",
@@ -10,7 +10,7 @@
       "checks": 21,
       "passed": 21,
       "failed": 0,
-      "durationMs": 2571,
+      "durationMs": 2303,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 2062,
+      "durationMs": 3036,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 12,
       "passed": 12,
       "failed": 0,
-      "durationMs": 5814,
+      "durationMs": 4404,
       "error": null
     },
     {
@@ -34,7 +34,15 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 2044,
+      "durationMs": 2916,
+      "error": null
+    },
+    {
+      "name": "eigenaar-zonder-app",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 2063,
       "error": null
     }
   ],
@@ -43,7 +51,7 @@
     "pageViolations": []
   },
   "checks": {
-    "total": 45,
+    "total": 47,
     "failed": 0,
     "entries": [
       {
@@ -250,6 +258,16 @@
         "name": "existing app: the right code continues to the landing place",
         "passed": true,
         "detail": "/internal/menu-concepts"
+      },
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "owner-only: a restaurant owner does not have to link an app",
+        "passed": true,
+        "detail": "{\"landed\":true,\"path\":\"/internal\"}"
       },
       {
         "name": "network guard: the page recorded no unknown route or external request",

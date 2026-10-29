@@ -148,6 +148,8 @@ async function waitForPath(cdp, pathname, timeoutMs = 25000) {
 }
 
 async function pageState(cdp) {
+  // A document can be mid-navigation; there is no documentElement for a moment.
+  await waitFor(cdp, 'document.documentElement !== null && document.body !== null', 10000);
   return evalJs(
     cdp,
     `(() => {
@@ -180,7 +182,7 @@ async function pageState(cdp) {
         qr: qr ? { src: qr.getAttribute('src'), alt: qr.getAttribute('alt') } : null,
         secret: secret ? secret.innerText.trim() : null,
         body: document.body ? document.body.innerText : '',
-        theme: document.documentElement.getAttribute('data-theme'),
+        theme: document.documentElement ? document.documentElement.getAttribute('data-theme') : null,
         path: location.pathname,
       };
     })()`,
@@ -203,7 +205,8 @@ async function startLogin(cdp, options) {
 async function warmUp(cdp) {
   console.log('warm-up: compiling the routes this check visits');
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript({}) });
-  for (const url of [LOGIN_URL, FORGOT_URL, `${APP}/internal/menu-concepts`, `${APP}/internal/set-password`]) {
+  const routes = [LOGIN_URL, FORGOT_URL, `${APP}/internal`, `${APP}/internal/menu-concepts`, `${APP}/internal/set-password`];
+  for (const url of routes) {
     await navigate(cdp, url, `document.readyState === 'complete'`);
     await new Promise((resolve) => setTimeout(resolve, 800));
   }
@@ -469,6 +472,38 @@ const SCENARIO_EXISTING_APP = {
   },
 };
 
+const SCENARIO_OWNER_ONLY = {
+  name: 'eigenaar-zonder-app',
+  run: async (cdp) => {
+    await startLogin(cdp, { theme: 'light', factors: [], roles: [{ role: 'owner', restaurant_id: '6' }] });
+    await fillField(cdp, '#auth-email', EMAIL);
+    await fillField(cdp, '#auth-password', PASSWORD);
+    await submitForm(cdp, 'form');
+    // No internal/editor role: the existing status page is the landing place and
+    // no authenticator app is asked for (BE-47 owns the restaurant route).
+    const landed = await waitForPath(cdp, '/internal');
+    const state = await pageState(cdp);
+    if (!landed) {
+      const debug = await evalJs(
+        cdp,
+        `(() => ({
+          path: location.pathname,
+          alert: document.querySelector('[role="alert"]') ? document.querySelector('[role="alert"]').innerText.trim() : null,
+          assurance: window.__BE48__ ? window.__BE48__.assurance() : null,
+          calls: window.__BE48__ ? window.__BE48__.calls.map((call) => call.method + ' ' + call.path) : [],
+          storage: Object.keys(localStorage),
+        }))()`,
+      );
+      console.log('owner-debug', JSON.stringify(debug));
+    }
+    check(
+      'owner-only: a restaurant owner does not have to link an app',
+      landed && !state.body.includes('Beveilig je account') && !state.body.includes('Code uit je app'),
+      JSON.stringify({ landed, path: state.path }),
+    );
+  },
+};
+
 // BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
 // alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
 const SCENARIOS = [
@@ -476,6 +511,7 @@ const SCENARIOS = [
   SCENARIO_WRONG_PASSWORD,
   SCENARIO_FORGOT,
   SCENARIO_EXISTING_APP,
+  SCENARIO_OWNER_ONLY,
 ];
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
 
@@ -487,6 +523,7 @@ const SAFE_SCENARIOS = SCENARIOS.map((scenario) => ({
     try {
       await scenario.run(cdp);
     } catch (error) {
+      console.log('scenario-error', String((error && error.stack) || error));
       check(`${scenario.name}: the scenario ran without an exception`, false, String((error && error.stack) || error).split('\n')[0]);
     }
   },
