@@ -72,6 +72,12 @@ function flatText(value) {
   return String(value === undefined || value === null ? '' : value).split(/\s+/).filter(Boolean).join(' ');
 }
 
+// BE-42 restpunt (#105): een knop die zijn emoji in een eigen span tekent
+// (BE-37's EmojiText) leest de browser als twee blokken — "📷\nLees met AI
+// (afbeelding)". Het label is één regel; daarom vergelijken de controles hier
+// de platte tekst van dat ene label. Alleen de verwachting, geen appwijziging.
+const PAGE_FLAT_TEXT = "const flat = (value) => String(value || '').replace(/\\s+/g, ' ').trim();";
+
 async function setViewport(cdp, width, height) {
   viewport = { width, height };
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
@@ -134,7 +140,8 @@ async function clickButton(cdp, label) {
   return evalJs(
     cdp,
     `(() => {
-      const el = [...document.querySelectorAll('button, a')].find((candidate) => (candidate.innerText || '').trim() === ${JSON.stringify(label)});
+      ${PAGE_FLAT_TEXT}
+      const el = [...document.querySelectorAll('button, a')].find((candidate) => flat(candidate.innerText) === ${JSON.stringify(label)});
       if (!el) return false;
       el.click();
       return true;
@@ -163,6 +170,7 @@ async function readRow(cdp) {
   return evalJs(
     cdp,
     `(() => {
+      ${PAGE_FLAT_TEXT}
       const rows = [...document.querySelectorAll('.cov-check-table tbody tr')];
       const row = rows.find((candidate) => (candidate.innerText || '').includes('Fictief Al Dente')) || rows[0] || null;
       // BE-34 (#81): the AI step is a button in the row now; a manual step is
@@ -174,14 +182,14 @@ async function readRow(cdp) {
         present: Boolean(row),
         text: document.body.innerText,
         rowText: row ? row.innerText : '',
-        outcome: row && row.querySelector('.cov-check-outcome') ? row.querySelector('.cov-check-outcome').innerText.trim() : '',
-        action: actionEl ? actionEl.innerText.trim() : '',
+        outcome: row && row.querySelector('.cov-check-outcome') ? flat(row.querySelector('.cov-check-outcome').innerText) : '',
+        action: actionEl ? flat(actionEl.innerText) : '',
         actionTag: actionEl ? actionEl.tagName.toLowerCase() : '',
         href: actionEl ? actionEl.getAttribute('href') : null,
-        paste: paste ? paste.innerText.trim() : '',
+        paste: paste ? flat(paste.innerText) : '',
         pasteHref: paste ? paste.getAttribute('href') : null,
-        hint: hint ? hint.innerText.trim() : '',
-        aiLabels: [...document.querySelectorAll('a.cov-check-action, button.cov-check-action, .srr-action')].map((el) => (el.innerText || '').trim()),
+        hint: hint ? flat(hint.innerText) : '',
+        aiLabels: [...document.querySelectorAll('a.cov-check-action, button.cov-check-action, .srr-action')].map((el) => flat(el.innerText)),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         theme: document.documentElement.getAttribute('data-theme'),
       };

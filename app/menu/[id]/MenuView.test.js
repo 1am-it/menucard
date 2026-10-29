@@ -69,7 +69,9 @@ test('BE-14: the back-link remains a real, accessible <Link> element — never a
 
 test('BE-12: imports the shared, unit-tested resolveDishTarget rather than duplicating validation logic here', () => {
   const source = readComponentSource();
-  assert.match(source, /import \{ resolveDishTarget \} from ['"]@\/src\/lib\/dishDeepLink['"]/);
+  // BE-44 (issue 105) adds the one shared deep-link builder to the same import;
+  // the resolver itself is still the shared, unit-tested one.
+  assert.match(source, /import \{[^}]*\bresolveDishTarget\b[^}]*\} from ['"]@\/src\/lib\/dishDeepLink['"]/);
 });
 
 test('BE-12: dish/name/cat/fromQuery are read as their own, separate params — never merged into the existing query/excludeAllergens filter state', () => {

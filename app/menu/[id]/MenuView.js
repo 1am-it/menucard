@@ -5,7 +5,11 @@ import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
-import { resolveDishTarget } from '@/src/lib/dishDeepLink'
+import { resolveDishTarget, buildDishDeepLink } from '@/src/lib/dishDeepLink'
+import { hasShareTheme, dishShareTitle } from '@/src/lib/dishShare'
+import { buildEntry } from '@/src/lib/dishList'
+import { RESERVATION_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
+import SavedListBar from '@/src/components/SavedListBar'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import EmojiText from '@/src/components/EmojiText'
@@ -81,6 +85,12 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
   const nameParam      = searchParams.get('name')
   const catParam       = searchParams.get('cat')
   const fromQueryParam = searchParams.get('fromQuery')
+  // BE-44 (#105) — de stand van een gedeelde link. Hij kiest alleen de kleuren
+  // van de voorvertoningsafbeelding (og:image) en verandert het thema van deze
+  // pagina niet; de pagina leest hem nergens anders voor. De aanwezigheid van
+  // een geldige stand is tegelijk het teken dat iemand deze link deelde, en
+  // dus wanneer de regel "Iemand deelde dit gerecht met je" hoort te staan.
+  const standParam = searchParams.get('stand')
 
   // Filter state — initialiseer vanuit URL
   const [query,           setQuery]           = useState(urlQuery)
@@ -131,6 +141,19 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
     [dishParam, nameParam, catParam, id, r]
   )
   const resolvedTargetItem = dishTarget ? r.categories[dishTarget.catIdx].items[dishTarget.itemIdx] : null
+
+  // BE-44 (#105, criterium 5) — de anonieme teller voor een klik op de
+  // reserveringslink. Er staat één reserveringsknop op de menukaart (bij het
+  // restaurant, niet per gerecht), dus valt er alleen een gerecht aan te wijzen
+  // als deze pagina met een geldige gerechtlink is geopend: dat is precies het
+  // gerecht waar de bezoeker voor kwam. Zonder zo'n link wordt er niets
+  // verstuurd — liever geen telling dan een telling op een willekeurig gerecht.
+  // Fire-and-forget: de link opent gewoon, ook als de telling mislukt.
+  const reservationDishKey = dishTarget ? `${id}-${dishTarget.catIdx}-${dishTarget.itemIdx}` : null
+  function countReservationClick() {
+    if (!reservationDishKey) return
+    void sendDishCounter({ dish: reservationDishKey, event: RESERVATION_EVENT })
+  }
 
   const highlightedItemRef = useRef(null)
   const [showPulse, setShowPulse] = useState(false)
@@ -360,6 +383,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   href={primaryReservation.href}
                   target={isExternalReservation(primaryReservation) ? '_blank' : undefined}
                   rel={isExternalReservation(primaryReservation) ? 'noopener noreferrer' : undefined}
+                  onClick={countReservationClick}
                 >
                   {primaryReservation.label}
                   {isExternalReservation(primaryReservation) && <ExternalLinkIcon />}
@@ -537,6 +561,32 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                     // gehaald; een actief filter verandert die niet.
                     const originalItemIndex = r.categories[origIdx] ? r.categories[origIdx].items.indexOf(item) : -1
                     const domId = originalItemIndex >= 0 ? `gerecht-${id}-${origIdx}-${originalItemIndex}` : undefined
+                    // BE-44 (#105, criterium 1) — de deellink van dit gerecht is
+                    // dezelfde BE-12-deeplink (`buildDishDeepLink`), zonder
+                    // `fromQuery`: een ontvanger hoeft geen zoekopdracht van
+                    // iemand anders te erven. De knop maakt hem bij de klik
+                    // absoluut en zet de stand van dit moment erbij.
+                    const shareHref = originalItemIndex >= 0 && origIdx >= 0
+                      ? buildDishDeepLink({
+                        menuLink: `/menu/${id}`,
+                        dishId: `${id}-${origIdx}-${originalItemIndex}`,
+                        name: item.name,
+                        category: cat.name,
+                      })
+                      : null
+                    // BE-44 (#105, criterium 4) — hetzelfde gerecht kan bewaard
+                    // worden. De knop bewaart alleen wat de pagina al toont:
+                    // naam, restaurant, prijs en de plek in de kaart.
+                    const saveEntry = originalItemIndex >= 0 && origIdx >= 0
+                      ? buildEntry({
+                        menuId: id,
+                        catIdx: origIdx,
+                        itemIdx: originalItemIndex,
+                        item,
+                        category: cat.name,
+                        restaurantName: r.name || restaurant.name,
+                      })
+                      : null
                     return (
                       <MenuItem
                         key={j}
@@ -551,6 +601,11 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         category={cat.name}
                         menuTitle={subtitle}
                         sourceDate={r.scraped}
+                        shareHref={shareHref}
+                        shareTitle={dishShareTitle({ name: item.name, restaurantName: r.name })}
+                        shareNote={isResolvedTarget && hasShareTheme(standParam)}
+                        saveEntry={saveEntry}
+                        dishKey={originalItemIndex >= 0 && origIdx >= 0 ? `${id}-${origIdx}-${originalItemIndex}` : null}
                       />
                     )
                   })}
@@ -572,6 +627,9 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
         </div>
       </main>
 
+      {/* BE-44 (issue 105, criterium 4) — "<n> bewaard · Bekijken →" zodra er
+          iets bewaard is; de balk staat boven de telefoonmenubalk. */}
+      <SavedListBar />
       <MobileTabBar />
     </>
   )
