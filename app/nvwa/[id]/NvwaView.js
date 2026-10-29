@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import Wordmark from '@/src/components/Wordmark'
 import MobileTabBar from '@/src/components/MobileTabBar'
 
@@ -117,6 +118,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
           <Wordmark />
           <div className="nvwa-header-actions">
             <ThemeToggle />
+            <ShareSettingsButton />
             <Link href={`/restaurant/${id}`} className="back-btn">← {restaurant.name}</Link>
             <button onClick={handlePrint} className="nvwa-export-btn">⬇ Export PDF</button>
           </div>

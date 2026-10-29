@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantListCard from '@/src/components/RestaurantListCard'
@@ -163,6 +164,7 @@ function AlleRestaurantsPageInner() {
           <div className="header-right">
             <PrimaryNav />
             <ThemeToggle />
+            <ShareSettingsButton />
           </div>
         </div>
       </header>

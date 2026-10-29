@@ -63,7 +63,7 @@ test('the count is computed from the real data: total restaurants and N with a m
 test('imports and renders the shared PrimaryNav component, before ThemeToggle, inside the existing header-right group', () => {
   const source = readPageSource();
   assert.match(source, /import PrimaryNav from ['"]@\/src\/components\/PrimaryNav['"]/);
-  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>/);
+  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<ShareSettingsButton \/>\s*<\/div>/);
 });
 
 test('the header-right group uses the shared .header-right class, not an inline style', () => {

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import { resolveDishTarget, buildDishDeepLink } from '@/src/lib/dishDeepLink'
@@ -279,6 +280,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <Wordmark />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', rowGap: 8 }}>
             <ThemeToggle />
+            <ShareSettingsButton />
             <Link href={`/restaurant/${baseId}`} className="back-btn">← {r.name || restaurant.name}</Link>
             {/* BE-12 — alongside, not replacing, the restaurant back-link
                 above. Only present when fromQuery is present. Wrapping

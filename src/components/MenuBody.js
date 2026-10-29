@@ -142,14 +142,12 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
       )}
 
-      {/* BE-44 (#105, criterium 1 en 4) — "Delen" en "Bewaren" onder de
-          beschrijving, niet naast de prijs. Alleen de publieke menukaart geeft
-          een link en een bewaarplek mee; het Publicatievoorbeeld (StaticMenu)
-          blijft ongewijzigd. `dishKey` is de id van dit gerecht voor de
-          anonieme teller (criterium 5). */}
-      {(shareHref || saveEntry) && (
-        <DishShareButton href={shareHref} title={shareTitle} entry={saveEntry} dishKey={dishKey} />
-      )}
+      {/* BE-49 (#115, criterium 1) — de kaart is weer van het gerecht: naam en
+          prijs bovenaan, de beschrijving over de volle breedte, en helemaal
+          onderaan één regel met links het label (bijvoorbeeld "Glutenvrij") en
+          rechts de twee icoonknoppen. De knoppen staan dus na de beschrijving,
+          de supplementen en de allergenen; de regel houdt zijn hoogte zodat een
+          kaart zonder label niet verspringt. */}
 
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
       {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}
@@ -191,27 +189,46 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         </div>
       )}
 
-      {dailyInfo && (
-        <div className="item-tags item-daily">
-          <span className="item-tag tag-daghap">
-            <Emoji glyph="📅" /> Daghap
-          </span>
-          <span className="item-daily-date">{dailyInfo.dateLine}</span>
-        </div>
-      )}
+      <div className="card-foot">
+        <div className="card-foot-labels">
+          {dailyInfo && (
+            <div className="item-tags item-daily">
+              <span className="item-tag tag-daghap">
+                <Emoji glyph="📅" /> Daghap
+              </span>
+              <span className="item-daily-date">{dailyInfo.dateLine}</span>
+            </div>
+          )}
 
-      {visibleTags.length > 0 && (
-        <div className="item-tags">
-          {visibleTags.map(t => (
-            <span key={t} className={`item-tag tag-${t}`}>
-              {/* BE-28 — het blad is nu het systeem-emoji (aria-hidden) in
-                  plaats van een SVG; de tekst ernaast draagt de betekenis. */}
-              {NEUTRAL_DIET_TAG_KEYS.has(t) && <Emoji glyph="🌱" className="item-tag-icon-size" />}
-              {TAG_LABELS[t] || t}
-            </span>
-          ))}
+          {visibleTags.length > 0 && (
+            <div className="item-tags">
+              {visibleTags.map(t => (
+                <span key={t} className={`item-tag tag-${t}`}>
+                  {/* BE-28 — het blad is nu het systeem-emoji (aria-hidden) in
+                      plaats van een SVG; de tekst ernaast draagt de betekenis. */}
+                  {NEUTRAL_DIET_TAG_KEYS.has(t) && <Emoji glyph="🌱" className="item-tag-icon-size" />}
+                  {TAG_LABELS[t] || t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+
+        {/* BE-44 (#105, criterium 1 en 4) + BE-49 (#115) — alleen de publieke
+            menukaart geeft een link en een bewaarplek mee; het
+            Publicatievoorbeeld (StaticMenu) blijft ongewijzigd. `dishKey` is de
+            id van dit gerecht voor de anonieme teller, `name` de gerechtnaam
+            voor de aria-labels ("Deel Poussin", "Bewaar Poussin"). */}
+        {(shareHref || saveEntry) && (
+          <DishShareButton
+            href={shareHref}
+            title={shareTitle}
+            entry={saveEntry}
+            dishKey={dishKey}
+            name={item.name}
+          />
+        )}
+      </div>
     </div>
   )
 }

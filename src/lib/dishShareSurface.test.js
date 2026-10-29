@@ -63,18 +63,24 @@ test('/menu/<id> gebruikt de ene deelbouwer voor link, metadata en og:image', ()
   assert.match(MENU_PAGE, /headerList\.get\('host'\)/);
 });
 
-test('de gerechtkaart toont "Delen" en "Bewaren" onder de beschrijving en niet naast de prijs', () => {
+test('de gerechtkaart toont "Delen" en "Bewaren" rechtsonder, onder de beschrijving', () => {
   const desc = MENU_BODY.indexOf('{item.desc && (');
+  const foot = MENU_BODY.indexOf('<div className="card-foot">');
+  const labels = MENU_BODY.indexOf('<div className="card-foot-labels">');
   const share = MENU_BODY.indexOf('<DishShareButton');
-  const supplement = MENU_BODY.indexOf('{item.sup');
-  assert.ok(desc > -1 && share > -1 && supplement > -1);
-  assert.ok(share > desc, 'de deel- en bewaarknoppen staan onder de beschrijving');
-  assert.ok(share < supplement, 'de knoppen staan vóór de supplementen, niet in de prijsregel');
+  assert.ok(desc > -1 && foot > -1 && labels > -1 && share > -1);
+  // BE-49 (#115, criterium 1): de onderste regel komt na de beschrijving, de
+  // supplementen en de allergenen; links de labels, rechts de knoppen.
+  assert.ok(foot > desc, 'de onderste regel staat onder de beschrijving');
+  assert.ok(MENU_BODY.indexOf('{item.sup') < foot, 'de knoppen staan in de onderste regel, niet tussen de tekst');
+  assert.ok(labels > foot && share > labels, 'het label staat links, de icoonknoppen rechts');
   const cardTop = MENU_BODY.slice(MENU_BODY.indexOf('<div className="card-top">'), desc);
   assert.doesNotMatch(cardTop, /DishShareButton|DishSaveButton/, 'de knoppen staan niet in de regel met de prijs');
   // BE-44 criterium 4: dezelfde regel geeft de bewaarplek mee aan de knop.
   assert.match(MENU_BODY, /\{\(shareHref \|\| saveEntry\) && \(/);
   assert.match(MENU_BODY, /entry=\{saveEntry\}/);
+  // BE-49 (#115): en de gerechtnaam, voor "Deel <gerecht>" en "Bewaar <gerecht>".
+  assert.match(MENU_BODY, /name=\{item\.name\}/);
 });
 
 test('alleen de publieke menukaart geeft een deellink mee; het Publicatievoorbeeld niet', () => {
@@ -96,16 +102,24 @@ test('de ontvanger ziet de regel "Iemand deelde dit gerecht met je" bij de kaart
   assert.doesNotMatch(MENU_VIEW, /standParam[\s\S]{0,40}(setQuery|setExcludeAllergens|setDietTags|setMaxPrice)/);
 });
 
-test('de deelknop geeft alleen url en title door, met een statusmelding en 44 px tikvlak', () => {
-  assert.match(SHARE_BUTTON, /buildSharePayload\(\{ title, url \}\)/);
-  assert.doesNotMatch(SHARE_BUTTON, /\btext:\s/, 'er gaat geen berichttekst mee');
-  assert.doesNotMatch(SHARE_BUTTON, /navigatorRef\.share\(\{[^}]*text/);
-  assert.match(SHARE_BUTTON, /copyShareLink\(navigatorRef\.clipboard, url\)/);
+test('de deelknop is een icoonknop met aria-label, aria-expanded en een statusmelding', () => {
+  // BE-49 (#115, criterium 1 en 6): geen zichtbaar woord meer, maar een
+  // icoonknop met de gerechtnaam in de aria-label en de stand in aria-expanded.
+  assert.match(SHARE_BUTTON, /aria-label=\{`Deel \$\{shareName\}`\}/);
+  assert.match(SHARE_BUTTON, /aria-expanded=\{open\}/);
   assert.match(SHARE_BUTTON, /role="status"/);
-  assert.match(SHARE_BUTTON, /Delen/);
+  assert.doesNotMatch(SHARE_BUTTON, /\btext:\s/, 'er gaat geen berichttekst mee');
+  // De payload zelf (alleen url en title) staat in de ene deeluitvoering.
+  const LIB = read('src/lib/sharePreference.js');
+  assert.match(LIB, /buildSharePayload\(\{ title, url: href \}\)/);
+  assert.match(SHARE_BUTTON, /await performShare\(\{/);
   const button = cssBlock('.dish-share-btn');
   assert.match(button, /min-height:\s*44px/);
   assert.match(button, /min-width:\s*44px/);
+  assert.match(button, /background:\s*transparent/, 'geen gevulde achtergrond');
+  assert.match(button, /border:\s*0/);
+  // Het zichtbare icoon is ±20 px.
+  assert.match(CSS, /\.dish-share-btn \.dish-share-icon \{ width: 20px; height: 20px; \}/);
 });
 
 test('de voorvertoningsafbeelding is 1200 × 630, met next/og en zonder foto', () => {

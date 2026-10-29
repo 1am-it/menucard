@@ -56,16 +56,20 @@ test('elke gerechtkaart op de menupagina krijgt "Delen" én "Bewaren"', () => {
   const saveEntry = MENU_VIEW.indexOf('const saveEntry = ');
   assert.ok(shareHref > -1 && saveEntry > shareHref, 'saveEntry volgt op shareHref');
   // BE-44 criterium 5 (#105): dezelfde kaart geeft ook de id van het gerecht
-  // mee voor de anonieme teller; het paar "Delen"+"Bewaren" blijft ongewijzigd.
-  assert.match(MENU_BODY, /<DishShareButton href=\{shareHref\} title=\{shareTitle\} entry=\{saveEntry\} dishKey=\{dishKey\} \/>/);
+  // mee voor de anonieme teller; BE-49 (#115) voegt de gerechtnaam toe voor de
+  // aria-labels van de twee icoonknoppen.
+  assert.match(MENU_BODY, /<DishShareButton\n\s*href=\{shareHref\}\n\s*title=\{shareTitle\}\n\s*entry=\{saveEntry\}\n\s*dishKey=\{dishKey\}\n\s*name=\{item\.name\}\n\s*\/>/);
 });
 
 test('de bewaarknop leest en schrijft via de lib en toont "Bewaard" met aria-pressed', () => {
-  assert.match(SAVE_BUTTON, /import \{[^}]*SAVED_LABEL[^}]*SAVE_LABEL[^}]*\} from '@\/src\/lib\/dishList'/s);
+  assert.match(SAVE_BUTTON, /isDishSaved\(safeBrowserStorage\(\), entry\.id\)/);
   assert.match(SAVE_BUTTON, /safeBrowserStorage\(\)/);
   assert.match(SAVE_BUTTON, /toggleSavedDish\(safeBrowserStorage\(\), entry\)/);
   assert.match(SAVE_BUTTON, /aria-pressed=\{saved\}/);
-  assert.match(SAVE_BUTTON, /\{saved \? SAVED_LABEL : SAVE_LABEL\}/);
+  // BE-49 (#115, criterium 1): geen zichtbaar label meer, maar een icoonknop
+  // met de gerechtnaam in de aria-label ("Bewaar <gerecht>").
+  assert.match(SAVE_BUTTON, /aria-label=\{`Bewaar \$\{saveName\}`\}/);
+  assert.doesNotMatch(SAVE_BUTTON, /SAVED_LABEL|SAVE_LABEL/, 'de icoonknop heeft geen zichtbaar label');
   assert.match(SAVE_BUTTON, /fill=\{saved \? 'currentColor' : 'none'\}/, 'de bladwijzer is gevuld zodra hij aanstaat');
   assert.match(SAVE_BUTTON, /SAVED_LIST_EVENT/);
   // De pagina werkt ook als opslag niet kan: er is geen try/catch meer nodig op
