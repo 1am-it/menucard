@@ -23,6 +23,7 @@ const {
   FORBIDDEN_MESSAGE,
   MAX_ROWS,
   PERIODS,
+  SORT_OPTIONS,
   TRUNCATED_MESSAGE,
   UNAVAILABLE_MESSAGE,
   UNKNOWN_DISH_LABEL,
@@ -30,11 +31,13 @@ const {
   buildTellersReport,
   nextSort,
   normalizePeriod,
+  parseSortOption,
   periodDays,
   periodLabel,
   periodRange,
   resolveReportRow,
   resolveSort,
+  sortOptionValue,
   sortRows,
   utcDayOf,
 } = require('./dishCounterReport');
@@ -302,4 +305,31 @@ test('echte menudata: naam, restaurant en deeplink komen uit de bestaande resolu
     menu.categories
   );
   assert.deepEqual(target, { catIdx: 0, itemIdx: 0 });
+});
+
+test('de keuzelijst van de telefoon biedt kolom én richting, en leest ze terug', () => {
+  assert.deepEqual(SORT_OPTIONS.map((option) => option.value), [
+    'gerecht:oplopend',
+    'restaurant:oplopend',
+    'gedeeld:aflopend',
+    'gedeeld:oplopend',
+    'bewaard:aflopend',
+    'bewaard:oplopend',
+    'reserveren:aflopend',
+    'reserveren:oplopend',
+  ]);
+  assert.equal(sortOptionValue(DEFAULT_SORT), 'gedeeld:aflopend');
+  assert.equal(sortOptionValue({ kolom: 'gerecht', richting: 'oplopend' }), 'gerecht:oplopend');
+  assert.deepEqual(parseSortOption('bewaard:oplopend'), { kolom: 'bewaard', richting: 'oplopend' });
+  assert.deepEqual(parseSortOption('reserveren:aflopend'), { kolom: 'reserveren', richting: 'aflopend' });
+  // Onbekend of half ingevuld valt terug, nooit een lege sortering.
+  assert.deepEqual(parseSortOption('onbekend:aflopend'), DEFAULT_SORT);
+  assert.deepEqual(parseSortOption(''), DEFAULT_SORT);
+  assert.deepEqual(parseSortOption(null), DEFAULT_SORT);
+  assert.deepEqual(parseSortOption('gerecht'), { kolom: 'gerecht', richting: 'oplopend' });
+  assert.deepEqual(parseSortOption('gedeeld:zijwaarts'), { kolom: 'gedeeld', richting: 'aflopend' });
+  // Elke optie uit de lijst komt terug als dezelfde sortering.
+  for (const option of SORT_OPTIONS) {
+    assert.equal(sortOptionValue(parseSortOption(option.value)), option.value);
+  }
 });

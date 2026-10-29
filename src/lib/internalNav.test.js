@@ -390,8 +390,11 @@ test('structural safety net (criterion 5): the trigger, every menu row, the add 
 });
 
 test('structural safety net (criterion 5): at 640 px and below the bar keeps Dekking, Werk (N) and a + button, and the menu gets Licht/Donker + Sign out at the bottom', () => {
-  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  const start = css.lastIndexOf('@media (max-width: 640px)');
+  // BE-45 (#114) adds a second 640 px block at the end of app/globals.css for the
+  // Tellers page, so this safety net finds the navigation block by its own first
+  // rule instead of "the last 640 px block in the file".
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8').replace(/\r\n/g, '\n');
+  const start = css.lastIndexOf('@media (max-width: 640px) {\n  .internal-nav {');
   assert.ok(start >= 0, 'expected the 640 px telephone breakpoint (covers 390 and 320)');
   const block = css.slice(start, css.indexOf('\n}', start) + 2);
   assert.match(block, /\.internal-nav-workqueue-title-full \{ display: none; \}/);

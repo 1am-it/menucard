@@ -254,6 +254,38 @@ function nextSort(sort, kolom) {
 }
 
 /**
+ * De sorteerstappen van de telefoon: één keuzelijst met kolom én richting, omdat
+ * een keuzelijst geen kolomkop kan zijn. Tekst sorteert A → Z (de richting van
+ * een naam omdraaien voegt daar niets aan toe), een aantal in beide richtingen.
+ */
+const SORT_OPTIONS = COLUMNS.flatMap((column) => (
+  column.numeric
+    ? [
+        { value: `${column.id}:aflopend`, label: `${column.label} (hoog → laag)` },
+        { value: `${column.id}:oplopend`, label: `${column.label} (laag → hoog)` },
+      ]
+    : [{ value: `${column.id}:oplopend`, label: `${column.label} (A → Z)` }]
+));
+
+/** De waarde van de keuzelijst die bij deze sortering hoort. */
+function sortOptionValue(sort) {
+  const resolved = resolveSort(sort);
+  return `${resolved.kolom}:${resolved.richting}`;
+}
+
+/**
+ * De sortering achter een keuze uit de lijst. Een onbekende waarde valt terug op
+ * de standaardsortering; een onbekende richting op de richting van die kolom.
+ */
+function parseSortOption(value) {
+  const parts = textOf(value).split(':');
+  const kolom = parts[0];
+  if (!COLUMN_IDS.includes(kolom)) return { ...DEFAULT_SORT };
+  const richting = SORT_DIRECTIONS.includes(parts[1]) ? parts[1] : defaultDirectionFor(kolom);
+  return { kolom, richting };
+}
+
+/**
  * Het volledige antwoord van de API: de periode, drie totalen en de rijen.
  *
  * `totalen` gaat over alle gerechten van de periode — ook over de rijen die niet
@@ -297,6 +329,7 @@ module.exports = {
   PERIOD_IDS,
   SORT_DIRECTIONS,
   SORT_LABEL,
+  SORT_OPTIONS,
   TABLE_CAPTION,
   TOTALS_LABEL,
   TRUNCATED_MESSAGE,
@@ -308,11 +341,13 @@ module.exports = {
   defaultDirectionFor,
   nextSort,
   normalizePeriod,
+  parseSortOption,
   periodDays,
   periodLabel,
   periodRange,
   resolveReportRow,
   resolveSort,
+  sortOptionValue,
   sortRows,
   utcDayOf,
   utcDayStart,
