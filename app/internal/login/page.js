@@ -80,8 +80,16 @@ export default function InternalLoginPage() {
       return
     }
     setEnrollment({ qrCode: enroll.qrCode, secret: enroll.secret })
-    // The visitor proves the app works immediately, with a code from it.
-    await openChallenge(supabase, enroll.factorId)
+    // The visitor proves the app works immediately, with a code from it, but the
+    // QR and the manual key stay on screen while they do.
+    const challenge = await startChallenge(supabase.auth, enroll.factorId)
+    if (!challenge.ok) {
+      setError(challenge.message)
+      return
+    }
+    setPending({ factorId: enroll.factorId, challengeId: challenge.challengeId })
+    setCode('')
+    setStep('enroll')
   }
 
   async function handlePasswordSubmit(e) {

@@ -80,7 +80,7 @@ test('the stub: a wrong password answers the Supabase invalid_credentials error'
     body: JSON.stringify({ email: 'medewerker@example.invalid', password: 'fout' }),
   });
   assert.equal(res.status, 400);
-  assert.equal((await res.json()).error, 'invalid_credentials');
+  assert.equal((await res.json()).error_code, 'invalid_credentials');
 });
 
 test('the stub: sign-in → link an app → code → aal2, including the JWT claims', async () => {
@@ -121,7 +121,7 @@ test('the stub: sign-in → link an app → code → aal2, including the JWT cla
     body: JSON.stringify({ challenge_id: 'challenge-1', code: '000000' }),
   });
   assert.equal(wrong.status, 422);
-  assert.equal((await wrong.json()).error, 'mfa_verification_failed');
+  assert.equal((await wrong.json()).error_code, 'mfa_verification_failed');
   assert.equal(api.assurance(), 'aal1');
 
   const verified = await fetch('http://127.0.0.1:9/auth/v1/factors/factor-fixture/verify', {
@@ -153,7 +153,7 @@ test('the stub: a recovery code works and the wrong one answers otp_expired', as
     body: 'type=recovery&token=000000&email=medewerker%40example.invalid',
   });
   assert.equal(wrong.status, 403);
-  assert.equal((await wrong.json()).error, 'otp_expired');
+  assert.equal((await wrong.json()).error_code, 'otp_expired');
 
   const right = await fetch('http://127.0.0.1:9/auth/v1/verify', {
     method: 'POST',
@@ -185,6 +185,64 @@ test('the stub: everything unknown is refused and recorded, never forwarded', as
     api.violations.map((entry) => entry.kind),
     ['external_origin', 'unknown_api_route', 'unknown_auth_route'],
   );
+});
+
+test('the stub: the real Supabase SDK accepts the sign-in, code and error shapes', async () => {
+  // The contract between stub and app is the SDK's own HTTP parsing, so this
+  // test drives @supabase/supabase-js itself against the stub — no browser, no
+  // network, no real project.
+  const { createClient } = require('@supabase/supabase-js');
+  const { fetch } = install();
+  const supabase = createClient('http://127.0.0.1:9', 'fixture-anon-key-not-a-secret', {
+    global: { fetch },
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+
+  const wrong = await supabase.auth.signInWithPassword({ email: 'medewerker@example.invalid', password: 'fout' });
+  assert.equal(wrong.error.code, 'invalid_credentials');
+  assert.equal(wrong.error.status, 400);
+
+  const right = await supabase.auth.signInWithPassword({
+    email: 'medewerker@example.invalid',
+    password: 'goed-wachtwoord',
+  });
+  assert.equal(right.error, null);
+  assert.equal(right.data.session.access_token.split('.').length, 3);
+
+  const levels = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  assert.equal(levels.data.currentLevel, 'aal1');
+  assert.equal(levels.data.nextLevel, 'aal1');
+
+  const enrolled = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+  assert.equal(enrolled.error, null);
+  assert.match(enrolled.data.totp.qr_code, /^data:image\/svg\+xml/);
+  assert.equal(enrolled.data.totp.secret, 'JBSWY3DPEHPK3PXP');
+
+  const challenge = await supabase.auth.mfa.challenge({ factorId: enrolled.data.id });
+  assert.equal(challenge.error, null);
+
+  const failedVerify = await supabase.auth.mfa.verify({
+    factorId: enrolled.data.id,
+    challengeId: challenge.data.id,
+    code: '000000',
+  });
+  assert.equal(failedVerify.error.code, 'mfa_verification_failed');
+
+  const verified = await supabase.auth.mfa.verify({
+    factorId: enrolled.data.id,
+    challengeId: challenge.data.id,
+    code: '123456',
+  });
+  assert.equal(verified.error, null);
+  const upgraded = await supabase.auth.getSession();
+  assert.equal(jwtPayload(upgraded.data.session.access_token).aal, 'aal2');
+
+  const recover = await supabase.auth.resetPasswordForEmail('medewerker@example.invalid');
+  assert.equal(recover.error, null);
+  const badRecovery = await supabase.auth.verifyOtp({ email: 'medewerker@example.invalid', token: '000000', type: 'recovery' });
+  assert.equal(badRecovery.error.code, 'otp_expired');
+  const recovery = await supabase.auth.verifyOtp({ email: 'medewerker@example.invalid', token: '123456', type: 'recovery' });
+  assert.equal(recovery.error, null);
 });
 
 test('the stub: the theme is stored for the page and the calls are logged', async () => {

@@ -698,6 +698,40 @@ check proves the payload, the message and the stored list, not the real share
 sheet, the real system clipboard or a private-mode failure. Developer evidence
 on a local build — not production, not independent review.
 
+## BE-48 internal sign-in with a second step (#112)
+
+`run-be48-browser-check.js` drives the real `/internal/login` and the new
+`/internal/wachtwoord-vergeten` in a local app with a **fictional Supabase**
+(`lib/be48-auth-stub.js` + `lib/be48-stub-page.js`). The app code is unchanged:
+the real Supabase client, the real `mfa.enroll/challenge/verify` calls, the real
+pages. Only the HTTP layer is fictional, and every URL outside the fake auth
+origin and the app's own read routes is refused and recorded.
+
+Scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **inloggen-en-koppelen** — labels, `autocomplete`, the "Toon" button with
+  `aria-pressed`, ≥ 44 px controls, the "Wachtwoord vergeten?" link and no
+  "30 dagen onthouden"; then password → "Beveilig je account met een app" with a
+  QR image that really renders and the manual key → a wrong code in Dutch
+  (`role="alert"`, never Supabase's English) → the right code lands on the same
+  place as before (`/internal/menu-concepts` for this fictional workqueue).
+- **fout-wachtwoord** — the contract sentence, no English text, still on the
+  login screen.
+- **wachtwoord-vergeten** — the neutral answer for an unknown address, the code
+  screen with "Nieuwe code sturen" and "Ander e-mailadres", a wrong code in
+  Dutch, and the right code continuing to the existing `/internal/set-password`.
+- **bestaande-app** — an account that already linked an app goes straight to
+  "Code uit je app", with no QR.
+
+Screenshots (light and dark) of the password, code and link-an-app screens land
+in the ignored `ops/browser/output/be-48/`; the record is
+`ops/browser/evidence/be48-browser-evidence.json`. A filtered run writes
+`be48-browser-evidence.filtered.json` and is never the full evidence.
+
+Limits: fixture evidence. No real Supabase project, no real authenticator app,
+no real e-mail, no production data or credentials, and no acceptance of the real
+second step — that needs the owner's real project after the release plan.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

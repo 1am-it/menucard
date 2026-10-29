@@ -33,7 +33,9 @@ function installBe48AuthStub(settings) {
   function token(payload) {
     const header = base64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const body = base64url(JSON.stringify(payload));
-    return header + '.' + body + '.fixture-signature';
+    // The SDK validates every JWT part against base64url, including its length,
+    // so the fake signature must be a valid base64url-sized string too.
+    return header + '.' + body + '.fixture-sig';
   }
 
   function jsonResponse(body, status) {
@@ -41,6 +43,24 @@ function installBe48AuthStub(settings) {
       status: status || 200,
       headers: { 'Content-Type': 'application/json' },
     });
+  }
+
+  // The SDK sends JSON for sign-in and factor calls and may send a form body for
+  // `verify`; both are accepted here.
+  function parseBody(body) {
+    if (!body) return {};
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed && typeof parsed === 'object') return parsed;
+    } catch (error) {
+      // not JSON: fall through to the form encoding
+    }
+    const result = {};
+    const params = new URLSearchParams(body);
+    params.forEach(function (value, key) {
+      result[key] = value;
+    });
+    return result;
   }
 
   function user() {
@@ -72,12 +92,21 @@ function installBe48AuthStub(settings) {
 
   function appResponse(url, method) {
     const authorized = assurance === 'aal2' || !needsSecondStep();
-    const known = url.pathname === '/api/internal/v1/me' || url.pathname === '/api/internal/v1/workqueue-counts';
+    const known =
+      url.pathname === '/api/internal/v1/me' ||
+      url.pathname === '/api/internal/v1/workqueue-counts' ||
+      url.pathname === '/api/internal/v1/menu-concepts';
     if (method === 'GET' && authorized && url.pathname === '/api/internal/v1/me') {
       return jsonResponse({ roles: settings.roles });
     }
     if (method === 'GET' && authorized && url.pathname === '/api/internal/v1/workqueue-counts') {
       return jsonResponse({ counts: settings.counts });
+    }
+    // The landing page after a successful second step reads this list; an empty
+    // fictional list keeps that screen quiet, so the check measures navigation
+    // instead of a data error.
+    if (method === 'GET' && authorized && url.pathname === '/api/internal/v1/menu-concepts') {
+      return jsonResponse({ items: [] });
     }
     if (method === 'GET' && known) {
       return jsonResponse({ error: 'Tweede inlogstap vereist', reason: 'aal2_required' }, 403);
@@ -95,7 +124,10 @@ function installBe48AuthStub(settings) {
         parsed.email === settings.email &&
         parsed.password === settings.password;
       if (!granted) {
-        return jsonResponse({ error: 'invalid_credentials', msg: 'Invalid login credentials' }, 400);
+        // GoTrue's real error shape: `error_code` plus a human `msg`. The SDK
+        // turns `error_code` into `error.code`, which is what the app's Dutch
+        // translation keys on.
+        return jsonResponse({ error_code: 'invalid_credentials', msg: 'Invalid login credentials' }, 400);
       }
       assurance = 'aal1';
       return jsonResponse(session());
@@ -108,9 +140,16 @@ function installBe48AuthStub(settings) {
         type: parsed.factor_type === 'totp' ? 'totp' : parsed.factor_type,
         status: 'unverified',
         totp: {
+          // A data URL may not contain a `#` (it starts a fragment), so the
+          // fixture SVG uses named colours; real Supabase sends base64 SVG here.
           qr_code:
             '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180">' +
-            '<rect width="180" height="180" fill="#ffffff"/><rect x="12" y="12" width="60" height="60" fill="#000000"/></svg>',
+            '<rect width="180" height="180" fill="white"/>' +
+            '<rect x="12" y="12" width="52" height="52" fill="black"/>' +
+            '<rect x="116" y="12" width="52" height="52" fill="black"/>' +
+            '<rect x="12" y="116" width="52" height="52" fill="black"/>' +
+            '<rect x="72" y="72" width="36" height="36" fill="black"/>' +
+            '</svg>',
           secret: 'JBSWY3DPEHPK3PXP',
         },
       });
@@ -124,7 +163,7 @@ function installBe48AuthStub(settings) {
       if (rest.slice(-'/verify'.length) === '/verify') {
         const parsed = body ? JSON.parse(body) : {};
         if (parsed.code !== settings.totpCode) {
-          return jsonResponse({ error: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' }, 422);
+          return jsonResponse({ error_code: 'mfa_verification_failed', msg: 'Invalid TOTP code entered' }, 422);
         }
         assurance = 'aal2';
         return jsonResponse(session());
@@ -132,9 +171,9 @@ function installBe48AuthStub(settings) {
     }
     if (path === '/auth/v1/recover' && method === 'POST') return jsonResponse({});
     if (path === '/auth/v1/verify' && method === 'POST') {
-      const params = new URLSearchParams(body || '');
-      if (params.get('type') !== 'recovery' || params.get('token') !== settings.totpCode) {
-        return jsonResponse({ error: 'otp_expired', msg: 'Token has expired or is invalid' }, 403);
+      const params = parseBody(body);
+      if (params.type !== 'recovery' || params.token !== settings.totpCode) {
+        return jsonResponse({ error_code: 'otp_expired', msg: 'Token has expired or is invalid' }, 403);
       }
       assurance = 'aal1';
       return jsonResponse(session());
