@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-29T01:01:01.613Z",
-  "ticket": "#105 BE-44 deel 2 — bewaren, het lijstje en de voorvertoning",
+  "generatedAt": "2026-10-29T01:35:40.820Z",
+  "ticket": "#105 BE-44 deel 3 — de anonieme tellers (met het migratiebestand)",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
   "filter": null,
@@ -10,7 +10,7 @@
       "checks": 70,
       "passed": 70,
       "failed": 0,
-      "durationMs": 23731,
+      "durationMs": 33741,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 21516,
+      "durationMs": 27974,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 84,
       "passed": 84,
       "failed": 0,
-      "durationMs": 31961,
+      "durationMs": 41287,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 35797,
+      "durationMs": 42818,
       "error": null
     },
     {
@@ -42,7 +42,15 @@
       "checks": 54,
       "passed": 54,
       "failed": 0,
-      "durationMs": 18457,
+      "durationMs": 20926,
+      "error": null
+    },
+    {
+      "name": "tellers",
+      "checks": 26,
+      "passed": 26,
+      "failed": 0,
+      "durationMs": 24771,
       "error": null
     },
     {
@@ -50,12 +58,12 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 5515,
+      "durationMs": 8697,
       "error": null
     }
   ],
   "checks": {
-    "total": 334,
+    "total": 360,
     "failed": 0,
     "entries": [
       {
@@ -1609,6 +1617,136 @@
         "detail": "[\"6-diner-0-0\",\"6-diner-0-1\"]"
       },
       {
+        "name": "tellers (server): een geldig gerecht en event antwoordt met 204 en zonder inhoud",
+        "passed": true,
+        "detail": "{\"status\":204,\"body\":\"\"}"
+      },
+      {
+        "name": "tellers (server): een onbekend gerecht antwoordt met 204 en zonder inhoud",
+        "passed": true,
+        "detail": "{\"status\":204,\"body\":\"\"}"
+      },
+      {
+        "name": "tellers (server): een onbekend event antwoordt met 204 en zonder inhoud",
+        "passed": true,
+        "detail": "{\"status\":204,\"body\":\"\"}"
+      },
+      {
+        "name": "tellers (server): een leeg verzoek antwoordt met 204 en zonder inhoud",
+        "passed": true,
+        "detail": "{\"status\":204,\"body\":\"\"}"
+      },
+      {
+        "name": "tellers (server): er is geen leesroute — GET wordt geweigerd",
+        "passed": true,
+        "detail": "405"
+      },
+      {
+        "name": "tellers (1280/licht): een geslaagd delen telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "tellers (1280/licht): de teller gaat naar /api/v1/tellers met POST en keepalive",
+        "passed": true,
+        "detail": "{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true}"
+      },
+      {
+        "name": "tellers (1280/licht): er gaan alleen dish en event mee",
+        "passed": true,
+        "detail": "{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}"
+      },
+      {
+        "name": "tellers (1280/licht): geen cookie en geen herkomst mee",
+        "passed": true,
+        "detail": "{\"credentials\":\"omit\",\"referrer\":\"no-referrer\"}"
+      },
+      {
+        "name": "tellers (1280/licht): de melding \"Link gekopieerd\" blijft gewoon staan",
+        "passed": true,
+        "detail": "Link gekopieerd"
+      },
+      {
+        "name": "tellers (1280/licht): bewaren telt ook als de teller mislukt",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"bewaard\"}}]"
+      },
+      {
+        "name": "tellers (1280/licht): \"Bewaard\" verschijnt ondanks de mislukte telling",
+        "passed": true,
+        "detail": "{\"text\":\"Bewaard\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+      },
+      {
+        "name": "tellers (1280/licht): een mislukte telling is nergens te zien",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "name": "tellers (1280/licht): weghalen telt niet",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "tellers (390/donker): een geslaagd delen telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "tellers (390/donker): de teller gaat naar /api/v1/tellers met POST en keepalive",
+        "passed": true,
+        "detail": "{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true}"
+      },
+      {
+        "name": "tellers (390/donker): er gaan alleen dish en event mee",
+        "passed": true,
+        "detail": "{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}"
+      },
+      {
+        "name": "tellers (390/donker): geen cookie en geen herkomst mee",
+        "passed": true,
+        "detail": "{\"credentials\":\"omit\",\"referrer\":\"no-referrer\"}"
+      },
+      {
+        "name": "tellers (390/donker): de melding \"Link gekopieerd\" blijft gewoon staan",
+        "passed": true,
+        "detail": "Link gekopieerd"
+      },
+      {
+        "name": "tellers (390/donker): bewaren telt ook als de teller mislukt",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"bewaard\"}}]"
+      },
+      {
+        "name": "tellers (390/donker): \"Bewaard\" verschijnt ondanks de mislukte telling",
+        "passed": true,
+        "detail": "{\"text\":\"Bewaard\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+      },
+      {
+        "name": "tellers (390/donker): een mislukte telling is nergens te zien",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "name": "tellers (390/donker): weghalen telt niet",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "tellers (reserveer): een klik op de reserveringslink telt",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"reserveren\"}}]"
+      },
+      {
+        "name": "tellers (reserveer): de telling hoort bij het gedeelde gerecht",
+        "passed": true,
+        "detail": "{\"dish\":\"6-diner-0-0\",\"event\":\"reserveren\"}"
+      },
+      {
+        "name": "tellers (reserveer): zonder gerechtlink wordt er niets geteld",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
         "name": "server: de gedeelde link antwoordt met 200",
         "passed": true,
         "detail": "200"
@@ -1759,7 +1897,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-light.png",
-        "sha256": "16cd6a7f86a769bdb98f224f179c68af2e9c22ab3be022fc07431e39276b93f0",
+        "sha256": "6b8486b32fee50cbc1a2cc736f4be5355b30195bfb4cfdd4bb1a6c21969b955d",
         "width": 390,
         "height": 844
       },
@@ -1784,7 +1922,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-light.png",
-        "sha256": "8ae06e823406cb154bdc8973651652619866aa5d742b8420727b7a43894afaaa",
+        "sha256": "7259ed25c9dc2168120eaddf4bee1843d94b3fda0e88970d8b2dc78fde0247a5",
         "width": 320,
         "height": 844
       },
@@ -1859,7 +1997,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "fe68d30be2e5e486266b3ddff4c51c0f72d99d7be788d6ccdf1bd3176173f7a7",
+        "sha256": "3c9f1ca2d742a2e211a105e7d6834254cb31cb256d69f467e1c4af8985307f1b",
         "width": 320,
         "height": 844
       },
@@ -1897,7 +2035,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "c6835025e0e55ac6b46e5c20dfbca02275a4b0fa0672c6207fed8abe4bd64fa7",
+        "sha256": "696aeda25c06ba29b40977d7d2aef7e51e2f789dc0e0fbebfca00198b007e529",
         "width": 390,
         "height": 844
       },
@@ -1910,7 +2048,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "ed5d242c920daed379078f338eb9ae6b98bb335e7d9567a745fbd65e8b63041a",
+        "sha256": "46a688135f8c210749e29a8d4ee858cad60b9f93eaa201a68c337dddb41e3f04",
         "width": 320,
         "height": 844
       },
@@ -1949,7 +2087,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "428abfa8de2d65bb6e0c5a51455b3dc879eb40598d6da7525733697d6d77b76f",
+        "sha256": "6bbb7c2795051f1c84bcde43c328a4344886ca511b85fde09df9ba280ceaa231",
         "width": 320,
         "height": 844
       },
@@ -1998,7 +2136,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-light.png",
-        "sha256": "ea5176c7e3e052fdd72b4d70f45d3c5c28f58fb743e9d93d3602ac3ff0fe8f0d",
+        "sha256": "53e151630b569cb802e6c215f452880dada402a8c02d727f1c4a3a19b9550503",
         "width": 390,
         "height": 844
       },
@@ -2010,7 +2148,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-light.png",
-        "sha256": "1c5bc2f2c082c262215d316f1e2929446caf133c16540f0acce2baf5eb258e8c",
+        "sha256": "0375f85dbeb085d10d918d2b5f13cbbd6786cbf4c30ba29d44966a465501bf4c",
         "width": 320,
         "height": 844
       },
@@ -2022,7 +2160,7 @@
     {
       "file": {
         "file": "be44-onderbalk-320-light.png",
-        "sha256": "2b85974f1700d13a8bcfda3c017dc9fc70ae91229291f1fcd34285f5113865c4",
+        "sha256": "ef57f41a560233450d43b91ca70b769a629caf6ab2dde28e33143bb51bcc0b18",
         "width": 320,
         "height": 844
       },
@@ -2034,7 +2172,7 @@
     {
       "file": {
         "file": "be44-bewaard-1280-dark.png",
-        "sha256": "665bc9441c4740639372f5f5636579c6983285ef9272bf02c606746978f6d935",
+        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
         "width": 1280,
         "height": 950
       },
@@ -2058,7 +2196,7 @@
     {
       "file": {
         "file": "be44-bewaard-390-dark.png",
-        "sha256": "7212ce087e4b329a34476a0b5a5dc848c0b5accbff2fec2e39a90950bb68eca8",
+        "sha256": "1c5e01c38b2e8556787275e1705f4b2b7015af7a18efe1d3187dd19d4515f4ae",
         "width": 390,
         "height": 844
       },
@@ -2070,7 +2208,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-dark.png",
-        "sha256": "cf5f21e3eab060c565f42543181a20a5454ada7defe23121bdc8020493e54ce5",
+        "sha256": "407922a411dd3d898161d7ecbb783e85afa2ddc08276f125e092ee8ccc8edb32",
         "width": 390,
         "height": 844
       },
@@ -2082,7 +2220,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-dark.png",
-        "sha256": "d28d8b8c43a9dbcb9858aaf7c7791dfd3125da1e3f9340fb0002f3e5ae20f25a",
+        "sha256": "272015b64b3590056b99a2a6dc6e0d0a32bdd4619521f2d090b1de005b743593",
         "width": 320,
         "height": 844
       },
@@ -2094,7 +2232,7 @@
     {
       "file": {
         "file": "be44-onderbalk-320-dark.png",
-        "sha256": "152cc1d69709035770b34ff49ed3b6dd8e3d7cdc11959218f4db7fa8485aaf75",
+        "sha256": "dfa62afe807cd806a073c72e5f921459da5141ebae7597085dfd4f42581862fd",
         "width": 320,
         "height": 844
       },
@@ -2269,6 +2407,8 @@
     "Het klembord is een stub: de check bewijst welke link gekopieerd wordt en dat de melding verschijnt, niet het echte systeemklembord.",
     "Het lijstje is localStorage in een tijdelijk browserprofiel: de check bewijst de opslag, de stand na een reload en het verwijderen, geen privémodus of volle schijf.",
     "De voorvertoning van het lijstje is een PNG van deze build; of externe platforms hem precies zo tonen, is niet in een browsercheck te bewijzen.",
+    "De anonieme tellers zijn hier een onderschepte route in de pagina plus de echte route zonder Supabase-sleutel: er is geen database-aanroep gedaan en er is geen migratie uitgevoerd. De tellers worden nergens getoond (apart ticket).",
+    "Een klik op \"Reserveer\" wordt alleen geteld als de pagina met een geldige gerechtlink is geopend; zonder die link is er geen gerecht om aan te wijzen en telt de klik niet.",
     "Dit is developer-evidence op een lokale build: geen productie, geen echte Supabase-credentials, geen merge of publicatie.",
     "De app-brede AI-activering valt buiten deze opdracht; er is hier niets aan AI of Supabase geactiveerd."
   ],
