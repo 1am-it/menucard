@@ -221,37 +221,39 @@ export default function ClaimView({ restaurantId, restaurant }) {
               )}
 
               {session === null && !codeSentTo && !configError && (
-                <form onSubmit={handleEmailSubmit} className="auth-form" noValidate>
+                <div className="claim-step">
                   <p className="claim-note">
                     Vul je zakelijke e-mailadres in. Je krijgt een code van zes cijfers per e-mail; daarmee bewijs je
                     dat je toegang hebt tot dit e-mailadres.
                   </p>
-                  <div className="auth-field">
-                    <label className="auth-label" htmlFor="claim-email">
-                      E-mailadres
-                    </label>
-                    <input
-                      id="claim-email"
-                      className="auth-input"
-                      type="email"
-                      name="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="email"
-                      aria-describedby={error ? 'claim-error' : undefined}
-                      aria-invalid={error ? 'true' : undefined}
-                      required
-                    />
-                  </div>
-                  {errorAlert}
-                  <button type="submit" className="auth-submit" disabled={loading}>
-                    {loading ? 'Bezig met versturen…' : 'Stuur code'}
-                  </button>
-                </form>
+                  <form onSubmit={handleEmailSubmit} className="auth-form" noValidate>
+                    <div className="auth-field">
+                      <label className="auth-label" htmlFor="claim-email">
+                        E-mailadres
+                      </label>
+                      <input
+                        id="claim-email"
+                        className="auth-input"
+                        type="email"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        autoComplete="email"
+                        aria-describedby={error ? 'claim-error' : undefined}
+                        aria-invalid={error ? 'true' : undefined}
+                        required
+                      />
+                    </div>
+                    {errorAlert}
+                    <button type="submit" className="auth-submit" disabled={loading}>
+                      {loading ? 'Bezig met versturen…' : 'Stuur code'}
+                    </button>
+                  </form>
+                </div>
               )}
 
               {session === null && codeSentTo && !configError && (
-                <>
+                <div className="claim-step">
                   <p className="claim-note">
                     We hebben een code van zes cijfers gestuurd naar <strong>{codeSentTo}</strong>. Je kunt de mail op
                     dit apparaat openen of op een ander apparaat; de code werkt op beide.
@@ -305,13 +307,13 @@ export default function ClaimView({ restaurantId, restaurant }) {
                     Geen code ontvangen? Kijk in je spam of stuur een nieuwe code. De koppeling in de e-mail werkt
                     voorlopig ook nog.
                   </p>
-                </>
+                </div>
               )}
 
               {session && claim === undefined && <p className="claim-note">Claimstatus laden…</p>}
 
               {session && claim === null && (
-                <div className="auth-form">
+                <div className="claim-step">
                   <p className="claim-note">
                     Ingelogd als {session.user?.email}. Klik hieronder om een claim in te dienen voor &quot;{restaurant.name}&quot;. Een
                     medewerker beoordeelt je aanvraag.

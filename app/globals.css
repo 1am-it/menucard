@@ -4399,6 +4399,10 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 .claim-note { color: var(--text-secondary); font-size: 14px; }
 .claim-error { color: var(--danger); font-size: 13px; }
 .claim-link { color: var(--accent); font-weight: 700; }
+/* BE-48 (issue 112): de claim stapelt tekst, formulier en knoppen met dezelfde
+   tussenruimte als de inlogschermen; alleen tokens. */
+.claim-step { display: grid; gap: 16px; }
+.claim-step .auth-actions { margin-top: 0; }
 
 /* NVWA-pagina. */
 .nvwa-page { max-width: var(--max-w); margin: 0 auto; padding: 24px 24px 96px; }
