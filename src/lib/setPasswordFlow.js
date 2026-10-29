@@ -20,6 +20,11 @@
 
 'use strict';
 
+// BE-48 (#112): every Supabase auth failure is translated in one place
+// (src/lib/authErrors.js) so no screen can invent its own text or echo the raw
+// `error.message`.
+const { authErrorMessage } = require('./authErrors');
+
 const MIN_PASSWORD_LENGTH = 8;
 
 /**
@@ -178,16 +183,10 @@ function resolveUpdatePasswordOutcome(error) {
   if (!error) {
     return { ok: true };
   }
-  if (error.name === 'AuthWeakPasswordError' || error.weakPassword) {
-    return {
-      ok: false,
-      message: 'Dat wachtwoord voldoet niet aan de eisen van deze site. Kies een ander wachtwoord.',
-    };
-  }
-  return {
-    ok: false,
-    message: 'Er ging iets mis bij het instellen van je wachtwoord. Vraag een nieuwe uitnodiging aan en probeer het opnieuw.',
-  };
+  // BE-48 (#112): the single Dutch translation lives in authErrors.js — a weak
+  // password, a rate limit, a lost connection and an unknown failure each get
+  // their own safe text. Supabase's own message is never shown.
+  return { ok: false, message: authErrorMessage(error, { context: 'password' }) };
 }
 
 module.exports = {
