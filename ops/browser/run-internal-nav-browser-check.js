@@ -159,13 +159,13 @@ async function desktopScenario(cdp) {
     bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim().toLowerCase(),
   }))()`);
   check(
-    'desktop: the bar shows Dekking, Werkvoorraad (N), the add entry, Licht/Donker and Sign out',
+    'desktop: the bar shows Dekking, Werkvoorraad (N), the add entry, Licht/Donker and Uitloggen',
     flatText(bar.text).includes('Dekking') &&
       flatText(bar.text).includes(`Werkvoorraad (${EXPECTED_TOTAL})`) &&
       flatText(bar.text).includes('Restaurant of menu toevoegen') &&
       flatText(bar.text).includes('Licht') &&
       flatText(bar.text).includes('Donker') &&
-      flatText(bar.text).includes('Sign out'),
+      flatText(bar.text).includes('Uitloggen'),
     bar.text.replace(/\n/g, ' | '),
   );
   check(
@@ -193,19 +193,21 @@ async function desktopScenario(cdp) {
     JSON.stringify(actualOpen),
   );
   check(
-    'desktop: below the separating line are Stadsoverzicht and Restaurantgegevens (concept), without a number',
+    'desktop: below the separating line are Stadsoverzicht, Restaurantgegevens (concept) and Tellers (BE-45), without a number',
     menu.separator === true &&
-      menu.rows.length === 6 &&
+      menu.rows.length === 7 &&
       menu.rows[4].label === 'Stadsoverzicht' &&
       menu.rows[4].count === null &&
       menu.rows[5].label === 'Restaurantgegevens (concept)' &&
-      menu.rows[5].count === null,
+      menu.rows[5].count === null &&
+      menu.rows[6].label === 'Tellers' &&
+      menu.rows[6].count === null,
     JSON.stringify(menu.rows.slice(4)),
   );
   check(
     'desktop: every row keeps its existing route',
     menu.rows.map((row) => row.href).join(',') ===
-      ['/internal/menu-concepts', '/internal/source-triage', '/internal/import-inbox', '/internal/moderation', '/internal/source-workqueue', '/internal/profile-drafts'].join(','),
+      ['/internal/menu-concepts', '/internal/bronnen', '/internal/import-inbox', '/internal/moderation', '/internal/source-workqueue', '/internal/profile-drafts', '/internal/tellers'].join(','),
     menu.rows.map((row) => row.href).join(','),
   );
   check('desktop: the panel has the "Open werk" heading', flatText(menu.panelText).toLowerCase().includes('open werk'), menu.panelText.replace(/\n/g, ' | '));
@@ -267,7 +269,7 @@ async function mobileScenario(cdp, width, theme) {
     bar.triggerHeight >= 44 && bar.triggerWidth >= 44 && bar.addHeight >= 44 && bar.addWidth >= 44,
     JSON.stringify({ triggerH: bar.triggerHeight, triggerW: bar.triggerWidth, addH: bar.addHeight, addW: bar.addWidth }),
   );
-  check(`${width}px/${theme}: Licht/Donker and Sign out are not in the bar itself`, bar.barActionsVisible === false);
+  check(`${width}px/${theme}: Licht/Donker and Uitloggen are not in the bar itself`, bar.barActionsVisible === false);
   check(`${width}px/${theme}: no horizontal overflow`, bar.overflow <= 0, `overflow=${bar.overflow}`);
   check(`${width}px/${theme}: the requested theme is active`, bar.theme === theme, bar.theme);
   await shot(cdp, `nav62-${width}-${theme}-bar.png`, { theme, menu: 'closed' });
@@ -276,7 +278,7 @@ async function mobileScenario(cdp, width, theme) {
   const menu = await readMenu(cdp);
   check(
     `${width}px/${theme}: the menu shows the same rows, numbers and separating line`,
-    menu.rows.length === 6 &&
+    menu.rows.length === 7 &&
       menu.rows[0].label === 'Menuconcepten beoordelen' &&
       menu.rows[0].count === String(NAV62_COUNTS['menu-concepts']) &&
       menu.rows[3].label === 'Beoordelen' &&
@@ -284,8 +286,8 @@ async function mobileScenario(cdp, width, theme) {
     JSON.stringify(menu.rows),
   );
   check(
-    `${width}px/${theme}: Licht/Donker and Sign out are at the bottom of the menu`,
-    menu.actionsVisible && flatText(menu.panelText).includes('Sign out') && flatText(menu.panelText).includes('Licht') && flatText(menu.panelText).includes('Donker'),
+    `${width}px/${theme}: Licht/Donker and Uitloggen are at the bottom of the menu`,
+    menu.actionsVisible && flatText(menu.panelText).includes('Uitloggen') && flatText(menu.panelText).includes('Licht') && flatText(menu.panelText).includes('Donker'),
     menu.panelText.replace(/\n/g, ' | '),
   );
   const rowHeight = await evalJs(cdp, `document.querySelector('.internal-nav-workqueue-item').getBoundingClientRect().height`);
@@ -308,7 +310,7 @@ async function countsScenario(cdp) {
   const failedMenu = await readMenu(cdp);
   check(
     'counts failed: no row shows a number, and certainly not a fake 0',
-    failedMenu.rows.length === 6 && failedMenu.rows.every((row) => row.count === null),
+    failedMenu.rows.length === 7 && failedMenu.rows.every((row) => row.count === null),
     JSON.stringify(failedMenu.rows),
   );
   await shot(cdp, 'nav62-390-light-counts-missing.png', { theme: 'light', menu: 'open', counts: 'failed' });

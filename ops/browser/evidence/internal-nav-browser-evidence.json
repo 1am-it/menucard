@@ -1,9 +1,9 @@
 {
   "category": "fixture evidence (fictional session and fictional API answers; not real acceptance)",
   "issue": "#62",
-  "generatedAt": "2026-10-24T20:30:42.572Z",
+  "generatedAt": "2026-10-29T21:56:36.330Z",
   "port": 3138,
-  "head": "473d01c160cf0d9d63746c89a92dc569aa17bda9",
+  "head": "8288a61c691a8a1dc24455a00aa3930f6dd1b8cd",
   "fixtureCounts": {
     "menu-concepts": 7,
     "source-triage": 2,
@@ -13,6 +13,49 @@
   "expectedTotal": 11,
   "mockupComparison": "not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots are saved for the Lead/human visual comparison",
   "fixtureNote": "the nav counts are one fixed fictional API answer; every fixture page keeps its own fictional list, so a row number is not derived from that page here. The real agreement (same definitions as the pages) is unit-tested in src/lib/workqueueCounts.test.js.",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 6046,
+      "error": null
+    },
+    {
+      "name": "mobiel",
+      "checks": 56,
+      "passed": 56,
+      "failed": 0,
+      "durationMs": 7788,
+      "error": null
+    },
+    {
+      "name": "counts",
+      "checks": 9,
+      "passed": 9,
+      "failed": 0,
+      "durationMs": 4791,
+      "error": null
+    },
+    {
+      "name": "landing",
+      "checks": 3,
+      "passed": 3,
+      "failed": 0,
+      "durationMs": 6382,
+      "error": null
+    },
+    {
+      "name": "keyboard",
+      "checks": 5,
+      "passed": 5,
+      "failed": 0,
+      "durationMs": 2547,
+      "error": null
+    }
+  ],
   "checks": [
     {
       "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
@@ -35,14 +78,14 @@
       "detail": "expected (11)"
     },
     {
-      "name": "desktop: the bar shows Dekking, Werkvoorraad (N), the add entry, Licht/Donker and Sign out",
+      "name": "desktop: the bar shows Dekking, Werkvoorraad (N), the add entry, Licht/Donker and Uitloggen",
       "passed": true,
-      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Sign out"
+      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Uitloggen"
     },
     {
       "name": "desktop: Onboarding Restaurant and Beheer are no longer bar items",
       "passed": true,
-      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Sign out"
+      "detail": "onze | menukaarten | Dekking | Werkvoorraad | (11) | + | Restaurant of menu toevoegen | Licht | Donker | Uitloggen"
     },
     {
       "name": "desktop: the menu starts closed",
@@ -75,19 +118,19 @@
       "detail": "[[\"Menuconcepten beoordelen\",\"7\"],[\"Bronnen beoordelen\",\"2\"],[\"Nieuwe aanleveringen\",\"1\"],[\"Beoordelen\",\"1\"]]"
     },
     {
-      "name": "desktop: below the separating line are Stadsoverzicht and Restaurantgegevens (concept), without a number",
+      "name": "desktop: below the separating line are Stadsoverzicht, Restaurantgegevens (concept) and Tellers (BE-45), without a number",
       "passed": true,
-      "detail": "[{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
       "name": "desktop: every row keeps its existing route",
       "passed": true,
-      "detail": "/internal/menu-concepts,/internal/source-triage,/internal/import-inbox,/internal/moderation,/internal/source-workqueue,/internal/profile-drafts"
+      "detail": "/internal/menu-concepts,/internal/bronnen,/internal/import-inbox,/internal/moderation,/internal/source-workqueue,/internal/profile-drafts,/internal/tellers"
     },
     {
       "name": "desktop: the panel has the \"Open werk\" heading",
       "passed": true,
-      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten"
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Tellers | Gedeeld, bewaard en reserveerkliks per gerecht"
     },
     {
       "name": "desktop: Escape closes the menu",
@@ -122,7 +165,7 @@
     {
       "name": "desktop: light and dark resolve to different background tokens",
       "passed": true,
-      "detail": "#fcfaf4 / #0a0a0a"
+      "detail": "#ffffff / #1f2328"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review)",
@@ -150,7 +193,7 @@
       "detail": "{\"triggerH\":44,\"triggerW\":106.875,\"addH\":44,\"addW\":44}"
     },
     {
-      "name": "390px/light: Licht/Donker and Sign out are not in the bar itself",
+      "name": "390px/light: Licht/Donker and Uitloggen are not in the bar itself",
       "passed": true,
       "detail": null
     },
@@ -177,12 +220,12 @@
     {
       "name": "390px/light: the menu shows the same rows, numbers and separating line",
       "passed": true,
-      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/bronnen\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
-      "name": "390px/light: Licht/Donker and Sign out are at the bottom of the menu",
+      "name": "390px/light: Licht/Donker and Uitloggen are at the bottom of the menu",
       "passed": true,
-      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Tellers | Gedeeld, bewaard en reserveerkliks per gerecht | Licht | Donker | Uitloggen"
     },
     {
       "name": "390px/light: every menu row is at least 44 px",
@@ -220,7 +263,7 @@
       "detail": "{\"triggerH\":44,\"triggerW\":100.875,\"addH\":44,\"addW\":44}"
     },
     {
-      "name": "320px/light: Licht/Donker and Sign out are not in the bar itself",
+      "name": "320px/light: Licht/Donker and Uitloggen are not in the bar itself",
       "passed": true,
       "detail": null
     },
@@ -247,12 +290,12 @@
     {
       "name": "320px/light: the menu shows the same rows, numbers and separating line",
       "passed": true,
-      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/bronnen\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
-      "name": "320px/light: Licht/Donker and Sign out are at the bottom of the menu",
+      "name": "320px/light: Licht/Donker and Uitloggen are at the bottom of the menu",
       "passed": true,
-      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Tellers | Gedeeld, bewaard en reserveerkliks per gerecht | Licht | Donker | Uitloggen"
     },
     {
       "name": "320px/light: every menu row is at least 44 px",
@@ -290,7 +333,7 @@
       "detail": "{\"triggerH\":44,\"triggerW\":106.875,\"addH\":44,\"addW\":44}"
     },
     {
-      "name": "390px/dark: Licht/Donker and Sign out are not in the bar itself",
+      "name": "390px/dark: Licht/Donker and Uitloggen are not in the bar itself",
       "passed": true,
       "detail": null
     },
@@ -317,12 +360,12 @@
     {
       "name": "390px/dark: the menu shows the same rows, numbers and separating line",
       "passed": true,
-      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/bronnen\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
-      "name": "390px/dark: Licht/Donker and Sign out are at the bottom of the menu",
+      "name": "390px/dark: Licht/Donker and Uitloggen are at the bottom of the menu",
       "passed": true,
-      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Tellers | Gedeeld, bewaard en reserveerkliks per gerecht | Licht | Donker | Uitloggen"
     },
     {
       "name": "390px/dark: every menu row is at least 44 px",
@@ -360,7 +403,7 @@
       "detail": "{\"triggerH\":44,\"triggerW\":100.875,\"addH\":44,\"addW\":44}"
     },
     {
-      "name": "320px/dark: Licht/Donker and Sign out are not in the bar itself",
+      "name": "320px/dark: Licht/Donker and Uitloggen are not in the bar itself",
       "passed": true,
       "detail": null
     },
@@ -387,12 +430,12 @@
     {
       "name": "320px/dark: the menu shows the same rows, numbers and separating line",
       "passed": true,
-      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":\"7\",\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":\"2\",\"href\":\"/internal/bronnen\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":\"1\",\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":\"1\",\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
-      "name": "320px/dark: Licht/Donker and Sign out are at the bottom of the menu",
+      "name": "320px/dark: Licht/Donker and Uitloggen are at the bottom of the menu",
       "passed": true,
-      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Licht | Donker | Sign out"
+      "detail": "OPEN WERK |  | Menuconcepten beoordelen | Concepten controleren en intern goedkeuren | 7 | Bronnen beoordelen | Bronvoorstellen vastleggen en beoordelen | 2 | Nieuwe aanleveringen | Nieuwe bronnen | 1 | Beoordelen | Menu's, profielen en eigenaarsclaims | 1 | Stadsoverzicht | Bron en menukaart per restaurant | Restaurantgegevens (concept) | Klaarzetten | Tellers | Gedeeld, bewaard en reserveerkliks per gerecht | Licht | Donker | Uitloggen"
     },
     {
       "name": "320px/dark: every menu row is at least 44 px",
@@ -427,7 +470,7 @@
     {
       "name": "counts failed: no row shows a number, and certainly not a fake 0",
       "passed": true,
-      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":null,\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":null,\"href\":\"/internal/source-triage\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":null,\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":null,\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"}]"
+      "detail": "[{\"label\":\"Menuconcepten beoordelen\",\"count\":null,\"href\":\"/internal/menu-concepts\"},{\"label\":\"Bronnen beoordelen\",\"count\":null,\"href\":\"/internal/bronnen\"},{\"label\":\"Nieuwe aanleveringen\",\"count\":null,\"href\":\"/internal/import-inbox\"},{\"label\":\"Beoordelen\",\"count\":null,\"href\":\"/internal/moderation\"},{\"label\":\"Stadsoverzicht\",\"count\":null,\"href\":\"/internal/source-workqueue\"},{\"label\":\"Restaurantgegevens (concept)\",\"count\":null,\"href\":\"/internal/profile-drafts\"},{\"label\":\"Tellers\",\"count\":null,\"href\":\"/internal/tellers\"}]"
     },
     {
       "name": "fixture bootstrap without error (http://localhost:3138/internal/toevoegen?theme=light&fixture=review&countsState=partial)",
@@ -543,7 +586,7 @@
   "screenshots": [
     {
       "file": "nav62-desktop-1280-light-bar.png",
-      "sha256": "6741affb9dd781f7cb6db844b91feee554b3f43b0f989abbf5a37d0ae8db71ca",
+      "sha256": "a52460091b15d591f4367f0364e5cc611db5a77b300ff2995e0a729f1d4196e0",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -552,7 +595,7 @@
     },
     {
       "file": "nav62-desktop-1280-light-menu.png",
-      "sha256": "0f42a956620d809c6b8fa1128fd68bb8d15de88168c3a8a2a5a13bc4980921f4",
+      "sha256": "91e3938d09deb0ba03b491795461aa29b7c2f9de46d80cd4562c1df0e4347127",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -561,7 +604,7 @@
     },
     {
       "file": "nav62-desktop-1280-dark-menu.png",
-      "sha256": "a997684486215ddd9ed0d1d30e2c357f77fa16d0007b85ed577b3c4478481c90",
+      "sha256": "7643f3b9952ff2f6bc46821ce5812ca2a169a6d8afebf8c19af7d646e1e90b76",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -570,7 +613,7 @@
     },
     {
       "file": "nav62-390-light-bar.png",
-      "sha256": "5b2ebdb3839267be5a13028cb0926b1b733f6925834437f68b249fd3fc35580a",
+      "sha256": "580bd9f71023701b1ee67f3de674280920537794412eb0b82e1cfcba462fbfc4",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -579,7 +622,7 @@
     },
     {
       "file": "nav62-390-light-menu.png",
-      "sha256": "dc9fafce8503c947ad24cbaed7e948fcc42e668dd4ad236c47ff1f7067889136",
+      "sha256": "c9e49252bb6334f5d6d44c2fffab0a4c8332c0295be5ccb2e22b36ba965ea4c6",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -588,7 +631,7 @@
     },
     {
       "file": "nav62-320-light-bar.png",
-      "sha256": "cd7b7baadb755bdbf7d5def4654a180c937b89d7f5bff8056b2c530764331bb7",
+      "sha256": "d1d5870d7a6a2e6745eb0b226e8fa70836e4d64624a00e5582d33daae2fe2d93",
       "width": 320,
       "height": 780,
       "viewport": "320x780",
@@ -597,7 +640,7 @@
     },
     {
       "file": "nav62-320-light-menu.png",
-      "sha256": "92935a86e0f15d10486e1620560f9964be34239e65337377dfaaf65cac977425",
+      "sha256": "00c562c0d36df2dd3e7712523128f852c81501e499a87728987bf7b3204ceff7",
       "width": 320,
       "height": 780,
       "viewport": "320x780",
@@ -606,7 +649,7 @@
     },
     {
       "file": "nav62-390-dark-bar.png",
-      "sha256": "04bbb443b1f808d30b79f9b80cb3d2dd2c1d6f4bf6855eacb08c625036b6fccf",
+      "sha256": "17b99894604374db9e5b0f765310cc55c83a4a8c47ba1dfb50720805acd7bda2",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -615,7 +658,7 @@
     },
     {
       "file": "nav62-390-dark-menu.png",
-      "sha256": "de48b016c2a6186d4bcb71aa2c240cbc4d9668693ceb3f874e7ef863bc1d5e47",
+      "sha256": "fe28da091584b31dedda229c2023d5cc3b71e208b3a5e8cd09d8b19ee82c511c",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -624,7 +667,7 @@
     },
     {
       "file": "nav62-320-dark-bar.png",
-      "sha256": "42498238975e89cbe25d3a74a578bf8364de2c0355f407e43706b7c53bc5425a",
+      "sha256": "f963bc8f8b7dec00c71d55588ccf88ffc4dd77f0049242481ef0142dc826a4c5",
       "width": 320,
       "height": 780,
       "viewport": "320x780",
@@ -633,7 +676,7 @@
     },
     {
       "file": "nav62-320-dark-menu.png",
-      "sha256": "8f17874babbb167f9632edd35869ef085657f7d42bb7e7f6706dfe5fcaf03777",
+      "sha256": "e31ba1271f8f6200388d8c9ce50044c9d85a8b4395d2e26be761ea0393f4a783",
       "width": 320,
       "height": 780,
       "viewport": "320x780",
@@ -642,7 +685,7 @@
     },
     {
       "file": "nav62-390-light-counts-missing.png",
-      "sha256": "6b2dd70bf99b7a5ebdd356dd0eb5f5f72eaffe7683c9ac0ed9e9acf523c2b45d",
+      "sha256": "178e23176a2e5288fa4e263063f1fbb9f6e15b4258663ccf75282d57120a7c98",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -652,7 +695,7 @@
     },
     {
       "file": "nav62-desktop-1280-light-counts-partial.png",
-      "sha256": "1bff833baa383810bf552221427ea71152b1459c213a68174479dbf4213aba0b",
+      "sha256": "eb3806041c73b0ee30c0afc0f8339134ccdc22c732817e457f9f3321a340ac8d",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -662,7 +705,7 @@
     },
     {
       "file": "nav62-landing-menu-concepts-1280-light.png",
-      "sha256": "24daa386b4b9392fb3ac6d6b2f005b3b77400ccb8c0bffac35bd9dd4abab212a",
+      "sha256": "753dc9d0f95060ff6da693266c48470bafc5cde665dee4ad3b3c93d83a2dc245",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
