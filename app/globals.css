@@ -5281,3 +5281,231 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   outline-offset: 2px;
 }
 
+
+/* ── BE-48 (#112): inloggen, tweede stap en wachtwoord vergeten ──────────────
+   The four internal auth screens (login, code from the app, link an app,
+   forgot password) share one small set of classes instead of the inline styles
+   the login page used to carry. Everything is a token (app/globals.css), so
+   light and dark follow automatically; no fixed colour is introduced. Every
+   button and input is at least 44 px high (WCAG 2.5.5). ─────────────────── */
+
+.auth-main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 56px 20px 64px;
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.auth-card {
+  padding: 24px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--panel-shadow);
+}
+
+.auth-title {
+  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.auth-intro {
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.auth-form {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-field {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.auth-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.auth-input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  border-color: var(--border-focus);
+}
+
+.auth-input--code {
+  font-family: ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  font-size: 20px;
+  letter-spacing: 0.18em;
+  text-align: center;
+}
+
+.auth-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.auth-input-row .auth-input { flex: 1 1 auto; }
+
+.auth-toggle {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-toggle:hover { border-color: var(--border-hover); }
+.auth-toggle:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 1px; }
+.auth-toggle[aria-pressed="true"] { border-color: var(--accent-border); color: var(--accent); }
+
+.auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--accent-fill);
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-submit:hover:not(:disabled) { background: var(--accent-fill-hover); border-color: var(--accent-fill-hover); }
+.auth-submit:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.auth-submit:disabled { opacity: 0.65; cursor: default; }
+
+.auth-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-secondary:hover:not(:disabled) { border-color: var(--border-hover); background: var(--surface-soft); }
+.auth-secondary:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.auth-secondary:disabled { opacity: 0.65; cursor: default; }
+
+.auth-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+.auth-error {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-notice {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid var(--status-positive-border);
+  border-radius: var(--radius-md);
+  background: var(--status-positive-bg);
+  color: var(--status-positive);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-help {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.auth-qr {
+  display: block;
+  width: 180px;
+  height: 180px;
+  max-width: 100%;
+  margin: 4px auto 12px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  /* No fixed colour here: Supabase's TOTP QR is an SVG that carries its own
+     light background, so the code stays scannable in the dark theme too. */
+  background: var(--bg-card);
+}
+
+.auth-secret {
+  display: block;
+  padding: 10px 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+  user-select: all;
+}
+
