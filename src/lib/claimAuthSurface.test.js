@@ -85,7 +85,7 @@ test('claim: de twee herstelknoppen en de gedeelde knopstijl staan er', () => {
 
 test('claim: de stapelstijl gebruikt alleen tokens', () => {
   const css = read(CSS);
-  const rule = css.match(/\/\* BE-48 \(issue 112\): de claim stapelt[\s\S]*?\.claim-step \.auth-actions \{[^}]*\}/);
+  const rule = css.match(/\/\* BE-48 \(issue 112\): de claim gebruikt[\s\S]*?\.claim-step \.auth-actions \{[^}]*\}/);
   assert.ok(rule, 'de claim-stapelstijl ontbreekt in app/globals.css');
   assert.doesNotMatch(rule[0], /#[0-9a-fA-F]{3,8}\b/);
   assert.doesNotMatch(rule[0], /rgb\(|hsl\(/);

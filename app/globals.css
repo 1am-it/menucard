@@ -4365,42 +4365,13 @@ header, .site-header { height: auto; min-height: var(--header-h); }
 }
 .claim-title { margin: 0 0 6px; font-size: clamp(24px, 4vw, 32px); font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
 .claim-restaurant { margin: 0 0 18px; font-size: 15px; font-weight: 700; color: var(--text-secondary); }
-.claim-form { display: grid; gap: 12px; }
-.claim-input {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--input-border);
-  border-radius: var(--radius-pill);
-  background: var(--card-surface);
-  color: var(--text-primary);
-  font: inherit;
-}
-.claim-input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
-.claim-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 48px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--button-primary-bg);
-  color: var(--button-primary-text);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.claim-submit:hover { background: var(--button-primary-hover); }
-.claim-submit:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .claim-status { padding: 14px; border-radius: var(--radius-card); background: var(--surface-soft); }
 .claim-note { color: var(--text-secondary); font-size: 14px; }
-.claim-error { color: var(--danger); font-size: 13px; }
 .claim-link { color: var(--accent); font-weight: 700; }
-/* BE-48 (issue 112): de claim stapelt tekst, formulier en knoppen met dezelfde
-   tussenruimte als de inlogschermen; alleen tokens. */
+/* BE-48 (issue 112): de claim gebruikt de gedeelde authstijl (auth-input,
+   auth-submit, auth-error) en stapelt tekst, formulier en knoppen met dezelfde
+   tussenruimte als de inlogschermen; alleen tokens. De oude claim-form,
+   claim-input, claim-submit en claim-error zijn daarmee vervallen. */
 .claim-step { display: grid; gap: 16px; }
 .claim-step .auth-actions { margin-top: 0; }
 

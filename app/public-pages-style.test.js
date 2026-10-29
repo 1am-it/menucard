@@ -31,7 +31,9 @@ test('claimpagina: gedeelde header, kaart, primaire knop-tokens en de telefoonme
   assert.match(source, /import MobileTabBar from '@\/src\/components\/MobileTabBar'/);
   assert.match(source, /<Wordmark \/>/);
   assert.match(source, /className="claim-card"/);
-  assert.match(source, /className="claim-submit"/);
+  // BE-48 (#112): de claim gebruikt de gedeelde authstijl (auth-submit,
+  // auth-input, auth-error) in plaats van eigen claim-knoppen.
+  assert.match(source, /className="auth-submit"/);
   assert.match(source, /<MobileTabBar \/>/);
   assert.doesNotMatch(source, /style=\{box\}|style=\{inputStyle\}|style=\{buttonStyle\}/, 'the old inline box/input/button styles must be gone');
 });
@@ -53,7 +55,9 @@ test('globals.css: BE-28b gebruikt alleen tokens voor kaarten, chips en claim/nv
   assert.match(block, /\.ar-card \{[^}]*background: var\(--card-surface\)/);
   assert.match(block, /\.ar-menu-button \{[^}]*background: var\(--surface-soft\)/);
   assert.match(block, /\.filter-chip \{[^}]*background: var\(--chip-bg\)/);
-  assert.match(block, /\.claim-submit \{[^}]*background: var\(--button-primary-bg\)/);
+  // BE-48 (#112): de claimknoppen zijn vervangen door de gedeelde authstijl; de
+  // claimstapel zelf blijft token-only (zie de controle hieronder).
+  assert.match(block, /\.claim-step \{ display: grid; gap: 16px; \}/);
   assert.match(block, /\.nvwa-export-btn \{[^}]*background: var\(--button-primary-bg\)/);
   assert.doesNotMatch(block, /#[0-9a-fA-F]{3,6}\b/, 'no hard-coded colour in the BE-28b block');
 });
