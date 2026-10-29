@@ -239,6 +239,17 @@ function installBe48AuthStub(settings) {
 
   try {
     window.localStorage.setItem('bredaeats_theme', settings.theme);
+    // A session from a previous scenario must never leak into the next one: the
+    // claim page reads the stored session on mount, and every scenario here
+    // starts signed out. Only Supabase's own keys are removed.
+    const stale = [];
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (key && key.indexOf('sb-') === 0) stale.push(key);
+    }
+    stale.forEach(function (key) {
+      window.localStorage.removeItem(key);
+    });
   } catch (error) {
     // A blocked storage context is harmless for this check.
   }

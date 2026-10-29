@@ -17,18 +17,26 @@ const { DEFAULT_SETTINGS, be48Settings, authStubScript } = require('./be48-auth-
 const APP = 'http://localhost:3139';
 
 // The page globals the stub uses. `btoa`, `Response` and `URL` already exist in
-// Node; only window/location/localStorage are supplied here.
-function install(overrides) {
-  const stored = [];
+// Node; only window/location/localStorage are supplied here. The storage is a
+// small real map, so the stub's own cleanup of a previous scenario's session is
+// observable too.
+function install(overrides, seed) {
+  const store = new Map(Object.entries(seed || {}));
   global.window = {
     location: { href: `${APP}/internal/login`, origin: APP, pathname: '/internal/login' },
     localStorage: {
-      setItem: (key, value) => stored.push({ key, value }),
+      setItem: (key, value) => store.set(key, String(value)),
+      getItem: (key) => (store.has(key) ? store.get(key) : null),
+      removeItem: (key) => store.delete(key),
+      key: (index) => (Array.from(store.keys())[index] === undefined ? null : Array.from(store.keys())[index]),
+      get length() {
+        return store.size;
+      },
     },
     fetch: null,
   };
   const result = installBe48AuthStub(be48Settings(overrides));
-  return { api: result, stored, fetch: global.window.fetch };
+  return { api: result, stored: store, fetch: global.window.fetch };
 }
 
 function jwtPayload(token) {
@@ -252,12 +260,19 @@ test('the stub: the real Supabase SDK accepts the sign-in, code and error shapes
 
 test('the stub: the theme is stored for the page and the calls are logged', async () => {
   const { fetch, stored, api } = install({ theme: 'light' });
-  assert.deepEqual(stored, [{ key: 'bredaeats_theme', value: 'light' }]);
+  assert.equal(stored.get('bredaeats_theme'), 'light');
   await fetch(`${APP}/api/internal/v1/me`, { method: 'GET' });
   assert.deepEqual(
     api.calls.map((call) => `${call.method} ${call.path}`),
     ['GET /api/internal/v1/me'],
   );
+});
+
+test('the stub: a previous scenario can never leak its session into the next one', () => {
+  const { stored } = install({ theme: 'dark' }, { 'sb-127-auth-token': '{"access_token":"oud"}', 'iets-anders': 'blijft' });
+  assert.equal(stored.has('sb-127-auth-token'), false);
+  assert.equal(stored.get('iets-anders'), 'blijft');
+  assert.equal(stored.get('bredaeats_theme'), 'dark');
 });
 test('the stub: the claim code arrives through /otp and verifies as its own type', async () => {
   const { fetch, api } = install();
