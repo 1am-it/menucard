@@ -5282,7 +5282,7 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 }
 
 
-/* ── BE-48 (#112): inloggen, tweede stap en wachtwoord vergeten ──────────────
+/* ── BE-48 (issue 112): inloggen, tweede stap en wachtwoord vergeten ─────────
    The four internal auth screens (login, code from the app, link an app,
    forgot password) share one small set of classes instead of the inline styles
    the login page used to carry. Everything is a token (app/globals.css), so
