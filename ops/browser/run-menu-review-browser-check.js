@@ -40,11 +40,18 @@ const {
   tabUntil,
 } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-menu-review-browser-check.js';
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const OUT_DIR = path.join(__dirname, 'output');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'menu-review-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'menu-review-browser-evidence.json');
 const PORT = Number(process.env.BROWSER_FIXTURE_PORT || 3137);
 const APP_ORIGINS = defaultAppOrigins(PORT);
 const BATCH_URL = `http://localhost:${PORT}/internal/bronnen/batch`;
@@ -59,6 +66,7 @@ const clickpaths = [];
 let networkGuard = null;
 let networkEvidence = null;
 let forcedWriteEvidence = null;
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -1700,7 +1708,13 @@ function writeEvidence({ passed, head, dirty, error, browser }) {
     head: head || 'pending-commit',
     worktreeDirty: Boolean(dirty),
     generatedAt: new Date().toISOString(),
-    command: 'npm run test:browser:menu-review',
+    command: SELECTION.filter
+      ? `npm run test:browser:menu-review -- --alleen=${SELECTION.filter.join(',')}`
+      : 'npm run test:browser:menu-review',
+    // BE-43 (#101): a filtered run names its selection and is never the full
+    // record; `passed` then covers only the chosen scenarios.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     // BE-40 (#95): the number of successful checks of a full run, explicitly in
     // the record instead of only in the console line.
     summary: {
@@ -2995,7 +3009,119 @@ async function manualCardKeyboardScenario(cdp) {
   screenshotFiles.push(await screenshot(cdp, OUT_DIR, 'ai-map-keyboard-390-light.png'));
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles in deze volgorde, precies zoals voorheen.
+const SCENARIOS = [
+  { name: 'review', run: (cdp) => reviewScenario(cdp) },
+  { name: 'read-only', run: (cdp) => readOnlyScenario(cdp) },
+  { name: 'empty', run: (cdp) => emptyScenario(cdp) },
+  { name: 'partial', run: (cdp) => partialScenario(cdp) },
+  { name: 'image-only', run: (cdp) => imageOnlyScenario(cdp) },
+  { name: 'structure', run: (cdp) => structureScenario(cdp) },
+  { name: 'be30', run: (cdp) => be30Scenario(cdp) },
+  // Stap 2 en 3 van de handmatige AI-import: stap 3 gaat verder op de pagina die
+  // stap 2 achterliet en hoort dus direct na `manual-import`.
+  { name: 'manual-import', run: (cdp) => manualImportScenario(cdp) },
+  { name: 'manual-review-steps', run: (cdp) => manualReviewSteps(cdp) },
+  // U1/U2: dit scenario opent zijn eigen afgekeurde antwoord.
+  { name: 'manual-rejected', run: (cdp) => manualRejectedScenario(cdp) },
+  // V1/V2 (review 6377050602): de afgeleide telling en status met de melding.
+  { name: 'manual-normalized', run: (cdp) => manualNormalizedScenario(cdp) },
+  // Variant 1 (order 6382189724): niet-overgenomen bronregels, met de
+  // toetsenbordroute en de standen na Toevoegen en Geen gerecht.
+  { name: 'manual-uncovered', run: (cdp) => manualUncoveredScenario(cdp) },
+  // Variant 5 (order 6382953597): de schakelaar Lijst | Kaart, de markeringen,
+  // de panelen en de luie kaartpagina. 390 px licht/donker en 320 px.
+  {
+    name: 'manual-card',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) await manualCardScenario(cdp, theme);
+      await manualCardScenario(cdp, 'light', 320);
+    },
+  },
+  { name: 'manual-card-keyboard', run: (cdp) => manualCardKeyboardScenario(cdp) },
+  // #59 / BE-21 (review 6380804419): "Lees met AI" op het bestaande scherm.
+  {
+    name: 'ai-read',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) await aiReadScenario(cdp, theme);
+    },
+  },
+  {
+    name: 'ai-read-batch',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) await aiReadBatchScenario(cdp, theme);
+    },
+  },
+  { name: 'ai-read-keyboard', run: (cdp) => aiReadKeyboardScenario(cdp) },
+  { name: 'v2', run: (cdp) => v2Scenario(cdp) },
+  { name: 'error', run: (cdp) => errorScenario(cdp) },
+  {
+    name: 'responsive',
+    run: async (cdp) => {
+      for (const width of [320, 390]) {
+        for (const theme of ['light', 'dark']) await responsiveScenario(cdp, width, theme);
+      }
+      await responsiveScenario(cdp, 1024, 'dark');
+      // Deze controle hoort bij dit scenario: alleen hier staan beide thema's.
+      check('light and dark resolve to different background tokens', themeBackgrounds.light !== themeBackgrounds.dark, `${themeBackgrounds.light} / ${themeBackgrounds.dark}`);
+    },
+  },
+  { name: 'keyboard', run: (cdp) => keyboardScenario(cdp) },
+  { name: 'concept-list-clickpath', run: (cdp) => conceptListClickPath(cdp) },
+  { name: 'concept-product-read-only', run: (cdp) => conceptProductReadOnlyScenario(cdp) },
+  { name: 'concept-list-states', run: (cdp) => conceptListStatesScenario(cdp) },
+  { name: 'concept-forced-write', run: (cdp) => conceptForcedWriteScenario(cdp) },
+  {
+    name: 'concept-responsive',
+    run: async (cdp) => {
+      for (const [width, theme] of [[320, 'light'], [390, 'light'], [390, 'dark'], [1024, 'dark']]) {
+        await conceptResponsiveScenario(cdp, width, theme);
+      }
+    },
+  },
+  {
+    name: 'concept-list-responsive',
+    run: async (cdp) => {
+      for (const [width, theme] of [[320, 'light'], [390, 'dark']]) {
+        await conceptListResponsiveScenario(cdp, width, theme);
+      }
+      check('concept light and dark resolve to different background tokens', conceptThemeBackgrounds.light !== conceptThemeBackgrounds.dark, `${conceptThemeBackgrounds.light} / ${conceptThemeBackgrounds.dark}`);
+    },
+  },
+  { name: 'concept-keyboard', run: (cdp) => conceptKeyboardScenario(cdp) },
+  // BE-39 (#93): "Klaar voor publicatie" as the second badge in the list.
+  { name: 'concept-publication', run: (cdp) => conceptPublicationScenario(cdp) },
+  // De bewuste negatieve netwerkprobes en de afsluitende netwerkcontroles.
+  {
+    name: 'netwerk',
+    run: async (cdp) => {
+      await networkGuardScenario(cdp, networkGuard);
+      const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
+      check('network guard: page recorded only deliberate blocked attempts', pageViolations.every((entry) => entry.phase === 'negative-probe'), JSON.stringify(pageViolations.filter((entry) => entry.phase !== 'negative-probe').slice(0, 5)));
+      networkEvidence = {
+        guard: 'in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown',
+        appViolations: networkGuard.appViolations(),
+        deliberateViolations: networkGuard.negativeViolations(),
+        pageViolations,
+      };
+    },
+  },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const browserPath = findBrowser();
   if (!browserPath) {
     writeEvidence({ passed: false, head: 'pending-commit', dirty: true, error: 'browser_unavailable' });
@@ -3018,64 +3144,7 @@ async function main() {
       source: fixtureBootstrap(fixtures.scenarios, { appOrigins: APP_ORIGINS, baseUrl: BATCH_URL }),
     });
 
-    await reviewScenario(cdp);
-    await readOnlyScenario(cdp);
-    await emptyScenario(cdp);
-    await partialScenario(cdp);
-    await imageOnlyScenario(cdp);
-    await structureScenario(cdp);
- await be30Scenario(cdp);
-    await manualImportScenario(cdp);
-    await manualReviewSteps(cdp);
-    // U1/U2: pas na de bestaande stroom, want die gaat verder op de pagina die
-    // stap 2 achterliet. Dit scenario opent zijn eigen afgekeurde antwoord.
-    await manualRejectedScenario(cdp);
-    // V1/V2 (review 6377050602): de afgeleide telling en status met de melding.
-    await manualNormalizedScenario(cdp);
-    // Variant 1 (order 6382189724): niet-overgenomen bronregels, met de
-    // toetsenbordroute en de standen na Toevoegen en Geen gerecht.
-    await manualUncoveredScenario(cdp);
-    // Variant 5 (order 6382953597): de schakelaar Lijst | Kaart, de markeringen,
-    // de panelen en de luie kaartpagina. 390 px licht/donker, 320 px en toetsenbord.
-    for (const theme of ['light', 'dark']) await manualCardScenario(cdp, theme);
-    await manualCardScenario(cdp, 'light', 320);
-    await manualCardKeyboardScenario(cdp);
-    // #59 / BE-21 (review 6380804419): "Lees met AI" op het bestaande scherm.
-    for (const theme of ['light', 'dark']) await aiReadScenario(cdp, theme);
-    for (const theme of ['light', 'dark']) await aiReadBatchScenario(cdp, theme);
-    await aiReadKeyboardScenario(cdp);
-    await v2Scenario(cdp);
-    await errorScenario(cdp);
-    for (const width of [320, 390]) {
-      for (const theme of ['light', 'dark']) await responsiveScenario(cdp, width, theme);
-    }
-    await responsiveScenario(cdp, 1024, 'dark');
-    check('light and dark resolve to different background tokens', themeBackgrounds.light !== themeBackgrounds.dark, `${themeBackgrounds.light} / ${themeBackgrounds.dark}`);
-    await keyboardScenario(cdp);
-    await conceptListClickPath(cdp);
-    await conceptProductReadOnlyScenario(cdp);
-    await conceptListStatesScenario(cdp);
-    await conceptForcedWriteScenario(cdp);
-    for (const [width, theme] of [[320, 'light'], [390, 'light'], [390, 'dark'], [1024, 'dark']]) {
-      await conceptResponsiveScenario(cdp, width, theme);
-    }
-    for (const [width, theme] of [[320, 'light'], [390, 'dark']]) {
-      await conceptListResponsiveScenario(cdp, width, theme);
-    }
-    check('concept light and dark resolve to different background tokens', conceptThemeBackgrounds.light !== conceptThemeBackgrounds.dark, `${conceptThemeBackgrounds.light} / ${conceptThemeBackgrounds.dark}`);
-    await conceptKeyboardScenario(cdp);
-    // BE-39 (#93): "Klaar voor publicatie" as the second badge in the list.
-    await conceptPublicationScenario(cdp);
-    await networkGuardScenario(cdp, networkGuard);
-
-    const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
-    check('network guard: page recorded only deliberate blocked attempts', pageViolations.every((entry) => entry.phase === 'negative-probe'), JSON.stringify(pageViolations.filter((entry) => entry.phase !== 'negative-probe').slice(0, 5)));
-    networkEvidence = {
-      guard: 'in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown',
-      appViolations: networkGuard.appViolations(),
-      deliberateViolations: networkGuard.negativeViolations(),
-      pageViolations,
-    };
+    scenarioRuns = await runScenarioSelection({ entries: SCENARIOS, checks, cdp, filter: SELECTION.filter });
 
     const exceptions = cdp.takeEvents('Runtime.exceptionThrown');
     check('no uncaught browser exception', exceptions.length === 0, JSON.stringify(exceptions.slice(0, 3)));
@@ -3091,7 +3160,7 @@ async function main() {
       .toString()
       .split(/\r?\n/)
       .filter(Boolean)
-      .filter((line) => !line.includes('ops/browser/evidence/menu-review-browser-evidence.json'));
+      .filter((line) => !line.includes('ops/browser/evidence/menu-review-browser-evidence'));
     const dirty = statusLines.length > 0;
     const passed = checks.every((entry) => entry.passed);
     const evidence = writeEvidence({ passed, head, dirty, browser });

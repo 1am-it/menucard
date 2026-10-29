@@ -36,11 +36,18 @@ const {
   screenshot,
 } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
+const SCRIPT_NAME = 'run-beeld-lezen-browser-check.js';
 const OUT_DIR = path.join(__dirname, 'output', 'be-33');
 const SHOTS_DIR = path.join(__dirname, 'evidence', 'be-33');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'beeld-lezen-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'beeld-lezen-browser-evidence.json');
 const PORT = Number(process.env.BEELD_FIXTURE_PORT || 3140);
 const APP = `http://localhost:${PORT}`;
 const START_URL = `${APP}/internal/bronnen`;
@@ -55,6 +62,7 @@ const WATCHDOG_MIN = Number(process.env.BEELD_WATCHDOG_MIN || 40);
 const checks = [];
 const shots = [];
 let viewport = { width: 1280, height: 900 };
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -111,6 +119,9 @@ function writeEvidence(extra) {
     port: PORT,
     screenshotsDir: 'ops/browser/evidence/be-33',
     screenshots: shots,
+    // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     checks,
     passed: checks.length > 0 && checks.every((entry) => entry.passed),
     ...extra,
@@ -435,7 +446,51 @@ async function warmUp(cdp) {
   await navigate(cdp, `${MANUAL_URL}?theme=light&fixture=manual-image`, `document.body.innerText.includes('Prompt maken')`).catch(() => {});
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles over de hele matrix. Deze vlag vervangt de oude
+// BEELD_ONLY=rows|map|all debugschakelaar; BEELD_THEMES en BEELD_WIDTHS blijven.
+const THEMES = (process.env.BEELD_THEMES || 'light,dark').split(',').map((entry) => entry.trim()).filter(Boolean);
+const WIDTH_LIST = (process.env.BEELD_WIDTHS || '1280,390').split(',').map((entry) => Number(entry.trim())).filter((entry) => entry > 0);
+const CHECK_SCENARIOS = [
+  {
+    name: 'rij-ai-aan',
+    run: async (cdp) => {
+      for (const theme of THEMES) {
+        for (const width of WIDTH_LIST) await rowScenario(cdp, width, theme, 'on');
+      }
+    },
+  },
+  {
+    name: 'rij-ai-uit',
+    run: async (cdp) => {
+      for (const theme of THEMES) {
+        for (const width of WIDTH_LIST) await rowScenario(cdp, width, theme, 'off');
+      }
+    },
+  },
+  {
+    name: 'kaart',
+    run: async (cdp) => {
+      for (const theme of THEMES) {
+        for (const width of WIDTH_LIST) await imageMapScenario(cdp, width, theme);
+      }
+    },
+  },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), CHECK_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: CHECK_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const watchdog = setTimeout(() => {
     try {
       writeEvidence({ error: 'run_timeout (' + WATCHDOG_MIN + ' min)' });
@@ -470,25 +525,8 @@ async function main() {
 
     console.log('warm-up: compiling the routes');
     await warmUp(cdp);
-    // The whole matrix by default; the environment switches only exist to debug
-    // one screen of this check during a round.
-    const only = process.env.BEELD_ONLY || 'all';
-    const themes = (process.env.BEELD_THEMES || 'light,dark').split(',').map((entry) => entry.trim()).filter(Boolean);
-    const widths = (process.env.BEELD_WIDTHS || '1280,390').split(',').map((entry) => Number(entry.trim())).filter((entry) => entry > 0);
-    for (const theme of themes) {
-      for (const width of widths) {
-        if (only === 'all' || only === 'rows') {
-          console.log(`scenario: rij ${width} ${theme} (AI aan)`);
-          await rowScenario(cdp, width, theme, 'on');
-          console.log(`scenario: rij ${width} ${theme} (AI uit)`);
-          await rowScenario(cdp, width, theme, 'off');
-        }
-        if (only === 'all' || only === 'map') {
-          console.log(`scenario: kaart ${width} ${theme}`);
-          await imageMapScenario(cdp, width, theme);
-        }
-      }
-    }
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: CHECK_SCENARIOS, checks, cdp, filter: SELECTION.filter });
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
     check('network guard: the page recorded no blocked app traffic', pageViolations.length === 0, JSON.stringify(pageViolations.slice(0, 3)));

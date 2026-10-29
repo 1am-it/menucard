@@ -33,13 +33,20 @@ const {
   screenshot,
 } = require('./lib/runtime');
 const { CdpClient } = require('./lib/cdp');
+const {
+  parseScenarioArgs,
+  scenarioSelectionOutcome,
+  filteredEvidencePath,
+  runScenarioSelection,
+} = require('./lib/scenario-filter');
 
 const OUT_DIR = path.join(__dirname, 'output', 'be-31');
 // The screenshots are also kept next to the evidence JSON, so the reviewable
 // proof travels with the branch instead of only living in a git-ignored folder.
 const SHOTS_DIR = path.join(__dirname, 'evidence', 'be-31');
 const EVIDENCE_DIR = path.join(__dirname, 'evidence');
-const EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'bronnen-browser-evidence.json');
+const BASE_EVIDENCE_PATH = path.join(EVIDENCE_DIR, 'bronnen-browser-evidence.json');
+const SCRIPT_NAME = 'run-bronnen-browser-check.js';
 const PORT = Number(process.env.BRONNEN_FIXTURE_PORT || 3139);
 const APP = `http://localhost:${PORT}`;
 const START_URL = `${APP}/internal/bronnen`;
@@ -49,6 +56,7 @@ const FIXTURES = { ...baseFixtures, ...SCENARIOS };
 const checks = [];
 const shots = [];
 let viewport = { width: 1280, height: 900 };
+let scenarioRuns = null;
 
 function check(name, passed, detail) {
   checks.push({ name, passed: Boolean(passed), detail: detail === undefined ? null : String(detail) });
@@ -138,6 +146,9 @@ function writeEvidence(extra) {
     port: PORT,
     screenshotsDir: 'ops/browser/evidence/be-31',
     screenshots: shots,
+    // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
+    filter: SELECTION.filter,
+    scenarios: scenarioRuns,
     checks,
     passed: checks.length > 0 && checks.every((entry) => entry.passed),
     ...extra,
@@ -402,7 +413,56 @@ async function warmUp(cdp) {
   check('warm-up: the route compiles and the task list renders', ready);
 }
 
+// BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
+// alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
+// Zonder vlag draait alles, in dezelfde volgorde en met dezelfde controles.
+const CHECK_SCENARIOS = [
+  {
+    name: 'scherm-1-4-6',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        for (const width of [1280, 390, 320]) await bronnenScenario(cdp, width, theme);
+      }
+    },
+  },
+  {
+    name: 'scherm-3',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        for (const width of [1280, 390, 320]) await emptyScenario(cdp, width, theme);
+      }
+    },
+  },
+  {
+    name: 'scherm-5',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        for (const width of [1280, 390, 320]) await coverageScenario(cdp, width, theme);
+      }
+    },
+  },
+  {
+    name: 'scherm-7',
+    run: async (cdp) => {
+      for (const theme of ['light', 'dark']) {
+        for (const width of [1280, 390, 320]) await addScenario(cdp, width, theme);
+      }
+    },
+  },
+];
+const SELECTION = parseScenarioArgs(process.argv.slice(2), CHECK_SCENARIOS);
+// Een gefilterde run schrijft nooit naar het volledige bewijsbestand.
+const EVIDENCE_PATH = filteredEvidencePath(BASE_EVIDENCE_PATH, SELECTION.filter);
+
 async function main() {
+  // BE-43 (#101): `--lijst` toont alleen de namen en `--alleen=<naam>` draait
+  // de keuze. Een onbekende naam is een gebruiks fout: er start niets.
+  const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: CHECK_SCENARIOS, scriptName: SCRIPT_NAME });
+  if (outcome.stop) {
+    process.exitCode = outcome.exitCode;
+    return;
+  }
+
   const watchdog = setTimeout(() => {
     try {
       writeEvidence({ error: 'run_timeout (12 min)' });
@@ -437,18 +497,8 @@ async function main() {
 
     console.log('warm-up: compiling the route and the APIs');
     await warmUp(cdp);
-    for (const theme of ['light', 'dark']) {
-      for (const width of [1280, 390, 320]) {
-        console.log(`scenario: scherm 1-4+6 ${width} ${theme}`);
-        await bronnenScenario(cdp, width, theme);
-        console.log(`scenario: scherm 3 ${width} ${theme}`);
-        await emptyScenario(cdp, width, theme);
-        console.log(`scenario: scherm 5 ${width} ${theme}`);
-        await coverageScenario(cdp, width, theme);
-        console.log(`scenario: scherm 7 ${width} ${theme}`);
-        await addScenario(cdp, width, theme);
-      }
-    }
+    // BE-43 (#101): alleen de gekozen scenario's, elk met één regel uitvoer.
+    scenarioRuns = await runScenarioSelection({ entries: CHECK_SCENARIOS, checks, cdp, filter: SELECTION.filter });
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
     check('network guard: the page recorded no blocked app traffic', pageViolations.length === 0, JSON.stringify(pageViolations.slice(0, 3)));
