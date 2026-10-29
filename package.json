@@ -24,6 +24,7 @@
     "test:browser:publicatie": "node ops/browser/run-klaar-voor-publicatie-browser-check.js",
     "test:browser:be42": "node ops/browser/run-be42-browser-check.js",
     "test:browser:be44": "node ops/browser/run-be44-browser-check.js",
+    "test:browser:be49": "node ops/browser/run-be49-browser-check.js",
     "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
     "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },

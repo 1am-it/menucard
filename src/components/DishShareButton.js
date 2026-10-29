@@ -45,18 +45,21 @@ function currentTheme() {
 }
 
 /**
- * Een gekozen webmanier openen. `https:` gaat in een nieuw tabblad (WhatsApp,
- * Telegram), `sms:` en `mailto:` in hetzelfde venster, zodat het systeem zijn
- * eigen app opent. Een geblokkeerde popup valt terug op hetzelfde venster.
+ * Een gekozen webmanier openen met een echte link: `https:` in een nieuw
+ * tabblad (WhatsApp, Telegram), `sms:` en `mailto:` in hetzelfde venster zodat
+ * het systeem zijn eigen app opent. Een tijdelijke, onzichtbare anchor is de
+ * gewone manier daarvoor — geen popup-blokkade en geen eigen URL-parser.
  */
 function openShareLink(link) {
-  if (typeof window === 'undefined') return
-  if (/^https?:/i.test(link)) {
-    const opened = typeof window.open === 'function' ? window.open(link, '_blank', 'noopener,noreferrer') : null
-    if (!opened) window.location.href = link
-    return
-  }
-  window.location.href = link
+  if (typeof document === 'undefined' || !document.body) return
+  const anchor = document.createElement('a')
+  anchor.href = link
+  anchor.rel = 'noopener noreferrer'
+  if (/^https?:/i.test(link)) anchor.target = '_blank'
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
 }
 
 export default function DishShareButton({ href, title, entry = null, dishKey = null, name = null }) {

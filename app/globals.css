@@ -820,6 +820,10 @@ header, .site-header {
   border-radius: var(--radius-md);
   padding: 14px 16px;
   transition: border-color 0.15s;
+  /* BE-49 (#115) — de onderste regel met het label en de icoonknoppen hoort
+     onderaan de kaart, ook als een kaart in de grid hoger is dan zijn inhoud. */
+  display: flex;
+  flex-direction: column;
 }
 .menu-card:hover { border-color: var(--border-hover); }
 
@@ -886,7 +890,8 @@ header, .site-header {
   justify-content: space-between;
   gap: 8px;
   min-height: 44px;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .card-foot-labels {

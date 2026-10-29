@@ -155,17 +155,24 @@ function readCardJs(name) {
     const card = cardFor(${JSON.stringify(name)});
     if (!card) return { missing: true, cards: document.querySelectorAll('.menu-card').length };
     const button = card.querySelector('.dish-share-btn');
+    const icon = button ? button.querySelector('svg') : null;
     const desc = card.querySelector('.td-desc');
     const cardTop = card.querySelector('.card-top');
     const status = card.querySelector('[role="status"]');
     const note = card.querySelector('.dish-share-note');
     const nameEl = card.querySelector('.td-name');
+    const style = button ? getComputedStyle(button) : null;
     return {
       missing: false,
       theme: document.documentElement.getAttribute('data-theme'),
-      button: button ? flat(button.innerText) : null,
+      // BE-49 (#115): de knop is een icoonknop; de naam staat in aria-label.
+      button: button ? flat(button.getAttribute('aria-label')) : null,
+      visibleText: button ? flat(button.innerText) : null,
       buttonBox: button ? box(button) : null,
-      icon: Boolean(button && button.querySelector('svg')),
+      iconBox: icon ? box(icon) : null,
+      background: style ? style.backgroundColor : null,
+      expanded: button ? button.getAttribute('aria-expanded') : null,
+      icon: Boolean(icon),
       insideCardTop: Boolean(cardTop && button && cardTop.contains(button)),
       afterDesc: Boolean(desc && button && box(button).top >= box(desc).top),
       statusRole: Boolean(status),
@@ -281,7 +288,7 @@ function readSaveJs(name) {
     let stored = null;
     try { stored = JSON.parse(localStorage.getItem(${JSON.stringify(SAVED_LIST_KEY)}) || '[]'); } catch (error) { stored = null; }
     return {
-      label: button ? flat(button.innerText) : null,
+      label: button ? flat(button.getAttribute('aria-label')) : null,
       pressed: button ? button.getAttribute('aria-pressed') : null,
       box: button ? box(button) : null,
       iconFill: icon ? icon.getAttribute('fill') : null,
@@ -372,7 +379,8 @@ function saveButtonJs(name) {
     if (!button) return null;
     const icon = button.querySelector('svg');
     return {
-      text: flat(button.innerText),
+      label: button ? flat(button.getAttribute('aria-label')) : null,
+      ariaLabel: button ? flat(button.getAttribute('aria-label')) : null,
       pressed: button.getAttribute('aria-pressed'),
       fill: icon ? icon.getAttribute('fill') : null,
     };
@@ -382,6 +390,15 @@ function saveButtonJs(name) {
 const SAVE_OBSERVED = savePressedJs(DISH_NAME);
 const UNSAVE_OBSERVED = saveReleasedJs(DISH_NAME);
 const SAVED_LIST_CLEARED = `localStorage.removeItem(${JSON.stringify(SAVED_LIST_KEY)})`;
+
+// BE-49 (#115) — de BE-44-scenario's bewijzen het gedrag van het telefoonmenu
+// (systeemmenu, anders kopiëren). Sinds BE-49 opent een tik op "Delen" eerst
+// het blad "Hoe deel je meestal?"; daarom zet deze check die voorkeur vooraf,
+// precies zoals een bezoeker dat één keer doet. De nieuwe scenario's (blad,
+// favorieten, snel delen) staan in run-be49-browser-check.js.
+const SHARE_PREFERENCE_KEY = 'deelvoorkeur';
+const SHARE_PREFERENCE_PHONE = `localStorage.setItem(${JSON.stringify(SHARE_PREFERENCE_KEY)}, JSON.stringify({ phone: true }))`;
+
 
 /** De menukaart openen met een lege bewaarlijst en de gevraagde stand. */
 async function openMenu(cdp, width, theme) {
@@ -393,6 +410,8 @@ async function openMenu(cdp, width, theme) {
     `${APP}/menu/${MENU_ID}`,
     `Boolean([...document.querySelectorAll('.menu-card .td-name')].find((el) => (el.innerText || '').trim() === ${JSON.stringify(DISH_NAME)}))`,
   );
+  // BE-49: dit scenario deelt zoals het telefoonmenu.
+  await evalJs(cdp, SHARE_PREFERENCE_PHONE);
 }
 
 // ── 1. De knop "Delen" (criterium 1) ────────────────────────────────────────
@@ -407,16 +426,18 @@ async function delenScenario(cdp) {
         `${APP}/menu/${MENU_ID}`,
         `Boolean([...document.querySelectorAll('.menu-card .td-name')].find((el) => (el.innerText || '').trim() === ${JSON.stringify(DISH_NAME)}))`,
       );
+      // BE-49: dit scenario deelt zoals het telefoonmenu (systeemmenu, anders
+      // kopiëren); het blad en de favorieten hebben hun eigen check.
+      await evalJs(cdp, SHARE_PREFERENCE_PHONE);
 
       const card = await evalJs(cdp, readCardJs(DISH_NAME));
-      check(`delen (${label}): de knop "Delen" staat op de gerechtkaart`, card.missing === false && card.button === 'Delen', JSON.stringify({ button: card.button, missing: card.missing }));
-      check(
-        `delen (${label}): het aanraakvlak is minstens 44 × 44 px`,
-        Boolean(card.buttonBox) && card.buttonBox.height >= 44 && card.buttonBox.width >= 44,
-        JSON.stringify(card.buttonBox),
-      );
+      check(`delen (${label}): de icoonknop "Deel ${DISH_NAME}" staat op de gerechtkaart`, card.missing === false && card.button === `Deel ${DISH_NAME}`, JSON.stringify({ button: card.button, missing: card.missing }));
+      check(`delen (${label}): het aanraakvlak is minstens 44 × 44 px`, Boolean(card.buttonBox) && card.buttonBox.height >= 44 && card.buttonBox.width >= 44, JSON.stringify(card.buttonBox));
+      check(`delen (${label}): het icoon is ±20 px`, Boolean(card.iconBox) && card.iconBox.width >= 18 && card.iconBox.width <= 22 && card.iconBox.height >= 18 && card.iconBox.height <= 22, JSON.stringify(card.iconBox));
+      check(`delen (${label}): geen gevulde achtergrond`, card.background === 'rgba(0, 0, 0, 0)' || card.background === 'transparent', card.background);
+      check(`delen (${label}): de knop toont geen tekst`, card.visibleText === '', JSON.stringify(card.visibleText));
+      check(`delen (${label}): aria-expanded is "false" zolang er niets openstaat`, card.expanded === 'false', card.expanded);
       check(`delen (${label}): de knop staat onder de beschrijving, niet naast de prijs`, card.afterDesc === true && card.insideCardTop === false, JSON.stringify({ afterDesc: card.afterDesc, insideCardTop: card.insideCardTop }));
-      check(`delen (${label}): de knop heeft het deelicoon`, card.icon === true);
       check(`delen (${label}): de melding staat in een role="status"`, card.statusRole === true);
       check(`delen (${label}): de stand van de pagina is ${theme}`, card.theme === theme, card.theme);
       check(`delen (${label}): geen horizontale overloop`, card.overflow <= 0, `overflow=${card.overflow}`);
@@ -488,7 +509,7 @@ async function ontvangerScenario(cdp) {
       check(`ontvanger (${label}): de regel "Iemand deelde dit gerecht met je" staat bij de kaart`, card.note === 'Iemand deelde dit gerecht met je', card.note);
       check(`ontvanger (${label}): de regel staat boven de kaart`, card.noteAboveName === true);
       check(`ontvanger (${label}): het gerecht is opgelicht`, lit === true && card.highlighted === true, JSON.stringify({ lit, highlighted: card.highlighted }));
-      check(`ontvanger (${label}): de deelknop staat ook op deze kaart`, card.button === 'Delen', card.button);
+      check(`ontvanger (${label}): de deelknop staat ook op deze kaart`, card.button === `Deel ${DISH_NAME}`, card.button);
       check(`ontvanger (${label}): de stand in de link verandert het thema niet`, card.theme === theme, JSON.stringify({ theme: card.theme, stand }));
       check(`ontvanger (${label}): geen horizontale overloop`, card.overflow <= 0, `overflow=${card.overflow}`);
       await evalJs(cdp, focusCardJs(DISH_NAME));
@@ -506,13 +527,13 @@ async function bewarenScenario(cdp) {
       await openMenu(cdp, width, theme);
 
       const before = await evalJs(cdp, readSaveJs(DISH_NAME));
-      check(`bewaren (${label}): de knop heet "Bewaren" en staat niet aan`, before.label === 'Bewaren' && before.pressed === 'false', JSON.stringify({ label: before.label, pressed: before.pressed }));
+      check(`bewaren (${label}): de knop heet "Bewaar ${DISH_NAME}" en staat niet aan`, before.label === `Bewaar ${DISH_NAME}` && before.pressed === 'false', JSON.stringify({ label: before.label, pressed: before.pressed }));
       check(`bewaren (${label}): het tikvlak is minstens 44 × 44 px`, Boolean(before.box) && before.box.height >= 44 && before.box.width >= 44, JSON.stringify(before.box));
       check(`bewaren (${label}): zonder bewaard gerecht is er geen onderbalk`, before.bar === null, before.bar);
 
       const saveClick = await clickUntilWith(cdp, clickSaveJs(DISH_NAME), SAVE_OBSERVED);
       const saved = await evalJs(cdp, readSaveJs(DISH_NAME));
-      check(`bewaren (${label}): de knop wordt "Bewaard" met aria-pressed`, saveClick.observed && saved.label === 'Bewaard' && saved.pressed === 'true', JSON.stringify({ label: saved.label, pressed: saved.pressed }));
+      check(`bewaren (${label}): de knop staat aan met aria-pressed`, saveClick.observed && saved.pressed === 'true', JSON.stringify({ label: saved.label, pressed: saved.pressed }));
       check(`bewaren (${label}): de bladwijzer is gevuld`, saved.iconFill === 'currentColor', saved.iconFill);
       check(`bewaren (${label}): het gerecht staat in localStorage`, JSON.stringify(saved.stored) === JSON.stringify([DISH_ID]), JSON.stringify(saved.stored));
       check(`bewaren (${label}): de onderbalk zegt "1 bewaard · Bekijken →"`, saved.bar === '1 bewaard · Bekijken →', saved.bar);
@@ -530,13 +551,13 @@ async function bewarenScenario(cdp) {
       await navigate(cdp, `${APP}/menu/${MENU_ID}`, `Boolean(document.querySelector('.dish-save-btn'))`);
       await waitFor(cdp, SAVE_OBSERVED, 8000);
       const reloaded = await evalJs(cdp, readSaveJs(DISH_NAME));
-      check(`bewaren (${label}): na een reload staat hij nog op "Bewaard"`, reloaded.label === 'Bewaard' && reloaded.pressed === 'true', JSON.stringify({ label: reloaded.label }));
+      check(`bewaren (${label}): na een reload staat hij nog aan`, reloaded.pressed === 'true', JSON.stringify({ label: reloaded.label, pressed: reloaded.pressed }));
       check(`bewaren (${label}): de onderbalk staat er na de reload ook`, reloaded.bar === '1 bewaard · Bekijken →', reloaded.bar);
 
       // En weer uitzetten: de balk verdwijnt en de opslag is leeg.
       await clickUntilWith(cdp, clickSaveJs(DISH_NAME), UNSAVE_OBSERVED);
       const released = await evalJs(cdp, readSaveJs(DISH_NAME));
-      check(`bewaren (${label}): uitgezet is hij weer "Bewaren"`, released.label === 'Bewaren' && released.pressed === 'false', JSON.stringify({ label: released.label }));
+      check(`bewaren (${label}): uitgezet staat hij weer uit`, released.pressed === 'false' && released.label === `Bewaar ${DISH_NAME}`, JSON.stringify({ label: released.label, pressed: released.pressed }));
       check(`bewaren (${label}): dan is er weer geen onderbalk en is de opslag leeg`, released.bar === null && Array.isArray(released.stored) && released.stored.length === 0, JSON.stringify({ bar: released.bar, stored: released.stored }));
     }
   }
@@ -740,7 +761,7 @@ async function tellersScenario(cdp) {
     const savedCard = await evalJs(cdp, readCardJs(DISH_NAME));
     const failedCounters = await evalJs(cdp, COUNTERS_READ);
     check(`tellers (${label}): bewaren telt ook als de teller mislukt`, saved.observed && countersFor(failedCounters, 'bewaard').length === 1, JSON.stringify(failedCounters));
-    check(`tellers (${label}): "Bewaard" verschijnt ondanks de mislukte telling`, Boolean(saveButton) && saveButton.text === 'Bewaard' && saveButton.pressed === 'true' && saveButton.fill === 'currentColor', JSON.stringify(saveButton));
+    check(`tellers (${label}): "Bewaard" verschijnt ondanks de mislukte telling`, Boolean(saveButton) && saveButton.ariaLabel === `Bewaar ${DISH_NAME}` && saveButton.pressed === 'true' && saveButton.fill === 'currentColor', JSON.stringify(saveButton));
     check(`tellers (${label}): een mislukte telling is nergens te zien`, !savedCard.statusText, savedCard.statusText);
 
     // Weghalen telt niet mee (contract: alleen bij aanzetten).
