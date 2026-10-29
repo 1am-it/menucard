@@ -18,6 +18,7 @@
 // src/lib/sharePreference.js; dit bestand is alleen de vorm.
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   MAX_SHARE_FAVORITES,
   PHONE_MENU_LABEL,
@@ -87,7 +88,11 @@ function useDialogFocus(open, panelRef, onClose) {
 
 /** De laag eromheen: een klik naast het paneel sluit het, net als Esc. */
 function ShareLayer({ onClose, children }) {
-  return (
+  // Een portal naar <body>: de kop van de pagina heeft een backdrop-filter en
+  // de kaarten leven in een grid; zonder portal zou een `position: fixed`-laag
+  // daarbinnen aan dat element hangen in plaats van aan het venster.
+  if (typeof document === 'undefined' || !document.body) return null
+  return createPortal(
     <div
       className="share-layer"
       role="presentation"
@@ -96,7 +101,8 @@ function ShareLayer({ onClose, children }) {
       }}
     >
       {children}
-    </div>
+    </div>,
+    document.body,
   )
 }
 

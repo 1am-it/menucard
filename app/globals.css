@@ -820,7 +820,7 @@ header, .site-header {
   border-radius: var(--radius-md);
   padding: 14px 16px;
   transition: border-color 0.15s;
-  /* BE-49 (#115) — de onderste regel met het label en de icoonknoppen hoort
+  /* BE-49 (issue 115) — de onderste regel met het label en de icoonknoppen hoort
      onderaan de kaart, ook als een kaart in de grid hoger is dan zijn inhoud. */
   display: flex;
   flex-direction: column;
@@ -871,7 +871,7 @@ header, .site-header {
 .td-price.no-price { color: var(--text-secondary); font-style: italic; font-weight: 400; }
 
 .td-desc {
-  /* BE-49 (#115, criterium 1) — de beschrijving is weer leesbaar: iets groter
+  /* BE-49 (issue 115, criterium 1) — de beschrijving is weer leesbaar: iets groter
      en ruimer, in de secundaire tekstkleur. Die haalt in beide thema's AA
      (≥ 4,5:1) op de kaart; de gemeten waarden staan in de BE-49-browsercheck. */
   font-size: 13px;
@@ -880,7 +880,7 @@ header, .site-header {
   margin-bottom: 4px;
 }
 
-/* BE-49 (#115, criterium 1) — de onderste regel van de gerechtkaart: links het
+/* BE-49 (issue 115, criterium 1) — de onderste regel van de gerechtkaart: links het
    label ("Glutenvrij", "Aanbevolen", …), rechts de twee icoonknoppen. De regel
    heeft altijd de hoogte van een tikvlak, ook zonder label, zodat kaarten met en
    zonder label niet verspringen. */
