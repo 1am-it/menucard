@@ -20,6 +20,7 @@ import {
   safeBrowserStorage,
   toggleSavedDish,
 } from '@/src/lib/dishList'
+import { SAVED_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
 
 export default function DishSaveButton({ entry = null }) {
   const [saved, setSaved] = useState(false)
@@ -44,6 +45,10 @@ export default function DishSaveButton({ entry = null }) {
     } catch (error) {
       // Geen venster (zou niet kunnen na een klik): de knop zelf is al bij.
     }
+    // BE-44 (#105, criterium 5) — alleen tellen als het gerecht erbij komt,
+    // nooit bij weghalen (contract), en fire-and-forget: de knop wacht niet op
+    // de teller en een mislukte telling verandert niets aan de stand.
+    if (result.saved) void sendDishCounter({ dish: entry && entry.id, event: SAVED_EVENT })
   }, [entry])
 
   if (!entry) return null

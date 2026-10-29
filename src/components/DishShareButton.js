@@ -21,6 +21,7 @@
 
 import { useState } from 'react'
 import { absoluteShareUrl, buildSharePayload, copyShareLink, shareTarget } from '@/src/lib/dishShare'
+import { SHARED_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
 import DishSaveButton from '@/src/components/DishSaveButton'
 
 function currentTheme() {
@@ -29,8 +30,18 @@ function currentTheme() {
     : null
 }
 
-export default function DishShareButton({ href, title, entry = null }) {
+export default function DishShareButton({ href, title, entry = null, dishKey = null }) {
   const [message, setMessage] = useState('')
+
+  // BE-44 (#105, criterium 5) — de anonieme teller van dit gerecht. Alleen na
+  // een geslaagd delen of kopiëren, en fire-and-forget: er wordt niet op
+  // gewacht, er verschijnt niets van en een fout laat de knop met rust. Een
+  // door de gebruiker afgebroken systeemmenu telt niet mee.
+  const dish = dishKey || (entry && entry.id) || null
+
+  function countShared() {
+    void sendDishCounter({ dish, event: SHARED_EVENT })
+  }
 
   async function handleShare() {
     const url = absoluteShareUrl({
@@ -50,12 +61,15 @@ export default function DishShareButton({ href, title, entry = null }) {
       } catch (error) {
         // Afgebroken door de gebruiker of niet beschikbaar: geen melding, en
         // vooral geen tweede, stille poging via het klembord.
+        return
       }
+      countShared()
       return
     }
     if (target === 'clipboard') {
       const result = await copyShareLink(navigatorRef.clipboard, url)
       setMessage(result.ok ? result.message : '')
+      if (result.ok) countShared()
     }
   }
 

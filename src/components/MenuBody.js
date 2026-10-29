@@ -102,7 +102,7 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null, dishKey = null }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
   // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
@@ -145,9 +145,10 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       {/* BE-44 (#105, criterium 1 en 4) — "Delen" en "Bewaren" onder de
           beschrijving, niet naast de prijs. Alleen de publieke menukaart geeft
           een link en een bewaarplek mee; het Publicatievoorbeeld (StaticMenu)
-          blijft ongewijzigd. */}
+          blijft ongewijzigd. `dishKey` is de id van dit gerecht voor de
+          anonieme teller (criterium 5). */}
       {(shareHref || saveEntry) && (
-        <DishShareButton href={shareHref} title={shareTitle} entry={saveEntry} />
+        <DishShareButton href={shareHref} title={shareTitle} entry={saveEntry} dishKey={dishKey} />
       )}
 
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}

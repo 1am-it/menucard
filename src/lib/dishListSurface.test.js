@@ -55,7 +55,9 @@ test('elke gerechtkaart op de menupagina krijgt "Delen" én "Bewaren"', () => {
   const shareHref = MENU_VIEW.indexOf('const shareHref = ');
   const saveEntry = MENU_VIEW.indexOf('const saveEntry = ');
   assert.ok(shareHref > -1 && saveEntry > shareHref, 'saveEntry volgt op shareHref');
-  assert.match(MENU_BODY, /<DishShareButton href=\{shareHref\} title=\{shareTitle\} entry=\{saveEntry\} \/>/);
+  // BE-44 criterium 5 (#105): dezelfde kaart geeft ook de id van het gerecht
+  // mee voor de anonieme teller; het paar "Delen"+"Bewaren" blijft ongewijzigd.
+  assert.match(MENU_BODY, /<DishShareButton href=\{shareHref\} title=\{shareTitle\} entry=\{saveEntry\} dishKey=\{dishKey\} \/>/);
 });
 
 test('de bewaarknop leest en schrijft via de lib en toont "Bewaard" met aria-pressed', () => {

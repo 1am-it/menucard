@@ -94,10 +94,13 @@ test('the v2 design adds no database migration in this branch', () => {
   const files = fs.readdirSync(MIGRATIONS).filter((name) => name.endsWith('.sql')).sort();
   assert.ok(files.length > 0);
   const later = files.filter((name) => /^00(2[0-9]|[3-9][0-9])_/.test(name));
-  // The only migration after the v2 design round is BE-25's reviewed human
-  // structure review (#59 review 6307703713). It adds no v2/product storage.
-  assert.deepEqual(later, ['0020_be25_menu_structure_reviews.sql']);
-  const source = fs.readFileSync(path.join(MIGRATIONS, later[0]), 'utf8');
-  assert.doesNotMatch(source, /menu_extraction_product|product_v2|schema_version|candidate_summary/i);
-  assert.doesNotMatch(source, /alter table\s+(url_intake_analysis_receipts|menu_snapshot_proposals|menu_snapshot_reviews)/i);
+  // The only migrations after the v2 design round are BE-25's reviewed human
+  // structure review (#59 review 6307703713) and BE-44's anonymous dish
+  // counters (#105, criterium 5). Neither adds v2/product storage.
+  assert.deepEqual(later, ['0020_be25_menu_structure_reviews.sql', '0021_be44_dish_counters.sql']);
+  for (const name of later) {
+    const source = fs.readFileSync(path.join(MIGRATIONS, name), 'utf8');
+    assert.doesNotMatch(source, /menu_extraction_product|product_v2|schema_version|candidate_summary/i, name);
+    assert.doesNotMatch(source, /alter table\s+(url_intake_analysis_receipts|menu_snapshot_proposals|menu_snapshot_reviews)/i, name);
+  }
 });

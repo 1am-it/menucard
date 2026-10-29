@@ -8,6 +8,7 @@ import { getReservationActions, getReservationNote, isExternalReservation, isVal
 import { resolveDishTarget, buildDishDeepLink } from '@/src/lib/dishDeepLink'
 import { hasShareTheme, dishShareTitle } from '@/src/lib/dishShare'
 import { buildEntry } from '@/src/lib/dishList'
+import { RESERVATION_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
 import SavedListBar from '@/src/components/SavedListBar'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
@@ -140,6 +141,19 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
     [dishParam, nameParam, catParam, id, r]
   )
   const resolvedTargetItem = dishTarget ? r.categories[dishTarget.catIdx].items[dishTarget.itemIdx] : null
+
+  // BE-44 (#105, criterium 5) — de anonieme teller voor een klik op de
+  // reserveringslink. Er staat één reserveringsknop op de menukaart (bij het
+  // restaurant, niet per gerecht), dus valt er alleen een gerecht aan te wijzen
+  // als deze pagina met een geldige gerechtlink is geopend: dat is precies het
+  // gerecht waar de bezoeker voor kwam. Zonder zo'n link wordt er niets
+  // verstuurd — liever geen telling dan een telling op een willekeurig gerecht.
+  // Fire-and-forget: de link opent gewoon, ook als de telling mislukt.
+  const reservationDishKey = dishTarget ? `${id}-${dishTarget.catIdx}-${dishTarget.itemIdx}` : null
+  function countReservationClick() {
+    if (!reservationDishKey) return
+    void sendDishCounter({ dish: reservationDishKey, event: RESERVATION_EVENT })
+  }
 
   const highlightedItemRef = useRef(null)
   const [showPulse, setShowPulse] = useState(false)
@@ -369,6 +383,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   href={primaryReservation.href}
                   target={isExternalReservation(primaryReservation) ? '_blank' : undefined}
                   rel={isExternalReservation(primaryReservation) ? 'noopener noreferrer' : undefined}
+                  onClick={countReservationClick}
                 >
                   {primaryReservation.label}
                   {isExternalReservation(primaryReservation) && <ExternalLinkIcon />}
@@ -590,6 +605,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         shareTitle={dishShareTitle({ name: item.name, restaurantName: r.name })}
                         shareNote={isResolvedTarget && hasShareTheme(standParam)}
                         saveEntry={saveEntry}
+                        dishKey={originalItemIndex >= 0 && origIdx >= 0 ? `${id}-${origIdx}-${originalItemIndex}` : null}
                       />
                     )
                   })}

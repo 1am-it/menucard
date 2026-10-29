@@ -37,6 +37,16 @@
 //   - de og:image van het lijstje (licht en donker) als PNG van 1200 × 630 en
 //     de metadata van de gedeelde lijstlink.
 //
+// BE-44 deel 3 (criterium 5, deze ronde) legt daarnaast vast, met een
+// onderschepte tellerroute in de pagina:
+//   - een geslaagd delen, kopiëren en bewaren (alleen bij aanzetten) en een
+//     klik op "Reserveer" sturen precies één telverzoek met alleen
+//     `{ dish, event }`, keepalive en zonder cookie;
+//   - een mislukte telling is nergens te zien en breekt geen knop;
+//   - de echte route antwoordt in deze build (zonder Supabase-sleutel) met 204
+//     op alles, ook op een onbekend gerecht, een onbekend event en een leeg
+//     verzoek; er is geen leesroute.
+//
 // Bewijs: `ops/browser/evidence/be44-browser-evidence.json` (in git) en de
 // schermafbeeldingen + og:image-PNG's in `ops/browser/output/be-44/` (buiten
 // git, zoals de opdracht vraagt). Dit is developer-evidence op een lokale
@@ -100,6 +110,7 @@ const SCENARIOS = [
   { name: 'bewaren', run: (cdp) => bewarenScenario(cdp) },
   { name: 'mijn-lijstje', run: (cdp) => mijnLijstjeScenario(cdp) },
   { name: 'gedeeld-lijstje', run: (cdp) => gedeeldLijstjeScenario(cdp) },
+  { name: 'tellers', run: (cdp) => tellersScenario(cdp) },
   { name: 'server', run: () => serverScenario() },
 ];
 // BE-43 (#101): tijdens het werk `--alleen=<naam>`, aan het eind één volledige
@@ -349,6 +360,22 @@ function saveReleasedJs(name) {
     const card = cardFor(${JSON.stringify(name)});
     const button = card ? card.querySelector('.dish-save-btn') : null;
     return Boolean(button && button.getAttribute('aria-pressed') === 'false');
+  })()`;
+}
+
+/** De bewaarknop zelf: tekst, aria-pressed en of de bladwijzer gevuld is. */
+function saveButtonJs(name) {
+  return `(() => {
+    ${PAGE_HELPERS}
+    const card = cardFor(${JSON.stringify(name)});
+    const button = card ? card.querySelector('.dish-save-btn') : null;
+    if (!button) return null;
+    const icon = button.querySelector('svg');
+    return {
+      text: flat(button.innerText),
+      pressed: button.getAttribute('aria-pressed'),
+      fill: icon ? icon.getAttribute('fill') : null,
+    };
   })()`;
 }
 
@@ -608,7 +635,147 @@ async function gedeeldLijstjeScenario(cdp) {
   }
 }
 
+// ── 7. De anonieme tellers (criterium 5) ────────────────────────────────────
+//
+// Het tellen mag niets breken en er gaat niets identificerends mee. Daarom
+// onderschept de check de tellerroute in de pagina (`window.fetch`) en legt
+// vast wat er verstuurd zou worden: alleen `{ dish, event }`, keepalive, geen
+// cookie. Daarna faalt de nep-route expres: de knop, de melding en de
+// reserveringslink moeten gewoon blijven werken.
+const COUNTER_STUB = `(() => {
+  window.__counters = [];
+  window.__counterMode = 'ok';
+  const realFetch = window.fetch.bind(window);
+  window.fetch = (input, init) => {
+    const url = typeof input === 'string' ? input : ((input && input.url) || '');
+    if (!url.includes('/api/v1/tellers')) return realFetch(input, init);
+    const raw = init && init.body ? String(init.body) : null;
+    let values = null;
+    try { values = raw ? JSON.parse(raw) : null; } catch (error) { values = null; }
+    window.__counters.push({
+      url,
+      method: init && init.method,
+      keepalive: Boolean(init && init.keepalive),
+      credentials: init && init.credentials,
+      referrerPolicy: init && init.referrerPolicy,
+      keys: values && typeof values === 'object' ? Object.keys(values).sort() : [],
+      values,
+    });
+    if (window.__counterMode === 'fail') return Promise.reject(new Error('teller mislukt'));
+    return Promise.resolve(new Response(null, { status: 204 }));
+  };
+  return true;
+})()`;
+
+const COUNTER_CLEARED = '(() => { window.__counters = []; return true; })()';
+const COUNTER_FAILS = `(() => { window.__counterMode = 'fail'; return true; })()`;
+const COUNTER_OK = `(() => { window.__counterMode = 'ok'; return true; })()`;
+const COUNTERS_READ = '(() => window.__counters || [])()';
+
+/** De teller(s) van één gebeurtenis, uit wat de pagina verstuurd heeft. */
+function countersFor(counters, event) {
+  return (counters || []).filter((entry) => entry.values && entry.values.event === event);
+}
+
+/** De reserveringsknop op deze pagina: eerst preventDefault, dan klikken. */
+const RESERVEER_CLICK = `(() => {
+  const link = document.querySelector('.rp-btn-reserveer');
+  if (!link) return false;
+  document.addEventListener('click', (event) => {
+    if (event.target && event.target.closest && event.target.closest('.rp-btn-reserveer')) event.preventDefault();
+  }, true);
+  link.click();
+  return true;
+})()`;
+
+
+async function tellersScenario(cdp) {
+  // De echte route in deze lokale build: geen Supabase-sleutel, dus de teller
+  // bestaat wel maar telt niets. De browser ziet alleen 204 — nooit een fout.
+  for (const [name, payload] of [
+    ['een geldig gerecht en event', { dish: DISH_ID, event: 'gedeeld' }],
+    ['een onbekend gerecht', { dish: UNKNOWN_DISH_ID, event: 'gedeeld' }],
+    ['een onbekend event', { dish: DISH_ID, event: 'liked' }],
+    ['een leeg verzoek', {}],
+  ]) {
+    const response = await fetch(`${APP}/api/v1/tellers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const text = await response.text();
+    check(`tellers (server): ${name} antwoordt met 204 en zonder inhoud`, response.status === 204 && text === '', JSON.stringify({ status: response.status, body: text }));
+  }
+  const readAttempt = await fetch(`${APP}/api/v1/tellers`);
+  check('tellers (server): er is geen leesroute — GET wordt geweigerd', readAttempt.status === 405, readAttempt.status);
+
+  for (const { width, theme } of [{ width: 1280, theme: 'licht' }, { width: 390, theme: 'donker' }]) {
+    const label = `${width}/${theme}`;
+    await openMenu(cdp, width, theme);
+    await evalJs(cdp, CLIPBOARD_STUB);
+    await evalJs(cdp, COUNTER_STUB);
+    await evalJs(cdp, COUNTER_CLEARED);
+
+    // Delen via het klembord: de melding blijft, de teller gaat mee.
+    const shared = await clickUntilWith(cdp, clickShareJs(DISH_NAME), `(() => (window.__counters || []).some((c) => c.values && c.values.event === 'gedeeld'))()`);
+    const card = await evalJs(cdp, readCardJs(DISH_NAME));
+    const counters = await evalJs(cdp, COUNTERS_READ);
+    const counted = countersFor(counters, 'gedeeld');
+    check(`tellers (${label}): een geslaagd delen telt één keer`, shared.observed && counted.length === 1, JSON.stringify(counters));
+    check(`tellers (${label}): de teller gaat naar /api/v1/tellers met POST en keepalive`, Boolean(counted[0]) && counted[0].url === '/api/v1/tellers' && counted[0].method === 'POST' && counted[0].keepalive === true, JSON.stringify(counted[0] && { url: counted[0].url, method: counted[0].method, keepalive: counted[0].keepalive }));
+    check(`tellers (${label}): er gaan alleen dish en event mee`, Boolean(counted[0]) && JSON.stringify(counted[0].keys) === JSON.stringify(['dish', 'event']) && counted[0].values.dish === DISH_ID, JSON.stringify(counted[0] && counted[0].values));
+    check(`tellers (${label}): geen cookie en geen herkomst mee`, Boolean(counted[0]) && counted[0].credentials === 'omit' && counted[0].referrerPolicy === 'no-referrer', JSON.stringify(counted[0] && { credentials: counted[0].credentials, referrer: counted[0].referrerPolicy }));
+    check(`tellers (${label}): de melding "Link gekopieerd" blijft gewoon staan`, card.statusText === 'Link gekopieerd', card.statusText);
+
+    // Opnieuw openen voor het bewaren: de deelmelding staat dan niet meer in de
+    // statusregel, zodat "een mislukte telling is nergens te zien" echt iets zegt.
+    await navigate(cdp, `${APP}/menu/${MENU_ID}`, `Boolean([...document.querySelectorAll('.menu-card .td-name')].find((el) => (el.innerText || '').trim() === ${JSON.stringify(DISH_NAME)}))`);
+    await evalJs(cdp, COUNTER_STUB);
+    await evalJs(cdp, COUNTER_CLEARED);
+
+    // Bewaren met een falende teller: de knop werkt door en er is geen fout te zien.
+    await evalJs(cdp, COUNTER_FAILS);
+    const saved = await clickUntilWith(cdp, clickSaveJs(DISH_NAME), SAVE_OBSERVED);
+    const saveButton = await evalJs(cdp, saveButtonJs(DISH_NAME));
+    const savedCard = await evalJs(cdp, readCardJs(DISH_NAME));
+    const failedCounters = await evalJs(cdp, COUNTERS_READ);
+    check(`tellers (${label}): bewaren telt ook als de teller mislukt`, saved.observed && countersFor(failedCounters, 'bewaard').length === 1, JSON.stringify(failedCounters));
+    check(`tellers (${label}): "Bewaard" verschijnt ondanks de mislukte telling`, Boolean(saveButton) && saveButton.text === 'Bewaard' && saveButton.pressed === 'true' && saveButton.fill === 'currentColor', JSON.stringify(saveButton));
+    check(`tellers (${label}): een mislukte telling is nergens te zien`, !savedCard.statusText, savedCard.statusText);
+
+    // Weghalen telt niet mee (contract: alleen bij aanzetten).
+    await evalJs(cdp, COUNTER_CLEARED);
+    await evalJs(cdp, COUNTER_OK);
+    await clickUntilWith(cdp, clickSaveJs(DISH_NAME), UNSAVE_OBSERVED);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const afterRemove = await evalJs(cdp, COUNTERS_READ);
+    check(`tellers (${label}): weghalen telt niet`, afterRemove.length === 0, JSON.stringify(afterRemove));
+  }
+
+  // De reserveringslink: geteld voor het gerecht waar de bezoeker voor kwam.
+  await setViewport(cdp, 390, 844);
+  await setTheme(cdp, 'licht');
+  await navigate(cdp, `${APP}${DEEP_LINK}&stand=licht`, `Boolean(document.querySelector('.rp-btn-reserveer'))`);
+  await evalJs(cdp, COUNTER_STUB);
+  await evalJs(cdp, COUNTER_CLEARED);
+  const reserved = await clickUntilWith(cdp, RESERVEER_CLICK, `(() => (window.__counters || []).some((c) => c.values && c.values.event === 'reserveren'))()`);
+  const reservedCounters = await evalJs(cdp, COUNTERS_READ);
+  const reservation = countersFor(reservedCounters, 'reserveren');
+  check('tellers (reserveer): een klik op de reserveringslink telt', reserved.observed && reservation.length === 1, JSON.stringify(reservedCounters));
+  check('tellers (reserveer): de telling hoort bij het gedeelde gerecht', Boolean(reservation[0]) && reservation[0].values.dish === DISH_ID, JSON.stringify(reservation[0] && reservation[0].values));
+
+  // Zonder gerechtlink is er geen gerecht om aan te wijzen: dan niets tellen.
+  await navigate(cdp, `${APP}/menu/${MENU_ID}`, `Boolean(document.querySelector('.rp-btn-reserveer'))`);
+  await evalJs(cdp, COUNTER_STUB);
+  await evalJs(cdp, COUNTER_CLEARED);
+  await clickUntilWith(cdp, RESERVEER_CLICK, `(() => true)()`);
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  const plainCounters = await evalJs(cdp, COUNTERS_READ);
+  check('tellers (reserveer): zonder gerechtlink wordt er niets geteld', plainCounters.length === 0, JSON.stringify(plainCounters));
+}
+
 async function serverScenario() {
+
   const sharedUrl = `${APP}${DEEP_LINK}&stand=donker`;
   const response = await fetch(sharedUrl);
   const html = await response.text();
@@ -718,7 +885,7 @@ async function main() {
     const failed = checks.filter((entry) => entry.passed === false);
     const record = {
       generatedAt: new Date().toISOString(),
-      ticket: '#105 BE-44 deel 2 — bewaren, het lijstje en de voorvertoning',
+      ticket: '#105 BE-44 deel 3 — de anonieme tellers (met het migratiebestand)',
       kind: 'developer evidence — local build, no production data or credentials',
       app: APP,
       filter: SELECTION.filter,
@@ -740,6 +907,8 @@ async function main() {
         'Het klembord is een stub: de check bewijst welke link gekopieerd wordt en dat de melding verschijnt, niet het echte systeemklembord.',
         'Het lijstje is localStorage in een tijdelijk browserprofiel: de check bewijst de opslag, de stand na een reload en het verwijderen, geen privémodus of volle schijf.',
         'De voorvertoning van het lijstje is een PNG van deze build; of externe platforms hem precies zo tonen, is niet in een browsercheck te bewijzen.',
+        'De anonieme tellers zijn hier een onderschepte route in de pagina plus de echte route zonder Supabase-sleutel: er is geen database-aanroep gedaan en er is geen migratie uitgevoerd. De tellers worden nergens getoond (apart ticket).',
+        'Een klik op "Reserveer" wordt alleen geteld als de pagina met een geldige gerechtlink is geopend; zonder die link is er geen gerecht om aan te wijzen en telt de klik niet.',
         'Dit is developer-evidence op een lokale build: geen productie, geen echte Supabase-credentials, geen merge of publicatie.',
         'De app-brede AI-activering valt buiten deze opdracht; er is hier niets aan AI of Supabase geactiveerd.',
       ],
