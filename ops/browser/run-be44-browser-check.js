@@ -582,6 +582,9 @@ async function gedeeldLijstjeScenario(cdp) {
       await setTheme(cdp, theme);
       await evalJs(cdp, SAVED_LIST_CLEARED);
       await navigate(cdp, `${APP}${sharedList}`, `Boolean(document.querySelector('.lijst-title'))`);
+      // De themakeuze bestaat pas na hydratatie; wachten daarop betekent dat de
+      // schermafbeelding de echte, interactieve pagina laat zien.
+      await waitFor(cdp, 'Boolean(document.querySelector(".theme-switch"))', 8000);
 
       const page = await evalJs(cdp, readListPageJs());
       check(`gedeeld lijstje (${label}): de kop is "Gedeeld lijstje · 2 gerechten"`, page.title === 'Gedeeld lijstje · 2 gerechten', page.title);

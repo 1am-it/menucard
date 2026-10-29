@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T00:43:30.519Z",
+  "generatedAt": "2026-10-29T01:01:01.613Z",
   "ticket": "#105 BE-44 deel 2 — bewaren, het lijstje en de voorvertoning",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
@@ -10,7 +10,7 @@
       "checks": 70,
       "passed": 70,
       "failed": 0,
-      "durationMs": 28362,
+      "durationMs": 23731,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 20149,
+      "durationMs": 21516,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 84,
       "passed": 84,
       "failed": 0,
-      "durationMs": 35359,
+      "durationMs": 31961,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 35269,
+      "durationMs": 35797,
       "error": null
     },
     {
@@ -42,7 +42,7 @@
       "checks": 54,
       "passed": 54,
       "failed": 0,
-      "durationMs": 18408,
+      "durationMs": 18457,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 5172,
+      "durationMs": 5515,
       "error": null
     }
   ],
@@ -1759,7 +1759,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-light.png",
-        "sha256": "356f09fcd9a2b6825f8f823c0dc7134f51e0d42fdc9ab683a191af7397c378f8",
+        "sha256": "16cd6a7f86a769bdb98f224f179c68af2e9c22ab3be022fc07431e39276b93f0",
         "width": 390,
         "height": 844
       },
@@ -1784,7 +1784,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-light.png",
-        "sha256": "d47bdae73122c014280b92be1f1b23384fe856672eb8ae8fbb7b373f7daf34e0",
+        "sha256": "8ae06e823406cb154bdc8973651652619866aa5d742b8420727b7a43894afaaa",
         "width": 320,
         "height": 844
       },
@@ -1809,7 +1809,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-dark.png",
-        "sha256": "e3f22415f6c0a279d0b6c33fc21c9e63d4d6082a1064541e712ad25b0c37c9e7",
+        "sha256": "1ca27f3e0e5e00a4670224a1f0f284ad172827aacfa45ad205e5f12226b1b3c5",
         "width": 1280,
         "height": 950
       },
@@ -1821,7 +1821,7 @@
     {
       "file": {
         "file": "be44-melding-1280-dark.png",
-        "sha256": "ec083f8f6ad54f5d6c46eb34ea54cdb2294b14ef97dd69db95c3d620006f97b2",
+        "sha256": "c16de2b100517c0cb47d99515814f3bd488e3b4731c3da726e4989dc8f6806c6",
         "width": 1280,
         "height": 950
       },
@@ -1834,7 +1834,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-dark.png",
-        "sha256": "ff35bd7d48e6af926e39ebdf035e7a68a41d48d65362d792d75014c5d53af879",
+        "sha256": "81e744e7a76d832bc53b93018727431ff861986dc2972c5474b53cfe3ef59ba5",
         "width": 390,
         "height": 844
       },
@@ -1846,7 +1846,7 @@
     {
       "file": {
         "file": "be44-melding-390-dark.png",
-        "sha256": "4b2818aa10c600e06371115565cfb6c267034cec180b390739fe95c05d64f0ae",
+        "sha256": "6e42a1441e39dc89ad238bcd71d34f6f3a7de989e49e234b83cd04bb8ab3657c",
         "width": 390,
         "height": 844
       },
@@ -1859,7 +1859,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "64dc6e413660d76d98923081509c70a9a87016eb8c72b0020bbb77f6f279a0ef",
+        "sha256": "fe68d30be2e5e486266b3ddff4c51c0f72d99d7be788d6ccdf1bd3176173f7a7",
         "width": 320,
         "height": 844
       },
@@ -1897,7 +1897,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "c4d48a7d0d0dfbdb47bb682c81608935b30c4d0c1dda1b28f81cce7e0db71b83",
+        "sha256": "c6835025e0e55ac6b46e5c20dfbca02275a4b0fa0672c6207fed8abe4bd64fa7",
         "width": 390,
         "height": 844
       },
@@ -1910,7 +1910,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "9bf9a541fb681fee427192862dbc6ffa91e4706863bdb4a6b63e9dc05a2dbe6a",
+        "sha256": "ed5d242c920daed379078f338eb9ae6b98bb335e7d9567a745fbd65e8b63041a",
         "width": 320,
         "height": 844
       },
@@ -1949,7 +1949,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "cb52e1a34dac025b8e358aaf476e26e2db3cfa2d6ec306a79dc6afd2d2d8dd96",
+        "sha256": "428abfa8de2d65bb6e0c5a51455b3dc879eb40598d6da7525733697d6d77b76f",
         "width": 320,
         "height": 844
       },
@@ -1986,7 +1986,7 @@
     {
       "file": {
         "file": "be44-bewaard-390-light.png",
-        "sha256": "238acb3c635e56f8735bb482239bd64807c146662e4982cbc5f834ec0eda5f75",
+        "sha256": "cb20236123256a67a571401d3e30d360b66c93a8b92cdf93cffbb1804727a33b",
         "width": 390,
         "height": 844
       },
@@ -1998,7 +1998,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-light.png",
-        "sha256": "9a9f309fa78b14a8c1391508e878c2ceabe130bfbe250432a41dbcadd18aaa37",
+        "sha256": "ea5176c7e3e052fdd72b4d70f45d3c5c28f58fb743e9d93d3602ac3ff0fe8f0d",
         "width": 390,
         "height": 844
       },
@@ -2010,7 +2010,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-light.png",
-        "sha256": "0375f85dbeb085d10d918d2b5f13cbbd6786cbf4c30ba29d44966a465501bf4c",
+        "sha256": "1c5bc2f2c082c262215d316f1e2929446caf133c16540f0acce2baf5eb258e8c",
         "width": 320,
         "height": 844
       },
@@ -2034,7 +2034,7 @@
     {
       "file": {
         "file": "be44-bewaard-1280-dark.png",
-        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
+        "sha256": "665bc9441c4740639372f5f5636579c6983285ef9272bf02c606746978f6d935",
         "width": 1280,
         "height": 950
       },
@@ -2058,7 +2058,7 @@
     {
       "file": {
         "file": "be44-bewaard-390-dark.png",
-        "sha256": "53a5a6acf2e3c08bf6e509ae9d5af43b9a7737c7a9480dc15e6ad12b5a3e80d8",
+        "sha256": "7212ce087e4b329a34476a0b5a5dc848c0b5accbff2fec2e39a90950bb68eca8",
         "width": 390,
         "height": 844
       },
@@ -2070,7 +2070,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-dark.png",
-        "sha256": "2f6970d8cf0bf346c5a528e28e012c7b26af99d08b833b4db505673e49d3636f",
+        "sha256": "cf5f21e3eab060c565f42543181a20a5454ada7defe23121bdc8020493e54ce5",
         "width": 390,
         "height": 844
       },
@@ -2082,7 +2082,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-dark.png",
-        "sha256": "272015b64b3590056b99a2a6dc6e0d0a32bdd4619521f2d090b1de005b743593",
+        "sha256": "d28d8b8c43a9dbcb9858aaf7c7791dfd3125da1e3f9340fb0002f3e5ae20f25a",
         "width": 320,
         "height": 844
       },
@@ -2094,7 +2094,7 @@
     {
       "file": {
         "file": "be44-onderbalk-320-dark.png",
-        "sha256": "dfa62afe807cd806a073c72e5f921459da5141ebae7597085dfd4f42581862fd",
+        "sha256": "152cc1d69709035770b34ff49ed3b6dd8e3d7cdc11959218f4db7fa8485aaf75",
         "width": 320,
         "height": 844
       },
@@ -2178,7 +2178,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-1280-light.png",
-        "sha256": "b66e65034d937760ff744061ddf43cb31d8e645d6d43aa449b112760d039e248",
+        "sha256": "6758cab1fa47a57865d4a8b5b8a6740e1ce056fadf24c517cfc4ff9acb412ec7",
         "width": 1280,
         "height": 950
       },
@@ -2191,7 +2191,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-390-light.png",
-        "sha256": "000a9f495e13906b8a5e230eaeebc8e4f29c82d51702f872490ba3637fc6ec75",
+        "sha256": "ec306057604bb6ec85212472c8d5a76d5e0e0a893451aa0a2e400a86ac1aa5ae",
         "width": 390,
         "height": 844
       },
@@ -2204,7 +2204,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-320-light.png",
-        "sha256": "b2ae2230c4d6ed49ccc8ddccf46648eeb2eba919e8adb2bb95a953d700566f96",
+        "sha256": "13399cd90a1f3e41b230f6618166a03ea89202b2e9016938e5f11baf0bc8db39",
         "width": 320,
         "height": 844
       },
@@ -2217,7 +2217,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-1280-dark.png",
-        "sha256": "b1c8e00033ee376a5034733325185665d9d8b5066106a2fe3b104b390ee64223",
+        "sha256": "477df87f65a916531697b74cd9317081e8644903345f8e6da4d8cd7399e6e911",
         "width": 1280,
         "height": 950
       },
@@ -2230,7 +2230,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-390-dark.png",
-        "sha256": "fd5ce112e5b248c6036697e1724d6acbda312329f00494d010475db74f29d80a",
+        "sha256": "a67a3417a1bd5b679a37b802f3bfb94812bce97b2fee375adcbfc4293f40370f",
         "width": 390,
         "height": 844
       },
@@ -2243,7 +2243,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-320-dark.png",
-        "sha256": "7144fa2615e41fe9f28cf16bb0c033aa9c3a8545be4864d9e3b29e0e698eec63",
+        "sha256": "af95acff316a52fbe7581190f00eb2a1f392fb9b2f7a3b31f6e595d2dcae7071",
         "width": 320,
         "height": 844
       },
