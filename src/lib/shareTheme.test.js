@@ -77,6 +77,8 @@ test('de waarden zijn de waarden uit het contract, in beide standen', () => {
     priceBg: '#F3F1EC',
     priceText: '#1A1410',
     border: '#EEEAE2',
+    logo: '#F6C057',
+    logoText: '#1F1600',
   });
   assert.deepEqual(SHARE_THEME.donker, {
     frame: '#1F2328',
@@ -86,6 +88,8 @@ test('de waarden zijn de waarden uit het contract, in beide standen', () => {
     priceBg: '#353A41',
     priceText: '#F2F3F4',
     border: '#3A4048',
+    logo: '#F2C35B',
+    logoText: '#1F1600',
   });
 });
 

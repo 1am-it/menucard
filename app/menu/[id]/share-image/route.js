@@ -1,12 +1,17 @@
 // BE-44 (#105, criterium 3) — de voorvertoningsafbeelding (1200 × 630) van één
 // gedeeld gerecht, in indeling D van het goedgekeurde ontwerp: een ronde kaart
 // met het restaurant groot bovenaan, het adres, het gerecht met de prijs in een
-// vlak, één regel beschrijving en "onze menukaarten" klein rechtsonder.
+// vlak, één regel beschrijving en "onze menukaarten" klein rechtsonder met het
+// "om"-blokje ervoor.
 //
-// De kleuren komen uit src/lib/shareTheme.js (de waarden van app/globals.css,
-// met een test die ze vergelijkt): licht met de okeren omlijsting, donker met
-// de antraciete. De stand komt uit `?stand=licht|donker` in de gedeelde link;
-// `?stand=` verandert alleen deze afbeelding, nooit de pagina zelf.
+// Kleuren: src/lib/shareTheme.js (de waarden van app/globals.css, met een test
+// die ze vergelijkt). De stand komt uit `?stand=licht|donker` in de gedeelde
+// link; `?stand=` verandert alleen deze afbeelding, nooit de pagina zelf.
+//
+// Maten: de artboards "Definitief · licht/donker" (restaurant ±64 px, gerecht
+// ±76 px, prijs ±46 px, beschrijving ±30 px). Restaurant en gerecht staan vet:
+// daarvoor laadt deze route één bold font (app/_share/fonts.js); op de gewone
+// pagina's komt dat bestand nooit mee.
 //
 // Geen foto, geen nieuwe dependency: next/og (ImageResponse) zit al in Next.
 // De afbeelding mag gecachet worden (contract criterium 3).
@@ -17,6 +22,8 @@ import restaurantsData from '@/data/restaurants.json'
 import { resolveDishTarget } from '@/src/lib/dishDeepLink'
 import { dishSharePrice, oneLineDescription } from '@/src/lib/dishShare'
 import { shareThemeFor } from '@/src/lib/shareTheme'
+import ShareCard from '@/app/_share/ShareCard'
+import { loadShareBoldFonts, SHARE_BOLD_FAMILY } from '@/app/_share/fonts'
 
 export const runtime = 'nodejs'
 
@@ -50,75 +57,69 @@ export async function GET(request, { params }) {
   const dishName = oneLineDescription(item.name, 40)
   const description = oneLineDescription(item.desc, 70)
   const price = dishSharePrice(item)
+  const fonts = await loadShareBoldFonts()
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          background: colors.frame,
-          padding: '42px',
-        }}
-      >
+      <ShareCard colors={colors}>
         <div
           style={{
-            width: '100%',
-            height: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            background: colors.card,
-            border: `3px solid ${colors.border}`,
-            borderRadius: '40px',
-            padding: '54px 60px',
+            fontSize: '64px',
+            lineHeight: 1.05,
+            fontFamily: SHARE_BOLD_FAMILY,
+            fontWeight: 700,
+            color: colors.textPrimary,
           }}
         >
-          <div style={{ display: 'flex', fontSize: '62px', lineHeight: 1.1, fontWeight: 700, color: colors.textPrimary }}>
-            {restaurantName}
+          {restaurantName}
+        </div>
+        {address ? (
+          <div style={{ display: 'flex', marginTop: '14px', fontSize: '30px', color: colors.textSecondary }}>
+            {address}
           </div>
-          {address ? (
-            <div style={{ display: 'flex', marginTop: '14px', fontSize: '30px', color: colors.textSecondary }}>
-              {address}
-            </div>
-          ) : null}
+        ) : null}
 
-          <div style={{ display: 'flex', alignItems: 'center', marginTop: '46px' }}>
-            <div style={{ display: 'flex', fontSize: '48px', fontWeight: 700, color: colors.textPrimary }}>
-              {dishName}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                marginLeft: '22px',
-                padding: '10px 26px',
-                borderRadius: '999px',
-                background: colors.priceBg,
-                color: colors.priceText,
-                fontSize: '32px',
-                fontWeight: 700,
-              }}
-            >
-              {price}
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '40px', gap: '24px' }}>
+          <div
+            style={{
+              display: 'flex',
+              maxWidth: '780px',
+              fontSize: '76px',
+              lineHeight: 1.05,
+              fontFamily: SHARE_BOLD_FAMILY,
+              fontWeight: 700,
+              color: colors.textPrimary,
+            }}
+          >
+            {dishName}
           </div>
-
-          {description ? (
-            <div style={{ display: 'flex', marginTop: '22px', fontSize: '28px', lineHeight: 1.35, color: colors.textSecondary }}>
-              {description}
-            </div>
-          ) : null}
-
-          <div style={{ display: 'flex', flexGrow: 1 }} />
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '22px', color: colors.textSecondary }}>
-            onze menukaarten
+          <div
+            style={{
+              display: 'flex',
+              padding: '10px 28px',
+              borderRadius: '18px',
+              background: colors.priceBg,
+              color: colors.priceText,
+              fontFamily: SHARE_BOLD_FAMILY,
+              fontSize: '46px',
+              fontWeight: 700,
+            }}
+          >
+            {price}
           </div>
         </div>
-      </div>
+
+        {description ? (
+          <div style={{ display: 'flex', marginTop: '20px', fontSize: '30px', lineHeight: 1.3, color: colors.textSecondary }}>
+            {description}
+          </div>
+        ) : null}
+      </ShareCard>
     ),
     {
       ...IMAGE_SIZE,
+      fonts,
       headers: {
         // De afbeelding mag gecachet worden (contract criterium 3).
         'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',

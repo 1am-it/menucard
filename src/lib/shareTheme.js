@@ -28,6 +28,10 @@ const SHARE_THEME_TOKENS = {
     priceBg: '--surface-soft',
     priceText: '--text-primary',
     border: '--border',
+    // Het "om"-blokje rechtsonder: de eigen accenttegel, net als het
+    // woordmerk en het app-icoon.
+    logo: '--accent-fill',
+    logoText: '--on-accent-fill',
   },
   donker: {
     frame: '--bg',
@@ -37,6 +41,8 @@ const SHARE_THEME_TOKENS = {
     priceBg: '--surface-soft',
     priceText: '--text-primary',
     border: '--border',
+    logo: '--accent-fill',
+    logoText: '--on-accent-fill',
   },
 };
 
@@ -49,6 +55,8 @@ const SHARE_THEME = {
     priceBg: '#F3F1EC',
     priceText: '#1A1410',
     border: '#EEEAE2',
+    logo: '#F6C057',
+    logoText: '#1F1600',
   },
   donker: {
     frame: '#1F2328',
@@ -58,6 +66,8 @@ const SHARE_THEME = {
     priceBg: '#353A41',
     priceText: '#F2F3F4',
     border: '#3A4048',
+    logo: '#F2C35B',
+    logoText: '#1F1600',
   },
 };
 
