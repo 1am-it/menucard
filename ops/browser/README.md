@@ -725,9 +725,29 @@ Scenarios (`--lijst`, `--alleen=<naam>`):
 - **eigenaar-zonder-app** — a restaurant owner (`owner` only) is not asked to
   link anything and lands on the existing status page; the second step is for
   `internal` and `editor` accounts (BE-47 owns the restaurant route).
+- **claim-met-code** — the public claim on `/claim/6`: a labelled e-mail field
+  with `autocomplete="email"` (no placeholder-only field), ≥ 44 px controls, then
+  the code screen ("Code uit de e-mail", `inputmode="numeric"`,
+  `autocomplete="one-time-code"`, "Nieuwe code sturen" and "Ander e-mailadres");
+  the right code signs the visitor in with the typed address and the claim itself
+  is submitted and shows "In afwachting van beoordeling".
+- **claim-foute-code** — a wrong (expired) code gives the Dutch sentence in
+  `role="alert"` and never the Supabase text; "Nieuwe code sturen" asks the
+  fictional Supabase again for the same address, "Ander e-mailadres" returns to
+  the address step with the typed address kept and the error cleared, and the
+  right code still works afterwards.
+
+The claim uses its own code (`emailCode`, `654321`) next to the authenticator
+code (`totpCode`, `123456`), so a code from one screen can never pass on the
+other. `/api/claims/mine` and `POST /api/claims` are answered with fictional
+data; they need no staff role and no second step.
 
 Screenshots (light and dark) of the password, code and link-an-app screens land
-in the ignored `ops/browser/output/be-48/`; the record is
+in the ignored `ops/browser/output/be-48/`. Criterion 7's screenshots — login,
+code step, linking, forgot password and the claim's code screen, light and dark
+at 390 px — are kept in the repository under
+`ops/browser/evidence/be48-screenshots/` and named in the evidence JSON
+(`screenshotsMobile`, `screenshotsDir`). The record is
 `ops/browser/evidence/be48-browser-evidence.json`. A filtered run writes
 `be48-browser-evidence.filtered.json` and is never the full evidence.
 

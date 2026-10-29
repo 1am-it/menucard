@@ -268,9 +268,12 @@ test('the stub: the theme is stored for the page and the calls are logged', asyn
   );
 });
 
-test('the stub: a previous scenario can never leak its session into the next one', () => {
-  const { stored } = install({ theme: 'dark' }, { 'sb-127-auth-token': '{"access_token":"oud"}', 'iets-anders': 'blijft' });
-  assert.equal(stored.has('sb-127-auth-token'), false);
+test('the stub: a reload keeps the stored session, so a recovery link survives it', () => {
+  // The forgot-password flow reloads the document on its way to
+  // /internal/set-password; the recovery session in localStorage must survive
+  // that. Clearing between scenarios is the browser check's job, not the stub's.
+  const { stored } = install({ theme: 'dark' }, { 'sb-127-auth-token': '{"access_token":"geldig"}', 'iets-anders': 'blijft' });
+  assert.equal(stored.get('sb-127-auth-token'), '{"access_token":"geldig"}');
   assert.equal(stored.get('iets-anders'), 'blijft');
   assert.equal(stored.get('bredaeats_theme'), 'dark');
 });

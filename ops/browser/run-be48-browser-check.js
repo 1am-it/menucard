@@ -20,7 +20,13 @@
 //  - an account that already linked an app goes straight to "Code uit je app";
 //  - "Wachtwoord vergeten": the neutral answer, then the code screen, a wrong
 //    code in Dutch, and the right code continuing to /internal/set-password;
-//  - light and dark screenshots of the password, code and link-an-app screens.
+//  - BE-48 part 2 — the public claim on /claim/6: the address, then the code
+//    screen, the right code signing in and the claim being submitted; a wrong
+//    code in Dutch, "Nieuwe code sturen" asking again and "Ander e-mailadres"
+//    returning to the address step;
+//  - light and dark screenshots of the password, code and link-an-app screens,
+//    plus the same screens (login, code, linking, forgot password, claim code)
+//    at 390 px in both themes in ops/browser/evidence/be48-screenshots/.
 //
 // Not proven here: a real Supabase project, a real authenticator app, a real
 // e-mail, or any production behaviour. This is developer evidence, not
@@ -58,15 +64,30 @@ const PORT = Number(process.env.BE48_FIXTURE_PORT || 3141);
 const APP = `http://localhost:${PORT}`;
 const LOGIN_URL = `${APP}/internal/login`;
 const FORGOT_URL = `${APP}/internal/wachtwoord-vergeten`;
+// Restaurant 6 exists in data/restaurants.json ("Brasserie Bardot"); the claim
+// page reads its name from the real dataset.
+const CLAIM_RESTAURANT_ID = '6';
+const CLAIM_URL = `${APP}/claim/${CLAIM_RESTAURANT_ID}`;
 const APP_ORIGINS = defaultAppOrigins(PORT);
 const LANDING = '/internal/menu-concepts';
 
 const EMAIL = 'medewerker@example.invalid';
 const PASSWORD = 'goed-wachtwoord';
 const CODE = '123456';
+// The fictional claim visitor and the fictional code in their e-mail (a
+// different code than the authenticator app's).
+const CLAIM_EMAIL = 'eigenaar@example.invalid';
+const CLAIM_CODE = '654321';
 const WRONG_PASSWORD_TEXT = 'E-mailadres of wachtwoord klopt niet. Controleer ze en probeer het opnieuw.';
 const WRONG_CODE_TEXT = 'Die code klopt niet of is verlopen. Probeer de nieuwste code uit je app.';
+// A rejected claim code uses the e-mail wording from src/lib/authErrors.js.
+const WRONG_EMAIL_CODE_TEXT = 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.';
 const NEUTRAL_TEXT = 'Als dit e-mailadres bij ons bekend is, ontvang je een e-mail met een code.';
+// Criterion 7 asks for light and dark screenshots on a 390 px wide screen; they
+// are kept with the evidence, not in the gitignored run output.
+const MOBILE_WIDTH = 390;
+const MOBILE_HEIGHT = 844;
+const SCREENSHOT_DIR = path.join(EVIDENCE_DIR, 'be48-screenshots');
 
 const checks = [];
 const shots = [];
@@ -82,6 +103,36 @@ async function shot(cdp, name) {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   const file = await screenshot(cdp, OUT_DIR, name);
   shots.push({ name, ...file });
+  return file;
+}
+
+// BE-48 criterion 7 — the light and dark screenshots that belong with the
+// delivery: 390 px wide (a phone), written into the evidence directory instead of
+// the gitignored run output, and recorded in the evidence JSON with their theme
+// and viewport.
+async function mobileShot(cdp, name, theme) {
+  const applied = await applyTheme(cdp, theme);
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: MOBILE_WIDTH,
+    height: MOBILE_HEIGHT,
+    deviceScaleFactor: 1,
+    mobile: true,
+  });
+  // Let the layout settle at the new width before capturing.
+  const sized = await waitFor(cdp, `window.innerWidth === ${MOBILE_WIDTH}`, 8000);
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+  const file = await screenshot(cdp, SCREENSHOT_DIR, name);
+  shots.push({
+    name,
+    theme,
+    viewport: `${MOBILE_WIDTH}x${MOBILE_HEIGHT}`,
+    path: `ops/browser/evidence/be48-screenshots/${name}`,
+    themeApplied: applied,
+    widthMatched: sized,
+    ...file,
+  });
+  await cdp.send('Emulation.clearDeviceMetricsOverride');
   return file;
 }
 
@@ -125,6 +176,27 @@ async function submitForm(cdp, selector) {
   );
 }
 
+// The claim's secondary actions are buttons, not form submits.
+async function clickButton(cdp, text) {
+  const clicked = await evalJs(
+    cdp,
+    `(() => {
+      const button = Array.from(document.querySelectorAll('button')).find(
+        (entry) => (entry.innerText || '').trim() === ${JSON.stringify(text)},
+      );
+      if (!button) return false;
+      button.click();
+      return true;
+    })()`,
+  );
+  if (!clicked) throw new Error(`could_not_click: ${text}`);
+}
+
+// Which addresses the fictional Supabase was asked to mail a code to.
+async function otpRequests(cdp) {
+  return evalJs(cdp, '(window.__BE48__ ? window.__BE48__.otpRequests : [])');
+}
+
 async function waitForText(cdp, text, timeoutMs = 25000) {
   return waitFor(cdp, `document.body && document.body.innerText.includes(${JSON.stringify(text)})`, timeoutMs);
 }
@@ -163,9 +235,13 @@ async function pageState(cdp) {
           autocomplete: el.getAttribute('autocomplete'),
           inputmode: el.getAttribute('inputmode'),
           height: Math.round(el.getBoundingClientRect().height),
+          placeholder: el.getAttribute('placeholder'),
+          value: typeof el.value === 'string' ? el.value : null,
+          type: el.getAttribute('type'),
         };
       };
       const alert = document.querySelector('[role="alert"]');
+      const status = document.querySelector('[role="status"]');
       const qr = document.querySelector('.auth-qr');
       const secret = document.querySelector('.auth-secret');
       return {
@@ -173,7 +249,11 @@ async function pageState(cdp) {
         email: field('#auth-email'),
         password: field('#auth-password'),
         code: field('#auth-code'),
+        // BE-48 claim screen (a public page, so its own ids).
+        claimEmail: field('#claim-email'),
+        claimCode: field('#claim-code'),
         alert: alert ? alert.innerText.trim() : null,
+        notice: status ? status.innerText.trim() : null,
         buttons: Array.from(document.querySelectorAll('button')).map((el) => ({
           text: (el.innerText || '').trim(),
           pressed: el.getAttribute('aria-pressed'),
@@ -189,7 +269,30 @@ async function pageState(cdp) {
   );
 }
 
+// A session from a previous scenario must never leak into the next one. The claim
+// page reads the stored session on mount, so each scenario starts signed out.
+// This runs between scenarios only — never inside one: the forgot-password flow
+// reloads the document on its way to /internal/set-password, and that reload must
+// keep the recovery session, so the stub itself leaves storage alone.
+async function resetAuthStorage(cdp) {
+  await navigate(cdp, LOGIN_URL, `document.readyState === 'complete'`);
+  const removed = await evalJs(
+    cdp,
+    `(() => {
+      const stale = [];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key && key.indexOf('sb-') === 0) stale.push(key);
+      }
+      stale.forEach((key) => localStorage.removeItem(key));
+      return stale.length;
+    })()`,
+  );
+  return removed;
+}
+
 async function startLogin(cdp, options) {
+  await resetAuthStorage(cdp);
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript(options) });
   await navigate(cdp, LOGIN_URL, `document.querySelector('h1') !== null`);
   // The server HTML is on screen before React has taken over the form; a native
@@ -199,13 +302,31 @@ async function startLogin(cdp, options) {
   return evalJs(cdp, 'window.__BE48__ ? window.__BE48__.settings : null');
 }
 
+// The claim page is public: it reads the stored session on mount, so this starts
+// from a signed-out state (`resetAuthStorage`).
+async function startClaim(cdp, options) {
+  await resetAuthStorage(cdp);
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript(options) });
+  await navigate(cdp, CLAIM_URL, `document.querySelector('#claim-email') !== null`);
+  const hydrated = await waitForHydration(cdp, 'form');
+  check('claim: the form is interactive (React hydration) before typing', hydrated);
+  return evalJs(cdp, 'window.__BE48__ ? window.__BE48__.settings : null');
+}
+
 // In dev mode Next compiles a route on its first request, and that first compile
 // can force a full page reload — which would reset the in-page stub in the middle
 // of a scenario. Every route this check visits is therefore compiled first.
 async function warmUp(cdp) {
   console.log('warm-up: compiling the routes this check visits');
   await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript({}) });
-  const routes = [LOGIN_URL, FORGOT_URL, `${APP}/internal`, `${APP}/internal/menu-concepts`, `${APP}/internal/set-password`];
+  const routes = [
+    LOGIN_URL,
+    FORGOT_URL,
+    `${APP}/internal`,
+    `${APP}/internal/menu-concepts`,
+    `${APP}/internal/set-password`,
+    CLAIM_URL,
+  ];
   for (const url of routes) {
     await navigate(cdp, url, `document.readyState === 'complete'`);
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -272,6 +393,9 @@ async function passwordToEnroll(cdp) {
   await shot(cdp, 'be48-login-licht-1280.png');
   await applyTheme(cdp, 'dark');
   await shot(cdp, 'be48-login-donker-1280.png');
+  // Criterion 7: the same screen on a 390 px phone, in both themes.
+  await mobileShot(cdp, 'be48-login-licht-390.png', 'light');
+  await mobileShot(cdp, 'be48-login-donker-390.png', 'dark');
 
   await fillField(cdp, '#auth-email', EMAIL);
   await fillField(cdp, '#auth-password', PASSWORD);
@@ -305,6 +429,9 @@ async function passwordToEnroll(cdp) {
   await shot(cdp, 'be48-koppelen-licht-1280.png');
   await applyTheme(cdp, 'dark');
   await shot(cdp, 'be48-koppelen-donker-1280.png');
+  // Criterion 7: linking an app (QR + manual key) on a 390 px phone.
+  await mobileShot(cdp, 'be48-koppelen-licht-390.png', 'light');
+  await mobileShot(cdp, 'be48-koppelen-donker-390.png', 'dark');
   return enroll;
 }
 
@@ -422,6 +549,9 @@ const SCENARIO_FORGOT = {
     await shot(cdp, 'be48-wachtwoord-vergeten-licht-1280.png');
     await applyTheme(cdp, 'dark');
     await shot(cdp, 'be48-wachtwoord-vergeten-donker-1280.png');
+    // Criterion 7: the forgot-password code screen on a 390 px phone.
+    await mobileShot(cdp, 'be48-wachtwoord-vergeten-licht-390.png', 'light');
+    await mobileShot(cdp, 'be48-wachtwoord-vergeten-donker-390.png', 'dark');
 
     await fillField(cdp, '#auth-code', '000000');
     await submitForm(cdp, 'form');
@@ -435,6 +565,19 @@ const SCENARIO_FORGOT = {
     const moved = await waitForPath(cdp, '/internal/set-password');
     check('forgot: the right code continues to the existing set-password page', moved, await evalJs(cdp, 'location.pathname'));
     const setPassword = await waitForText(cdp, 'Nieuw wachtwoord');
+    if (!setPassword) {
+      const debug = await evalJs(
+        cdp,
+        `(() => ({
+          path: location.pathname,
+          body: document.body ? document.body.innerText.slice(0, 400) : '',
+          alert: document.querySelector('[role="alert"]') ? document.querySelector('[role="alert"]').innerText.trim() : null,
+          calls: window.__BE48__ ? window.__BE48__.calls.map((call) => call.method + ' ' + call.path) : [],
+          storage: Object.keys(localStorage),
+        }))()`,
+      );
+      console.log('set-password-debug', JSON.stringify(debug));
+    }
     check('forgot: the set-password page shows the new-password fields', setPassword);
   },
 };
@@ -461,6 +604,9 @@ const SCENARIO_EXISTING_APP = {
     await shot(cdp, 'be48-code-licht-1280.png');
     await applyTheme(cdp, 'dark');
     await shot(cdp, 'be48-code-donker-1280.png');
+    // Criterion 7: the code step ("Code uit je app") on a 390 px phone.
+    await mobileShot(cdp, 'be48-code-licht-390.png', 'light');
+    await mobileShot(cdp, 'be48-code-donker-390.png', 'dark');
 
     await fillField(cdp, '#auth-code', CODE);
     await submitForm(cdp, 'form');
@@ -504,6 +650,164 @@ const SCENARIO_OWNER_ONLY = {
   },
 };
 
+// ─── scenario 6: claim met een code uit de e-mail ──────────────────────────
+
+const SCENARIO_CLAIM_CODE = {
+  name: 'claim-met-code',
+  run: async (cdp) => {
+    const settings = await startClaim(cdp, {
+      theme: 'light',
+      roles: [{ role: 'owner', restaurant_id: CLAIM_RESTAURANT_ID }],
+    });
+    check('claim: the fictional Supabase stub is installed', Boolean(settings), JSON.stringify(settings && settings.roles));
+
+    const initial = await pageState(cdp);
+    check(
+      'claim: heading is "Claim dit restaurant"',
+      typeof initial.heading === 'string' && initial.heading.startsWith('Claim dit restaurant'),
+      initial.heading,
+    );
+    check('claim: the restaurant from the dataset is named', initial.body.includes('Brasserie Bardot'), initial.body.slice(0, 160));
+    check(
+      'claim: e-mail has a real label and autocomplete="email"',
+      (initial.claimEmail.labels || []).join(' ') === 'E-mailadres' && initial.claimEmail.autocomplete === 'email',
+      JSON.stringify(initial.claimEmail),
+    );
+    check('claim: the e-mail field is never placeholder-only', initial.claimEmail.placeholder === null, initial.claimEmail.placeholder);
+    check(
+      'claim: every control is at least 44 px high',
+      [initial.claimEmail.height, ...initial.buttons.map((button) => button.height)].every((height) => height >= 44),
+      JSON.stringify([initial.claimEmail.height, ...initial.buttons.map((button) => button.height)]),
+    );
+
+    await fillField(cdp, '#claim-email', CLAIM_EMAIL);
+    await submitForm(cdp, 'form');
+    const codeScreen = await waitFor(cdp, `document.querySelector('#claim-code') !== null`, 15000);
+    const codeState = await pageState(cdp);
+    check('claim: sending the address opens the code screen', codeScreen && Boolean(codeState.claimCode), JSON.stringify({ codeScreen }));
+    check(
+      'claim: the code field is labelled, numeric and one-time-code',
+      (codeState.claimCode.labels || []).join(' ') === 'Code uit de e-mail' &&
+        codeState.claimCode.inputmode === 'numeric' &&
+        codeState.claimCode.autocomplete === 'one-time-code',
+      JSON.stringify(codeState.claimCode),
+    );
+    check('claim: the screen names the address the code went to', codeState.body.includes(CLAIM_EMAIL), codeState.body.slice(0, 200));
+    const codeButtons = codeState.buttons.map((button) => button.text);
+    check(
+      'claim: "Nieuwe code sturen" and "Ander e-mailadres" are offered',
+      codeButtons.includes('Nieuwe code sturen') && codeButtons.includes('Ander e-mailadres'),
+      JSON.stringify(codeButtons),
+    );
+    check(
+      'claim: the code screen controls are at least 44 px high',
+      [codeState.claimCode.height, ...codeState.buttons.map((button) => button.height)].every((height) => height >= 44),
+      JSON.stringify([codeState.claimCode.height, ...codeState.buttons.map((button) => button.height)]),
+    );
+    // Only the phrases Supabase itself would show; a generic word search would
+    // flag this page's own Dutch copy.
+    const english = codeState.body.match(
+      /invalid login|invalid token|token has expired|rate limit|user already registered|database error/i,
+    );
+    check(
+      'claim: no English Supabase text on the code screen',
+      english === null,
+      english ? english[0] : 'geen Engelse melding',
+    );
+
+    // Criterion 7: the claim's code screen on a 390 px phone, both themes.
+    await mobileShot(cdp, 'be48-claim-licht-390.png', 'light');
+    await mobileShot(cdp, 'be48-claim-donker-390.png', 'dark');
+
+    await fillField(cdp, '#claim-code', CLAIM_CODE);
+    await submitForm(cdp, 'form');
+    const signedIn = await waitForText(cdp, 'Dien claim in');
+    const claimStep = await pageState(cdp);
+    check(
+      'claim: the right code signs the visitor in with the typed address',
+      signedIn && claimStep.body.includes(`Ingelogd als ${CLAIM_EMAIL}`),
+      claimStep.body.slice(0, 200),
+    );
+
+    await clickButton(cdp, 'Dien claim in');
+    const submitted = await waitForText(cdp, 'In afwachting van beoordeling');
+    const done = await pageState(cdp);
+    check('claim: the claim is submitted and shows its pending status', submitted, done.body.slice(0, 200));
+    check('claim: no error is shown after submitting', done.alert === null, done.alert);
+    const requests = await otpRequests(cdp);
+    check('claim: exactly one code was requested', requests.length === 1 && requests[0] === CLAIM_EMAIL, JSON.stringify(requests));
+  },
+};
+
+
+// ─── scenario 7: een foute code, opnieuw sturen en een ander adres ─────────
+
+const SCENARIO_CLAIM_WRONG_CODE = {
+  name: 'claim-foute-code',
+  run: async (cdp) => {
+    await startClaim(cdp, { theme: 'dark' });
+    await fillField(cdp, '#claim-email', CLAIM_EMAIL);
+    await submitForm(cdp, 'form');
+    await waitFor(cdp, `document.querySelector('#claim-code') !== null`, 15000);
+    const sent = await otpRequests(cdp);
+    check('claim: the first code was requested for the typed address', sent.length === 1 && sent[0] === CLAIM_EMAIL, JSON.stringify(sent));
+
+    await fillField(cdp, '#claim-code', '000000');
+    await submitForm(cdp, 'form');
+    const shown = await waitForText(cdp, WRONG_EMAIL_CODE_TEXT);
+    const wrong = await pageState(cdp);
+    check(
+      'claim: a wrong or expired code gets the Dutch sentence in role="alert"',
+      shown && wrong.alert === WRONG_EMAIL_CODE_TEXT,
+      JSON.stringify({ shown, alert: wrong.alert }),
+    );
+    check('claim: the raw Supabase token text never appears', !/token has expired|invalid token/i.test(wrong.body));
+    check(
+      'claim: "Nieuwe code sturen" is offered after a wrong code',
+      wrong.buttons.some((button) => button.text === 'Nieuwe code sturen'),
+      JSON.stringify(wrong.buttons.map((button) => button.text)),
+    );
+
+    await clickButton(cdp, 'Nieuwe code sturen');
+    const noticeShown = await waitForText(cdp, 'We hebben een nieuwe code gestuurd naar');
+    const resent = await pageState(cdp);
+    check(
+      'claim: "Nieuwe code sturen" asks Supabase again and says so',
+      noticeShown && typeof resent.notice === 'string' && resent.notice.includes(CLAIM_EMAIL),
+      JSON.stringify({ noticeShown, notice: resent.notice }),
+    );
+    const resentRequests = await otpRequests(cdp);
+    check(
+      'claim: the resend is a second request for the same address',
+      resentRequests.length === 2 && resentRequests[1] === CLAIM_EMAIL,
+      JSON.stringify(resentRequests),
+    );
+
+    await clickButton(cdp, 'Ander e-mailadres');
+    const back = await waitFor(cdp, `document.querySelector('#claim-email') !== null`, 10000);
+    const backState = await pageState(cdp);
+    check('claim: "Ander e-mailadres" returns to the address step', back && !backState.claimCode, JSON.stringify({ back }));
+    check(
+      'claim: the typed address is kept for correction',
+      Boolean(backState.claimEmail) && backState.claimEmail.value === CLAIM_EMAIL,
+      JSON.stringify(backState.claimEmail),
+    );
+    check('claim: the old code error is cleared', backState.alert === null, backState.alert);
+
+    // After resending and switching addresses the right code still works.
+    await submitForm(cdp, 'form');
+    await waitFor(cdp, `document.querySelector('#claim-code') !== null`, 15000);
+    await fillField(cdp, '#claim-code', CLAIM_CODE);
+    await submitForm(cdp, 'form');
+    check(
+      'claim: the right code still signs the visitor in afterwards',
+      await waitForText(cdp, 'Dien claim in'),
+      await evalJs(cdp, 'document.body ? document.body.innerText.slice(0, 200) : ""'),
+    );
+  },
+};
+
+
 // BE-43 (#101): elk scenario is één benoemde stap. Met `--alleen=<naam>` draait
 // alleen die stap; met `--lijst` zie je de namen zonder dat er iets start.
 const SCENARIOS = [
@@ -512,6 +816,8 @@ const SCENARIOS = [
   SCENARIO_FORGOT,
   SCENARIO_EXISTING_APP,
   SCENARIO_OWNER_ONLY,
+  SCENARIO_CLAIM_CODE,
+  SCENARIO_CLAIM_WRONG_CODE,
 ];
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
 
@@ -588,6 +894,12 @@ async function main() {
       network: networkEvidence,
       checks: { total: checks.length, failed: failed.length, entries: checks },
       screenshots: shots,
+      // BE-48 criterion 7: the mobile light/dark screenshots live in the repo and
+      // are named here, so the delivery names its own evidence.
+      screenshotsDir: path.relative(REPO_ROOT, SCREENSHOT_DIR).split(path.sep).join('/'),
+      screenshotsMobile: shots
+        .filter((entry) => entry.viewport)
+        .map((entry) => `${entry.name} (${entry.theme}, ${entry.viewport})`),
       limits:
         'Fixture evidence: a real browser against a fictional Supabase. Not a real Supabase project, authenticator app, e-mail, or production acceptance.',
       result: failed.length === 0 ? 'passed' : 'failed',

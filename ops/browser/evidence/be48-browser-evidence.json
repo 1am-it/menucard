@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T18:45:55.171Z",
+  "generatedAt": "2026-10-29T21:09:21.553Z",
   "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
   "contract": "#112 BE-48 (inloggen met tweede stap, wachtwoord vergeten)",
   "app": "http://localhost:3141",
@@ -10,7 +10,7 @@
       "checks": 21,
       "passed": 21,
       "failed": 0,
-      "durationMs": 2303,
+      "durationMs": 5117,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 3036,
+      "durationMs": 3199,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 12,
       "passed": 12,
       "failed": 0,
-      "durationMs": 4404,
+      "durationMs": 6950,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 2916,
+      "durationMs": 3964,
       "error": null
     },
     {
@@ -42,7 +42,23 @@
       "checks": 2,
       "passed": 2,
       "failed": 0,
-      "durationMs": 2063,
+      "durationMs": 3562,
+      "error": null
+    },
+    {
+      "name": "claim-met-code",
+      "checks": 17,
+      "passed": 17,
+      "failed": 0,
+      "durationMs": 4158,
+      "error": null
+    },
+    {
+      "name": "claim-foute-code",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 3967,
       "error": null
     }
   ],
@@ -51,7 +67,7 @@
     "pageViolations": []
   },
   "checks": {
-    "total": 47,
+    "total": 75,
     "failed": 0,
     "entries": [
       {
@@ -72,12 +88,12 @@
       {
         "name": "login: e-mail has a real label and autocomplete=\"username\"",
         "passed": true,
-        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46}"
+        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
       },
       {
         "name": "login: password has a real label and autocomplete=\"current-password\"",
         "passed": true,
-        "detail": "{\"id\":\"auth-password\",\"labels\":[\"Wachtwoord\"],\"autocomplete\":\"current-password\",\"inputmode\":null,\"height\":46}"
+        "detail": "{\"id\":\"auth-password\",\"labels\":[\"Wachtwoord\"],\"autocomplete\":\"current-password\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"password\"}"
       },
       {
         "name": "login: \"Toon\" has aria-pressed=\"false\" and is at least 44 px",
@@ -137,7 +153,7 @@
       {
         "name": "enroll: the code field is labelled, numeric and one-time-code",
         "passed": true,
-        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit je app\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52}"
+        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit je app\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
       },
       {
         "name": "enroll: the screen suggests linking a second device",
@@ -197,7 +213,7 @@
       {
         "name": "forgot: e-mail has a real label and autocomplete=\"username\"",
         "passed": true,
-        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46}"
+        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
       },
       {
         "name": "forgot: the neutral promise is not shown before sending",
@@ -212,7 +228,7 @@
       {
         "name": "forgot: the code field is numeric with autocomplete=\"one-time-code\"",
         "passed": true,
-        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52}"
+        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
       },
       {
         "name": "forgot: \"Nieuwe code sturen\" and \"Ander e-mailadres\" are offered",
@@ -270,6 +286,146 @@
         "detail": "{\"landed\":true,\"path\":\"/internal\"}"
       },
       {
+        "name": "claim: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: the fictional Supabase stub is installed",
+        "passed": true,
+        "detail": "[{\"role\":\"owner\",\"restaurant_id\":\"6\"}]"
+      },
+      {
+        "name": "claim: heading is \"Claim dit restaurant\"",
+        "passed": true,
+        "detail": "Claim dit restaurant 🔑"
+      },
+      {
+        "name": "claim: the restaurant from the dataset is named",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nVul je zakelijke e-mailadres in. Je krijgt "
+      },
+      {
+        "name": "claim: e-mail has a real label and autocomplete=\"email\"",
+        "passed": true,
+        "detail": "{\"id\":\"claim-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"email\",\"inputmode\":null,\"height\":44,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
+      },
+      {
+        "name": "claim: the e-mail field is never placeholder-only",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: every control is at least 44 px high",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "claim: sending the address opens the code screen",
+        "passed": true,
+        "detail": "{\"codeScreen\":true}"
+      },
+      {
+        "name": "claim: the code field is labelled, numeric and one-time-code",
+        "passed": true,
+        "detail": "{\"id\":\"claim-code\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":45,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
+      },
+      {
+        "name": "claim: the screen names the address the code went to",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nWe hebben een code van zes cijfers gestuurd naar eigenaar@example.invalid. Je kunt "
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" and \"Ander e-mailadres\" are offered",
+        "passed": true,
+        "detail": "[\"Licht\",\"Donker\",\"Code controleren\",\"Nieuwe code sturen\",\"Ander e-mailadres\"]"
+      },
+      {
+        "name": "claim: the code screen controls are at least 44 px high",
+        "passed": true,
+        "detail": "[45,44,44,44,44,44]"
+      },
+      {
+        "name": "claim: no English Supabase text on the code screen",
+        "passed": true,
+        "detail": "geen Engelse melding"
+      },
+      {
+        "name": "claim: the right code signs the visitor in with the typed address",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nIngelogd als eigenaar@example.invalid. Klik hieronder om een claim in te dienen voo"
+      },
+      {
+        "name": "claim: the claim is submitted and shows its pending status",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\n📋 In afwachting van beoordeling\nIngediend op 29-10-2026"
+      },
+      {
+        "name": "claim: no error is shown after submitting",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: exactly one code was requested",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: the first code was requested for the typed address",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: a wrong or expired code gets the Dutch sentence in role=\"alert\"",
+        "passed": true,
+        "detail": "{\"shown\":true,\"alert\":\"Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.\"}"
+      },
+      {
+        "name": "claim: the raw Supabase token text never appears",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" is offered after a wrong code",
+        "passed": true,
+        "detail": "[\"Licht\",\"Donker\",\"Code controleren\",\"Nieuwe code sturen\",\"Ander e-mailadres\"]"
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" asks Supabase again and says so",
+        "passed": true,
+        "detail": "{\"noticeShown\":true,\"notice\":\"We hebben een nieuwe code gestuurd naar eigenaar@example.invalid.\"}"
+      },
+      {
+        "name": "claim: the resend is a second request for the same address",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\",\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: \"Ander e-mailadres\" returns to the address step",
+        "passed": true,
+        "detail": "{\"back\":true}"
+      },
+      {
+        "name": "claim: the typed address is kept for correction",
+        "passed": true,
+        "detail": "{\"id\":\"claim-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"email\",\"inputmode\":null,\"height\":44,\"placeholder\":null,\"value\":\"eigenaar@example.invalid\",\"type\":\"email\"}"
+      },
+      {
+        "name": "claim: the old code error is cleared",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: the right code still signs the visitor in afterwards",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nIngelogd als eigenaar@example.invalid. Klik hieronder om een claim in te dienen voo"
+      },
+      {
         "name": "network guard: the page recorded no unknown route or external request",
         "passed": true,
         "detail": "[]"
@@ -307,6 +463,30 @@
       "height": 488
     },
     {
+      "name": "be48-login-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-login-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-login-licht-390.png",
+      "sha256": "8fd9d5f9f842e7227f52dd1c860af69034a6b54ec074b23fdabcee44397871f2",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-login-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-login-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-login-donker-390.png",
+      "sha256": "912259ed2ed4a78444472cd129e8972a22270b9d3953c1fa861078b60e1c0ea0",
+      "width": 390,
+      "height": 844
+    },
+    {
       "name": "be48-koppelen-licht-1280.png",
       "file": "be48-koppelen-licht-1280.png",
       "sha256": "853cdfc8e235bf8ccebf2c09a7c1547a9957f1f7530c93f821f5d6a524712576",
@@ -319,6 +499,30 @@
       "sha256": "9524fd33a1aec81d2bf8d6f3cb4ee56c5699deb0d68a5db8177a02353d5e18ea",
       "width": 756,
       "height": 488
+    },
+    {
+      "name": "be48-koppelen-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-koppelen-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-koppelen-licht-390.png",
+      "sha256": "41ab1caec1a1473c24a7f9c0de8e1227bc3cbd1c8ea7e37d7473a2923186da10",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-koppelen-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-koppelen-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-koppelen-donker-390.png",
+      "sha256": "1bebf9e2f46df07d41be4210aa3eb45981a864e0b75c551533192551057ed362",
+      "width": 390,
+      "height": 844
     },
     {
       "name": "be48-code-donker-1280.png",
@@ -349,6 +553,30 @@
       "height": 488
     },
     {
+      "name": "be48-wachtwoord-vergeten-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-wachtwoord-vergeten-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-wachtwoord-vergeten-licht-390.png",
+      "sha256": "13d3eba22a8353fff32ae7f4eabe5dc4d17479e2f87c7bb123620dc37b076cf8",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-wachtwoord-vergeten-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-wachtwoord-vergeten-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-wachtwoord-vergeten-donker-390.png",
+      "sha256": "9dea8ad4432f609e9dbc1c0dab6338bf4cd0431b8249a2be89bd4df88d981eb2",
+      "width": 390,
+      "height": 844
+    },
+    {
       "name": "be48-code-licht-1280.png",
       "file": "be48-code-licht-1280.png",
       "sha256": "1557f4c4fe31822e701ef123343094723c57b88b46680e2dee9e237a9b310654",
@@ -361,7 +589,68 @@
       "sha256": "a2fd639b1097e08f8a74cd09921c31cc548228bf7e09b217ab0b535f8634cef3",
       "width": 756,
       "height": 488
+    },
+    {
+      "name": "be48-code-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-code-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-code-licht-390.png",
+      "sha256": "a2f448494857378fe7385dfdc9475d23d602c2665865e2e055a60312dbc043dd",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-code-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-code-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-code-donker-390.png",
+      "sha256": "affc79eeec87faaa7a290e814d72f4bfb2a5d2b7d9ac1dda929a60c828a8407d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-claim-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-claim-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-claim-licht-390.png",
+      "sha256": "846b1c65579688357419f510ddbb66a90ca4e6f5bb497b8eb51f7986f7220c9d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-claim-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-claim-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-claim-donker-390.png",
+      "sha256": "3fed25c0d9f5f3eeb4c3e56872676d8c65ceeb2d8e2ec6082a8e21e3372621d0",
+      "width": 390,
+      "height": 844
     }
+  ],
+  "screenshotsDir": "ops/browser/evidence/be48-screenshots",
+  "screenshotsMobile": [
+    "be48-login-licht-390.png (light, 390x844)",
+    "be48-login-donker-390.png (dark, 390x844)",
+    "be48-koppelen-licht-390.png (light, 390x844)",
+    "be48-koppelen-donker-390.png (dark, 390x844)",
+    "be48-wachtwoord-vergeten-licht-390.png (light, 390x844)",
+    "be48-wachtwoord-vergeten-donker-390.png (dark, 390x844)",
+    "be48-code-licht-390.png (light, 390x844)",
+    "be48-code-donker-390.png (dark, 390x844)",
+    "be48-claim-licht-390.png (light, 390x844)",
+    "be48-claim-donker-390.png (dark, 390x844)"
   ],
   "limits": "Fixture evidence: a real browser against a fictional Supabase. Not a real Supabase project, authenticator app, e-mail, or production acceptance.",
   "result": "passed"
