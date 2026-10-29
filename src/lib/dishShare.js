@@ -86,7 +86,11 @@ function withShareTheme(href, theme) {
     return null;
   }
   parsed.searchParams.set(SHARE_THEME_PARAM, normalizeShareTheme(theme));
-  return absolute ? parsed.toString() : `${parsed.pathname}${parsed.search}`;
+  // `URLSearchParams` schrijft een komma als %2C; de id's van een gedeeld
+  // lijstje blijven zo leesbaar in de chat. De pagina leest beide vormen.
+  const suffix = `${parsed.pathname}${parsed.search}`.replace(/%2C/gi, ',');
+  const path = parsed.hash ? `${suffix}${parsed.hash}` : suffix;
+  return absolute ? `${parsed.origin}${path}` : path;
 }
 
 /**
@@ -190,6 +194,52 @@ async function copyShareLink(clipboard, url) {
 }
 
 /**
+ * De relatieve deeplink met de stand van dit moment, absoluut gemaakt tegen de
+ * oorsprong van de pagina. Zonder href of zonder bruikbare oorsprong: geen URL.
+ */
+function absoluteShareUrl({ href, origin, theme } = {}) {
+  const themed = withShareTheme(href, theme);
+  if (!themed) return null;
+  try {
+    return new URL(themed, origin || 'http://localhost').toString();
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Delen zoals de eigenaar het wil (BE-44 criterium 1 en 4): het systeemmenu als
+ * dat er is, anders de link naar het klembord, anders niets. Eén functie voor
+ * het gerecht en het lijstje, zodat de twee knoppen niet uit elkaar lopen.
+ *
+ * `browser` is `window` (of een stub in een test). Een afgebroken of mislukte
+ * deelactie geeft geen melding en vooral geen tweede, stille poging.
+ */
+async function shareLink({ browser, href, title, theme } = {}) {
+  const navigatorRef = browser && browser.navigator ? browser.navigator : null;
+  const origin = browser && browser.location ? browser.location.origin : undefined;
+  const url = absoluteShareUrl({ href, origin, theme });
+  if (!url) return { mode: 'none', message: '', url: null };
+  const mode = shareTarget({
+    share: navigatorRef ? navigatorRef.share : undefined,
+    clipboard: navigatorRef ? navigatorRef.clipboard : undefined,
+  });
+  if (mode === 'share') {
+    try {
+      await navigatorRef.share(buildSharePayload({ title, url }));
+    } catch (error) {
+      // Afgebroken door de gebruiker of niet beschikbaar: geen melding.
+    }
+    return { mode: 'share', message: '', url };
+  }
+  if (mode === 'clipboard') {
+    const result = await copyShareLink(navigatorRef.clipboard, url);
+    return { mode: 'clipboard', message: result.message, url };
+  }
+  return { mode: 'none', message: '', url: null };
+}
+
+/**
  * De metadata van een gedeelde gerechtlink: og:title "<gerecht> · <prijs>",
  * og:description met restaurant, adres en één regel beschrijving, og:url en de
  * voorvertoningsafbeelding. Geen foto.
@@ -230,6 +280,7 @@ module.exports = {
   SHARE_THEME_DARK,
   SHARE_THEME_LIGHT,
   SHARE_THEME_PARAM,
+  absoluteShareUrl,
   buildSharePayload,
   copyShareLink,
   dishShareHref,
@@ -241,6 +292,7 @@ module.exports = {
   normalizeShareTheme,
   oneLineDescription,
   shareImageHref,
+  shareLink,
   shareOgDescription,
   shareTarget,
   shareThemeFromAttribute,

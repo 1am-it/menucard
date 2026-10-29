@@ -102,7 +102,7 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
   // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
@@ -142,10 +142,13 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         <div className="td-desc">{highlight(item.desc, displayQuery)}</div>
       )}
 
-      {/* BE-44 (#105, criterium 1) — "Delen" onder de beschrijving, niet naast
-          de prijs. Alleen de publieke menukaart geeft een link mee; het
-          Publicatievoorbeeld (StaticMenu) blijft ongewijzigd. */}
-      {shareHref && <DishShareButton href={shareHref} title={shareTitle} />}
+      {/* BE-44 (#105, criterium 1 en 4) — "Delen" en "Bewaren" onder de
+          beschrijving, niet naast de prijs. Alleen de publieke menukaart geeft
+          een link en een bewaarplek mee; het Publicatievoorbeeld (StaticMenu)
+          blijft ongewijzigd. */}
+      {(shareHref || saveEntry) && (
+        <DishShareButton href={shareHref} title={shareTitle} entry={saveEntry} />
+      )}
 
       {item.sup  && <div className="td-sup">+ {highlight(item.sup, query)}</div>}
       {item.wine && <div className="td-wine"><Emoji glyph="🍷" /> {item.wine}</div>}

@@ -5032,3 +5032,252 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   color: var(--text-secondary);
 }
 
+
+/* ── BE-44 (issue 105) — bewaren en het lijstje ──────────────────────────────
+   "Bewaren" staat naast "Delen" op dezelfde regel, met een bladwijzer; staat hij
+   aan, dan "Bewaard", een gevulde bladwijzer en aria-pressed. Het aanraakvlak is
+   net als bij "Delen" minstens 44 × 44 px. Alles met de bestaande tokens. */
+
+.dish-share-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dish-save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dish-save-btn:hover { border-color: var(--border-hover); }
+
+.dish-save-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.dish-save-btn.is-saved {
+  background: var(--button-primary-bg);
+  border-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+/* De onderbalk op de menupagina: "<n> bewaard · Bekijken →", zodra er iets
+   bewaard is. Eén link, dus één groot tikvlak. */
+.saved-list-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 130;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 10px 30px var(--shadow-tint-lg);
+}
+
+.saved-list-bar:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+.saved-list-bar-icon { width: 16px; height: 16px; flex: none; }
+
+/* De vaste balk dekt niets af: deze ruimte staat in de gewone paginaflow. */
+.saved-list-bar-spacer { height: 84px; }
+
+/* Op de telefoon staat de zwevende menubalk onderin; de bewaarbalk komt
+   erboven, zodat geen van twee bedekt raakt. */
+@media (max-width: 720px) {
+  .saved-list-bar { bottom: 84px; }
+}
+
+/* ── BE-44 — "Mijn lijstje" en het gedeelde lijstje ───────────────────────── */
+
+.lijst-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 120px;
+}
+
+.lijst-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.lijst-title {
+  margin: 8px 0 4px;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.lijst-skipped {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.lijst-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lijst-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lijst-row-link {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  min-height: 64px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.lijst-row-link:hover { border-color: var(--border-hover); }
+
+.lijst-row-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.lijst-row-name { grid-column: 1; font-size: 16px; font-weight: 700; }
+.lijst-row-meta { grid-column: 1; font-size: 13px; color: var(--text-secondary); }
+
+.lijst-row-price {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.lijst-remove {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lijst-remove:hover { border-color: var(--border-hover); }
+
+.lijst-remove:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.lijst-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.lijst-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--button-primary-bg);
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lijst-add-btn:disabled { opacity: 0.6; cursor: default; }
+
+.lijst-primary-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.lijst-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.lijst-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.lijst-empty {
+  margin-top: 16px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.lijst-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.lijst-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+

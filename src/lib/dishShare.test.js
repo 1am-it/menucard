@@ -21,6 +21,7 @@ const { resolveDishTarget } = require('./dishDeepLink');
 const {
   COPIED_MESSAGE,
   SHARE_THEME_PARAM,
+  absoluteShareUrl,
   buildSharePayload,
   copyShareLink,
   dishShareHref,
@@ -32,6 +33,7 @@ const {
   normalizeShareTheme,
   oneLineDescription,
   shareImageHref,
+  shareLink,
   shareOgDescription,
   shareTarget,
   shareThemeFromAttribute,
@@ -257,4 +259,78 @@ test('een geweigerde of ontbrekende kopie geeft geen melding en gooit nooit', as
   assert.deepEqual(await copyShareLink({}, 'https://example.org/x'), { ok: false, message: '' });
   assert.deepEqual(await copyShareLink({ writeText: async () => {} }, ''), { ok: false, message: '' });
 });
+
+// ─── Delen via het systeemmenu, het klembord of niets (criterium 1 en 4) ────
+// Dezelfde weg voor één gerecht en voor het hele lijstje: alleen de link en
+// hooguit de kop van het deelmenu, nooit een berichttekst.
+
+test('de absolute link krijgt de stand van dit moment, tegen de oorsprong van de pagina', () => {
+  const url = absoluteShareUrl({ href: '/mijn-lijstje?lijst=6-diner-0-0', origin: 'https://example.org', theme: 'donker' });
+  assert.equal(url, 'https://example.org/mijn-lijstje?lijst=6-diner-0-0&stand=donker');
+  assert.equal(absoluteShareUrl({ href: '', origin: 'https://example.org' }), null);
+  assert.equal(absoluteShareUrl({ href: null }), null);
+  assert.equal(absoluteShareUrl({ href: '/menu/6-diner', origin: 'https://example.org', theme: 'licht' }), 'https://example.org/menu/6-diner?stand=licht');
+});
+
+test("de komma's van een gedeeld lijstje blijven leesbaar in de link", () => {
+  const href = withShareTheme('/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1', 'donker');
+  assert.equal(href, '/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker');
+  assert.equal(href.includes('%2C'), false);
+  const absolute = absoluteShareUrl({ href, origin: 'https://example.org', theme: 'donker' });
+  assert.equal(absolute, 'https://example.org/mijn-lijstje?lijst=6-diner-0-0,6-diner-0-1&stand=donker');
+  // En de pagina leest de id's er weer uit.
+  assert.equal(new URL(absolute).searchParams.get('lijst'), '6-diner-0-0,6-diner-0-1');
+});
+
+test('shareLink gebruikt het systeemmenu met alleen url en title', async () => {
+  const shared = [];
+  const browser = {
+    location: { origin: 'https://example.org' },
+    navigator: { share: async (payload) => { shared.push(payload); } },
+  };
+  const result = await shareLink({ browser, href: `/menu/6-diner?dish=${dishId}`, title: 'Poussin', theme: 'licht' });
+  assert.equal(result.mode, 'share');
+  assert.equal(result.message, '');
+  assert.deepEqual(shared, [{ url: `https://example.org/menu/6-diner?dish=${dishId}&stand=licht`, title: 'Poussin' }]);
+  assert.equal('text' in shared[0], false);
+});
+
+test('shareLink valt zonder systeemmenu terug op het klembord, met de melding', async () => {
+  const copied = [];
+  const browser = {
+    location: { origin: 'https://example.org' },
+    navigator: { clipboard: { writeText: async (value) => { copied.push(value); } } },
+  };
+  const result = await shareLink({ browser, href: '/mijn-lijstje?lijst=6-diner-0-0', title: 'Mijn lijstje', theme: 'donker' });
+  assert.equal(result.mode, 'clipboard');
+  assert.equal(result.message, COPIED_MESSAGE);
+  assert.deepEqual(copied, ['https://example.org/mijn-lijstje?lijst=6-diner-0-0&stand=donker']);
+});
+
+test('shareLink gooit nooit: afgebroken systeemmenu, geweigerd klembord, geen browser', async () => {
+  const aborted = {
+    location: { origin: 'https://example.org' },
+    navigator: { share: async () => { throw new Error('AbortError'); } },
+  };
+  assert.deepEqual(await shareLink({ browser: aborted, href: '/menu/x?dish=x', title: 'x' }), {
+    mode: 'share',
+    message: '',
+    url: 'https://example.org/menu/x?dish=x&stand=licht',
+  });
+  const denied = {
+    location: { origin: 'https://example.org' },
+    navigator: { clipboard: { writeText: async () => { throw new Error('NotAllowedError'); } } },
+  };
+  assert.deepEqual(await shareLink({ browser: denied, href: '/menu/x?dish=x' }), {
+    mode: 'clipboard',
+    message: '',
+    url: 'https://example.org/menu/x?dish=x&stand=licht',
+  });
+  assert.deepEqual(await shareLink({ browser: null, href: '/menu/x' }), { mode: 'none', message: '', url: null });
+  assert.deepEqual(
+    await shareLink({ browser: { location: { origin: 'https://example.org' }, navigator: {} }, href: '/menu/x' }),
+    { mode: 'none', message: '', url: null },
+  );
+});
+
 

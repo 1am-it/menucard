@@ -7,6 +7,8 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import { resolveDishTarget, buildDishDeepLink } from '@/src/lib/dishDeepLink'
 import { hasShareTheme, dishShareTitle } from '@/src/lib/dishShare'
+import { buildEntry } from '@/src/lib/dishList'
+import SavedListBar from '@/src/components/SavedListBar'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import EmojiText from '@/src/components/EmojiText'
@@ -557,6 +559,19 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         category: cat.name,
                       })
                       : null
+                    // BE-44 (#105, criterium 4) — hetzelfde gerecht kan bewaard
+                    // worden. De knop bewaart alleen wat de pagina al toont:
+                    // naam, restaurant, prijs en de plek in de kaart.
+                    const saveEntry = originalItemIndex >= 0 && origIdx >= 0
+                      ? buildEntry({
+                        menuId: id,
+                        catIdx: origIdx,
+                        itemIdx: originalItemIndex,
+                        item,
+                        category: cat.name,
+                        restaurantName: r.name || restaurant.name,
+                      })
+                      : null
                     return (
                       <MenuItem
                         key={j}
@@ -574,6 +589,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                         shareHref={shareHref}
                         shareTitle={dishShareTitle({ name: item.name, restaurantName: r.name })}
                         shareNote={isResolvedTarget && hasShareTheme(standParam)}
+                        saveEntry={saveEntry}
                       />
                     )
                   })}
@@ -595,6 +611,9 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
         </div>
       </main>
 
+      {/* BE-44 (issue 105, criterium 4) — "<n> bewaard · Bekijken →" zodra er
+          iets bewaard is; de balk staat boven de telefoonmenubalk. */}
+      <SavedListBar />
       <MobileTabBar />
     </>
   )

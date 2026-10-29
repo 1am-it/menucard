@@ -63,15 +63,18 @@ test('/menu/<id> gebruikt de ene deelbouwer voor link, metadata en og:image', ()
   assert.match(MENU_PAGE, /headerList\.get\('host'\)/);
 });
 
-test('de gerechtkaart toont "Delen" onder de beschrijving en niet naast de prijs', () => {
+test('de gerechtkaart toont "Delen" en "Bewaren" onder de beschrijving en niet naast de prijs', () => {
   const desc = MENU_BODY.indexOf('{item.desc && (');
-  const share = MENU_BODY.indexOf('{shareHref && <DishShareButton');
+  const share = MENU_BODY.indexOf('<DishShareButton');
   const supplement = MENU_BODY.indexOf('{item.sup');
   assert.ok(desc > -1 && share > -1 && supplement > -1);
-  assert.ok(share > desc, 'de deelknop staat onder de beschrijving');
-  assert.ok(share < supplement, 'de deelknop staat vóór de supplementen, niet in de prijsregel');
+  assert.ok(share > desc, 'de deel- en bewaarknoppen staan onder de beschrijving');
+  assert.ok(share < supplement, 'de knoppen staan vóór de supplementen, niet in de prijsregel');
   const cardTop = MENU_BODY.slice(MENU_BODY.indexOf('<div className="card-top">'), desc);
-  assert.doesNotMatch(cardTop, /DishShareButton/, 'de deelknop staat niet in de regel met de prijs');
+  assert.doesNotMatch(cardTop, /DishShareButton|DishSaveButton/, 'de knoppen staan niet in de regel met de prijs');
+  // BE-44 criterium 4: dezelfde regel geeft de bewaarplek mee aan de knop.
+  assert.match(MENU_BODY, /\{\(shareHref \|\| saveEntry\) && \(/);
+  assert.match(MENU_BODY, /entry=\{saveEntry\}/);
 });
 
 test('alleen de publieke menukaart geeft een deellink mee; het Publicatievoorbeeld niet', () => {

@@ -1,10 +1,11 @@
 'use client'
 
-// BE-44 (#105, criterium 1) — de knop "Delen" op de gerechtkaart.
+// BE-44 (#105, criterium 1 en 4) — de knoppen op de gerechtkaart: "Delen" en
+// "Bewaren", in één regel onder de beschrijving.
 //
-// De eigenaar koos variant A (het iPhone-deelicoon) en "zo snel mogelijk
-// doorsturen, zonder begeleidende tekst": de gebruiker typt zelf in de chat.
-// Daarom:
+// De eigenaar koos variant A (het iPhone-deelicoon), variant 1 (de bladwijzer)
+// en "zo snel mogelijk doorsturen, zonder begeleidende tekst": de gebruiker typt
+// zelf in de chat. Daarom:
 //   - op een telefoon met `navigator.share`: het systeemmenu met alleen
 //     `{ url, title }` — de bestaande BE-12-deeplink, geen `text`;
 //   - zonder `navigator.share`: de link naar het klembord, met de melding
@@ -14,28 +15,29 @@
 // De knop bouwt de absolute link pas bij de klik, uit de relatieve deeplink die
 // de server al rendert: zo blijft de HTML aan beide kanten gelijk en gaat de
 // stand van dit moment (licht of donker) mee voor de voorvertoning.
+//
+// Het bewaren zelf (opslag, stand, aria-pressed) zit in DishSaveButton; deze
+// component bezit alleen de regel waarin beide knoppen staan.
 
 import { useState } from 'react'
-import { buildSharePayload, copyShareLink, shareTarget, withShareTheme } from '@/src/lib/dishShare'
+import { absoluteShareUrl, buildSharePayload, copyShareLink, shareTarget } from '@/src/lib/dishShare'
+import DishSaveButton from '@/src/components/DishSaveButton'
 
-function absoluteShareUrl(href) {
-  if (!href || typeof window === 'undefined') return null
-  const theme = typeof document !== 'undefined' && document.documentElement
+function currentTheme() {
+  return typeof document !== 'undefined' && document.documentElement
     ? document.documentElement.getAttribute('data-theme')
     : null
-  const withTheme = withShareTheme(href, theme) || href
-  try {
-    return new URL(withTheme, window.location.origin).toString()
-  } catch (error) {
-    return null
-  }
 }
 
-export default function DishShareButton({ href, title }) {
+export default function DishShareButton({ href, title, entry = null }) {
   const [message, setMessage] = useState('')
 
   async function handleShare() {
-    const url = absoluteShareUrl(href)
+    const url = absoluteShareUrl({
+      href,
+      origin: typeof window === 'undefined' ? undefined : window.location.origin,
+      theme: currentTheme(),
+    })
     if (!url) return
     const navigatorRef = typeof navigator === 'undefined' ? null : navigator
     const target = shareTarget({
@@ -57,19 +59,24 @@ export default function DishShareButton({ href, title }) {
     }
   }
 
-  if (!href) return null
+  if (!href && !entry) return null
 
   return (
     <div className="dish-share">
-      <button type="button" className="dish-share-btn" onClick={handleShare}>
-        {/* Het deelicoon, variant A: een vierkant met een pijl omhoog. */}
-        <svg className="dish-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-          <path d="M12 3v12" />
-          <path d="M8 7l4-4 4 4" />
-          <path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1" />
-        </svg>
-        Delen
-      </button>
+      <div className="dish-share-buttons">
+        {href ? (
+          <button type="button" className="dish-share-btn" onClick={handleShare}>
+            {/* Het deelicoon, variant A: een vierkant met een pijl omhoog. */}
+            <svg className="dish-share-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+              <path d="M12 3v12" />
+              <path d="M8 7l4-4 4 4" />
+              <path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1" />
+            </svg>
+            Delen
+          </button>
+        ) : null}
+        {entry ? <DishSaveButton entry={entry} /> : null}
+      </div>
       <span className="dish-share-status" role="status">{message}</span>
     </div>
   )
