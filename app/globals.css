@@ -5905,6 +5905,8 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
    buiten zijn vlak. Past het niet naast elkaar, dan gaat de prijs naar de
    volgende regel (`.card-top` wrapt). */
 .card-top > .td-name { flex: 1 1 auto; min-width: min(100%, 12ch); }
+/* Gaat de prijs naar de volgende regel, dan blijft hij rechts staan (BE-42, 3B). */
+.card-top > .td-price { margin-left: auto; }
 /* Een statusbadge stond op één regel en liep bij 200% tekst over zijn eigen
    vlak heen. */
 .status-badge { white-space: normal; flex-wrap: wrap; min-width: 0; }
