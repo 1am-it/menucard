@@ -1,7 +1,7 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T22:00:35.247Z",
+  "startedAt": "2026-10-30T22:20:24.324Z",
   "port": 3195,
   "scenarioRuns": [
     {
@@ -9,7 +9,7 @@
       "checks": 109,
       "passed": 109,
       "failed": 0,
-      "durationMs": 27146,
+      "durationMs": 29356,
       "error": null
     },
     {
@@ -17,7 +17,7 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 5509,
+      "durationMs": 5026,
       "error": null
     },
     {
@@ -25,7 +25,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 17006,
+      "durationMs": 28605,
       "error": null
     },
     {
@@ -33,7 +33,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 11188,
+      "durationMs": 40186,
       "error": null
     }
   ],
@@ -615,22 +615,22 @@
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"ad3cbb17b439c746b9882f98\"},{\"apparaat\":\"ad3cbb17b439c746b9882f98\"}]"
+      "detail": "[{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"},{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"ad3cbb17b439c746b9882f98\"}"
+      "detail": "{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "ad3cbb17b439c746b9882f98"
+      "detail": "12d0ec2e50d12db6d83d5d0c"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "ad3cbb17b439c746b9882f98"
+      "detail": "12d0ec2e50d12db6d83d5d0c"
     },
     {
       "name": "zoeken light/1280: het thema is toegepast",
@@ -1161,7 +1161,7 @@
   "shots": [
     {
       "file": "be55-vandaag-restaurant-1280-light.png",
-      "sha256": "6576af9875ce294851879562655001fadd52d3485de09b1daf8fa97c54deae18",
+      "sha256": "74a7daf88a0f34ae750da7a70659056d95d10857209cbc0adf40a57b316245e0",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1188,7 +1188,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-1280-dark.png",
-      "sha256": "11141ef79412b2d3e8369f32ee50239a25ece7344e7c331620b7901e802c2edd",
+      "sha256": "c7545088b2dd9fa4033fa3e21108b9f4b4ad0616de0bc86c09d7e7270154b58a",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1215,7 +1215,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-light.png",
-      "sha256": "6d611fc41c649abf0f7b66603f2b31e9994d9141ea24676a6b2ca5c310a96e70",
+      "sha256": "302824464151f6fe50599ef914e9fe45457ea16dbe5aff81461f9bed285e7819",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1224,7 +1224,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-dark.png",
-      "sha256": "41e8ec163727a3c24b1f90b9123a9cb33f92cc4ef2fd5a7a4194f6c4dd0a913e",
+      "sha256": "553db7a87ef90836e425b7efb663b042e1e630ed6fa7d0a803b35ff268bd0796",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1233,7 +1233,7 @@
     },
     {
       "file": "be55-vandaag-leeg-390-light.png",
-      "sha256": "276e408e94302752b56d361e7c3f792ddfaa52d744c23dd3767db6659ec2432c",
+      "sha256": "46d847b84ea417bcbc99078047f05ff388ff1a6f0d368824a95b7126ac4911a8",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1251,7 +1251,7 @@
     },
     {
       "file": "be55-zoeken-1280-light.png",
-      "sha256": "952974b138092abcbd6c2c788bd9ddae5da23e14f871daa1ac54702ba7247410",
+      "sha256": "023d993d27e0bea51de665ed4725fd9c769961b10ebd9d87d92f83f027d037e6",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1260,7 +1260,7 @@
     },
     {
       "file": "be55-zoeken-390-light.png",
-      "sha256": "8e629390d896ce6f721ddca87941b7630828ee5d4743e4e86b4c01a6e39225eb",
+      "sha256": "8bbc87d2694de3691c40195f23588ed8a168272dacb84eca5b80681450b15c6f",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1269,7 +1269,7 @@
     },
     {
       "file": "be55-zoeken-320-light.png",
-      "sha256": "06ef75518833ef54600a2bf89296e968968a5f7e53615477b8d2a2dc22e6ada0",
+      "sha256": "c110e14b828e1d3e9fe8c05e51c3c183016e43a3310222067036149a6882ca06",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1278,7 +1278,7 @@
     },
     {
       "file": "be55-zoeken-1280-dark.png",
-      "sha256": "f51bac657f57430055d4a976467cb14e93efece2dff7cefd7ddb9123d3d546af",
+      "sha256": "88da11695d18374ee8c6b0b2caa4b6aec97de2cec6329202ba2d053852220271",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1287,7 +1287,7 @@
     },
     {
       "file": "be55-zoeken-390-dark.png",
-      "sha256": "94448fcfe7330372ef3ebef8d5823b81adfb41ffeb3e14fd9a653b9b84021830",
+      "sha256": "c1b3be668ceef74c3a9eff1eb0c434a9a26f73e77b76d38d5e2d6116ce53c92a",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1296,7 +1296,7 @@
     },
     {
       "file": "be55-zoeken-320-dark.png",
-      "sha256": "e2fa414c4e9f187096bca1bda8660cc656ea67d49f5e57af0d1b045ba712a5a0",
+      "sha256": "b038f27f27668334660ef159775ef628d98a406bbe09692547b1507e56222314",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1305,7 +1305,7 @@
     },
     {
       "file": "be55-zoeken-filter-aan-390-dark.png",
-      "sha256": "2779c69834806b2903d0429bf38b93c91250f52e36606f7b6a8488ab3d30e07a",
+      "sha256": "15f5c37b60ef8de80bae5ea193a3085555b29a39db750e2b497a62d71c067820",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1314,7 +1314,7 @@
     },
     {
       "file": "be55-home-daghappen-1280-light.png",
-      "sha256": "ee0a76eca5e5e70d8c5f383647a5a3774900ad0150bd3f87690a0785d70d061c",
+      "sha256": "b82e260c1f81fb79fea5638de47a7f1fe3f7fc83b177b3ff4beec3078132e04f",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1323,7 +1323,7 @@
     },
     {
       "file": "be55-home-daghappen-390-light.png",
-      "sha256": "193cf31330e0f583453455766ad36e2869ae007dc6216980693394544212ad0d",
+      "sha256": "b047e444c9d64d48e1fecdb560a226b6d24781267e4b560beb99dc41668a2b4c",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1332,7 +1332,7 @@
     },
     {
       "file": "be55-home-daghappen-320-light.png",
-      "sha256": "0a53eebfe7600a711f7bb8afd7c5d5132ac832f8e91038f4cda92a5008c8e910",
+      "sha256": "4d7e029f7e4a601a979eb577f24404f55cae267dcb616e0ece71bb503acda7a1",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1341,7 +1341,7 @@
     },
     {
       "file": "be55-home-daghappen-1280-dark.png",
-      "sha256": "c0a2380481f6fee44cc0cd0eadda93b6148b5a93784371d7c361a903cbc34915",
+      "sha256": "701770164e6b256af9d17870c3fcfbc8303bb45b3ae96a4802b98282ed654026",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1350,7 +1350,7 @@
     },
     {
       "file": "be55-home-daghappen-390-dark.png",
-      "sha256": "81cb5d6be4ed480ada04b211235140f7c7af55d9a55484def5781bcf189238ba",
+      "sha256": "541a7570db189503ed72c184bb2484b642ecb8e3c25e10d7ac7d5f7c7b002072",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1359,7 +1359,7 @@
     },
     {
       "file": "be55-home-daghappen-320-dark.png",
-      "sha256": "9db716c588e8366c9c8b6878375f5c39b17198f70c5e9eb508a69ef71f5f7c99",
+      "sha256": "beb13ee58f3b686af820b0e122b4058ac1adc21ca85d1d8375b1a2a438b96f56",
       "width": 320,
       "height": 900,
       "viewport": "320x900",

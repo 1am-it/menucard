@@ -40,6 +40,25 @@
   outline-offset: 2px;
 }
 
+/* BE-55 deel 5 (issue 135) — met een actieve chip (zoals "Vandaag") staat er
+   ook een verwijderknop in de chipbalk. De bestaande knop is 11×16 px; met
+   dezelfde negatieve marge blijft de balk even hoog, maar is het doel groot
+   genoeg om met de vinger te raken. */
+.filter-tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -8px;
+}
+
+/* Bij 200% tekst mag een lange gerechtnaam in de groep afbreken; anders duwt
+   hij de kaart een paar pixels voorbij de rand op 320 px. */
+.dish-group-card .dish-group-example-link {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 390px) {
   .vandaag-label {
     margin-left: 4px;

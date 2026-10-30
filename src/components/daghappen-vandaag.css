@@ -24,10 +24,15 @@
 }
 
 .daghappen-vandaag-alle {
-  color: var(--accent-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--accent);
   font-size: 0.9rem;
   text-decoration: none;
-  padding: 6px 4px;
+  padding: 6px 10px;
 }
 
 .daghappen-vandaag-alle:hover,
@@ -78,9 +83,10 @@
 .daghappen-vandaag-label {
   align-self: flex-start;
   padding: 2px 8px;
+  border: 1px solid var(--card-border-color);
   border-radius: 999px;
-  background: var(--accent-surface);
-  color: var(--surface-soft);
+  background: var(--chip-bg);
+  color: var(--accent);
   font-size: 0.75rem;
 }
 
