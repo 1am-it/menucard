@@ -79,3 +79,35 @@ test('BE-58: "Menukaart bijwerken" staat in Mijn restaurant en in de interne nav
   assert.equal(item.placement, 'secondary', 'onder de scheidingslijn, zodat het totaal geen nep-getal wordt');
   assert.ok(!('countKey' in item), 'geen verzonnen telling');
 });
+
+test('BE-58: de overlay komt uit de cache, niet uit een nieuwe vraag per bezoek', () => {
+  const loader = read('src/lib/menukaartOverlayServer.js');
+  assert.match(loader, /unstable_cache/, 'de overlay hangt in de Data Cache');
+  assert.match(loader, /OVERLAY_CACHE_SECONDS/, 'met een vangnet-revalidate');
+  assert.match(loader, /overlayTag\(id\)/, 'met een tag per restaurant');
+  assert.match(loader, /cachePerRestaurant/, 'één gecachte functie per restaurant');
+  // Alleen dit restaurant, nooit de hele tabel.
+  assert.match(loader, /overlay\?restaurant=/);
+});
+
+test('BE-58: goedkeuren en bevestigen verversen de publieke pagina\'s via een dependency', () => {
+  const handler = read('src/lib/snelAanpassenHandlers.js');
+  assert.match(handler, /revalidate = null/, 'de dependency is optioneel en testbaar');
+  assert.match(handler, /await verseKaart\(rij\.menu_id, rij\.restaurant_id\)/, 'goedkeuren ververst');
+  assert.match(handler, /await verseKaart\(menuId, restaurantId\)/, 'bevestigen ververst');
+
+  const deps = read('src/lib/snelAanpassenRouteDeps.js');
+  assert.match(deps, /revalidate: maakMenukaartVerversen\(\{ revalidatePath, revalidateTag \}\)/);
+
+  const verversen = require('./menukaartVerversen');
+  assert.deepEqual(verversen.publiekePaden({ menuId: '9-lunch', restaurantId: '9' }), [
+    '/menu/9-lunch',
+    '/restaurant/9',
+  ]);
+});
+
+test('BE-58: afwijzen verandert niets publiek en ververst dus niet', () => {
+  const handler = read('src/lib/snelAanpassenHandlers.js');
+  const afwijzen = handler.slice(handler.indexOf('async function wijsAf'));
+  assert.equal(afwijzen.includes('verseKaart('), false);
+});
