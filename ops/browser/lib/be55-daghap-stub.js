@@ -39,6 +39,24 @@ function be55StubScript({ aanbod = [DAGHAP, SEIZOEN] } = {}) {
   const nativeFetch = window.fetch ? window.fetch.bind(window) : null;
   const aanbod = ${JSON.stringify(aanbod)};
   const gemeld = {};
+  // BE-55 deel 5 (#135) — dezelfde kleine lijst die de zoekroute zou maken:
+  // één restaurant met een daghap, één met een seizoensgerecht.
+  const zoekAanbod = { '6': [{ soort: 'daghap', naam: ${JSON.stringify(DAGHAP.naam)} }], '19': [{ soort: 'seizoensgerecht', naam: ${JSON.stringify(SEIZOEN.naam)} }] };
+  function groep(restaurantId, restaurantName, mealType, dish) {
+    const hit = zoekAanbod[restaurantId];
+    return {
+      restaurantId: restaurantId,
+      restaurantName: restaurantName,
+      menus: [{
+        mealType: mealType,
+        count: 1,
+        menuLink: '/menu/' + restaurantId + '-' + mealType,
+        examples: [{ dishId: restaurantId + '-' + mealType + '-0-0', name: dish.naam, category: 'Hoofdgerechten', weakMatch: false, priceDisplay: dish.prijs, priceOnRequest: false, priceIsFrom: false }],
+      }],
+      ...(hit ? { vandaag: { soort: hit[0].soort, naam: hit[0].naam } } : {}),
+    };
+  }
+  const groepen = [groep('6', 'Brasserie Bardot', 'diner', ${JSON.stringify(DAGHAP)}), groep('23', 'T-Huis', 'lunch', { naam: 'Tomatensoep', prijs: '€ 5,00' })];
   function antwoord(body, status) {
     return Promise.resolve(new Response(JSON.stringify(body), {
       status: status || 200,
@@ -48,6 +66,20 @@ function be55StubScript({ aanbod = [DAGHAP, SEIZOEN] } = {}) {
   window.fetch = async function (input, init) {
     const url = String(typeof input === 'string' ? input : (input && input.url) || '');
     const method = String((init && init.method) || 'GET').toUpperCase();
+    if (url.indexOf('/api/search') !== -1) {
+      const filterAan = url.indexOf('vandaag=1') !== -1;
+      (window.__BE55_ZOEK__ = window.__BE55_ZOEK__ || []).push(url);
+      // De server filtert; de stub doet precies hetzelfde: alleen de treffers.
+      const zichtbaar = filterAan ? groepen.filter((rij) => Boolean(rij.vandaag)) : groepen;
+      return antwoord({ results: [], total: zichtbaar.length, nextCursor: null, hasMore: false, restaurantGroups: zichtbaar });
+    }
+    if (url.indexOf('/api/v1/daghap/vandaag') !== -1) {
+      (window.__BE55_HOME__ = window.__BE55_HOME__ || []).push(url);
+      return antwoord({ ok: true, aanbod: [
+        { ...${JSON.stringify(DAGHAP)}, restaurantId: '6' },
+        { ...${JSON.stringify(SEIZOEN)}, restaurantId: '19' },
+      ] });
+    }
     if (url.indexOf('/api/v1/daghap/publiek') !== -1) {
       const leeg = location.search.indexOf('leeg=1') !== -1;
       window.__BE55_LAATSTE__ = { url: url, methode: method };

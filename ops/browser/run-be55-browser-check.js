@@ -260,10 +260,158 @@ async function meldenScenario(cdp) {
   check('melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is', Boolean(apparaat) && apparaat === (verzonden && verzonden[0] && verzonden[0].apparaat), apparaat);
 }
 
+// BE-55 deel 5 (#135) — het zoekresultaat met het label en het filter "Vandaag".
+const ZOEK_STAAT = `(() => {
+  const kaarten = Array.from(document.querySelectorAll('.dish-group-card'));
+  const knop = document.querySelector('.vandaag-filter-btn');
+  const labels = Array.from(document.querySelectorAll('.vandaag-label'));
+  const eerste = labels[0] || null;
+  const stijl = eerste ? getComputedStyle(eerste) : null;
+  return {
+    thema: document.documentElement.getAttribute('data-theme'),
+    groepen: kaarten.length,
+    koppen: kaarten.map((kaart) => ((kaart.querySelector('.dish-group-restaurant-name') || {}).textContent || '').trim()),
+    labels: labels.map((label) => label.textContent.trim()),
+    labelKleur: stijl ? stijl.color : '',
+    labelAchtergrond: stijl ? stijl.backgroundColor : '',
+    knopTekst: knop ? knop.textContent.trim() : '',
+    knopAan: knop ? knop.getAttribute('aria-pressed') : '',
+    knopSoort: knop ? knop.tagName : '',
+    knopTab: knop ? knop.tabIndex : -1,
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+})()`;
+
+// Het label moet bij de opname echt in het beeld staan, niet alleen bestaan.
+const TOON_ZOEK_LABEL = `(() => {
+  const label = document.querySelector('.vandaag-label');
+  if (!label) return { inBeeld: false, reden: 'geen label' };
+  label.scrollIntoView({ block: 'center', inline: 'nearest' });
+  const kaart = label.closest('.dish-group-card') || label;
+  const r = kaart.getBoundingClientRect();
+  const l = label.getBoundingClientRect();
+  return {
+    inBeeld: r.top < window.innerHeight && r.bottom > 0,
+    labelInBeeld: l.top >= 0 && l.bottom <= window.innerHeight,
+    boven: Math.round(r.top),
+    onder: Math.round(r.bottom),
+    scherm: window.innerHeight,
+  };
+})()`;
+async function zoekenScenario(cdp) {
+  await setViewport(cdp, 1280, 900);
+  await navigate(cdp, `${APP}/search?q=soep`, `Boolean(document.querySelector('.dish-group-card'))`, 120000);
+
+  for (const theme of ['light', 'dark']) {
+    await kiesThema(cdp, theme);
+    for (const width of [1280, 390, 320]) {
+      await setViewport(cdp, width, 900);
+      await navigate(cdp, `${APP}/search?q=soep&vandaag=1`, `Boolean(document.querySelector('.dish-group-card'))`, 120000);
+      const staat = await evalJs(cdp, ZOEK_STAAT);
+      const waar = `${theme}/${width}`;
+
+      check(`zoeken ${waar}: het thema is toegepast`, staat.thema === theme, staat.thema);
+      check(`zoeken ${waar}: alleen de treffer staat er nog`, staat.groepen === 1, staat.groepen);
+      check(`zoeken ${waar}: het label heet "Vandaag · daghap"`, staat.labels.join('|') === 'Vandaag · daghap', staat.labels.join('|'));
+      check(`zoeken ${waar}: het label staat bij de juiste groep`, staat.koppen.join('|') === 'Brasserie Bardot', staat.koppen.join('|'));
+      check(`zoeken ${waar}: de filterknop heet "Vandaag"`, staat.knopTekst === 'Vandaag', staat.knopTekst);
+      check(`zoeken ${waar}: de filterknop staat aan`, staat.knopAan === 'true', staat.knopAan);
+      check(`zoeken ${waar}: de filterknop is een echte knop met toetsenbordfocus`,
+        staat.knopSoort === 'BUTTON' && staat.knopTab === 0, `${staat.knopSoort}/${staat.knopTab}`);
+      check(`zoeken ${waar}: geen horizontale overflow`, staat.overflow <= 0, staat.overflow);
+
+      const contrast = audit.contrastRatio(staat.labelKleur, staat.labelAchtergrond);
+      check(`zoeken ${waar}: het label haalt 4,5:1`, Number(contrast) >= 4.5, contrast);
+
+      const inBeeld = await evalJs(cdp, TOON_ZOEK_LABEL);
+      check(`zoeken ${waar}: het label staat in beeld bij de opname`,
+        inBeeld.inBeeld && inBeeld.labelInBeeld, JSON.stringify(inBeeld));
+
+      await shot(cdp, `be55-zoeken-${width}-${theme}.png`, { theme, state: 'vandaag' });
+    }
+  }
+
+  // Zonder filter: geen label. Eén klik op de knop zet het filter aan en de
+  // zoekvraag gaat met vandaag=1 naar de API.
+  await setViewport(cdp, 390, 900);
+  await navigate(cdp, `${APP}/search?q=soep`, `Boolean(document.querySelector('.dish-group-card'))`, 120000);
+  const voor = await evalJs(cdp, ZOEK_STAAT);
+  check('zoeken: zonder filter twee groepen en geen label', voor.groepen === 2 && voor.labels.length === 0, `${voor.groepen}/${voor.labels.length}`);
+  check('zoeken: de knop staat zonder filter uit', voor.knopAan === 'false', voor.knopAan);
+
+  await evalJs(cdp, `document.querySelector('.vandaag-filter-btn').click()`);
+  const naGezien = await waitFor(
+    cdp,
+    `location.search.indexOf('vandaag=1') !== -1 && document.querySelectorAll('.vandaag-label').length === 1`,
+    20000,
+  );
+  const na = await evalJs(cdp, ZOEK_STAAT);
+  const zoekUrls = await evalJs(cdp, 'window.__BE55_ZOEK__ || []');
+  check('zoeken: de knop zet ?vandaag=1 in de URL', naGezien, naGezien);
+  check('zoeken: na de klik alleen de treffer, met label', na.groepen === 1 && na.labels.length === 1, `${na.groepen}/${na.labels.length}`);
+  check('zoeken: de knop staat dan aan', na.knopAan === 'true', na.knopAan);
+  check('zoeken: de zoekvraag ging met vandaag=1 naar de API',
+    Array.isArray(zoekUrls) && zoekUrls.some((url) => url.indexOf('vandaag=1') !== -1),
+    Array.isArray(zoekUrls) ? zoekUrls[zoekUrls.length - 1] : zoekUrls);
+  await shot(cdp, 'be55-zoeken-filter-aan-390-dark.png', { theme: 'dark', state: 'filter-aan' });
+}
+
+
+
+
 const SCENARIOS = [
   { name: 'vandaag', run: (cdp) => vandaagScenario(cdp) },
   { name: 'melden', run: (cdp) => meldenScenario(cdp) },
+  { name: 'zoeken', run: (cdp) => zoekenScenario(cdp) },
+  { name: 'home', run: (cdp) => homeScenario(cdp) },
 ];
+// "Daghappen vandaag" op de home.
+const HOME_STAAT = `(() => {
+  const sectie = document.querySelector('.daghappen-vandaag');
+  if (!sectie) return { bestaat: false, overflow: document.documentElement.scrollWidth - window.innerWidth };
+  const kaarten = Array.from(sectie.querySelectorAll('.daghappen-vandaag-kaart'));
+  const titel = sectie.querySelector('#daghappen-vandaag-titel');
+  const alle = sectie.querySelector('.daghappen-vandaag-alle');
+  sectie.scrollIntoView({ block: 'center' });
+  const r = sectie.getBoundingClientRect();
+  return {
+    bestaat: true,
+    thema: document.documentElement.getAttribute('data-theme'),
+    titel: titel ? titel.textContent.trim() : '',
+    aantal: kaarten.length,
+    namen: kaarten.map((kaart) => ((kaart.querySelector('.daghappen-vandaag-naam') || {}).textContent || '').trim()),
+    alleHref: alle ? alle.getAttribute('href') : '',
+    aria: sectie.getAttribute('aria-labelledby'),
+    titelId: titel ? titel.id : '',
+    inBeeld: r.top < window.innerHeight && r.bottom > 0,
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+})()`;
+
+async function homeScenario(cdp) {
+  await setViewport(cdp, 1280, 900);
+  await navigate(cdp, `${APP}/`, `Boolean(document.querySelector('.daghappen-vandaag-kaart'))`, 120000);
+  for (const theme of ['light', 'dark']) {
+    await kiesThema(cdp, theme);
+    for (const width of [1280, 390, 320]) {
+      await setViewport(cdp, width, 900);
+      await navigate(cdp, `${APP}/`, `Boolean(document.querySelector('.daghappen-vandaag-kaart'))`, 120000);
+      const staat = await evalJs(cdp, HOME_STAAT);
+      const waar = `${theme}/${width}`;
+
+      check(`home ${waar}: de sectie "Daghappen vandaag" staat er`, staat.bestaat && staat.titel === 'Daghappen vandaag', `${staat.bestaat}/${staat.titel}`);
+      check(`home ${waar}: twee kaarten met naam en prijs`, staat.aantal === 2 && staat.namen.join('|') === `${DAGHAP.naam}|${SEIZOEN.naam}`, `${staat.aantal}/${staat.namen.join('|')}`);
+      check(`home ${waar}: "Alle" gaat naar het filter Vandaag`, staat.alleHref === '/search?vandaag=1', staat.alleHref);
+      check(`home ${waar}: de sectie is gelabeld door zijn kop`, Boolean(staat.titelId) && staat.aria === staat.titelId, `${staat.aria}/${staat.titelId}`);
+      check(`home ${waar}: geen horizontale overflow`, staat.overflow <= 0, staat.overflow);
+      check(`home ${waar}: de sectie staat in beeld bij de opname`, staat.inBeeld, staat.inBeeld);
+
+      await shot(cdp, `be55-home-daghappen-${width}-${theme}.png`, { theme, state: 'daghappen-vandaag' });
+    }
+  }
+}
+
+
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
 
 function evidencePath() {
@@ -327,7 +475,11 @@ async function main() {
       appOrigins: APP_ORIGINS,
       baseUrl: RESTAURANT_URL(),
       // De in-page stub antwoordt zelf; de guard moet de route alleen toestaan.
-      fixtureRoutes: [{ id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET', 'POST'] }],
+      fixtureRoutes: [
+        { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET', 'POST'] },
+        // BE-55 deel 5 (#135): het zoekresultaat met label en filter.
+        { id: 'zoeken', match: 'prefix', path: '/api/search', methods: ['GET'] },
+      ],
     });
     await enableFetchGuard(cdp, guard);
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: be55StubScript() });

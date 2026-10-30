@@ -10,7 +10,7 @@ import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import StatusIcon from '@/src/components/StatusIcon'
-// BE-55 stap B, deel 5 (#135) — eigen opmaak voor het label en het filter
+// BE-55 stap B, deel 5 (issue 135) — eigen opmaak voor het label en het filter
 // "Vandaag" in de zoekresultaten, naast deze pagina (BE-52).
 import './search.css'
 
@@ -110,7 +110,7 @@ function parseFilters(searchParams) {
     excl: (searchParams.get('excl') || '').split(',').filter(Boolean),
     day: searchParams.get('day') || '',
     nowOpen: searchParams.get('nowOpen') === '1',
-    // BE-55 stap B, deel 5 (#135) — het filter "Vandaag": alleen restaurants met
+    // BE-55 stap B, deel 5 (issue 135); het filter "Vandaag": alleen restaurants met
     // een actieve daghap of een actief seizoensgerecht.
     vandaag: searchParams.get('vandaag') === '1',
   }
@@ -530,7 +530,7 @@ function SearchPageInner() {
       <div className="dish-group-list">
         {groups.map((group) => (
           <div key={group.restaurantId} className="menu-card dish-group-card">
-            {/* BE-55 stap B, deel 5 (#135) — het label staat er alleen als de
+            {/* BE-55 stap B, deel 5 (issue 135); het label staat er alleen als de
                 zoekroute dit restaurant als treffer teruggaf (group.vandaag).
                 Geen aanbod betekent geen label, geen lege plek. Het label staat
                 naast de kop, niet erin: de kop blijft precies de naam. */}
@@ -714,7 +714,7 @@ function SearchPageInner() {
             <StatusIcon name="clock" size={14} className="now-open-icon" />
             Nu open
           </button>
-          {/* BE-55 stap B, deel 5 (#135) — het filter "Vandaag". Zelfde vorm als
+          {/* BE-55 stap B, deel 5 (issue 135); het filter "Vandaag". Zelfde vorm als
               "Nu open": één knop, met dezelfde actieve stand en aria-pressed. */}
           <button
             type="button"
