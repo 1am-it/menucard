@@ -80,7 +80,14 @@ async function startServer({ port, appUrl, outputDir, readyPath }) {
   // BE-31 (#74): the old batch page address answers with a 308, so the default
   // ready path is the login route (always 200, no auth) and a check can name its
   // own path instead.
-  await waitForHttp(`${appUrl}${readyPath || '/internal/login'}`, 120000);
+  // BE-51 (#121): a server that never becomes reachable must not leave its
+  // process (and the check reading its pipes) behind for ever.
+  try {
+    await waitForHttp(`${appUrl}${readyPath || '/internal/login'}`, 120000);
+  } catch (error) {
+    killTree(child);
+    throw error;
+  }
   return child;
 }
 

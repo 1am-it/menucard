@@ -57,7 +57,8 @@ const audit = require('./lib/a11y-audit');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const PORT = Number(process.env.BE51_PORT || 3170);
-const APP = `http://localhost:${PORT}`;
+// BE-51: de app-URL volgt de gekozen poort (zie PORT_ARG), anders start de check
+// zijn server op de ene poort en wacht hij op de andere.
 const OUT_DIR = path.join(REPO_ROOT, 'ops', 'browser', 'output', 'be-51');
 // De kleine focusopnamen horen bij de levering en staan daarom in git.
 const EVIDENCE_DIR = path.join(REPO_ROOT, 'ops', 'browser', 'evidence', 'a11y-public');
@@ -163,6 +164,8 @@ function argValue(name, fallback) {
 const PHASE = argValue('--fase', 'na');
 const THEME_ARG = argValue('--thema', 'beide');
 const PORT_ARG = Number(argValue('--poort', PORT));
+// Dezelfde poort voor de server en voor de pagina's die de check opent.
+const APP = `http://localhost:${PORT_ARG}`;
 
 const WIDTHS = [
   { name: 'desktop', width: 1280, height: 900 },
