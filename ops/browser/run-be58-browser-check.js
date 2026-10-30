@@ -109,20 +109,38 @@ async function setViewport(width, height) {
 // de check zelf zet: zo doet de bezoeker het ook.
 async function chooseTheme(theme) {
   const label = theme === 'dark' ? 'Donker' : 'Licht';
-  const clicked = await evalJs(
-    cdp,
-    `(() => {
-      const knoppen = Array.from(document.querySelectorAll('.theme-switch button'));
-      const knop = knoppen.filter((el) => (el.innerText || '').trim() === ${JSON.stringify(label)})[0];
-      if (!knop) return false;
-      knop.click();
-      return true;
-    })()`,
-  );
-  if (!clicked) return false;
-  await waitFor(cdp, `document.documentElement.getAttribute('data-theme') === ${JSON.stringify(theme)}`, 8000);
-  await new Promise((resolve) => setTimeout(resolve, 120));
-  return (await evalJs(cdp, 'document.documentElement.getAttribute("data-theme")')) === theme;
+  const klik = (naam) => `(() => {
+      function zichtbaar(el) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return false;
+        const stijl = getComputedStyle(el);
+        return stijl.visibility !== 'hidden' && stijl.display !== 'none';
+      }
+      const knoppen = Array.from(document.querySelectorAll('.theme-switch button'))
+        .filter((el) => (el.innerText || '').trim() === ${JSON.stringify(naam)});
+      const doel = knoppen.filter(zichtbaar)[0];
+      if (doel) {
+        doel.click();
+        return 'geklikt';
+      }
+      // Op een smal scherm zit de themaknop in het menu van de navigatie; dat
+      // opent de bezoeker ook eerst.
+      const trigger = Array.from(document.querySelectorAll('nav button[aria-expanded="false"]'))[0];
+      if (!trigger) return 'geen-knop';
+      trigger.click();
+      return 'menu-geopend';
+    })()`;
+  for (let poging = 0; poging < 3; poging += 1) {
+    const resultaat = await evalJs(cdp, klik(label));
+    if (resultaat === 'geklikt') {
+      await waitFor(cdp, `document.documentElement.getAttribute('data-theme') === ${JSON.stringify(theme)}`, 8000);
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      return (await evalJs(cdp, 'document.documentElement.getAttribute("data-theme")')) === theme;
+    }
+    if (resultaat === 'geen-knop') return false;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+  return false;
 }
 
 async function installStub(options) {
@@ -136,14 +154,21 @@ async function installStub(options) {
   stubScriptId = result.identifier || null;
 }
 
-// De stand van de fictieve server terug naar de beginstand: de stub bewaart
-// zijn stand in sessionStorage, dus die sleutel weg en de pagina verversen.
-async function resetStubState(readyExpression) {
-  await evalJs(cdp, `(() => { try { sessionStorage.removeItem('be58-state'); } catch (error) {} return true; })()`);
-  await cdp.send('Page.reload');
-  const ready = await waitFor(cdp, readyExpression, 45000);
-  if (!ready) throw new Error('page_not_ready_after_reload');
-  await new Promise((resolve) => setTimeout(resolve, 250));
+// De stand van de fictieve server terug naar de beginstand. Dit gebeurt vóór de
+// nieuwe navigatie: de stub bewaart zijn stand in sessionStorage, dus een nieuw
+// document leest daarna precies de beginstand en nooit de oude.
+async function clearStubState() {
+  await evalJs(
+    cdp,
+    `(() => {
+      if (window.__BE58__ && window.__BE58__.clear) {
+        window.__BE58__.clear();
+        return true;
+      }
+      try { sessionStorage.removeItem('be58-state'); } catch (error) {}
+      return true;
+    })()`,
+  );
 }
 
 // Het hele onderdeel op de opname: de uitsnede loopt van de bovenkant van het
@@ -234,15 +259,42 @@ async function a11y(label, theme) {
 
 const OWNER_READY = `document.querySelector('.mk-card') !== null`;
 
+// De eerste navigatie naar een route in `next dev` en de tweede kunnen even op
+// zich laten wachten (compileren, hydrateren). Eén herkansing met een korte
+// eerste wachttijd houdt de check snel en de meting eerlijk: pas als het scherm
+// er echt staat, wordt er gemeten.
+async function gotoPage(url, readyExpression) {
+  for (let poging = 1; poging <= 2; poging += 1) {
+    await cdp.send('Page.navigate', { url });
+    const klaar = await waitFor(
+      cdp,
+      `document.readyState !== 'loading' && (${readyExpression})`,
+      poging === 1 ? 20000 : 45000,
+    );
+    if (klaar) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      return true;
+    }
+  }
+  const staart = await evalJs(
+    cdp,
+    `(() => {
+      const opslag = (() => { try { return Boolean(localStorage.getItem('sb-127-auth-token')); } catch (error) { return null; } })();
+      return JSON.stringify({ pad: location.pathname, sessie: opslag, tekst: document.body ? document.body.innerText.slice(-500) : '' });
+    })()`,
+  );
+  throw new Error(`page_not_ready: ${url}\n${staart}`);
+}
+
 async function openOwner() {
   await installStub({ roles: [{ role: 'owner', restaurant_id: RESTAURANT_ID }] });
-  await navigate(cdp, OWNER_URL, OWNER_READY);
+  await gotoPage(OWNER_URL, OWNER_READY);
 }
 
 async function openOwnerFresh(theme, size) {
   await setViewport(size.width, size.height);
+  await clearStubState();
   await openOwner();
-  await resetStubState(OWNER_READY);
   const themed = await chooseTheme(theme);
   add(`houder (${theme}/${size.name}): thema via de themaknop van de app`, themed, `data-theme=${theme}`);
   return themed;
@@ -436,13 +488,13 @@ const INTERNAL_READY = `document.querySelector('.mw-card') !== null`;
 
 async function openIntern() {
   await installStub({ roles: [{ role: 'internal', restaurant_id: null }] });
-  await navigate(cdp, INTERNAL_URL, INTERNAL_READY);
+  await gotoPage(INTERNAL_URL, INTERNAL_READY);
 }
 
 async function openInternFresh(theme, size) {
   await setViewport(size.width, size.height);
+  await clearStubState();
   await openIntern();
-  await resetStubState(INTERNAL_READY);
   const themed = await chooseTheme(theme);
   add(`intern (${theme}/${size.name}): thema via de themaknop van de app`, themed, `data-theme=${theme}`);
   return themed;
@@ -582,7 +634,7 @@ async function runIntern() {
 
   // 5. Toetsenbord en focus, op de werkvoorraad.
   await openInternFresh('light', WIDTHS[0]);
-  await focusWalk('intern', ['Goedkeuren', 'Afwijzen', 'Terug naar']);
+  await focusWalk('intern', ['Te beoordelen', 'Goedkeuren', 'Afwijzen']);
 
   // 6. De a11y-check op deze pagina, in licht en donker.
   for (const theme of THEMES) {
