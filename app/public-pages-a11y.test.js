@@ -97,6 +97,6 @@ test('de menukaart heeft echte navigatiegebieden in plaats van losse divs', () =
 
 test('Mijn lijstje heeft een nav-landmark voor de terugweg', () => {
   const source = read('app/mijn-lijstje/MijnLijstjeView.js');
-  assert.match(source, /<nav className="lijst-back" aria-label="Terug">\s*<Link href="\/" className="back-btn">/);
+  assert.match(source, /<nav className="lijst-back" aria-label="Terug">\s*<Link href="\/" className="back-btn"( prefetch=\{false\})?>/);
   assert.match(be51Block(), /\.lijst-back \{ display: flex; \}/);
 });
