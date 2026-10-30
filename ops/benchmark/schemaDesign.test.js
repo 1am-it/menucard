@@ -102,6 +102,9 @@ test('the v2 design adds no database migration in this branch', () => {
     '0020_be25_menu_structure_reviews.sql',
     '0021_be44_dish_counters.sql',
     '0022_be46_samen_kiezen.sql',
+    // BE-55 (#135) daghap en BE-57 (#139) bekeken: geen v2/productopslag.
+    '0023_be55_daghap.sql',
+    '0024_be57_bekeken.sql',
   ]);
   for (const name of later) {
     const source = fs.readFileSync(path.join(MIGRATIONS, name), 'utf8');
