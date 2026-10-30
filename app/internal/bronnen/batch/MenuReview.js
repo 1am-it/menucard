@@ -76,7 +76,7 @@ export function ConceptStructure({ captured, rename, idPrefix = 'mcr-structure' 
               {plural(capsTargets.length, 'kopje staat', 'kopjes staan')} geheel in hoofdletters.{' '}
               <button type="button" className="stg-btn-secondary bta-btn mcr-structure-btn" onClick={normaliseAll}>
                 Normale hoofdletters
-                <span className="bta-sr-only"> voor {plural(capsTargets.length, 'dit kopje', 'deze kopjes')}</span>
+                <span className="bta-sr-only"> voor {capsTargets.length === 1 ? 'dit kopje' : 'deze kopjes'}</span>
               </button>
             </p>
           )}

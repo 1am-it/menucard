@@ -61,15 +61,28 @@ const NEW_ID = fixtures.RENAME_IDS.v2;
 const STORAGE_KEY = 'be53-version-posts';
 const EMPTY_NAME_MESSAGE = 'Vul een naam voor dit menukopje in.';
 const UNCHANGED_NAME_MESSAGE = 'Dit is al de naam van dit menukopje.';
+// BE-53 deel 2: the second fictional concept, with a shared opening and kopjes
+// in capitals (contract points 5-7).
+const BATCH_OLD_ID = fixtures.BATCH_IDS.v1;
+const BATCH_NEW_ID = fixtures.BATCH_IDS.v2;
+const BATCH_PREFIX = fixtures.BATCH_PREFIX.trim();
+const BATCH_QUICK = fixtures.BATCH_QUICK;
 
-// De bestaande regels plus precies één fictieve schrijfroute, alleen voor dit
-// fictieve concept-id. De gedeelde standaardlijst blijft ongewijzigd.
+// De bestaande regels plus precies één fictieve schrijfroute per fictief
+// concept, alleen voor die concept-id's. De gedeelde standaardlijst blijft
+// ongewijzigd.
 const FIXTURE_ROUTES = [
   ...FIXTURE_API_ROUTES,
   {
     id: 'menu-concepts-versions',
     match: 'exact',
     path: `/api/internal/v1/menu-concepts/${OLD_ID}/versions`,
+    methods: ['POST'],
+  },
+  {
+    id: 'menu-concepts-versions',
+    match: 'exact',
+    path: `/api/internal/v1/menu-concepts/${BATCH_OLD_ID}/versions`,
     methods: ['POST'],
   },
 ];
@@ -137,8 +150,17 @@ const STATE_JS = `(() => {
   return {
     theme: document.documentElement.getAttribute('data-theme'),
     rows: [...document.querySelectorAll('.bta-structure li')].map((li) => (li.innerText || '').trim()),
+    headings: [...document.querySelectorAll('.bta-structure li')].map((li) => {
+      const heading = li.querySelector('.bta-dish');
+      // The card shows "Menukaart › <kopje>"; only the kopje name is compared.
+      return heading ? (heading.innerText || '').trim().split(' › ').pop().trim() : '';
+    }),
     renameButtons: document.querySelectorAll('.mcr-rename-open').length,
     undoButtons: [...document.querySelectorAll('.bta-structure button')].filter((b) => (b.innerText || '').includes('Ongedaan maken')).length,
+    hints: [...document.querySelectorAll('.mcr-structure-hint')].map((p) => (p.innerText || '').trim()),
+    structureButtons: [...document.querySelectorAll('.mcr-structure-hints button')].map((b) => (b.innerText || '').trim().split('\\n')[0].trim()),
+    batchError: (document.querySelector('.mcr-batch-error') || {}).innerText || null,
+    presets: [...document.querySelectorAll('.mcr-rename-preset')].map((b) => (b.innerText || '').trim()),
     fieldOpen: Boolean(form),
     label: input && input.labels && input.labels.length > 0 ? input.labels[0].innerText.trim() : null,
     value: input ? input.value : null,
@@ -199,12 +221,12 @@ async function selectAll(cdp) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function navigateToNewVersion(cdp) {
+async function navigateToNewVersion(cdp, id = NEW_ID) {
   const deadline = Date.now() + 20000;
   while (Date.now() < deadline) {
     const url = await evalJs(cdp, 'location.pathname');
     const version = await evalJs(cdp, '(document.body.innerText.match(/conceptversie (\\d+)/) || [])[1] || null');
-    if (url && url.includes(NEW_ID) && version === '2') {
+    if (url && url.includes(id) && version === '2') {
       await sleep(250);
       return true;
     }
@@ -359,6 +381,192 @@ async function newVersionScenario(cdp) {
 }
 
 
+/**
+ * BE-53 deel 2 — one round on one theme/width for the repeated changes: remove
+ * the shared opening, normalise the capitals, pick a standard name, undo one
+ * kopje on its own and save version 2.
+ */
+async function batchRound(cdp, { theme, width }) {
+  const label = `${width}px/${theme} hulp`;
+  await setViewport(cdp, width);
+  await navigate(
+    cdp,
+    conceptUrl({ id: BATCH_OLD_ID, theme }),
+    'document.body.innerText.includes("Beoordeel menuconcept") && Boolean(document.querySelector(".mcr-page"))'
+  );
+  const opened = await openStructure(cdp);
+  const before = await state(cdp);
+  check(`BE-53 ${label}: de Structuur-lijst toont de drie kopjes`, opened && before.rows.length === 3, `${opened} ${JSON.stringify(before.rows)}`);
+  check(
+    `BE-53 ${label}: één voorstel voor het gedeelde voorvoegsel`,
+    before.hints.some((hint) => hint.includes(`2 kopjes beginnen met "${BATCH_PREFIX}". Weghalen?`)),
+    JSON.stringify(before.hints)
+  );
+  check(
+    `BE-53 ${label}: de knoppen Weghalen en Normale hoofdletters staan klaar`,
+    before.structureButtons.includes('Weghalen') && before.structureButtons.includes('Normale hoofdletters'),
+    JSON.stringify(before.structureButtons)
+  );
+  check(`BE-53 ${label}: geen horizontale overloop met de hulpknoppen`, before.overflow <= 0, String(before.overflow));
+
+  // Keyboard: focus "Weghalen" and press Enter — both kopjes lose the opening.
+  const focused = await focusByText(cdp, '.mcr-structure-btn', 'Weghalen');
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  await sleep(300);
+  const shortened = await state(cdp);
+  check(
+    `BE-53 ${label}: Weghalen is met het toetsenbord te bedienen`,
+    focused && shortened.headings.includes('HOOFD') && shortened.headings.includes('DESSERT'),
+    JSON.stringify(shortened.headings)
+  );
+  check(
+    `BE-53 ${label}: na Weghalen is het voorvoegsel weg bij beide kopjes`,
+    !shortened.headings.some((heading) => heading.includes(BATCH_PREFIX)),
+    JSON.stringify(shortened.headings)
+  );
+  check(`BE-53 ${label}: elk ingekort kopje is los ongedaan te maken`, shortened.undoButtons === 2, String(shortened.undoButtons));
+  check(`BE-53 ${label}: geen foutmelding bij het weghalen`, shortened.batchError === null, String(shortened.batchError));
+
+  // "Normale hoofdletters" turns every all-capitals kopje into a normal name.
+  await evalJs(
+    cdp,
+    `[...document.querySelectorAll('.mcr-structure-btn')].find((b) => (b.innerText || '').includes('Normale hoofdletters')).click()`
+  );
+  await sleep(300);
+  const normal = await state(cdp);
+  check(
+    `BE-53 ${label}: Normale hoofdletters maakt Hoofd, Dessert en Voor`,
+    JSON.stringify(normal.headings) === JSON.stringify(['Hoofd', 'Dessert', 'Voor']),
+    JSON.stringify(normal.headings)
+  );
+  check(
+    `BE-53 ${label}: de knop Normale hoofdletters verdwijnt als er geen kopje meer in hoofdletters staat`,
+    !normal.structureButtons.includes('Normale hoofdletters') && !normal.hints.some((hint) => hint.includes('hoofdletters')),
+    JSON.stringify([normal.structureButtons, normal.hints])
+  );
+  check(`BE-53 ${label}: de drie kopjes zijn los ongedaan te maken`, normal.undoButtons === 3, String(normal.undoButtons));
+
+  // A quick pick fills the field; saving it stays a separate click.
+  await evalJs(cdp, '[...document.querySelectorAll(".mcr-rename-open")][0].click()');
+  await sleep(200);
+  const openField = await state(cdp);
+  check(
+    `BE-53 ${label}: het tekstveld biedt de negen standaardnamen als snelkeuze`,
+    openField.presets.length === 9 && openField.presets.includes(BATCH_QUICK),
+    JSON.stringify(openField.presets)
+  );
+  await evalJs(cdp, `[...document.querySelectorAll('.mcr-rename-preset')].find((b) => (b.innerText || '').trim() === ${escapeJs(BATCH_QUICK)}).click()`);
+  await sleep(150);
+  const picked = await state(cdp);
+  check(`BE-53 ${label}: een snelkeuze vult het tekstveld met de standaardnaam`, picked.value === BATCH_QUICK, JSON.stringify(picked.value));
+  check(`BE-53 ${label}: het veld houdt zijn label bij een snelkeuze`, picked.label === 'Nieuwe naam voor dit menukopje', JSON.stringify(picked.label));
+  await evalJs(
+    cdp,
+    `[...document.querySelectorAll('.mcr-rename button')].find((b) => (b.innerText || '').includes('Opslaan in deze correctie')).click()`
+  );
+  await sleep(300);
+  const renamed = await state(cdp);
+  check(`BE-53 ${label}: de snelkeuze staat als nieuwe kopjesnaam in de lijst`, renamed.headings.includes(BATCH_QUICK), JSON.stringify(renamed.headings));
+  check(`BE-53 ${label}: de correctie telt mee voor "Correcties opslaan als versie 2"`, Boolean(renamed.saveVersionButton && renamed.saveVersionButton.text === 'Correcties opslaan als versie 2'), JSON.stringify(renamed.saveVersionButton));
+  const shotBatch = await shot(cdp, `be53-hulp-${width}-${theme}.png`);
+
+  // Undo stays per kopje: undoing the first one restores only its stored name.
+  await focusByText(cdp, '.bta-structure button', 'Ongedaan maken');
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  await sleep(300);
+  const undone = await state(cdp);
+  check(
+    `BE-53 ${label}: Ongedaan maken raakt alleen dat ene kopje`,
+    undone.headings[0] === fixtures.BATCH_SECTION_A &&
+      undone.headings.includes('Dessert') &&
+      undone.headings.includes('Voor') &&
+      !undone.headings.includes(BATCH_QUICK),
+    JSON.stringify(undone.headings)
+  );
+  check(`BE-53 ${label}: de twee andere kopjes houden hun Ongedaan maken`, undone.undoButtons === 2, String(undone.undoButtons));
+
+  // Pick the standard name again on that kopje and save the correction.
+  await evalJs(cdp, '[...document.querySelectorAll(".mcr-rename-open")][0].click()');
+  await sleep(200);
+  await evalJs(cdp, `[...document.querySelectorAll('.mcr-rename-preset')].find((b) => (b.innerText || '').trim() === ${escapeJs(BATCH_QUICK)}).click()`);
+  await sleep(150);
+  await evalJs(
+    cdp,
+    `[...document.querySelectorAll('.mcr-rename button')].find((b) => (b.innerText || '').includes('Opslaan in deze correctie')).click()`
+  );
+  await sleep(300);
+  const again = await state(cdp);
+  check(
+    `BE-53 ${label}: opnieuw kiezen en opslaan werkt`,
+    again.headings.includes(BATCH_QUICK) && again.undoButtons === 3,
+    JSON.stringify([again.headings, again.undoButtons])
+  );
+
+  await evalJs(
+    cdp,
+    `[...document.querySelectorAll('button')].find((b) => (b.innerText || '').includes('Correcties opslaan als versie 2')).click()`
+  );
+  const navigated = await navigateToNewVersion(cdp, BATCH_NEW_ID);
+  const saved = await state(cdp);
+  check(`BE-53 ${label}: "Correcties opslaan als versie 2" opent de nieuwe versie 2`, navigated && saved.version === '2', JSON.stringify([navigated, saved.version]));
+  return { shot: shotBatch, theme, width };
+}
+
+/** Version 2 of the second concept shows all three new kopjesnamen. */
+async function batchVersionScenario(cdp) {
+  await setViewport(cdp, 1280);
+  await openStructure(cdp);
+  const structure = await state(cdp);
+  check(
+    'BE-53 versie 2 hulp: de Structuur-lijst toont de drie nieuwe kopjesnamen',
+    JSON.stringify(structure.headings) === JSON.stringify([BATCH_QUICK, 'Dessert', 'Voor']),
+    JSON.stringify(structure.headings)
+  );
+  check(
+    'BE-53 versie 2 hulp: het oude voorvoegsel staat niet meer in de Structuur-lijst',
+    !structure.headings.some((heading) => heading.includes(BATCH_PREFIX)) && !structure.headings.includes('VOOR'),
+    JSON.stringify(structure.headings)
+  );
+  await evalJs(
+    cdp,
+    `(() => {
+      const button = [...document.querySelectorAll('[role=tab]')].find((tab) => (tab.innerText || '').includes('Publicatievoorbeeld'));
+      if (!button) return false;
+      button.click();
+      return true;
+    })()`
+  );
+  await sleep(300);
+  const preview = await evalJs(
+    cdp,
+    `(() => {
+      const panel = document.getElementById('mcr-${BATCH_NEW_ID}-panel-preview');
+      return {
+        shown: Boolean(panel && !panel.hidden),
+        text: panel ? panel.innerText : '',
+        headings: panel ? [...panel.querySelectorAll('h2, h3, h4')].map((h) => (h.innerText || '').trim()) : [],
+      };
+    })()`
+  );
+  const previewText = String(preview.text || '');
+  const previewUpper = previewText.toUpperCase();
+  check(
+    'BE-53 versie 2 hulp: het Publicatievoorbeeld toont de nieuwe kopjesnaam',
+    preview.shown && previewUpper.includes(BATCH_QUICK.toUpperCase()),
+    previewText.slice(0, 240)
+  );
+  // The public renderer sets headings in capitals, so the old headings are
+  // compared by their full text: neither the shared opening nor the old name of
+  // the second kopje may survive in the preview of version 2.
+  check(
+    'BE-53 versie 2 hulp: het Publicatievoorbeeld toont het oude voorvoegsel niet meer',
+    preview.shown && !previewUpper.includes(BATCH_PREFIX.toUpperCase()) && !previewUpper.includes(fixtures.BATCH_SECTION_B.toUpperCase()),
+    previewText.slice(0, 240)
+  );
+  return { shot: await shot(cdp, 'be53-hulp-versie-2-1280.png') };
+}
+
+
 /** What the browser really posted to the existing versions route. */
 async function postedEdits(cdp) {
   const raw = await evalJs(cdp, `window.localStorage.getItem(${escapeJs(STORAGE_KEY)}) || '[]'`);
@@ -403,7 +611,41 @@ async function renameScenario(cdp) {
   shots.push(version2.shot);
   const finalState = await state(cdp);
   check('BE-53 versie 2: geen horizontale overloop op 1280 px', finalState.overflow <= 0, String(finalState.overflow));
-  return { shots, posts: posts.length };
+
+  // BE-53 deel 2 (#130): the repeated changes on the second fictional concept,
+  // per theme and width, with the same kind of save.
+  for (const theme of THEMES) {
+    for (const width of WIDTHS) {
+      const round = await batchRound(cdp, { theme, width });
+      shots.push(round.shot);
+    }
+  }
+  const allPosts = await postedEdits(cdp);
+  const batchPosts = allPosts.slice(posts.length);
+  check(
+    'BE-53 hulp opslaan: elke hulp-ronde postte precies één nieuwe versie',
+    batchPosts.length === THEMES.length * WIDTHS.length,
+    JSON.stringify(batchPosts.map((post) => post.expectedVersion))
+  );
+  const batchPaths = batchPosts.map((post) => {
+    const lines = (post.edits && post.edits.lines) || {};
+    const pairs = Object.entries(lines)
+      .filter(([, edit]) => edit && Array.isArray(edit.path))
+      .map(([id, edit]) => [id, edit.path.join(' › ')]);
+    return Object.fromEntries(pairs.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)));
+  });
+  const expectedPaths = { '0.0.0': BATCH_QUICK, '0.0.1': BATCH_QUICK, '0.1.0': 'Dessert', '0.2.0': 'Voor' };
+  check(
+    'BE-53 hulp opslaan: de post bevat voor elk gerecht het nieuwe kopje als bestaand path-veld',
+    batchPaths.length === batchPosts.length && batchPaths.every((paths) => JSON.stringify(paths) === JSON.stringify(expectedPaths)),
+    JSON.stringify(batchPaths)
+  );
+
+  const batchVersion = await batchVersionScenario(cdp);
+  shots.push(batchVersion.shot);
+  const batchFinal = await state(cdp);
+  check('BE-53 hulp versie 2: geen horizontale overloop op 1280 px', batchFinal.overflow <= 0, String(batchFinal.overflow));
+  return { shots, posts: allPosts.length };
 }
 
 function head() {

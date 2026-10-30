@@ -400,7 +400,7 @@ function fixtureBootstrap(scenarios, options = {}) {
         // scenario answers with its new version; the posted edits are kept in
         // localStorage so the browser check can prove what was really sent.
         const scenario = fixtures[fixture];
-        if (!scenario || !scenario.versionResponse) return jsonResponse({ error: 'Fictief versiescenario ontbreekt.' }, 500);
+        if (!scenario || (!scenario.versionResponse && !scenario.versionResponses)) return jsonResponse({ error: 'Fictief versiescenario ontbreekt.' }, 500);
         try {
           const posted = verdict.body ? JSON.parse(verdict.body) : null;
           const storageKey = 'be53-version-posts';
@@ -410,7 +410,16 @@ function fixtureBootstrap(scenarios, options = {}) {
         } catch (ignored) {
           // An unreadable request body is not evidence; the check reports it.
         }
-        return jsonResponse(scenario.versionResponse, 201);
+        // A scenario may hold more than one fictional concept; the answer then
+        // comes from versionResponses, keyed by the concept id in the real
+        // request path. A single-concept scenario keeps its one answer.
+        const prefix = '/api/internal/v1/menu-concepts/';
+        let conceptId = decodeURIComponent(new URL(verdict.url).pathname.slice(prefix.length));
+        if (conceptId.slice(-9) === '/versions') conceptId = conceptId.slice(0, -9);
+        const byId = scenario.versionResponses || {};
+        const answer = byId[conceptId] || scenario.versionResponse;
+        if (!answer) return jsonResponse({ error: 'Fictief versieantwoord ontbreekt.' }, 500);
+        return jsonResponse(answer, 201);
       }
       return jsonResponse({ error: 'fixture route not implemented' }, 500);
     }

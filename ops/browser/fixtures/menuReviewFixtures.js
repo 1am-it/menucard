@@ -6,7 +6,7 @@
 // browser sees the same shapes the server sends. No production data, identity,
 // credential or URL is used; every URL is on the .invalid TLD.
 
-const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines, renameSectionEdits } = require('../../../src/lib/menuConcept');
+const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines, renameSectionEdits, renameSectionsEdits } = require('../../../src/lib/menuConcept');
 const { uncertainSections } = require('../../../src/lib/menuStructureReview');
 const {
   adviceRecord,
@@ -1045,6 +1045,100 @@ const publicationDetails = {
   }),
 };
 
+// ─── BE-53 deel 2 (#130) — hulp bij herhaalde wijzigingen ───────────────────
+// One fictional concept where two kopjes repeat the same opening and one kopje
+// is written entirely in capitals. Version 2 is built with the same pure rules
+// the screen uses (prefix removal, normal capitals, one quick pick), so the
+// stub can never answer with a shape the product does not produce.
+const BATCH_IDS = { v1: 'concept-be53-0200', v2: 'concept-be53-0201' };
+const BATCH_RESTAURANT = 'Fictief Concept Herhaling';
+const BATCH_PREFIX = 'PROEF HET BESTE VAN HET SEIZOEN — ';
+const BATCH_SECTION_A = `${BATCH_PREFIX}HOOFD`;
+const BATCH_SECTION_B = `${BATCH_PREFIX}DESSERT`;
+const BATCH_SECTION_C = 'VOOR';
+const BATCH_QUICK = 'Hoofdgerechten';
+const BATCH_SOURCE = 'https://fictief-herhaling.invalid/menukaart';
+
+const batchMenus = [
+  {
+    title: 'Menukaart',
+    categories: [
+      {
+        name: BATCH_SECTION_A,
+        path: [BATCH_SECTION_A],
+        sourcePath: ['PROEF HET BESTE VAN HET SEIZOEN', 'HOOFD'],
+        items: [
+          { name: 'Fictieve kabeljauw', desc: 'Fictief, met prei', price: '23,50' },
+          { name: 'Fictieve eend', price: '27,00' },
+        ],
+      },
+      {
+        name: BATCH_SECTION_B,
+        path: [BATCH_SECTION_B],
+        sourcePath: ['PROEF HET BESTE VAN HET SEIZOEN', 'DESSERT'],
+        items: [{ name: 'Fictieve sorbet', price: '7,50' }],
+      },
+      { name: BATCH_SECTION_C, path: [BATCH_SECTION_C], sourcePath: ['VOOR'], items: [{ name: 'Fictieve olijven', price: '4,50' }] },
+    ],
+  },
+];
+const batchV1Concept = buildMenuConcept({ menus: batchMenus, liveLines: [], edits: {} });
+
+/** The edits the reviewer makes in this scenario, in the order the screen offers
+ *  them: the shared opening, then normal capitals, then one quick pick. */
+function batchCorrectionEdits() {
+  const steps = [
+    [
+      { path: [BATCH_SECTION_A], name: 'HOOFD' },
+      { path: [BATCH_SECTION_B], name: 'DESSERT' },
+    ],
+    [
+      { path: ['HOOFD'], name: 'Hoofd' },
+      { path: ['DESSERT'], name: 'Dessert' },
+      { path: [BATCH_SECTION_C], name: 'Voor' },
+    ],
+    [{ path: ['Hoofd'], name: BATCH_QUICK }],
+  ];
+  let lines = batchV1Concept.lines;
+  let edits = { lines: {} };
+  for (const step of steps) {
+    const result = renameSectionsEdits(lines, step);
+    edits = { lines: { ...edits.lines, ...result.edits.lines } };
+    lines = buildMenuConcept({ menus: batchMenus, liveLines: [], edits }).lines;
+  }
+  return edits;
+}
+const batchV2Concept = buildMenuConcept({ menus: batchMenus, liveLines: [], edits: batchCorrectionEdits() });
+
+function batchDetail({ id, version, content, history }) {
+  const base = conceptDetail({
+    id,
+    key: 'v1',
+    name: BATCH_RESTAURANT,
+    captured: content,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+    sourceUrl: BATCH_SOURCE,
+    preview: { concept: { key: 'be53-herhaling', entry: { title: 'Lunch', categories: content.categories } }, current: [] },
+  });
+  return {
+    ...base,
+    concept: { ...base.concept, version, latestVersion: version, latestId: id, sourceUrl: BATCH_SOURCE },
+    history,
+  };
+}
+
+const BATCH_HISTORY_V1 = {
+  id: BATCH_IDS.v1,
+  version: 1,
+  createdAt: '2026-10-29T10:00:00.000Z',
+  createdBySelf: true,
+  basedOnVersion: null,
+  status: 'waiting',
+  reviews: [],
+};
+
 // ─── BE-53 (#130) — menukopje wijzigen ──────────────────────────────────────
 // One fictional concept in exactly the situation of the issue: a menukopje
 // that reads like a sentence instead of "Hoofdgerechten". Both versions are
@@ -1120,6 +1214,14 @@ const renameScenario = {
         readOnly: false,
         schemaVersion: null,
       }),
+      conceptRow({
+        id: BATCH_IDS.v1,
+        key: 'v1',
+        name: BATCH_RESTAURANT,
+        counts: { dishCount: batchV1Concept.lines.length, attentionCount: 0, blockerCount: 0 },
+        readOnly: false,
+        schemaVersion: null,
+      }),
     ],
   },
   detail: {
@@ -1130,9 +1232,22 @@ const renameScenario = {
       content: renameV2Concept.content,
       history: [{ ...RENAME_HISTORY_V1, id: RENAME_IDS.v2, version: 2, basedOnVersion: 1, createdAt: '2026-10-29T09:05:00.000Z' }, RENAME_HISTORY_V1],
     }),
+    [BATCH_IDS.v1]: batchDetail({ id: BATCH_IDS.v1, version: 1, content: batchV1Concept.content, history: [BATCH_HISTORY_V1] }),
+    [BATCH_IDS.v2]: batchDetail({
+      id: BATCH_IDS.v2,
+      version: 2,
+      content: batchV2Concept.content,
+      history: [{ ...BATCH_HISTORY_V1, id: BATCH_IDS.v2, version: 2, basedOnVersion: 1, createdAt: '2026-10-29T10:05:00.000Z' }, BATCH_HISTORY_V1],
+    }),
   },
   // The real POST …/<id>/versions answers 201 with the new version's identity.
+  // Two fictional concepts share this scenario, so the answer is keyed by the
+  // concept that was really posted to; the first one stays the default.
   versionResponse: { concept: { id: RENAME_IDS.v2, version: 2, unchanged: false } },
+  versionResponses: {
+    [RENAME_IDS.v1]: { concept: { id: RENAME_IDS.v2, version: 2, unchanged: false } },
+    [BATCH_IDS.v1]: { concept: { id: BATCH_IDS.v2, version: 2, unchanged: false } },
+  },
 };
 
 const conceptScenarios = {
@@ -1188,6 +1303,14 @@ module.exports = {
   RENAME_SECTION,
   RENAME_NEW,
   renameScenario,
+  BATCH_IDS,
+  BATCH_RESTAURANT,
+  BATCH_PREFIX,
+  BATCH_SECTION_A,
+  BATCH_SECTION_B,
+  BATCH_SECTION_C,
+  BATCH_QUICK,
+  batchScenario: renameScenario,
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),
