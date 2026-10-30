@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-30T10:11:01.092Z",
+  "generatedAt": "2026-10-30T11:21:35.845Z",
   "ticket": "#121 BE-51 — toegankelijkheid van de publieke pagina's",
   "category": "developer evidence — local build, no production data or credentials",
-  "head": "c0c906e9214b2101fd20be5214c1885be8be4249",
-  "app": "http://localhost:3170",
-  "port": 3170,
-  "phase": "voor",
+  "head": "8ab1a2cf48cf5f1a39b691c7f8f4d643f136627f",
+  "app": "http://localhost:3175",
+  "port": 3175,
+  "phase": "na",
   "filter": null,
   "themes": [
     "licht",
@@ -4852,8 +4852,8 @@
       }
     },
     "na": {
-      "head": "c0c906e9214b2101fd20be5214c1885be8be4249",
-      "generatedAt": "2026-10-30T10:05:49.301Z",
+      "head": "8ab1a2cf48cf5f1a39b691c7f8f4d643f136627f",
+      "generatedAt": "2026-10-30T11:21:35.840Z",
       "themes": [
         "licht",
         "donker"
@@ -4878,11 +4878,11 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 23,
+                  "measuredTexts": 40,
                   "minRatio": 5.99,
-                  "interactive": 16,
-                  "tabStops": 16,
-                  "tabbables": 16,
+                  "interactive": 22,
+                  "tabStops": 22,
+                  "tabbables": 22,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -4895,6 +4895,14 @@
                     },
                     {
                       "selector": "a.primary-nav-link",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
                       "indicator": "outline"
                     },
                     {
@@ -4919,14 +4927,6 @@
                     },
                     {
                       "selector": "a.home-chip",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.home-tile",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.home-tile",
                       "indicator": "outline"
                     },
                     {
@@ -4962,7 +4962,7 @@
                   "checks": 11,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 41,
+                  "measuredTexts": 43,
                   "minRatio": 5.99,
                   "interactive": 25,
                   "tabStops": 25,
@@ -5041,7 +5041,7 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 42,
+                  "measuredTexts": 44,
                   "minRatio": 5.99,
                   "interactive": 25,
                   "tabStops": 25,
@@ -5125,11 +5125,11 @@
                   "checks": 11,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 41,
-                  "minRatio": 5.99,
-                  "interactive": 25,
+                  "measuredTexts": 22,
+                  "minRatio": 8.25,
+                  "interactive": 16,
                   "tabStops": 25,
-                  "tabbables": 25,
+                  "tabbables": 16,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -5537,8 +5537,8 @@
           "themes": {
             "licht": {
               "checks": 28,
-              "failedChecks": 1,
-              "errors": 2,
+              "failedChecks": 0,
+              "errors": 0,
               "widths": {
                 "desktop": {
                   "checks": 17,
@@ -5626,8 +5626,8 @@
                 },
                 "telefoon": {
                   "checks": 11,
-                  "failedChecks": 1,
-                  "errors": 2,
+                  "failedChecks": 0,
+                  "errors": 0,
                   "measuredTexts": 33,
                   "minRatio": 5.99,
                   "interactive": 22,
@@ -5692,24 +5692,16 @@
                 }
               },
               "groups": {
-                "total": 2,
-                "groups": 1,
-                "entries": [
-                  {
-                    "criterion": "tikdoel",
-                    "reason": "te-dicht-op-elkaar",
-                    "name": "a.dish-group-example-link",
-                    "detail": "171.2×24 px · \"Caesar Salade\" · naast a.mobile-tab-link",
-                    "count": 2
-                  }
-                ],
+                "total": 0,
+                "groups": 0,
+                "entries": [],
                 "truncated": false
               }
             },
             "donker": {
               "checks": 28,
-              "failedChecks": 1,
-              "errors": 2,
+              "failedChecks": 0,
+              "errors": 0,
               "widths": {
                 "desktop": {
                   "checks": 17,
@@ -5797,8 +5789,8 @@
                 },
                 "telefoon": {
                   "checks": 11,
-                  "failedChecks": 1,
-                  "errors": 2,
+                  "failedChecks": 0,
+                  "errors": 0,
                   "measuredTexts": 33,
                   "minRatio": 5.99,
                   "interactive": 22,
@@ -5863,17 +5855,9 @@
                 }
               },
               "groups": {
-                "total": 2,
-                "groups": 1,
-                "entries": [
-                  {
-                    "criterion": "tikdoel",
-                    "reason": "te-dicht-op-elkaar",
-                    "name": "a.dish-group-example-link",
-                    "detail": "171.2×24 px · \"Caesar Salade\" · naast a.mobile-tab-link",
-                    "count": 2
-                  }
-                ],
+                "total": 0,
+                "groups": 0,
+                "entries": [],
                 "truncated": false
               }
             }
@@ -7189,14 +7173,6 @@
                       "indicator": "outline"
                     },
                     {
-                      "selector": "button.theme-btn",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.theme-btn.active",
-                      "indicator": "outline"
-                    },
-                    {
                       "selector": "button.share-settings-btn",
                       "indicator": "outline"
                     },
@@ -7218,6 +7194,14 @@
                     },
                     {
                       "selector": "a.cat-nav-item.active",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "a.cat-nav-item",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "a.cat-nav-item",
                       "indicator": "outline"
                     },
                     {
@@ -7352,14 +7336,6 @@
                       "indicator": "outline"
                     },
                     {
-                      "selector": "button.theme-btn",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.theme-btn.active",
-                      "indicator": "outline"
-                    },
-                    {
                       "selector": "button.share-settings-btn",
                       "indicator": "outline"
                     },
@@ -7381,6 +7357,14 @@
                     },
                     {
                       "selector": "a.cat-nav-item.active",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "a.cat-nav-item",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "a.cat-nav-item",
                       "indicator": "outline"
                     },
                     {
@@ -7513,20 +7497,12 @@
                   "measuredTexts": 8,
                   "minRatio": 8.25,
                   "interactive": 4,
-                  "tabStops": 8,
+                  "tabStops": 6,
                   "tabbables": 4,
-                  "skippedFocusSteps": 0,
+                  "skippedFocusSteps": 1,
                   "focusPath": [
                     {
                       "selector": "a.wordmark",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.theme-btn",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.theme-btn.active",
                       "indicator": "outline"
                     },
                     {
@@ -7761,13 +7737,13 @@
       "totals": {
         "pages": 9,
         "checks": 520,
-        "failedChecks": 2,
-        "errors": 4
+        "failedChecks": 0,
+        "errors": 0
       }
     }
   },
   "screenshots": 108,
-  "result": "failed",
+  "result": "passed",
   "gaps": [
     "Dit is developer-evidence op een lokale build: geen productie, geen Supabase-credentials, geen onafhankelijke acceptatie.",
     "De toetsenbordronde is per pagina een steekproef van de eerste 60 stops; bij een groot menu staan er meer bedieningselementen in de DOM dan dat.",
