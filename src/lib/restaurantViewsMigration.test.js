@@ -116,3 +116,11 @@ test('0024: additief — geen bestaand object wordt gewijzigd, verwijderd of her
   assert.doesNotMatch(code, /dish_counters/i);
   assert.match(SQL, /Additive only/);
 });
+
+test('0024: de lib, de route en de migratie gebruiken dezelfde namen', () => {
+  const views = fs.readFileSync(path.join(REPO_ROOT, 'src/lib/restaurantViews.js'), 'utf8');
+  assert.match(views, /VIEW_ENDPOINT = '\/api\/v1\/bekeken'/);
+  assert.match(views, /VIEW_FUNCTION = 'increment_restaurant_view'/);
+  assert.match(views, /VIEW_TABLE = 'restaurant_views'/);
+  assert.ok(fs.existsSync(path.join(REPO_ROOT, 'app/api/v1/bekeken/route.js')));
+});
