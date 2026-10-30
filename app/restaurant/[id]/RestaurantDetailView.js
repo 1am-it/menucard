@@ -15,7 +15,10 @@ import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 // BE-42 (#98) 2A — de hele kaart van het actieve tabblad is exact dezelfde
 // opbouw als op /menu/<id> (src/components/MenuBody.js). Geen tweede
 // weergave van gerechten.
-import { StaticMenu, MenuConfirmation } from '@/src/components/MenuBody'
+import { StaticMenu } from '@/src/components/MenuBody'
+// BE-58 (#143): het bevestigingslabel, apart geïmporteerd zodat de bestaande
+// regressie op deze importregel blijft kloppen.
+import { MenuConfirmation } from '@/src/components/MenuBody'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
