@@ -895,9 +895,25 @@ de oude naam terug; opnieuw wijzigen werkt; "Correcties opslaan als versie 2"
 opent de nieuwe versie, die in Structuur én in het Publicatievoorbeeld
 "Hoofdgerechten" toont.
 
+BE-53 deel 2 (contractpunten 5-7) gebruikt het tweede fictieve concept
+`concept-be53-0200` in dezelfde fixture: twee kopjes beginnen met
+"PROEF HET BESTE VAN HET SEIZOEN — " en één kopje heet "VOOR". Per thema en
+breedte wordt bewezen: het voorstel met de knop **Weghalen** (met het
+toetsenbord, Enter), waarna beide kopjes "HOOFD" en "DESSERT" heten en los
+ongedaan te maken zijn; de knop **Normale hoofdletters**, waarna "Hoofd",
+"Dessert" en "Voor" ontstaan en de knop verdwijnt; de negen standaardnamen als
+snelkeuze in het Wijzig-veld; ongedaan maken van één kopje terwijl de andere
+twee hun correctie houden; opnieuw kiezen en opslaan; en versie 2
+(`concept-be53-0201`) met de drie nieuwe kopjesnamen in Structuur en
+Publicatievoorbeeld. Versie 2 wordt met dezelfde pure regels
+(`renameSectionsEdits`) gebouwd als het scherm: het voorvoegsel, de
+hoofdletters en de snelkeuze in die volgorde.
+
 Eén schrijfroute is fictioneel beantwoord: `POST
 /api/internal/v1/menu-concepts/concept-be53-0100/versions`, exact dat pad en
-alleen in dit script (de gedeelde lijst blijft ongewijzigd). Het antwoord is de
+alleen in dit script (de gedeelde lijst blijft ongewijzigd). Voor het tweede
+concept geldt precies zo'n route voor `concept-be53-0200`; de fixture antwoordt
+per concept-id (`versionResponses`). Het antwoord is de
 nieuwe versie uit de fixture; de verstuurde edits worden in `localStorage`
 bewaard en in het bewijs samengevat. Elke andere schrijf-, export- en
 publicatieroute blijft geweigerd. Bewijs:
