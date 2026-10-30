@@ -360,6 +360,8 @@ async function loginScenario(cdp) {
     JSON.stringify(codeState.buttons),
   );
   await mobileShot(cdp, 'be47-code-390-licht.png', 'light');
+  await mobileShot(cdp, 'be47-code-390-donker.png', 'dark');
+  await applyTheme(cdp, 'light');
 
   await fillField(cdp, '#owner-code', WRONG_CODE);
   await submitForm(cdp);
@@ -469,7 +471,9 @@ async function statusesScenario(cdp) {
     JSON.stringify(state.links),
   );
   await desktopShot(cdp, 'be47-statussen-1280-licht.png', 'light');
+  await desktopShot(cdp, 'be47-statussen-1280-donker.png', 'dark');
   await mobileShot(cdp, 'be47-statussen-390-licht.png', 'light');
+  await mobileShot(cdp, 'be47-statussen-390-donker.png', 'dark');
   await applyTheme(cdp, 'light');
 }
 
@@ -510,6 +514,7 @@ async function deleteScenario(cdp) {
     JSON.stringify(codeState.deleteCode),
   );
   await mobileShot(cdp, 'be47-verwijderen-390-licht.png', 'light');
+  await mobileShot(cdp, 'be47-verwijderen-390-donker.png', 'dark');
   await applyTheme(cdp, 'light');
 
   await fillField(cdp, '#owner-delete-code', WRONG_CODE);
