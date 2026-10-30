@@ -257,6 +257,64 @@ test('correction: a new immutable version with maker, analysis result and base v
   assert.equal(rpcs(supabase).length, 0);
 });
 
+test('BE-53 correction: a renamed menukopje is the new version\'s heading; the previous version never changes', async () => {
+  const { storedConceptInput, renameSectionEdits } = require('./menuConcept');
+  const version1 = content({ resolved: true });
+  const supabase = world({ snapshots: [snapshotRow(1, 1, version1)] });
+
+  // The reviewer saw the stored version; the helper turns one menukopje into
+  // the existing per-dish `path` edits.
+  const stored = storedConceptInput(version1);
+  const storedConcept = buildMenuConcept({ menus: stored.menus, liveLines: [], edits: stored.edits });
+  const section = storedConcept.content.categories[0];
+  assert.equal(section.name, 'Koud');
+  const rename = renameSectionEdits(storedConcept.lines, section.path || [section.name], 'Koud gerechten');
+  assert.equal(rename.ok, true);
+
+  const res = await handlersFor(supabase).saveVersion(request({ expected_version: 1, edits: rename.edits }), '1');
+  assert.equal(res.status, 201);
+  assert.equal(res.body.concept.version, 2);
+
+  // The new version carries the new heading and every dish of that menukopje.
+  const [write] = inserts(supabase);
+  const newSections = write.row.captured_content.categories;
+  assert.deepEqual(newSections.map((c) => c.name), ['Koud gerechten', 'Kaas']);
+  assert.deepEqual(
+    newSections[0].items.map((i) => i.name),
+    ['Fictieve soep', 'Fictieve salade', 'Fictief tartaar']
+  );
+
+  // Version 1 is untouched: same content, same version, still the stored row.
+  const previous = supabase.tables.menu_snapshot_proposals.find((row) => row.id === 1);
+  assert.equal(previous.version, 1);
+  assert.deepEqual(previous.captured_content, version1);
+  assert.equal(write.row.based_on_snapshot_id, 1);
+  // Nothing is published or exported by a correction.
+  assert.equal(rpcs(supabase).length, 0);
+});
+
+test('BE-53 correction: an empty or over-long menukopje name never becomes a stored heading', async () => {
+  const { storedConceptInput } = require('./menuConcept');
+  const version1 = content({ resolved: true });
+  const stored = storedConceptInput(version1);
+  const storedConcept = buildMenuConcept({ menus: stored.menus, liveLines: [], edits: stored.edits });
+  const section = storedConcept.content.categories[0];
+  const ids = storedConcept.lines.filter((l) => l.categoryPath[0] === section.name).map((l) => l.id);
+
+  for (const name of ['', '   ', 'x'.repeat(201)]) {
+    const edits = { lines: Object.fromEntries(ids.map((id) => [id, { path: [name] }])) };
+    const supabase = world({ snapshots: [snapshotRow(1, 1, version1)] });
+    // `sanitizeEdits` drops a label that is empty or above MAX_EDIT_TEXT, so the
+    // server keeps the stored heading and writes no new version at all.
+    const res = await handlersFor(supabase).saveVersion(request({ expected_version: 1, edits }), '1');
+    assert.equal(res.status, 200, `${JSON.stringify(name)}: ${JSON.stringify(res.body)}`);
+    assert.deepEqual([res.body.concept.version, res.body.concept.unchanged], [1, true]);
+    assert.equal(inserts(supabase).length, 0);
+    assert.equal(supabase.tables.menu_snapshot_proposals.length, 1);
+    assert.deepEqual(supabase.tables.menu_snapshot_proposals[0].captured_content, version1);
+  }
+});
+
 test('correction: a stale version is a conflict and is never overwritten; identical content makes no new version', async () => {
   const resolved = content({ resolved: true });
   const supabase = world({ snapshots: [snapshotRow(1, 1, content({ resolved: false })), snapshotRow(2, 2, resolved, { based_on_snapshot_id: 1 })] });

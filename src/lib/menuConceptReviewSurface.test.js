@@ -73,9 +73,61 @@ test('concept detail: the overview and the structure card use one section count,
   assert.match(view, /const sectionCount = conceptSectionCount\(concept\)/);
   assert.doesNotMatch(view, /new Set\(concept\.lines/);
   // The structure card shows the same built concept, never the stored copy.
-  assert.match(view, /<ConceptStructure captured=\{concept\.content\} \/>/);
+  assert.match(view, /<ConceptStructure captured=\{concept\.content\} rename=\{sectionRename\}/);
   // The card itself counts the categories it lists, not their names.
   assert.match(read('app/internal/bronnen/batch/MenuReview.js'), /plural\(categories\.length, 'menukopje', 'menukopjes'\)/);
+});
+
+test('BE-53 rename: shared path edits, an own stylesheet, and no new route, write or publication', () => {
+  const view = read('app/internal/menu-concepts/MenuConceptsView.js');
+  // BE-52 (#128) pattern: new CSS next to the view, nothing appended to globals.
+  assert.match(view, /import '\.\/menu-concepts\.css'/);
+  assert.doesNotMatch(view, /globals\.css/);
+  assert.ok(fs.existsSync(path.join(ROOT, 'app/internal/menu-concepts/menu-concepts.css')));
+  // The rule is the pure helper, not a second implementation in the browser.
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
+  assert.match(review, /renameSectionEdits\(lines, sectionPathOf\(category\), text\)/);
+  assert.match(view, /renameSectionEdits|useSectionRename\(\{/);
+  // The correction still travels through the existing versions route.
+  assert.match(view, /onSaveVersion\(c\.version, edits\)/);
+  assert.doesNotMatch(view, /\bfetch\(/);
+  // No database change and no new API route for a rename.
+  for (const file of fs.readdirSync(path.join(ROOT, 'app/api/internal/v1/menu-concepts/[id]'))) {
+    assert.ok(['route.js', 'versions', 'decision', 'export'].includes(file), `new route: ${file}`);
+  }
+  // Nothing in the rename path can publish.
+  for (const file of ['app/internal/menu-concepts/MenuConceptsView.js', 'app/internal/bronnen/batch/MenuReview.js']) {
+    assert.doesNotMatch(read(file), /Publiceer|publiceren\b|\/api\/internal\/v1\/menu-concepts\/[^']*\/publish/, file);
+  }
+});
+
+test('BE-53 deel 2: het voorstel, de hoofdletterknop en de snelkeuzes gebruiken de pure helpers', () => {
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
+  const view = read('app/internal/menu-concepts/MenuConceptsView.js');
+  // The browser never re-implements the rule: detection, capitals and the fixed
+  // list all come from src/lib/menuConcept.js.
+  assert.match(review, /sharedSectionPrefix\(sectionNames\)/);
+  assert.match(review, /renameSectionsEdits\(lines, renames\)/);
+  assert.match(review, /isCapsSectionName\(category\.name\)/);
+  assert.match(review, /normalCaseSectionName\(category\.name\)/);
+  assert.match(review, /DEFAULT_SECTION_NAMES\.map\(/);
+  assert.match(review, /rename\.applyMany\(/);
+  // One click on the whole list, and each kopje keeps its own undo.
+  assert.match(review, /Weghalen/);
+  assert.match(review, /Normale hoofdletters/);
+  assert.match(review, /Ongedaan maken/);
+  // The correction still travels through the same versions route, unchanged.
+  assert.match(view, /onSaveVersion\(c\.version, edits\)/);
+  assert.doesNotMatch(view, /\bfetch\(/);
+  assert.doesNotMatch(view, /globals\.css/);
+  // The new controls live in the page stylesheet next to the view (BE-52).
+  const css = read('app/internal/menu-concepts/menu-concepts.css');
+  for (const className of ['mcr-structure-hints', 'mcr-structure-hint', 'mcr-structure-btn', 'mcr-batch-error', 'mcr-rename-presets', 'mcr-rename-preset']) {
+    assert.ok(css.includes(`.${className}`), className);
+  }
+  // Geen hex-, rgb()- of hsl()-kleuren in de eigen opmaak: kleuren komen uit de
+  // tokens (comments tellen niet mee).
+  assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ''), /#[0-9a-fA-F]{3,6}\b|rgba?\(|hsla?\(/);
 });
 
 test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {

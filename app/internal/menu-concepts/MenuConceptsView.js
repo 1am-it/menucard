@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
 import { StaticMenu, menuTitle } from '@/src/components/MenuBody'
 import { buildMenuConcept, storedConceptInput, mergeEdits, conceptSectionCount } from '@/src/lib/menuConcept'
+import { pathKey } from '@/src/lib/menuHierarchy'
 import { deriveNextStep, derivePublicationReadiness, EXPORT_STATUS_LABELS } from '@/src/lib/menuConceptPublication'
 import { menuSourceLink } from '@/src/lib/menuConceptUrls'
 import {
@@ -24,9 +25,12 @@ import {
   BlockerBanner,
   ConceptStructure,
   useConceptEdits,
+  useSectionRename,
+  sectionPathOf,
   conceptParts,
   ProductReview,
 } from '../bronnen/batch/MenuReview'
+import './menu-concepts.css'
 
 const STATUS_VIEW = {
   waiting: { role: 'neutral', icon: 'clock', label: 'Wacht op beoordeling' },
@@ -622,7 +626,7 @@ function ProductConceptReview({ data, crumbs, loadError, message }) {
 }
 
 export function ConceptReview({ data, loadError, message, busy, onSaveVersion, onDecide, onExport }) {
-  const { edits, touched, setLineEdit, decideRemoved, reset, dirty } = useConceptEdits()
+  const { edits, touched, setLineEdit, setLineEdits, clearLinePaths, decideRemoved, reset, dirty } = useConceptEdits()
   const [rejecting, setRejecting] = useState(false)
   const [tab, setTab] = useState(() => (data && data.concept.status === 'approved' && data.preview && data.preview.concept ? 'preview' : 'changes'))
   // BE-41: the list links straight to what needs attention — `?tab=changes`
@@ -642,6 +646,20 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
     () => (stored ? buildMenuConcept({ menus: stored.menus, liveLines: data.liveLines, edits: mergeEdits(stored.edits, edits) }) : null),
     [stored, data, edits]
   )
+  // BE-53 (#130): the stored version as it is now — without the unsaved
+  // correction. A renamed menukopje shows its previous name from here, and
+  // "Ongedaan maken" only removes the path edits of that correction.
+  const storedConcept = useMemo(
+    () => (stored ? buildMenuConcept({ menus: stored.menus, liveLines: data.liveLines, edits: stored.edits }) : null),
+    [stored, data]
+  )
+  // The rename field is a hook, so it is called before the early returns; only
+  // the latest version of a readable concept may open it.
+  const rename = useSectionRename({
+    lines: concept ? concept.lines : [],
+    readOnly: !data || !data.concept || !data.concept.isLatest,
+    onApply: (result) => setLineEdits(result.edits.lines),
+  })
 
   const crumbs = (
     <nav aria-label="Kruimelpad" className="bta-breadcrumb">
@@ -683,6 +701,47 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
 
   const c = data.concept
   const readOnly = !c.isLatest
+  // BE-53 (#130): which dishes sit under each menukopje right now, which of
+  // them were renamed by this unsaved correction, and what the stored version
+  // called that menukopje. Only exact data: no guessed previous name.
+  const lineIdsBySection = new Map()
+  for (const line of concept.lines) {
+    const key = pathKey(line.categoryPath)
+    if (!lineIdsBySection.has(key)) lineIdsBySection.set(key, [])
+    lineIdsBySection.get(key).push(line.id)
+  }
+  const storedPathByLine = new Map()
+  if (storedConcept) for (const line of storedConcept.lines) storedPathByLine.set(line.id, line.categoryPath)
+  const previousNames = new Map()
+  for (const [key, ids] of lineIdsBySection) {
+    const storedKeys = new Set(ids.map((id) => (storedPathByLine.has(id) ? pathKey(storedPathByLine.get(id)) : null)))
+    if (storedKeys.size !== 1) continue
+    const storedKey = [...storedKeys][0]
+    if (!storedKey || storedKey === key) continue
+    const storedPath = storedPathByLine.get(ids[0]) || []
+    const previous = storedPath[storedPath.length - 1]
+    if (previous) previousNames.set(key, previous)
+  }
+  const sectionRename = {
+    ...rename,
+    readOnly,
+    previous: previousNames,
+    canUndo: (key) =>
+      // Only a path edit that really differs from the stored version is a
+      // correction to undo; retyping the stored name changes nothing.
+      Boolean(
+        (lineIdsBySection.get(key) || []).some((id) => {
+          const edit = edits.lines[id]
+          if (!edit || !Object.prototype.hasOwnProperty.call(edit, 'path')) return false
+          const storedPath = storedPathByLine.get(id)
+          return !storedPath || pathKey(edit.path) !== pathKey(storedPath)
+        })
+      ),
+    undo: (category) => {
+      clearLinePaths(lineIdsBySection.get(pathKey(sectionPathOf(category))) || [])
+      rename.cancel()
+    },
+  }
   const { editorLines, safe, excluded, categories } = conceptParts(concept, touched)
   // One rule for the whole concept: sections per full path, exactly as the
   // concept stores them. Counting by the last label merged "Lunch › Dessert"
@@ -765,7 +824,7 @@ export function ConceptReview({ data, loadError, message, busy, onSaveVersion, o
             <BlockerBanner concept={concept} />
             {/* The same built concept as the counters, so the section count can
                 never disagree with the overview. */}
-            <ConceptStructure captured={concept.content} />
+            <ConceptStructure captured={concept.content} rename={sectionRename} idPrefix={`mcr-${c.id}`} />
             {editorLines.length > 0 && (
               <ul className="bta-concept-lines" aria-label="Aandachtspunten en blokkades">
                 {editorLines.map((line) => (
