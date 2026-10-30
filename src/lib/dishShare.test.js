@@ -133,6 +133,15 @@ test('de basis-URL: lokaal is http, een echte host is https, een proxyheader win
   assert.equal(siteBaseUrl({ host: 'localhost:3157', proto: 'https' }), 'https://localhost:3157');
 });
 
+test('BE-56: alleen een geldige https-instelling wint van de host, nooit een gok', () => {
+  // Dezelfde helper als app/layout.js, app/robots.js en app/sitemap.js
+  // (src/lib/siteUrl.js): http en een pad zijn geen basis-URL. Dan blijft het
+  // bestaande gedrag overeind — de host van het verzoek.
+  assert.equal(siteBaseUrl({ envUrl: 'http://onzemenukaarten.nl', host: 'menukaarten.example' }), 'https://menukaarten.example');
+  assert.equal(siteBaseUrl({ envUrl: 'https://onzemenukaarten.nl/menu', host: 'menukaarten.example' }), 'https://menukaarten.example');
+  assert.equal(siteBaseUrl({ envUrl: 'HTTPS://OnzeMenukaarten.NL/', host: 'ignored.example' }), 'https://onzemenukaarten.nl');
+});
+
 test('de kop van het deelmenu is gerecht en restaurant, geen berichttekst', () => {
   assert.equal(dishShareTitle({ name: dish.name, restaurantName: restaurant.name }), 'Poussin · Brasserie Bardot');
   assert.equal(dishShareTitle({ name: dish.name }), 'Poussin');
