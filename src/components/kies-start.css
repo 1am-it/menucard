@@ -1,0 +1,59 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-46 — "Samen kiezen" in Mijn lijstje: de knop, het blad met de
+   sluitingstijd en de klaargezette stemlink (issue 106).
+   BE-52 (#128): hoort bij src/components/KiesStartButton.js en KiesShareButton.js;
+   alleen die twee gebruiken deze klassen. Alles is een token, dus licht en donker
+   volgen automatisch.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* "Samen kiezen" in Mijn lijstje: de knop en het blad voor de sluitingstijd. */
+.kies-start { display: inline-flex; flex-direction: column; gap: 6px; }
+
+.kies-layer { z-index: 60; }
+
+.kies-panel { max-width: 420px; }
+
+.kies-time-label {
+  display: block;
+  margin: 8px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kies-time-input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.kies-time-input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.kies-started {
+  margin: 4px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kies-started-link { margin: 0 0 8px; }
+
+.kies-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.kies-share { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.kies-start-link { min-height: 44px; }
