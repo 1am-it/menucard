@@ -150,3 +150,12 @@
   .owner-main { padding: 18px 14px 64px; }
   .owner-title { font-size: 22px; }
 }
+
+/* BE-57 herstel (#139): op de telefoon staat de navigatie in MobileTabBar
+   onderaan (dezelfde balk als /mijn-restaurant/claimen). Die balk is `fixed`
+   (12px van onderen, 48px hoge knoppen in 6px padding), dus de pagina houdt
+   daaronder ruimte vrij. Zonder deze regel verdwijnt de laatste inhoud achter
+   de balk. Boven 720px is de balk verborgen en geldt deze regel niet. */
+@media (max-width: 720px) {
+  .owner-main { padding-bottom: 112px; }
+}

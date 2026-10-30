@@ -35,6 +35,7 @@ import './mijn-restaurant.css'
 
 import Wordmark from '@/src/components/Wordmark'
 import PrimaryNav from '@/src/components/PrimaryNav'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import OwnerAccountDeletion from './OwnerAccountDeletion'
 import OwnerStatsPanel from './OwnerStatsPanel'
 
@@ -191,11 +192,19 @@ export default function OwnerDashboard({ restaurantIndex }) {
 
   return (
     <>
+      {/* BE-57 herstel (#139): dezelfde kop-opbouw als /mijn-restaurant/claimen
+          (BE-54). Woordmerk en themaknop staan op één regel; PrimaryNav zit
+          binnen .header-right en is daarmee op de telefoon verborgen
+          (@media max-width 720px in app/globals.css), waar MobileTabBar onderaan
+          de navigatie doet. Zo blijft de kop één regel hoog en schuift de titel
+          "Deze week" niet onder de vaste kop. Het nav-landmark blijft altijd
+          aanwezig: PrimaryNav op desktop, MobileTabBar (aria-label "Hoofdmenu")
+          op mobiel. */}
       <header className="site-header">
         <div className="header-inner">
           <Wordmark />
-          <PrimaryNav />
           <div className="header-right">
+            <PrimaryNav />
             <ThemeToggle />
           </div>
         </div>
@@ -319,6 +328,8 @@ export default function OwnerDashboard({ restaurantIndex }) {
           </>
         )}
       </main>
+
+      <MobileTabBar />
     </>
   )
 }
