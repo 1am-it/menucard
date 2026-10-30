@@ -5859,3 +5859,25 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   user-select: all;
 }
 
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-51 (#121) — toegankelijkheid van de publieke pagina's
+   Alleen tokens, semantiek en ARIA: geen nieuwe kleuren, geen herontwerp.
+   Wat hier staat is gevonden door ops/browser/run-a11y-public-check.js en per
+   punt in beide thema's opnieuw gemeten.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* 1. Beweging (criterium 1, "prefers-reduced-motion wordt gerespecteerd").
+   Zonder deze regel liepen de overgangen van knoppen, kaarten en de menubalk
+   door en scrollde de pagina vloeiend, ook als de gebruiker om rust heeft
+   gevraagd. De bestaande vormgeving blijft; alleen de duur gaat naar vrijwel
+   nul en het scrollen wordt direct. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
