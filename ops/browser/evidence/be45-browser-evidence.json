@@ -1,0 +1,563 @@
+{
+  "category": "fixture evidence (fictional session and fictional teller rows; not real acceptance)",
+  "issue": "#114",
+  "script": "run-be45-browser-check.js",
+  "generatedAt": "2026-10-29T22:00:46.017Z",
+  "port": 3145,
+  "head": "0673cbf2b2e604227bb38c12d89a392c492b7c47",
+  "fixtureRows": [
+    "Stoofvlees met friet",
+    "Tosti ham-kaas",
+    "Vegetarische lasagne",
+    "8-lunch-9-9"
+  ],
+  "mockupComparison": "not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots in evidence/be-45/ are saved for the Lead/human visual comparison",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "desktop",
+      "checks": 22,
+      "passed": 22,
+      "failed": 0,
+      "durationMs": 6871,
+      "error": null
+    },
+    {
+      "name": "mobiel",
+      "checks": 33,
+      "passed": 33,
+      "failed": 0,
+      "durationMs": 5847,
+      "error": null
+    },
+    {
+      "name": "leeg",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 4640,
+      "error": null
+    },
+    {
+      "name": "fout",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 4148,
+      "error": null
+    }
+  ],
+  "checks": [
+    {
+      "name": "warm-up: de pagina en de fictieve tellerroute antwoorden",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=light&tellers=gevuld)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "desktop/licht: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "desktop: de titel is Tellers",
+      "passed": true,
+      "detail": "Tellers"
+    },
+    {
+      "name": "desktop: de drie periodeknoppen staan er met aria-pressed, standaard 7 dagen",
+      "passed": true,
+      "detail": "[{\"label\":\"Vandaag\",\"pressed\":\"false\",\"height\":44},{\"label\":\"7 dagen\",\"pressed\":\"true\",\"height\":44},{\"label\":\"30 dagen\",\"pressed\":\"false\",\"height\":44}]"
+    },
+    {
+      "name": "desktop: elke periodeknop is een tikdoel van minstens 44 px",
+      "passed": true,
+      "detail": "[44,44,44]"
+    },
+    {
+      "name": "desktop: de drie totalen staan er met de opgetelde waarden",
+      "passed": true,
+      "detail": "[{\"label\":\"Gedeeld\",\"value\":\"25\"},{\"label\":\"Bewaard\",\"value\":\"17\"},{\"label\":\"Reserveer\",\"value\":\"5\"}]"
+    },
+    {
+      "name": "desktop: de tabel heeft vijf kolomkoppen op een echte knop",
+      "passed": true,
+      "detail": "[\"GERECHT\",\"RESTAURANT\",\"GEDEELD\",\"BEWAARD\",\"RESERVEER\"]"
+    },
+    {
+      "name": "desktop: de standaardsortering is Gedeeld, aflopend",
+      "passed": true,
+      "detail": "[[\"GERECHT\",\"none\"],[\"RESTAURANT\",\"none\"],[\"GEDEELD\",\"descending\"],[\"BEWAARD\",\"none\"],[\"RESERVEER\",\"none\"]]"
+    },
+    {
+      "name": "desktop: de rijen staan in die volgorde (Gedeeld, aflopend)",
+      "passed": true,
+      "detail": "[\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"Vegetarische lasagne\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "desktop: de gerechtnaam linkt naar de publieke gerechtpagina",
+      "passed": true,
+      "detail": "/menu/7-diner?dish=7-diner-0-0&name=Stoofvlees+met+friet&cat=Hoofdgerechten"
+    },
+    {
+      "name": "desktop: een onbekende sleutel staat er met \"onbekend gerecht\" en zonder link",
+      "passed": true,
+      "detail": "{\"name\":\"8-lunch-9-9\",\"key\":\"8-lunch-9-9\",\"unknown\":\"onbekend gerecht\",\"href\":null,\"restaurant\":\"Fictief Lunchcafé\",\"gedeeld\":\"2\",\"bewaard\":\"1\",\"reserveren\":\"1\"}"
+    },
+    {
+      "name": "desktop: alleen de tabel is zichtbaar, de telefoonlijst niet",
+      "passed": true,
+      "detail": "{\"table\":true,\"list\":false}"
+    },
+    {
+      "name": "desktop: een kolomkop is een echte knop die de sortering verandert",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "desktop: na de klik is Bewaard de aflopende sorteerkolom",
+      "passed": true,
+      "detail": "[[\"GERECHT\",\"none\"],[\"RESTAURANT\",\"none\"],[\"GEDEELD\",\"none\"],[\"BEWAARD\",\"descending\"],[\"RESERVEER\",\"none\"]]"
+    },
+    {
+      "name": "desktop: de rijen sorteren echt op Bewaard (9, 5, 2, 1)",
+      "passed": true,
+      "detail": "[\"Vegetarische lasagne\",\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "desktop: een periodeknop is echt en zet aria-pressed",
+      "passed": true,
+      "detail": "[{\"label\":\"Vandaag\",\"pressed\":\"false\",\"height\":44},{\"label\":\"7 dagen\",\"pressed\":\"false\",\"height\":44},{\"label\":\"30 dagen\",\"pressed\":\"true\",\"height\":44}]"
+    },
+    {
+      "name": "desktop: de nieuwe periode laadt opnieuw en houdt de rij(en)",
+      "passed": true,
+      "detail": "[\"Vegetarische lasagne\",\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=dark&tellers=gevuld)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "desktop/donker: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "desktop: het gevraagde donkere thema is actief",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "desktop: licht en donker lossen verschillend op (token --bg)",
+      "passed": true,
+      "detail": "#FFFFFF / #1F2328"
+    },
+    {
+      "name": "desktop: de tabel staat er ook in donker, met dezelfde rijen",
+      "passed": true,
+      "detail": "[\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"Vegetarische lasagne\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=light&tellers=gevuld)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390px/light: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/light: de tabel is vervangen door de lijst",
+      "passed": true,
+      "detail": "{\"table\":false,\"list\":true}"
+    },
+    {
+      "name": "390px/light: de lijst toont dezelfde vier gerechten",
+      "passed": true,
+      "detail": "[\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"Vegetarische lasagne\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "390px/light: de eerste kaart linkt naar de publieke gerechtpagina",
+      "passed": true,
+      "detail": "/menu/7-diner?dish=7-diner-0-0&name=Stoofvlees+met+friet&cat=Hoofdgerechten"
+    },
+    {
+      "name": "390px/light: de sorteerkeuze staat er met kolom én richting",
+      "passed": true,
+      "detail": "{\"value\":\"gedeeld:aflopend\",\"options\":[\"gerecht:oplopend\",\"restaurant:oplopend\",\"gedeeld:aflopend\",\"gedeeld:oplopend\",\"bewaard:aflopend\",\"bewaard:oplopend\",\"reserveren:aflopend\",\"reserveren:oplopend\"],\"label\":\"Gedeeld (hoog → laag)\",\"height\":44}"
+    },
+    {
+      "name": "390px/light: de sorteerkeuze en de periodeknoppen zijn tikdoelen van minstens 44 px",
+      "passed": true,
+      "detail": "{\"select\":44,\"periods\":[44,44,44]}"
+    },
+    {
+      "name": "390px/light: de drie totalen staan er ook op de telefoon",
+      "passed": true,
+      "detail": "[{\"label\":\"Gedeeld\",\"value\":\"25\"},{\"label\":\"Bewaard\",\"value\":\"17\"},{\"label\":\"Reserveer\",\"value\":\"5\"}]"
+    },
+    {
+      "name": "390px/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px/light: de sorteerkeuze sorteert de lijst echt (Bewaard, hoog → laag)",
+      "passed": true,
+      "detail": "[\"Vegetarische lasagne\",\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "390px/light: de keuze blijft in de lijst staan",
+      "passed": true,
+      "detail": "\"bewaard:aflopend\""
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=dark&tellers=gevuld)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "390px/dark: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "390px/dark: de tabel is vervangen door de lijst",
+      "passed": true,
+      "detail": "{\"table\":false,\"list\":true}"
+    },
+    {
+      "name": "390px/dark: de lijst toont dezelfde vier gerechten",
+      "passed": true,
+      "detail": "[\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"Vegetarische lasagne\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "390px/dark: de eerste kaart linkt naar de publieke gerechtpagina",
+      "passed": true,
+      "detail": "/menu/7-diner?dish=7-diner-0-0&name=Stoofvlees+met+friet&cat=Hoofdgerechten"
+    },
+    {
+      "name": "390px/dark: de sorteerkeuze staat er met kolom én richting",
+      "passed": true,
+      "detail": "{\"value\":\"gedeeld:aflopend\",\"options\":[\"gerecht:oplopend\",\"restaurant:oplopend\",\"gedeeld:aflopend\",\"gedeeld:oplopend\",\"bewaard:aflopend\",\"bewaard:oplopend\",\"reserveren:aflopend\",\"reserveren:oplopend\"],\"label\":\"Gedeeld (hoog → laag)\",\"height\":44}"
+    },
+    {
+      "name": "390px/dark: de sorteerkeuze en de periodeknoppen zijn tikdoelen van minstens 44 px",
+      "passed": true,
+      "detail": "{\"select\":44,\"periods\":[44,44,44]}"
+    },
+    {
+      "name": "390px/dark: de drie totalen staan er ook op de telefoon",
+      "passed": true,
+      "detail": "[{\"label\":\"Gedeeld\",\"value\":\"25\"},{\"label\":\"Bewaard\",\"value\":\"17\"},{\"label\":\"Reserveer\",\"value\":\"5\"}]"
+    },
+    {
+      "name": "390px/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px/dark: de sorteerkeuze sorteert de lijst echt (Bewaard, hoog → laag)",
+      "passed": true,
+      "detail": "[\"Vegetarische lasagne\",\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "390px/dark: de keuze blijft in de lijst staan",
+      "passed": true,
+      "detail": "\"bewaard:aflopend\""
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=light&tellers=gevuld)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "320px/light: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "320px/light: de tabel is vervangen door de lijst",
+      "passed": true,
+      "detail": "{\"table\":false,\"list\":true}"
+    },
+    {
+      "name": "320px/light: de lijst toont dezelfde vier gerechten",
+      "passed": true,
+      "detail": "[\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"Vegetarische lasagne\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "320px/light: de eerste kaart linkt naar de publieke gerechtpagina",
+      "passed": true,
+      "detail": "/menu/7-diner?dish=7-diner-0-0&name=Stoofvlees+met+friet&cat=Hoofdgerechten"
+    },
+    {
+      "name": "320px/light: de sorteerkeuze staat er met kolom én richting",
+      "passed": true,
+      "detail": "{\"value\":\"gedeeld:aflopend\",\"options\":[\"gerecht:oplopend\",\"restaurant:oplopend\",\"gedeeld:aflopend\",\"gedeeld:oplopend\",\"bewaard:aflopend\",\"bewaard:oplopend\",\"reserveren:aflopend\",\"reserveren:oplopend\"],\"label\":\"Gedeeld (hoog → laag)\",\"height\":44}"
+    },
+    {
+      "name": "320px/light: de sorteerkeuze en de periodeknoppen zijn tikdoelen van minstens 44 px",
+      "passed": true,
+      "detail": "{\"select\":44,\"periods\":[44,44,44]}"
+    },
+    {
+      "name": "320px/light: de drie totalen staan er ook op de telefoon",
+      "passed": true,
+      "detail": "[{\"label\":\"Gedeeld\",\"value\":\"25\"},{\"label\":\"Bewaard\",\"value\":\"17\"},{\"label\":\"Reserveer\",\"value\":\"5\"}]"
+    },
+    {
+      "name": "320px/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px/light: de sorteerkeuze sorteert de lijst echt (Bewaard, hoog → laag)",
+      "passed": true,
+      "detail": "[\"Vegetarische lasagne\",\"Stoofvlees met friet\",\"Tosti ham-kaas\",\"8-lunch-9-9\"]"
+    },
+    {
+      "name": "320px/light: de keuze blijft in de lijst staan",
+      "passed": true,
+      "detail": "\"bewaard:aflopend\""
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=light&tellers=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "leeg: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "leeg: de eerlijke lege staat staat er",
+      "passed": true,
+      "detail": "Nog geen tellingen in deze periode."
+    },
+    {
+      "name": "leeg: de drie totalen staan op 0 en er is geen tabelrij of kaart",
+      "passed": true,
+      "detail": "{\"totals\":[{\"label\":\"Gedeeld\",\"value\":\"0\"},{\"label\":\"Bewaard\",\"value\":\"0\"},{\"label\":\"Reserveer\",\"value\":\"0\"}],\"rows\":0}"
+    },
+    {
+      "name": "leeg: er is geen foutstaat en geen crash",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=dark&tellers=leeg)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "leeg/donker: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "leeg: de lege staat werkt ook in donker",
+      "passed": true,
+      "detail": "Nog geen tellingen in deze periode."
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=light&tellers=fout)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout: de nette foutstaat staat er",
+      "passed": true,
+      "detail": "Tellers zijn nu niet beschikbaar."
+    },
+    {
+      "name": "fout: er is geen tabel en geen verzonnen 0 als totaal",
+      "passed": true,
+      "detail": "{\"table\":false,\"totals\":0}"
+    },
+    {
+      "name": "fout: de pagina blijft werken (titel en periodeknoppen)",
+      "passed": true,
+      "detail": "{\"title\":\"Tellers\",\"periods\":3}"
+    },
+    {
+      "name": "fixture bootstrap zonder fout (/internal/tellers?theme=dark&tellers=fout)",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "fout/donker: de pagina laadt met een tabel, een lege staat of een foutstaat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fout: dezelfde foutstaat in donker",
+      "passed": true,
+      "detail": "Tellers zijn nu niet beschikbaar."
+    },
+    {
+      "name": "netwerk: de pagina heeft geen geblokkeerde oproep geregistreerd",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: de CDP-laag heeft geen geblokkeerde oproep geregistreerd",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen fout in de fixture-bootstrap aan het eind",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "clickpaths": [
+    {
+      "name": "kolomkop Bewaard sorteren",
+      "steps": [
+        "klik op Bewaard"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "telefoon 390px/light: sorteerkeuze Bewaard",
+      "steps": [
+        "kies Bewaard (hoog → laag)"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "telefoon 390px/dark: sorteerkeuze Bewaard",
+      "steps": [
+        "kies Bewaard (hoog → laag)"
+      ],
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "telefoon 320px/light: sorteerkeuze Bewaard",
+      "steps": [
+        "kies Bewaard (hoog → laag)"
+      ],
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "be45-desktop-1280-light.png",
+      "sha256": "e2f4cf8c6d42599a553def611c25c03a250b10b6b07decbe5c612f7dc80c88d6",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "gevuld"
+    },
+    {
+      "file": "be45-desktop-1280-light-30-dagen.png",
+      "sha256": "daf4efbae5da9f7ceff80f066d1cb60ad8ad7922a113efa3bb1e1ec227ea9e87",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "periode-30"
+    },
+    {
+      "file": "be45-desktop-1280-dark.png",
+      "sha256": "b045dc691b942840e483b9c5d443e95118e098fbd4ed476fe4271e8bf01f0a99",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "gevuld"
+    },
+    {
+      "file": "be45-390-light.png",
+      "sha256": "e4c75f2be9a7d59f302dcde161421e767a2f9e8bf21e519f422077d4c376599b",
+      "width": 390,
+      "height": 800,
+      "viewport": "390x800",
+      "theme": "light",
+      "state": "gevuld"
+    },
+    {
+      "file": "be45-390-dark.png",
+      "sha256": "290538492dd80718e9b50e2472fca14be8d7700904e7218372c6293b8263cf65",
+      "width": 390,
+      "height": 800,
+      "viewport": "390x800",
+      "theme": "dark",
+      "state": "gevuld"
+    },
+    {
+      "file": "be45-320-light.png",
+      "sha256": "83ad242f972bd3d448a3c2d9793fadef928a042eaac69ca1584e64556986502a",
+      "width": 320,
+      "height": 800,
+      "viewport": "320x800",
+      "theme": "light",
+      "state": "gevuld"
+    },
+    {
+      "file": "be45-leeg-1280-light.png",
+      "sha256": "6d2b96c7e45315492a4a5778280b3ddc743598ff1433e1666d32590874d0910c",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "leeg"
+    },
+    {
+      "file": "be45-leeg-1280-dark.png",
+      "sha256": "28e0ca7bd23ffe5d5a9deabcd20f9948ad7dcc2febe43ffac3850d3bcd6f59de",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "leeg"
+    },
+    {
+      "file": "be45-fout-1280-light.png",
+      "sha256": "020d2125a6399e350c52ba04c8a85761f9853886c15306f61ea0a5f2ec1d1ab9",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "fout"
+    },
+    {
+      "file": "be45-fout-1280-dark.png",
+      "sha256": "83d23f94a6d829849e22ecdf13fa416670c3ef4ab3f1a71677936d90f0afe4d3",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "fout"
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "passed": true
+}
