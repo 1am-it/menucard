@@ -95,9 +95,14 @@ test('the v2 design adds no database migration in this branch', () => {
   assert.ok(files.length > 0);
   const later = files.filter((name) => /^00(2[0-9]|[3-9][0-9])_/.test(name));
   // The only migrations after the v2 design round are BE-25's reviewed human
-  // structure review (#59 review 6307703713) and BE-44's anonymous dish
-  // counters (#105, criterium 5). Neither adds v2/product storage.
-  assert.deepEqual(later, ['0020_be25_menu_structure_reviews.sql', '0021_be44_dish_counters.sql']);
+  // structure review (#59 review 6307703713), BE-44's anonymous dish counters
+  // (#105, criterium 5) and BE-46's samen-kiezen tables (#106, criterium 1).
+  // None adds v2/product storage.
+  assert.deepEqual(later, [
+    '0020_be25_menu_structure_reviews.sql',
+    '0021_be44_dish_counters.sql',
+    '0022_be46_samen_kiezen.sql',
+  ]);
   for (const name of later) {
     const source = fs.readFileSync(path.join(MIGRATIONS, name), 'utf8');
     assert.doesNotMatch(source, /menu_extraction_product|product_v2|schema_version|candidate_summary/i, name);

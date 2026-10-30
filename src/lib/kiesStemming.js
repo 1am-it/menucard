@@ -25,8 +25,6 @@
 
 'use strict';
 
-const crypto = require('node:crypto');
-
 const { dishCountLabel, dishIdOf, parseDishId, absoluteUrl } = require('./dishList');
 const { dishSharePrice, normalizeShareTheme, withShareTheme } = require('./dishShare');
 const { MISSING_STORAGE_CODES } = require('./dishCounters');
@@ -83,13 +81,41 @@ function textOf(value) {
   return String(value === undefined || value === null ? '' : value).trim();
 }
 
+// De letters van base64url (RFC 4648 §5): alleen A-Z, a-z, 0-9, - en _. Zelf
+// gecodeerd in plaats van met `Buffer`, zodat dit bestand ook in de browser
+// werkt (de stemlink leest hier zijn constanten en rekenregels).
+const BASE64URL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
 /** Base64url van willekeurige bytes: alleen A-Z, a-z, 0-9, - en _. */
 function base64url(bytes) {
-  return Buffer.from(bytes).toString('base64url');
+  const list = bytes instanceof Uint8Array ? bytes : Uint8Array.from(bytes || []);
+  let out = '';
+  for (let index = 0; index < list.length; index += 3) {
+    const first = list[index];
+    const second = index + 1 < list.length ? list[index + 1] : 0;
+    const third = index + 2 < list.length ? list[index + 2] : 0;
+    out += BASE64URL[first >> 2];
+    out += BASE64URL[((first & 3) << 4) | (second >> 4)];
+    if (index + 1 < list.length) out += BASE64URL[((second & 15) << 2) | (third >> 6)];
+    if (index + 2 < list.length) out += BASE64URL[third & 63];
+  }
+  return out;
 }
 
+/**
+ * Echte willekeur van het platform: `crypto.getRandomValues` bestaat in de
+ * browser én in Node 22, zonder import en zonder dependency. Zonder die bron
+ * gooit deze functie; de aanroeper geeft dan null terug in plaats van een code
+ * die te raden is.
+ */
 function defaultRandom(count) {
-  return crypto.randomBytes(count);
+  const platform = typeof globalThis === 'undefined' ? null : globalThis.crypto;
+  if (!platform || typeof platform.getRandomValues !== 'function') {
+    throw new Error('no_secure_random');
+  }
+  const bytes = new Uint8Array(count);
+  platform.getRandomValues(bytes);
+  return bytes;
 }
 
 /** Een code voor een stemlink, of null als de bron geen echte bytes gaf. */

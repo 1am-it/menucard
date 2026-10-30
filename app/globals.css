@@ -5859,3 +5859,357 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   user-select: all;
 }
 
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-46 — Samen kiezen: de stemlink, de kaartenstapel en de uitslag (issue 106).
+   Alleen tokens (licht en donker werken zonder eigen regels), knoppen ≥ 44 px,
+   en de beweging van de kaart respecteert prefers-reduced-motion. De drempel
+   van het swipen (30% van de kaartbreedte) staat in src/lib/kiesStemming.js.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.kies-main {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 20px 120px;
+}
+
+.kies-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.kies-hint {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.kies-status {
+  margin: 8px 0 0;
+  min-height: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.kies-status-error { color: var(--danger); }
+
+.kies-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kies-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.kies-input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.kies-join { margin-top: 12px; }
+
+/* De kaart van het blad, het roepnaamformulier en de stapel. */
+.kies-card {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  color: var(--text-primary);
+}
+
+.kies-name { margin-top: 8px; }
+
+.kies-stack { margin-top: 8px; outline: none; }
+
+.kies-stack:focus-visible .kies-card-wrap {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 4px;
+  border-radius: var(--radius-card);
+}
+
+.kies-progress {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+.kies-card-wrap {
+  position: relative;
+  margin: 14px 0 18px;
+  /* Verticaal scrollen en het terug-gebaar van de telefoon blijven werken;
+     alleen horizontaal slepen is van de kaart. */
+  touch-action: pan-y;
+}
+
+.kies-dish-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Dezelfde kaart als de menukaart, zonder foto's (src/CONTEXT.md). */
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  box-shadow: var(--card-shadow);
+  cursor: grab;
+  user-select: none;
+}
+
+.kies-dish-card.is-dragging { cursor: grabbing; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .kies-dish-card {
+    transition: transform 0.18s ease-out;
+  }
+  .kies-dish-card.is-dragging { transition: none; }
+}
+
+.kies-cat {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+}
+
+.kies-dish {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.kies-rest { font-size: 14px; color: var(--text-secondary); }
+
+.kies-price {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.kies-desc {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* Het label dat tijdens het slepen de richting toont. */
+.kies-swipe-label {
+  position: absolute;
+  top: 12px;
+  z-index: 2;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.kies-swipe-lekker { right: 12px; }
+.kies-swipe-liever-niet { left: 12px; }
+
+.kies-vote-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.kies-vote-btn,
+.kies-undo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.kies-vote-lekker {
+  border-color: var(--button-primary-bg);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.kies-vote-btn:focus-visible,
+.kies-undo:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.kies-vote-btn:disabled,
+.kies-undo:disabled { opacity: 0.55; cursor: default; }
+
+.kies-undo {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* De uitslag: een echte lijst, met de favoriet bovenaan. */
+.kies-result { margin-top: 8px; }
+
+.kies-uitslag {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kies-uitslag-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  color: var(--text-primary);
+}
+
+.kies-uitslag-row.is-favoriet {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.kies-uitslag-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kies-uitslag-name { font-size: 17px; font-weight: 800; }
+
+.kies-uitslag-price {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.kies-uitslag-meta { font-size: 13px; color: var(--text-secondary); }
+
+.kies-uitslag-count { font-size: 14px; font-weight: 600; }
+
+.kies-uitslag-names { font-size: 13px; color: var(--text-secondary); }
+
+.kies-favoriet {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--tag-featured-bg);
+  color: var(--tag-featured);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kies-uitslag-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.kies-uitslag-actions .share-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+/* "Samen kiezen" in Mijn lijstje: de knop en het blad voor de sluitingstijd. */
+.kies-start { display: inline-flex; flex-direction: column; gap: 6px; }
+
+.kies-layer { z-index: 60; }
+
+.kies-panel { max-width: 420px; }
+
+.kies-time-label {
+  display: block;
+  margin: 8px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kies-time-input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.kies-time-input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.kies-started {
+  margin: 4px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kies-started-link { margin: 0 0 8px; }
+
+.kies-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.kies-share { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+.kies-start-link { min-height: 44px; }
+
+@media (max-width: 420px) {
+  .kies-vote-actions { grid-template-columns: 1fr; }
+  .kies-dish { font-size: 22px; }
+}
+

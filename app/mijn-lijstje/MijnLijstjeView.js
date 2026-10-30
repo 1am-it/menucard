@@ -19,6 +19,7 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import ListShareButton from '@/src/components/ListShareButton'
+import KiesStartButton from '@/src/components/KiesStartButton'
 import Wordmark from '@/src/components/Wordmark'
 import {
   ADD_TO_OWN_LIST_LABEL,
@@ -156,6 +157,8 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
                 href={listShareHref({ values: own })}
                 title={`Mijn lijstje · ${dishCountLabel(own.length)}`}
               />
+              {/* Samen kiezen: van het lijstje een stemlink maken. */}
+              <KiesStartButton dishes={own} />
             </div>
           </>
         )}
