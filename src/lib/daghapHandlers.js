@@ -81,6 +81,11 @@ const DAGHAP_NOT_AVAILABLE_MESSAGE = 'Daghappen zijn nog niet beschikbaar.';
 // haalt een kleine kandidatenlijst op en nooit de hele tabel.
 const DAGHAP_HOME_LIMIT = 3;
 const DAGHAP_HOME_KANDIDATEN = 24;
+// BE-55 deel 5 (#135) — de zoekresultaten vragen één keer om het actieve aanbod
+// per restaurant. Ook hier een vaste bovengrens, zodat één verzoek nooit de
+// hele aanbodstabel kan opvragen.
+const DAGHAP_ZOEK_KANDIDATEN = 400;
+
 
 function tekst(value) {
   return String(value === undefined || value === null ? '' : value).trim();
@@ -866,6 +871,42 @@ function createDaghapHandlers({
     };
   }
 
+  /**
+   * BE-55 stap B, deel 5 (#135) — het aanbod per restaurant, voor het filter en
+   * het label "Vandaag" in de zoekresultaten. Eén kleine lijstvraag op de
+   * actieve, niet-verlopen rijen; alleen `restaurant_id`, `soort` en `naam`
+   * komen mee. Deze methode is voor de zoekroute (server-tot-server), niet voor
+   * de browser, en levert nooit de volledige aanbodstabel.
+   */
+  async function zoekAanbod() {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_AANBOD)
+        .select('restaurant_id, soort, naam')
+        .eq('status', DAGHAP_STATUS_ONLINE)
+        .gt('verloopt_op', new Date(Number(now())).toISOString())
+        .order('verloopt_op', { ascending: true })
+        .limit(DAGHAP_ZOEK_KANDIDATEN),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+
+    const perRestaurant = {};
+    for (const rij of Array.isArray(gevonden.data) ? gevonden.data : []) {
+      const restaurantId = rij && rij.restaurant_id;
+      if (!restaurantId) continue;
+      if (!perRestaurant[restaurantId]) perRestaurant[restaurantId] = [];
+      perRestaurant[restaurantId].push({
+        soort: rij.soort === 'seizoensgerecht' ? 'seizoensgerecht' : 'daghap',
+        naam: tekst(rij.naam).slice(0, 80),
+      });
+    }
+
+    return { status: 200, body: { ok: true, aanbod: perRestaurant } };
+  }
+
   return {
     lijstAanbod,
     meldAanbod,
@@ -875,6 +916,7 @@ function createDaghapHandlers({
     publiekVandaag,
     ruimVerlopenOp,
     wijzigAanbod,
+    zoekAanbod,
   };
 }
 

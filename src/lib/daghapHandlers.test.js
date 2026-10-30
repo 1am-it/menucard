@@ -721,6 +721,7 @@ test('BE-55: na drie meldingen van drie apparaten gaat het aanbod op in_controle
   assert.equal(derde.status, 200);
   assert.equal(derde.body.aantal, DAGHAP_MELDINGEN_TOT_CONTROLE);
   assert.equal(derde.body.inControle, true);
+
   assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].status, 'in_controle');
   assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].filter_reden, 'meldingen');
 
@@ -784,5 +785,43 @@ test('BE-55: melden kan niet op verlopen of offline aanbod en vraagt een apparaa
   assert.equal((await handlersFor(zonderMigratie).meldAanbod(meldRequest(APPARAAT_A), { id: '1' })).status, 503);
 });
 
+test('BE-55 deel 5: zoekAanbod geeft per restaurant alleen het actieve aanbod en nooit interne kolommen', async () => {
+  const client = fakeSupabase({
+    aanbod: [
+      { id: 1, soort: 'daghap', naam: 'Pompoensoep met brood' },
+      { id: 2, restaurant_id: '23', soort: 'seizoensgerecht', naam: 'Herfststoof' },
+      // Verlopen aanbod en aanbod in controle horen niet in de zoekmap.
+      { id: 3, restaurant_id: '19', soort: 'daghap', naam: 'Oude soep', verloopt_op: VERLOOPT_GISTEREN },
+      { id: 4, restaurant_id: '6', soort: 'daghap', naam: 'In controle', status: 'in_controle' },
+    ],
+  });
+  const handlers = handlersFor(client);
 
+  const resultaat = await handlers.zoekAanbod();
 
+  assert.equal(resultaat.status, 200);
+  assert.deepEqual(Object.keys(resultaat.body.aanbod).sort(), ['1', '23']);
+  assert.deepEqual(resultaat.body.aanbod['1'], [{ soort: 'daghap', naam: 'Pompoensoep met brood' }]);
+  assert.deepEqual(resultaat.body.aanbod['23'], [{ soort: 'seizoensgerecht', naam: 'Herfststoof' }]);
+  const rij = resultaat.body.aanbod['1'][0];
+  assert.deepEqual(Object.keys(rij).sort(), ['naam', 'soort'], 'geen prijs, status, account of filterreden naar de zoeklaag');
+  const vragen = client.calls.filter((call) => call.table === DAGHAP_TABLE_AANBOD);
+  assert.equal(vragen.length, 1, 'één kleine lijstvraag, geen tweede ronde');
+  assert.equal(vragen[0].action, 'select');
+});
+
+test('BE-55 deel 5: zoekAanbod zonder migratie of zonder client is 503 en gooit niet', async () => {
+  const zonderMigratie = fakeSupabase({ failing: { [DAGHAP_TABLE_AANBOD]: true } });
+  assert.equal((await handlersFor(zonderMigratie).zoekAanbod()).status, 503);
+
+  const zonderClient = createDaghapHandlers({
+    getSupabase: () => {
+      throw new Error('Supabase is not configured');
+    },
+    authenticate: async () => ({ ok: true, userId: OWNER_ID }),
+    duursteKaartPrijs: () => 0,
+    now: () => NOW,
+    timeoutMs: 200,
+  });
+  assert.equal((await zonderClient.zoekAanbod()).status, 503);
+});
