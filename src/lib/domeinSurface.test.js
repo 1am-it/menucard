@@ -25,6 +25,7 @@ const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g,
 const LAYOUT = read('app/layout.js');
 const ROBOTS = read('app/robots.js');
 const SITEMAP = read('app/sitemap.js');
+const QR_PAGE = read('app/r/[id]/page.js');
 
 // De domeinen die in de code zouden kunnen opduiken. Ze mogen alleen in
 // documentatie of in een test staan, nooit in de productcode.
@@ -62,8 +63,32 @@ test('app/sitemap.js is een dunne ingang op src/lib/seo.js met de statische gege
   assert.doesNotMatch(SITEMAP, DOMAIN);
 });
 
+test('/r/[id] stuurt 307 door naar de restaurantpagina en geeft een onbekend id een 404', () => {
+  assert.match(QR_PAGE, /import \{ notFound, redirect \} from 'next\/navigation'/);
+  assert.match(QR_PAGE, /import \{ qrRestaurantTarget, restaurantHref \} from '@\/src\/lib\/qrRoute'/);
+  assert.match(QR_PAGE, /import restaurantsData from '@\/data\/restaurants\.json'/);
+  assert.match(QR_PAGE, /export const dynamic = 'force-dynamic'/, 'de doorverwijzing volgt altijd de actuele gegevens');
+  assert.match(QR_PAGE, /const target = qrRestaurantTarget\(\{ id, restaurants: restaurantsData \}\)/);
+  assert.match(QR_PAGE, /if \(!target\) notFound\(\)/);
+  assert.match(QR_PAGE, /redirect\(restaurantHref\(target\)\)/);
+  // 307, geen 308: het is een tijdelijke doorverwijzing zolang het adres kan
+  // veranderen. `redirect()` doet dat standaard; een vaste code zou afwijken.
+  assert.doesNotMatch(QR_PAGE, /permanent|statusCode: 30[18]/);
+  assert.doesNotMatch(QR_PAGE, DOMAIN);
+  assert.doesNotMatch(QR_PAGE, /href=|Nooit gevonden|Naar de home/, 'geen omleiding of link in plaats van de 404');
+});
+
+test('geen statische robots.txt of sitemap in public/ die de routes overschrijft', () => {
+  // Next.js serveert een bestand uit public/ vóór dezelfde route. Een oude
+  // public/robots.txt maakte app/robots.js dus onbereikbaar; dat is hier
+  // bewezen met een echte `next build` + `next start` (zie de checkpoint).
+  for (const file of ['public/robots.txt', 'public/sitemap.xml']) {
+    assert.equal(fs.existsSync(path.join(ROOT, file)), false, `${file} zou app/${path.basename(file).replace('.txt', '.js')} overschrijven`);
+  }
+});
+
 test('in de eigen productcode staat geen hardgecodeerd domein', () => {
-  for (const file of ['src/lib/siteUrl.js', 'src/lib/seo.js', 'app/robots.js', 'app/sitemap.js', 'app/layout.js']) {
+  for (const file of ['src/lib/siteUrl.js', 'src/lib/seo.js', 'src/lib/qrRoute.js', 'app/robots.js', 'app/sitemap.js', 'app/layout.js', 'app/r/[id]/page.js']) {
     assert.doesNotMatch(read(file), DOMAIN, `${file} mag geen domein bevatten`);
   }
 });
