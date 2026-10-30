@@ -266,6 +266,7 @@ test('kies: de browsercheck zet het thema per opname en controleert het vóór d
     ['be46-sleep-390-dark.png', 'dark', 'sleep-lekker'],
     ['be46-uitslag-390-light.png', 'light', 'uitslag'],
     ['be46-uitslag-390-dark.png', 'dark', 'uitslag'],
+    ['be46-stapel-na-swipen-390-dark.png', 'dark', 'stapel-na-swipen'],
     ['be46-sluitingstijd-390-dark.png', 'dark', 'sluitingstijd'],
     ['be46-zonder-migratie-390-dark.png', 'dark', 'zonder-migratie'],
   ]) {

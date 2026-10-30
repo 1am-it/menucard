@@ -582,7 +582,8 @@ async function holdCard(cdp, ratio) {
  * de client-side navigatie naar de stemlink.
  */
 async function createScenario(cdp) {
-  await setViewport(cdp, 390, 780);
+  // 900 px hoog: het blad met de sluitingstijd past dan helemaal in beeld.
+  await setViewport(cdp, 390, 900);
   await navigate(cdp, `${APP}/mijn-lijstje`, `Boolean(document.querySelector('.lijst-title'))`);
 
   // Het lijstje van de maker en de deelvoorkeur op het klembord, in dezelfde
@@ -876,15 +877,18 @@ async function routeScenario(cdp) {
   // begint in een nieuwe pagina leeg, dus dit is het enige juiste moment.
   const calls = await callsOf(cdp);
 
-  // De eigen stem is bewaard: opnieuw openen geeft meteen de uitslag.
-  await cdp.send('Page.reload', { ignoreCache: false });
-  const reopened = await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 20000);
-  check('route: opnieuw openen toont meteen de uitslag', reopened);
-
+  // Dezelfde uitslag in donker, ook vóór de herlaadbeurt: anders staat er in de
+  // opname een lege uitslag (de stub kent de stemmen na een herlaadbeurt niet
+  // meer) en dat is geen bruikbaar bewijs voor de mockup.
   const dark = await readState(cdp);
   check('route: de uitslag staat er ook in donker', dark.resultIsList && dark.rows.length === 4, String(dark.rows.length));
   await shotInTheme(cdp, 'be46-uitslag-390-dark.png', 'dark', 'uitslag');
   await setTheme(cdp, 'light');
+
+  // De eigen stem is bewaard: opnieuw openen geeft meteen de uitslag.
+  await cdp.send('Page.reload', { ignoreCache: false });
+  const reopened = await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 20000);
+  check('route: opnieuw openen toont meteen de uitslag', reopened);
 
   const posts = calls.filter((call) => call.method === 'POST');
   check(
@@ -945,7 +949,7 @@ async function swipeScenario(cdp) {
   const third = await readState(cdp);
   check('swipen: na links staat het derde gerecht vooraan', third.dish === FIXTURE_DISHES[2].name, third.dish);
 
-  await shotInTheme(cdp, 'be46-stapel-390-dark.png', 'dark', 'stapel-na-swipen');
+  await shotInTheme(cdp, 'be46-stapel-na-swipen-390-dark.png', 'dark', 'stapel-na-swipen');
   await setTheme(cdp, 'light');
 }
 

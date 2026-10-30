@@ -2,9 +2,9 @@
   "category": "fixture evidence (stubbed /api/v1/kies*; not real acceptance)",
   "issue": "#106",
   "script": "run-be46-browser-check.js",
-  "generatedAt": "2026-10-30T08:20:51.792Z",
+  "generatedAt": "2026-10-30T10:29:23.736Z",
   "port": 3166,
-  "head": "2d77038a26fe30326741c42d2bc3b2c9ea333682",
+  "head": "81d41e0457a5bab41535d7fb8dc92084d2224f65",
   "stub": {
     "dishes": [
       "Fictieve pasta",
@@ -14,31 +14,31 @@
     ],
     "note": "the API answers come from stubSource() in this file, with the shape of src/lib/kiesHandlers.js; the database and the migration are not involved"
   },
-  "mockupComparison": "not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots in evidence/be-46/ are saved for the Lead/human visual comparison",
+  "mockupComparison": "niet machinaal te vergelijken: de goedgekeurde mockup is een extern Claude-artifact. De opnames in evidence/be-46/ zijn voor de visuele vergelijking door de Lead/eigenaar; elke opname heeft daarnaast themeProof (data-theme, de helderheid van de achtergrond en de actieve themaknop) en de gemeten maten van de kaart, de knoppen en de balken.",
   "filter": null,
   "scenarios": [
     {
       "name": "maken",
-      "checks": 27,
-      "passed": 27,
+      "checks": 31,
+      "passed": 31,
       "failed": 0,
-      "durationMs": 6830,
+      "durationMs": 7154,
       "error": null
     },
     {
       "name": "route",
-      "checks": 25,
-      "passed": 25,
+      "checks": 38,
+      "passed": 38,
       "failed": 0,
-      "durationMs": 4672,
+      "durationMs": 6072,
       "error": null
     },
     {
       "name": "swipen",
-      "checks": 8,
-      "passed": 8,
+      "checks": 13,
+      "passed": 13,
       "failed": 0,
-      "durationMs": 4959,
+      "durationMs": 7411,
       "error": null
     },
     {
@@ -46,7 +46,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 2641,
+      "durationMs": 3135,
       "error": null
     },
     {
@@ -54,15 +54,15 @@
       "checks": 5,
       "passed": 5,
       "failed": 0,
-      "durationMs": 3087,
+      "durationMs": 4433,
       "error": null
     },
     {
       "name": "zonder-migratie",
-      "checks": 2,
-      "passed": 2,
+      "checks": 4,
+      "passed": 4,
       "failed": 0,
-      "durationMs": 1282,
+      "durationMs": 1959,
       "error": null
     }
   ],
@@ -108,6 +108,16 @@
       "detail": "true"
     },
     {
+      "name": "thema: be46-sluitingstijd-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
+      "name": "thema: be46-sluitingstijd-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
+    },
+    {
       "name": "maken: de sluitingstijd is in te vullen",
       "passed": true,
       "detail": "18:00"
@@ -141,6 +151,11 @@
       "name": "maken: het blad noemt de gekozen tijd",
       "passed": true,
       "detail": "Samen kiezen\n\nStemlink gemaakt\n\nOpen de stemlink\n\nStemmen tot 18:00\n\nDeel de stemlink\nAnnuleren"
+    },
+    {
+      "name": "thema: be46-gemaakt-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
     },
     {
       "name": "maken: \"Deel de stemlink\" deelt de link",
@@ -208,6 +223,11 @@
       "detail": "Fictieve pasta\n€14,50\nFictief Restaurant Een\n1× lekker · 0× liever niet\nSam\nFAVORIET\nReserveer\nRoute"
     },
     {
+      "name": "thema: be46-uitslag-na-maken-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
       "name": "route: de stemlink begint met de roepnaam",
       "passed": true,
       "detail": "true"
@@ -230,12 +250,12 @@
     {
       "name": "route: de knoppen noemen het gerecht in hun aria-label",
       "passed": true,
-      "detail": "[{\"label\":\"Liever niet: Fictieve pasta\",\"text\":\"← Liever niet\",\"height\":52},{\"label\":\"Lekker: Fictieve pasta\",\"text\":\"Lekker →\",\"height\":52}]"
+      "detail": "[{\"label\":\"Liever niet: Fictieve pasta\",\"text\":\"Liever niet\",\"height\":56},{\"label\":\"Lekker: Fictieve pasta\",\"text\":\"Lekker\",\"height\":56}]"
     },
     {
       "name": "route: de knoppen zijn minstens 44 px hoog",
       "passed": true,
-      "detail": "[52,52]"
+      "detail": "[56,56]"
     },
     {
       "name": "route: \"Vorige stem ongedaan maken\" is uit zonder stem",
@@ -246,6 +266,56 @@
       "name": "route: verticaal scrollen blijft werken (touch-action: pan-y)",
       "passed": true,
       "detail": "pan-y"
+    },
+    {
+      "name": "mockup: de kaart is ±85% van de breedte op 390 px",
+      "passed": true,
+      "detail": "{\"cardWidth\":350,\"ratio\":90}"
+    },
+    {
+      "name": "mockup: de kaart is ±440 px hoog",
+      "passed": true,
+      "detail": "440"
+    },
+    {
+      "name": "mockup: er staat een tweede kaart achter de stapel",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "mockup: de kaart toont restaurant, gerecht, prijs en beschrijving, in die volgorde",
+      "passed": true,
+      "detail": "kies-rest kies-dish kies-price kies-desc"
+    },
+    {
+      "name": "mockup: naast \"Gerecht 1 van 4\" staat een dunne voortgangsbalk",
+      "passed": true,
+      "detail": "{\"hasBar\":true,\"width\":239,\"fill\":\"25%\"}"
+    },
+    {
+      "name": "mockup: twee knoppen naast elkaar van ±132 px breed en 56 px hoog, met een icoon",
+      "passed": true,
+      "detail": "[{\"text\":\"Liever niet\",\"width\":132,\"height\":56,\"icon\":true,\"background\":\"rgb(243, 241, 236)\"},{\"text\":\"Lekker\",\"width\":132,\"height\":56,\"icon\":true,\"background\":\"rgb(246, 192, 87)\"}]"
+    },
+    {
+      "name": "mockup: \"Lekker\" heeft de primaire knopkleur, \"Liever niet\" een rand",
+      "passed": true,
+      "detail": "{\"primary\":\"rgb(246, 192, 87)\",\"buttons\":[\"rgb(243, 241, 236)\",\"rgb(246, 192, 87)\"]}"
+    },
+    {
+      "name": "mockup: \"Vorige stem ongedaan maken\" is een tekstlink met een terug-pijl",
+      "passed": true,
+      "detail": "{\"text\":\"Vorige stem ongedaan maken\",\"height\":44,\"icon\":true,\"underline\":\"underline\",\"background\":\"rgba(0, 0, 0, 0)\",\"borderWidth\":\"0px\"}"
+    },
+    {
+      "name": "thema: be46-stapel-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
+      "name": "thema: be46-stapel-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
     },
     {
       "name": "route: de knop \"Lekker\" werkt",
@@ -313,6 +383,16 @@
       "detail": "[\"tel:0760000001\",\"https://www.google.com/maps/search/?api=1&query=Fictief+1%2C+Breda\"]"
     },
     {
+      "name": "mockup: elk gerecht in de uitslag heeft een balk met het aandeel \"lekker\"",
+      "passed": true,
+      "detail": "[\"100%\",\"100%\",\"0%\",\"0%\"]"
+    },
+    {
+      "name": "thema: be46-uitslag-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
       "name": "route: opnieuw openen toont meteen de uitslag",
       "passed": true,
       "detail": null
@@ -323,14 +403,39 @@
       "detail": "4"
     },
     {
+      "name": "thema: be46-uitslag-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
+    },
+    {
       "name": "route: elke stem is precies één POST met alleen de vier velden",
       "passed": true,
-      "detail": "[{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":true},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-0\",\"lekker\":false},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-1\",\"lekker\":false}]"
+      "detail": "[{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":true},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-0\",\"lekker\":false},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-1\",\"lekker\":false}]"
     },
     {
       "name": "route: de pagina leest de stemming via GET",
       "passed": true,
       "detail": "5"
+    },
+    {
+      "name": "swipen: het label \"Lekker →\" staat op de kaart tijdens het slepen",
+      "passed": true,
+      "detail": "Lekker →"
+    },
+    {
+      "name": "thema: be46-sleep-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
+      "name": "thema: be46-sleep-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
+    },
+    {
+      "name": "swipen: onder de drempel blijft het eerste gerecht staan",
+      "passed": true,
+      "detail": "Fictieve pasta"
     },
     {
       "name": "swipen: slepen naar rechts toont \"Lekker →\"",
@@ -340,7 +445,7 @@
     {
       "name": "swipen: 40% naar rechts is een stem \"lekker\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
     },
     {
       "name": "swipen: na de stem staat het tweede gerecht vooraan",
@@ -365,12 +470,17 @@
     {
       "name": "swipen: 45% naar links is een stem \"liever niet\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
     },
     {
       "name": "swipen: na links staat het derde gerecht vooraan",
       "passed": true,
       "detail": "Fictieve salade"
+    },
+    {
+      "name": "thema: be46-stapel-na-swipen-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
     },
     {
       "name": "toetsenbord: de kaartenstapel is met het toetsenbord te bereiken",
@@ -380,12 +490,12 @@
     {
       "name": "toetsenbord: ArrowRight stemt \"lekker\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
     },
     {
       "name": "toetsenbord: ArrowLeft stemt \"liever niet\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
     },
     {
       "name": "toetsenbord: de voortgang telt mee",
@@ -400,7 +510,7 @@
     {
       "name": "ongedaan: de undo-knop is minstens 44 px hoog",
       "passed": true,
-      "detail": "52"
+      "detail": "44"
     },
     {
       "name": "ongedaan: het eerste gerecht staat weer vooraan",
@@ -415,7 +525,7 @@
     {
       "name": "ongedaan: de pagina stuurt één DELETE met alleen de stemmer",
       "passed": true,
-      "detail": "[{\"method\":\"DELETE\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"2dCl2qoyvSDSOyYNPujIUg\"}}]"
+      "detail": "[{\"method\":\"DELETE\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VdR-yuXvt6-YKZqpIMByBQ\"}}]"
     },
     {
       "name": "zonder migratie: de pagina toont de ene melding",
@@ -428,6 +538,16 @@
       "detail": "false"
     },
     {
+      "name": "thema: be46-zonder-migratie-390-light.png staat echt in light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
+    },
+    {
+      "name": "thema: be46-zonder-migratie-390-dark.png staat echt in dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
+    },
+    {
       "name": "geen onafgevangen browserfout",
       "passed": true,
       "detail": "[]"
@@ -436,75 +556,190 @@
   "screenshots": [
     {
       "file": "be46-sluitingstijd-390-light.png",
-      "sha256": "77e3a6edced59a33dae98b8d76a2ad5966b8097d3207ea1a5b1524cbf7e2e5fb",
+      "sha256": "77577c2f1e4d868fc20f110ee518fe50e585fcc4dfce9e62ddab1ced9f2d91af",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
       "state": "sluitingstijd"
     },
     {
       "file": "be46-sluitingstijd-390-dark.png",
-      "sha256": "50cd5739167e1f42867664f40682357e3e1fd4b2f30e02be90fc571812e4730b",
+      "sha256": "b304caf982b48b4f8a4f0bbaf9a995dc349fd77eabad13ae1730058bdcb11df3",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
       "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
       "state": "sluitingstijd"
     },
     {
       "file": "be46-gemaakt-390-light.png",
-      "sha256": "7ee40a56f406b8c1e00a38ca7ac250a2cb477ffe25247da4ea2ee5298215a12c",
+      "sha256": "8a0ca6d25a785ba07d0badec1899ed6aeedad4e821b19546438cdd9cc3e30e86",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
       "state": "gemaakt"
     },
     {
       "file": "be46-uitslag-na-maken-390-light.png",
-      "sha256": "00ff22934d1bbfff56e9e824d90f5ea9094981577797525688edc61f4323b3f8",
+      "sha256": "5d1ab9885aafdf8b504cea7466991f5fb9a5f5039c3f6ab4f8c35a65a0f53d60",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
       "state": "uitslag-na-maken"
     },
     {
       "file": "be46-stapel-390-light.png",
-      "sha256": "f432d5b33372f5ac0377158c2dab0f793c2ba985ea83853efe50c0231368e089",
+      "sha256": "bd2af8d5b1b9aaed8527e1d7aa86960c7408b48e99b1fa89320906b6f732f9fb",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
+      "state": "stapel"
+    },
+    {
+      "file": "be46-stapel-390-dark.png",
+      "sha256": "8f0d792915fb535498a58fef8417d102e1d602f02f22d43375990409796ce8af",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
       "state": "stapel"
     },
     {
       "file": "be46-uitslag-390-light.png",
-      "sha256": "799443309158c622c3af4c7d9e7414a3d7da39f93cf207b87cf0ce52417fa109",
+      "sha256": "7d2ae290e0e39442d464a97607b791ce38a7436aa929b855585158fe71fccccc",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
       "state": "uitslag"
     },
     {
       "file": "be46-uitslag-390-dark.png",
-      "sha256": "8a14ae5e84676f0466675e063273c9b3c1bdd9c44cf0e5e5d1ddab26b307a8b4",
+      "sha256": "c0af81b49238a2dbd72d885ed271c00b9c8c4fb15763c4f9ea75e643db8cf4e3",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
       "state": "uitslag"
     },
     {
-      "file": "be46-stapel-390-dark.png",
-      "sha256": "100285112233d7f1f34dd5979dbd930cb6cfedb26cba3d61033b1299c49ff677",
+      "file": "be46-sleep-390-light.png",
+      "sha256": "113ef7df8de1dd374e2fae3af4400165f1b720ee9eaaf4c933f8b556b485ff8b",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
+      "state": "sleep-lekker"
+    },
+    {
+      "file": "be46-sleep-390-dark.png",
+      "sha256": "751e742287c3cdcb00f28c68ffb9a10ceac1778253709405e4828ff691974e06",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
       "theme": "dark",
-      "state": "stapel"
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
+      "state": "sleep-lekker"
+    },
+    {
+      "file": "be46-stapel-na-swipen-390-dark.png",
+      "sha256": "664702d942af8102e085021a863e8bcd6512866b147729bbe344c5d91fc6f2e5",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
+      "state": "stapel-na-swipen"
     },
     {
       "file": "be46-zonder-migratie-390-light.png",
@@ -513,6 +748,31 @@
       "height": 780,
       "viewport": "390x780",
       "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "bodyBackground": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ]
+      },
+      "state": "zonder-migratie"
+    },
+    {
+      "file": "be46-zonder-migratie-390-dark.png",
+      "sha256": "0ce6b93f1b9237aad8d6830e4e58632dc1a34fe3aecb740258b2a2a0b62183a7",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "bodyBackground": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ]
+      },
       "state": "zonder-migratie"
     }
   ],
