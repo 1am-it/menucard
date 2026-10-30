@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    BE-46 — "Samen kiezen" in Mijn lijstje: de knop, het blad met de
    sluitingstijd en de klaargezette stemlink (issue 106).
-   BE-52 (#128): hoort bij src/components/KiesStartButton.js en KiesShareButton.js;
+   BE-52 (issue 128): hoort bij src/components/KiesStartButton.js en KiesShareButton.js;
    alleen die twee gebruiken deze klassen. Alles is een token, dus licht en donker
    volgen automatisch.
    ───────────────────────────────────────────────────────────────────────────── */

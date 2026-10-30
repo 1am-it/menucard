@@ -5,7 +5,7 @@
    van het swipen (30% van de kaartbreedte) staat in src/lib/kiesStemming.js.
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* BE-52 (#128): dit bestand hoort bij app/kies/[code]/KiesView.js. Het blad van
+/* BE-52 (issue 128): dit bestand hoort bij app/kies/[code]/KiesView.js. Het blad van
    "Samen kiezen" in Mijn lijstje staat in src/components/kies-start.css. */
 
 .kies-main {

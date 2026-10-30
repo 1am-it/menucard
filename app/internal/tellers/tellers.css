@@ -7,7 +7,7 @@
    scherm een tabel, op een telefoon dezelfde rijen als lijst met een keuze.
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* BE-52 (#128): dit bestand hoort bij app/internal/tellers/page.js en staat
+/* BE-52 (issue 128): dit bestand hoort bij app/internal/tellers/page.js en staat
    daarom niet meer in app/globals.css. De regels zelf zijn ongewijzigd. */
 
 .tellers-periods { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
