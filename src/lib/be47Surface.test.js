@@ -174,7 +174,8 @@ test('BE-47: geen migratie, geen nieuwe tabel, geen RLS-wijziging', () => {
 });
 
 test('BE-45-bijvangst: de getallenkolom in /internal/tellers staat expliciet op --text-primary', () => {
-  const css = read('app/globals.css');
+  // BE-52 (#128): deze regels staan naast de tellerspagina.
+  const css = read('app/internal/tellers/tellers.css');
   assert.match(css, /\.tellers-table td\.tellers-col-number \{ color: var\(--text-primary\); \}/);
   assert.match(css, /\.tellers-table th\.tellers-col-number \{ color: var\(--text-secondary\); \}/);
   // No rule paints a number cell with the accent or a link colour.
