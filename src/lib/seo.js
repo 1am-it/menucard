@@ -55,6 +55,33 @@ function robotsMetadata({ siteUrl: configuredUrl } = {}) {
   return metadata;
 }
 
+/**
+ * De sitemap (contract, punt 4): de home, de lijstpagina, elke restaurantpagina
+ * en elke menukaart uit de statische gegevens. Geen interne of persoonlijke
+ * pagina's — `isPrivatePath()` is hier het vangnet. Zonder eigen domein is de
+ * sitemap leeg: een half gevulde sitemap met relatieve adressen bestaat niet.
+ */
+function sitemapEntries({ siteUrl: configuredUrl, restaurants = [], menus = [] } = {}) {
+  const base = normalizeSiteUrl(configuredUrl);
+  if (!base) return [];
+
+  const paths = [...PUBLIC_PATHS];
+  const add = (path) => {
+    if (!path || isPrivatePath(path) || paths.includes(path)) return;
+    paths.push(path);
+  };
+  // Alleen een simpele id komt in een pad; een id met een slash, vraagteken of
+  // ander teken is geen echte pagina en hoort er niet in.
+  const validId = (value) => /^[A-Za-z0-9_-]+$/.test(String(value === undefined || value === null ? '' : value).trim());
+  for (const id of restaurants || []) {
+    if (validId(id)) add(`/restaurant/${String(id).trim()}`);
+  }
+  for (const id of menus || []) {
+    if (validId(id)) add(`/menu/${String(id).trim()}`);
+  }
+  return paths.map((path) => ({ url: `${base}${path}` }));
+}
+
 module.exports = {
   PRIVATE_PATHS,
   PUBLIC_PATHS,
@@ -62,4 +89,5 @@ module.exports = {
   absoluteHref,
   isPrivatePath,
   robotsMetadata,
+  sitemapEntries,
 };

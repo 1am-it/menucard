@@ -24,6 +24,7 @@ const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8').replace(/\r\n/g,
 
 const LAYOUT = read('app/layout.js');
 const ROBOTS = read('app/robots.js');
+const SITEMAP = read('app/sitemap.js');
 
 // De domeinen die in de code zouden kunnen opduiken. Ze mogen alleen in
 // documentatie of in een test staan, nooit in de productcode.
@@ -46,8 +47,23 @@ test('app/robots.js is een dunne ingang op src/lib/seo.js en de siteUrl-helper',
   assert.doesNotMatch(ROBOTS, /disallow:\s*\[/, 'de uitsluitlijst staat in src/lib/seo.js, niet hier');
 });
 
+test('app/sitemap.js is een dunne ingang op src/lib/seo.js met de statische gegevens', () => {
+  assert.match(SITEMAP, /import \{ sitemapEntries \} from '@\/src\/lib\/seo'/);
+  assert.match(SITEMAP, /import \{ siteUrl \} from '@\/src\/lib\/siteUrl'/);
+  assert.match(SITEMAP, /import restaurantsData from '@\/data\/restaurants\.json'/);
+  assert.match(SITEMAP, /import menusData from '@\/data\/menus\.json'/);
+  assert.match(SITEMAP, /export default function sitemap\(\)/);
+  assert.match(SITEMAP, /siteUrl: siteUrl\(\)/);
+  assert.match(SITEMAP, /restaurants: Object\.keys\(restaurantsData\)/);
+  assert.match(SITEMAP, /menus: Object\.keys\(menusData\)/);
+  // Geen interne of persoonlijke pagina's en geen eigen padlijst: die staan in
+  // src/lib/seo.js (getest in seo.test.js).
+  assert.doesNotMatch(SITEMAP, /\/internal|\/api|\/mijn-restaurant|\/claim|\/kies|\/mijn-lijstje/);
+  assert.doesNotMatch(SITEMAP, DOMAIN);
+});
+
 test('in de eigen productcode staat geen hardgecodeerd domein', () => {
-  for (const file of ['src/lib/siteUrl.js', 'src/lib/seo.js', 'app/robots.js', 'app/layout.js']) {
+  for (const file of ['src/lib/siteUrl.js', 'src/lib/seo.js', 'app/robots.js', 'app/sitemap.js', 'app/layout.js']) {
     assert.doesNotMatch(read(file), DOMAIN, `${file} mag geen domein bevatten`);
   }
 });

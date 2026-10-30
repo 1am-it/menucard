@@ -19,7 +19,13 @@ const {
   absoluteHref,
   isPrivatePath,
   robotsMetadata,
+  sitemapEntries,
 } = require('./seo');
+
+// De echte statische gegevens, net als app/sitemap.js ze aanlevert. Deze test
+// controleert dus de werkelijke 25 restaurants en 11 menukaarten, geen fixture.
+const RESTAURANTS = Object.keys(require('../../data/restaurants.json'));
+const MENUS = Object.keys(require('../../data/menus.json'));
 
 const SITE = 'https://onzemenukaarten.nl';
 
@@ -70,4 +76,56 @@ test('een pad wordt alleen met een geldige https-basis een absolute link', () =>
 test('de publieke lijst is de home plus de lijstpagina, zonder privépaden', () => {
   assert.deepEqual(PUBLIC_PATHS, ['/', '/alle-restaurants']);
   for (const path of PUBLIC_PATHS) assert.equal(isPrivatePath(path), false);
+});
+
+test('de sitemap bevat de home, de lijstpagina en elke echte restaurant- en menukaart', () => {
+  const entries = sitemapEntries({ siteUrl: SITE, restaurants: RESTAURANTS, menus: MENUS });
+  const urls = entries.map((entry) => entry.url);
+
+  assert.equal(entries.length, 2 + RESTAURANTS.length + MENUS.length, 'geen dubbele en geen ontbrekende pagina');
+  assert.ok(urls.includes('https://onzemenukaarten.nl/'));
+  assert.ok(urls.includes('https://onzemenukaarten.nl/alle-restaurants'));
+  // De echte gegevens: elk restaurant en elke menukaart, met een id in het pad.
+  for (const id of RESTAURANTS) {
+    assert.ok(urls.includes(`https://onzemenukaarten.nl/restaurant/${id}`), `restaurant ${id} ontbreekt`);
+  }
+  for (const id of MENUS) {
+    assert.ok(urls.includes(`https://onzemenukaarten.nl/menu/${id}`), `menukaart ${id} ontbreekt`);
+  }
+  assert.equal(RESTAURANTS.length, 25);
+  assert.equal(MENUS.length, 11);
+  // Elke regel is een volledige https-URL op het eigen domein.
+  for (const url of urls) assert.match(url, /^https:\/\/onzemenukaarten\.nl\//);
+});
+
+test('de sitemap bevat geen interne of persoonlijke paden', () => {
+  const entries = sitemapEntries({ siteUrl: SITE, restaurants: RESTAURANTS, menus: MENUS });
+  for (const entry of entries) {
+    const path = entry.url.replace(SITE, '');
+    assert.equal(isPrivatePath(path), false, `${path} hoort niet in de sitemap`);
+    for (const prefix of ['/internal', '/api', '/mijn-restaurant', '/claim', '/kies', '/mijn-lijstje']) {
+      assert.equal(path.startsWith(prefix), false, `${path} hoort niet in de sitemap`);
+    }
+    assert.doesNotMatch(entry.url, /[?#]/, 'geen query of fragment in de sitemap');
+  }
+  // Ook een bron die per ongeluk zo'n pad aanlevert, komt er niet in: een id met
+  // een slash valt af, en een id dat een privépad zou opleveren ook.
+  const leaky = sitemapEntries({
+    siteUrl: SITE,
+    restaurants: ['6', '/internal', 'mijn-restaurant'],
+    menus: ['6-diner', 'kies', ''],
+  });
+  const leakyPaths = leaky.map((entry) => entry.url.replace(SITE, ''));
+  assert.deepEqual(leakyPaths.filter((path) => PRIVATE_PATHS.some((prefix) => path.startsWith(prefix))), []);
+  assert.ok(leakyPaths.includes('/restaurant/6'));
+  assert.ok(leakyPaths.includes('/menu/6-diner'));
+  assert.equal(leakyPaths.includes('/menu/'), false, 'een lege id levert geen pad op');
+});
+
+test('zonder eigen domein is de sitemap leeg', () => {
+  assert.deepEqual(sitemapEntries({ siteUrl: '', restaurants: RESTAURANTS, menus: MENUS }), []);
+  assert.deepEqual(sitemapEntries({ restaurants: RESTAURANTS, menus: MENUS }), []);
+  assert.deepEqual(sitemapEntries({ siteUrl: 'http://onzemenukaarten.nl', restaurants: RESTAURANTS, menus: MENUS }), []);
+  assert.deepEqual(sitemapEntries({ siteUrl: 'niet-een-url', restaurants: RESTAURANTS, menus: MENUS }), []);
+  assert.deepEqual(sitemapEntries(), []);
 });
