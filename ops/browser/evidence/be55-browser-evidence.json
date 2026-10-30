@@ -1,15 +1,15 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T20:49:42.904Z",
+  "startedAt": "2026-10-30T21:14:57.246Z",
   "port": 3195,
   "scenarioRuns": [
     {
       "name": "vandaag",
-      "checks": 93,
-      "passed": 93,
+      "checks": 109,
+      "passed": 109,
       "failed": 0,
-      "durationMs": 47675,
+      "durationMs": 57436,
       "error": null
     },
     {
@@ -17,7 +17,7 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 4410,
+      "durationMs": 4658,
       "error": null
     }
   ],
@@ -92,6 +92,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag light/1280: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag light/1280: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
@@ -100,6 +105,11 @@
       "name": "vandaag light/1280: de naam haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/1280: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":378,\"onder\":891,\"hoogte\":513,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "vandaag light/390: het thema is toegepast",
@@ -167,6 +177,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag light/390: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag light/390: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
@@ -175,6 +190,11 @@
       "name": "vandaag light/390: de naam haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/390: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":475,\"onder\":1056,\"hoogte\":581,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "vandaag light/320: het thema is toegepast",
@@ -229,7 +249,7 @@
     {
       "name": "vandaag light/320: de meldknop is minstens 44 px hoog",
       "passed": true,
-      "detail": "44"
+      "detail": "58"
     },
     {
       "name": "vandaag light/320: het blok is gelabeld door zijn kop",
@@ -242,6 +262,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag light/320: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag light/320: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
@@ -250,6 +275,11 @@
       "name": "vandaag light/320: de naam haalt 4,5:1",
       "passed": true,
       "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/320: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":552,\"onder\":1203,\"hoogte\":651,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "vandaag dark/1280: het thema is toegepast",
@@ -317,6 +347,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag dark/1280: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag dark/1280: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "6.946559942869543"
@@ -325,6 +360,11 @@
       "name": "vandaag dark/1280: de naam haalt 4,5:1",
       "passed": true,
       "detail": "12.144216065351369"
+    },
+    {
+      "name": "vandaag dark/1280: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":378,\"onder\":891,\"hoogte\":513,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "vandaag dark/390: het thema is toegepast",
@@ -392,6 +432,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag dark/390: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag dark/390: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "6.946559942869543"
@@ -400,6 +445,11 @@
       "name": "vandaag dark/390: de naam haalt 4,5:1",
       "passed": true,
       "detail": "12.144216065351369"
+    },
+    {
+      "name": "vandaag dark/390: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":475,\"onder\":1056,\"hoogte\":581,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "vandaag dark/320: het thema is toegepast",
@@ -454,7 +504,7 @@
     {
       "name": "vandaag dark/320: de meldknop is minstens 44 px hoog",
       "passed": true,
-      "detail": "44"
+      "detail": "58"
     },
     {
       "name": "vandaag dark/320: het blok is gelabeld door zijn kop",
@@ -467,6 +517,11 @@
       "detail": "true/true"
     },
     {
+      "name": "vandaag dark/320: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
       "name": "vandaag dark/320: de prijs haalt 4,5:1",
       "passed": true,
       "detail": "6.946559942869543"
@@ -477,14 +532,39 @@
       "detail": "12.144216065351369"
     },
     {
+      "name": "vandaag dark/320: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":552,\"onder\":1203,\"hoogte\":651,\"scherm\":900,\"scrollY\":0}"
+    },
+    {
       "name": "menu light: het blok \"Vandaag\" staat ook op de menupagina",
       "passed": true,
       "detail": "2/Vandaag"
     },
     {
+      "name": "menu light: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
+      "name": "menu light: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":558,\"onder\":1071,\"hoogte\":513,\"scherm\":900,\"scrollY\":0}"
+    },
+    {
       "name": "menu dark: het blok \"Vandaag\" staat ook op de menupagina",
       "passed": true,
       "detail": "2/Vandaag"
+    },
+    {
+      "name": "menu dark: precies één \"Bewaar\" en één \"Deel\" op de kaart",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
+      "name": "menu dark: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"kopInBeeld\":true,\"boven\":558,\"onder\":1071,\"hoogte\":513,\"scherm\":900,\"scrollY\":0}"
     },
     {
       "name": "zonder aanbod: er is geen blok \"Vandaag\"",
@@ -519,22 +599,22 @@
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"},{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"}]"
+      "detail": "[{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"},{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"}"
+      "detail": "{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "c4fb32f3b1f6ca5431baa7f8"
+      "detail": "3ec954aebd8598c5fd10c07f"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "c4fb32f3b1f6ca5431baa7f8"
+      "detail": "3ec954aebd8598c5fd10c07f"
     },
     {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
@@ -555,7 +635,7 @@
   "shots": [
     {
       "file": "be55-vandaag-restaurant-1280-light.png",
-      "sha256": "ae8817f9f9c3805952331aed5ee199bc7a5a7f2a3d3ce4bc753d08170aebab6b",
+      "sha256": "6576af9875ce294851879562655001fadd52d3485de09b1daf8fa97c54deae18",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -564,7 +644,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-390-light.png",
-      "sha256": "4a846c8e6332a37380b3b3a60c8551ddba94f25449fabec2ecded7deaf884d2b",
+      "sha256": "47defebac1e1f9d6cad2ba8fa85876ab493e100dcef831285c916d498d51c464",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -573,7 +653,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-320-light.png",
-      "sha256": "ed4d6a6e7a1fd8572ab8c5135c2b99d594135383a212fdf7e48e4273d0ad7aaa",
+      "sha256": "3dd458faf7c66dade5291cf9cb63f7558a8337666d490be9ddbada94c08f77af",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -582,7 +662,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-1280-dark.png",
-      "sha256": "f6e18aa52798a559c245389b90c79a7fd12f25ffaa6d0aa70bd0da39bd167886",
+      "sha256": "11141ef79412b2d3e8369f32ee50239a25ece7344e7c331620b7901e802c2edd",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -591,7 +671,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-390-dark.png",
-      "sha256": "0b1ac85e6c600fa88499a6dbf1725f30c396b2860ad754597cdd8c988ed4a202",
+      "sha256": "aac7947e717960f426aca9881e47c9e432622f0094b52836737b12b6ef3d7a40",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -600,7 +680,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-320-dark.png",
-      "sha256": "4291cd3108a15c05cb799f7bcae29c591ade2be640f0a5214a9a2a35d05f8f79",
+      "sha256": "8eb98663c07bc1b34d618f8d65e554961ce8b002b287660cac0993f7cc33b44b",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -609,7 +689,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-light.png",
-      "sha256": "93364e20a5bb3f2a48baf3825c133ff43050bf3a3fa0d2f9b334795d9be3b78c",
+      "sha256": "6d611fc41c649abf0f7b66603f2b31e9994d9141ea24676a6b2ca5c310a96e70",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -618,7 +698,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-dark.png",
-      "sha256": "738a26803ab5e246fceddd1f5433020f8661a48ea1f7a609f08ae561c501a030",
+      "sha256": "41e8ec163727a3c24b1f90b9123a9cb33f92cc4ef2fd5a7a4194f6c4dd0a913e",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -636,7 +716,7 @@
     },
     {
       "file": "be55-melden-bevestiging-390-dark.png",
-      "sha256": "6081b888d95129946b15f571988a6d30ced6a4b9c66f18d7f5ca10b9448f6203",
+      "sha256": "312979599066f08766906543add47eed25bbc9b3feaf5532e12054fce437ff1c",
       "width": 390,
       "height": 900,
       "viewport": "390x900",

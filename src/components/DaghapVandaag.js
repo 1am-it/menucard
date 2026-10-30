@@ -141,7 +141,7 @@ export default function DaghapVandaag({ restaurantId }) {
                 </p>
               )}
               <div className="daghap-vandaag-actions">
-                {/* BE-55 (#135, herstel na review deel 2) — DishShareButton
+                {/* BE-55 (issue 135, herstel na review deel 2) — DishShareButton
                     rendert zelf de bewaarknop zodra hij een `entry` krijgt.
                     Een losse DishSaveButton ernaast gaf twee bladwijzers;
                     daarom staat hier alleen de deelknop, net als op de

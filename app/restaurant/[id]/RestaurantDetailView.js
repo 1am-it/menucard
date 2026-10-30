@@ -95,9 +95,9 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
               </div>
             )}
 
-            {/* BE-55 (#135, herstel na review deel 2) — "Vandaag" hoort direct
-                onder de kop met naam en beschrijving en vóór de menuknoppen,
-                zoals in de mockup; niet onderaan de pagina. */}
+            {/* BE-55 (issue 135, herstel na review deel 2) — "Vandaag" hoort
+                direct onder de kop met naam en beschrijving en vóór de
+                menuknoppen, zoals in de mockup; niet onderaan de pagina. */}
             <DaghapVandaag restaurantId={id} />
 
             {/* Menu links */}
