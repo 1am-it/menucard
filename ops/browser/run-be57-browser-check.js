@@ -59,6 +59,7 @@ const CLAIMS = [{ id: 'claim-approved', restaurant_id: '1', status: 'approved', 
 const checks = [];
 const errors = [];
 const shots = [];
+const injectedScripts = [];
 let cdp = null;
 let server = null;
 let browser = null;
@@ -284,7 +285,17 @@ async function resetStorage(theme) {
 /** De pagina openen voor één stand: eigen stub, eigen sessie, eigen thema. */
 async function openState(state, theme) {
   await resetStorage(theme);
-  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+  // Alleen de nieuwste stub telt; de vorige scripts worden opgeruimd zodat een
+  // oude stand nooit door een latere documentlaad heen sijpelt.
+  for (const identifier of injectedScripts) {
+    try {
+      await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier });
+    } catch (error) {
+      /* een verdwenen script is geen fout */
+    }
+  }
+  injectedScripts.length = 0;
+  const added = await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
     source: authStubScript({
       theme,
       email: OWNER_EMAIL,
@@ -294,17 +305,21 @@ async function openState(state, theme) {
       ownerStats: { '/api/mijn-restaurant/1/cijfers': { status: 200, body: state.stats } },
     }),
   });
+  if (added && added.identifier) injectedScripts.push(added.identifier);
+
   await navigate(cdp, DASHBOARD_URL, `document.readyState === 'complete'`);
   // Zonder sessie stuurt de pagina naar de login; daar loggen we in en komen we
   // terug op het overzicht.
   if (!(await waitFor(cdp, `document.querySelector('#owner-email') === null`, 15000))) {
     await signIn();
   }
-  const ready = await waitFor(
-    cdp,
-    `document.querySelector('.owner-stats') && document.querySelector('.owner-stats').innerText.indexOf(${JSON.stringify(state.expected)}) >= 0`,
-    25000,
-  );
+  const panelText = `document.querySelector('.owner-stats') && document.querySelector('.owner-stats').innerText.indexOf(${JSON.stringify(state.expected)}) >= 0`;
+  let ready = await waitFor(cdp, panelText, 30000);
+  if (!ready) {
+    // Eén herlaadpoging: de eerste keer kan de dev-server nog compileren.
+    await navigate(cdp, DASHBOARD_URL, `document.readyState === 'complete'`);
+    ready = await waitFor(cdp, panelText, 30000);
+  }
   if (!ready) throw new Error(`stats_missing: ${state.name}`);
   return evalJs(cdp, 'window.__BE48__ ? window.__BE48__.violations : []');
 }
@@ -458,7 +473,8 @@ async function run() {
 
   // Warm-up met de gewone stub: de routes zijn dan al gecompileerd voordat de
   // echte metingen beginnen.
-  await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript({}) });
+  const warm = await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: authStubScript({}) });
+  if (warm && warm.identifier) injectedScripts.push(warm.identifier);
   await navigate(cdp, LOGIN_URL, `document.readyState === 'complete'`);
   await navigate(cdp, DASHBOARD_URL, `document.readyState === 'complete'`);
 

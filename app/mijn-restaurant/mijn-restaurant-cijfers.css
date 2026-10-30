@@ -127,7 +127,7 @@
   background: var(--accent);
 }
 
-.owner-welcome .owner-note { margin-bottom: 10px; }
+.owner-welcome p { margin-bottom: 10px; }
 
 .owner-start {
   margin: 0 0 14px;
@@ -144,7 +144,7 @@
   border-top: 1px solid var(--border);
 }
 
-.owner-menu .owner-note { margin-bottom: 0; }
+.owner-menu p { margin-bottom: 0; }
 
 @media (max-width: 640px) {
   .owner-figures,

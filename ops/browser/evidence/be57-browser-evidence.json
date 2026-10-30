@@ -2,7 +2,7 @@
   "ticket": "BE-57 (#139, deel 2)",
   "route": "/mijn-restaurant",
   "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3187); geen productie, geen echte acceptatie",
-  "ranAt": "2026-10-30T21:45:08.378Z",
+  "ranAt": "2026-10-30T21:55:02.237Z",
   "passed": true,
   "checks": [
     {
@@ -113,7 +113,7 @@
     {
       "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 47 teksten gemeten tegen de echte achtergrond",
       "passed": true,
-      "detail": "zwakste 5.92:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 10 bedieningselementen",
@@ -183,7 +183,7 @@
     {
       "name": "overzicht: de schermafdruk 390/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":126,\"bottom\":718,\"height\":592,\"inView\":true}"
+      "detail": "{\"top\":128,\"bottom\":720,\"height\":592,\"inView\":true}"
     },
     {
       "name": "overzicht: geen horizontale scroll bij 390/light",
@@ -213,7 +213,7 @@
     {
       "name": "overzicht: de schermafdruk 320/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":-17,\"bottom\":730,\"height\":746,\"inView\":true}"
+      "detail": "{\"top\":-22,\"bottom\":725,\"height\":746,\"inView\":true}"
     },
     {
       "name": "overzicht: geen horizontale scroll bij 320/light",
@@ -383,7 +383,7 @@
     {
       "name": "net-geclaimd: de schermafdruk 390/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":109,\"bottom\":735,\"height\":626,\"inView\":true}"
+      "detail": "{\"top\":110,\"bottom\":736,\"height\":626,\"inView\":true}"
     },
     {
       "name": "net-geclaimd: geen horizontale scroll bij 390/light",
@@ -583,7 +583,7 @@
     {
       "name": "geen-cijfers: de schermafdruk 390/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":112,\"bottom\":738,\"height\":626,\"inView\":true}"
+      "detail": "{\"top\":115,\"bottom\":741,\"height\":626,\"inView\":true}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 390/light",
@@ -686,13 +686,13 @@
       "theme": "light",
       "viewport": "390x844",
       "panel": {
-        "top": 126,
-        "bottom": 718,
+        "top": 128,
+        "bottom": 720,
         "height": 592,
         "inView": true
       },
       "file": "be57-overzicht-390-licht.png",
-      "sha256": "ee633a6e60d14f775a463bce13ea90d9484a55462431ba26f284aae8ee7d7056",
+      "sha256": "7a17b10e7aaccd55ea1f79fcf074016078e59ca89cf802286d3987cac6802ced",
       "width": 390,
       "height": 844
     },
@@ -718,13 +718,13 @@
       "theme": "light",
       "viewport": "320x700",
       "panel": {
-        "top": -17,
-        "bottom": 730,
+        "top": -22,
+        "bottom": 725,
         "height": 746,
         "inView": true
       },
       "file": "be57-overzicht-320-licht.png",
-      "sha256": "df309219af30d4f1e2997bc96177cd4396f71338f9dc6a7061d7db7267d99acf",
+      "sha256": "df355ff9247f6277629e68b3da4390c6153285b5ef76ba8079d35ff34ac0db17",
       "width": 320,
       "height": 700
     },
@@ -782,8 +782,8 @@
       "theme": "light",
       "viewport": "390x844",
       "panel": {
-        "top": 109,
-        "bottom": 735,
+        "top": 110,
+        "bottom": 736,
         "height": 626,
         "inView": true
       },
@@ -878,13 +878,13 @@
       "theme": "light",
       "viewport": "390x844",
       "panel": {
-        "top": 112,
-        "bottom": 738,
+        "top": 115,
+        "bottom": 741,
         "height": 626,
         "inView": true
       },
       "file": "be57-geen-cijfers-390-licht.png",
-      "sha256": "3198d703ac332cbf2de41707e5d23b88c30e5a0ab0947f1e2adf98cb9f11ad7d",
+      "sha256": "ecaf78cc4b3beeceaff7714e068a98a52cf6de97aee3b611d93b99e7aac860ac",
       "width": 390,
       "height": 844
     },
@@ -1088,8 +1088,8 @@
           "viewport": "390",
           "theme": "light",
           "visible": {
-            "top": 126,
-            "bottom": 718,
+            "top": 128,
+            "bottom": 720,
             "height": 592,
             "inView": true
           }
@@ -1108,8 +1108,8 @@
           "viewport": "320",
           "theme": "light",
           "visible": {
-            "top": -17,
-            "bottom": 730,
+            "top": -22,
+            "bottom": 725,
             "height": 746,
             "inView": true
           }
@@ -1199,8 +1199,8 @@
           "viewport": "390",
           "theme": "light",
           "visible": {
-            "top": 109,
-            "bottom": 735,
+            "top": 110,
+            "bottom": 736,
             "height": 626,
             "inView": true
           }
@@ -1310,8 +1310,8 @@
           "viewport": "390",
           "theme": "light",
           "visible": {
-            "top": 112,
-            "bottom": 738,
+            "top": 115,
+            "bottom": 741,
             "height": 626,
             "inView": true
           }
