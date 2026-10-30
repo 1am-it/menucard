@@ -904,8 +904,8 @@ async function swipeScenario(cdp) {
   await join(cdp, 'Sam');
 
   // Een opname terwijl de kaart vasthangt: het label staat op de kaart, in
-  // licht én donker. 15% is onder de drempel, dus loslaten stemt hier niet.
-  const held = await holdCard(cdp, 0.15);
+  // licht én donker. 24% is onder de drempel, dus loslaten stemt hier niet.
+  const held = await holdCard(cdp, 0.24);
   check('swipen: het label "Lekker →" staat op de kaart tijdens het slepen', Boolean(held) && (held.label || '').indexOf('Lekker') >= 0, held && held.label);
   await shotInTheme(cdp, 'be46-sleep-390-light.png', 'light', 'sleep-lekker');
   await shotInTheme(cdp, 'be46-sleep-390-dark.png', 'dark', 'sleep-lekker');

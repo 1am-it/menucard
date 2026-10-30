@@ -189,6 +189,9 @@ test('kies: de kaartenstapel en de uitslag volgen de goedgekeurde mockup', () =>
   // "Vorige stem ongedaan maken" is een tekstlink met een terug-pijl.
   assert.match(VIEW, /className="kies-undo"[\s\S]*?<BackIcon \/>[\s\S]*?<span>\{KIES_UNDO_LABEL\}<\/span>/);
   assert.match(CSS, /\.kies-undo \{[\s\S]*?text-decoration: underline;/);
+  // Het label blijft in beeld: het staat aan de kant waar de kaart vandaan komt.
+  assert.match(CSS, /\.kies-swipe-lekker \{\n {2}left: 16px;/);
+  assert.match(CSS, /\.kies-swipe-liever-niet \{\n {2}right: 16px;/);
   // De uitslag: "Reserveer" in de primaire kleur, "Route" met rand, en per
   // gerecht een balk met het aandeel "lekker".
   assert.match(VIEW, /className="lijst-primary-btn"[\s\S]*?\{KIES_RESERVE_LABEL\}/);

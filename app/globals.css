@@ -6066,10 +6066,11 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   color: var(--text-secondary);
 }
 
-/* Het label dat tijdens het slepen de richting toont, op de kaart zelf. */
+/* Het label dat tijdens het slepen de richting toont, op de kaart zelf. Het
+   staat onderaan: daar is de kaart leeg, dus het label dekt geen tekst af. */
 .kies-swipe-label {
   position: absolute;
-  top: 16px;
+  bottom: 20px;
   z-index: 2;
   padding: 6px 14px;
   border: 1.5px solid var(--border);
@@ -6080,14 +6081,17 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   color: var(--text-primary);
 }
 
+/* Het label staat aan de kant waar de kaart naartoe beweegt vrij: bij een
+   sleep naar rechts staat "Lekker →" links op de kaart en bij een sleep naar
+   links staat "← Liever niet" rechts, zodat het label in beeld blijft. */
 .kies-swipe-lekker {
-  right: 16px;
+  left: 16px;
   border-color: var(--accent);
   color: var(--accent);
 }
 
 .kies-swipe-liever-niet {
-  left: 16px;
+  right: 16px;
   border-color: var(--danger);
   color: var(--danger);
 }
@@ -6305,8 +6309,9 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 
 .kies-start-link { min-height: 44px; }
 
-@media (max-width: 420px) {
-  .kies-vote-actions { grid-template-columns: 1fr; }
-  .kies-dish { font-size: 22px; }
+/* De twee knoppen blijven naast elkaar, ook op 390 px (mockup); pas op de
+   smalste schermen wordt de gerechtnaam een maat kleiner. */
+@media (max-width: 360px) {
+  .kies-dish { font-size: 26px; }
 }
 
