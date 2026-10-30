@@ -60,7 +60,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
       <header>
         <div className="header-inner">
           <Wordmark />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="header-actions">
             <ThemeToggle />
             <ShareSettingsButton />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>

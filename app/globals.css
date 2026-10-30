@@ -5881,3 +5881,76 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
     scroll-behavior: auto !important;
   }
 }
+
+/* 2. Reflow (criterium 1, "320 px breed en 200% tekst"). Een raster- of
+   flexkolom mag smaller worden dan zijn inhoud: `minmax(0, 1fr)` in plaats van
+   `auto`, `min(…, 100%)` voor een vaste minimumbreedte en `min-width: 0` op de
+   kolommen zelf. Zonder dat duwt de inhoud bij 200% tekst de pagina breder dan
+   het venster. Geen nieuwe kleur en geen andere opbouw. */
+.tonight-list { grid-template-columns: minmax(0, 1fr); }
+.home-tile-grid { grid-template-columns: repeat(auto-fill, minmax(min(180px, 100%), 1fr)); }
+.menu-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.hero-inner { grid-template-columns: minmax(0, 1fr) auto; }
+.restaurant-panel { min-width: min(240px, 100%); }
+.menu-grid > *, .menu-card, .card-top > *, .card-foot > *, .rp-btns > *, .ar-heading-copy, .dish-result-main {
+  min-width: 0;
+}
+
+/* 2b. Een prijsvlak, badge of lange titel breekt in plaats van buiten zijn vlak
+   te lopen. Het prijsvlak was `nowrap` en mocht niet krimpen; op 200% tekst
+   duwde dat de kaart breder dan het scherm. */
+.td-price { white-space: normal; flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; }
+/* De gerechtnaam houdt een leesbare minimumbreedte: zonder die ondergrens kromp
+   hij naast het prijsvlak tot een paar pixels en brak het laatste teken alsnog
+   buiten zijn vlak. Past het niet naast elkaar, dan gaat de prijs naar de
+   volgende regel (`.card-top` wrapt). */
+.card-top > .td-name { flex: 1 1 auto; min-width: min(100%, 12ch); }
+/* Een statusbadge stond op één regel en liep bij 200% tekst over zijn eigen
+   vlak heen. */
+.status-badge { white-space: normal; flex-wrap: wrap; min-width: 0; }
+.home-title, .home-section-title, .hero-title, .detail-name, .ar-title, .lijst-title,
+.td-name, .tonight-name, .tonight-price, .rp-name, .rp-line, .rp-label, .status-badge,
+.detail-tag, .hours-time, .dip-section-title, .td-desc, .td-sup, .cat-title, .ar-kind,
+.price-label, .reservation-note, .card-foot-labels, .home-tile > span {
+  overflow-wrap: anywhere;
+}
+
+/* 2c. Rijen die naast elkaar staan mogen bij weinig ruimte onder elkaar
+   verdergaan in plaats van de pagina breder te maken. */
+.card-top, .card-foot, .dish-share, .rp-btns, .dip-row, .dish-result-card-row, .tonight-card, .saved-list-bar {
+  flex-wrap: wrap;
+}
+/* De kop van de restaurantpagina had zijn knoppen in een inline-stijl zonder
+   `flex-wrap`; die stijl staat nu in een klasse, zodat de knoppen bij weinig
+   ruimte onder elkaar kunnen. Zelfde opmaak, breder inzetbaar. */
+.header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.share-settings-btn { white-space: normal; }
+/* Een lange bron-URL of sorteerlabel loopt niet buiten zijn vlak. */
+.rp-source, .rp-source a, .ar-sort-label, .ar-name { max-width: 100%; overflow-wrap: anywhere; }
+.ar-sort-label { min-width: 0; flex-wrap: wrap; }
+.ar-sort { min-width: 0; max-width: 100%; }
+
+/* 2d. De emoji-tegels hadden een vaste breedte; bij 200% tekst is het teken
+   breder dan de tegel. De tegel groeit mee in plaats van eroverheen. */
+.tonight-emoji, .dish-result-emoji { width: auto; min-width: 36px; }
+.ar-tile { width: auto; min-width: 44px; }
+
+/* 2e. De vaste "Mijn lijstje"-balk is gecentreerd en stond op één regel; bij
+   200% tekst werd hij breder dan het venster en duwde hij de pagina opzij. */
+.saved-list-bar { max-width: calc(100% - 24px); white-space: normal; justify-content: center; }
+
+@media (max-width: 720px) {
+  .home-tile-grid { grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); }
+  /* De twee kolommen van de menu- en restaurantkop passen bij 320 px niet naast
+     elkaar; ze staan dan onder elkaar, net als op de rest van de telefoonweergave. */
+  .hero-inner, .detail-hero-inner { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  /* De zwevende menubalk: bij 200% tekst passen twee labels niet meer naast
+     elkaar. De balk blijft binnen het scherm en de labels gaan dan onder elkaar
+     staan in plaats van buiten het venster te lopen; de pagina houdt daaronder
+     ruimte vrij, zodat geen link of knop onder de balk verdwijnt. */
+  .mobile-tabbar { max-width: calc(100% - 24px); flex-wrap: wrap; }
+  .mobile-tab-link { min-width: 0; padding: 0 6px; text-align: center; overflow-wrap: anywhere; }
+  .page-with-tabbar { padding-bottom: 128px; }
+  .results-section { padding-bottom: 128px; }
+}
+

@@ -38,3 +38,23 @@ test('de BE-51-laag gebruikt alleen tokens en geen eigen kleuren', () => {
   assert.doesNotMatch(block, /:\s*#[0-9a-fA-F]{3,8}\b/, 'geen hardgecodeerde kleur in de BE-51-laag');
   assert.doesNotMatch(block, /:\s*rgba?\(/, 'geen hardgecodeerde kleur in de BE-51-laag');
 });
+
+test('de reflow-regels van BE-51 staan er: rasterkolommen, wrapping en tikdoelen', () => {
+  const block = be51Block();
+  assert.match(block, /\.tonight-list \{ grid-template-columns: minmax\(0, 1fr\); \}/);
+  assert.match(block, /minmax\(min\(280px, 100%\), 1fr\)/);
+  assert.match(block, /\.mobile-tabbar \{ max-width: calc\(100% - 24px\); flex-wrap: wrap; \}/);
+  assert.match(block, /\.hero-inner, \.detail-hero-inner \{ grid-template-columns: minmax\(0, 1fr\); gap: 24px; \}/);
+  // Het prijsvlak mocht niet krimpen en stond op één regel; dat duwde de kaart
+  // bij 200% tekst breder dan het scherm.
+  assert.match(block, /\.td-price \{ white-space: normal; flex-shrink: 1; min-width: 0; overflow-wrap: anywhere; \}/);
+  assert.match(block, /\.card-top > \.td-name \{ flex: 1 1 auto; min-width: min\(100%, 12ch\); \}/);
+  assert.match(block, /\.status-badge \{ white-space: normal; flex-wrap: wrap; min-width: 0; \}/);
+});
+
+test('de restaurantpagina houdt zijn kopknoppen in een klasse die mag wrappen', () => {
+  const source = read('app/restaurant/[id]/RestaurantDetailView.js');
+  assert.match(source, /<div className="header-actions">/);
+  assert.doesNotMatch(source, /style=\{\{ display: 'flex', gap: 8, alignItems: 'center' \}\}/);
+  assert.match(be51Block(), /\.header-actions \{[^}]*flex-wrap: wrap/);
+});
