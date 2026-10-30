@@ -81,6 +81,58 @@
   margin: 0;
 }
 
+/* BE-53 deel 2 — hulp bij herhaalde wijzigingen: het voorstel voor een gedeeld
+   voorvoegsel, de knop Normale hoofdletters en de snelkeuzes in het veld. */
+.mcr-structure-hints {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.mcr-structure-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.mcr-structure-btn {
+  margin: 0 0 0 4px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.mcr-batch-error {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+.mcr-rename-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+}
+
+.mcr-rename-presets-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.mcr-rename-presets .mcr-rename-preset {
+  margin: 0;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
 /* Zichtbare focus: ook na een klik, zodat de rand nooit stil verdwijnt. */
 .mcr-rename-input:focus,
 .mcr-rename-input:focus-visible,

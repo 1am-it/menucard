@@ -17,7 +17,7 @@
 
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey, renameSectionEdits } from '@/src/lib/menuConcept'
+import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey, renameSectionEdits, renameSectionsEdits, sharedSectionPrefix, isCapsSectionName, normalCaseSectionName, cleanSectionName, DEFAULT_SECTION_NAMES } from '@/src/lib/menuConcept'
 import { formatPath, pathKey } from '@/src/lib/menuHierarchy'
 import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
 
@@ -34,12 +34,59 @@ export function ConceptStructure({ captured, rename, idPrefix = 'mcr-structure' 
   const categories = (captured && Array.isArray(captured.categories) && captured.categories) || []
   if (categories.length === 0) return null
   const title = captured && typeof captured.title === 'string' ? captured.title : null
+  const editable = Boolean(rename) && !rename.readOnly
+  // BE-53 deel 2: one proposal for kopjes that repeat the same opening, and the
+  // normal-capitals button only for kopjes that are entirely in capitals. Both
+  // act on the whole list at once; every kopje keeps its own Ongedaan maken.
+  const sectionNames = categories.map((category) => category.name)
+  const proposal = editable ? sharedSectionPrefix(sectionNames) : null
+  const capsTargets = editable
+    ? categories.filter((category) => isCapsSectionName(category.name) && normalCaseSectionName(category.name) !== cleanSectionName(category.name))
+    : []
+  function shortenAll() {
+    if (!proposal) return
+    rename.applyMany(
+      categories
+        .filter((category) => Object.prototype.hasOwnProperty.call(proposal.shorten, category.name))
+        .map((category) => ({ path: sectionPathOf(category), name: proposal.shorten[category.name] }))
+    )
+  }
+  function normaliseAll() {
+    rename.applyMany(capsTargets.map((category) => ({ path: sectionPathOf(category), name: normalCaseSectionName(category.name) })))
+  }
   return (
     <details className="bta-category">
       <summary>
         <span className="bta-category-name">Structuur</span>
         <span className="bta-muted"> · {plural(categories.length, 'menukopje', 'menukopjes')}{title ? ` onder "${title}"` : ''}</span>
       </summary>
+      {(proposal || capsTargets.length > 0 || (rename && rename.batchError)) && (
+        <div className="mcr-structure-hints">
+          {proposal && (
+            <p className="mcr-structure-hint">
+              {proposal.count} kopjes beginnen met &quot;{proposal.prefix.trim()}&quot;. Weghalen?{' '}
+              <button type="button" className="stg-btn-secondary bta-btn mcr-structure-btn" onClick={shortenAll}>
+                Weghalen
+                <span className="bta-sr-only"> van dat gedeelde voorvoegsel bij {proposal.count} kopjes</span>
+              </button>
+            </p>
+          )}
+          {capsTargets.length > 0 && (
+            <p className="mcr-structure-hint">
+              {plural(capsTargets.length, 'kopje staat', 'kopjes staan')} geheel in hoofdletters.{' '}
+              <button type="button" className="stg-btn-secondary bta-btn mcr-structure-btn" onClick={normaliseAll}>
+                Normale hoofdletters
+                <span className="bta-sr-only"> voor {plural(capsTargets.length, 'dit kopje', 'deze kopjes')}</span>
+              </button>
+            </p>
+          )}
+          {rename && rename.batchError && (
+            <p className="mcr-batch-error" role="alert">
+              {rename.batchError}
+            </p>
+          )}
+        </div>
+      )}
       <ul className="bta-structure">
         {categories.map((category, i) => {
           const path = sectionPathOf(category)
@@ -120,6 +167,21 @@ export function ConceptStructure({ captured, rename, idPrefix = 'mcr-structure' 
                       <button type="button" className="stg-btn-secondary bta-btn" onClick={rename.cancel}>
                         Annuleren
                       </button>
+                    </span>
+                    {/* BE-53 deel 2: standaardnamen als snelkeuze. Ze vullen het
+                        veld; opslaan blijft een eigen, bewuste klik. */}
+                    <span className="mcr-rename-presets" role="group" aria-label="Standaardnamen">
+                      <span className="mcr-rename-presets-title">Standaardnaam:</span>
+                      {DEFAULT_SECTION_NAMES.map((name) => (
+                        <button
+                          key={name}
+                          type="button"
+                          className="stg-btn-secondary bta-btn mcr-rename-preset"
+                          onClick={() => rename.change(name)}
+                        >
+                          {name}
+                        </button>
+                      ))}
                     </span>
                   </form>
                 )}
@@ -912,11 +974,15 @@ export function useSectionRename({ lines, readOnly, onApply }) {
   const [openKey, setOpenKey] = useState(null)
   const [text, setText] = useState('')
   const [error, setError] = useState(null)
+  // BE-53 deel 2: the message of a whole-list help action (remove a shared
+  // opening, normal capitals). A refused kopje is named instead of hidden.
+  const [batchError, setBatchError] = useState(null)
   function start(category) {
     if (readOnly) return
     setOpenKey(pathKey(sectionPathOf(category)))
     setText(category.name || '')
     setError(null)
+    setBatchError(null)
   }
   function change(value) {
     setText(value)
@@ -936,7 +1002,27 @@ export function useSectionRename({ lines, readOnly, onApply }) {
     onApply(result)
     cancel()
   }
-  return { openKey, text, error, start, change, cancel, save }
+  /**
+   * One click for several kopjes at once (shared opening, normal capitals).
+   * The batch rule lives in `renameSectionsEdits`; a refused kopje keeps its
+   * name and its reason is shown, so the reviewer always sees the result first.
+   */
+  function applyMany(renames) {
+    if (readOnly) return
+    const result = renameSectionsEdits(lines, renames)
+    if (!result.ok) {
+      setBatchError(result.refused.length > 0 ? result.refused[0].error : 'Deze wijziging kon niet worden toegepast.')
+      return
+    }
+    onApply(result)
+    cancel()
+    setBatchError(
+      result.refused.length > 0
+        ? `${plural(result.refused.length, 'kopje is', 'kopjes zijn')} niet aangepast: ${result.refused[0].error}`
+        : null
+    )
+  }
+  return { openKey, text, error, batchError, start, change, cancel, save, applyMany }
 }
 
 /** The human structure decisions that were part of the confirmed source version. */

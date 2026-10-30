@@ -101,6 +101,35 @@ test('BE-53 rename: shared path edits, an own stylesheet, and no new route, writ
   }
 });
 
+test('BE-53 deel 2: het voorstel, de hoofdletterknop en de snelkeuzes gebruiken de pure helpers', () => {
+  const review = read('app/internal/bronnen/batch/MenuReview.js');
+  const view = read('app/internal/menu-concepts/MenuConceptsView.js');
+  // The browser never re-implements the rule: detection, capitals and the fixed
+  // list all come from src/lib/menuConcept.js.
+  assert.match(review, /sharedSectionPrefix\(sectionNames\)/);
+  assert.match(review, /renameSectionsEdits\(lines, renames\)/);
+  assert.match(review, /isCapsSectionName\(category\.name\)/);
+  assert.match(review, /normalCaseSectionName\(category\.name\)/);
+  assert.match(review, /DEFAULT_SECTION_NAMES\.map\(/);
+  assert.match(review, /rename\.applyMany\(/);
+  // One click on the whole list, and each kopje keeps its own undo.
+  assert.match(review, /Weghalen/);
+  assert.match(review, /Normale hoofdletters/);
+  assert.match(review, /Ongedaan maken/);
+  // The correction still travels through the same versions route, unchanged.
+  assert.match(view, /onSaveVersion\(c\.version, edits\)/);
+  assert.doesNotMatch(view, /\bfetch\(/);
+  assert.doesNotMatch(view, /globals\.css/);
+  // The new controls live in the page stylesheet next to the view (BE-52).
+  const css = read('app/internal/menu-concepts/menu-concepts.css');
+  for (const className of ['mcr-structure-hints', 'mcr-structure-hint', 'mcr-structure-btn', 'mcr-batch-error', 'mcr-rename-presets', 'mcr-rename-preset']) {
+    assert.ok(css.includes(`.${className}`), className);
+  }
+  // Geen hex-, rgb()- of hsl()-kleuren in de eigen opmaak: kleuren komen uit de
+  // tokens (comments tellen niet mee).
+  assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ''), /#[0-9a-fA-F]{3,6}\b|rgba?\(|hsla?\(/);
+});
+
 test('BE-27 export: the route only delegates; the GitHub client cannot merge, delete or move a branch, and its token stays on the server', () => {
   const route = code('app/api/internal/v1/menu-concepts/[id]/export/route.js');
   assert.deepEqual([...route.matchAll(/export async function (\w+)/g)].map((m) => m[1]), ['POST']);
