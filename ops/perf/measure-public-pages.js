@@ -270,7 +270,21 @@ function summarizePage(page, entries) {
 // /api/search op /search) mee en ook de prefetch die Next.js zelf na de
 // eerste render start, zonder dat trage ISR-rendering de meting onbruikbaar
 // maakt.
-async function waitForIdle(meter, { idleMs = 1500, timeoutMs = 25000 } = {}) {
+//
+// BE-50 (#120) — het venster moet lang genoeg zijn om de prefetch die Next.js
+// na de eerste render start normaal mee te nemen. Met 1,5 s viel die prefetch
+// soms net binnen en soms net buiten het venster: twee metingen van dezelfde
+// build gaven /alle-restaurants 159,6 KB bij 14 verzoeken en 164,1 KB bij 23
+// verzoeken. Met 4 s stil is het beeld rustiger: de grootste posten (JS, CSS,
+// HTML) en het totaal zijn per run gelijk op ±1 KB, en alleen de prefetch van
+// zichtbare links kan nog een paar RSC-verzoeken toevoegen of weglaten
+// (gemeten: /restaurant/6 173,1 KB bij 15 verzoeken en 175,1 KB bij 19
+// verzoeken). Die prefetch is een bewuste versnelling van de volgende tik, geen
+// deel van de eerste render; de harde grens voor regressies staat daarom in de
+// budgettest op de bouwkant (criterium 5), die deterministisch is.
+const SETTLE = { idleMs: 4000, timeoutMs: 40000 };
+
+async function waitForIdle(meter, { idleMs = SETTLE.idleMs, timeoutMs = SETTLE.timeoutMs } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (meter.pending() === 0 && meter.idleMs() >= idleMs) return true;
@@ -436,6 +450,7 @@ async function main() {
       viewport: `${VIEWPORT.width}x${VIEWPORT.height}`,
       build: skipBuild ? 'hergebruikt bestaande .next (--geen-build)' : 'next build in dit script',
       cache: 'cache uitgeschakeld en per pagina geleegd (koude eerste lading)',
+      settle: `netwerk ${SETTLE.idleMs} ms stil na de eerste render; prefetch van zichtbare links valt daar soms binnen, bovengrens ${SETTLE.timeoutMs} ms`,
       network: 'alleen localhost; de browser kan geen externe host bereiken',
       nature: 'developer evidence, lokaal gemeten; geen productiemeting en geen acceptatie',
       pages: pageResults,

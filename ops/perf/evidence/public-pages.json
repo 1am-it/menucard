@@ -1,15 +1,16 @@
 {
   "be": "BE-50 (#120)",
-  "measuredAt": "2026-10-30T06:50:33.280Z",
-  "gitHead": "536c69f09a3ca5f1e647d9e3e2559ba7fed88f05",
+  "measuredAt": "2026-10-30T07:31:15.082Z",
+  "gitHead": "20b060d1b325eac2f3f8eeb4a4d2fb1a7ae0300f",
   "branch": "feat/snelheid-120",
   "node": "v22.22.3",
   "next": "15.5.15",
-  "port": 3171,
-  "baseUrl": "http://localhost:3171",
+  "port": 3177,
+  "baseUrl": "http://localhost:3177",
   "viewport": "1280x900",
-  "build": "next build in dit script",
+  "build": "hergebruikt bestaande .next (--geen-build)",
   "cache": "cache uitgeschakeld en per pagina geleegd (koude eerste lading)",
+  "settle": "netwerk 4000 ms stil na de eerste render (prefetch van zichtbare links inbegrepen), bovengrens 40000 ms",
   "network": "alleen localhost; de browser kan geen externe host bereiken",
   "nature": "developer evidence, lokaal gemeten; geen productiemeting en geen acceptatie",
   "pages": [
@@ -18,12 +19,12 @@
       "label": "Home",
       "path": "/",
       "route": "/page",
-      "totalBytes": 180753,
+      "totalBytes": 180748,
       "totalKb": 176.5,
       "requests": 18,
       "categories": {
         "html": {
-          "bytes": 8292,
+          "bytes": 8291,
           "kb": 8.1
         },
         "js": {
@@ -35,7 +36,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 7506,
+          "bytes": 7502,
           "kb": 7.3
         },
         "font": {
@@ -82,12 +83,12 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=3lb4g",
-          "bytes": 2499,
+          "bytes": 2497,
           "kb": 2.4
         },
         {
           "url": "/search?_rsc=3lb4g",
-          "bytes": 2493,
+          "bytes": 2491,
           "kb": 2.4
         },
         {
@@ -166,7 +167,7 @@
       "requests": 15,
       "categories": {
         "html": {
-          "bytes": 3200,
+          "bytes": 3202,
           "kb": 3.1
         },
         "js": {
@@ -178,7 +179,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 4181,
+          "bytes": 4179,
           "kb": 4.1
         },
         "font": {
@@ -225,7 +226,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=unnn1",
-          "bytes": 2499,
+          "bytes": 2497,
           "kb": 2.4
         },
         {
@@ -294,12 +295,12 @@
       "label": "Alle restaurants",
       "path": "/alle-restaurants",
       "route": "/alle-restaurants/page",
-      "totalBytes": 163386,
+      "totalBytes": 163385,
       "totalKb": 159.6,
       "requests": 14,
       "categories": {
         "html": {
-          "bytes": 3206,
+          "bytes": 3207,
           "kb": 3.1
         },
         "js": {
@@ -311,7 +312,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 4241,
+          "bytes": 4239,
           "kb": 4.1
         },
         "font": {
@@ -358,7 +359,7 @@
       "dataRequests": [
         {
           "url": "/search?_rsc=1tikd",
-          "bytes": 2493,
+          "bytes": 2491,
           "kb": 2.4
         },
         {
@@ -422,12 +423,12 @@
       "label": "Restaurant (Bardot, 4 kaarten)",
       "path": "/restaurant/6",
       "route": "/restaurant/[id]/page",
-      "totalBytes": 177217,
-      "totalKb": 173.1,
-      "requests": 15,
+      "totalBytes": 179307,
+      "totalKb": 175.1,
+      "requests": 19,
       "categories": {
         "html": {
-          "bytes": 11916,
+          "bytes": 11915,
           "kb": 11.6
         },
         "js": {
@@ -439,8 +440,8 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 2499,
-          "kb": 2.4
+          "bytes": 4590,
+          "kb": 4.5
         },
         "font": {
           "bytes": 0,
@@ -486,8 +487,28 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=10qzd",
-          "bytes": 2499,
+          "bytes": 2497,
           "kb": 2.4
+        },
+        {
+          "url": "/menu/6-specialiteiten?_rsc=10qzd",
+          "bytes": 528,
+          "kb": 0.5
+        },
+        {
+          "url": "/menu/6-lunch?_rsc=10qzd",
+          "bytes": 522,
+          "kb": 0.5
+        },
+        {
+          "url": "/menu/6-borrel?_rsc=10qzd",
+          "bytes": 522,
+          "kb": 0.5
+        },
+        {
+          "url": "/menu/6-diner?_rsc=10qzd",
+          "bytes": 521,
+          "kb": 0.5
         }
       ],
       "foreignRequests": 0,
@@ -555,12 +576,12 @@
       "label": "Menu (T-Huis borrel, 138 gerechten)",
       "path": "/menu/23-borrel",
       "route": "/menu/[id]/page",
-      "totalBytes": 186979,
+      "totalBytes": 186978,
       "totalKb": 182.6,
       "requests": 13,
       "categories": {
         "html": {
-          "bytes": 26955,
+          "bytes": 26954,
           "kb": 26.3
         },
         "js": {
@@ -682,12 +703,12 @@
       "label": "Mijn lijstje",
       "path": "/mijn-lijstje",
       "route": "/mijn-lijstje/page",
-      "totalBytes": 159465,
+      "totalBytes": 159462,
       "totalKb": 155.7,
       "requests": 13,
       "categories": {
         "html": {
-          "bytes": 5204,
+          "bytes": 5203,
           "kb": 5.1
         },
         "js": {
@@ -699,7 +720,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 2499,
+          "bytes": 2497,
           "kb": 2.4
         },
         "font": {
@@ -746,7 +767,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=1tpm6",
-          "bytes": 2499,
+          "bytes": 2497,
           "kb": 2.4
         }
       ],
