@@ -54,10 +54,12 @@ the stricter workflow-acceptance requirements already added in #56.
     wasted or fix rounds.
   - For the real costs, use the DeepSeek CSV export. The runner usage export
     counts only at the off-peak price.
-- **Merge-ready handover.** The owner only gets merge links for PRs that are
-  conflict-free against the current main. The Lead first merges main into the
-  branch, then builds and tests. After every owner merge, the Lead repeats
-  this for the remaining PRs.
+- **The Lead merges (owner decision 2026-10-30).** The Lead merges every PR
+  itself, after its own review, with green tests and build and no conflict with
+  main. Before merging, the Lead merges main into the branch and resolves
+  conflicts. Afterwards it makes the remaining open PRs conflict-free again. The
+  owner hears what went live the next time they write; there are no separate
+  merge links.
   - Release-preparation PRs, such as `DOCUMENTED_RELEASE_VERSIONS` in
     `production-db-migrate.yml`, come together with the migration PR.
   - Production approvals, such as `production-migrations`, stay with the owner.

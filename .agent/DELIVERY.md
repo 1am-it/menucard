@@ -97,11 +97,12 @@ A production result is not claimed from local or fixture evidence alone.
 ### 4. Review And Release
 
 The Delivery Lead reviews the diff against the build contract and calls out
-risks, missing evidence, or out-of-scope changes. A green PR is not an
-authorization for merge, migration, source activation, export, or publication.
+risks, missing evidence, or out-of-scope changes. A green PR alone is not an
+authorization for migration, source activation, export, or publication. Merges
+are delegated to the Lead after its own review (owner decision 2026-10-30).
 
 The Product Owner receives a notification only when there is a real decision,
-a merge or protected-environment approval, a production acceptance action, or
+a protected-environment approval, a production acceptance action, or
 a blocker that cannot be resolved within the contract.
 
 ### 5. Close
