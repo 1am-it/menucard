@@ -29,6 +29,12 @@
 
 'use strict';
 
+// BE-48 (#112): every Supabase auth failure is translated in one place
+// (src/lib/authErrors.js) so no screen can invent its own text or echo the raw
+// `error.message`. The one-time e-mail code of this page uses the e-mail
+// variant, which keeps the existing wording for an expired or wrong code.
+const { authErrorMessage } = require('./authErrors');
+
 /** The only two Supabase OTP types this page ever accepts — matches the
  * two real flows that lead here: accepting an invite, or resetting a
  * password. */
@@ -99,6 +105,11 @@ function activationValidationMessage(reason) {
  * email, or any other account/technical detail. `error` may be
  * `null`/`undefined` (success) or any thrown/rejected value; both are
  * handled without inspecting *why* it failed.
+ *
+ * BE-48 (#112): the text comes from the shared translation
+ * (src/lib/authErrors.js), so a rate limit and a lost connection are now told
+ * apart and each gets its own Dutch message; an expired or wrong code keeps
+ * this page's existing wording.
  */
 function resolveActivationOutcome(error) {
   if (!error) {
@@ -106,7 +117,7 @@ function resolveActivationOutcome(error) {
   }
   return {
     ok: false,
-    message: 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.',
+    message: authErrorMessage(error, { context: 'email-code' }),
   };
 }
 

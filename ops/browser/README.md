@@ -745,6 +745,63 @@ sms app, or a private-mode failure. The approved mockup is an external artifact;
 the screenshots are for the visual comparison by the Lead or the owner.
 Developer evidence on a local build — not production, not independent review.
 
+## BE-48 internal sign-in with a second step (#112)
+
+`run-be48-browser-check.js` drives the real `/internal/login` and the new
+`/internal/wachtwoord-vergeten` in a local app with a **fictional Supabase**
+(`lib/be48-auth-stub.js` + `lib/be48-stub-page.js`). The app code is unchanged:
+the real Supabase client, the real `mfa.enroll/challenge/verify` calls, the real
+pages. Only the HTTP layer is fictional, and every URL outside the fake auth
+origin and the app's own read routes is refused and recorded.
+
+Scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **inloggen-en-koppelen** — labels, `autocomplete`, the "Toon" button with
+  `aria-pressed`, ≥ 44 px controls, the "Wachtwoord vergeten?" link and no
+  "30 dagen onthouden"; then password → "Beveilig je account met een app" with a
+  QR image that really renders and the manual key → a wrong code in Dutch
+  (`role="alert"`, never Supabase's English) → the right code lands on the same
+  place as before (`/internal/menu-concepts` for this fictional workqueue).
+- **fout-wachtwoord** — the contract sentence, no English text, still on the
+  login screen.
+- **wachtwoord-vergeten** — the neutral answer for an unknown address, the code
+  screen with "Nieuwe code sturen" and "Ander e-mailadres", a wrong code in
+  Dutch, and the right code continuing to the existing `/internal/set-password`.
+- **bestaande-app** — an account that already linked an app goes straight to
+  "Code uit je app", with no QR.
+- **eigenaar-zonder-app** — a restaurant owner (`owner` only) is not asked to
+  link anything and lands on the existing status page; the second step is for
+  `internal` and `editor` accounts (BE-47 owns the restaurant route).
+- **claim-met-code** — the public claim on `/claim/6`: a labelled e-mail field
+  with `autocomplete="email"` (no placeholder-only field), ≥ 44 px controls, then
+  the code screen ("Code uit de e-mail", `inputmode="numeric"`,
+  `autocomplete="one-time-code"`, "Nieuwe code sturen" and "Ander e-mailadres");
+  the right code signs the visitor in with the typed address and the claim itself
+  is submitted and shows "In afwachting van beoordeling".
+- **claim-foute-code** — a wrong (expired) code gives the Dutch sentence in
+  `role="alert"` and never the Supabase text; "Nieuwe code sturen" asks the
+  fictional Supabase again for the same address, "Ander e-mailadres" returns to
+  the address step with the typed address kept and the error cleared, and the
+  right code still works afterwards.
+
+The claim uses its own code (`emailCode`, `654321`) next to the authenticator
+code (`totpCode`, `123456`), so a code from one screen can never pass on the
+other. `/api/claims/mine` and `POST /api/claims` are answered with fictional
+data; they need no staff role and no second step.
+
+Screenshots (light and dark) of the password, code and link-an-app screens land
+in the ignored `ops/browser/output/be-48/`. Criterion 7's screenshots — login,
+code step, linking, forgot password and the claim's code screen, light and dark
+at 390 px — are kept in the repository under
+`ops/browser/evidence/be48-screenshots/` and named in the evidence JSON
+(`screenshotsMobile`, `screenshotsDir`). The record is
+`ops/browser/evidence/be48-browser-evidence.json`. A filtered run writes
+`be48-browser-evidence.filtered.json` and is never the full evidence.
+
+Limits: fixture evidence. No real Supabase project, no real authenticator app,
+no real e-mail, no production data or credentials, and no acceptance of the real
+second step — that needs the owner's real project after the release plan.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

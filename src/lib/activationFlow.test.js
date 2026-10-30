@@ -14,6 +14,8 @@ const {
   resolveActivationOutcome,
   performActivation,
 } = require('./activationFlow');
+// BE-48 (#112): the shared Dutch auth texts.
+const { MESSAGES } = require('./authErrors');
 
 // ─── resolveActivationType — from a non-secret query param, never form input ─
 
@@ -141,7 +143,10 @@ test('performActivation: verifyOtp REJECTING (thrown inside the async function) 
   await assert.doesNotReject(async () => {
     const outcome = await performActivation(fakeAuth, { email: 'developer@1am-it.com', token: '123456', type: 'recovery' });
     assert.equal(outcome.ok, false);
-    assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
+    // BE-48 (#112): an unrecognized failure now gets the shared safe default
+    // instead of pretending the code was wrong; still Dutch, still no raw text.
+    assert.equal(outcome.message, MESSAGES.generic);
+    assert.equal(outcome.message.includes('localStorage'), false);
   });
 });
 
@@ -153,7 +158,10 @@ test('performActivation: verifyOtp throwing SYNCHRONOUSLY (not even returning a 
   };
   const outcome = await performActivation(fakeAuth, { email: 'developer@1am-it.com', token: '123456', type: 'recovery' });
   assert.equal(outcome.ok, false);
-  assert.equal(outcome.message, 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.');
+  // BE-48 (#112): a TypeError is the SDK's own "could not reach the server", so
+  // it gets the connection message rather than a wrong "code" statement.
+  assert.equal(outcome.message, MESSAGES.network);
+  assert.equal(outcome.message.includes('unexpected client failure'), false);
 });
 
 test('performActivation: passes email, token, and type through to verifyOtp exactly as given', async () => {
