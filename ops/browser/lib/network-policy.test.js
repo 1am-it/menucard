@@ -46,6 +46,17 @@ test('unknown local API and write routes fail closed', () => {
   assert.equal(classify('ftp://localhost/file').reason, 'unsupported_protocol');
 });
 
+test('BE-57: alleen de bezoekteller is als schrijfroute toegestaan', () => {
+  const beacon = classify('/api/v1/bekeken', 'POST');
+  assert.equal(beacon.allowed, true);
+  assert.equal(beacon.kind, 'fixture_api');
+  assert.equal(beacon.routeId, 'bekeken');
+  // Lezen bestaat niet op deze route, en een tweede schrijfpad blijft onbekend.
+  assert.equal(classify('/api/v1/bekeken', 'GET').reason, 'method_not_allowed');
+  assert.equal(classify('/api/v1/bekeken/anders', 'POST').reason, 'unknown_api_route');
+  assert.equal(classify('/api/v1/gedeeld', 'POST').reason, 'unknown_api_route');
+});
+
 test('only explicit local app and fixture routes are allowed', () => {
   assert.equal(classify('/_next/static/chunk.js').kind, 'app_resource');
   assert.equal(classify('/internal/source-triage/batch?fixture=review').kind, 'app_resource');
