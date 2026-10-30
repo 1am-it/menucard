@@ -1,0 +1,221 @@
+/* BE-54 (#133) — opmaak voor /mijn-restaurant/claimen.
+   Eigen bestand naast de pagina (BE-52), zodat app/globals.css ongemoeid blijft.
+   Alles is een token uit dat bestand: licht en donker volgen automatisch en er
+   staat nergens een hardgecodeerde kleur. Maten uit de goedgekeurde mockup:
+   zoekveld 52 px hoog met een rand van 2 px, naam 17 px vet, en elk bedienbaar
+   element minimaal 44 px hoog. */
+
+.claimen-main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 72px;
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.claimen-title {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.claimen-intro {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.claimen-search {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.claimen-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.claimen-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 16px;
+}
+
+.claimen-input::placeholder { color: var(--text-secondary); }
+.claimen-input:hover { border-color: var(--border-hover); }
+
+.claimen-input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-color: var(--border-hover);
+}
+
+.claimen-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.claimen-status {
+  min-height: 21px;
+  margin: 0 0 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.claimen-results {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+
+.claimen-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft);
+}
+
+.claimen-result-text {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.claimen-result-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.claimen-result-detail {
+  margin: 2px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.claimen-result-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.claimen-result-button:hover { background: var(--button-primary-hover); }
+
+.claimen-result-button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+}
+
+.claimen-empty {
+  margin: 0 0 28px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-soft);
+}
+
+.claimen-empty-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.claimen-empty-text {
+  margin: 0 0 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.claimen-contact {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.claimen-contact:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.claimen-how {
+  margin: 0 0 24px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-warm);
+}
+
+.claimen-how-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.claimen-steps {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.claimen-step-title {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.claimen-step-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Op 320 px past de knop niet meer naast de tekst: hij wordt volle breedte en
+   houdt zijn 44 px. */
+@media (max-width: 419px) {
+  .claimen-main { padding: 20px 14px 64px; }
+  .claimen-title { font-size: 23px; }
+  .claimen-result { padding: 12px; }
+  .claimen-result-button { width: 100%; }
+}

@@ -24,6 +24,9 @@
 const OWNER_LOGIN_HREF = '/mijn-restaurant/inloggen';
 const OWNER_HOME_HREF = '/mijn-restaurant';
 const INTERNAL_LOGIN_HREF = '/internal/login';
+// BE-54 (#133): "Claim je restaurant" gaat naar het zoekscherm, niet meer naar
+// de volledige lijst /alle-restaurants. Eén bron voor beide links.
+const CLAIM_SEARCH_HREF = '/mijn-restaurant/claimen';
 
 // Dezelfde twee rollen als src/lib/internalAuthCore.js's SECOND_FACTOR_ROLES.
 const SECOND_FACTOR_ROLES = Object.freeze(['internal', 'editor']);
@@ -91,6 +94,7 @@ function resolveInternalOwnerRedirect(roles) {
 }
 
 module.exports = {
+  CLAIM_SEARCH_HREF,
   INTERNAL_LOGIN_HREF,
   OWNER_ACCESS_MESSAGES,
   OWNER_HOME_HREF,

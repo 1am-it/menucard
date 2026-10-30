@@ -1,0 +1,430 @@
+{
+  "ticket": "BE-54 (#133)",
+  "route": "/mijn-restaurant/claimen",
+  "category": "lokale browsercheck (next dev op poort 3186); geen productie en geen echte acceptatie",
+  "ranAt": "2026-10-30T19:47:28.657Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "inloggen: \"Claim je restaurant\" gaat naar /mijn-restaurant/claimen",
+      "passed": true,
+      "detail": "[{\"href\":\"/mijn-restaurant/claimen\",\"text\":\"Claim je restaurant\"}]"
+    },
+    {
+      "name": "light 1280px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "light 1280px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "light 1280px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "light 1280px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "light 1280px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "light 1280px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "light 1280px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "light 1280px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "light 390px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "light 390px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "light 390px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "light 390px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "light 390px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "light 390px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "light 390px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "light 390px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "light 320px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "light 320px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "light 320px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "light 320px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "light 320px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "light 320px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "light 320px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "light 320px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "dark 1280px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "dark 1280px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "dark 1280px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "dark 1280px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "dark 1280px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "dark 1280px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "dark 1280px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "dark 1280px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "dark 390px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "dark 390px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "dark 390px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "dark 390px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "dark 390px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "dark 390px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "dark 390px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "dark 390px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "dark 320px: thema toegepast",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "dark 320px: zoeken op naam geeft één regel",
+      "passed": true,
+      "detail": "[{\"name\":\"Restaurant Wolfslaar\",\"detail\":\"Wolfslaardreef 100, 4834 SP Breda · Wolfslaar\",\"button\":\"Dit is mijn restaurant\",\"href\":\"/claim/1\",\"buttonHeight\":44}]"
+    },
+    {
+      "name": "dark 320px: de regel toont naam, adres en buurt",
+      "passed": true,
+      "detail": "Wolfslaardreef 100, 4834 SP Breda · Wolfslaar"
+    },
+    {
+      "name": "dark 320px: de knop heet \"Dit is mijn restaurant\" en linkt naar /claim/1",
+      "passed": true,
+      "detail": "Dit is mijn restaurant → /claim/1"
+    },
+    {
+      "name": "dark 320px: het aantal staat in role=\"status\"",
+      "passed": true,
+      "detail": "1 restaurant gevonden."
+    },
+    {
+      "name": "dark 320px: tikdoel van de knop is minimaal 44 px",
+      "passed": true,
+      "detail": "44px"
+    },
+    {
+      "name": "dark 320px: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth-innerWidth=0"
+    },
+    {
+      "name": "dark 320px: de knop opent /claim/1",
+      "passed": true,
+      "detail": "/claim/1"
+    },
+    {
+      "name": "niets gevonden: de lege stand verschijnt",
+      "passed": true,
+      "detail": "Niets gevonden | Zoek op een deel van de naam of op straat. | Staat je restaurant er niet bij? Laat het ons weten."
+    },
+    {
+      "name": "niets gevonden: de tip noemt een deel van de naam of de straat",
+      "passed": true,
+      "detail": "Niets gevonden | Zoek op een deel van de naam of op straat. | Staat je restaurant er niet bij? Laat het ons weten."
+    },
+    {
+      "name": "niets gevonden: zonder NEXT_PUBLIC_CONTACT_EMAIL geen mailto-link, wel de tekst",
+      "passed": true,
+      "detail": "mailto-links=0"
+    },
+    {
+      "name": "niets gevonden: de status zegt het eerlijk",
+      "passed": true,
+      "detail": "Geen restaurant gevonden met deze zoekterm."
+    },
+    {
+      "name": "toetsenbord: minstens vijf stappen, elk met een zichtbare focusring",
+      "passed": true,
+      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"input#claimen-q.claimen-input\",\"name\":\"Naam, straat of buurt\",\"visible\":true},{\"selector\":\"a.claimen-result-button\",\"name\":\"Dit is mijn restaurant\",\"visible\":true},{\"selector\":\"a.mobile-tab-link\",\"name\":\"Zoeken\",\"visible\":true},{\"selector\":\"a.mobile-tab-link\",\"name\":\"Restaurants\",\"visible\":true}]"
+    },
+    {
+      "name": "toetsenbord: het zoekveld en de resultaatknop komen langs",
+      "passed": true,
+      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Licht\",\"Donker\",\"Naam, straat of buurt\",\"Dit is mijn restaurant\",\"Zoeken\",\"Restaurants\"]"
+    },
+    {
+      "name": "claimen (licht) · contrast: 22 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "claimen (licht) · naam: 7 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "claimen (licht) · tikdoel: 7 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "claimen (licht) · koppen: één h1 bij 6 koppen",
+      "passed": true,
+      "detail": "h1: \"Welk restaurant is van jou?\""
+    },
+    {
+      "name": "claimen (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "claimen (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "claimen (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "claimen (licht) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "claimen (donker) · contrast: 22 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "claimen (donker) · naam: 7 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "claimen (donker) · tikdoel: 7 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "claimen (donker) · koppen: één h1 bij 6 koppen",
+      "passed": true,
+      "detail": "h1: \"Welk restaurant is van jou?\""
+    },
+    {
+      "name": "claimen (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "claimen (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "claimen (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "claimen (donker) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    }
+  ],
+  "errors": [],
+  "shots": [
+    {
+      "name": "be54-resultaten-1280-light",
+      "theme": "light",
+      "viewport": "1280x900",
+      "file": "be54-resultaten-1280-light.png",
+      "sha256": "0f3a3aab1268c080a75704dedbe2bc2a20300aec0b5f461c915d31b59c603ec1",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be54-resultaten-390-light",
+      "theme": "light",
+      "viewport": "390x844",
+      "file": "be54-resultaten-390-light.png",
+      "sha256": "add0000bb2854fe8da556d0d2f2bf377bb3fc4e6f215c0ccb184cb95669f56f6",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be54-resultaten-320-light",
+      "theme": "light",
+      "viewport": "320x800",
+      "file": "be54-resultaten-320-light.png",
+      "sha256": "c77cc6be61114ba61e4748d0286f6613911e5057ed46990af03559f075b6a7b2",
+      "width": 320,
+      "height": 800
+    },
+    {
+      "name": "be54-resultaten-1280-dark",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "file": "be54-resultaten-1280-dark.png",
+      "sha256": "d098c090f7fc792682a949bdb3a21bc8d358a50aa654abdd1c44dfb60bc25b09",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be54-resultaten-390-dark",
+      "theme": "dark",
+      "viewport": "390x844",
+      "file": "be54-resultaten-390-dark.png",
+      "sha256": "da175b0792388d6fa05245920e05a874b20765382310be8b18197003c96717a9",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be54-resultaten-320-dark",
+      "theme": "dark",
+      "viewport": "320x800",
+      "file": "be54-resultaten-320-dark.png",
+      "sha256": "7a3f0d4635a8e46296782d39d2c713e04c045aa22f4d448c08d7fb1459254f30",
+      "width": 320,
+      "height": 800
+    },
+    {
+      "name": "be54-niets-gevonden-390-licht",
+      "theme": "light",
+      "viewport": "390x844",
+      "file": "be54-niets-gevonden-390-licht.png",
+      "sha256": "f9666f32c1d35d54c983712ca42094fd95982024940ffa3e36d1d254673f5149",
+      "width": 390,
+      "height": 844
+    }
+  ]
+}

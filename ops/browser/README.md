@@ -974,3 +974,40 @@ nonce can only be redeemed by `updateUser({ nonce })` and no server route can
 verify it, so deletion asks a fresh sign-in code that the route verifies itself
 (see src/lib/ownerAccountDeletion.js). The "Reauthentication" template is
 therefore not needed for this flow.
+
+## BE-54 (#133) — "Claim je restaurant": zoeken en direct naar de claim
+
+`npm run test:browser:be54` (of `node ops/browser/run-be54-browser-check.js`).
+Eén scenario, dus geen `--alleen`/`--lijst`; de poort is 3186 (uit 3180-3189) en
+via `BE54_PORT` te wijzigen. De check start zijn eigen `next dev` en een lokale
+Edge/Chrome via CDP; er is geen productie, geen account en geen externe host bij
+betrokken.
+
+Wat hij meet:
+
+- **de link** — "Claim je restaurant" op `/mijn-restaurant/inloggen` wijst naar
+  `/mijn-restaurant/claimen` (het houderoverzicht wordt alleen met een bronregressie
+  bewezen: daarvoor is een ingelogde houder nodig);
+- **zoeken tijdens het typen** — "Wolfslaar" geeft precies één regel met naam,
+  adres en buurt, de knop "Dit is mijn restaurant" naar `/claim/1`, en
+  `role="status"` met "1 restaurant gevonden.", op 1280, 390 en 320 px in licht
+  en donker, met een tikdoel van minimaal 44 px en zonder horizontale overloop;
+- **de knop zelf** — die opent de bestaande claimpagina `/claim/1` en verandert
+  daar niets;
+- **niets gevonden** — "zzzzzz" geeft de lege stand met de tip en, omdat
+  `NEXT_PUBLIC_CONTACT_EMAIL` hier niet gezet is, géén `mailto:`-link;
+- **toetsenbord** — een tabwandeling met een zichtbare focusring op elke stap,
+  inclusief het zoekveld en de resultaatknop;
+- **a11y** — de bestaande audit (`lib/a11y-audit.js`) voor deze ene pagina in
+  licht en donker: contrast, toegankelijke namen, tikdoelen, koppen, landmarks en
+  taal.
+
+Bewijs: `ops/browser/evidence/be-54/` (zeven schermafdrukken, in git) en
+`ops/browser/evidence/be54-browser-evidence.json`. De laatste volledige run gaf
+71 checks en 0 fouten. Grenzen: dit is lokale ontwikkelaarsbewijs, geen
+onafhankelijke review en geen acceptatie; de visuele vergelijking met de
+goedgekeurde mockup blijft mensenwerk (de schermafdrukken staan er daarom in).
+De pagina zoekt in dezelfde gegevens als `/alle-restaurants`
+(`GET /api/restaurants`, dezelfde paginering) met de geteste regel uit
+`src/lib/claimSearch.js`; er is geen nieuwe API, database of dependency.
+

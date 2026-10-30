@@ -152,6 +152,7 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/internal/menu-concepts/menu-concepts.css',
     'app/internal/tellers/tellers.css',
     'app/kies/kies.css',
+    'app/mijn-restaurant/claimen/claimen.css',
     'app/mijn-restaurant/mijn-restaurant.css',
     'src/components/kies-start.css',
   ]);
