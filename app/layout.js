@@ -1,6 +1,16 @@
 import './globals.css'
+import { siteUrl } from '@/src/lib/siteUrl'
+
+// BE-56 (#137, punt 2) — één basis voor alle relatieve metadata.
+//
+// De waarde komt uit NEXT_PUBLIC_SITE_URL via src/lib/siteUrl.js, dezelfde
+// helper als app/robots.js en app/sitemap.js; er staat geen domein in de code.
+// Zonder geldige instelling is er geen metadataBase en gokt Next.js niet: het
+// valt dan terug op de host van het verzoek, precies zoals voorheen.
+const SITE_URL = siteUrl()
 
 export const metadata = {
+  ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: 'BredaEats — Zie de menukaart vóór je reserveert',
   description: 'De slimste manier om uit eten te gaan in Breda. Blader door menukaarten van 25 restaurants, filter op ingrediënt, dag en maaltijdtype.',
   keywords: 'Breda restaurants, menukaart, eten Breda, lunch Breda, diner Breda',
