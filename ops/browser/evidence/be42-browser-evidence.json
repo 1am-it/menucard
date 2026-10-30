@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28T21:05:16.492Z",
+  "generatedAt": "2026-10-30T07:44:26.778Z",
   "ticket": "#98 BE-42 deel 1 (1A + 3B) en deel 2 (2A)",
   "kind": "developer evidence — local production build, no production data or credentials",
   "app": "http://localhost:3152",
@@ -10,17 +10,17 @@
       {
         "name": "overdracht: /alle-restaurants blijft onder 250 KB",
         "passed": true,
-        "detail": "163.5 KB"
+        "detail": "160.1 KB"
       },
       {
         "name": "2A overdracht: /restaurant/6 blijft ná 2A onder 250 KB",
         "passed": true,
-        "detail": "176 KB"
+        "detail": "173.1 KB"
       },
       {
         "name": "2A overdracht: de eerste overdracht groeit hooguit met één kaart (max. +25 KB op 169,9 KB)",
         "passed": true,
-        "detail": "voor 169.9 KB, na 176 KB"
+        "detail": "voor 169.9 KB, na 173.1 KB"
       },
       {
         "name": "2A server-HTML: /restaurant/6 antwoordt met 200",
@@ -437,16 +437,16 @@
   "measurements": {
     "server-html": {
       "standard": {
-        "bytes": 47969,
-        "markupKb": 28
+        "bytes": 50976,
+        "markupKb": 30.7
       },
       "borrel": {
-        "bytes": 40013,
-        "markupKb": 20.4
+        "bytes": 43475,
+        "markupKb": 23.5
       },
       "single": {
-        "bytes": 21497,
-        "markupKb": 11.7
+        "bytes": 22359,
+        "markupKb": 12.3
       }
     },
     "alle-restaurants-light": {
@@ -1538,141 +1538,141 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 167439,
-      "totalKb": 163.5,
-      "documentKb": 3,
-      "resourceCount": 14
+      "totalBytes": 163912,
+      "totalKb": 160.1,
+      "documentKb": 3.1,
+      "resourceCount": 15
     },
     {
       "label": "na 2A (Bardot, 4 kaarten)",
       "page": "/restaurant/6",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 180256,
-      "totalKb": 176,
-      "documentKb": 11.4,
-      "resourceCount": 18
+      "totalBytes": 177218,
+      "totalKb": 173.1,
+      "documentKb": 11.6,
+      "resourceCount": 15
     }
   ],
   "screenshots": [
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-1280.png",
-      "bytes": 249360,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-light-1280.png",
+      "bytes": 250914,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-390.png",
-      "bytes": 58787,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-light-390.png",
+      "bytes": 56721,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-light-320.png",
-      "bytes": 47708,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-light-320.png",
+      "bytes": 45337,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-1280.png",
-      "bytes": 313000,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-light-1280.png",
+      "bytes": 322617,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-390.png",
-      "bytes": 45141,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-light-390.png",
+      "bytes": 37273,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-light-320.png",
-      "bytes": 43304,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-light-320.png",
+      "bytes": 35669,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-1280.png",
-      "bytes": 241313,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-light-1280.png",
+      "bytes": 250329,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-390.png",
-      "bytes": 54487,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-light-390.png",
+      "bytes": 45046,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-light-320.png",
-      "bytes": 52178,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-light-320.png",
+      "bytes": 42785,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-1280.png",
-      "bytes": 114318,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-light-1280.png",
+      "bytes": 117858,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-390.png",
-      "bytes": 38113,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-light-390.png",
+      "bytes": 37450,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-light-320.png",
-      "bytes": 37300,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-light-320.png",
+      "bytes": 36531,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-1280.png",
-      "bytes": 243423,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-dark-1280.png",
+      "bytes": 245306,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-390.png",
-      "bytes": 60030,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-dark-390.png",
+      "bytes": 58250,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\alle-restaurants-dark-320.png",
-      "bytes": 49528,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\alle-restaurants-dark-320.png",
+      "bytes": 46940,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-1280.png",
-      "bytes": 296176,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-dark-1280.png",
+      "bytes": 306037,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-390.png",
-      "bytes": 43419,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-dark-390.png",
+      "bytes": 36290,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-dark-320.png",
-      "bytes": 41605,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-dark-320.png",
+      "bytes": 35189,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-1280.png",
-      "bytes": 225996,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-dark-1280.png",
+      "bytes": 234946,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-390.png",
-      "bytes": 53754,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-dark-390.png",
+      "bytes": 45048,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-6-borrel-dark-320.png",
-      "bytes": 51373,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-6-borrel-dark-320.png",
+      "bytes": 43284,
       "viewport": "320x720"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-1280.png",
-      "bytes": 112303,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-dark-1280.png",
+      "bytes": 115556,
       "viewport": "1280x900"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-390.png",
-      "bytes": 37089,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-dark-390.png",
+      "bytes": 36412,
       "viewport": "390x844"
     },
     {
-      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner\\be42-evidence\\restaurant-1-dark-320.png",
-      "bytes": 36260,
+      "file": "C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\be42-evidence\\restaurant-1-dark-320.png",
+      "bytes": 35552,
       "viewport": "320x720"
     }
   ],
