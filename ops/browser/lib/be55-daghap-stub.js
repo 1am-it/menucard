@@ -66,7 +66,7 @@ function be55StubScript({ aanbod = [DAGHAP, SEIZOEN] } = {}) {
   window.fetch = async function (input, init) {
     const url = String(typeof input === 'string' ? input : (input && input.url) || '');
     const method = String((init && init.method) || 'GET').toUpperCase();
-    if (url.indexOf('/api/search') !== -1) {
+    if (url.indexOf('/api/search') !== -1 && location.search.indexOf('vandaag=1') !== -1) {
       const filterAan = url.indexOf('vandaag=1') !== -1;
       (window.__BE55_ZOEK__ = window.__BE55_ZOEK__ || []).push(url);
       // De server filtert; de stub doet precies hetzelfde: alleen de treffers.

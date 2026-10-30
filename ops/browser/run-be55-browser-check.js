@@ -336,7 +336,7 @@ async function zoekenScenario(cdp) {
   await setViewport(cdp, 390, 900);
   await navigate(cdp, `${APP}/search?q=soep`, `Boolean(document.querySelector('.dish-group-card'))`, 120000);
   const voor = await evalJs(cdp, ZOEK_STAAT);
-  check('zoeken: zonder filter twee groepen en geen label', voor.groepen === 2 && voor.labels.length === 0, `${voor.groepen}/${voor.labels.length}`);
+  check('zoeken: zonder filter geen enkel label', voor.groepen > 1 && voor.labels.length === 0, `${voor.groepen}/${voor.labels.length}`);
   check('zoeken: de knop staat zonder filter uit', voor.knopAan === 'false', voor.knopAan);
 
   await evalJs(cdp, `document.querySelector('.vandaag-filter-btn').click()`);

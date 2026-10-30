@@ -118,6 +118,12 @@ const SCENARIOS = [
     ready: `${MAIN_READY} && !!document.querySelector('.results-count')`,
     label: 'zoeken met resultaten',
   },
+  {
+    name: 'zoeken-vandaag',
+    url: '/search?q=soep&vandaag=1',
+    ready: `${MAIN_READY} && !!document.querySelector('.vandaag-label')`,
+    label: 'zoeken met het filter Vandaag',
+  },
   { name: 'alle-restaurants', url: '/alle-restaurants', ready: "!!document.querySelector('.ar-card')", label: 'alle restaurants' },
   { name: 'restaurant', url: '/restaurant/6', ready: "!!document.querySelector('.detail-name')", label: 'een restaurant' },
   { name: 'menu', url: '/menu/23-borrel', ready: "!!document.querySelector('.menu-card')", label: 'een groot menu' },
