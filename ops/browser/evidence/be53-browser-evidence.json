@@ -11,16 +11,14 @@
       "checks": 184,
       "passed": 184,
       "failed": 0,
-      "durationMs": 62295,
+      "durationMs": 70220,
       "error": null
     }
   ],
-  "head": "2c3c661d065418b7558fd346a534574804a84b1a",
-  "worktreeDirty": true,
-  "worktreeChanges": [
-    " M ops/browser/README.md"
-  ],
-  "generatedAt": "2026-10-30T19:32:20.731Z",
+  "head": "40aefa4a4917d60edb82c0025ce6249cc17a120f",
+  "worktreeDirty": false,
+  "worktreeChanges": [],
+  "generatedAt": "2026-10-30T19:39:53.022Z",
   "environment": {
     "node": "v22.22.3",
     "loopback": "http://localhost:3193 (own next dev) + own local browser over CDP",
