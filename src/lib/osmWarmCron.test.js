@@ -19,13 +19,14 @@ function read(relative) {
   return fs.readFileSync(path.join(ROOT, relative), 'utf8');
 }
 
-test('vercel.json holds exactly two daily crons and no other setting', () => {
+test('vercel.json holds exactly three daily crons and no other setting', () => {
   const config = JSON.parse(read('vercel.json'));
   assert.deepEqual(Object.keys(config), ['crons']);
-  assert.equal(config.crons.length, 2);
+  assert.equal(config.crons.length, 3);
+  // BE-46 (#106, criterium 3) voegt het dagelijkse opruimen van stemmingen toe.
   assert.deepEqual(
     config.crons.map((cron) => cron.path).sort(),
-    ['/api/cron/osm-breda', '/api/health/db'],
+    ['/api/cron/kies-opruimen', '/api/cron/osm-breda', '/api/health/db'],
   );
   for (const cron of config.crons) {
     // "minute hour * * *": one run a day, never more.

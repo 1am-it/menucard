@@ -830,6 +830,52 @@ Limits: fixture evidence. No real Supabase project, no real authenticator app,
 no real e-mail, no production data or credentials, and no acceptance of the real
 second step — that needs the owner's real project after the release plan.
 
+## BE-46 (#106) — samen kiezen: a stemlink and a card stack
+
+`run-be46-browser-check.js` (also `npm run test:browser:be46`) starts its own
+local dev server (port 3166, `BE46_FIXTURE_PORT`) and browser through the same
+runtime as the other checks and records six scenarios (`--lijst`,
+`--alleen=<naam>`):
+
+- **maken** — the whole route from making to result: `Mijn lijstje` with four
+  saved dishes shows "Samen kiezen" next to "Lijstje delen"; one tap opens a real
+  `role="dialog"` sheet ("Tot wanneer mag er gestemd worden?") that says "Geen
+  sluitingstijd" while empty; filling in 18:00 and pressing "Maak de stemlink"
+  sends exactly `{ dish_keys, sluit_om }` (the four ids in list order and an ISO
+  closing time) to `POST /api/v1/kies`, after which "Stemlink gemaakt" and
+  "Open de stemlink" → `/kies/<code>` appear; "Deel de stemlink" copies that
+  link through the existing BE-49 share route, shows "Link gekopieerd" and sends
+  the anonymous `gedeeld` counter once per dish of the stemming and nothing
+  else; opening the link, giving a roepnaam, swiping all four dishes and ending
+  on the group result works in the same session.
+- **route** — the stemlink itself: roepnaam, four dishes, progress in
+  `role="status"` ("Gerecht 1 van 4"), vote buttons labelled with the dish name
+  and ≥ 44 px, `touch-action: pan-y`, an undo button that starts disabled, the
+  result as a real `<ul>`, the favourite first with "Favoriet" and the existing
+  "Reserveer"/"Route" actions, the result on reopening the link, and light and
+  dark at 390 px.
+- **swipen** — pointer drags: 40% right shows "Lekker →" and votes `lekker =
+  true`, 10% left shows "← Liever niet" but stays under the 30% threshold and
+  votes nothing, 45% left votes `liever niet`; light and dark screenshots of the
+  stack.
+- **toetsenbord** — the stack is reachable with the keyboard; ArrowRight and
+  ArrowLeft cast the same votes as the buttons.
+- **ongedaan** — "Vorige stem ongedaan maken" brings the last dish back and sends
+  one `DELETE` with only the anonymous browser id.
+- **zonder-migratie** — with the stub answering like a missing table (503) the
+  page shows "Samen kiezen is nog niet beschikbaar", no card stack and no crash.
+
+The record lands in `ops/browser/evidence/be46-browser-evidence.json`; the
+screenshots stay in the repository under `ops/browser/evidence/be-46/`. A
+filtered run writes `be46-browser-evidence.filtered.json` and is never the full
+evidence.
+
+Limits: fixture evidence. `/api/v1/kies*` and `/api/v1/tellers` are answered by
+`stubSource()` in the page with the shape of `src/lib/kiesHandlers.js`; the
+database, the migration 0022 and the real counter table are not involved, and
+the approved mockup (an external Claude artifact) can only be compared by the
+Lead or the owner against these screenshots. This is not acceptance.
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real
