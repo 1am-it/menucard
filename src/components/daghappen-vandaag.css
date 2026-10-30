@@ -1,0 +1,91 @@
+/* BE-55 stap B, deel 4 (#135) — "Daghappen vandaag" op de home.
+   Eigen bestand naast de component (BE-52); kleuren alleen via tokens. */
+
+.daghappen-vandaag {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 0 16px 24px;
+  max-width: 1080px;
+}
+
+.daghappen-vandaag-kop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.daghappen-vandaag-titel {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+}
+
+.daghappen-vandaag-alle {
+  color: var(--accent-surface);
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 6px 4px;
+}
+
+.daghappen-vandaag-alle:hover,
+.daghappen-vandaag-alle:focus-visible {
+  text-decoration: underline;
+}
+
+.daghappen-vandaag-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.daghappen-vandaag-kaart {
+  min-width: 0;
+}
+
+.daghappen-vandaag-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.daghappen-vandaag-link:hover,
+.daghappen-vandaag-link:focus-visible {
+  outline: 2px solid var(--accent-surface);
+  outline-offset: 2px;
+}
+
+.daghappen-vandaag-naam {
+  font-weight: 600;
+}
+
+.daghappen-vandaag-prijs {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.daghappen-vandaag-label {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-surface);
+  color: var(--surface-soft);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .daghappen-vandaag-lijst {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

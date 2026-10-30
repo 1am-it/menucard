@@ -133,6 +133,7 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaats
           ? String(a[kolom]).localeCompare(String(b[kolom]))
           : String(b[kolom]).localeCompare(String(a[kolom]))));
       }
+      if (query.maxRijen) gevonden = gevonden.slice(0, query.maxRijen);
       return Promise.resolve({ data: one ? gevonden[0] || null : gevonden, error: null });
     }
 
@@ -192,6 +193,7 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaats
       gt(kolom, waarde) { query.filters.push([kolom, 'gt', waarde]); return query; },
       gte(kolom, waarde) { query.filters.push([kolom, 'gte', waarde]); return query; },
       order(kolom, { ascending = true } = {}) { query.order = { kolom, oplopend: ascending }; return query; },
+      limit(aantal) { query.maxRijen = aantal; return query; },
       insert(rij) { query.action = 'insert'; query.payload = Array.isArray(rij) ? rij[0] : { ...rij }; return query; },
       update(patch) { query.action = 'update'; query.payload = { ...patch }; return query; },
       delete() { query.action = 'delete'; return query; },
@@ -333,6 +335,53 @@ test('BE-55: een houder zonder plaatsrecht krijgt 403 bij plaatsen en wijzigen',
   });
   const welkom = await handlersFor(elders).plaatsAanbod(request(daghapBody()));
   assert.equal(welkom.status, 201);
+});
+
+test('BE-55: "Daghappen vandaag" geeft maximaal drie aanbiedingen in willekeurige volgorde', async () => {
+  const rijen = [1, 2, 3, 4, 5].map((id) => aanbodRij({
+    id,
+    restaurant_id: String(id),
+    naam: `Daghap ${id}`,
+    status: 'online',
+  }));
+  const client = fakeSupabase({
+    aanbod: [
+      ...rijen,
+      aanbodRij({ id: 6, status: 'in_controle' }),
+      aanbodRij({ id: 7, status: 'offline' }),
+      aanbodRij({ id: 8, status: 'online', verloopt_op: VERLOOPT_GISTEREN }),
+    ],
+  });
+
+  // Vaste reeks in plaats van Math.random: de volgorde is echt willekeurig,
+  // maar deze test moet altijd hetzelfde bewijs geven.
+  const reeks = [0.9, 0.1, 0.7, 0.3, 0.1];
+  let teller = 0;
+  const handlers = handlersFor(client, { random: () => reeks[teller++ % reeks.length] });
+
+  const resultaat = await handlers.publiekVandaag(request(undefined, {
+    url: 'http://localhost/api/v1/daghap/vandaag',
+  }));
+
+  assert.equal(resultaat.status, 200);
+  assert.equal(resultaat.body.aanbod.length, 3, 'hooguit drie');
+  // Alleen online, niet verlopen aanbod, en alleen de weergavevelden.
+  assert.ok(resultaat.body.aanbod.every((rij) => rij.id <= 5));
+  const eerste = resultaat.body.aanbod[0];
+  assert.deepEqual(Object.keys(eerste).sort(), [
+    'beschrijving', 'id', 'labels', 'naam', 'prijs', 'prijsCent', 'restaurantId', 'soort', 'verlooptOp',
+  ]);
+  assert.equal(eerste.restaurantId, String(eerste.id), 'het restaurant gaat mee voor de link');
+  // De query vroeg nooit meer dan de kandidatenlijst op.
+  const selectie = client.calls.find((aanroep) => aanroep.action === 'select');
+  assert.ok(selectie, 'er is gelezen');
+  assert.doesNotMatch(selectie.payload || '', /user_id|status|filter_reden/, 'geen interne kolommen');
+
+  // Een kleiner gevraagd aantal blijft binnen de grens van drie.
+  const kleiner = await handlers.publiekVandaag(request(undefined, {
+    url: 'http://localhost/api/v1/daghap/vandaag?limit=9',
+  }));
+  assert.equal(kleiner.body.aanbod.length, 3);
 });
 
 test('BE-55: een filtertreffer gaat naar in_controle, niet online', async () => {

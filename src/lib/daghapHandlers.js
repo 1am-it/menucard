@@ -72,8 +72,15 @@ const AANBOD_KOLOMMEN = 'id, restaurant_id, soort, naam, prijs_cent, beschrijvin
 // De publieke kant krijgt alleen deze kolommen: geen account, geen status, geen
 // filterreden. Zo gaat er nooit een interne kolom naar de browser van een gast.
 const PUBLIEK_KOLOMMEN = 'id, soort, naam, prijs_cent, beschrijving, labels, verloopt_op';
+// Voor de home is ook het restaurant nodig, anders is er geen link bij het
+// gerecht. Dat is het enige extra veld.
+const HOME_KOLOMMEN = `${PUBLIEK_KOLOMMEN}, restaurant_id`;
 
 const DAGHAP_NOT_AVAILABLE_MESSAGE = 'Daghappen zijn nog niet beschikbaar.';
+// De home toont er maximaal drie, in willekeurige volgorde (contract). De query
+// haalt een kleine kandidatenlijst op en nooit de hele tabel.
+const DAGHAP_HOME_LIMIT = 3;
+const DAGHAP_HOME_KANDIDATEN = 24;
 
 function tekst(value) {
   return String(value === undefined || value === null ? '' : value).trim();
@@ -146,6 +153,8 @@ function createDaghapHandlers({
   authenticate,
   duursteKaartPrijs,
   now = Date.now,
+  // Willekeurige volgorde op de home; in tests vervangbaar door een vaste reeks.
+  random = Math.random,
   timeoutMs = DAGHAP_TIMEOUT_MS,
 } = {}) {
   /** De admin-client, of null als hij niet geconfigureerd is. */
@@ -684,6 +693,57 @@ function createDaghapHandlers({
     return { status: 200, body: { ok: true, aanbod } };
   }
 
+  /**
+   * GET /api/v1/daghap/vandaag — "Daghappen vandaag" op de home: maximaal drie
+   * aanbiedingen in willekeurige volgorde, elk met alleen de weergavevelden en
+   * het restaurant voor de link. Geen sessie nodig, geen volledige lijst: de
+   * query haalt een kleine kandidatenlijst op en de server kiest daaruit.
+   */
+  async function publiekVandaag(request) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+
+    let gevraagd = DAGHAP_HOME_LIMIT;
+    try {
+      const url = request && typeof request.url === 'string' ? new URL(request.url, 'http://daghap.invalid') : null;
+      const waarde = url ? Number(url.searchParams.get('limit')) : NaN;
+      if (Number.isInteger(waarde) && waarde > 0) gevraagd = Math.min(waarde, DAGHAP_HOME_LIMIT);
+    } catch (error) {
+      gevraagd = DAGHAP_HOME_LIMIT;
+    }
+
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_AANBOD)
+        .select(HOME_KOLOMMEN)
+        .eq('status', DAGHAP_STATUS_ONLINE)
+        .gt('verloopt_op', new Date(Number(now())).toISOString())
+        .order('verloopt_op', { ascending: true })
+        .limit(DAGHAP_HOME_KANDIDATEN),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+
+    const rijen = (Array.isArray(gevonden.data) ? gevonden.data : [])
+      .filter((rij) => !isVerlopen(rij.verloopt_op, now()));
+    // Willekeurige volgorde (contract): elke kandidaat even vaak, zonder
+    // voorrang voor een restaurant of een soort.
+    const geschud = rijen
+      .map((rij) => ({ rij, sorteersleutel: Number(random()) || 0 }))
+      .sort((a, b) => a.sorteersleutel - b.sorteersleutel)
+      .map(({ rij }) => rij);
+
+    const aanbod = geschud
+      .slice(0, gevraagd)
+      .map((rij) => {
+        const scherm = publiekAanbodVoorScherm(rij);
+        if (!scherm) return null;
+        return { ...scherm, restaurantId: rij.restaurant_id || null };
+      })
+      .filter(Boolean);
+
+    return { status: 200, body: { ok: true, aanbod } };
+  }
+
   /** Hoeveel meldingen dit aanbod heeft (elk apparaat telt één keer). */
   async function telMeldingen(supabase, aanbodId) {
     const gevonden = await ask(
@@ -812,6 +872,7 @@ function createDaghapHandlers({
     offlineAanbod,
     plaatsAanbod,
     publiekAanbod,
+    publiekVandaag,
     ruimVerlopenOp,
     wijzigAanbod,
   };
