@@ -320,6 +320,7 @@ test('BE-13/BE-16: q=friet — none of the shown examples are weak matches, even
   // Confirm the real weak-match dish this fixture is known to contain
   // still exists in the underlying (ungrouped) result set — proving the
   // hint mechanism is correctly selective, not simply always-false.
+
   const ungrouped = searchDishes({ q: 'friet' });
   assert.ok(ungrouped.results.some((d) => d.dishId === '23-lunch-0-12'), 'expected the known real weak-match dish to still be part of the underlying friet result set');
 });
@@ -353,3 +354,69 @@ test('BE-15: lowCoverage keeps its exact existing trigger under group=restaurant
   assert.deepEqual(grouped.lowCoverage, ungrouped.lowCoverage, 'lowCoverage must be identical in both modes for the same genuinely-zero-match filters');
   assert.deepEqual(grouped.restaurantGroups, [], 'zero underlying matches means zero groups too');
 });
+
+// BE-55 stap B, deel 5 (#135) — het filter en het label "Vandaag".
+// Echte data: q=brood levert vier restaurantgroepen. Het aanbod komt — net als
+// in de zoekroute — als map binnen; deze laag kent zelf geen databank.
+
+const AANBOD_VOORBEELD = [{ soort: 'daghap', naam: 'Pompoensoep met brood' }];
+
+function groepIds(res) {
+  return res.restaurantGroups.map((g) => g.restaurantId);
+}
+
+test('BE-55: het filter Vandaag sluit gerechten en groepen zonder aanbod uit', () => {
+  const zonderFilter = searchDishes({ q: 'brood', group: 'restaurant' });
+  assert.ok(groepIds(zonderFilter).length > 3, 'baseline: q=brood moet meerdere restaurants geven');
+
+  const doel = groepIds(zonderFilter)[0];
+  const metFilter = searchDishes({
+    q: 'brood',
+    group: 'restaurant',
+    vandaag: true,
+    aanbod: { [doel]: AANBOD_VOORBEELD },
+  });
+
+  assert.deepEqual(groepIds(metFilter), [doel], 'alleen het restaurant met aanbod blijft over');
+  assert.equal(metFilter.total, 1);
+  const ongegroepeerd = searchDishes({ q: 'brood', vandaag: true, aanbod: { [doel]: AANBOD_VOORBEELD } });
+  assert.ok(ongegroepeerd.results.length > 0);
+  assert.ok(ongegroepeerd.results.every((dish) => dish.restaurantId === doel), 'ook losse gerechten zonder aanbod vallen af');
+  assert.equal(searchDishes({ q: 'brood', vandaag: true }).total, 0, 'zonder opgehaald aanbod is er geen treffer');
+});
+
+test('BE-55: de volgorde is identiek met en zonder daghap', () => {
+  const zonderAanbod = searchDishes({ q: 'brood', group: 'restaurant' });
+  const eersteTwee = groepIds(zonderAanbod).slice(0, 2);
+  const aanbod = { [eersteTwee[1]]: AANBOD_VOORBEELD, [eersteTwee[0]]: AANBOD_VOORBEELD };
+  // Zonder filter: het aanbod voegt alleen een label toe, geen andere volgorde.
+  const metAanbod = searchDishes({ q: 'brood', group: 'restaurant', aanbod });
+  assert.deepEqual(groepIds(metAanbod), groepIds(zonderAanbod));
+  assert.deepEqual(
+    metAanbod.restaurantGroups.map((g) => g.menus.map((m) => m.examples.map((e) => e.dishId))),
+    zonderAanbod.restaurantGroups.map((g) => g.menus.map((m) => m.examples.map((e) => e.dishId))),
+    'ook de menu-subgroepen en hun voorbeelden houden hun volgorde',
+  );
+  // Met filter: precies dezelfde volgorde, alleen zonder de restaurants zonder aanbod.
+  const gefilterd = searchDishes({ q: 'brood', group: 'restaurant', vandaag: true, aanbod });
+  assert.deepEqual(groepIds(gefilterd), groepIds(zonderAanbod).filter((id) => aanbod[id]));
+  const losZonderAanbod = searchDishes({ q: 'brood' }).results.map((d) => d.dishId);
+  const losMetAanbod = searchDishes({ q: 'brood', aanbod }).results.map((d) => d.dishId);
+  assert.deepEqual(losMetAanbod, losZonderAanbod, 'de losse gerechten houden hun volgorde');
+});
+
+test('BE-55: het label Vandaag staat alleen bij een restaurant met aanbod', () => {
+  const zonderAanbod = searchDishes({ q: 'brood', group: 'restaurant' });
+  const doel = groepIds(zonderAanbod)[0];
+  const metAanbod = searchDishes({ q: 'brood', group: 'restaurant', aanbod: { [doel]: AANBOD_VOORBEELD } });
+  for (const groep of metAanbod.restaurantGroups) {
+    if (groep.restaurantId === doel) {
+      assert.deepEqual(groep.vandaag, { soort: 'daghap', naam: 'Pompoensoep met brood' });
+    } else {
+      assert.equal(groep.vandaag, undefined, 'geen aanbod betekent geen label');
+    }
+  }
+  const leegAanbod = searchDishes({ q: 'brood', group: 'restaurant', aanbod: { [doel]: [] } });
+  assert.ok(leegAanbod.restaurantGroups.every((groep) => groep.vandaag === undefined), 'een lege lijst is geen treffer');
+});
+

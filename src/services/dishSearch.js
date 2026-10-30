@@ -263,6 +263,23 @@ function toPublicDishShape(dish) {
   return shape
 }
 
+// BE-55 stap B, deel 5 (#135) — het aanbod als simpele map van restaurantId
+// naar de (publieke) aanbiedingen van dat restaurant. Alleen restaurants met
+// ten minste één aanbod horen in de map; een lege lijst telt niet als treffer,
+// zodat het label "Vandaag" nooit bij een leeg aanbod verschijnt.
+function normaliseerAanbodMap(aanbod) {
+  const map = new Map()
+  if (!aanbod) return map
+  const entries = aanbod instanceof Map ? aanbod.entries() : Object.entries(aanbod)
+  for (const [restaurantId, items] of entries) {
+    if (!restaurantId) continue
+    const lijst = (Array.isArray(items) ? items : [])
+      .filter((item) => item && typeof item === 'object')
+    if (lijst.length > 0) map.set(String(restaurantId), lijst)
+  }
+  return map
+}
+
 /**
  * @param {object} params
  * @param {string} [params.q]
@@ -273,6 +290,11 @@ function toPublicDishShape(dish) {
  * @param {number[]} [params.excludeAllergens]
  * @param {string} [params.day] - 'ma'..'zo'
  * @param {boolean} [params.nowOpen]
+ * @param {boolean} [params.vandaag] - BE-55 stap B, deel 5: alleen restaurants
+ *   met actief (online, niet-verlopen) daghap- of seizoensaanbod
+ * @param {object|Map} [params.aanbod] - het aanbod per restaurantId, zoals de
+ *   caller het net ophaalde (bv. { '23': [{ soort: 'daghap', naam: '...' }] });
+ *   leeg of afwezig betekent: nergens aanbod
  * @param {number} [params.cursor] - offset into the filtered result set
  * @param {number} [params.limit]
  * @param {string} [params.group] - BE-15: 'restaurant' for the additive
@@ -291,17 +313,27 @@ function searchDishes({
   cursor = 0,
   limit = DEFAULT_LIMIT,
   group = '',
+  vandaag = false,
+  aanbod = null,
 } = {}) {
   const boundedLimit = Math.min(Math.max(1, limit || DEFAULT_LIMIT), MAX_LIMIT)
   const boundedCursor = Math.max(0, cursor || 0)
   const trimmedQ = (q || '').trim()
   const hasQuery = trimmedQ.length >= 2 // same minimum-length convention used elsewhere in the app
   const needle = hasQuery ? trimmedQ.toLowerCase() : null
+  // BE-55 stap B, deel 5 — het aanbod komt van de caller (de zoekroute haalt het
+  // met één kleine lijstvraag op) en is hier alleen een map. Deze module kent
+  // geen Supabase en geen databank, net als bij de rest van de zoeklaag.
+  const aanbodPerRestaurant = normaliseerAanbodMap(aanbod)
 
   const candidates = getDishIndex()
     .filter((dish) => {
       if (meal && !MEAL_TYPES.includes(meal)) return false
       if (meal && dish.mealType !== meal) return false
+      // BE-55 — het filter "Vandaag" laat alleen restaurants met actief aanbod
+      // door. Het is een filter, geen sortering: de volgorde hieronder blijft
+      // exact dezelfde als zonder daghap.
+      if (vandaag && !aanbodPerRestaurant.has(dish.restaurantId)) return false
       if (!priceMatches(dish, maxPrice)) return false
       if (!matchesCuisine(dish._restaurant, cuisines)) return false
       if (buurt && dish._restaurant.buurt !== buurt) return false
@@ -433,7 +465,18 @@ function searchDishes({
       .map((mealType) => entry.menusByType.get(mealType))
       .sort((a, b) => b.count - a.count)
     restaurantIdsWithGroups.add(restaurantId)
-    allGroups.push({ restaurantId: entry.restaurantId, restaurantName: entry.restaurantName, menus })
+    // BE-55 — het label "Vandaag · daghap" hoort alleen bij een restaurant met
+    // actief aanbod. Geen aanbod: geen veld, dus ook geen label. De volgorde
+    // van de groepen en van de menu's blijft ongewijzigd.
+    const aanbodHier = aanbodPerRestaurant.get(restaurantId)
+    allGroups.push({
+      restaurantId: entry.restaurantId,
+      restaurantName: entry.restaurantName,
+      menus,
+      ...(aanbodHier
+        ? { vandaag: { soort: aanbodHier[0].soort || null, naam: aanbodHier[0].naam || '' } }
+        : {}),
+    })
   }
 
   // Restaurant-level pagination (never raw-dish, never menu-subgroup) —

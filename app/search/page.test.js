@@ -369,3 +369,32 @@ test('BE-15: "load more" now paginates restaurant groups (groupsNextCursor/group
   const source = readPageSource();
   assert.match(source, /const handleLoadMore = \(\) => \{\s*if \(groupsNextCursor == null\) return\s*runSearch\(filters, groupsNextCursor\)/);
 });
+
+test('BE-55 deel 5: het filter Vandaag komt uit de URL (?vandaag=1) en gaat er ook weer in', () => {
+  const source = readPageSource();
+  assert.match(source, /vandaag: searchParams\.get\('vandaag'\) === '1'/, 'de URL is de enige bron van het filter');
+  assert.match(source, /if \(f\.vandaag\) p\.set\('vandaag', '1'\)/);
+  assert.match(source, /vandaag: false \}\)/, 'reset zet het filter ook uit');
+});
+
+test('BE-55 deel 5: de filterknop "Vandaag" staat bij de snelle filters en heeft een actieve stand', () => {
+  const source = readPageSource();
+  assert.match(source, /aria-pressed=\{filters\.vandaag\}/);
+  assert.match(source, /vandaag-filter-btn/);
+  assert.match(source, /onClick=\{\(\) => setFilter\('vandaag', !filters\.vandaag\)\}/);
+  assert.match(source, />\s*Vandaag\s*<\/button>/, 'de knop heet letterlijk "Vandaag"');
+});
+
+test('BE-55 deel 5: het label "Vandaag · daghap" verschijnt alleen bij een treffer van de zoekroute', () => {
+  const source = readPageSource();
+  assert.match(source, /return soort === 'seizoensgerecht' \? 'Vandaag · seizoensgerecht' : 'Vandaag · daghap'/);
+  assert.match(source, /\{group\.vandaag && \(/, 'geen aanbod betekent geen label');
+  assert.match(source, /<div className="dish-group-head">\s*<h3 className="dish-group-restaurant-name">\{group\.restaurantName\}<\/h3>/);
+  assert.match(source, /<span className="vandaag-label">\{vandaagLabel\(group\.vandaag\.soort\)\}<\/span>/);
+});
+
+test('BE-55 deel 5: de pagina haalt zelf geen aanbodlijst op — dat komt mee met de zoekvraag', () => {
+  const source = readPageSource();
+  assert.doesNotMatch(source, /\/api\/v1\/daghap/, 'geen tweede verzoek en nooit een volledige aanbodlijst naar de browser');
+  assert.match(source, /import '\.\/search\.css'/, 'eigen opmaakbestand naast de pagina');
+});

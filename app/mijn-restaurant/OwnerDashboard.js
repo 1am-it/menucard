@@ -39,6 +39,11 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import OwnerAccountDeletion from './OwnerAccountDeletion'
 import OwnerStatsPanel from './OwnerStatsPanel'
 
+// BE-55 stap B (#135) — de houder beheert zijn daghap en seizoensgerechten op
+// een eigen pagina; het dashboard linkt daarheen.
+const AANBOD_HREF = '/mijn-restaurant/aanbod'
+const AANBOD_LINK_LABEL = 'Daghap of seizoensgerecht plaatsen'
+
 export default function OwnerDashboard({ restaurantIndex }) {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
@@ -262,6 +267,11 @@ export default function OwnerDashboard({ restaurantIndex }) {
                         )}
                         {restaurant.known && !restaurant.menuHref && (
                           <span className="owner-note">{OWNER_OVERVIEW_MESSAGES.noMenuLink}</span>
+                        )}
+                        {restaurant.status === 'approved' && (
+                          <Link className="owner-link" href={AANBOD_HREF}>
+                            {AANBOD_LINK_LABEL}
+                          </Link>
                         )}
                       </div>
                       {overview.hasOwnerAccess && ownedIds.includes(restaurant.id) && (

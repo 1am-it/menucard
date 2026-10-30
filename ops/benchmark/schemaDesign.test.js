@@ -97,6 +97,7 @@ test('the v2 design adds no database migration in this branch', () => {
   // The only migrations after the v2 design round are BE-25's reviewed human
   // structure review (#59 review 6307703713), BE-44's anonymous dish counters
   // (#105, criterium 5), BE-46's samen-kiezen tables (#106, criterium 1) and
+  // BE-55's daghap/season tables (#135, step A). None adds v2/product storage.
   // BE-57's anonymous "bekeken" counter (#139). None adds v2/product storage.
   assert.deepEqual(later, [
     '0020_be25_menu_structure_reviews.sql',
