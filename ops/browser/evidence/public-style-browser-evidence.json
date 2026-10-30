@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T07:24:50.598Z",
+  "generatedAt": "2026-10-30T18:39:46.784Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
-  "app": "http://localhost:3175",
+  "app": "http://localhost:3144",
   "filter": null,
   "scenarios": [
     {
@@ -10,7 +10,7 @@
       "checks": 26,
       "passed": 26,
       "failed": 0,
-      "durationMs": 7031,
+      "durationMs": 7036,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 6988,
+      "durationMs": 7204,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 7696,
+      "durationMs": 8262,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 8159,
+      "durationMs": 7436,
       "error": null
     },
     {
@@ -42,7 +42,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 8940,
+      "durationMs": 8269,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 7228,
+      "durationMs": 7106,
       "error": null
     },
     {
@@ -58,7 +58,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 8064,
+      "durationMs": 8374,
       "error": null
     },
     {
@@ -66,7 +66,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 6958,
+      "durationMs": 7283,
       "error": null
     },
     {
@@ -74,7 +74,7 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 8888,
+      "durationMs": 8842,
       "error": null
     },
     {
@@ -82,7 +82,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 1140,
+      "durationMs": 1120,
       "error": null
     },
     {
@@ -90,7 +90,7 @@
       "checks": 20,
       "passed": 20,
       "failed": 0,
-      "durationMs": 4205,
+      "durationMs": 4303,
       "error": null
     },
     {
@@ -98,7 +98,7 @@
       "checks": 1,
       "passed": 1,
       "failed": 0,
-      "durationMs": 1020,
+      "durationMs": 1042,
       "error": null
     },
     {
@@ -106,7 +106,7 @@
       "checks": 94,
       "passed": 94,
       "failed": 0,
-      "durationMs": 36898,
+      "durationMs": 36934,
       "error": null
     },
     {
@@ -114,7 +114,7 @@
       "checks": 5,
       "passed": 5,
       "failed": 0,
-      "durationMs": 2069,
+      "durationMs": 1038,
       "error": null
     },
     {
@@ -122,7 +122,7 @@
       "checks": 1,
       "passed": 1,
       "failed": 0,
-      "durationMs": 1238,
+      "durationMs": 1099,
       "error": null
     },
     {
@@ -130,7 +130,7 @@
       "checks": 2,
       "passed": 2,
       "failed": 0,
-      "durationMs": 4649,
+      "durationMs": 4593,
       "error": null
     },
     {
@@ -138,7 +138,7 @@
       "checks": 2,
       "passed": 2,
       "failed": 0,
-      "durationMs": 3043,
+      "durationMs": 3064,
       "error": null
     }
   ],
@@ -148,15 +148,15 @@
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 180754,
-      "totalKb": 176.5,
-      "documentBytes": 8293,
+      "totalBytes": 180850,
+      "totalKb": 176.6,
+      "documentBytes": 8292,
       "resourceCount": 18,
       "byType": {
-        "Document": 8293,
-        "Stylesheet": 26563,
-        "Script": 137730,
-        "Fetch": 7506,
+        "Document": 8292,
+        "Stylesheet": 26484,
+        "Script": 137917,
+        "Fetch": 7495,
         "Other": 662
       },
       "biggest": [
@@ -171,29 +171,29 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/c420d58390fa255a.css",
+          "url": "/_next/static/css/35120c0af2a21ebf.css",
           "type": "Stylesheet",
-          "bytes": 26563
+          "bytes": 26484
         },
         {
-          "url": "/_next/static/chunks/app/page-e5b7f090b613275e.js",
+          "url": "/_next/static/chunks/app/page-74410f2f414106ad.js",
           "type": "Script",
-          "bytes": 9016
+          "bytes": 9088
         },
         {
           "url": "/",
           "type": "Document",
-          "bytes": 8293
+          "bytes": 8292
         },
         {
-          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
+          "url": "/_next/static/chunks/app/search/page-43b245897542ae09.js",
           "type": "Script",
-          "bytes": 7384
+          "bytes": 7476
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
           "type": "Script",
-          "bytes": 5270
+          "bytes": 5336
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -207,15 +207,15 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 165478,
-      "totalKb": 161.6,
-      "documentBytes": 3205,
-      "resourceCount": 18,
+      "totalBytes": 163419,
+      "totalKb": 159.6,
+      "documentBytes": 3206,
+      "resourceCount": 14,
       "byType": {
-        "Document": 3205,
-        "Script": 128714,
-        "Stylesheet": 26563,
-        "Fetch": 6334,
+        "Document": 3206,
+        "Script": 128829,
+        "Stylesheet": 26484,
+        "Fetch": 4238,
         "Other": 662
       },
       "biggest": [
@@ -230,19 +230,19 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/c420d58390fa255a.css",
+          "url": "/_next/static/css/35120c0af2a21ebf.css",
           "type": "Stylesheet",
-          "bytes": 26563
+          "bytes": 26484
         },
         {
-          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
+          "url": "/_next/static/chunks/app/search/page-43b245897542ae09.js",
           "type": "Script",
-          "bytes": 7384
+          "bytes": 7476
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
           "type": "Script",
-          "bytes": 5270
+          "bytes": 5336
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -250,14 +250,14 @@
           "bytes": 4781
         },
         {
-          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "url": "/_next/static/chunks/2619-3c9e02e22d10480a.js",
           "type": "Script",
-          "bytes": 3861
+          "bytes": 3784
         },
         {
           "url": "/alle-restaurants",
           "type": "Document",
-          "bytes": 3205
+          "bytes": 3206
         }
       ]
     }
@@ -700,7 +700,7 @@
       {
         "name": "search-results light 1280px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 1280 vs innerWidth 1280"
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
       },
       {
         "name": "search-results light 1280px: tab bar hidden",
@@ -757,7 +757,7 @@
       {
         "name": "search-results dark 1280px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 1280 vs innerWidth 1280"
+        "detail": "scrollWidth 1274 vs innerWidth 1280"
       },
       {
         "name": "search-results dark 1280px: tab bar hidden",
@@ -966,7 +966,7 @@
       {
         "name": "restaurant-with-menu light 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 369 vs innerWidth 369"
+        "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
         "name": "restaurant-with-menu light 320px: tab bar visible",
@@ -1023,7 +1023,7 @@
       {
         "name": "restaurant-with-menu dark 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 369 vs innerWidth 369"
+        "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
         "name": "restaurant-with-menu dark 320px: tab bar visible",
@@ -1080,7 +1080,7 @@
       {
         "name": "restaurant-without-menu light 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 369 vs innerWidth 369"
+        "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
         "name": "restaurant-without-menu light 320px: tab bar visible",
@@ -1137,7 +1137,7 @@
       {
         "name": "restaurant-without-menu dark 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 369 vs innerWidth 369"
+        "detail": "scrollWidth 320 vs innerWidth 320"
       },
       {
         "name": "restaurant-without-menu dark 320px: tab bar visible",
@@ -2097,12 +2097,12 @@
       {
         "name": "internal/coverage light: captured without production credentials",
         "passed": true,
-        "detail": "{\"path\":\"/internal/login\",\"text\":\"Inloggen (intern)\\n\\nLog in met je werkmail en je wachtwoord. Daarna vraag je een code uit je authenticator-app.\\n\\nE-mailadres\\nWachtwoord\\nToon\\nInloggen\\nWachtwoord \",\"theme\":\"light\"}"
+        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
       },
       {
         "name": "internal/coverage dark: captured without production credentials",
         "passed": true,
-        "detail": "{\"path\":\"/internal/login\",\"text\":\"Inloggen (intern)\\n\\nLog in met je werkmail en je wachtwoord. Daarna vraag je een code uit je authenticator-app.\\n\\nE-mailadres\\nWachtwoord\\nToon\\nInloggen\\nWachtwoord \",\"theme\":\"dark\"}"
+        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
       },
       {
         "name": "internal/login light: renders with the new tokens",
@@ -2119,9 +2119,9 @@
   "screenshots": [
     {
       "file": "ops/browser/output/be-28/home-light-1280.png",
-      "bytes": 115628,
+      "bytes": 119176,
       "width": 1274,
-      "height": 1273,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
@@ -2140,9 +2140,9 @@
     },
     {
       "file": "ops/browser/output/be-28/home-dark-1280.png",
-      "bytes": 104864,
+      "bytes": 108449,
       "width": 1274,
-      "height": 1273,
+      "height": 1324,
       "viewport": "1280x900"
     },
     {
@@ -2161,252 +2161,252 @@
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-1280.png",
-      "bytes": 64609,
-      "width": 1280,
-      "height": 900,
+      "bytes": 64703,
+      "width": 1274,
+      "height": 913,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390.png",
-      "bytes": 49737,
+      "bytes": 48440,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-320.png",
-      "bytes": 44142,
+      "bytes": 44387,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-1280.png",
-      "bytes": 62127,
-      "width": 1280,
-      "height": 900,
+      "bytes": 62171,
+      "width": 1274,
+      "height": 913,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-390.png",
-      "bytes": 51098,
+      "bytes": 49559,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-320.png",
-      "bytes": 45813,
+      "bytes": 46019,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-1280.png",
-      "bytes": 250914,
+      "bytes": 251090,
       "width": 1274,
       "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-390.png",
-      "bytes": 56201,
+      "bytes": 56102,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-320.png",
-      "bytes": 49980,
+      "bytes": 49945,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-1280.png",
-      "bytes": 245306,
+      "bytes": 245635,
       "width": 1274,
       "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-390.png",
-      "bytes": 58008,
+      "bytes": 57993,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-320.png",
-      "bytes": 51081,
+      "bytes": 51055,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-1280.png",
-      "bytes": 322617,
+      "bytes": 328139,
       "width": 1274,
-      "height": 4061,
+      "height": 4156,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-390.png",
-      "bytes": 46144,
+      "bytes": 46784,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-320.png",
-      "bytes": 37497,
+      "bytes": 39984,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-1280.png",
-      "bytes": 306037,
+      "bytes": 311608,
       "width": 1274,
-      "height": 4061,
+      "height": 4156,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-390.png",
-      "bytes": 47424,
+      "bytes": 47996,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-320.png",
-      "bytes": 37341,
+      "bytes": 41261,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-1280.png",
-      "bytes": 83009,
+      "bytes": 82893,
       "width": 1274,
       "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-390.png",
-      "bytes": 41156,
+      "bytes": 42155,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-320.png",
-      "bytes": 35555,
+      "bytes": 38798,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-1280.png",
-      "bytes": 81370,
+      "bytes": 81183,
       "width": 1274,
       "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-390.png",
-      "bytes": 41898,
+      "bytes": 42841,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-320.png",
-      "bytes": 35085,
+      "bytes": 39424,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-1280.png",
-      "bytes": 299315,
+      "bytes": 301343,
       "width": 1274,
-      "height": 3185,
+      "height": 3278,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-390.png",
-      "bytes": 44823,
+      "bytes": 44913,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-320.png",
-      "bytes": 41440,
+      "bytes": 41401,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-1280.png",
-      "bytes": 288754,
+      "bytes": 290999,
       "width": 1274,
-      "height": 3185,
+      "height": 3278,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-390.png",
-      "bytes": 48548,
+      "bytes": 48592,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-320.png",
-      "bytes": 44993,
+      "bytes": 44911,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-1280.png",
-      "bytes": 34825,
+      "bytes": 34410,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-390.png",
-      "bytes": 31722,
+      "bytes": 30797,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-320.png",
-      "bytes": 31261,
+      "bytes": 30936,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-1280.png",
-      "bytes": 34086,
+      "bytes": 33578,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-390.png",
-      "bytes": 32140,
+      "bytes": 31194,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-320.png",
-      "bytes": 31671,
+      "bytes": 31220,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
@@ -2455,168 +2455,168 @@
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390-detail.png",
-      "bytes": 50044,
+      "bytes": 48740,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-1280.png",
-      "bytes": 118911,
+      "bytes": 118897,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-390.png",
-      "bytes": 99645,
+      "bytes": 99690,
       "width": 390,
-      "height": 1659,
+      "height": 1679,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-320.png",
-      "bytes": 101216,
+      "bytes": 101333,
       "width": 320,
-      "height": 2074,
+      "height": 2114,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-1280.png",
-      "bytes": 108331,
+      "bytes": 108273,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-390.png",
-      "bytes": 91154,
+      "bytes": 91163,
       "width": 390,
-      "height": 1659,
+      "height": 1679,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-320.png",
-      "bytes": 92175,
+      "bytes": 92375,
       "width": 320,
-      "height": 2074,
+      "height": 2114,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-1280.png",
-      "bytes": 121680,
+      "bytes": 121649,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-390.png",
-      "bytes": 100772,
+      "bytes": 100938,
       "width": 390,
-      "height": 1653,
+      "height": 1693,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-320.png",
-      "bytes": 103475,
+      "bytes": 103615,
       "width": 320,
-      "height": 2122,
+      "height": 2162,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-1280.png",
-      "bytes": 111109,
+      "bytes": 111060,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-390.png",
-      "bytes": 92173,
+      "bytes": 92388,
       "width": 390,
-      "height": 1653,
+      "height": 1693,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-320.png",
-      "bytes": 94376,
+      "bytes": 94588,
       "width": 320,
-      "height": 2122,
+      "height": 2162,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-1280.png",
-      "bytes": 118901,
+      "bytes": 118886,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-390.png",
-      "bytes": 98905,
+      "bytes": 99146,
       "width": 390,
-      "height": 1639,
+      "height": 1679,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-320.png",
-      "bytes": 100700,
+      "bytes": 100813,
       "width": 320,
-      "height": 2088,
+      "height": 2128,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-1280.png",
-      "bytes": 108221,
+      "bytes": 108178,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-390.png",
-      "bytes": 90347,
+      "bytes": 90567,
       "width": 390,
-      "height": 1639,
+      "height": 1679,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-320.png",
-      "bytes": 91671,
+      "bytes": 91871,
       "width": 320,
-      "height": 2088,
+      "height": 2128,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-390.png",
-      "bytes": 222000,
+      "bytes": 223778,
       "width": 390,
       "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-dark-390.png",
-      "bytes": 215472,
+      "bytes": 218116,
       "width": 390,
       "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-1280.png",
-      "bytes": 242022,
+      "bytes": 244345,
       "width": 1274,
-      "height": 2867,
+      "height": 2922,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-coverage-light-1280.png",
-      "bytes": 26126,
+      "bytes": 9370,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-coverage-dark-1280.png",
-      "bytes": 22913,
+      "bytes": 9370,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"

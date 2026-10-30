@@ -1,8 +1,8 @@
 {
   "be": "BE-50 (#120)",
-  "measuredAt": "2026-10-30T07:40:17.025Z",
-  "gitHead": "2086bdc5d0832d63cc8bb4904528d5c3ca064170",
-  "branch": "feat/snelheid-120",
+  "measuredAt": "2026-10-30T18:47:59.762Z",
+  "gitHead": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
+  "branch": "feat/css-per-pagina-128",
   "node": "v22.22.3",
   "next": "15.5.15",
   "port": 3170,
@@ -19,24 +19,24 @@
       "label": "Home",
       "path": "/",
       "route": "/page",
-      "totalBytes": 180752,
-      "totalKb": 176.5,
+      "totalBytes": 180849,
+      "totalKb": 176.6,
       "requests": 18,
       "categories": {
         "html": {
-          "bytes": 8291,
+          "bytes": 8292,
           "kb": 8.1
         },
         "js": {
-          "bytes": 137730,
-          "kb": 134.5
+          "bytes": 137917,
+          "kb": 134.7
         },
         "css": {
-          "bytes": 26563,
+          "bytes": 26484,
           "kb": 25.9
         },
         "data": {
-          "bytes": 7506,
+          "bytes": 7494,
           "kb": 7.3
         },
         "font": {
@@ -65,45 +65,45 @@
           "kb": 45.4
         },
         {
-          "url": "/_next/static/chunks/app/page-e5b7f090b613275e.js",
-          "bytes": 9016,
-          "kb": 8.8
+          "url": "/_next/static/chunks/app/page-74410f2f414106ad.js",
+          "bytes": 9088,
+          "kb": 8.9
         },
         {
-          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
-          "bytes": 7384,
-          "kb": 7.2
+          "url": "/_next/static/chunks/app/search/page-43b245897542ae09.js",
+          "bytes": 7476,
+          "kb": 7.3
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-          "bytes": 5270,
-          "kb": 5.1
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+          "bytes": 5336,
+          "kb": 5.2
         }
       ],
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=3lb4g",
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         },
         {
           "url": "/search?_rsc=3lb4g",
-          "bytes": 2493,
+          "bytes": 2490,
           "kb": 2.4
         },
         {
           "url": "/api/search?q=wild&limit=1",
-          "bytes": 842,
+          "bytes": 840,
           "kb": 0.8
         },
         {
           "url": "/api/search?q=mosselen&limit=1",
-          "bytes": 838,
+          "bytes": 836,
           "kb": 0.8
         },
         {
           "url": "/api/search?q=pompoen&limit=1",
-          "bytes": 834,
+          "bytes": 832,
           "kb": 0.8
         }
       ],
@@ -112,9 +112,9 @@
         "route": "/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -127,14 +127,14 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -147,13 +147,13 @@
             "gzipBytes": 2632
           },
           {
-            "file": "static/chunks/app/page-e5b7f090b613275e.js",
-            "bytes": 24602,
-            "gzipBytes": 8614
+            "file": "static/chunks/app/page-74410f2f414106ad.js",
+            "bytes": 24948,
+            "gzipBytes": 8685
           }
         ],
-        "rawBytes": 402531,
-        "gzipBytes": 121315,
+        "rawBytes": 402592,
+        "gzipBytes": 121344,
         "missing": []
       }
     },
@@ -162,24 +162,24 @@
       "label": "Zoeken (q=pasta)",
       "path": "/search?q=pasta",
       "route": "/search/page",
-      "totalBytes": 163321,
+      "totalBytes": 163351,
       "totalKb": 159.5,
       "requests": 15,
       "categories": {
         "html": {
-          "bytes": 3201,
+          "bytes": 3198,
           "kb": 3.1
         },
         "js": {
-          "bytes": 128714,
-          "kb": 125.7
+          "bytes": 128829,
+          "kb": 125.8
         },
         "css": {
-          "bytes": 26563,
+          "bytes": 26484,
           "kb": 25.9
         },
         "data": {
-          "bytes": 4181,
+          "bytes": 4178,
           "kb": 4.1
         },
         "font": {
@@ -208,14 +208,14 @@
           "kb": 45.4
         },
         {
-          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
-          "bytes": 7384,
-          "kb": 7.2
+          "url": "/_next/static/chunks/app/search/page-43b245897542ae09.js",
+          "bytes": 7476,
+          "kb": 7.3
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-          "bytes": 5270,
-          "kb": 5.1
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+          "bytes": 5336,
+          "kb": 5.2
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -226,7 +226,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=unnn1",
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         },
         {
@@ -245,9 +245,9 @@
         "route": "/search/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -260,14 +260,14 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -280,13 +280,13 @@
             "gzipBytes": 2632
           },
           {
-            "file": "static/chunks/app/search/page-404ee8e3ad534765.js",
-            "bytes": 22875,
-            "gzipBytes": 6975
+            "file": "static/chunks/app/search/page-43b245897542ae09.js",
+            "bytes": 23305,
+            "gzipBytes": 7070
           }
         ],
-        "rawBytes": 400804,
-        "gzipBytes": 119676,
+        "rawBytes": 400949,
+        "gzipBytes": 119729,
         "missing": []
       }
     },
@@ -295,25 +295,25 @@
       "label": "Alle restaurants",
       "path": "/alle-restaurants",
       "route": "/alle-restaurants/page",
-      "totalBytes": 163386,
-      "totalKb": 159.6,
-      "requests": 14,
+      "totalBytes": 164466,
+      "totalKb": 160.6,
+      "requests": 16,
       "categories": {
         "html": {
-          "bytes": 3206,
+          "bytes": 3205,
           "kb": 3.1
         },
         "js": {
-          "bytes": 128714,
-          "kb": 125.7
+          "bytes": 128829,
+          "kb": 125.8
         },
         "css": {
-          "bytes": 26563,
+          "bytes": 26484,
           "kb": 25.9
         },
         "data": {
-          "bytes": 4241,
-          "kb": 4.1
+          "bytes": 5286,
+          "kb": 5.2
         },
         "font": {
           "bytes": 0,
@@ -341,14 +341,14 @@
           "kb": 45.4
         },
         {
-          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
-          "bytes": 7384,
-          "kb": 7.2
+          "url": "/_next/static/chunks/app/search/page-43b245897542ae09.js",
+          "bytes": 7476,
+          "kb": 7.3
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-          "bytes": 5270,
-          "kb": 5.1
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+          "bytes": 5336,
+          "kb": 5.2
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -359,13 +359,23 @@
       "dataRequests": [
         {
           "url": "/search?_rsc=1tikd",
-          "bytes": 2493,
+          "bytes": 2490,
           "kb": 2.4
         },
         {
           "url": "/api/restaurants?limit=50",
           "bytes": 1748,
           "kb": 1.7
+        },
+        {
+          "url": "/restaurant/6?_rsc=1tikd",
+          "bytes": 524,
+          "kb": 0.5
+        },
+        {
+          "url": "/menu/6-lunch?_rsc=1tikd",
+          "bytes": 524,
+          "kb": 0.5
         }
       ],
       "foreignRequests": 0,
@@ -373,9 +383,9 @@
         "route": "/alle-restaurants/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -388,14 +398,14 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -408,13 +418,13 @@
             "gzipBytes": 2632
           },
           {
-            "file": "static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-            "bytes": 14262,
-            "gzipBytes": 4867
+            "file": "static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+            "bytes": 14608,
+            "gzipBytes": 4932
           }
         ],
-        "rawBytes": 392191,
-        "gzipBytes": 117568,
+        "rawBytes": 392252,
+        "gzipBytes": 117591,
         "missing": []
       }
     },
@@ -423,24 +433,24 @@
       "label": "Restaurant (Bardot, 4 kaarten)",
       "path": "/restaurant/6",
       "route": "/restaurant/[id]/page",
-      "totalBytes": 177218,
+      "totalBytes": 177225,
       "totalKb": 173.1,
       "requests": 15,
       "categories": {
         "html": {
-          "bytes": 11917,
+          "bytes": 11907,
           "kb": 11.6
         },
         "js": {
-          "bytes": 135577,
-          "kb": 132.4
+          "bytes": 135676,
+          "kb": 132.5
         },
         "css": {
-          "bytes": 26563,
+          "bytes": 26484,
           "kb": 25.9
         },
         "data": {
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         },
         "font": {
@@ -474,9 +484,9 @@
           "kb": 6.8
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-          "bytes": 5270,
-          "kb": 5.1
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+          "bytes": 5336,
+          "kb": 5.2
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -487,7 +497,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=10qzd",
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         }
       ],
@@ -496,9 +506,9 @@
         "route": "/restaurant/[id]/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -511,14 +521,14 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -536,18 +546,18 @@
             "gzipBytes": 6527
           },
           {
-            "file": "static/chunks/9193-15a93cb77e2f5909.js",
-            "bytes": 10606,
-            "gzipBytes": 3948
+            "file": "static/chunks/9193-39811b8894c9a744.js",
+            "bytes": 10938,
+            "gzipBytes": 4032
           },
           {
-            "file": "static/chunks/app/restaurant/[id]/page-399a1abca8ad3812.js",
-            "bytes": 8070,
-            "gzipBytes": 2570
+            "file": "static/chunks/app/restaurant/[id]/page-05fc5750d8285ed6.js",
+            "bytes": 8049,
+            "gzipBytes": 2559
           }
         ],
-        "rawBytes": 413597,
-        "gzipBytes": 125746,
+        "rawBytes": 413623,
+        "gzipBytes": 125777,
         "missing": []
       }
     },
@@ -556,25 +566,25 @@
       "label": "Menu (T-Huis borrel, 138 gerechten)",
       "path": "/menu/23-borrel",
       "route": "/menu/[id]/page",
-      "totalBytes": 186981,
-      "totalKb": 182.6,
-      "requests": 13,
+      "totalBytes": 188115,
+      "totalKb": 183.7,
+      "requests": 15,
       "categories": {
         "html": {
-          "bytes": 26957,
-          "kb": 26.3
+          "bytes": 27002,
+          "kb": 26.4
         },
         "js": {
-          "bytes": 132799,
-          "kb": 129.7
+          "bytes": 132915,
+          "kb": 129.8
         },
         "css": {
-          "bytes": 26563,
+          "bytes": 26484,
           "kb": 25.9
         },
         "data": {
-          "bytes": 0,
-          "kb": 0
+          "bytes": 1052,
+          "kb": 1
         },
         "font": {
           "bytes": 0,
@@ -607,9 +617,9 @@
           "kb": 6.8
         },
         {
-          "url": "/_next/static/chunks/app/menu/%5Bid%5D/page-cef2d2acf8cf809a.js",
-          "bytes": 5465,
-          "kb": 5.3
+          "url": "/_next/static/chunks/app/menu/%5Bid%5D/page-56c86bd4748531ce.js",
+          "bytes": 5539,
+          "kb": 5.4
         },
         {
           "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
@@ -617,15 +627,26 @@
           "kb": 4.7
         }
       ],
-      "dataRequests": [],
+      "dataRequests": [
+        {
+          "url": "/menu/23-lunch?_rsc=172x5",
+          "bytes": 527,
+          "kb": 0.5
+        },
+        {
+          "url": "/restaurant/23?_rsc=172x5",
+          "bytes": 525,
+          "kb": 0.5
+        }
+      ],
       "foreignRequests": 0,
       "buildFirstLoadJs": {
         "route": "/menu/[id]/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -638,14 +659,14 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -663,18 +684,18 @@
             "gzipBytes": 6527
           },
           {
-            "file": "static/chunks/9193-15a93cb77e2f5909.js",
-            "bytes": 10606,
-            "gzipBytes": 3948
+            "file": "static/chunks/9193-39811b8894c9a744.js",
+            "bytes": 10938,
+            "gzipBytes": 4032
           },
           {
-            "file": "static/chunks/app/menu/[id]/page-cef2d2acf8cf809a.js",
-            "bytes": 13881,
-            "gzipBytes": 5066
+            "file": "static/chunks/app/menu/[id]/page-56c86bd4748531ce.js",
+            "bytes": 14089,
+            "gzipBytes": 5139
           }
         ],
-        "rawBytes": 419408,
-        "gzipBytes": 128242,
+        "rawBytes": 419663,
+        "gzipBytes": 128357,
         "missing": []
       }
     },
@@ -683,24 +704,24 @@
       "label": "Mijn lijstje",
       "path": "/mijn-lijstje",
       "route": "/mijn-lijstje/page",
-      "totalBytes": 159467,
-      "totalKb": 155.7,
-      "requests": 13,
+      "totalBytes": 169137,
+      "totalKb": 165.2,
+      "requests": 15,
       "categories": {
         "html": {
-          "bytes": 5206,
-          "kb": 5.1
+          "bytes": 5303,
+          "kb": 5.2
         },
         "js": {
-          "bytes": 124537,
-          "kb": 121.6
+          "bytes": 133041,
+          "kb": 129.9
         },
         "css": {
-          "bytes": 26563,
-          "kb": 25.9
+          "bytes": 27635,
+          "kb": 27
         },
         "data": {
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         },
         "font": {
@@ -716,7 +737,7 @@
           "kb": 0.6
         }
       },
-      "jsRequests": 9,
+      "jsRequests": 10,
       "topScripts": [
         {
           "url": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -729,25 +750,25 @@
           "kb": 45.4
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
-          "bytes": 5270,
-          "kb": 5.1
+          "url": "/_next/static/chunks/5088-d591218038e48903.js",
+          "bytes": 5901,
+          "kb": 5.8
         },
         {
-          "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
-          "bytes": 4781,
-          "kb": 4.7
+          "url": "/_next/static/chunks/app/mijn-lijstje/page-dd8edd956dc6f2ae.js",
+          "bytes": 5787,
+          "kb": 5.7
         },
         {
-          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
-          "bytes": 3861,
-          "kb": 3.8
+          "url": "/_next/static/chunks/app/alle-restaurants/page-30f556f0c082cdf1.js",
+          "bytes": 5336,
+          "kb": 5.2
         }
       ],
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=1tpm6",
-          "bytes": 2499,
+          "bytes": 2496,
           "kb": 2.4
         }
       ],
@@ -756,9 +777,9 @@
         "route": "/mijn-lijstje/page",
         "files": [
           {
-            "file": "static/chunks/webpack-baff8ef2ce7b8e04.js",
-            "bytes": 3515,
-            "gzipBytes": 1791
+            "file": "static/chunks/webpack-b48c276bcf0a7946.js",
+            "bytes": 3561,
+            "gzipBytes": 1825
           },
           {
             "file": "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -771,14 +792,19 @@
             "gzipBytes": 45964
           },
           {
-            "file": "static/chunks/main-app-8a473dfdd3f093ae.js",
+            "file": "static/chunks/main-app-56c1da069822777b.js",
             "bytes": 560,
-            "gzipBytes": 227
+            "gzipBytes": 228
           },
           {
-            "file": "static/chunks/176-b1374ab33d855c73.js",
-            "bytes": 8869,
-            "gzipBytes": 3462
+            "file": "static/css/c908bd525dbf5b06.css",
+            "bytes": 818,
+            "gzipBytes": 386
+          },
+          {
+            "file": "static/chunks/2619-3c9e02e22d10480a.js",
+            "bytes": 8538,
+            "gzipBytes": 3385
           },
           {
             "file": "static/chunks/214-807403e7bf278f2e.js",
@@ -791,13 +817,18 @@
             "gzipBytes": 2632
           },
           {
-            "file": "static/chunks/app/mijn-lijstje/page-142c00ff02c7c51b.js",
-            "bytes": 7775,
-            "gzipBytes": 2805
+            "file": "static/chunks/5088-d591218038e48903.js",
+            "bytes": 13906,
+            "gzipBytes": 5499
+          },
+          {
+            "file": "static/chunks/app/mijn-lijstje/page-dd8edd956dc6f2ae.js",
+            "bytes": 17058,
+            "gzipBytes": 5381
           }
         ],
-        "rawBytes": 385704,
-        "gzipBytes": 115506,
+        "rawBytes": 409426,
+        "gzipBytes": 123925,
         "missing": []
       }
     }
