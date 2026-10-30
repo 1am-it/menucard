@@ -56,6 +56,9 @@ import {
   swipeOutcome,
   writeKiesProgress,
 } from '@/src/lib/kiesStemming'
+// BE-52 (#128): de eigen opmaak van deze pagina staat naast de view.
+import '../kies.css'
+
 
 const NOT_FOUND_MESSAGE = 'Deze stemlink bestaat niet (meer).'
 const NAME_REQUIRED_MESSAGE = 'Vul een roepnaam van hoogstens 24 tekens in.'

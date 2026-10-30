@@ -32,6 +32,33 @@ merge one to mask missing acceptance in the other. Before applying adoption
 to a running UI branch, reconcile AGENTS.md/design docs explicitly and retain
 the stricter workflow-acceptance requirements already added in #56.
 
+## Owner agreements on ways of working (2026-10-29/30)
+
+- **DeepSeek peak hours: ask first.** DeepSeek charges double in peak hours:
+  Monday to Friday 01:00–04:00 and 06:00–10:00 UTC. That is 02–05 and 07–11
+  Dutch winter time and 03–06 and 08–12 summer time. Source:
+  api-docs.deepseek.com/quick_start/pricing. On 2026-10-30 84% of the spend fell
+  in peak hours.
+  - Before an order or marker would start a round in peak hours, or a round
+    (about 35 minutes) would run into them, the Lead reports it. The owner then
+    chooses: start now at the double price, or wait until off-peak, with the
+    start time named.
+  - Without a choice, the Lead waits.
+  - Off-peak and at weekends, the Lead starts as usual.
+  - For the real costs, use the DeepSeek CSV export. The runner usage export
+    counts only at the off-peak price.
+- **Merge-ready handover.** The owner only gets merge links for PRs that are
+  conflict-free against the current main. The Lead first merges main into the
+  branch, then builds and tests. After every owner merge, the Lead repeats
+  this for the remaining PRs.
+  - Release-preparation PRs, such as `DOCUMENTED_RELEASE_VERSIONS` in
+    `production-db-migrate.yml`, come together with the migration PR.
+  - Production approvals, such as `production-migrations`, stay with the owner.
+    The Lead gives one link and the exact clicks.
+- **No automatic status reports.** No recurring cron or Lead checks. The Lead
+  checks the runners when the owner next writes, or when a background wait on
+  a runner reports back.
+
 Use .agent/DELIVERY.md for the standard project handoff. The new checkpoint
 adds saved/remote commit, stop reason and next action. No workflow, production,
 secrets or integration changes are authorized by these documents.

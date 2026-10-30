@@ -32,6 +32,9 @@ import {
   sluitOmFromTime,
 } from '@/src/lib/kiesStemming'
 import KiesShareButton from '@/src/components/KiesShareButton'
+// BE-52 (#128): de opmaak van dit blad staat naast de component.
+import './kies-start.css'
+
 
 const START_FAILED_MESSAGE = 'De stemlink is niet gemaakt. Probeer het opnieuw.'
 const TOO_MANY_MESSAGE = `Samen kiezen kan met hooguit ${KIES_MAX_DISHES} gerechten.`
