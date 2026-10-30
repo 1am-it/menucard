@@ -10,10 +10,11 @@
 //
 // Roles and access are unchanged: this page decides nothing itself and grants
 // nothing. An account without a usable role keeps the same explicit "no internal
-// access" status with sign out as its only action, and an owner-only account
-// keeps the existing "nothing to open yet" note instead of being redirected into
-// a route that would deny it. Every module route still enforces its own
-// unchanged server-side authorization.
+// access" status with sign out as its only action. BE-47 (#111, criterion 5):
+// an owner-only account no longer sees "Nog niets te openen" but is sent on to
+// /mijn-restaurant, its own screen; the rule itself lives in
+// src/lib/ownerAccess.js and is unit-tested there. Every module route still
+// enforces its own unchanged server-side authorization.
 //
 // Only the existing, read-only GET /api/internal/v1/me and
 // GET /api/internal/v1/workqueue-counts are called. A failed counts call never
@@ -25,9 +26,8 @@ import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import {
   resolveVisibleModules,
   resolveLandingHref,
-  isOwnerRole,
-  hasAnyKnownRole,
 } from '@/src/lib/internalNav'
+import { resolveInternalOwnerRedirect } from '@/src/lib/ownerAccess'
 
 const SHELL_STYLE = {
   maxWidth: 960,
@@ -42,7 +42,7 @@ const SHELL_STYLE = {
 export default function InternalHomePage() {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
-  const [status, setStatus] = useState('loading') // loading | redirecting | no-access | owner
+  const [status, setStatus] = useState('loading') // loading | redirecting | no-access
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -73,7 +73,14 @@ export default function InternalHomePage() {
         }
         const roles = Array.isArray(me.roles) ? me.roles : []
         if (resolveVisibleModules(roles).length === 0) {
-          setStatus(hasAnyKnownRole(roles) && isOwnerRole(roles) ? 'owner' : 'no-access')
+          // BE-47 (#111): an owner-only account belongs on /mijn-restaurant.
+          const ownerHref = resolveInternalOwnerRedirect(roles)
+          if (ownerHref) {
+            setStatus('redirecting')
+            router.replace(ownerHref)
+            return
+          }
+          setStatus('no-access')
           return
         }
 
@@ -92,7 +99,9 @@ export default function InternalHomePage() {
 
         const href = resolveLandingHref(roles, counts)
         if (!href) {
-          setStatus(hasAnyKnownRole(roles) ? 'owner' : 'no-access')
+          // Only reachable when a visible module has no landing place at all; an
+          // owner-only account was already sent to /mijn-restaurant above.
+          setStatus('no-access')
           return
         }
         setStatus('redirecting')
@@ -160,27 +169,6 @@ export default function InternalHomePage() {
           {error}
         </div>
         {signOutButton}
-      </main>
-    )
-  }
-
-  if (status === 'owner') {
-    return (
-      <main className="cov-dashboard" style={SHELL_STYLE}>
-        <div
-          style={{
-            marginTop: 20,
-            padding: 18,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px dashed var(--border)',
-            background: 'var(--bg-elevated)',
-            color: 'var(--text-secondary)',
-          }}
-        >
-          <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>Beheerdersfuncties</div>
-          <p style={{ margin: 0, fontSize: 13 }}>Nog niets te openen — er is nog geen interne pagina voor de beheerder.</p>
-        </div>
-        <div style={{ marginTop: 16 }}>{signOutButton}</div>
       </main>
     )
   }

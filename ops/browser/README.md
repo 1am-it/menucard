@@ -838,3 +838,41 @@ actual restaurant site, or production behaviour. The product extraction
 runtime remains disabled. The fictional session/API is intercepted in the page;
 it never falls through to a real API or an external host. A green browser run
 is not independent review and not authenticated acceptance.
+
+
+## BE-47 (#111) — de restauranthouder op /mijn-restaurant
+
+`run-be47-browser-check.js` (also `npm run test:browser:be47`) drives the real
+`/mijn-restaurant/inloggen`, `/mijn-restaurant` and `/internal` in a local app
+with the same **fictional Supabase** as BE-48 (`lib/be48-auth-stub.js`), now with
+fictional claims behind `/api/claims/mine` and a fictional
+`POST /api/mijn-restaurant/account-verwijderen`. The app code is unchanged: the
+real pages, the real flow module, the real client. Only the HTTP layer is
+fictional, and every other URL is refused and recorded.
+
+Scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **inloggen** (390 and 1280, light and dark) — the sign-in screen with a real
+  `<label>`, `autocomplete="email"`, ≥ 44 px controls, the "Claim je restaurant"
+  route and the `/internal/login` hint; **no phone field at all** while
+  `NEXT_PUBLIC_OWNER_SMS_LOGIN` is off; the neutral "if this address is known to
+  us" notice; a wrong code in Dutch in `role="alert"`; the right code landing on
+  `/mijn-restaurant` with the restaurant's name, the public page link, the menu
+  link and the approved chip.
+- **statussen** — one approved, one pending and one rejected claim side by side:
+  three chips, the waiting text, and only the rejected claim offering
+  "Opnieuw claimen".
+- **verwijderen** — the confirmation, then a fresh code, a wrong code refused in
+  Dutch with the account still there, the right code deleting the fictional
+  account and signing out; the recorded request carries only `{ code }`, never a
+  user id or an address.
+- **doorsturen** — an owner-only account on `/internal` ends on
+  `/mijn-restaurant` (no more "Nog niets te openen"); an `internal` account that
+  uses the owner sign-in ends on `/internal/login` with its token still `aal1`.
+
+Screenshots stay in `ops/browser/evidence/be-47/` (in git), the record in
+`ops/browser/evidence/be47-browser-evidence.json` (a filtered run writes
+`*.filtered.json`, git-ignored). Limits: fixture evidence. No real Supabase
+project, mailbox or sms, no production data or credentials, and no acceptance of
+the real sign-in — the Supabase "Reauthentication" template still needs
+`{{ .Token }}` before use, as the contract says.
