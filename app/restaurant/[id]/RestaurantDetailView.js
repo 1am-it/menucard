@@ -16,6 +16,9 @@ import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 // opbouw als op /menu/<id> (src/components/MenuBody.js). Geen tweede
 // weergave van gerechten.
 import { StaticMenu } from '@/src/components/MenuBody'
+// BE-55 stap B (#135) — het blok "Vandaag" haalt zelf alleen het actieve aanbod
+// van dit ene restaurant op; zonder aanbod verschijnt er niets.
+import DaghapVandaag from '@/src/components/DaghapVandaag'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -207,6 +210,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
 
       {/* ── Menukaarten (BE-42 2A) ── */}
       <main className="page-main page-with-tabbar">
+        <DaghapVandaag restaurantId={id} />
         {menus ? (
           <section aria-labelledby="menukaarten-title">
             <div className="rpm-head">

@@ -17,6 +17,8 @@ import EmojiText from '@/src/components/EmojiText'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
+// BE-55 stap B (#135) — "Vandaag" op de menupagina; geen aanbod, geen blok.
+import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
 import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings } from '@/src/components/MenuBody'
@@ -533,6 +535,9 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
       {/* ── Menu items ── */}
       <main className="page-main page-with-tabbar">
+        {/* BE-55 stap B (#135) — "Vandaag": het actieve aanbod van dit restaurant,
+            los van de filters hieronder, en weg als er niets online staat. */}
+        <DaghapVandaag restaurantId={id.split('-')[0]} />
         {filteredCategories.length === 0 ? (
           <div className="empty-state">
             <div style={{ fontSize: 36, marginBottom: 12 }}><Emoji glyph="🔍" /></div>
