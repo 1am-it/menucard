@@ -11,9 +11,11 @@
 //
 // De beslissingen staan in de geteste module; dit component doet niets anders
 // dan hem op het juiste moment en met de echte browserobjecten aanroepen.
+// Het importeert bewust alleen de browsercode (viewBeacon.js): de serverkant
+// blijft uit het client-bundel.
 
 import { useEffect } from 'react'
-import { scheduleRestaurantView } from '@/src/lib/restaurantViews'
+import { scheduleRestaurantView } from '@/src/lib/viewBeacon'
 
 function sessionStore() {
   try {

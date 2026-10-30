@@ -119,7 +119,10 @@ test('0024: additief — geen bestaand object wordt gewijzigd, verwijderd of her
 
 test('0024: de lib, de route en de migratie gebruiken dezelfde namen', () => {
   const views = fs.readFileSync(path.join(REPO_ROOT, 'src/lib/restaurantViews.js'), 'utf8');
-  assert.match(views, /VIEW_ENDPOINT = '\/api\/v1\/bekeken'/);
+  const beacon = fs.readFileSync(path.join(REPO_ROOT, 'src/lib/viewBeacon.js'), 'utf8');
+  // De endpointnaam staat in de browsercode (die gaat naar de pagina's), de
+  // functie- en tabelnaam in de serverkant.
+  assert.match(beacon, /VIEW_ENDPOINT = '\/api\/v1\/bekeken'/);
   assert.match(views, /VIEW_FUNCTION = 'increment_restaurant_view'/);
   assert.match(views, /VIEW_TABLE = 'restaurant_views'/);
   assert.ok(fs.existsSync(path.join(REPO_ROOT, 'app/api/v1/bekeken/route.js')));
