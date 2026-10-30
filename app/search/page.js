@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AccountMenu from '@/src/components/AccountMenu'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
@@ -640,7 +640,7 @@ function SearchPageInner() {
             <PrimaryNav />
             <ThemeToggle />
             <ShareSettingsButton />
-            <AccountMenu />
+            <AccountMenuButton />
           </div>
         </div>
       </header>

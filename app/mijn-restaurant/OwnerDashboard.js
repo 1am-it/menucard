@@ -28,7 +28,7 @@ import {
   resolveOwnerEntry,
 } from '@/src/lib/ownerAccess'
 import { OWNER_OVERVIEW_MESSAGES, buildOwnerOverview } from '@/src/lib/ownerRestaurantOverview'
-import AccountMenu from '@/src/components/AccountMenu'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 // BE-52 (#128): de eigen opmaak van deze pagina staat naast de pagina.
 import './mijn-restaurant.css'
@@ -142,7 +142,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
           <Wordmark />
           <div className="header-right">
             <ThemeToggle />
-            <AccountMenu />
+            <AccountMenuButton />
           </div>
         </div>
       </header>

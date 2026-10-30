@@ -20,10 +20,9 @@
 // Dit is uitsluitend een zichtbaarheidslaag. Elke bestaande route houdt zijn
 // eigen, ongewijzigde servercontrole; niets hier verleent toegang.
 
-// De opslagsleutel die de Supabase-client zelf gebruikt: `sb-<projectref>-auth-token`
-// (bij grote tokens opgeknipt in `...-auth-token.0`, `.1`, ...). Alleen deze
-// goedkope controle bepaalt of de dure client en het menu geladen worden.
-const AUTH_STORAGE_PATTERN = /^sb-.+-auth-token(\.\d+)?$/;
+// De opslagsleutel en de goedkope sessiecontrole staan in accountSession.js:
+// de koppen laden alleen dat kleine bestand, en pas bij een sessie het menu.
+const { AUTH_STORAGE_PATTERN, hasSupabaseSessionKey } = require('./accountSession');
 
 const BEHEER_HREF = '/internal';
 const MIJN_RESTAURANT_HREF = '/mijn-restaurant';
@@ -66,24 +65,6 @@ function hasWorkRoles(roles) {
  * andere verzonnen aanduiding. */
 function resolveRoleLabels(roles) {
   return ROLE_LABELS.filter(([role]) => hasRole(roles, role)).map(([, label]) => label);
-}
-
-/** Goedkope controle of er een Supabase-sessiesleutel in de opslag staat.
- * Nooit een exception naar buiten: zonder bruikbare opslag is het antwoord
- * "geen sessie" (dus een gast), precies zoals de pagina zich dan gedraagt. */
-function hasSupabaseSessionKey(storage) {
-  if (!storage || typeof storage !== 'object') return false;
-  try {
-    const length = Number(storage.length);
-    if (!Number.isInteger(length) || length <= 0) return false;
-    for (let index = 0; index < length; index += 1) {
-      const key = storage.key(index);
-      if (typeof key === 'string' && AUTH_STORAGE_PATTERN.test(key)) return true;
-    }
-    return false;
-  } catch {
-    return false;
-  }
 }
 
 function withoutDiacritics(value) {

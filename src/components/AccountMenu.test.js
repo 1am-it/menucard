@@ -125,17 +125,36 @@ test('geen nieuwe dependency, geen eigen inloglogica of TOTP', () => {
   assert.doesNotMatch(source, /signInWith|verifyOtp|totp|mfa|enroll/i);
 });
 
-test('het menu staat in elke kop waar het contract hem vraagt', () => {
+test('het menu staat in elke kop waar het contract hem vraagt, via de goedkope voordeur', () => {
   for (const file of MOUNTED_IN) {
     const source = read(file);
-    assert.match(source, /import AccountMenu from '@\/src\/components\/AccountMenu'/, `${file} importeert het menu`);
-    assert.match(source, /<AccountMenu \/>/, `${file} toont het menu`);
+    assert.match(source, /import AccountMenuButton from '@\/src\/components\/AccountMenuButton'/, `${file} importeert de voordeur`);
+    assert.match(source, /<AccountMenuButton \/>/, `${file} toont het menu`);
+    assert.doesNotMatch(source, /import AccountMenu from/, `${file} laadt het menu zelf niet in de eerste lading`);
   }
+});
+
+test('de voordeur laadt het menu pas na de sessiecontrole, met een dynamische import', () => {
+  const loader = read('src/components/AccountMenuButton.js');
+  assert.match(loader, /^'use client'/);
+  assert.match(loader, /import \{ hasSupabaseSessionKey \} from '@\/src\/lib\/accountSession'/);
+  assert.match(loader, /if \(!hasSupabaseSessionKey\(storage\)\) return undefined/);
+  assert.match(loader, /import\('\.\/AccountMenu'\)/);
+  const imports = loader.match(/^import .+$/gm) || [];
+  assert.deepEqual(
+    imports.map((line) => line.trim()),
+    [
+      "import { useEffect, useState } from 'react'",
+      "import { hasSupabaseSessionKey } from '@/src/lib/accountSession'",
+    ],
+    'de voordeur importeert alleen React en de goedkope sessiecontrole',
+  );
+  assert.doesNotMatch(loader, /supabaseBrowser|fetch\(/, 'geen client en geen verzoek in de eerste lading');
 });
 
 test('de interne navigatie toont "Bekijk de site" via het accountmenu, niet als eigen balk-item', () => {
   const nav = read('src/components/InternalNav.js');
-  assert.match(nav, /<AccountMenu \/>/);
+  assert.match(nav, /<AccountMenuButton \/>/);
   const code = nav.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   assert.doesNotMatch(code, /Bekijk de site/, 'het interne balk-item blijft weg; die link hoort in het menu');
 });

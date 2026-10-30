@@ -47,7 +47,7 @@ import {
 // stored as `bredaeats_theme`, dark when nothing is stored, no OS-preference
 // following). Mounted here so every internal page gets it — no internal-only
 // theme logic.
-import AccountMenu from '@/src/components/AccountMenu'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import { WordmarkInline } from '@/src/components/Wordmark'
 
@@ -382,7 +382,7 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
       {/* BE-59 (#146) — hetzelfde accountmenu als op de publieke pagina's. Op
           interne pagina's staat daar ook "Bekijk de site" in (de keuze daarvoor
           komt uit het pad, zie src/lib/accountMenu.js). */}
-      <AccountMenu />
+      <AccountMenuButton />
 
       {!narrow && (
         <div className="internal-nav-actions">

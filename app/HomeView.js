@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import AccountMenu from '@/src/components/AccountMenu'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
@@ -123,7 +123,7 @@ export default function HomeView({ candidates = [] }) {
             <PrimaryNav />
             <ThemeToggle />
             <ShareSettingsButton />
-            <AccountMenu />
+            <AccountMenuButton />
           </div>
         </div>
       </header>
