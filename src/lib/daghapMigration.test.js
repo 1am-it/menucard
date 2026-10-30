@@ -43,7 +43,9 @@ test('0023: één nieuw, uniek migratienummer na 0022', () => {
   assert.deepEqual(files.filter((name) => name.startsWith('0023')), [FILE]);
   const nummers = files.map((name) => name.slice(0, 4));
   assert.equal(new Set(nummers).size, nummers.length, 'elk nummer is uniek');
-  assert.equal(files[files.length - 1], FILE, '0023 is de nieuwste migratie');
+  // Niet "de nieuwste migratie": een volgende migratie (0024, ...) zou deze
+  // test dan breken. Alleen dat 0023 bestaat en uniek is telt hier.
+  assert.ok(files.includes(FILE), '0023 staat in de reeks');
   assert.match(SQL, /^-- 0023 /);
   assert.match(SQL, /NOT YET APPLIED/i, 'het bestand wordt niet uitgevoerd in deze PR');
 });
