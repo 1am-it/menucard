@@ -28,6 +28,7 @@
     "test:browser:be45": "node ops/browser/run-be45-browser-check.js",
     "test:browser:be46": "node ops/browser/run-be46-browser-check.js",
     "test:browser:be47": "node ops/browser/run-be47-browser-check.js",
+    "test:browser:be55": "node ops/browser/run-be55-browser-check.js",
     "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
     "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },

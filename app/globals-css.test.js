@@ -151,7 +151,10 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/globals.css',
     'app/internal/tellers/tellers.css',
     'app/kies/kies.css',
+    // BE-55: aanbodformulier en het blok "Vandaag", beide naast hun code.
+    'app/mijn-restaurant/aanbod/aanbod.css',
     'app/mijn-restaurant/mijn-restaurant.css',
+    'src/components/daghap-vandaag.css',
     'src/components/kies-start.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');

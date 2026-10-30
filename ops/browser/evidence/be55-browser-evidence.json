@@ -1,23 +1,23 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T20:40:42.707Z",
+  "startedAt": "2026-10-30T20:49:42.904Z",
   "port": 3195,
   "scenarioRuns": [
     {
       "name": "vandaag",
       "checks": 93,
-      "passed": 87,
-      "failed": 6,
-      "durationMs": 43822,
+      "passed": 93,
+      "failed": 0,
+      "durationMs": 47675,
       "error": null
     },
     {
       "name": "melden",
       "checks": 9,
-      "passed": 6,
-      "failed": 3,
-      "durationMs": 4606,
+      "passed": 9,
+      "failed": 0,
+      "durationMs": 4410,
       "error": null
     }
   ],
@@ -88,8 +88,8 @@
     },
     {
       "name": "vandaag light/1280: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag light/1280: de prijs haalt 4,5:1",
@@ -163,8 +163,8 @@
     },
     {
       "name": "vandaag light/390: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag light/390: de prijs haalt 4,5:1",
@@ -238,8 +238,8 @@
     },
     {
       "name": "vandaag light/320: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag light/320: de prijs haalt 4,5:1",
@@ -313,8 +313,8 @@
     },
     {
       "name": "vandaag dark/1280: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag dark/1280: de prijs haalt 4,5:1",
@@ -388,8 +388,8 @@
     },
     {
       "name": "vandaag dark/390: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag dark/390: de prijs haalt 4,5:1",
@@ -463,8 +463,8 @@
     },
     {
       "name": "vandaag dark/320: \"Bewaar\" en \"Deel\" staan op de kaart",
-      "passed": false,
-      "detail": "false/true"
+      "passed": true,
+      "detail": "true/true"
     },
     {
       "name": "vandaag dark/320: de prijs haalt 4,5:1",
@@ -503,38 +503,38 @@
     },
     {
       "name": "melden: de bevestiging verschijnt",
-      "passed": false,
-      "detail": null
+      "passed": true,
+      "detail": "Bedankt, we kijken ernaar."
     },
     {
       "name": "melden: de bevestiging is een status voor hulpsoftware",
-      "passed": false,
-      "detail": null
+      "passed": true,
+      "detail": "status"
     },
     {
       "name": "melden: een tweede tik zegt dat het al gemeld is",
-      "passed": false,
-      "detail": "true"
+      "passed": true,
+      "detail": "Je had dit al gemeld. We kijken ernaar."
     },
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"},{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"}]"
+      "detail": "[{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"},{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"}"
+      "detail": "{\"apparaat\":\"c4fb32f3b1f6ca5431baa7f8\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "924a775b5b2f6e2a7fc9e943"
+      "detail": "c4fb32f3b1f6ca5431baa7f8"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "924a775b5b2f6e2a7fc9e943"
+      "detail": "c4fb32f3b1f6ca5431baa7f8"
     },
     {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
@@ -609,7 +609,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-light.png",
-      "sha256": "2b3dbc6301d3fd75128067e58d4bd1663bc199f8531aec7e9503414c2babf37a",
+      "sha256": "93364e20a5bb3f2a48baf3825c133ff43050bf3a3fa0d2f9b334795d9be3b78c",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -618,7 +618,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-dark.png",
-      "sha256": "98bdeb313caf5a30964244d9dee3082951f5987586132ff135c1757b9ac302a8",
+      "sha256": "738a26803ab5e246fceddd1f5433020f8661a48ea1f7a609f08ae561c501a030",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -636,7 +636,7 @@
     },
     {
       "file": "be55-melden-bevestiging-390-dark.png",
-      "sha256": "1c9c0c60a7d3e59306076493457a8fad03f118f2e130cf497e2eac530204983a",
+      "sha256": "6081b888d95129946b15f571988a6d30ced6a4b9c66f18d7f5ca10b9448f6203",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -644,6 +644,6 @@
       "state": "bevestiging"
     }
   ],
-  "failed": 9,
-  "passed": false
+  "failed": 0,
+  "passed": true
 }
