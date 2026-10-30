@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T06:45:36.244Z",
+  "generatedAt": "2026-10-30T06:52:14.136Z",
   "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
   "contract": "issue #111 BE-47 (inloggen met e-mailcode voor restauranthouders)",
-  "head": "1bb4ef2c62a55548fc45ab7a30cc785fd8adc3fe",
+  "head": "fcf1ee198bb40d6cbf4df6ec14d90021632d46f0",
   "app": "http://localhost:3147",
   "filter": null,
   "scenarios": [
@@ -11,7 +11,7 @@
       "checks": 20,
       "passed": 20,
       "failed": 0,
-      "durationMs": 7807,
+      "durationMs": 8978,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 10,
       "passed": 10,
       "failed": 0,
-      "durationMs": 4786,
+      "durationMs": 6194,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 15,
       "passed": 15,
       "failed": 0,
-      "durationMs": 5852,
+      "durationMs": 9067,
       "error": null
     },
     {
@@ -35,7 +35,7 @@
       "checks": 11,
       "passed": 11,
       "failed": 0,
-      "durationMs": 11685,
+      "durationMs": 15929,
       "error": null
     }
   ],
@@ -402,6 +402,17 @@
       "height": 844
     },
     {
+      "name": "be47-code-390-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-code-390-donker.png",
+      "file": "be47-code-390-donker.png",
+      "sha256": "090841e89b6ae5229148236b1003278712d50325a6368260ac366d41414625a4",
+      "width": 390,
+      "height": 844
+    },
+    {
       "name": "be47-mijn-restaurant-1280-licht.png",
       "theme": "light",
       "applied": true,
@@ -441,7 +452,7 @@
       "viewport": "390x844",
       "path": "ops/browser/evidence/be-47/be47-mijn-restaurant-390-donker.png",
       "file": "be47-mijn-restaurant-390-donker.png",
-      "sha256": "17d2367d71b1125ccd98dde4bd39a91d322f0445f7dc27839984e1335eddd98c",
+      "sha256": "88bcbf9917261388448a37d8df2e74aacccaebf82cb2c606812335c8604b81fa",
       "width": 390,
       "height": 844
     },
@@ -457,6 +468,17 @@
       "height": 900
     },
     {
+      "name": "be47-statussen-1280-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-statussen-1280-donker.png",
+      "file": "be47-statussen-1280-donker.png",
+      "sha256": "0807a07448ea9f63ca83e94ac06ee1349cd3eee141682857be8e327ec48ee473",
+      "width": 1280,
+      "height": 900
+    },
+    {
       "name": "be47-statussen-390-licht.png",
       "theme": "light",
       "applied": true,
@@ -468,6 +490,17 @@
       "height": 844
     },
     {
+      "name": "be47-statussen-390-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-statussen-390-donker.png",
+      "file": "be47-statussen-390-donker.png",
+      "sha256": "7349a80ac81ae387b75f02f2078941c4a2a63dbc8d190cf3a7b6ae711ec4e5f2",
+      "width": 390,
+      "height": 844
+    },
+    {
       "name": "be47-verwijderen-390-licht.png",
       "theme": "light",
       "applied": true,
@@ -475,6 +508,17 @@
       "path": "ops/browser/evidence/be-47/be47-verwijderen-390-licht.png",
       "file": "be47-verwijderen-390-licht.png",
       "sha256": "a9d5323272278070c8f152fa05f75328a9299a3cdafa44f23a64dee74a61f6b1",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-verwijderen-390-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-verwijderen-390-donker.png",
+      "file": "be47-verwijderen-390-donker.png",
+      "sha256": "0de67ea9aa63ee2c5379af4a51e76edfba342bf2a913a8fc275876d4a2184a55",
       "width": 390,
       "height": 844
     }

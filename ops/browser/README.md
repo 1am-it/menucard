@@ -874,5 +874,11 @@ Screenshots stay in `ops/browser/evidence/be-47/` (in git), the record in
 `ops/browser/evidence/be47-browser-evidence.json` (a filtered run writes
 `*.filtered.json`, git-ignored). Limits: fixture evidence. No real Supabase
 project, mailbox or sms, no production data or credentials, and no acceptance of
-the real sign-in — the Supabase "Reauthentication" template still needs
-`{{ .Token }}` before use, as the contract says.
+the real sign-in. Release prerequisite: the **Magic Link** e-mail template in the
+Supabase project must contain `{{ .Token }}` (the same requirement BE-48 already
+has for the claim), because sign-in and the delete confirmation both ask for that
+code. The contract's `reauthenticate()` step is *not* used for deletion: its
+nonce can only be redeemed by `updateUser({ nonce })` and no server route can
+verify it, so deletion asks a fresh sign-in code that the route verifies itself
+(see src/lib/ownerAccountDeletion.js). The "Reauthentication" template is
+therefore not needed for this flow.
