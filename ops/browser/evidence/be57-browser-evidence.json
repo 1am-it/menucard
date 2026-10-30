@@ -2,8 +2,8 @@
   "ticket": "BE-57 (#139, deel 2)",
   "route": "/mijn-restaurant",
   "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3187); geen productie, geen echte acceptatie",
-  "ranAt": "2026-10-30T21:42:17.230Z",
-  "passed": false,
+  "ranAt": "2026-10-30T21:45:08.378Z",
+  "passed": true,
   "checks": [
     {
       "name": "overzicht: geen extern of onbekend verzoek",
@@ -63,25 +63,25 @@
     {
       "name": "toetsenbord: minstens vijf stappen, elk met een zichtbare focusring",
       "passed": true,
-      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je restaurantpagina\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart op de publieke pagina\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Uitloggen\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Account verwijderen\",\"visible\":true}]"
+      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Zoeken\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Alle restaurants\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je restaurantpagina\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart op de publieke pagina\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Uitloggen\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Account verwijderen\",\"visible\":true}]"
     },
     {
       "name": "toetsenbord: de link naar de menukaart komt langs",
       "passed": true,
-      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Licht\",\"Donker\",\"Bekijk je restaurantpagina\",\"Bekijk je menukaart\",\"Bekijk je menukaart op de publieke pagina\",\"Uitloggen\",\"Account verwijderen\"]"
+      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Zoeken\",\"Alle restaurants\",\"Licht\",\"Donker\",\"Bekijk je restaurantpagina\",\"Bekijk je menukaart\",\"Bekijk je menukaart op de publieke pagina\",\"Uitloggen\",\"Account verwijderen\"]"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · contrast: 45 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · contrast: 47 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -96,9 +96,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (licht) · taal: lang=\"nl\"",
@@ -111,22 +111,17 @@
       "detail": "0 zonder label"
     },
     {
-      "name": "mijn-restaurant-cijfers (overzicht, light) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 45 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 47 teksten gemeten tegen de echte achtergrond",
       "passed": true,
-      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+      "detail": "zwakste 5.92:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -141,9 +136,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (donker) · taal: lang=\"nl\"",
@@ -154,11 +149,6 @@
       "name": "mijn-restaurant-cijfers/overzicht (donker) · formulier: 0 velden met een label",
       "passed": true,
       "detail": "0 zonder label"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (overzicht, dark) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
     },
     {
       "name": "overzicht: de schermafdruk 1280/light toont het cijferblok zelf",
@@ -223,7 +213,7 @@
     {
       "name": "overzicht: de schermafdruk 320/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":-23,\"bottom\":724,\"height\":746,\"inView\":true}"
+      "detail": "{\"top\":-17,\"bottom\":730,\"height\":746,\"inView\":true}"
     },
     {
       "name": "overzicht: geen horizontale scroll bij 320/light",
@@ -281,17 +271,17 @@
       "detail": "Laatst bijgewerkt op 25 maart 2026."
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · contrast: 37 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · contrast: 39 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -306,9 +296,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · taal: lang=\"nl\"",
@@ -321,22 +311,17 @@
       "detail": "0 zonder label"
     },
     {
-      "name": "mijn-restaurant-cijfers (net-geclaimd, light) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · contrast: 37 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · contrast: 39 teksten gemeten tegen de echte achtergrond",
       "passed": true,
-      "detail": "zwakste 5.92:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -351,9 +336,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · taal: lang=\"nl\"",
@@ -364,11 +349,6 @@
       "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · formulier: 0 velden met een label",
       "passed": true,
       "detail": "0 zonder label"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (net-geclaimd, dark) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
     },
     {
       "name": "net-geclaimd: de schermafdruk 1280/light toont het cijferblok zelf",
@@ -491,17 +471,17 @@
       "detail": "Laatst bijgewerkt op 25 maart 2026."
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · contrast: 37 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · contrast: 39 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -516,9 +496,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · taal: lang=\"nl\"",
@@ -531,22 +511,17 @@
       "detail": "0 zonder label"
     },
     {
-      "name": "mijn-restaurant-cijfers (geen-cijfers, light) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · contrast: 37 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · contrast: 39 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · naam: 8 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · naam: 10 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · tikdoel: 8 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · tikdoel: 10 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
@@ -561,9 +536,9 @@
       "detail": "null"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · landmarks: 1 main, 0 nav",
-      "passed": false,
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · taal: lang=\"nl\"",
@@ -574,11 +549,6 @@
       "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · formulier: 0 velden met een label",
       "passed": true,
       "detail": "0 zonder label"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (geen-cijfers, dark) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document · geen nav-landmark"
     },
     {
       "name": "geen-cijfers: de schermafdruk 1280/light toont het cijferblok zelf",
@@ -613,7 +583,7 @@
     {
       "name": "geen-cijfers: de schermafdruk 390/light toont het cijferblok zelf",
       "passed": true,
-      "detail": "{\"top\":109,\"bottom\":735,\"height\":626,\"inView\":true}"
+      "detail": "{\"top\":112,\"bottom\":738,\"height\":626,\"inView\":true}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 390/light",
@@ -676,56 +646,7 @@
       "detail": "[]"
     }
   ],
-  "errors": [
-    {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (overzicht, light) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (overzicht, dark) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (net-geclaimd, light) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (net-geclaimd, dark) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (geen-cijfers, light) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    },
-    {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · landmarks: 1 main, 0 nav",
-      "detail": "main 1 (verwacht 1), nav 0 (verwacht ≥ 1)"
-    },
-    {
-      "name": "mijn-restaurant-cijfers (geen-cijfers, dark) · a11y-fout · landmarks",
-      "detail": "nav · document · geen nav-landmark"
-    }
-  ],
+  "errors": [],
   "shots": [
     {
       "name": "be57-overzicht-1280-licht.png",
@@ -739,7 +660,7 @@
         "inView": true
       },
       "file": "be57-overzicht-1280-licht.png",
-      "sha256": "5238e35e29d2a823c87e2b4cbcbba793cbab80ffa59b1d06599e5956bd6589a4",
+      "sha256": "b84d00663e9a66857d2dfd00c0572b5d7b97a2054930df394eadf11b505d33f5",
       "width": 1280,
       "height": 900
     },
@@ -755,7 +676,7 @@
         "inView": true
       },
       "file": "be57-overzicht-1280-donker.png",
-      "sha256": "16d900738fdaebba7a43cef224cc4e34ea4e8dac00545649b0580753c29b9113",
+      "sha256": "6d48deef524ebb0418cacaa3d87caea3824f18996dc451a6b654d7243d4e5999",
       "width": 1280,
       "height": 900
     },
@@ -771,7 +692,7 @@
         "inView": true
       },
       "file": "be57-overzicht-390-licht.png",
-      "sha256": "ebe0bf551a7bad6375a9b5d86d9b6be9ae7fc5409bbf0cbdba973b6fb4323f4c",
+      "sha256": "ee633a6e60d14f775a463bce13ea90d9484a55462431ba26f284aae8ee7d7056",
       "width": 390,
       "height": 844
     },
@@ -787,7 +708,7 @@
         "inView": true
       },
       "file": "be57-overzicht-390-donker.png",
-      "sha256": "ffdd94327e9da180968d97da5d838f70dc73d4f63d1059bc868b8f64bfcd5f33",
+      "sha256": "8fbe02015349a97e004cd0876db7b4d990b912b10e086ef8e62ada2ed820aedd",
       "width": 390,
       "height": 844
     },
@@ -797,13 +718,13 @@
       "theme": "light",
       "viewport": "320x700",
       "panel": {
-        "top": -23,
-        "bottom": 724,
+        "top": -17,
+        "bottom": 730,
         "height": 746,
         "inView": true
       },
       "file": "be57-overzicht-320-licht.png",
-      "sha256": "2910b3410f4d74192ad2b986ea62dc8f50a4e8b069a4dcae3d0339346e0363a9",
+      "sha256": "df309219af30d4f1e2997bc96177cd4396f71338f9dc6a7061d7db7267d99acf",
       "width": 320,
       "height": 700
     },
@@ -819,7 +740,7 @@
         "inView": true
       },
       "file": "be57-overzicht-320-donker.png",
-      "sha256": "bbfb9715e071be0c32dca413606ee0088f1f7e2f373407acda0be5c9f711dee1",
+      "sha256": "64fe6a8876eab12883f4b5724a38ab47065fb343ee25aef6b4e4cf4d43cf1ae2",
       "width": 320,
       "height": 700
     },
@@ -835,7 +756,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-1280-licht.png",
-      "sha256": "61177e5a0308c8309bb7c7b96cb5ef1d57be54a3bb5b74af583ba6cacfa4adaf",
+      "sha256": "254f970751ccf6cb7dc2f7a9437d09388d6fe12abdba751d3564a2fca49cfaaf",
       "width": 1280,
       "height": 900
     },
@@ -851,7 +772,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-1280-donker.png",
-      "sha256": "c918fa7d38aa07309bf5b67c8943567640ec67efc51a6293dc82679ba101ffa5",
+      "sha256": "aee137d03d6996e6f2fc95c08737a75e087cbd09b5934621e7a840d6273672b8",
       "width": 1280,
       "height": 900
     },
@@ -867,7 +788,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-390-licht.png",
-      "sha256": "01264b8e6e541de939534134d2c28082cd8da7ffe783615a4495243db40ba068",
+      "sha256": "9a10639e0e9ce56caa6eec3e7e4eff72eb68e0ac35f5abd866e602dc16f41419",
       "width": 390,
       "height": 844
     },
@@ -883,7 +804,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-390-donker.png",
-      "sha256": "7b1395e247dd25490f5f84c9da79083f8248795aab5276b1c8bf48bdec513a94",
+      "sha256": "4d34155dbf5ba9f2e0a1da14bb86c38ba1ebf2ac72f2029aa91728aa6bfb2e03",
       "width": 390,
       "height": 844
     },
@@ -899,7 +820,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-320-licht.png",
-      "sha256": "00bf568cfc0b52c5e76e360895c2a0e953181a8baecf1b87a9502ff7a3a6bd26",
+      "sha256": "4511688349c19627d1b6a62cf1ebb6a2e9e4e8bb9766543948cdcee40a59d1a4",
       "width": 320,
       "height": 700
     },
@@ -915,7 +836,7 @@
         "inView": true
       },
       "file": "be57-net-geclaimd-320-donker.png",
-      "sha256": "cae88714cb837b6f548d631db3cd7fd6005405c9ad217f6f53d28e5f77d3db8f",
+      "sha256": "528a6a0367f31077172dd5e30a3928a3af9b1f4c20b67d1bfc1bf70894ad3f08",
       "width": 320,
       "height": 700
     },
@@ -931,7 +852,7 @@
         "inView": true
       },
       "file": "be57-geen-cijfers-1280-licht.png",
-      "sha256": "5b8aecef103d3fb30bec10fc97b6f69de7723a1451e60df162c28d519cee972b",
+      "sha256": "1a6037f8bdd69975424b8a1187c09c7d7fa2bbf926a1f8ad43c7c7bca3dd153e",
       "width": 1280,
       "height": 900
     },
@@ -947,7 +868,7 @@
         "inView": true
       },
       "file": "be57-geen-cijfers-1280-donker.png",
-      "sha256": "855dd79d27db58ce73e32a8a69d30d081f82c57955d04695fc913076f4e3d678",
+      "sha256": "13e43f235b45b8ae58b4f1d502f1b0e873ae464e277fa0f369f29cabbd26f32c",
       "width": 1280,
       "height": 900
     },
@@ -957,13 +878,13 @@
       "theme": "light",
       "viewport": "390x844",
       "panel": {
-        "top": 109,
-        "bottom": 735,
+        "top": 112,
+        "bottom": 738,
         "height": 626,
         "inView": true
       },
       "file": "be57-geen-cijfers-390-licht.png",
-      "sha256": "0c4715b20bec4a9faf41b88a0d027fb988424c93f2196713fa5936be28012224",
+      "sha256": "3198d703ac332cbf2de41707e5d23b88c30e5a0ab0947f1e2adf98cb9f11ad7d",
       "width": 390,
       "height": 844
     },
@@ -979,7 +900,7 @@
         "inView": true
       },
       "file": "be57-geen-cijfers-390-donker.png",
-      "sha256": "9d9b444ca4cbbf274ab5aab046224896a6f388696ca16e49165bd15decccecb3",
+      "sha256": "0a02ff8af8d73b38062e3a9f468597401f56cd836b8746ae7d83f415daa0936c",
       "width": 390,
       "height": 844
     },
@@ -995,7 +916,7 @@
         "inView": true
       },
       "file": "be57-geen-cijfers-320-licht.png",
-      "sha256": "21cd5e7c33638e8dd0b5e76e268d02bb056afd169e119baa0e194dc118c25168",
+      "sha256": "acfb85525746a03b5dcbedeceea3b11c015e1d895cb37caecc4e9c57c2248f13",
       "width": 320,
       "height": 700
     },
@@ -1011,7 +932,7 @@
         "inView": true
       },
       "file": "be57-geen-cijfers-320-donker.png",
-      "sha256": "2b248f6451ba5a9ba8eb64541e31fd7e1fbf3057a7ebcfa4ae32e93500996752",
+      "sha256": "c4db2219a93ecc5eca6de7c7586184f704843638d1c88173d6b5d448d6071cf6",
       "width": 320,
       "height": 700
     }
@@ -1097,6 +1018,16 @@
           "visible": true
         },
         {
+          "selector": "a.primary-nav-link",
+          "name": "Zoeken",
+          "visible": true
+        },
+        {
+          "selector": "a.primary-nav-link",
+          "name": "Alle restaurants",
+          "visible": true
+        },
+        {
           "selector": "button.theme-btn.active",
           "name": "Licht",
           "visible": true
@@ -1177,8 +1108,8 @@
           "viewport": "320",
           "theme": "light",
           "visible": {
-            "top": -23,
-            "bottom": 724,
+            "top": -17,
+            "bottom": 730,
             "height": 746,
             "inView": true
           }
@@ -1379,8 +1310,8 @@
           "viewport": "390",
           "theme": "light",
           "visible": {
-            "top": 109,
-            "bottom": 735,
+            "top": 112,
+            "bottom": 738,
             "height": 626,
             "inView": true
           }
