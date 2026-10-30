@@ -40,7 +40,7 @@ test('app/layout.js zet metadataBase via siteUrl(), niet met een eigen domein', 
 });
 
 test('app/robots.js is een dunne ingang op src/lib/seo.js en de siteUrl-helper', () => {
-  assert.match(ROBOTS, /import \{ robotsMetadata \} from '@\/src\/lib\/seo'/);
+  assert.match(ROBOTS, /import \{ closedRobotsMetadata, isIndexable, robotsMetadata \} from '@\/src\/lib\/seo'/);
   assert.match(ROBOTS, /import \{ siteUrl \} from '@\/src\/lib\/siteUrl'/);
   assert.match(ROBOTS, /export default function robots\(\)/);
   assert.match(ROBOTS, /return robotsMetadata\(\{ siteUrl: siteUrl\(\) \}\)/);
@@ -49,7 +49,7 @@ test('app/robots.js is een dunne ingang op src/lib/seo.js en de siteUrl-helper',
 });
 
 test('app/sitemap.js is een dunne ingang op src/lib/seo.js met de statische gegevens', () => {
-  assert.match(SITEMAP, /import \{ sitemapEntries \} from '@\/src\/lib\/seo'/);
+  assert.match(SITEMAP, /import \{ isIndexable, sitemapEntries \} from '@\/src\/lib\/seo'/);
   assert.match(SITEMAP, /import \{ siteUrl \} from '@\/src\/lib\/siteUrl'/);
   assert.match(SITEMAP, /import restaurantsData from '@\/data\/restaurants\.json'/);
   assert.match(SITEMAP, /import menusData from '@\/data\/menus\.json'/);
