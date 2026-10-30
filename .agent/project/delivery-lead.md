@@ -45,6 +45,13 @@ the stricter workflow-acceptance requirements already added in #56.
     start time named.
   - Without a choice, the Lead waits.
   - Off-peak and at weekends, the Lead starts as usual.
+  - Check the weekday in UTC, not only the hour. On a Friday evening, Dutch
+    time after 01:00 UTC is already Saturday, so off-peak. Peak starts again
+    Monday at 01:00 UTC.
+  - Measured on 2026-10-30, these do not save money: an earlier compaction
+    threshold (Cline CLI 3.0.73 ignores it) and `--thinking low` (reasoning is
+    about 1 cent per round). The real levers are peak hours and avoiding
+    wasted or fix rounds.
   - For the real costs, use the DeepSeek CSV export. The runner usage export
     counts only at the off-peak price.
 - **Merge-ready handover.** The owner only gets merge links for PRs that are
