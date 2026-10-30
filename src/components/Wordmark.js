@@ -49,10 +49,19 @@ function WordmarkText() {
   )
 }
 
+// BE-50 (#120) — het woordmerk is op elke publieke pagina de tweede weg naar
+// de home, niet de eerste: de twee echte bestemmingen staan in <PrimaryNav/> en
+// in de telefoonbalk. Zonder `prefetch={false}` haalde Next.js daarom op elke
+// andere pagina de hele home vooruit op: de routechunk van `/` (8,8 KB) plus
+// de complete RSC-lading van de home (5,9 KB, inclusief de kandidatenlijst van
+// "Vanavond op de kaart"). De meting in ops/perf/ laat dat als grootste
+// post zien die niemand nodig heeft vóór een tik. De link zelf, zijn doel en
+// zijn toegankelijke naam blijven precies gelijk; alleen het vooruit laden
+// vervalt.
 export default function Wordmark({ href = '/', descriptor = true, size = 'md', label = WORDMARK_HOME_LABEL }) {
   return (
     <span className={`wordmark-wrap wordmark--${size}`}>
-      <Link href={href} className="wordmark" aria-label={label}>
+      <Link href={href} className="wordmark" aria-label={label} prefetch={false}>
         <WordmarkMark />
         <WordmarkText />
       </Link>

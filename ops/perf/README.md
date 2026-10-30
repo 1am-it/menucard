@@ -11,16 +11,16 @@ staat in `ops/perf/evidence/public-pages.json`; de budgettest
 `ops/perf/public-pages-budget.test.js` gebruikt die grenzen.
 
 <!-- meting:begin -->
-Gemeten: 2026-10-30T06:27:14.006Z · commit `e3474fbe5c3c` · poort 3171 · koude cache.
+Gemeten: 2026-10-30T06:30:57.376Z · commit `a8d51e820da4` · poort 3171 · koude cache.
 
 | Pagina | HTML | JS | CSS | JSON/data | Totaal | Verzoeken | Grootste script |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Home (`/`) | 8.1 | 134.7 | 25.9 | 7.3 | **176.7** | 18 | 53.5 KB |
-| Zoeken (q=pasta) (`/search?q=pasta`) | 3.1 | 134.7 | 25.9 | 10 | **174.4** | 17 | 53.5 KB |
-| Alle restaurants (`/alle-restaurants`) | 3.1 | 134.7 | 25.9 | 15.2 | **179.6** | 26 | 53.5 KB |
-| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 141.3 | 25.9 | 8.4 | **187.9** | 17 | 53.5 KB |
-| Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 26.3 | 138.6 | 25.9 | 5.9 | **197.5** | 15 | 53.5 KB |
-| Mijn lijstje (`/mijn-lijstje`) | 5.1 | 130.6 | 25.9 | 8.4 | **170.6** | 15 | 53.5 KB |
+| Zoeken (q=pasta) (`/search?q=pasta`) | 3.1 | 125.9 | 25.9 | 4.1 | **159.8** | 15 | 53.5 KB |
+| Alle restaurants (`/alle-restaurants`) | 3.1 | 125.9 | 25.9 | 4.1 | **159.8** | 14 | 53.5 KB |
+| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 132.6 | 25.9 | 2.4 | **173.2** | 15 | 53.5 KB |
+| Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 26.3 | 129.9 | 25.9 | 0 | **182.8** | 13 | 53.5 KB |
+| Mijn lijstje (`/mijn-lijstje`) | 5.1 | 130.6 | 25.9 | 8.4 | **170.7** | 15 | 53.5 KB |
 
 Alle bedragen in KB. Het eigen productdoel uit `CLAUDE.md` is minder dan 250 KB overgedragen bij de eerste keer laden.
 <!-- meting:eind -->
