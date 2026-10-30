@@ -123,9 +123,11 @@ test('BE-47: /internal stuurt een owner-only account door en laat de rest staan'
 });
 
 test('BE-47: de stijlen gebruiken alleen tokens en blijven ≥ 44 px', () => {
-  const start = CSS.indexOf('/* ── BE-47 (issue 111)');
-  assert.ok(start > 0, 'the BE-47 style block exists');
-  const block = CSS.slice(start);
+  // BE-52 (#128): de houderstijlen staan naast de pagina, niet meer in
+  // app/globals.css; de gedeelde BE-48-authstijl blijft daar staan.
+  const ownerCss = read('app/mijn-restaurant/mijn-restaurant.css');
+  assert.match(ownerCss, /BE-47 \(issue 111\)/, 'the BE-47 style block exists');
+  const block = ownerCss;
   assert.doesNotMatch(block, /#[0-9a-fA-F]{3,8}\b/, 'no hard-coded colour');
   assert.doesNotMatch(block, /\brgba?\(/, 'no hard-coded colour');
   for (const selector of ['.owner-link', '.owner-main']) {
@@ -174,7 +176,8 @@ test('BE-47: geen migratie, geen nieuwe tabel, geen RLS-wijziging', () => {
 });
 
 test('BE-45-bijvangst: de getallenkolom in /internal/tellers staat expliciet op --text-primary', () => {
-  const css = read('app/globals.css');
+  // BE-52 (#128): deze regels staan naast de tellerspagina.
+  const css = read('app/internal/tellers/tellers.css');
   assert.match(css, /\.tellers-table td\.tellers-col-number \{ color: var\(--text-primary\); \}/);
   assert.match(css, /\.tellers-table th\.tellers-col-number \{ color: var\(--text-secondary\); \}/);
   // No rule paints a number cell with the accent or a link colour.

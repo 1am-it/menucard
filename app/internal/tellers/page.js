@@ -26,6 +26,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import InternalNav from '@/src/components/InternalNav'
+// BE-52 (#128): de eigen opmaak van deze pagina staat naast de pagina.
+import './tellers.css'
+
 import {
   COLUMNS,
   DEFAULT_PERIOD,

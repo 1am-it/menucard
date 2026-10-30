@@ -11,16 +11,16 @@ staat in `ops/perf/evidence/public-pages.json`; de budgettest
 `ops/perf/public-pages-budget.test.js` gebruikt die grenzen.
 
 <!-- meting:begin -->
-Gemeten: 2026-10-30T07:40:17.025Z · commit `2086bdc5d083` · poort 3170 · koude cache.
+Gemeten: 2026-10-30T18:47:59.762Z · commit `57b25e3bb605` · poort 3170 · koude cache.
 
 | Pagina | HTML | JS | CSS | JSON/data | Totaal | Verzoeken | Grootste script |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Home (`/`) | 8.1 | 134.5 | 25.9 | 7.3 | **176.5** | 18 | 53.5 KB |
-| Zoeken (q=pasta) (`/search?q=pasta`) | 3.1 | 125.7 | 25.9 | 4.1 | **159.5** | 15 | 53.5 KB |
-| Alle restaurants (`/alle-restaurants`) | 3.1 | 125.7 | 25.9 | 4.1 | **159.6** | 14 | 53.5 KB |
-| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 132.4 | 25.9 | 2.4 | **173.1** | 15 | 53.5 KB |
-| Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 26.3 | 129.7 | 25.9 | 0 | **182.6** | 13 | 53.5 KB |
-| Mijn lijstje (`/mijn-lijstje`) | 5.1 | 121.6 | 25.9 | 2.4 | **155.7** | 13 | 53.5 KB |
+| Home (`/`) | 8.1 | 134.7 | 25.9 | 7.3 | **176.6** | 18 | 53.5 KB |
+| Zoeken (q=pasta) (`/search?q=pasta`) | 3.1 | 125.8 | 25.9 | 4.1 | **159.5** | 15 | 53.5 KB |
+| Alle restaurants (`/alle-restaurants`) | 3.1 | 125.8 | 25.9 | 5.2 | **160.6** | 16 | 53.5 KB |
+| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 132.5 | 25.9 | 2.4 | **173.1** | 15 | 53.5 KB |
+| Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 26.4 | 129.8 | 25.9 | 1 | **183.7** | 15 | 53.5 KB |
+| Mijn lijstje (`/mijn-lijstje`) | 5.2 | 129.9 | 27 | 2.4 | **165.2** | 15 | 53.5 KB |
 
 Alle bedragen in KB. Het eigen productdoel uit `CLAUDE.md` is minder dan 250 KB overgedragen bij de eerste keer laden.
 <!-- meting:eind -->
@@ -83,3 +83,36 @@ uit `buildFirstLoadJs.gzipBytes` in `evidence/public-pages.json` en faalt boven
 
 Deze sectie staat buiten de `meting:begin`/`meting:eind`-markeringen en blijft
 dus staan als het meetscript de tabel opnieuw schrijft.
+
+## BE-52 (issue 128): paginagebonden CSS, eerste lading niet zwaarder
+
+Zelfde script, zelfde koude eerste lading en viewport. De nulmeting is een
+`git archive` van de basis van deze branch (`572a723`) in een eigen map met
+dezelfde `node_modules` (poort 3176); het bewijs staat in
+`ops/perf/evidence/public-pages-base-572a723.json`. De meting erna is de tabel
+hierboven (poort 3170). Bedragen in KB overgedragen.
+
+| Pagina | Basis 572a723 | Na BE-52 | Verschil |
+| --- | ---: | ---: | ---: |
+| Home (`/`) | 178,6 | 176,6 | -2,0 |
+| Zoeken (`/search?q=pasta`) | 161,5 | 159,5 | -2,0 |
+| Alle restaurants (`/alle-restaurants`) | 161,5 | 160,6 | -0,9 |
+| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 175,0 | 173,1 | -1,9 |
+| Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 184,6 | 183,7 | -0,9 |
+| Mijn lijstje (`/mijn-lijstje`) | 166,0 | 165,2 | -0,8 |
+
+Geen enkele publieke pagina wordt zwaarder; elke pagina laadt juist minder,
+omdat de verhuisde regels niet meer in de gedeelde `globals.css` zitten.
+`/mijn-lijstje` is de enige pagina die er een klein bestand bij krijgt
+(`src/components/kies-start.css`, 0,4 KB gzip) voor de knop "Samen kiezen";
+dat weegt minder dan wat er uit `globals.css` verdween.
+
+Let op bij het vergelijken met de BE-50-tabel: die is gemeten op `main` vóór
+BE-46. `/menu/23-borrel` (183,7 tegen 182,6) en `/mijn-lijstje` (165,2 tegen
+155,7) zijn op de basis van deze branch al zwaarder dan in die tabel, door
+BE-46 zelf; BE-52 maakt ze kleiner dan hun eigen basis, niet groter.
+
+Welke CSS een pagina echt laadt, is apart gecontroleerd op de productiebuild:
+`/`, `/search?q=pasta`, `/alle-restaurants`, `/restaurant/6` en `/menu/23-borrel`
+bevatten geen `.kies-`, `.tellers-`- of `.owner-`-regel meer; `/mijn-lijstje`
+laadt alleen de `.kies-*`-regels van de "Samen kiezen"-knop.

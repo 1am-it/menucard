@@ -36,6 +36,8 @@ const REPORT = read('src/lib/dishCounterReport.js');
 const PAGE = read('app/internal/tellers/page.js');
 const NAV = read('src/lib/internalNav.js');
 const CSS = read('app/globals.css');
+// BE-52 (#128): de tellerstijlen staan naast de pagina, niet meer in globals.css.
+const TELLERS_CSS = read('app/internal/tellers/tellers.css');
 
 const { INTERNAL_MODULES, resolveVisibleModules, groupModulesByPlacement } = require('./internalNav');
 
@@ -134,10 +136,10 @@ test('tellers: geen migratie, geen nieuwe tabel, geen wijziging aan dish_counter
   assert.doesNotMatch(REPORT + HANDLERS + ROUTE + PAGE, /increment_dish_counter/);
 });
 
-test('tellers: de nieuwe stijlen gebruiken alleen tokens uit app/globals.css', () => {
-  const start = CSS.indexOf('.tellers-periods');
-  assert.ok(start > 0, 'de teller-stijlen staan in app/globals.css');
-  const block = CSS.slice(start);
+test('tellers: de stijlen naast de pagina gebruiken alleen tokens uit app/globals.css', () => {
+  const start = TELLERS_CSS.indexOf('.tellers-periods');
+  assert.ok(start > 0, 'de teller-stijlen staan in app/internal/tellers/tellers.css');
+  const block = TELLERS_CSS.slice(start);
   assert.ok(block.includes('.tellers-table'), 'de tabelstijl staat er');
   assert.ok(block.includes('.tellers-cards'), 'de lijststijl staat er');
   assert.ok(block.includes('@media (max-width: 640px)'), 'het telefoonbreekpunt staat er');
