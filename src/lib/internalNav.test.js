@@ -464,15 +464,22 @@ test('structural safety net: /internal keeps the unchanged session gate and neve
   assert.doesNotMatch(source, /\.from\(['"]/);
 });
 
-test('structural safety net: /internal keeps the existing no-access status and owner note, and invents no owner destination', () => {
+test('structural safety net: /internal keeps the no-access status and sends an owner-only account on by the tested rule', () => {
   const source = fs.readFileSync(INTERNAL_HOME_PAGE_PATH, 'utf8');
-  assert.match(source, /hasAnyKnownRole/);
-  assert.match(source, /isOwnerRole/);
+  const withoutComments = source
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//'))
+    .join('\n');
+  // BE-47 (#111, criterium 5): de owner-only doorsturing komt uit de geteste
+  // regel in src/lib/ownerAccess.js; de oude regel "Nog niets te openen" bestaat
+  // niet meer en er wordt geen andere bestemming verzonnen.
+  assert.match(withoutComments, /resolveInternalOwnerRedirect\(roles\)/);
+  assert.match(withoutComments, /router\.replace\(ownerHref\)/);
   // BE-37 (#89): de interne statuspagina is Nederlands, net als de navigatie.
-  assert.match(source, /Dit account heeft geen interne toegang\./);
-  assert.match(source, /Nog niets te openen/);
-  assert.match(source, /signOut/);
-  assert.doesNotMatch(source, /<a\s/, 'no clickable invented owner or module destination on the status page');
+  assert.match(withoutComments, /Dit account heeft geen interne toegang\./);
+  assert.doesNotMatch(withoutComments, /Nog niets te openen/);
+  assert.match(withoutComments, /signOut/);
+  assert.doesNotMatch(withoutComments, /<a\s/, 'no clickable invented owner or module destination on the status page');
 });
 
 // --- Structural safety net: login uses the same landing rule ---

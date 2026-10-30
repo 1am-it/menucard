@@ -24,6 +24,59 @@ function installBe48AuthStub(settings) {
   const calls = [];
   const violations = [];
   const otpRequests = [];
+  // BE-47 (#111): wat het verwijderscherm naar de serverroute stuurde, en of de
+  // fictieve gebruiker daarna echt weg is. De stub controleert hetzelfde als de
+  // echte route: alleen een code, en alleen voor de eigen sessie.
+  //
+  // De vastlegging gaat óók naar sessionStorage: na een geslaagde verwijdering
+  // stuurt de pagina de bezoeker naar /mijn-restaurant/inloggen, en dan is dit
+  // document (met zijn eigen stub) weg. De check leest het bewijs daarom uit de
+  // opslag van hetzelfde tabblad, niet uit het geheugen van het oude document.
+  const deleteRequests = [];
+  let deletedAccount = false;
+  const DELETE_LOG_KEY = 'be47-delete-log';
+  const DELETED_FLAG_KEY = 'be47-deleted';
+
+  function storedDeleteLog() {
+    try {
+      const raw = window.sessionStorage.getItem(DELETE_LOG_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function readDeleteLog() {
+    const stored = storedDeleteLog();
+    return stored.length > 0 ? stored : deleteRequests.slice();
+  }
+
+  function recordDeleteRequest(entry) {
+    deleteRequests.push(entry);
+    try {
+      // Lees alleen uit de opslag en voeg daar één keer aan toe: het geheugen van
+      // dit document bevat dezelfde poging al, dus een gedeelde lijst zou dubbel
+      // tellen.
+      const log = storedDeleteLog();
+      log.push(entry);
+      window.sessionStorage.setItem(DELETE_LOG_KEY, JSON.stringify(log));
+      if (entry.accepted) window.sessionStorage.setItem(DELETED_FLAG_KEY, '1');
+    } catch (error) {
+      // Zonder opslag blijft het geheugen van dit document over; de check leest
+      // dan wat er in deze pagina gebeurde.
+    }
+  }
+
+  function wasDeleted() {
+    try {
+      if (window.sessionStorage.getItem(DELETED_FLAG_KEY) === '1') return true;
+    } catch (error) {
+      // valt terug op het geheugen hieronder
+    }
+    return deletedAccount;
+  }
+
   let assurance = 'aal1';
   let challengeCount = 0;
   // The address whose e-mail code was just verified; the claim signs in with
@@ -99,7 +152,8 @@ function installBe48AuthStub(settings) {
     const known =
       url.pathname === '/api/internal/v1/me' ||
       url.pathname === '/api/internal/v1/workqueue-counts' ||
-      url.pathname === '/api/internal/v1/menu-concepts';
+      url.pathname === '/api/internal/v1/menu-concepts' ||
+      url.pathname === '/api/mijn-restaurant/account-verwijderen';
     if (method === 'GET' && authorized && url.pathname === '/api/internal/v1/me') {
       return jsonResponse({ roles: settings.roles });
     }
@@ -117,9 +171,10 @@ function installBe48AuthStub(settings) {
     }
     // PLATFORM-07 / BE-48: the public claim routes. Any signed-in visitor may use
     // them (no staff role, no second step), so the claim scenario proves the
-    // claim flow and not the moderation guard.
+    // claim flow and not the moderation guard. BE-47: the owner dashboard reads
+    // the same route; the fictional claims come from the settings.
     if (method === 'GET' && url.pathname === '/api/claims/mine') {
-      return jsonResponse({ claims: [] });
+      return jsonResponse({ claims: settings.claims || [] });
     }
     if (method === 'POST' && url.pathname === '/api/claims') {
       let restaurantId = null;
@@ -139,6 +194,26 @@ function installBe48AuthStub(settings) {
         },
         201,
       );
+    }
+    // BE-47 (#111), criterion 4: the account-deletion route. The fictional server
+    // refuses any code except the one in the fictional e-mail, and it deletes the
+    // signed-in account only after that code was accepted — exactly the shape the
+    // real route promises. The check reads `deleteRequests` to prove the client
+    // sent nothing but its own code.
+    if (method === 'POST' && url.pathname === '/api/mijn-restaurant/account-verwijderen') {
+      const params = parseBody(body);
+      const expected = settings.deleteCode || settings.emailCode;
+      const accepted = params.code === expected;
+      recordDeleteRequest({
+        code: typeof params.code === 'string' ? params.code : null,
+        body: body || null,
+        accepted: accepted,
+      });
+      if (!accepted) {
+        return jsonResponse({ error: 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.' }, 400);
+      }
+      deletedAccount = true;
+      return jsonResponse({ deleted: true, message: 'Je account is verwijderd. Je bent uitgelogd.' });
     }
     violations.push({ kind: 'unknown_api_route', method: method, url: url.href });
     return jsonResponse({ error: 'fixture_unknown_api_route' }, 500);
@@ -248,6 +323,8 @@ function installBe48AuthStub(settings) {
     calls: calls,
     violations: violations,
     otpRequests: otpRequests,
+    deleteLog: readDeleteLog,
+    deletedAccount: wasDeleted,
     assurance: function () {
       return assurance;
     },

@@ -28,6 +28,11 @@ const DEFAULT_SETTINGS = {
   theme: 'dark',
   factors: [],
   counts: { 'menu-concepts': 2, 'source-triage': 1, 'import-inbox': 0 },
+  // BE-47 (#111): the fictional claims behind `GET /api/claims/mine`, and the
+  // code the fictional e-mail for "Account verwijderen" contains (defaults to
+  // `emailCode`). Both are plain data: the stub never reaches a real project.
+  claims: [],
+  deleteCode: null,
 };
 
 /**
@@ -48,6 +53,7 @@ function be48Settings(options = {}) {
   settings.theme = settings.theme === 'light' ? 'light' : 'dark';
   if (!Array.isArray(settings.roles)) settings.roles = [];
   if (!Array.isArray(settings.factors)) settings.factors = [];
+  if (!Array.isArray(settings.claims)) settings.claims = [];
   if (typeof settings.emailCode !== 'string' || !settings.emailCode) settings.emailCode = DEFAULT_SETTINGS.emailCode;
   return settings;
 }
