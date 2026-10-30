@@ -149,6 +149,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
   const stylesheets = cssFiles().sort();
   assert.deepEqual(stylesheets, [
     'app/globals.css',
+    // BE-55 deel 4: de interne werkvoorraad, naast zijn pagina.
+    'app/internal/aanbod/aanbod-beheer.css',
     'app/internal/menu-concepts/menu-concepts.css',
     'app/internal/tellers/tellers.css',
     'app/kies/kies.css',
