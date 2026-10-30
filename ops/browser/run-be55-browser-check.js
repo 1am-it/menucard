@@ -116,9 +116,38 @@ const KAART_STAAT = `(() => {
     h2Id: blok && blok.querySelector('h2') ? blok.querySelector('h2').id : '',
     bewaar: Boolean(eerste && eerste.querySelector('[aria-label^="Bewaar"]')),
     deel: Boolean(eerste && eerste.querySelector('[aria-label^="Deel"]')),
+    bewaarAantal: eerste ? eerste.querySelectorAll('[aria-label^="Bewaar"]').length : 0,
+    deelAantal: eerste ? eerste.querySelectorAll('[aria-label^="Deel"]').length : 0,
     apparaat: (() => { try { return localStorage.getItem('daghap-apparaat') || ''; } catch (error) { return ''; } })(),
   };
 })()`;
+
+// BE-55 (#135, herstel na review deel 2) — bewijs dat het blok écht in het
+// beeld staat bij de opname. Eerst naar het blok scrollen (met ruimte voor de
+// plakkende kop), daarna meten of het binnen de viewport valt.
+const TOON_BLOK = `(() => {
+  const blok = document.querySelector('.daghap-vandaag');
+  if (!blok) return { inBeeld: false, reden: 'geen blok' };
+  blok.scrollIntoView({ block: 'start', inline: 'nearest' });
+  window.scrollBy(0, -80);
+  const kop = blok.querySelector('h2');
+  const r = blok.getBoundingClientRect();
+  const k = kop ? kop.getBoundingClientRect() : null;
+  return {
+    inBeeld: r.top >= 0 && r.top < window.innerHeight && r.bottom > 0,
+    kopInBeeld: Boolean(k) && k.top >= 0 && k.top < window.innerHeight,
+    boven: Math.round(r.top),
+    onder: Math.round(r.bottom),
+    hoogte: Math.round(r.height),
+    scherm: window.innerHeight,
+    scrollY: Math.round(window.scrollY),
+  };
+})()`;
+
+async function toonEnMeetBlok(cdp) {
+  return evalJs(cdp, TOON_BLOK);
+}
+
 
 async function vandaagScenario(cdp) {
   // Eerst één keer naar de app: localStorage van about:blank hoort bij een
@@ -147,11 +176,17 @@ async function vandaagScenario(cdp) {
       check(`vandaag ${waar}: de meldknop is minstens 44 px hoog`, staat.knopHoogte >= 44, staat.knopHoogte);
       check(`vandaag ${waar}: het blok is gelabeld door zijn kop`, Boolean(staat.h2Id) && staat.aria === staat.h2Id, `${staat.aria}/${staat.h2Id}`);
       check(`vandaag ${waar}: "Bewaar" en "Deel" staan op de kaart`, staat.bewaar && staat.deel, `${staat.bewaar}/${staat.deel}`);
+      check(`vandaag ${waar}: precies één "Bewaar" en één "Deel" op de kaart`, staat.bewaarAantal === 1 && staat.deelAantal === 1, `${staat.bewaarAantal}/${staat.deelAantal}`);
 
       const prijsContrast = audit.contrastRatio(staat.prijsKleur, staat.prijsAchtergrond);
       const kopContrast = audit.contrastRatio(staat.kopKleur, staat.kaartAchtergrond);
       check(`vandaag ${waar}: de prijs haalt 4,5:1`, Number(prijsContrast) >= 4.5, prijsContrast);
       check(`vandaag ${waar}: de naam haalt 4,5:1`, Number(kopContrast) >= 4.5, kopContrast);
+
+      const inBeeld = await toonEnMeetBlok(cdp);
+      check(`vandaag ${waar}: het blok staat in beeld bij de opname`,
+        inBeeld.inBeeld && inBeeld.kopInBeeld,
+        JSON.stringify(inBeeld));
 
       await shot(cdp, `be55-vandaag-restaurant-${width}-${theme}.png`, { theme, state: 'aanbod' });
     }
@@ -164,6 +199,11 @@ async function vandaagScenario(cdp) {
     await navigate(cdp, MENU_URL, `Boolean(document.querySelector('.daghap-vandaag-card'))`, 120000);
     const staat = await evalJs(cdp, KAART_STAAT);
     check(`menu ${theme}: het blok "Vandaag" staat ook op de menupagina`, staat.aantal === 2 && staat.titel === 'Vandaag', `${staat.aantal}/${staat.titel}`);
+    check(`menu ${theme}: precies één "Bewaar" en één "Deel" op de kaart`, staat.bewaarAantal === 1 && staat.deelAantal === 1, `${staat.bewaarAantal}/${staat.deelAantal}`);
+    const inBeeld = await toonEnMeetBlok(cdp);
+    check(`menu ${theme}: het blok staat in beeld bij de opname`,
+      inBeeld.inBeeld && inBeeld.kopInBeeld,
+      JSON.stringify(inBeeld));
     await shot(cdp, `be55-vandaag-menu-1280-${theme}.png`, { theme, state: 'menu' });
   }
 

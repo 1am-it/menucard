@@ -54,6 +54,7 @@ const {
 } = require('./lib/scenario-filter');
 const { CdpClient } = require('./lib/cdp');
 const audit = require('./lib/a11y-audit');
+const { be55StubScript } = require('./lib/be55-daghap-stub');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const PORT = Number(process.env.BE51_PORT || 3170);
@@ -588,6 +589,12 @@ async function main() {
     await cdp.ready;
     await cdp.send('Page.enable');
     await cdp.send('Runtime.enable');
+    // BE-55 (#135, review deel 2 punt 5) — het blok "Vandaag" haalt zijn aanbod
+    // via de publieke daghap-API op. Zonder Supabase-project antwoordt die leeg
+    // en is er niets te controleren; daarom krijgt elke pagina hier dezelfde
+    // fictieve daghap-stub als in run-be55-browser-check.js. Hij vangt alleen
+    // de daghap-routes af, dus de rest van de audit verandert niet.
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: be55StubScript() });
 
     const runs = [];
     for (const scenario of selected) {
