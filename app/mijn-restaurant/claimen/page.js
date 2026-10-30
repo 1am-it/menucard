@@ -17,6 +17,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import MobileTabBar from '@/src/components/MobileTabBar'
+import PrimaryNav from '@/src/components/PrimaryNav'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import Wordmark from '@/src/components/Wordmark'
 import {
@@ -108,6 +110,7 @@ export default function ClaimSearchPage() {
         <div className="header-inner">
           <Wordmark />
           <div className="header-right">
+            <PrimaryNav />
             <ThemeToggle />
           </div>
         </div>
@@ -190,6 +193,8 @@ export default function ClaimSearchPage() {
           </ol>
         </section>
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

@@ -24,6 +24,17 @@ const LOGIN_VIEW = read('app/mijn-restaurant/inloggen/OwnerLoginView.js');
 const DASHBOARD = read('app/mijn-restaurant/OwnerDashboard.js');
 const OWNER_ACCESS = read('src/lib/ownerAccess.js');
 
+test('BE-54: de pagina gebruikt de gedeelde header met een nav-landmark en de telefoonbalk', () => {
+  assert.match(PAGE, /import PrimaryNav from '@\/src\/components\/PrimaryNav'/);
+  assert.match(PAGE, /import MobileTabBar from '@\/src\/components\/MobileTabBar'/);
+  assert.match(
+    PAGE,
+    /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>/,
+    'zelfde header als /alle-restaurants, met de nav vóór de themaknop',
+  );
+  assert.match(PAGE, /<MobileTabBar \/>/);
+});
+
 test('BE-54: de pagina zoekt met dezelfde gegevens als /alle-restaurants', () => {
   assert.match(PAGE, /fetch\(`\/api\/restaurants\?\$\{params\.toString\(\)\}`\)/);
   assert.match(PAGE, /params\.set\('limit', String\(PAGE_LIMIT\)\)/);
