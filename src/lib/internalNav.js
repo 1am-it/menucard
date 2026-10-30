@@ -72,6 +72,11 @@ const INTERNAL_MODULES = [
   { id: 'moderation', label: 'Beoordelen', href: '/internal/moderation', requiredRole: 'editor', placement: 'open-work', countKey: 'moderation', subtitle: "Menu's, profielen en eigenaarsclaims" },
   { id: 'source-workqueue', label: 'Stadsoverzicht', href: '/internal/source-workqueue', requiredRole: 'internal', placement: 'secondary', subtitle: 'Bron en menukaart per restaurant' },
   { id: 'profile-drafts', label: 'Restaurantgegevens (concept)', href: '/internal/profile-drafts', requiredRole: 'internal', placement: 'secondary', subtitle: 'Klaarzetten' },
+  // BE-55 deel 4 (#135): de werkvoorraad van daghap en seizoensgerecht. De
+  // pagina en de API weigeren een account zonder de rol `internal` ook zelf;
+  // dit item is vindbaarheid, nooit beveiliging. Geen countKey: de lijst is
+  // klein en telt niet mee in "Werkvoorraad (N)".
+  { id: 'daghap-beheer', label: 'Aanbod in controle', href: '/internal/aanbod', requiredRole: 'internal', placement: 'secondary', subtitle: 'Tegengehouden en gemeld daghap-aanbod' },
   // BE-45 (#114, criterium 4): de anonieme tellers per gerecht. Alleen voor de
   // rol `internal` — de pagina en de API weigeren een editor of owner ook zelf
   // (403), dus dit item is hooguit de vindbaarheid, nooit de beveiliging.

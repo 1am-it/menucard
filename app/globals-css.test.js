@@ -149,11 +149,20 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
   const stylesheets = cssFiles().sort();
   assert.deepEqual(stylesheets, [
     'app/globals.css',
+    // BE-55 deel 4: de interne werkvoorraad, naast zijn pagina.
+    'app/internal/aanbod/aanbod-beheer.css',
     'app/internal/menu-concepts/menu-concepts.css',
     'app/internal/tellers/tellers.css',
     'app/kies/kies.css',
+    // BE-55: aanbodformulier en het blok "Vandaag", beide naast hun code.
+    'app/mijn-restaurant/aanbod/aanbod.css',
     'app/mijn-restaurant/claimen/claimen.css',
     'app/mijn-restaurant/mijn-restaurant.css',
+    // BE-55 deel 5: het label en het filter "Vandaag" in de zoekresultaten.
+    'app/search/search.css',
+    'src/components/daghap-vandaag.css',
+    // BE-55 deel 4: "Daghappen vandaag" op de home.
+    'src/components/daghappen-vandaag.css',
     'src/components/kies-start.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');

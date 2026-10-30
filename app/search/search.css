@@ -1,0 +1,68 @@
+/* BE-55 stap B, deel 5 (issue 135); het label en de filterknop "Vandaag" in de
+   zoekresultaten. Eigen bestand naast de pagina (BE-52); kleuren alleen via de
+   bestaande tokens, geen nieuwe kleurwaarden. */
+
+/* Het label staat naast de restaurantkop in dezelfde regel, ook op 320 px:
+   de kop en het label mogen allebei doorlopen, niets valt buiten beeld. */
+.dish-group-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+/* Het label is een markering, geen status: accent als tekst op de
+   accent-oppervlakte, net als het daglabel in de openingstijden. */
+.vandaag-label {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--card-border-color);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* De filterknop erft de vorm van "Nu open"; alleen de actieve stand krijgt
+   dezelfde accentkleur als het label, zodat filter en label bij elkaar horen. */
+.vandaag-filter-btn.active {
+  border-color: var(--card-border-color);
+  background: var(--surface-soft);
+  color: var(--accent);
+}
+
+.vandaag-filter-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* BE-55 deel 5 (issue 135) — met een actieve chip (zoals "Vandaag") staat er
+   ook een verwijderknop in de chipbalk. De bestaande knop is 11×16 px; met
+   dezelfde negatieve marge blijft de balk even hoog, maar is het doel groot
+   genoeg om met de vinger te raken. */
+.filter-tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -8px;
+}
+
+/* Bij 200% tekst mag een lange gerechtnaam in de groep afbreken; anders duwt
+   hij de kaart een paar pixels voorbij de rand op 320 px. */
+.dish-group-card .dish-group-example-link {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 390px) {
+  .vandaag-label {
+    margin-left: 4px;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}

@@ -1,0 +1,148 @@
+/* BE-55 stap B (#135) — het blok "Vandaag" op de restaurant- en menupagina.
+ *
+ * Eigen bestand naast de component (BE-52); globals.css blijft ongemoeid.
+ * Kleuren alleen via de bestaande tokens, zodat licht en donker allebei kloppen.
+ * De rand van 2 px en de prijspil komen uit het goedgekeurde ontwerp.
+ */
+
+.daghap-vandaag {
+  margin: 24px 0;
+}
+
+/* BE-55 (#135, herstel na review deel 2) — de band tussen de kop en de
+ * zoek- en filterbalk van de menupagina: dezelfde breedte en zijmarge als
+ * .page-main, zonder de pagina-opmaak van globals.css te raken. */
+.daghap-band {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 8px 24px 0;
+}
+
+.daghap-band:empty {
+  display: none;
+}
+
+.daghap-vandaag-title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+}
+
+.daghap-vandaag-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.daghap-vandaag-card {
+  border: 2px solid var(--accent-border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.daghap-vandaag-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.daghap-vandaag-name {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.daghap-vandaag-price {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--price-bg);
+  color: var(--price-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.daghap-vandaag-desc {
+  margin: 0;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.daghap-vandaag-labels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.daghap-vandaag-label {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-size: 0.8rem;
+}
+
+.daghap-vandaag-season {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.daghap-vandaag-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.daghap-vandaag-report {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.daghap-vandaag-report-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.daghap-vandaag-report-button:hover {
+  color: var(--text-primary);
+}
+
+.daghap-vandaag-report-button:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.daghap-vandaag-report-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+  .daghap-vandaag-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
