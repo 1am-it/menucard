@@ -1,0 +1,1279 @@
+{
+  "generatedAt": "2026-10-29T22:57:15.952Z",
+  "ticket": "#115 BE-49 — rustiger gerechtkaart en snel delen",
+  "category": "developer evidence — local build, no production data or credentials",
+  "head": "a80e95e1d3f07bc2f33a50e4fabafc882d0a64c6",
+  "app": "http://localhost:3158",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "kaart",
+      "checks": 124,
+      "passed": 124,
+      "failed": 0,
+      "durationMs": 28452,
+      "error": null
+    },
+    {
+      "name": "eerste-keer",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 4354,
+      "error": null
+    },
+    {
+      "name": "een-favoriet",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 8054,
+      "error": null
+    },
+    {
+      "name": "toetsenbord",
+      "checks": 12,
+      "passed": 12,
+      "failed": 0,
+      "durationMs": 5326,
+      "error": null
+    },
+    {
+      "name": "links",
+      "checks": 15,
+      "passed": 15,
+      "failed": 0,
+      "durationMs": 20863,
+      "error": null
+    },
+    {
+      "name": "meer",
+      "checks": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 7434,
+      "error": null
+    },
+    {
+      "name": "instellingen",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 8535,
+      "error": null
+    }
+  ],
+  "checks": {
+    "total": 202,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "kaart (1280/light): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (1280/light): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (1280/light): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (1280/light): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.24,\"color\":\"rgb(92, 86, 80)\",\"background\":\"rgb(255, 255, 255)\"}"
+      },
+      {
+        "name": "kaart (1280/light): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (1280/light): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (1280/light): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":887.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":887.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (1280/light): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":899.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":899.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (1280/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (1280/light): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (1280/light): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (1280/light): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (1280/light): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (1280/light): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (1280/light): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (1280/light): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (1280/light): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (1280/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "kaart (1280/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (1280/light): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":55,\"y\":673,\"width\":293,\"height\":282}"
+      },
+      {
+        "name": "kaart (390/light): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (390/light): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (390/light): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (390/light): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.24,\"color\":\"rgb(92, 86, 80)\",\"background\":\"rgb(255, 255, 255)\"}"
+      },
+      {
+        "name": "kaart (390/light): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (390/light): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (390/light): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":788.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":788.96875,\"left\":305,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (390/light): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":800.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":800.96875,\"left\":317,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (390/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (390/light): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (390/light): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (390/light): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (390/light): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (390/light): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (390/light): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (390/light): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (390/light): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (390/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "kaart (390/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (390/light): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":10,\"y\":1263,\"width\":370,\"height\":192}"
+      },
+      {
+        "name": "kaart (390/light): bewaard is de bladwijzer gevuld met aria-pressed=\"true\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+      },
+      {
+        "name": "kaart (390/light): bewaard blijft het een icoonknop zonder tekst of vlak",
+        "passed": true,
+        "detail": "{\"background\":\"rgba(0, 0, 0, 0)\",\"text\":\"\"}"
+      },
+      {
+        "name": "kaart (320/light): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (320/light): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (320/light): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (320/light): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.24,\"color\":\"rgb(92, 86, 80)\",\"background\":\"rgb(255, 255, 255)\"}"
+      },
+      {
+        "name": "kaart (320/light): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (320/light): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (320/light): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":1433.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":1433.96875,\"left\":235,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (320/light): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":1445.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":1445.96875,\"left\":247,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (320/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (320/light): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (320/light): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (320/light): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (320/light): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (320/light): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (320/light): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (320/light): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (320/light): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (320/light): de stand van de pagina is light",
+        "passed": true,
+        "detail": "light"
+      },
+      {
+        "name": "kaart (320/light): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (320/light): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":10,\"y\":1311,\"width\":300,\"height\":188}"
+      },
+      {
+        "name": "kaart (1280/dark): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (1280/dark): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (1280/dark): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (1280/dark): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.05,\"color\":\"rgb(182, 188, 195)\",\"background\":\"rgb(42, 47, 53)\"}"
+      },
+      {
+        "name": "kaart (1280/dark): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (1280/dark): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (1280/dark): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":562.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":562.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (1280/dark): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":574.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":574.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (1280/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (1280/dark): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (1280/dark): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (1280/dark): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (1280/dark): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (1280/dark): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (1280/dark): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (1280/dark): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (1280/dark): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (1280/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "kaart (1280/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (1280/dark): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":55,\"y\":677,\"width\":293,\"height\":282}"
+      },
+      {
+        "name": "kaart (390/dark): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (390/dark): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (390/dark): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (390/dark): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.05,\"color\":\"rgb(182, 188, 195)\",\"background\":\"rgb(42, 47, 53)\"}"
+      },
+      {
+        "name": "kaart (390/dark): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (390/dark): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (390/dark): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":619.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":619.96875,\"left\":305,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (390/dark): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":631.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":631.96875,\"left\":317,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (390/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (390/dark): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (390/dark): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (390/dark): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (390/dark): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (390/dark): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (390/dark): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (390/dark): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (390/dark): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (390/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "kaart (390/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (390/dark): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":10,\"y\":1263,\"width\":370,\"height\":192}"
+      },
+      {
+        "name": "kaart (390/dark): bewaard is de bladwijzer gevuld met aria-pressed=\"true\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+      },
+      {
+        "name": "kaart (390/dark): bewaard blijft het een icoonknop zonder tekst of vlak",
+        "passed": true,
+        "detail": "{\"background\":\"rgba(0, 0, 0, 0)\",\"text\":\"\"}"
+      },
+      {
+        "name": "kaart (320/dark): het gerecht staat bovenaan met zijn prijs",
+        "passed": true,
+        "detail": "{\"name\":\"Poussin\",\"price\":\"€20,95\"}"
+      },
+      {
+        "name": "kaart (320/dark): de beschrijving staat er nog",
+        "passed": true,
+        "detail": "Krielkippetje van onze huisrotisserie met citroen, tijm en a"
+      },
+      {
+        "name": "kaart (320/dark): de beschrijving is minstens 13 px met ruime regelafstand",
+        "passed": true,
+        "detail": "{\"size\":13,\"ratio\":1.5499999999999998}"
+      },
+      {
+        "name": "kaart (320/dark): de beschrijving haalt contrast ≥ 4,5:1 op de kaart",
+        "passed": true,
+        "detail": "{\"contrast\":7.05,\"color\":\"rgb(182, 188, 195)\",\"background\":\"rgb(42, 47, 53)\"}"
+      },
+      {
+        "name": "kaart (320/dark): de deelknop heet \"Deel Poussin\"",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "kaart (320/dark): de bewaarknop heet \"Bewaar Poussin\"",
+        "passed": true,
+        "detail": "Bewaar Poussin"
+      },
+      {
+        "name": "kaart (320/dark): beide knoppen zijn minstens 44 × 44 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":708.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":708.96875,\"left\":235,\"width\":44,\"height\":44}}"
+      },
+      {
+        "name": "kaart (320/dark): het zichtbare icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"share\":{\"top\":720.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":720.96875,\"left\":247,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "kaart (320/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "{\"share\":\"rgba(0, 0, 0, 0)\",\"save\":\"rgba(0, 0, 0, 0)\"}"
+      },
+      {
+        "name": "kaart (320/dark): de knoppen tonen geen tekst",
+        "passed": true,
+        "detail": "{\"share\":\"\",\"save\":\"\"}"
+      },
+      {
+        "name": "kaart (320/dark): \"Delen\" en \"Bewaren\" staan in de onderste regel",
+        "passed": true,
+        "detail": "{\"foot\":true,\"buttons\":true}"
+      },
+      {
+        "name": "kaart (320/dark): het label staat links, de knoppen rechts",
+        "passed": true,
+        "detail": "{\"inside\":true,\"left\":true}"
+      },
+      {
+        "name": "kaart (320/dark): het label van dit gerecht staat er (\"Aanbevolen\")",
+        "passed": true,
+        "detail": "[\"AANBEVOLEN\"]"
+      },
+      {
+        "name": "kaart (320/dark): de knoppen staan onder de naam, niet ernaast",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (320/dark): de bewaarknop staat uit met aria-pressed=\"false\"",
+        "passed": true,
+        "detail": "{\"pressed\":\"false\",\"fill\":\"none\"}"
+      },
+      {
+        "name": "kaart (320/dark): de deelknop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "kaart (320/dark): de statusmelding staat in een role=\"status\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "kaart (320/dark): de stand van de pagina is dark",
+        "passed": true,
+        "detail": "dark"
+      },
+      {
+        "name": "kaart (320/dark): geen horizontale overloop",
+        "passed": true,
+        "detail": "overflow=0"
+      },
+      {
+        "name": "kaart (320/dark): de kaart is volledig in beeld voor de opname",
+        "passed": true,
+        "detail": "{\"x\":10,\"y\":1367,\"width\":300,\"height\":188}"
+      },
+      {
+        "name": "eerste keer: zonder voorkeur opent het blad \"Hoe deel je meestal?\"",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"observed\":true}"
+      },
+      {
+        "name": "eerste keer: het blad is een echt dialoogvenster",
+        "passed": true,
+        "detail": "{\"role\":\"dialog\",\"modal\":\"true\"}"
+      },
+      {
+        "name": "eerste keer: de titel is \"Hoe deel je meestal?\"",
+        "passed": true,
+        "detail": "Hoe deel je meestal?"
+      },
+      {
+        "name": "eerste keer: de uitleg noemt het maximum van 3",
+        "passed": true,
+        "detail": "Kies maximaal 3 manieren. Daarna deel je met één of twee tikken."
+      },
+      {
+        "name": "eerste keer: vijf echte checkboxen, in de volgorde van het contract",
+        "passed": true,
+        "detail": "[\"whatsapp\",\"copy\",\"sms\",\"telegram\",\"email\"]"
+      },
+      {
+        "name": "eerste keer: \"Liever altijd het telefoonmenu\" is er ook, als checkbox",
+        "passed": true,
+        "detail": "{\"type\":\"checkbox\",\"value\":\"on\",\"name\":\"deelvoorkeur-telefoonmenu\",\"checked\":false,\"disabled\":false,\"box\":{\"top\":733.5,\"left\":37,\"width\":20,\"height\":20}}"
+      },
+      {
+        "name": "eerste keer: de checkboxen zijn minstens 20 px",
+        "passed": true,
+        "detail": "[{\"top\":497,\"left\":37,\"width\":20,\"height\":20},{\"top\":543,\"left\":37,\"width\":20,\"height\":20},{\"top\":589,\"left\":37,\"width\":20,\"height\":20},{\"top\":635,\"left\":37,\"width\":20,\"height\":20},{\"top\":681,\"left\":37,\"width\":20,\"height\":20}]"
+      },
+      {
+        "name": "eerste keer: zonder keuze kan er niets bewaard worden",
+        "passed": true,
+        "detail": "{\"label\":\"Opslaan\",\"disabled\":true}"
+      },
+      {
+        "name": "eerste keer: drie aangevinkte manieren",
+        "passed": true,
+        "detail": "[\"whatsapp\",\"copy\",\"sms\"]"
+      },
+      {
+        "name": "eerste keer: de overige twee zijn uitgeschakeld",
+        "passed": true,
+        "detail": "[{\"value\":\"telegram\",\"disabled\":true},{\"value\":\"email\",\"disabled\":true}]"
+      },
+      {
+        "name": "eerste keer: een vierde keuze kan niet",
+        "passed": true,
+        "detail": "[{\"type\":\"checkbox\",\"value\":\"whatsapp\",\"name\":\"deelmanier\",\"checked\":true,\"disabled\":false,\"box\":{\"top\":489,\"left\":37,\"width\":20,\"height\":20}},{\"type\":\"checkbox\",\"value\":\"copy\",\"name\":\"deelmanier\",\"checked\":true,\"disabled\":false,\"box\":{\"top\":535,\"left\":37,\"width\":20,\"height\":20}},{\"type\":\"checkbox\",\"value\":\"sms\",\"name\":\"deelmanier\",\"checked\":true,\"disabled\":false,\"box\":{\"top\":581,\"left\":37,\"width\":20,\"height\":20}},{\"type\":\"checkbox\",\"value\":\"telegram\",\"name\":\"deelmanier\",\"checked\":false,\"disabled\":true,\"box\":{\"top\":627,\"left\":37,\"width\":20,\"height\":20}},{\"type\":\"checkbox\",\"value\":\"email\",\"name\":\"deelmanier\",\"checked\":false,\"disabled\":true,\"box\":{\"top\":673,\"left\":37,\"width\":20,\"height\":20}},{\"type\":\"checkbox\",\"value\":\"on\",\"name\":\"deelvoorkeur-telefoonmenu\",\"checked\":false,\"disabled\":false,\"box\":{\"top\":725.5,\"left\":37,\"width\":20,\"height\":20}}]"
+      },
+      {
+        "name": "eerste keer: bewaren sluit het blad en opent het kleine menu",
+        "passed": true,
+        "detail": "{\"clicked\":true,\"observed\":true}"
+      },
+      {
+        "name": "eerste keer: het menu toont de twee favorieten en \"Meer…\"",
+        "passed": true,
+        "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+      },
+      {
+        "name": "eerste keer: het menu zegt bij welk gerecht het hoort",
+        "passed": true,
+        "detail": "Deel Poussin"
+      },
+      {
+        "name": "eerste keer: de voorkeur staat alleen in localStorage",
+        "passed": true,
+        "detail": "{\"methods\":[\"whatsapp\",\"copy\"]}"
+      },
+      {
+        "name": "eerste keer: WhatsApp opent de link uit het contract",
+        "passed": true,
+        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "eerste keer: het menu is daarna dicht",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "eerste keer: de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "een favoriet (390/light): één tik deelt meteen via Telegram",
+        "passed": true,
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "een favoriet (390/light): er opent geen blad of menu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "een favoriet (390/light): de teller telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "een favoriet (390/light): de knop blijft dicht (aria-expanded=\"false\")",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "een favoriet (1280/dark): één tik deelt meteen via Telegram",
+        "passed": true,
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"}"
+      },
+      {
+        "name": "een favoriet (1280/dark): er opent geen blad of menu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "een favoriet (1280/dark): de teller telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "een favoriet (1280/dark): de knop blijft dicht (aria-expanded=\"false\")",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "toetsenbord: de deelknop kan de focus krijgen",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "toetsenbord: Enter opent het blad",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "toetsenbord: de focus staat meteen in het blad",
+        "passed": true,
+        "detail": "{\"tag\":\"INPUT\",\"type\":\"checkbox\",\"value\":\"whatsapp\",\"text\":\"\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: en wel op de eerste checkbox",
+        "passed": true,
+        "detail": "{\"tag\":\"INPUT\",\"type\":\"checkbox\",\"value\":\"whatsapp\",\"text\":\"\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: Tab blijft binnen het blad",
+        "passed": true,
+        "detail": "{\"tag\":\"INPUT\",\"type\":\"checkbox\",\"value\":\"sms\",\"text\":\"\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: Shift+Tab vanaf het begin blijft binnen het blad",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"Annuleren\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: Esc sluit het blad",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "toetsenbord: de focus gaat terug naar de deelknop",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"\",\"label\":\"Deel Poussin\",\"insidePanel\":false,\"isShareButton\":true,\"expanded\":\"false\"}"
+      },
+      {
+        "name": "toetsenbord: en de knop zegt weer aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"\",\"label\":\"Deel Poussin\",\"insidePanel\":false,\"isShareButton\":true,\"expanded\":\"false\"}"
+      },
+      {
+        "name": "toetsenbord: Enter opent het kleine menu met de focus erin",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"WhatsApp\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: de focus staat op de eerste favoriet",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"WhatsApp\",\"label\":null,\"insidePanel\":true,\"isShareButton\":false,\"expanded\":null}"
+      },
+      {
+        "name": "toetsenbord: Esc sluit het menu en de focus keert terug",
+        "passed": true,
+        "detail": "{\"tag\":\"BUTTON\",\"type\":\"button\",\"value\":null,\"text\":\"\",\"label\":\"Deel Poussin\",\"insidePanel\":false,\"isShareButton\":true,\"expanded\":\"false\"}"
+      },
+      {
+        "name": "links (whatsapp): de link is exact de link uit het contract",
+        "passed": true,
+        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "links (whatsapp): de link opent geen systeemmenu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "links (whatsapp): de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "links (telegram): de link is exact de link uit het contract",
+        "passed": true,
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "links (telegram): de link opent geen systeemmenu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "links (telegram): de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "links (sms): de link is exact de link uit het contract",
+        "passed": true,
+        "detail": "{\"opened\":[\"sms:?&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"sms:?&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "links (sms): de link opent geen systeemmenu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "links (sms): de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "links (email): de link is exact de link uit het contract",
+        "passed": true,
+        "detail": "{\"opened\":[\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+      },
+      {
+        "name": "links (email): de link opent geen systeemmenu",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "links (email): de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "links (copy): het klembord krijgt de deeplink met de stand",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"expected\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
+      },
+      {
+        "name": "links (copy): \"Link gekopieerd\" verschijnt in de statusmelding",
+        "passed": true,
+        "detail": "Link gekopieerd"
+      },
+      {
+        "name": "links (copy): de teller telt één keer, met alleen dish en event",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "meer (desktop): het menu opent met de favorieten",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "meer (desktop): \"Meer…\" valt terug op kopiëren",
+        "passed": true,
+        "detail": "{\"copied\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
+      },
+      {
+        "name": "meer (desktop): met de melding \"Link gekopieerd\"",
+        "passed": true,
+        "detail": "Link gekopieerd"
+      },
+      {
+        "name": "meer (desktop): en de teller telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "meer (telefoon): \"Meer…\" gebruikt het systeemmenu",
+        "passed": true,
+        "detail": "{\"url\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}"
+      },
+      {
+        "name": "meer (telefoon): met alleen url en title, zonder tekst",
+        "passed": true,
+        "detail": "{\"keys\":[\"title\",\"url\"],\"payload\":{\"url\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+      },
+      {
+        "name": "meer (telefoon): en de teller telt één keer",
+        "passed": true,
+        "detail": "[{\"url\":\"/api/v1/tellers\",\"method\":\"POST\",\"keepalive\":true,\"credentials\":\"omit\",\"referrerPolicy\":\"no-referrer\",\"keys\":[\"dish\",\"event\"],\"values\":{\"dish\":\"6-diner-0-0\",\"event\":\"gedeeld\"}}]"
+      },
+      {
+        "name": "instellingen (1280/light): de knop staat naast de themakeuze in de kop",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "instellingen (1280/light): \"Delen via\" staat naast de themakeuze",
+        "passed": true,
+        "detail": "{\"found\":true,\"text\":\"Delen via\",\"box\":{\"top\":12,\"left\":983.828125,\"width\":80,\"height\":44},\"expanded\":\"false\",\"hasPopup\":\"dialog\",\"sameParentAsTheme\":true,\"themeFound\":true}"
+      },
+      {
+        "name": "instellingen (1280/light): de knop heeft een tikvlak van 44 px",
+        "passed": true,
+        "detail": "{\"top\":12,\"left\":983.828125,\"width\":80,\"height\":44}"
+      },
+      {
+        "name": "instellingen (1280/light): de knop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "instellingen (1280/light): hetzelfde blad opent, met de huidige favorieten",
+        "passed": true,
+        "detail": "{\"title\":\"Delen via\",\"checked\":[\"whatsapp\",\"copy\"]}"
+      },
+      {
+        "name": "instellingen (1280/light): er is een knop \"Wissen\"",
+        "passed": true,
+        "detail": "[\"Wissen\",\"Annuleren\",\"Opslaan\"]"
+      },
+      {
+        "name": "instellingen (1280/light): wijzigen bewaart meteen",
+        "passed": true,
+        "detail": "{\"methods\":[\"whatsapp\",\"email\"]}"
+      },
+      {
+        "name": "instellingen (1280/light): \"Wissen\" haalt de voorkeur weg",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "instellingen (1280/light): daarna opent weer \"Hoe deel je meestal?\"",
+        "passed": true,
+        "detail": "Hoe deel je meestal?"
+      },
+      {
+        "name": "instellingen (390/dark): de knop staat naast de themakeuze in de kop",
+        "passed": true,
+        "detail": "true"
+      },
+      {
+        "name": "instellingen (390/dark): \"Delen via\" staat naast de themakeuze",
+        "passed": true,
+        "detail": "{\"found\":true,\"text\":\"Delen via\",\"box\":{\"top\":76,\"left\":143.65625,\"width\":80,\"height\":44},\"expanded\":\"false\",\"hasPopup\":\"dialog\",\"sameParentAsTheme\":true,\"themeFound\":true}"
+      },
+      {
+        "name": "instellingen (390/dark): de knop heeft een tikvlak van 44 px",
+        "passed": true,
+        "detail": "{\"top\":76,\"left\":143.65625,\"width\":80,\"height\":44}"
+      },
+      {
+        "name": "instellingen (390/dark): de knop zegt aria-expanded=\"false\"",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "instellingen (390/dark): hetzelfde blad opent, met de huidige favorieten",
+        "passed": true,
+        "detail": "{\"title\":\"Delen via\",\"checked\":[\"whatsapp\",\"copy\"]}"
+      },
+      {
+        "name": "instellingen (390/dark): er is een knop \"Wissen\"",
+        "passed": true,
+        "detail": "[\"Wissen\",\"Annuleren\",\"Opslaan\"]"
+      },
+      {
+        "name": "instellingen (390/dark): wijzigen bewaart meteen",
+        "passed": true,
+        "detail": "{\"methods\":[\"whatsapp\",\"email\"]}"
+      },
+      {
+        "name": "instellingen (390/dark): \"Wissen\" haalt de voorkeur weg",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "instellingen (390/dark): daarna opent weer \"Hoe deel je meestal?\"",
+        "passed": true,
+        "detail": "Hoe deel je meestal?"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 1280,
+      "file": "ops/browser/evidence/be-49/be49-kaart-1280-light.png",
+      "viewport": "1280x950",
+      "pngWidth": 293,
+      "pngHeight": 282
+    },
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 1280,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-1280-light.png",
+      "viewport": "1280x950",
+      "pngWidth": 1280,
+      "pngHeight": 950
+    },
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/evidence/be-49/be49-kaart-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 370,
+      "pngHeight": 192
+    },
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "kaart",
+      "state": "bewaard",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-bewaard-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 370,
+      "pngHeight": 192
+    },
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 320,
+      "file": "ops/browser/evidence/be-49/be49-kaart-320-light.png",
+      "viewport": "320x844",
+      "pngWidth": 300,
+      "pngHeight": 188
+    },
+    {
+      "scenario": "kaart",
+      "theme": "light",
+      "width": 320,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-320-light.png",
+      "viewport": "320x844",
+      "pngWidth": 320,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 1280,
+      "file": "ops/browser/evidence/be-49/be49-kaart-1280-dark.png",
+      "viewport": "1280x950",
+      "pngWidth": 293,
+      "pngHeight": 282
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 1280,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-1280-dark.png",
+      "viewport": "1280x950",
+      "pngWidth": 1280,
+      "pngHeight": 950
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 390,
+      "file": "ops/browser/evidence/be-49/be49-kaart-390-dark.png",
+      "viewport": "390x844",
+      "pngWidth": 370,
+      "pngHeight": 192
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-390-dark.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "kaart",
+      "state": "bewaard",
+      "theme": "dark",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-bewaard-390-dark.png",
+      "viewport": "390x844",
+      "pngWidth": 370,
+      "pngHeight": 192
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 320,
+      "file": "ops/browser/evidence/be-49/be49-kaart-320-dark.png",
+      "viewport": "320x844",
+      "pngWidth": 300,
+      "pngHeight": 188
+    },
+    {
+      "scenario": "kaart",
+      "theme": "dark",
+      "width": 320,
+      "file": "ops/browser/output/be-49/be49-kaart-volledig-320-dark.png",
+      "viewport": "320x844",
+      "pngWidth": 320,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "eerste-keer",
+      "state": "blad",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-blad-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "eerste-keer",
+      "state": "max3",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-blad-max3-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "eerste-keer",
+      "state": "menu",
+      "theme": "light",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-menu-390-light.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    },
+    {
+      "scenario": "instellingen",
+      "theme": "light",
+      "width": 1280,
+      "file": "ops/browser/output/be-49/be49-instellen-1280-light.png",
+      "viewport": "1280x950",
+      "pngWidth": 1280,
+      "pngHeight": 950
+    },
+    {
+      "scenario": "instellingen",
+      "theme": "dark",
+      "width": 390,
+      "file": "ops/browser/output/be-49/be49-instellen-390-dark.png",
+      "viewport": "390x844",
+      "pngWidth": 390,
+      "pngHeight": 844
+    }
+  ],
+  "fixture": {
+    "menu": "6-diner",
+    "dish": "6-diner-0-0",
+    "name": "Poussin",
+    "category": "Specialiteiten van Bardot",
+    "restaurant": "Brasserie Bardot",
+    "deepLink": "/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot",
+    "preferenceKey": "deelvoorkeur"
+  },
+  "gaps": [
+    "Het systeemdeelmenu is van de telefoon: navigator.share is hier een stub die de payload vastlegt, geen echte share-sheet.",
+    "Het klembord is een stub: de check bewijst welke link gekopieerd wordt en dat de melding verschijnt, niet het echte systeemklembord.",
+    "Een klik op een deellink (WhatsApp, Telegram, Sms, E-mail) wordt in de check tegengehouden en vastgelegd; er is geen echt WhatsApp, Telegram, sms- of mailprogramma geopend.",
+    "De voorkeur is localStorage in een tijdelijk browserprofiel: de check bewijst lezen, schrijven, wijzigen en wissen, geen privémodus of volle schijf.",
+    "De goedgekeurde mockup is een extern Claude-artifact: de opnamen in evidence/be-49/ zijn bedoeld voor de visuele vergelijking door de Lead of eigenaar, niet automatisch vergeleken.",
+    "Dit is developer-evidence op een lokale build: geen productie, geen Supabase-credentials, geen merge of publicatie.",
+    "De app-brede AI-activering valt buiten deze opdracht; er is hier niets aan AI of Supabase geactiveerd."
+  ],
+  "result": "passed"
+}

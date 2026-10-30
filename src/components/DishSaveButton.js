@@ -1,10 +1,12 @@
 'use client'
 
-// BE-44 (#105, criterium 4) — de knop "Bewaren" met de bladwijzer, naast
-// "Delen" op de gerechtkaart.
+// BE-44 (#105, criterium 4) + BE-49 (#115, criterium 1) — de knop "Bewaren"
+// met de bladwijzer, rechtsonder naast "Delen" op de gerechtkaart.
 //
-// - Staat hij aan, dan toont hij "Bewaard" met een gevulde bladwijzer en
-//   `aria-pressed="true"` (contract).
+// BE-49: kleine icoonknop van 44 × 44 px, zichtbaar icoon ±20 px, geen gevulde
+// achtergrond. De toegankelijke naam is "Bewaar <gerecht>"; staat hij aan, dan
+// is de bladwijzer gevuld en zegt `aria-pressed="true"` het (contract).
+//
 // - De stand komt altijd uit de opslag zelf (`localStorage`, in try/catch in
 //   src/lib/dishList.js). Kan de browser niet opslaan, dan blijft de knop
 //   werken en de pagina staan; alleen het onthouden lukt dan niet.
@@ -13,16 +15,14 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import {
-  SAVED_LABEL,
   SAVED_LIST_EVENT,
-  SAVE_LABEL,
   isDishSaved,
   safeBrowserStorage,
   toggleSavedDish,
 } from '@/src/lib/dishList'
 import { SAVED_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
 
-export default function DishSaveButton({ entry = null }) {
+export default function DishSaveButton({ entry = null, name = null }) {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
@@ -53,18 +53,20 @@ export default function DishSaveButton({ entry = null }) {
 
   if (!entry) return null
 
+  const saveName = String(name || entry.name || '').trim() || 'dit gerecht'
+
   return (
     <button
       type="button"
       className={`dish-save-btn${saved ? ' is-saved' : ''}`}
       aria-pressed={saved}
+      aria-label={`Bewaar ${saveName}`}
       onClick={handleClick}
     >
       {/* Variant 1: een bladwijzer; gevuld zodra het gerecht bewaard is. */}
       <svg className="dish-share-icon" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
         <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z" />
       </svg>
-      {saved ? SAVED_LABEL : SAVE_LABEL}
     </button>
   )
 }

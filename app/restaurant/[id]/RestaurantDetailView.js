@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
@@ -61,6 +62,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
           <Wordmark />
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <ThemeToggle />
+            <ShareSettingsButton />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>

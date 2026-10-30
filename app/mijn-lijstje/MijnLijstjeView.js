@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import ListShareButton from '@/src/components/ListShareButton'
 import Wordmark from '@/src/components/Wordmark'
@@ -98,6 +99,7 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
           <Wordmark />
           <div className="lijst-header-actions">
             <ThemeToggle />
+            <ShareSettingsButton />
             <Link href="/" className="back-btn">← Home</Link>
           </div>
         </div>

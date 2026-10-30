@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'rea
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
+import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
@@ -637,6 +638,7 @@ function SearchPageInner() {
           <div className="header-right">
             <PrimaryNav />
             <ThemeToggle />
+            <ShareSettingsButton />
           </div>
         </div>
       </header>

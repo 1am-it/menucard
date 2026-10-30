@@ -170,8 +170,12 @@ async function navigate(cdp, url, readyExpression) {
   await new Promise((resolve) => setTimeout(resolve, 250));
 }
 
-async function screenshot(cdp, outputDir, name) {
-  const result = await cdp.send('Page.captureScreenshot', { format: 'png', fromSurface: true });
+async function screenshot(cdp, outputDir, name, options = {}) {
+  const params = { format: 'png', fromSurface: true };
+  // BE-49 (#115): een kleine opname van precies één kaart in plaats van het
+  // hele venster. `clip` is in CSS-pixels van de pagina.
+  if (options && options.clip) params.clip = { ...options.clip, scale: 1 };
+  const result = await cdp.send('Page.captureScreenshot', params);
   const buffer = Buffer.from(result.data, 'base64');
   fs.writeFileSync(path.join(outputDir, name), buffer);
   return { file: name, sha256: crypto.createHash('sha256').update(buffer).digest('hex'), ...pngSize(buffer) };

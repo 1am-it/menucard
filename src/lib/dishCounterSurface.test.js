@@ -62,16 +62,16 @@ test('tellers: de echte client en de echte menukaarten komen alleen via de route
   assert.match(HANDLERS, /limiter\.allow\(dish\.dishKey, body\.event\)/);
 });
 
-test('tellers: "Delen" telt na een geslaagd delen of kopiëren, nooit na een afbreking', () => {
+test('tellers: "Delen" telt na een geslaagde deelactie, nooit na een afbreking', () => {
   assert.match(SHARE_BUTTON, /import \{ SHARED_EVENT, sendDishCounter \} from '@\/src\/lib\/dishCounters'/);
   assert.match(SHARE_BUTTON, /void sendDishCounter\(\{ dish, event: SHARED_EVENT \}\)/);
-  // In de catch (afgebroken systeemmenu) staat een return vóór het tellen.
-  const share = SHARE_BUTTON.slice(SHARE_BUTTON.indexOf("if (target === 'share')"), SHARE_BUTTON.indexOf("if (target === 'clipboard')"));
-  const catchIndex = share.indexOf('} catch (error) {');
-  assert.ok(catchIndex > 0);
-  assert.match(share.slice(catchIndex), /return\n\s*\}\n\s*countShared\(\)/, 'pas na een geslaagd delen tellen');
-  // Het klembord telt alleen als het kopiëren echt lukte.
-  assert.match(SHARE_BUTTON, /if \(result\.ok\) countShared\(\)/);
+  // BE-49 (#115) — elke manier gaat door de ene deeluitvoering, met dezelfde
+  // teller. Die telt in src/lib/sharePreference.js alleen bij een geslaagde
+  // actie (unit-tests daar) en nooit bij een afbreking of weigering.
+  assert.match(SHARE_BUTTON, /await performShare\(\{/);
+  assert.match(SHARE_BUTTON, /count: countShared/);
+  // De knop wacht nooit op de teller.
+  assert.doesNotMatch(SHARE_BUTTON, /await sendDishCounter/);
 });
 
 test('tellers: "Bewaren" telt alleen bij aanzetten, "Reserveer" bij een klik, allebei fire-and-forget', () => {
@@ -89,7 +89,9 @@ test('tellers: "Bewaren" telt alleen bij aanzetten, "Reserveer" bij een klik, al
 
 test('tellers: elke gerechtkaart geeft zijn eigen id mee aan de teller', () => {
   assert.match(MENU_BODY, /dishKey = null/);
-  assert.match(MENU_BODY, /<DishShareButton href=\{shareHref\} title=\{shareTitle\} entry=\{saveEntry\} dishKey=\{dishKey\} \/>/);
+  // BE-49 (#115) — dezelfde kaart geeft ook de gerechtnaam mee voor de
+  // aria-labels; de id blijft de id van dit gerecht.
+  assert.match(MENU_BODY, /<DishShareButton\n\s*href=\{shareHref\}\n\s*title=\{shareTitle\}\n\s*entry=\{saveEntry\}\n\s*dishKey=\{dishKey\}\n\s*name=\{item\.name\}\n\s*\/>/);
   assert.match(MENU_VIEW, /dishKey=\{originalItemIndex >= 0 && origIdx >= 0 \? `\$\{id\}-\$\{origIdx\}-\$\{originalItemIndex\}` : null\}/);
   // Het Publicatievoorbeeld geeft geen id en telt dus niets.
   const staticMenu = MENU_BODY.slice(MENU_BODY.indexOf('export function StaticMenu'));

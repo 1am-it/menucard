@@ -646,13 +646,16 @@ local dev server and browser through the same runtime as the other checks and
 records seven scenarios (`--lijst`, `--alleen=<naam>`):
 
 - **delen** — on `/menu/6-diner` the card of the real dish "Poussin" (€20,95)
-  has the button "Delen" with the share icon, under the description and not in
-  the row with the price, with a tap target of at least 44 × 44 px, at 1280, 390
-  and 320 px in light and dark. At 1280 px (no `navigator.share`) the clipboard
-  receives the existing BE-12 deep link with `?stand=` for the current theme and
-  "Link gekopieerd" appears in a `role="status"`; at 390 and 320 px exactly
-  `{ url, title }` goes to `navigator.share` — never `text` — and the clipboard
-  alternative is forced there as well so the message is recorded at every width.
+  has the share icon button with the accessible name "Deel Poussin" (since
+  BE-49 (#115) a 44 × 44 px icon button, no filled background), under the
+  description and not in the row with the price, at 1280, 390 and 320 px in
+  light and dark. The check pre-sets the BE-49 preference "telefoonmenu", so
+  the behaviour of this scenario is unchanged: at 1280 px (no
+  `navigator.share`) the clipboard receives the existing BE-12 deep link with
+  `?stand=` for the current theme and "Link gekopieerd" appears in a
+  `role="status"`; at 390 and 320 px exactly `{ url, title }` goes to
+  `navigator.share` — never `text` — and the clipboard alternative is forced
+  there as well so the message is recorded at every width.
 - **ontvanger** — opening the shared link shows "Iemand deelde dit gerecht met
   je" above the highlighted card, and the `?stand=` in the link does not change
   the page's theme for the receiver.
@@ -697,6 +700,51 @@ in the ignored `ops/browser/output/be-44/`. `navigator.share`, the clipboard and
 check proves the payload, the message and the stored list, not the real share
 sheet, the real system clipboard or a private-mode failure. Developer evidence
 on a local build — not production, not independent review.
+
+## BE-49 (#115) — rustiger gerechtkaart en snel delen
+
+`run-be49-browser-check.js` (also `npm run test:browser:be49`) starts its own
+local dev server and browser through the same runtime as the other checks and
+records seven scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **kaart** — on `/menu/6-diner` the real dish "Poussin": name and price on top,
+  the description in `var(--text-secondary)` with a measured contrast ≥ 4.5:1 on
+  the card, and one bottom row with the label ("Aanbevolen") on the left and two
+  44 × 44 px icon buttons on the right ("Deel Poussin", "Bewaar Poussin"), each
+  with a visible icon of ±20 px and no filled background, at 1280, 390 and 320 px
+  in light and dark. Per stand a small card PNG lands in
+  `ops/browser/evidence/be-49/` (in git); the full-width screenshots stay in the
+  ignored `ops/browser/output/be-49/`. Saved, the bookmark is filled and
+  `aria-pressed="true"`, still without text or filled surface.
+- **eerste-keer** — with no preference a tap on "Delen" opens the sheet "Hoe deel
+  je meestal?" (real checkboxes, `aria-modal`), at most three can be chosen and
+  the other checkboxes are disabled at that limit; saving opens the small menu
+  with the two favourites plus "Meer…", the preference lands in
+  `localStorage` under `deelvoorkeur`, and picking WhatsApp opens exactly
+  `https://wa.me/?text=<encoded deep link>` and counts one `gedeeld`.
+- **een-favoriet** — with one favourite the same tap opens the Telegram link
+  immediately: no sheet, no menu, one `gedeeld`.
+- **toetsenbord** — with the share button focused, Enter opens the sheet, the
+  focus is on the first checkbox, Tab and Shift+Tab stay inside, Esc closes it
+  and the focus returns to the button with `aria-expanded="false"`; the same for
+  the small menu.
+- **links** — each of WhatsApp, Telegram, Sms, E-mail and Link kopiëren builds
+  exactly its link from the contract (URL-encoded, no accompanying text) and
+  counts one `gedeeld` with only `{ dish, event }`.
+- **meer** — "Meer…" falls back to copying with "Link gekopieerd" on desktop and
+  uses `navigator.share` with exactly `{ url, title }` where it exists.
+- **instellingen** — "Delen via" stands next to the theme choice, opens the same
+  sheet with the current favourites checked, saves a change immediately and
+  "Wissen" brings back "Hoe deel je meestal?" on the next tap.
+
+The record lands in `ops/browser/evidence/be49-browser-evidence.json` (in git).
+`navigator.share`, the clipboard, the share links and `localStorage` are stubbed
+inside the temporary headless profile: the check proves the payloads, the links,
+the messages and the stored preference, not a real share sheet, a real mail or
+sms app, or a private-mode failure. The approved mockup is an external artifact;
+the screenshots are for the visual comparison by the Lead or the owner.
+Developer evidence on a local build — not production, not independent review.
+
 
 ## BE-45 (#114) — the counter table in the internal admin
 

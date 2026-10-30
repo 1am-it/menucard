@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T01:35:40.820Z",
+  "generatedAt": "2026-10-29T22:55:19.727Z",
   "ticket": "#105 BE-44 deel 3 — de anonieme tellers (met het migratiebestand)",
   "kind": "developer evidence — local build, no production data or credentials",
   "app": "http://localhost:3157",
@@ -7,10 +7,10 @@
   "scenarios": [
     {
       "name": "delen",
-      "checks": 70,
-      "passed": 70,
+      "checks": 88,
+      "passed": 88,
       "failed": 0,
-      "durationMs": 33741,
+      "durationMs": 32307,
       "error": null
     },
     {
@@ -18,7 +18,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 27974,
+      "durationMs": 26631,
       "error": null
     },
     {
@@ -26,7 +26,7 @@
       "checks": 84,
       "passed": 84,
       "failed": 0,
-      "durationMs": 41287,
+      "durationMs": 39296,
       "error": null
     },
     {
@@ -34,7 +34,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 42818,
+      "durationMs": 35840,
       "error": null
     },
     {
@@ -42,7 +42,7 @@
       "checks": 54,
       "passed": 54,
       "failed": 0,
-      "durationMs": 20926,
+      "durationMs": 21555,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "checks": 26,
       "passed": 26,
       "failed": 0,
-      "durationMs": 24771,
+      "durationMs": 19299,
       "error": null
     },
     {
@@ -58,33 +58,48 @@
       "checks": 24,
       "passed": 24,
       "failed": 0,
-      "durationMs": 8697,
+      "durationMs": 8921,
       "error": null
     }
   ],
   "checks": {
-    "total": 360,
+    "total": 378,
     "failed": 0,
     "entries": [
       {
-        "name": "delen (1280/light): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (1280/light): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (1280/light): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":774.6875,\"left\":78,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":889.703125,\"left\":224.5,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (1280/light): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":901.703125,\"left\":236.5,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (1280/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (1280/light): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (1280/light): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (1280/light): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (1280/light): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (1280/light): de melding staat in een role=\"status\"",
@@ -112,24 +127,39 @@
         "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
       },
       {
-        "name": "delen (390/light): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (390/light): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (390/light): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1304.6875,\"left\":33,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":1385.96875,\"left\":257,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (390/light): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":1397.96875,\"left\":269,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (390/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (390/light): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (390/light): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (390/light): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (390/light): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (390/light): de melding staat in een role=\"status\"",
@@ -177,24 +207,39 @@
         "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
       },
       {
-        "name": "delen (320/light): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (320/light): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (320/light): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1408.6875,\"left\":33,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":1433.96875,\"left\":187,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (320/light): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":1445.96875,\"left\":199,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (320/light): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (320/light): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (320/light): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (320/light): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (320/light): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (320/light): de melding staat in een role=\"status\"",
@@ -242,24 +287,39 @@
         "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht"
       },
       {
-        "name": "delen (1280/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (1280/dark): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (1280/dark): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":774.6875,\"left\":78,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":889.703125,\"left\":224.5,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (1280/dark): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":901.703125,\"left\":236.5,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (1280/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (1280/dark): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (1280/dark): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (1280/dark): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (1280/dark): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (1280/dark): de melding staat in een role=\"status\"",
@@ -287,24 +347,39 @@
         "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
       },
       {
-        "name": "delen (390/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (390/dark): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (390/dark): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1304.6875,\"left\":33,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":1385.96875,\"left\":257,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (390/dark): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":1397.96875,\"left\":269,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (390/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (390/dark): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (390/dark): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (390/dark): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (390/dark): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (390/dark): de melding staat in een role=\"status\"",
@@ -352,24 +427,39 @@
         "detail": "http://localhost:3157/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker"
       },
       {
-        "name": "delen (320/dark): de knop \"Delen\" staat op de gerechtkaart",
+        "name": "delen (320/dark): de icoonknop \"Deel Poussin\" staat op de gerechtkaart",
         "passed": true,
-        "detail": "{\"button\":\"Delen\",\"missing\":false}"
+        "detail": "{\"button\":\"Deel Poussin\",\"missing\":false}"
       },
       {
         "name": "delen (320/dark): het aanraakvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1408.6875,\"left\":33,\"width\":97,\"height\":44}"
+        "detail": "{\"top\":1433.96875,\"left\":187,\"width\":44,\"height\":44}"
+      },
+      {
+        "name": "delen (320/dark): het icoon is ±20 px",
+        "passed": true,
+        "detail": "{\"top\":1445.96875,\"left\":199,\"width\":20,\"height\":20}"
+      },
+      {
+        "name": "delen (320/dark): geen gevulde achtergrond",
+        "passed": true,
+        "detail": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "name": "delen (320/dark): de knop toont geen tekst",
+        "passed": true,
+        "detail": "\"\""
+      },
+      {
+        "name": "delen (320/dark): aria-expanded is \"false\" zolang er niets openstaat",
+        "passed": true,
+        "detail": "false"
       },
       {
         "name": "delen (320/dark): de knop staat onder de beschrijving, niet naast de prijs",
         "passed": true,
         "detail": "{\"afterDesc\":true,\"insideCardTop\":false}"
-      },
-      {
-        "name": "delen (320/dark): de knop heeft het deelicoon",
-        "passed": true,
-        "detail": null
       },
       {
         "name": "delen (320/dark): de melding staat in een role=\"status\"",
@@ -434,7 +524,7 @@
       {
         "name": "ontvanger (1280/light): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (1280/light): de stand in de link verandert het thema niet",
@@ -464,7 +554,7 @@
       {
         "name": "ontvanger (390/light): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (390/light): de stand in de link verandert het thema niet",
@@ -494,7 +584,7 @@
       {
         "name": "ontvanger (320/light): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (320/light): de stand in de link verandert het thema niet",
@@ -524,7 +614,7 @@
       {
         "name": "ontvanger (1280/dark): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (1280/dark): de stand in de link verandert het thema niet",
@@ -554,7 +644,7 @@
       {
         "name": "ontvanger (390/dark): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (390/dark): de stand in de link verandert het thema niet",
@@ -584,7 +674,7 @@
       {
         "name": "ontvanger (320/dark): de deelknop staat ook op deze kaart",
         "passed": true,
-        "detail": "Delen"
+        "detail": "Deel Poussin"
       },
       {
         "name": "ontvanger (320/dark): de stand in de link verandert het thema niet",
@@ -597,14 +687,14 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (1280/light): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (1280/light): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (1280/light): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":774.6875,\"left\":184.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":889.703125,\"left\":272.5,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (1280/light): zonder bewaard gerecht is er geen onderbalk",
@@ -612,9 +702,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (1280/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (1280/light): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (1280/light): de bladwijzer is gevuld",
@@ -647,9 +737,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (1280/light): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (1280/light): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (1280/light): de onderbalk staat er na de reload ook",
@@ -657,9 +747,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (1280/light): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (1280/light): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (1280/light): dan is er weer geen onderbalk en is de opslag leeg",
@@ -667,14 +757,14 @@
         "detail": "{\"bar\":null,\"stored\":[]}"
       },
       {
-        "name": "bewaren (390/light): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (390/light): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (390/light): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1304.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":1385.96875,\"left\":305,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (390/light): zonder bewaard gerecht is er geen onderbalk",
@@ -682,9 +772,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (390/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (390/light): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (390/light): de bladwijzer is gevuld",
@@ -717,9 +807,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (390/light): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (390/light): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (390/light): de onderbalk staat er na de reload ook",
@@ -727,9 +817,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (390/light): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (390/light): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (390/light): dan is er weer geen onderbalk en is de opslag leeg",
@@ -737,14 +827,14 @@
         "detail": "{\"bar\":null,\"stored\":[]}"
       },
       {
-        "name": "bewaren (320/light): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (320/light): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (320/light): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1408.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":1433.96875,\"left\":235,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (320/light): zonder bewaard gerecht is er geen onderbalk",
@@ -752,9 +842,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (320/light): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (320/light): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (320/light): de bladwijzer is gevuld",
@@ -787,9 +877,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (320/light): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (320/light): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (320/light): de onderbalk staat er na de reload ook",
@@ -797,9 +887,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (320/light): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (320/light): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (320/light): dan is er weer geen onderbalk en is de opslag leeg",
@@ -807,14 +897,14 @@
         "detail": "{\"bar\":null,\"stored\":[]}"
       },
       {
-        "name": "bewaren (1280/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (1280/dark): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (1280/dark): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":774.6875,\"left\":184.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":889.703125,\"left\":272.5,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (1280/dark): zonder bewaard gerecht is er geen onderbalk",
@@ -822,9 +912,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (1280/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (1280/dark): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (1280/dark): de bladwijzer is gevuld",
@@ -857,9 +947,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (1280/dark): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (1280/dark): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (1280/dark): de onderbalk staat er na de reload ook",
@@ -867,9 +957,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (1280/dark): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (1280/dark): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (1280/dark): dan is er weer geen onderbalk en is de opslag leeg",
@@ -877,14 +967,14 @@
         "detail": "{\"bar\":null,\"stored\":[]}"
       },
       {
-        "name": "bewaren (390/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (390/dark): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (390/dark): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1304.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":1385.96875,\"left\":305,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (390/dark): zonder bewaard gerecht is er geen onderbalk",
@@ -892,9 +982,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (390/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (390/dark): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (390/dark): de bladwijzer is gevuld",
@@ -927,9 +1017,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (390/dark): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (390/dark): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (390/dark): de onderbalk staat er na de reload ook",
@@ -937,9 +1027,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (390/dark): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (390/dark): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (390/dark): dan is er weer geen onderbalk en is de opslag leeg",
@@ -947,14 +1037,14 @@
         "detail": "{\"bar\":null,\"stored\":[]}"
       },
       {
-        "name": "bewaren (320/dark): de knop heet \"Bewaren\" en staat niet aan",
+        "name": "bewaren (320/dark): de knop heet \"Bewaar Poussin\" en staat niet aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\",\"pressed\":\"false\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (320/dark): het tikvlak is minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"top\":1408.6875,\"left\":139.75,\"width\":114,\"height\":44}"
+        "detail": "{\"top\":1433.96875,\"left\":235,\"width\":44,\"height\":44}"
       },
       {
         "name": "bewaren (320/dark): zonder bewaard gerecht is er geen onderbalk",
@@ -962,9 +1052,9 @@
         "detail": "null"
       },
       {
-        "name": "bewaren (320/dark): de knop wordt \"Bewaard\" met aria-pressed",
+        "name": "bewaren (320/dark): de knop staat aan met aria-pressed",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\",\"pressed\":\"true\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (320/dark): de bladwijzer is gevuld",
@@ -997,9 +1087,9 @@
         "detail": "overflow=0"
       },
       {
-        "name": "bewaren (320/dark): na een reload staat hij nog op \"Bewaard\"",
+        "name": "bewaren (320/dark): na een reload staat hij nog aan",
         "passed": true,
-        "detail": "{\"label\":\"Bewaard\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"true\"}"
       },
       {
         "name": "bewaren (320/dark): de onderbalk staat er na de reload ook",
@@ -1007,9 +1097,9 @@
         "detail": "1 bewaard · Bekijken →"
       },
       {
-        "name": "bewaren (320/dark): uitgezet is hij weer \"Bewaren\"",
+        "name": "bewaren (320/dark): uitgezet staat hij weer uit",
         "passed": true,
-        "detail": "{\"label\":\"Bewaren\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"pressed\":\"false\"}"
       },
       {
         "name": "bewaren (320/dark): dan is er weer geen onderbalk en is de opslag leeg",
@@ -1674,7 +1764,7 @@
       {
         "name": "tellers (1280/licht): \"Bewaard\" verschijnt ondanks de mislukte telling",
         "passed": true,
-        "detail": "{\"text\":\"Bewaard\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"ariaLabel\":\"Bewaar Poussin\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
       },
       {
         "name": "tellers (1280/licht): een mislukte telling is nergens te zien",
@@ -1719,7 +1809,7 @@
       {
         "name": "tellers (390/donker): \"Bewaard\" verschijnt ondanks de mislukte telling",
         "passed": true,
-        "detail": "{\"text\":\"Bewaard\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
+        "detail": "{\"label\":\"Bewaar Poussin\",\"ariaLabel\":\"Bewaar Poussin\",\"pressed\":\"true\",\"fill\":\"currentColor\"}"
       },
       {
         "name": "tellers (390/donker): een mislukte telling is nergens te zien",
@@ -1872,7 +1962,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-light.png",
-        "sha256": "e698fe4a943688e4397f5086b8906b8ef118df2624faa4841074059af880d5ce",
+        "sha256": "b57860ddec8a684a01925c25bea46f92437b065c7ea3b7432fae39a16c1195d8",
         "width": 1280,
         "height": 950
       },
@@ -1884,7 +1974,7 @@
     {
       "file": {
         "file": "be44-melding-1280-light.png",
-        "sha256": "5f05dfe1e4ce87f6a91b906db96d4e58706833041dd34b72840447155fdfe817",
+        "sha256": "568c54eb4a6f2b60475b13460916028367e79bf8706394afd61d8c1905dafc2f",
         "width": 1280,
         "height": 950
       },
@@ -1897,7 +1987,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-light.png",
-        "sha256": "6b8486b32fee50cbc1a2cc736f4be5355b30195bfb4cfdd4bb1a6c21969b955d",
+        "sha256": "648a71c50e188d99b166791e6008ad41f725331f8b3941e990f441a184e9184c",
         "width": 390,
         "height": 844
       },
@@ -1909,7 +1999,7 @@
     {
       "file": {
         "file": "be44-melding-390-light.png",
-        "sha256": "f336878e7bc444ed659572aff09bc30171a6dc74f9bdf2499241437f39f7cff4",
+        "sha256": "8272a5d3490e58e936141755c578ca9570745c23a93e6f0d809a7d83cf91d90f",
         "width": 390,
         "height": 844
       },
@@ -1922,7 +2012,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-light.png",
-        "sha256": "7259ed25c9dc2168120eaddf4bee1843d94b3fda0e88970d8b2dc78fde0247a5",
+        "sha256": "a01b3ecec9ec45c569e25d181f8629fabaf05c549eefdafeabad9a6e9b859e94",
         "width": 320,
         "height": 844
       },
@@ -1934,7 +2024,7 @@
     {
       "file": {
         "file": "be44-melding-320-light.png",
-        "sha256": "f5c7897ad449824d904a64f865ecb8b6bf806a48b48eceed4b5db0db8d8707be",
+        "sha256": "f5b2c5336b2f9cb5d895d6261d963a888b736ca4fb7daf07d35623d303075264",
         "width": 320,
         "height": 844
       },
@@ -1947,7 +2037,7 @@
     {
       "file": {
         "file": "be44-deelknop-1280-dark.png",
-        "sha256": "1ca27f3e0e5e00a4670224a1f0f284ad172827aacfa45ad205e5f12226b1b3c5",
+        "sha256": "2d23ed9d17220966bf01607acafe9fee1ffc1d486c2aafac2e86c8c13eec8d3e",
         "width": 1280,
         "height": 950
       },
@@ -1959,7 +2049,7 @@
     {
       "file": {
         "file": "be44-melding-1280-dark.png",
-        "sha256": "c16de2b100517c0cb47d99515814f3bd488e3b4731c3da726e4989dc8f6806c6",
+        "sha256": "8e294dfd8a65df6f6d7ed59f57e7bf5d70095d969611da3866bb2aaa518aff7d",
         "width": 1280,
         "height": 950
       },
@@ -1972,7 +2062,7 @@
     {
       "file": {
         "file": "be44-deelknop-390-dark.png",
-        "sha256": "81e744e7a76d832bc53b93018727431ff861986dc2972c5474b53cfe3ef59ba5",
+        "sha256": "d90106d0e5da703c88a2815e6dd61d34c19312c1a5c6a3cda540d6db042ddcd2",
         "width": 390,
         "height": 844
       },
@@ -1984,7 +2074,7 @@
     {
       "file": {
         "file": "be44-melding-390-dark.png",
-        "sha256": "6e42a1441e39dc89ad238bcd71d34f6f3a7de989e49e234b83cd04bb8ab3657c",
+        "sha256": "be5ff9d01f054fb47c6ab2132f84eba2c10b113f667a42bf771c290b59bc32c6",
         "width": 390,
         "height": 844
       },
@@ -1997,7 +2087,7 @@
     {
       "file": {
         "file": "be44-deelknop-320-dark.png",
-        "sha256": "3c9f1ca2d742a2e211a105e7d6834254cb31cb256d69f467e1c4af8985307f1b",
+        "sha256": "e24614b27cc388ea6452d28c43da19ce601039c42c19f6b448bd7392e92f1aa1",
         "width": 320,
         "height": 844
       },
@@ -2009,7 +2099,7 @@
     {
       "file": {
         "file": "be44-melding-320-dark.png",
-        "sha256": "62ea9936f33275bb8f2b626ccee63aece77611dc6dff57106ff5980e74ed2d05",
+        "sha256": "9a7933f03a93027efe27770d2a17fce3b31ea910cad4438e54591d28dc996e49",
         "width": 320,
         "height": 844
       },
@@ -2022,7 +2112,7 @@
     {
       "file": {
         "file": "be44-ontvanger-1280-light.png",
-        "sha256": "f2a85ba6208edba8789d453b499418a9c793a975c7442c1ec4af6b7d16366cbb",
+        "sha256": "818cbb081c5b0ec660635b2b893a2452749824a58899d8943c126dfb5e627464",
         "width": 1280,
         "height": 950
       },
@@ -2035,7 +2125,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-light.png",
-        "sha256": "696aeda25c06ba29b40977d7d2aef7e51e2f789dc0e0fbebfca00198b007e529",
+        "sha256": "262de31fdbb71b4e02e3c26df475ccccac4ff62527ee909101e6e415c95858a0",
         "width": 390,
         "height": 844
       },
@@ -2048,7 +2138,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-light.png",
-        "sha256": "46a688135f8c210749e29a8d4ee858cad60b9f93eaa201a68c337dddb41e3f04",
+        "sha256": "b7b1d9a54038a71fd24f1be1fbf8dffa3b7043ed29974278c229b6866754f91e",
         "width": 320,
         "height": 844
       },
@@ -2061,7 +2151,7 @@
     {
       "file": {
         "file": "be44-ontvanger-1280-dark.png",
-        "sha256": "f72293b3f8a9a86f6cf92b47fb32ba73e99b8381b3b16adedfeb6219ac337097",
+        "sha256": "7bedf6bd9178a0730609d6d2b0e855474de2d0e621a8eac2df2cd77eb9e88448",
         "width": 1280,
         "height": 950
       },
@@ -2074,7 +2164,7 @@
     {
       "file": {
         "file": "be44-ontvanger-390-dark.png",
-        "sha256": "6dce4c13a62253be6ddedddca6c9b46e4293b1b333e4a13e7ceca197b92c19ed",
+        "sha256": "86a5579bbceaf1052d3f6c635bbb11935eeb9bd199b069435c8f434545691437",
         "width": 390,
         "height": 844
       },
@@ -2087,7 +2177,7 @@
     {
       "file": {
         "file": "be44-ontvanger-320-dark.png",
-        "sha256": "6bbb7c2795051f1c84bcde43c328a4344886ca511b85fde09df9ba280ceaa231",
+        "sha256": "8be90c9cc0a62adcb8cd71c61c5d144e8e08aba548fede74d2f3067985b3b91a",
         "width": 320,
         "height": 844
       },
@@ -2100,7 +2190,7 @@
     {
       "file": {
         "file": "be44-bewaard-1280-light.png",
-        "sha256": "d3dd5308d77e29c0c2ac9198b0e3c980b405677b130ddbd8a157921e1f947fcf",
+        "sha256": "43c039784692ecd39c8680cbf53e921b5b6f5aa875ebdfd180c84238ece894c5",
         "width": 1280,
         "height": 950
       },
@@ -2112,7 +2202,7 @@
     {
       "file": {
         "file": "be44-onderbalk-1280-light.png",
-        "sha256": "d3dd5308d77e29c0c2ac9198b0e3c980b405677b130ddbd8a157921e1f947fcf",
+        "sha256": "5c5f64bea6fce380591de1b4c4c1cd1a3cd8b065ae8aa2a5b6aae34a08a06b6a",
         "width": 1280,
         "height": 950
       },
@@ -2124,7 +2214,7 @@
     {
       "file": {
         "file": "be44-bewaard-390-light.png",
-        "sha256": "cb20236123256a67a571401d3e30d360b66c93a8b92cdf93cffbb1804727a33b",
+        "sha256": "1128ba4c2f0c8e0c3562b7e44401dccfd967fb38e09427a8f4e87fe0dff7c403",
         "width": 390,
         "height": 844
       },
@@ -2136,7 +2226,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-light.png",
-        "sha256": "53e151630b569cb802e6c215f452880dada402a8c02d727f1c4a3a19b9550503",
+        "sha256": "76b05a20e68fae96689b780b734f2de1c172c074f1adea9ef789c5010886437c",
         "width": 390,
         "height": 844
       },
@@ -2148,7 +2238,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-light.png",
-        "sha256": "0375f85dbeb085d10d918d2b5f13cbbd6786cbf4c30ba29d44966a465501bf4c",
+        "sha256": "e134629957145d6b5e5a5dd8769fa372f8f9dc12927da5d5ff4787ba04724530",
         "width": 320,
         "height": 844
       },
@@ -2160,7 +2250,7 @@
     {
       "file": {
         "file": "be44-onderbalk-320-light.png",
-        "sha256": "ef57f41a560233450d43b91ca70b769a629caf6ab2dde28e33143bb51bcc0b18",
+        "sha256": "44f05daece7e7ecd0f733feed44c8f3c40ba3085b873fe762d5c338059f3c485",
         "width": 320,
         "height": 844
       },
@@ -2172,7 +2262,7 @@
     {
       "file": {
         "file": "be44-bewaard-1280-dark.png",
-        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
+        "sha256": "112f967ec985e9b8c02be69af688fe6a2541ce14ff7742a9cfa68955da8d2c6b",
         "width": 1280,
         "height": 950
       },
@@ -2184,7 +2274,7 @@
     {
       "file": {
         "file": "be44-onderbalk-1280-dark.png",
-        "sha256": "861246f6f71496e08bc12ae972a4154558df08f4375b931ff896eb0e2173cf65",
+        "sha256": "998aedeb9049d40d9d42cfd62e7c684c2e955f50bdedd8e48385c5da190e3ada",
         "width": 1280,
         "height": 950
       },
@@ -2196,7 +2286,7 @@
     {
       "file": {
         "file": "be44-bewaard-390-dark.png",
-        "sha256": "1c5e01c38b2e8556787275e1705f4b2b7015af7a18efe1d3187dd19d4515f4ae",
+        "sha256": "9426d3ab91ad92d4d5b6f040eaeeedb9d77160a50a1cea3b1dbff997c196d3c7",
         "width": 390,
         "height": 844
       },
@@ -2208,7 +2298,7 @@
     {
       "file": {
         "file": "be44-onderbalk-390-dark.png",
-        "sha256": "407922a411dd3d898161d7ecbb783e85afa2ddc08276f125e092ee8ccc8edb32",
+        "sha256": "614c4c0d9f0359604f7c869975907c490e29ee651a917a66ecce937690bac9c9",
         "width": 390,
         "height": 844
       },
@@ -2220,7 +2310,7 @@
     {
       "file": {
         "file": "be44-bewaard-320-dark.png",
-        "sha256": "272015b64b3590056b99a2a6dc6e0d0a32bdd4619521f2d090b1de005b743593",
+        "sha256": "ddcf27a81663cdd92c2153c0a2498b448e1870ba24164f327941af0963090b2f",
         "width": 320,
         "height": 844
       },
@@ -2232,7 +2322,7 @@
     {
       "file": {
         "file": "be44-onderbalk-320-dark.png",
-        "sha256": "dfa62afe807cd806a073c72e5f921459da5141ebae7597085dfd4f42581862fd",
+        "sha256": "eee93c5d1cf34e4698e0b5649b6e39e3661dfc06078a9d10794889af52cdef59",
         "width": 320,
         "height": 844
       },
@@ -2244,7 +2334,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-1280-light.png",
-        "sha256": "4f35dbd9502501e39a60de0d1408e165f858974e1f22c3d4c7cf0547d3570686",
+        "sha256": "3cea37e57cf28ac5eb4f2c47b0dfed55be007ad7546aa9169c7aea00ff583026",
         "width": 1280,
         "height": 950
       },
@@ -2256,7 +2346,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-390-light.png",
-        "sha256": "e67264859c9651414f1eb383c2e77e2f47e6fa242b8efde12bfff22e13da482e",
+        "sha256": "a441a6e4a903537422b86b771bb07ac7384b6dc19ba6f1fe8d428aa77929b7fb",
         "width": 390,
         "height": 844
       },
@@ -2268,7 +2358,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-320-light.png",
-        "sha256": "b0eecb0a61289b18b390780189387a5786a7817eb28c498360ba4c261e7c0f58",
+        "sha256": "ea262736addb987e63997738c7e3d13117b8f5dc500d2cff9cf35bf44d5755fe",
         "width": 320,
         "height": 844
       },
@@ -2280,7 +2370,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-1280-dark.png",
-        "sha256": "97c75f47154bf3ad0fb86ddcce552f43a89c61396e02ed5bc7df8f00376c4db3",
+        "sha256": "a6ccdf65395fce31f953fdadce9b9b779ebfc9b6a8e7c9554c313e92d9e70ed7",
         "width": 1280,
         "height": 950
       },
@@ -2292,7 +2382,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-390-dark.png",
-        "sha256": "24c8ec9011bf3de6d0606e576904954ea18a4af63479a713991ee3d67f21a611",
+        "sha256": "72f1b2498e07cb7a8bdee74a46c32bbe659d56681d58a6febf370f198c220e25",
         "width": 390,
         "height": 844
       },
@@ -2304,7 +2394,7 @@
     {
       "file": {
         "file": "be44-mijn-lijstje-320-dark.png",
-        "sha256": "6ce8f9a8ce1687c14e81df6935ba1f111ebd1b00edd04a9dbb9d5d29f96d0d98",
+        "sha256": "77f9897d4e10e2f15b1563f95a5db3f10deb1ff3d146ef96f4984d46561b72be",
         "width": 320,
         "height": 844
       },
@@ -2316,7 +2406,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-1280-light.png",
-        "sha256": "6758cab1fa47a57865d4a8b5b8a6740e1ce056fadf24c517cfc4ff9acb412ec7",
+        "sha256": "eb921d3eef1f0d4f78db9d7373388a0665c8940f2848fb2ddedc1439a21b348b",
         "width": 1280,
         "height": 950
       },
@@ -2329,7 +2419,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-390-light.png",
-        "sha256": "ec306057604bb6ec85212472c8d5a76d5e0e0a893451aa0a2e400a86ac1aa5ae",
+        "sha256": "97416113693d81ce4c0dca040244b11435defdafd83640ca1bf2f311f63f1c0b",
         "width": 390,
         "height": 844
       },
@@ -2342,7 +2432,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-320-light.png",
-        "sha256": "13399cd90a1f3e41b230f6618166a03ea89202b2e9016938e5f11baf0bc8db39",
+        "sha256": "3d7b5a896650f07e59cf9e7ba17459bf8c70945b14383d415d3e6f5a7bca7d8c",
         "width": 320,
         "height": 844
       },
@@ -2355,7 +2445,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-1280-dark.png",
-        "sha256": "477df87f65a916531697b74cd9317081e8644903345f8e6da4d8cd7399e6e911",
+        "sha256": "d18776df523a202ba6d6f9160efa359add2df1149472bb0aebea6543d3bf2948",
         "width": 1280,
         "height": 950
       },
@@ -2368,7 +2458,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-390-dark.png",
-        "sha256": "a67a3417a1bd5b679a37b802f3bfb94812bce97b2fee375adcbfc4293f40370f",
+        "sha256": "aaac7f6ed0ad9d79b6ce834507e23850930c4321347b018ad752d921a3bc3051",
         "width": 390,
         "height": 844
       },
@@ -2381,7 +2471,7 @@
     {
       "file": {
         "file": "be44-gedeeld-lijstje-320-dark.png",
-        "sha256": "af95acff316a52fbe7581190f00eb2a1f392fb9b2f7a3b31f6e595d2dcae7071",
+        "sha256": "d9feca33f3baf9af3cd5d0d142ff3524606dc20946cf1579e34f8e7de172ef88",
         "width": 320,
         "height": 844
       },
