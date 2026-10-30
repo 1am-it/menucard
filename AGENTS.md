@@ -38,5 +38,6 @@ model-specific privileges. These files implement the owner's central working
 method (`C:/Users/madej/Documents/Codex/ai-build-operations/WERKWIJZE.md`);
 the files in this repository are binding and are never widened by it.
 
-No new production action, merge, publication, paid fallback or expanded access
-without explicit authorization. Templates and vendor files do not grant it.
+No new production action, publication, paid fallback or expanded access
+without explicit authorization. Merges to `main` are delegated to the Delivery
+Lead (owner decision 2026-10-30, see AI-WORKING-AGREEMENT.md). Templates and vendor files do not grant it.
