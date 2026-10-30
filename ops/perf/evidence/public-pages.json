@@ -1,7 +1,7 @@
 {
   "be": "BE-50 (#120)",
-  "measuredAt": "2026-10-30T06:37:06.053Z",
-  "gitHead": "ac19b512e32dba26caee40acc482913b854fc009",
+  "measuredAt": "2026-10-30T06:50:33.280Z",
+  "gitHead": "536c69f09a3ca5f1e647d9e3e2559ba7fed88f05",
   "branch": "feat/snelheid-120",
   "node": "v22.22.3",
   "next": "15.5.15",
@@ -18,9 +18,9 @@
       "label": "Home",
       "path": "/",
       "route": "/page",
-      "totalBytes": 181344,
-      "totalKb": 177.1,
-      "requests": 19,
+      "totalBytes": 180753,
+      "totalKb": 176.5,
+      "requests": 18,
       "categories": {
         "html": {
           "bytes": 8292,
@@ -35,8 +35,8 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 8097,
-          "kb": 7.9
+          "bytes": 7506,
+          "kb": 7.3
         },
         "font": {
           "bytes": 0,
@@ -82,12 +82,12 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=3lb4g",
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         },
         {
           "url": "/search?_rsc=3lb4g",
-          "bytes": 2492,
+          "bytes": 2493,
           "kb": 2.4
         },
         {
@@ -104,11 +104,6 @@
           "url": "/api/search?q=pompoen&limit=1",
           "bytes": 834,
           "kb": 0.8
-        },
-        {
-          "url": "/menu/23-lunch?dish=23-lunch-0-8&name=White+Bean+%26+Veggie+Sandwich&cat=Breakfast+%26+Lunch&_rsc=3lb4g",
-          "bytes": 593,
-          "kb": 0.6
         }
       ],
       "foreignRequests": 0,
@@ -171,7 +166,7 @@
       "requests": 15,
       "categories": {
         "html": {
-          "bytes": 3201,
+          "bytes": 3200,
           "kb": 3.1
         },
         "js": {
@@ -183,7 +178,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 4180,
+          "bytes": 4181,
           "kb": 4.1
         },
         "font": {
@@ -230,7 +225,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=unnn1",
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         },
         {
@@ -299,12 +294,12 @@
       "label": "Alle restaurants",
       "path": "/alle-restaurants",
       "route": "/alle-restaurants/page",
-      "totalBytes": 165481,
-      "totalKb": 161.6,
-      "requests": 18,
+      "totalBytes": 163386,
+      "totalKb": 159.6,
+      "requests": 14,
       "categories": {
         "html": {
-          "bytes": 3205,
+          "bytes": 3206,
           "kb": 3.1
         },
         "js": {
@@ -316,8 +311,8 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 6337,
-          "kb": 6.2
+          "bytes": 4241,
+          "kb": 4.1
         },
         "font": {
           "bytes": 0,
@@ -363,33 +358,13 @@
       "dataRequests": [
         {
           "url": "/search?_rsc=1tikd",
-          "bytes": 2492,
+          "bytes": 2493,
           "kb": 2.4
         },
         {
           "url": "/api/restaurants?limit=50",
           "bytes": 1748,
           "kb": 1.7
-        },
-        {
-          "url": "/restaurant/19?_rsc=1tikd",
-          "bytes": 525,
-          "kb": 0.5
-        },
-        {
-          "url": "/menu/19-lunch?_rsc=1tikd",
-          "bytes": 525,
-          "kb": 0.5
-        },
-        {
-          "url": "/menu/1-lunch?_rsc=1tikd",
-          "bytes": 524,
-          "kb": 0.5
-        },
-        {
-          "url": "/menu/1-diner?_rsc=1tikd",
-          "bytes": 523,
-          "kb": 0.5
         }
       ],
       "foreignRequests": 0,
@@ -447,7 +422,7 @@
       "label": "Restaurant (Bardot, 4 kaarten)",
       "path": "/restaurant/6",
       "route": "/restaurant/[id]/page",
-      "totalBytes": 177216,
+      "totalBytes": 177217,
       "totalKb": 173.1,
       "requests": 15,
       "categories": {
@@ -464,7 +439,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         },
         "font": {
@@ -511,7 +486,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=10qzd",
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         }
       ],
@@ -580,12 +555,12 @@
       "label": "Menu (T-Huis borrel, 138 gerechten)",
       "path": "/menu/23-borrel",
       "route": "/menu/[id]/page",
-      "totalBytes": 186980,
+      "totalBytes": 186979,
       "totalKb": 182.6,
       "requests": 13,
       "categories": {
         "html": {
-          "bytes": 26956,
+          "bytes": 26955,
           "kb": 26.3
         },
         "js": {
@@ -707,7 +682,7 @@
       "label": "Mijn lijstje",
       "path": "/mijn-lijstje",
       "route": "/mijn-lijstje/page",
-      "totalBytes": 159464,
+      "totalBytes": 159465,
       "totalKb": 155.7,
       "requests": 13,
       "categories": {
@@ -724,7 +699,7 @@
           "kb": 25.9
         },
         "data": {
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         },
         "font": {
@@ -771,7 +746,7 @@
       "dataRequests": [
         {
           "url": "/alle-restaurants?_rsc=1tpm6",
-          "bytes": 2498,
+          "bytes": 2499,
           "kb": 2.4
         }
       ],
