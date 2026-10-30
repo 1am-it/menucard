@@ -111,6 +111,11 @@ export default function OwnerAccountDeletion({ session, onDeleted }) {
     </p>
   ) : null
 
+  const noticeAlert = notice ? (
+    <p className="auth-notice" role="status">
+      {notice}
+    </p>
+  ) : null
 
   return (
     <section className="owner-danger" aria-labelledby="owner-delete-title">

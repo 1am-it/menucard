@@ -208,7 +208,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
                 Je claims
               </h2>
               {overview.claims.length === 0 ? (
-                <p className="owner-note">{OWNER_OVERVIEW_MESSAGES.noClaims}</p>
+                <p className="owner-note">{overview.claimsNote}</p>
               ) : (
                 <ul className="owner-list">
                   {overview.claims.map((claim) => (

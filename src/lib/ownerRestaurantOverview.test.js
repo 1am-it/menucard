@@ -43,6 +43,9 @@ test('overview: an approved claim becomes a restaurant card with both public lin
   assert.deepEqual(overview.claims, []);
   assert.equal(overview.empty, false);
   assert.equal(overview.hasOwnerAccess, true);
+  // The claim list never says "no claim at all" next to an approved claim.
+  assert.equal(overview.claimsNote, OWNER_OVERVIEW_MESSAGES.noOpenClaims);
+  assert.match(overview.claimsNote, /goedgekeurd/i);
 });
 
 test('overview: a claim in behandeling shows the neutral waiting text and no buttons', () => {

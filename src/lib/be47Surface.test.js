@@ -114,6 +114,12 @@ test('BE-47: /internal stuurt een owner-only account door en laat de rest staan'
   assert.doesNotMatch(code(INTERNAL_PAGE), /Nog niets te openen/);
   // An account without a usable role still gets the explicit status.
   assert.match(INTERNAL_PAGE, /Dit account heeft geen interne toegang/);
+  // BE-47: an owner now has a real destination in the shared internal nav, instead
+  // of the old "nog niet beschikbaar" note.
+  const nav = read('src/components/InternalNav.js');
+  assert.match(nav, /href="\/mijn-restaurant"/);
+  assert.match(nav, /Mijn restaurant/);
+  assert.doesNotMatch(code(nav), /nog niet beschikbaar/);
 });
 
 test('BE-47: de stijlen gebruiken alleen tokens en blijven ≥ 44 px', () => {
@@ -140,6 +146,10 @@ test('BE-47: de houder-sessie blijft de standaard Supabase-sessie, zonder eigen 
   // The documented practical duration lives in the one place that owns the client.
   const browser = read('src/lib/supabaseBrowser.js');
   assert.match(browser, /createClient\(url, anonKey\)/);
+  assert.match(browser, /criterium 3/);
+  assert.match(browser, /access token is 1 uur/i);
+  assert.match(browser, /ververst het access token zelf/i);
+  assert.doesNotMatch(code(browser), /localStorage|sessionStorage/, 'the shared client adds no own token storage');
 });
 
 test('BE-47: criterium 4 is gebouwd op expliciete ON DELETE-cascades', () => {

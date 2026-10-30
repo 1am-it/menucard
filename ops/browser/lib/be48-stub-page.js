@@ -27,8 +27,56 @@ function installBe48AuthStub(settings) {
   // BE-47 (#111): wat het verwijderscherm naar de serverroute stuurde, en of de
   // fictieve gebruiker daarna echt weg is. De stub controleert hetzelfde als de
   // echte route: alleen een code, en alleen voor de eigen sessie.
+  //
+  // De vastlegging gaat óók naar sessionStorage: na een geslaagde verwijdering
+  // stuurt de pagina de bezoeker naar /mijn-restaurant/inloggen, en dan is dit
+  // document (met zijn eigen stub) weg. De check leest het bewijs daarom uit de
+  // opslag van hetzelfde tabblad, niet uit het geheugen van het oude document.
   const deleteRequests = [];
   let deletedAccount = false;
+  const DELETE_LOG_KEY = 'be47-delete-log';
+  const DELETED_FLAG_KEY = 'be47-deleted';
+
+  function storedDeleteLog() {
+    try {
+      const raw = window.sessionStorage.getItem(DELETE_LOG_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function readDeleteLog() {
+    const stored = storedDeleteLog();
+    return stored.length > 0 ? stored : deleteRequests.slice();
+  }
+
+  function recordDeleteRequest(entry) {
+    deleteRequests.push(entry);
+    try {
+      // Lees alleen uit de opslag en voeg daar één keer aan toe: het geheugen van
+      // dit document bevat dezelfde poging al, dus een gedeelde lijst zou dubbel
+      // tellen.
+      const log = storedDeleteLog();
+      log.push(entry);
+      window.sessionStorage.setItem(DELETE_LOG_KEY, JSON.stringify(log));
+      if (entry.accepted) window.sessionStorage.setItem(DELETED_FLAG_KEY, '1');
+    } catch (error) {
+      // Zonder opslag blijft het geheugen van dit document over; de check leest
+      // dan wat er in deze pagina gebeurde.
+    }
+  }
+
+  function wasDeleted() {
+    try {
+      if (window.sessionStorage.getItem(DELETED_FLAG_KEY) === '1') return true;
+    } catch (error) {
+      // valt terug op het geheugen hieronder
+    }
+    return deletedAccount;
+  }
+
   let assurance = 'aal1';
   let challengeCount = 0;
   // The address whose e-mail code was just verified; the claim signs in with
@@ -154,9 +202,14 @@ function installBe48AuthStub(settings) {
     // sent nothing but its own code.
     if (method === 'POST' && url.pathname === '/api/mijn-restaurant/account-verwijderen') {
       const params = parseBody(body);
-      deleteRequests.push({ code: typeof params.code === 'string' ? params.code : null, body: body || null });
       const expected = settings.deleteCode || settings.emailCode;
-      if (params.code !== expected) {
+      const accepted = params.code === expected;
+      recordDeleteRequest({
+        code: typeof params.code === 'string' ? params.code : null,
+        body: body || null,
+        accepted: accepted,
+      });
+      if (!accepted) {
         return jsonResponse({ error: 'Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.' }, 400);
       }
       deletedAccount = true;
@@ -270,10 +323,8 @@ function installBe48AuthStub(settings) {
     calls: calls,
     violations: violations,
     otpRequests: otpRequests,
-    deleteRequests: deleteRequests,
-    deletedAccount: function () {
-      return deletedAccount;
-    },
+    deleteLog: readDeleteLog,
+    deletedAccount: wasDeleted,
     assurance: function () {
       return assurance;
     },

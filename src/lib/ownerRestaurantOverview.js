@@ -33,7 +33,8 @@ const OWNER_OVERVIEW_MESSAGES = Object.freeze({
   restaurantLink: 'Bekijk je restaurantpagina',
   menuLink: 'Bekijk je menukaart',
   noMenuLink: 'Er staat nog geen menukaart online.',
-  approvedNote: 'Je claim is goedgekeurd. Je bent geverifieerd als eigenaar van dit restaurant.',
+  approvedNote:
+    'Je claim is goedgekeurd: je bent geverifieerd als eigenaar. Wijzigingen aan je pagina of menukaart lopen nu via de redactie; zelf bewerken volgt in een latere stap.',
   pendingNote: 'Een medewerker beoordeelt je aanvraag. Je hoeft nu niets te doen.',
   rejectedNote:
     'Je claim is niet goedgekeurd. Je kunt opnieuw een claim indienen. Klopt dit niet, neem dan contact op met de redactie.',
@@ -43,6 +44,7 @@ const OWNER_OVERVIEW_MESSAGES = Object.freeze({
   noRestaurants: 'Je account is nog niet aan een restaurant gekoppeld.',
   noRestaurantsHelp: 'Claim je restaurant om je pagina te beheren.',
   noClaims: 'Je hebt nog geen claim ingediend.',
+  noOpenClaims: 'Je claim is goedgekeurd; je restaurant staat hierboven.',
   signOut: 'Uitloggen',
   deleteAccount: 'Account verwijderen',
 });
@@ -186,6 +188,11 @@ function buildOwnerOverview(input) {
   return {
     restaurants: approved,
     claims: openClaims,
+    // The claim list's own empty text: never "no claim at all" when an approved
+    // claim is already shown as a restaurant above.
+    claimsNote: openClaims.length === 0 && approved.length > 0
+      ? OWNER_OVERVIEW_MESSAGES.noOpenClaims
+      : OWNER_OVERVIEW_MESSAGES.noClaims,
     empty: approved.length === 0 && openClaims.length === 0,
     hasOwnerAccess: ownedIds.length > 0,
     heading: OWNER_OVERVIEW_MESSAGES.title,

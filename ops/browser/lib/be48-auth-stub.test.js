@@ -404,8 +404,9 @@ test('the stub: the delete route accepts only the fictional code and records the
   assert.equal(api.deletedAccount(), true);
 
   // What the client sent is recorded, so the check can prove it sent only a code.
+  // One attempt per request: the log must not double-count.
   assert.deepEqual(
-    api.deleteRequests.map((entry) => entry.code),
+    api.deleteLog().map((entry) => entry.code),
     ['000000', DEFAULT_SETTINGS.emailCode],
   );
   assert.deepEqual(api.violations, []);

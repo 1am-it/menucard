@@ -214,9 +214,14 @@ async function resetAuthStorage(cdp, theme) {
       const stale = [];
       for (let index = 0; index < localStorage.length; index += 1) {
         const key = localStorage.key(index);
-        if (key && key.indexOf('sb-') === 0) stale.push(key);
+        if (key && (key.indexOf('sb-') === 0 || key.indexOf('be47-') === 0)) stale.push(key);
       }
       stale.forEach((key) => localStorage.removeItem(key));
+      // BE-47: the delete evidence lives in sessionStorage so it survives the
+      // redirect; a new scenario must start without it.
+      try {
+        ['be47-delete-log', 'be47-deleted'].forEach((key) => sessionStorage.removeItem(key));
+      } catch (error) {}
       return stale.length;
     })()`,
   );
@@ -529,18 +534,24 @@ async function deleteScenario(cdp) {
   const deleted = await evalJs(cdp, 'window.__BE48__ ? window.__BE48__.deletedAccount() : false');
   check('verwijderen: de serverroute heeft het eigen account verwijderd', deleted === true);
 
-  const requests = await evalJs(cdp, 'window.__BE48__ ? window.__BE48__.deleteRequests : []');
-  check('verwijderen: er zijn precies twee pogingen gedaan', Array.isArray(requests) && requests.length === 2, JSON.stringify(requests && requests.length));
+  const requests = await evalJs(cdp, 'window.__BE48__ ? window.__BE48__.deleteLog() : []');
+  const codes = Array.isArray(requests) ? requests.map((entry) => entry.code) : [];
   check(
-    'verwijderen: het verzoek bevat alleen de code, nooit een gebruikers-id of adres',
+    'verwijderen: precies één poging is geaccepteerd (en dat was de juiste code)',
+    Array.isArray(requests) && requests.filter((entry) => entry && entry.accepted).length === 1,
+    JSON.stringify(codes),
+  );
+  check(
+    'verwijderen: elk verzoek bevat alleen de code, nooit een gebruikers-id of adres',
     Array.isArray(requests) &&
+      requests.length > 0 &&
       requests.every((entry) => {
         if (!entry || typeof entry.body !== 'string') return false;
         const parsed = JSON.parse(entry.body);
         const keys = Object.keys(parsed);
         return keys.length === 1 && keys[0] === 'code';
       }),
-    JSON.stringify(requests),
+    JSON.stringify(codes),
   );
 
   // The session is gone: the login screen is shown again, with the same neutral

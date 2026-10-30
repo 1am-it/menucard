@@ -1,0 +1,484 @@
+{
+  "generatedAt": "2026-10-30T06:45:36.244Z",
+  "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
+  "contract": "issue #111 BE-47 (inloggen met e-mailcode voor restauranthouders)",
+  "head": "1bb4ef2c62a55548fc45ab7a30cc785fd8adc3fe",
+  "app": "http://localhost:3147",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "inloggen",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 7807,
+      "error": null
+    },
+    {
+      "name": "statussen",
+      "checks": 10,
+      "passed": 10,
+      "failed": 0,
+      "durationMs": 4786,
+      "error": null
+    },
+    {
+      "name": "verwijderen",
+      "checks": 15,
+      "passed": 15,
+      "failed": 0,
+      "durationMs": 5852,
+      "error": null
+    },
+    {
+      "name": "doorsturen",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 11685,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": {
+    "total": 59,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "inloggen: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "inloggen: de titel is de houder-login",
+        "passed": true,
+        "detail": "Inloggen voor restauranthouders"
+      },
+      {
+        "name": "inloggen: het e-mailveld heeft een echt label, autocomplete=\"email\" en 44 px",
+        "passed": true,
+        "detail": "{\"id\":\"owner-email\",\"type\":\"email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"email\",\"inputmode\":null,\"pattern\":null,\"height\":46}"
+      },
+      {
+        "name": "inloggen: zonder NEXT_PUBLIC_OWNER_SMS_LOGIN is er geen telefoonveld",
+        "passed": true,
+        "detail": "false"
+      },
+      {
+        "name": "inloggen: \"Stuur code\" is een knop van minimaal 44 px",
+        "passed": true,
+        "detail": "[{\"text\":\"Stuur code\",\"height\":44}]"
+      },
+      {
+        "name": "inloggen: de route naar \"Claim je restaurant\" staat erbij",
+        "passed": true,
+        "detail": "[{\"text\":\"Claim je restaurant\",\"href\":\"/alle-restaurants\"},{\"text\":\"Ik werk bij de redactie\",\"href\":\"/internal/login\"}]"
+      },
+      {
+        "name": "inloggen: een interne beheerder wordt naar /internal/login verwezen",
+        "passed": true,
+        "detail": "[{\"text\":\"Claim je restaurant\",\"href\":\"/alle-restaurants\"},{\"text\":\"Ik werk bij de redactie\",\"href\":\"/internal/login\"}]"
+      },
+      {
+        "name": "inloggen: geen horizontale overflow op 390 px",
+        "passed": true,
+        "detail": "0"
+      },
+      {
+        "name": "inloggen: het codescherm verschijnt na het e-mailadres",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "inloggen: de melding is neutraal en verraadt niet of het adres bestaat",
+        "passed": true,
+        "detail": "[\"Als dit e-mailadres bij ons bekend is, ontvang je nu een code van zes cijfers.\"]"
+      },
+      {
+        "name": "inloggen: het codeveld is numeriek met autocomplete=\"one-time-code\" en 44 px",
+        "passed": true,
+        "detail": "{\"id\":\"owner-code\",\"type\":\"text\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"pattern\":\"[0-9]*\",\"height\":52}"
+      },
+      {
+        "name": "inloggen: \"Nieuwe code sturen\" en \"Ander e-mailadres\" staan er",
+        "passed": true,
+        "detail": "[{\"text\":\"Inloggen\",\"height\":44},{\"text\":\"Nieuwe code sturen\",\"height\":44},{\"text\":\"Ander e-mailadres\",\"height\":44}]"
+      },
+      {
+        "name": "inloggen: een foute code geeft Nederlandse tekst in role=\"alert\"",
+        "passed": true,
+        "detail": "[\"Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.\"]"
+      },
+      {
+        "name": "inloggen: de juiste code landt op /mijn-restaurant",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "inloggen: het eigen restaurant staat er met zijn naam",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "inloggen: de kop is \"Mijn restaurant\"",
+        "passed": true,
+        "detail": "Mijn restaurant"
+      },
+      {
+        "name": "inloggen: de link naar de publieke pagina en naar de menukaart staan er",
+        "passed": true,
+        "detail": "[{\"text\":\"onze\\nmenukaarten\",\"href\":\"/\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/1\"},{\"text\":\"Bekijk je menukaart\",\"href\":\"/menu/1-lunch\"}]"
+      },
+      {
+        "name": "inloggen: de goedgekeurde claim toont de status \"Goedgekeurd\"",
+        "passed": true,
+        "detail": "[{\"text\":\"Goedgekeurd\",\"className\":\"owner-status owner-status--approved\"}]"
+      },
+      {
+        "name": "inloggen: uitloggen en account verwijderen staan er",
+        "passed": true,
+        "detail": "[{\"text\":\"Licht\",\"height\":44},{\"text\":\"Donker\",\"height\":44},{\"text\":\"Uitloggen\",\"height\":44},{\"text\":\"Account verwijderen\",\"height\":44}]"
+      },
+      {
+        "name": "inloggen: geen horizontale overflow op /mijn-restaurant",
+        "passed": true,
+        "detail": "0"
+      },
+      {
+        "name": "statussen: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "statussen: the code screen appears after the address",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "statussen: the code screen closes after a verified code",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "statussen: het overzicht staat er",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "statussen: \"Goedgekeurd\" staat er met de eigen chip",
+        "passed": true,
+        "detail": "[{\"text\":\"Goedgekeurd\",\"className\":\"owner-status owner-status--approved\"},{\"text\":\"In behandeling\",\"className\":\"owner-status owner-status--pending\"},{\"text\":\"Afgewezen\",\"className\":\"owner-status owner-status--rejected\"}]"
+      },
+      {
+        "name": "statussen: \"In behandeling\" staat er met de eigen chip",
+        "passed": true,
+        "detail": "[{\"text\":\"Goedgekeurd\",\"className\":\"owner-status owner-status--approved\"},{\"text\":\"In behandeling\",\"className\":\"owner-status owner-status--pending\"},{\"text\":\"Afgewezen\",\"className\":\"owner-status owner-status--rejected\"}]"
+      },
+      {
+        "name": "statussen: \"Afgewezen\" staat er met de eigen chip",
+        "passed": true,
+        "detail": "[{\"text\":\"Goedgekeurd\",\"className\":\"owner-status owner-status--approved\"},{\"text\":\"In behandeling\",\"className\":\"owner-status owner-status--pending\"},{\"text\":\"Afgewezen\",\"className\":\"owner-status owner-status--rejected\"}]"
+      },
+      {
+        "name": "statussen: de wachtende claim noemt het restaurant en vraagt niets",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\nMijn restaurant\n\nDit is je eigen overzicht. Wijzigingen aan je pagina en menukaart lopen nu via de redactie; zelf bewerken volgt in een latere stap.\n"
+      },
+      {
+        "name": "statussen: de afgewezen claim biedt de route om opnieuw te claimen",
+        "passed": true,
+        "detail": "[{\"text\":\"onze\\nmenukaarten\",\"href\":\"/\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/1\"},{\"text\":\"Bekijk je menukaart\",\"href\":\"/menu/1-lunch\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/2\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/3\"},{\"text\":\"Opnieuw claimen\",\"href\":\"/claim/3\"}]"
+      },
+      {
+        "name": "statussen: een wachtende claim heeft geen beheerknop",
+        "passed": true,
+        "detail": "[{\"text\":\"onze\\nmenukaarten\",\"href\":\"/\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/1\"},{\"text\":\"Bekijk je menukaart\",\"href\":\"/menu/1-lunch\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/2\"},{\"text\":\"Bekijk je restaurantpagina\",\"href\":\"/restaurant/3\"},{\"text\":\"Opnieuw claimen\",\"href\":\"/claim/3\"}]"
+      },
+      {
+        "name": "verwijderen: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: the code screen appears after the address",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: the code screen closes after a verified code",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: het overzicht staat er",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: eerst een bevestiging, geen directe verwijdering",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: er is nog niets verwijderd voordat de code is ingevuld",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: de verse code wordt gevraagd",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: het codeveld is numeriek met autocomplete=\"one-time-code\"",
+        "passed": true,
+        "detail": "{\"id\":\"owner-delete-code\",\"type\":\"text\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"pattern\":\"[0-9]*\",\"height\":52}"
+      },
+      {
+        "name": "verwijderen: een foute code wordt in het Nederlands geweigerd",
+        "passed": true,
+        "detail": "[\"Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.\"]"
+      },
+      {
+        "name": "verwijderen: na een foute code bestaat het account nog",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: na de juiste code gaat de bezoeker terug naar het inloggen",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: de serverroute heeft het eigen account verwijderd",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "verwijderen: precies één poging is geaccepteerd (en dat was de juiste code)",
+        "passed": true,
+        "detail": "[\"000000\",\"654321\"]"
+      },
+      {
+        "name": "verwijderen: elk verzoek bevat alleen de code, nooit een gebruikers-id of adres",
+        "passed": true,
+        "detail": "[\"000000\",\"654321\"]"
+      },
+      {
+        "name": "verwijderen: het inlogscherm staat er weer",
+        "passed": true,
+        "detail": "Inloggen voor restauranthouders"
+      },
+      {
+        "name": "doorsturen (houder): the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen (houder): the code screen appears after the address",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen (houder): the code screen closes after a verified code",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen: de houder landt eerst op /mijn-restaurant",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen: /internal stuurt een owner-only account naar /mijn-restaurant",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen: \"Nog niets te openen\" bestaat niet meer voor de houder",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\nMijn restaurant\n\nDit is je eigen overzicht. Wijzigingen aan je pagina en menukaart lopen nu via de redactie; "
+      },
+      {
+        "name": "doorsturen (beheerder): the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen (beheerder): the code screen appears after the address",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen (beheerder): the code screen closes after a verified code",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen: een internal-account gaat naar /internal/login",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "doorsturen: de tweede stap is niet omzeild (token blijft aal1)",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "netwerk: geen onbekende route of extern verzoek geregistreerd",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "netwerk: de CDP-laag blokkeerde geen appverkeer",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "geen onafgevangen browserfout",
+        "passed": true,
+        "detail": "[]"
+      }
+    ]
+  },
+  "screenshotsDir": "ops/browser/evidence/be-47",
+  "screenshots": [
+    {
+      "name": "be47-inloggen-390-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-inloggen-390-licht.png",
+      "file": "be47-inloggen-390-licht.png",
+      "sha256": "3557d15294db53e190aef61eebdda41b6912bf63deaf13653a3c101445c6194b",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-inloggen-390-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-inloggen-390-donker.png",
+      "file": "be47-inloggen-390-donker.png",
+      "sha256": "7c4cd2e80ed4a314875ec337df39f8148db26c8d177273b8e35663f9c4a3b55b",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-inloggen-1280-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-inloggen-1280-licht.png",
+      "file": "be47-inloggen-1280-licht.png",
+      "sha256": "df25eb4707ac9c40da6b21770fb43da2a4b2609091310c0a808715da30a92dce",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be47-inloggen-1280-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-inloggen-1280-donker.png",
+      "file": "be47-inloggen-1280-donker.png",
+      "sha256": "28c6373121ed7ebadd0b376a8ba2c9d60c1394f5f8e8834b0885d4b2c6fa0b07",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be47-code-390-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-code-390-licht.png",
+      "file": "be47-code-390-licht.png",
+      "sha256": "399d8a3adc4ea786efdf1f911f530973853318899bca1ba36011a97f35eb73aa",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-mijn-restaurant-1280-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-mijn-restaurant-1280-licht.png",
+      "file": "be47-mijn-restaurant-1280-licht.png",
+      "sha256": "b769b04a57bec4db384720726c73ae2ed7190b1a1fe408b81064c6a3a96c06b9",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be47-mijn-restaurant-1280-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-mijn-restaurant-1280-donker.png",
+      "file": "be47-mijn-restaurant-1280-donker.png",
+      "sha256": "50adc806b71304385c95d0e1bd0b05858b83bc8b5ba6fc28754cd76e10bc0395",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be47-mijn-restaurant-390-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-mijn-restaurant-390-licht.png",
+      "file": "be47-mijn-restaurant-390-licht.png",
+      "sha256": "a4163369a804bb4199aa97cfb5732c89d9915ee99e015b3d02ec76d233dd1c0f",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-mijn-restaurant-390-donker.png",
+      "theme": "dark",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-mijn-restaurant-390-donker.png",
+      "file": "be47-mijn-restaurant-390-donker.png",
+      "sha256": "17d2367d71b1125ccd98dde4bd39a91d322f0445f7dc27839984e1335eddd98c",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-statussen-1280-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "1280x900",
+      "path": "ops/browser/evidence/be-47/be47-statussen-1280-licht.png",
+      "file": "be47-statussen-1280-licht.png",
+      "sha256": "e938ccf11c1b02e73a1689cd4ad0d58c2a5086a0c02b5fae7cc28d290edb19fc",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be47-statussen-390-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-statussen-390-licht.png",
+      "file": "be47-statussen-390-licht.png",
+      "sha256": "549567b58ab2c0f698d38c38680a01d0ca64f815fa0322900592e996922dca1e",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be47-verwijderen-390-licht.png",
+      "theme": "light",
+      "applied": true,
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be-47/be47-verwijderen-390-licht.png",
+      "file": "be47-verwijderen-390-licht.png",
+      "sha256": "a9d5323272278070c8f152fa05f75328a9299a3cdafa44f23a64dee74a61f6b1",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "limits": "Fixture evidence: a real browser against a fictional Supabase. No real Supabase project, mailbox, sms, credential or production acceptance.",
+  "result": "passed"
+}
