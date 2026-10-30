@@ -17,6 +17,8 @@ import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
 import { authenticateAnyUser } from '@/src/lib/claimAuth'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
 import { createSnelAanpassenHandlers } from '@/src/lib/snelAanpassenHandlers'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { maakMenukaartVerversen } from '@/src/lib/menukaartVerversen'
 import menusData from '@/data/menus.json'
 
 export const snelAanpassenHandlers = createSnelAanpassenHandlers({
@@ -24,4 +26,8 @@ export const snelAanpassenHandlers = createSnelAanpassenHandlers({
   authenticate: authenticateAnyUser,
   authenticateInternal: authenticateInternalRequest,
   menus: menusData,
+  // BE-58 deel 3 (#143): goedkeuren en bevestigen verversen de twee publieke
+  // pagina's van dat restaurant plus de cache-tag van zijn overlay, zodat de
+  // wijziging meteen zichtbaar is en niet pas na de vangnet-revalidate.
+  revalidate: maakMenukaartVerversen({ revalidatePath, revalidateTag }),
 })

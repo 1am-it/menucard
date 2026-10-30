@@ -174,7 +174,7 @@ function createFakeSupabase({
   return { from: (table) => builder(table), calls, tabellen };
 }
 
-function handlersVoor(client, { houder = true, internal = true, rol = 'internal', now = NOW } = {}) {
+function handlersVoor(client, { houder = true, internal = true, rol = 'internal', now = NOW, revalidate = null } = {}) {
   return createSnelAanpassenHandlers({
     getSupabase: () => client,
     authenticate: async () => (houder ? { ok: true, userId: 'houder-1' } : { ok: false, status: 401 }),
@@ -184,6 +184,7 @@ function handlersVoor(client, { houder = true, internal = true, rol = 'internal'
       return { ok: true, userId: 'beheer-1', roles: [{ role: rol }] };
     },
     menus: MENUS,
+    revalidate,
     now,
   });
 }
@@ -378,6 +379,62 @@ test('BE-58: niet-eigenaren kunnen niet bevestigen', async () => {
   assert.equal(uitkomst.status, 403);
   assert.equal(client.tabellen[TABLE_BEVESTIGINGEN].length, 0);
   assert.equal(client.calls.some((call) => call.table === TABLE_GEBEURTENISSEN), false);
+});
+
+test('BE-58: goedkeuren ververst precies de twee publieke pagina\'s van dat restaurant', async () => {
+  const client = createFakeSupabase();
+  const ververst = [];
+  const handlers = handlersVoor(client, { revalidate: (context) => ververst.push(context) });
+  const ingediend = await handlers.diendeWijzigingIn(request({ body: wijzigingBody() }));
+  assert.equal(ververst.length, 0, 'indienen verandert niets publiek');
+
+  const goedgekeurd = await handlers.keurGoed(request(), { id: String(ingediend.body.wijziging.wijzigingId) });
+  assert.equal(goedgekeurd.status, 200);
+  assert.deepEqual(ververst, [{ menuId: '9-lunch', restaurantId: '9' }]);
+});
+
+test('BE-58: bevestigen ververst precies de twee publieke pagina\'s van dat restaurant', async () => {
+  const client = createFakeSupabase();
+  const ververst = [];
+  const handlers = handlersVoor(client, { revalidate: (context) => ververst.push(context) });
+  const bevestigd = await handlers.bevestigMenukaart(request({ body: { menuId: '9-lunch' } }));
+  assert.equal(bevestigd.status, 200);
+  assert.deepEqual(ververst, [{ menuId: '9-lunch', restaurantId: '9' }]);
+});
+
+test('BE-58: afwijzen, een mislukte controle en een 403 verversen niets', async () => {
+  const client = createFakeSupabase();
+  const ververst = [];
+  const handlers = handlersVoor(client, { revalidate: (context) => ververst.push(context) });
+  const ingediend = await handlers.diendeWijzigingIn(request({ body: wijzigingBody() }));
+  const id = String(ingediend.body.wijziging.wijzigingId);
+
+  const afgewezen = await handlers.wijsAf(request({ body: { reden: 'Prijs klopt niet' } }), { id });
+  assert.equal(afgewezen.status, 200);
+
+  const nogmaals = await handlers.keurGoed(request(), { id });
+  assert.equal(nogmaals.status, 409, 'een afgewezen wijziging is niet meer in controle');
+
+  const geenEigenaar = handlersVoor(createFakeSupabase({ staffRoles: [] }), {
+    revalidate: (context) => ververst.push(context),
+  });
+  const geweigerd = await geenEigenaar.bevestigMenukaart(request({ body: { menuId: '9-lunch' } }));
+  assert.equal(geweigerd.status, 403);
+
+  assert.deepEqual(ververst, []);
+});
+
+test('BE-58: een fout in het verversen draait een geslaagde goedkeuring niet terug', async () => {
+  const client = createFakeSupabase();
+  const handlers = handlersVoor(client, {
+    revalidate: () => {
+      throw new Error('cache onbereikbaar');
+    },
+  });
+  const ingediend = await handlers.diendeWijzigingIn(request({ body: wijzigingBody() }));
+  const goedgekeurd = await handlers.keurGoed(request(), { id: String(ingediend.body.wijziging.wijzigingId) });
+  assert.equal(goedgekeurd.status, 200);
+  assert.equal(goedgekeurd.body.wijziging.status, 'goedgekeurd');
 });
 
 test('BE-58: de publieke overlay leest alleen het gevraagde restaurant', async () => {

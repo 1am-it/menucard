@@ -155,6 +155,9 @@ function missingStorage(error) {
  *   authenticate         de bestaande houder-sessiecontrole (authenticateAnyUser);
  *   authenticateInternal de bestaande interne controle (authenticateInternalRequest);
  *   menus                data/menus.json, voor de statische kaart en de huidige prijs;
+ *   revalidate           ververs de publieke pagina's na een geslaagde wijziging
+ *                        (BE-58, Lead-besluit 31 okt): krijgt `{menuId,
+ *                        restaurantId}` en gooit nooit een fout door;
  *   now                  de klok (tests);
  *   timeoutMs            bovengrens per databasebelofte.
  */
@@ -163,6 +166,7 @@ function createSnelAanpassenHandlers({
   authenticate,
   authenticateInternal,
   menus = {},
+  revalidate = null,
   now = Date.now,
   timeoutMs = TIMEOUT_MS,
 } = {}) {
@@ -197,6 +201,25 @@ function createSnelAanpassenHandlers({
 
   function opslagFout(error) {
     return missingStorage(error) ? UNAVAILABLE : failed();
+  }
+
+  /**
+   * BE-58 (#143, Lead-besluit 31 okt) — een geslaagde goedkeuring of
+   * bevestiging moet meteen op de publieke kaart staan, ook als die uit de
+   * cache komt. Alleen dáár verversen: afwijzen verandert niets publiek.
+   * Een fout in het verversen mag de geslaagde controle nooit terugdraaien;
+   * de vangnet-revalidate van de cache haalt dat later recht.
+   */
+  async function verseKaart(menuId, restaurantId) {
+    if (typeof revalidate !== 'function') return;
+    try {
+      await revalidate({
+        menuId: tekst(menuId) || null,
+        restaurantId: tekst(restaurantId) || null,
+      });
+    } catch (error) {
+      return;
+    }
   }
 
   /** De sessie van de aanvrager, of een kant-en-klaar antwoord. */
@@ -627,6 +650,10 @@ function createSnelAanpassenHandlers({
     });
     if (geschiedenis.response) return geschiedenis.response;
 
+    // BE-58: de houder bevestigt de kaart; de publieke pagina's tonen daarna
+    // meteen het label met de datum.
+    await verseKaart(menuId, restaurantId);
+
     return {
       status: 200,
       body: {
@@ -781,6 +808,10 @@ function createSnelAanpassenHandlers({
 
     const bevestiging = await bevestig(supabase, { restaurantId: rij.restaurant_id, userId: rij.user_id });
     if (bevestiging.response) return bevestiging.response;
+
+    // Pas ná een volledig geslaagde controle: de publieke kaart en het label
+    // meteen verversen (het label is de bevestiging die hierbij hoort).
+    await verseKaart(rij.menu_id, rij.restaurant_id);
 
     return {
       status: 200,
