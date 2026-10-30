@@ -7,65 +7,20 @@
 // docs/api/data-trust-model.md's status-label mapping — never accepted
 // from client input (see planning/specs/platform-trust-model.md's "never
 // silently upgrade confidence" requirement).
+//
+// BE-48 (#112): the guard now also refuses an `internal` or `editor` account
+// whose token is still `aal1` (password only) with 403 "Tweede inlogstap
+// vereist", so the second step cannot be skipped by bypassing the login screen.
+// The decision logic (including reading `aal` from the verified token) lives in
+// src/lib/internalAuthCore.js, where it is unit-tested with a fictional client;
+// this file only injects the real one and keeps the existing import path and
+// exports for every route.
 
 import { getSupabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { createInternalAuth, getAccessForRestaurant } from '@/src/lib/internalAuthCore'
 
-export async function authenticateInternalRequest(request) {
-  const authHeader = request.headers.get('authorization') || ''
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+const guard = createInternalAuth({ getSupabase: getSupabaseAdmin })
 
-  if (!token) {
-    return { ok: false, status: 401, error: 'Missing bearer token' }
-  }
+export const authenticateInternalRequest = guard.authenticateInternalRequest
 
-  let supabase
-  try {
-    supabase = getSupabaseAdmin()
-  } catch (e) {
-    // Misconfiguration (missing SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY) is
-    // an operator-facing problem, not a caller error — still return a
-    // clean JSON body instead of letting it surface as an opaque 500 with
-    // no message, but log the real cause server-side for whoever's
-    // debugging deployment.
-    console.error(e)
-    return { ok: false, status: 500, error: 'Internal API is not configured' }
-  }
-
-  const { data: userData, error: userError } = await supabase.auth.getUser(token)
-  if (userError || !userData?.user) {
-    return { ok: false, status: 401, error: 'Invalid or expired session' }
-  }
-
-  const userId = userData.user.id
-  const { data: roles, error: roleError } = await supabase
-    .from('staff_roles')
-    .select('role, restaurant_id')
-    .eq('user_id', userId)
-
-  if (roleError) {
-    return { ok: false, status: 500, error: 'Failed to resolve staff role' }
-  }
-  if (!roles || roles.length === 0) {
-    return { ok: false, status: 403, error: 'No staff role assigned for this account' }
-  }
-
-  return { ok: true, userId, roles }
-}
-
-// Whether `roles` (from authenticateInternalRequest) may act on
-// `restaurantId`, and — for writes — the source/confidence that must be
-// recorded, derived strictly from the role per data-trust-model.md's
-// status-label mapping (owner -> high, editor -> high, imported -> low).
-// A caller with multiple roles gets the strongest applicable one.
-export function getAccessForRestaurant(roles, restaurantId) {
-  if (roles.some((r) => r.role === 'editor')) {
-    return { allowed: true, source: 'editor', confidence: 'high' }
-  }
-  if (roles.some((r) => r.role === 'owner' && r.restaurant_id === restaurantId)) {
-    return { allowed: true, source: 'owner', confidence: 'high' }
-  }
-  if (roles.some((r) => r.role === 'internal')) {
-    return { allowed: true, source: 'imported', confidence: 'low' }
-  }
-  return { allowed: false }
-}
+export { getAccessForRestaurant }

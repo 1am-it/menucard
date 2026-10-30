@@ -1,0 +1,657 @@
+{
+  "generatedAt": "2026-10-29T21:19:33.894Z",
+  "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
+  "contract": "#112 BE-48 (inloggen met tweede stap, wachtwoord vergeten)",
+  "app": "http://localhost:3141",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "inloggen-en-koppelen",
+      "checks": 21,
+      "passed": 21,
+      "failed": 0,
+      "durationMs": 5582,
+      "error": null
+    },
+    {
+      "name": "fout-wachtwoord",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "durationMs": 3957,
+      "error": null
+    },
+    {
+      "name": "wachtwoord-vergeten",
+      "checks": 12,
+      "passed": 12,
+      "failed": 0,
+      "durationMs": 8225,
+      "error": null
+    },
+    {
+      "name": "bestaande-app",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "durationMs": 4893,
+      "error": null
+    },
+    {
+      "name": "eigenaar-zonder-app",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 4323,
+      "error": null
+    },
+    {
+      "name": "claim-met-code",
+      "checks": 17,
+      "passed": 17,
+      "failed": 0,
+      "durationMs": 4507,
+      "error": null
+    },
+    {
+      "name": "claim-foute-code",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 4722,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": {
+    "total": 75,
+    "failed": 0,
+    "entries": [
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "login: the fictional Supabase stub is installed",
+        "passed": true,
+        "detail": "[{\"role\":\"internal\",\"restaurant_id\":null}]"
+      },
+      {
+        "name": "login: heading is \"Inloggen (intern)\"",
+        "passed": true,
+        "detail": "Inloggen (intern)"
+      },
+      {
+        "name": "login: e-mail has a real label and autocomplete=\"username\"",
+        "passed": true,
+        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
+      },
+      {
+        "name": "login: password has a real label and autocomplete=\"current-password\"",
+        "passed": true,
+        "detail": "{\"id\":\"auth-password\",\"labels\":[\"Wachtwoord\"],\"autocomplete\":\"current-password\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"password\"}"
+      },
+      {
+        "name": "login: \"Toon\" has aria-pressed=\"false\" and is at least 44 px",
+        "passed": true,
+        "detail": "{\"text\":\"Toon\",\"pressed\":\"false\",\"height\":46}"
+      },
+      {
+        "name": "login: \"Toon\" shows the password and flips aria-pressed",
+        "passed": true,
+        "detail": "{\"type\":\"text\",\"pressed\":\"true\",\"text\":\"Verberg\"}"
+      },
+      {
+        "name": "login: the \"Wachtwoord vergeten?\" link is present",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "login: the password field is a real password field again",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "login: \"Dit apparaat 30 dagen onthouden\" is absent",
+        "passed": true,
+        "detail": "Inloggen (intern)\n\nLog in met je werkmail en je wachtwoord. Daarna vraag je een code uit je authenticator-app.\n\nE-mailad"
+      },
+      {
+        "name": "login: e-mail and password are labelled, never placeholder-only",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "login: every control is at least 44 px high",
+        "passed": true,
+        "detail": "[46,46,46,44]"
+      },
+      {
+        "name": "enroll: a first sign-in opens \"Beveilig je account met een app\"",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "enroll: the QR code is an image with an alternative text",
+        "passed": true,
+        "detail": "{\"alt\":\"QR-code om je authenticator-app te koppelen\",\"src\":\"data:image/svg+xml;utf-8,<sv\"}"
+      },
+      {
+        "name": "enroll: the manual key is shown as text",
+        "passed": true,
+        "detail": "JBSWY3DPEHPK3PXP"
+      },
+      {
+        "name": "enroll: the QR image really renders (not a broken image)",
+        "passed": true,
+        "detail": "{\"complete\":true,\"naturalWidth\":180}"
+      },
+      {
+        "name": "enroll: the code field is labelled, numeric and one-time-code",
+        "passed": true,
+        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit je app\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
+      },
+      {
+        "name": "enroll: the screen suggests linking a second device",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "code: a wrong code shows the contract sentence in role=\"alert\"",
+        "passed": true,
+        "detail": "Die code klopt niet of is verlopen. Probeer de nieuwste code uit je app."
+      },
+      {
+        "name": "code: the raw Supabase text never appears",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "code: the right code continues to the existing landing place",
+        "passed": true,
+        "detail": "/internal/menu-concepts"
+      },
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "wrong password: the contract sentence appears in role=\"alert\"",
+        "passed": true,
+        "detail": "E-mailadres of wachtwoord klopt niet. Controleer ze en probeer het opnieuw."
+      },
+      {
+        "name": "wrong password: no English Supabase text on screen",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "wrong password: the visitor stays on the login screen",
+        "passed": true,
+        "detail": "{\"path\":\"/internal/login\",\"heading\":\"Inloggen (intern)\"}"
+      },
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "forgot: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "forgot: heading is \"Wachtwoord vergeten\"",
+        "passed": true,
+        "detail": "Wachtwoord vergeten"
+      },
+      {
+        "name": "forgot: e-mail has a real label and autocomplete=\"username\"",
+        "passed": true,
+        "detail": "{\"id\":\"auth-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"username\",\"inputmode\":null,\"height\":46,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
+      },
+      {
+        "name": "forgot: the neutral promise is not shown before sending",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "forgot: an unknown address gets the same neutral answer",
+        "passed": true,
+        "detail": "{\"neutral\":true,\"alert\":null}"
+      },
+      {
+        "name": "forgot: the code field is numeric with autocomplete=\"one-time-code\"",
+        "passed": true,
+        "detail": "{\"id\":\"auth-code\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":52,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
+      },
+      {
+        "name": "forgot: \"Nieuwe code sturen\" and \"Ander e-mailadres\" are offered",
+        "passed": true,
+        "detail": "[\"Doorgaan\",\"Nieuwe code sturen\",\"Ander e-mailadres\"]"
+      },
+      {
+        "name": "forgot: every control is at least 44 px high",
+        "passed": true,
+        "detail": "[44,44,44]"
+      },
+      {
+        "name": "forgot: a wrong code is Dutch and in role=\"alert\"",
+        "passed": true,
+        "detail": "Deze code is ongeldig of verlopen. Vraag een nieuwe code aan."
+      },
+      {
+        "name": "forgot: the right code continues to the existing set-password page",
+        "passed": true,
+        "detail": "/internal/set-password"
+      },
+      {
+        "name": "forgot: the set-password page shows the new-password fields",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "existing app: the code screen appears straight after the password",
+        "passed": true,
+        "detail": "{\"shown\":true,\"heading\":\"Code uit je app\"}"
+      },
+      {
+        "name": "existing app: no QR code and no link-an-app text",
+        "passed": true,
+        "detail": "{\"qr\":null}"
+      },
+      {
+        "name": "existing app: the right code continues to the landing place",
+        "passed": true,
+        "detail": "/internal/menu-concepts"
+      },
+      {
+        "name": "login: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "owner-only: a restaurant owner does not have to link an app",
+        "passed": true,
+        "detail": "{\"landed\":true,\"path\":\"/internal\"}"
+      },
+      {
+        "name": "claim: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: the fictional Supabase stub is installed",
+        "passed": true,
+        "detail": "[{\"role\":\"owner\",\"restaurant_id\":\"6\"}]"
+      },
+      {
+        "name": "claim: heading is \"Claim dit restaurant\"",
+        "passed": true,
+        "detail": "Claim dit restaurant 🔑"
+      },
+      {
+        "name": "claim: the restaurant from the dataset is named",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nVul je zakelijke e-mailadres in. Je krijgt "
+      },
+      {
+        "name": "claim: e-mail has a real label and autocomplete=\"email\"",
+        "passed": true,
+        "detail": "{\"id\":\"claim-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"email\",\"inputmode\":null,\"height\":44,\"placeholder\":null,\"value\":\"\",\"type\":\"email\"}"
+      },
+      {
+        "name": "claim: the e-mail field is never placeholder-only",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: every control is at least 44 px high",
+        "passed": true,
+        "detail": "[44,44,44,44]"
+      },
+      {
+        "name": "claim: sending the address opens the code screen",
+        "passed": true,
+        "detail": "{\"codeScreen\":true}"
+      },
+      {
+        "name": "claim: the code field is labelled, numeric and one-time-code",
+        "passed": true,
+        "detail": "{\"id\":\"claim-code\",\"labels\":[\"Code uit de e-mail\"],\"autocomplete\":\"one-time-code\",\"inputmode\":\"numeric\",\"height\":45,\"placeholder\":null,\"value\":\"\",\"type\":\"text\"}"
+      },
+      {
+        "name": "claim: the screen names the address the code went to",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nWe hebben een code van zes cijfers gestuurd naar eigenaar@example.invalid. Je kunt "
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" and \"Ander e-mailadres\" are offered",
+        "passed": true,
+        "detail": "[\"Licht\",\"Donker\",\"Code controleren\",\"Nieuwe code sturen\",\"Ander e-mailadres\"]"
+      },
+      {
+        "name": "claim: the code screen controls are at least 44 px high",
+        "passed": true,
+        "detail": "[45,44,44,44,44,44]"
+      },
+      {
+        "name": "claim: no English Supabase text on the code screen",
+        "passed": true,
+        "detail": "geen Engelse melding"
+      },
+      {
+        "name": "claim: the right code signs the visitor in with the typed address",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nIngelogd als eigenaar@example.invalid. Klik hieronder om een claim in te dienen voo"
+      },
+      {
+        "name": "claim: the claim is submitted and shows its pending status",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\n📋 In afwachting van beoordeling\nIngediend op 29-10-2026"
+      },
+      {
+        "name": "claim: no error is shown after submitting",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: exactly one code was requested",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: the form is interactive (React hydration) before typing",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: the first code was requested for the typed address",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: a wrong or expired code gets the Dutch sentence in role=\"alert\"",
+        "passed": true,
+        "detail": "{\"shown\":true,\"alert\":\"Deze code is ongeldig of verlopen. Vraag een nieuwe code aan.\"}"
+      },
+      {
+        "name": "claim: the raw Supabase token text never appears",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" is offered after a wrong code",
+        "passed": true,
+        "detail": "[\"Licht\",\"Donker\",\"Code controleren\",\"Nieuwe code sturen\",\"Ander e-mailadres\"]"
+      },
+      {
+        "name": "claim: \"Nieuwe code sturen\" asks Supabase again and says so",
+        "passed": true,
+        "detail": "{\"noticeShown\":true,\"notice\":\"We hebben een nieuwe code gestuurd naar eigenaar@example.invalid.\"}"
+      },
+      {
+        "name": "claim: the resend is a second request for the same address",
+        "passed": true,
+        "detail": "[\"eigenaar@example.invalid\",\"eigenaar@example.invalid\"]"
+      },
+      {
+        "name": "claim: \"Ander e-mailadres\" returns to the address step",
+        "passed": true,
+        "detail": "{\"back\":true}"
+      },
+      {
+        "name": "claim: the typed address is kept for correction",
+        "passed": true,
+        "detail": "{\"id\":\"claim-email\",\"labels\":[\"E-mailadres\"],\"autocomplete\":\"email\",\"inputmode\":null,\"height\":44,\"placeholder\":null,\"value\":\"eigenaar@example.invalid\",\"type\":\"email\"}"
+      },
+      {
+        "name": "claim: the old code error is cleared",
+        "passed": true,
+        "detail": "null"
+      },
+      {
+        "name": "claim: the right code still signs the visitor in afterwards",
+        "passed": true,
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\n← Brasserie Bardot\nClaim dit restaurant 🔑\n\n🍽️ Brasserie Bardot\n\nIngelogd als eigenaar@example.invalid. Klik hieronder om een claim in te dienen voo"
+      },
+      {
+        "name": "network guard: the page recorded no unknown route or external request",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "network guard: the CDP layer blocked no app traffic",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "no uncaught browser exception",
+        "passed": true,
+        "detail": "[]"
+      },
+      {
+        "name": "no stub bootstrap error",
+        "passed": true,
+        "detail": "ok"
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "name": "be48-login-licht-1280.png",
+      "file": "be48-login-licht-1280.png",
+      "sha256": "ebc2e23675c7a83cc55c3cc616ba3594494e310ed791e67fb6220f45f430035c",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-login-donker-1280.png",
+      "file": "be48-login-donker-1280.png",
+      "sha256": "cf6ed8611b669d8a19e7811cf8a8d96df7adc260c9efb58f7635095d31143aef",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-login-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-login-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-login-licht-390.png",
+      "sha256": "8fd9d5f9f842e7227f52dd1c860af69034a6b54ec074b23fdabcee44397871f2",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-login-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-login-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-login-donker-390.png",
+      "sha256": "912259ed2ed4a78444472cd129e8972a22270b9d3953c1fa861078b60e1c0ea0",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-koppelen-licht-1280.png",
+      "file": "be48-koppelen-licht-1280.png",
+      "sha256": "853cdfc8e235bf8ccebf2c09a7c1547a9957f1f7530c93f821f5d6a524712576",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-koppelen-donker-1280.png",
+      "file": "be48-koppelen-donker-1280.png",
+      "sha256": "9524fd33a1aec81d2bf8d6f3cb4ee56c5699deb0d68a5db8177a02353d5e18ea",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-koppelen-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-koppelen-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-koppelen-licht-390.png",
+      "sha256": "41ab1caec1a1473c24a7f9c0de8e1227bc3cbd1c8ea7e37d7473a2923186da10",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-koppelen-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-koppelen-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-koppelen-donker-390.png",
+      "sha256": "1bebf9e2f46df07d41be4210aa3eb45981a864e0b75c551533192551057ed362",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-code-donker-1280.png",
+      "file": "be48-code-donker-1280.png",
+      "sha256": "3a3797f9ff9fb236d431b2ca7b9c8d39a7db097c4f8624a9650296e233d894c3",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-login-fout-licht-1280.png",
+      "file": "be48-login-fout-licht-1280.png",
+      "sha256": "2de081688aed509c96b05fd90589ce5e36498f7efb03884ddb75aea89a1bad76",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-wachtwoord-vergeten-licht-1280.png",
+      "file": "be48-wachtwoord-vergeten-licht-1280.png",
+      "sha256": "031fbc83c7967af8ac5e23a9191a8a7b54f305d3c34bfe9e14e612ce483bc35c",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-wachtwoord-vergeten-donker-1280.png",
+      "file": "be48-wachtwoord-vergeten-donker-1280.png",
+      "sha256": "e660af5fdc7dad215aa94e559479c27fa5b7b282e8b31bc9c4e1762fc58edeab",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-wachtwoord-vergeten-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-wachtwoord-vergeten-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-wachtwoord-vergeten-licht-390.png",
+      "sha256": "13d3eba22a8353fff32ae7f4eabe5dc4d17479e2f87c7bb123620dc37b076cf8",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-wachtwoord-vergeten-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-wachtwoord-vergeten-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-wachtwoord-vergeten-donker-390.png",
+      "sha256": "9dea8ad4432f609e9dbc1c0dab6338bf4cd0431b8249a2be89bd4df88d981eb2",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-code-licht-1280.png",
+      "file": "be48-code-licht-1280.png",
+      "sha256": "1557f4c4fe31822e701ef123343094723c57b88b46680e2dee9e237a9b310654",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-code-donker-1280.png",
+      "file": "be48-code-donker-1280.png",
+      "sha256": "a2fd639b1097e08f8a74cd09921c31cc548228bf7e09b217ab0b535f8634cef3",
+      "width": 756,
+      "height": 488
+    },
+    {
+      "name": "be48-code-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-code-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-code-licht-390.png",
+      "sha256": "a2f448494857378fe7385dfdc9475d23d602c2665865e2e055a60312dbc043dd",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-code-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-code-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-code-donker-390.png",
+      "sha256": "affc79eeec87faaa7a290e814d72f4bfb2a5d2b7d9ac1dda929a60c828a8407d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-claim-licht-390.png",
+      "theme": "light",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-claim-licht-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-claim-licht-390.png",
+      "sha256": "846b1c65579688357419f510ddbb66a90ca4e6f5bb497b8eb51f7986f7220c9d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be48-claim-donker-390.png",
+      "theme": "dark",
+      "viewport": "390x844",
+      "path": "ops/browser/evidence/be48-screenshots/be48-claim-donker-390.png",
+      "themeApplied": true,
+      "widthMatched": true,
+      "file": "be48-claim-donker-390.png",
+      "sha256": "3fed25c0d9f5f3eeb4c3e56872676d8c65ceeb2d8e2ec6082a8e21e3372621d0",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "screenshotsDir": "ops/browser/evidence/be48-screenshots",
+  "screenshotsMobile": [
+    "be48-login-licht-390.png (light, 390x844)",
+    "be48-login-donker-390.png (dark, 390x844)",
+    "be48-koppelen-licht-390.png (light, 390x844)",
+    "be48-koppelen-donker-390.png (dark, 390x844)",
+    "be48-wachtwoord-vergeten-licht-390.png (light, 390x844)",
+    "be48-wachtwoord-vergeten-donker-390.png (dark, 390x844)",
+    "be48-code-licht-390.png (light, 390x844)",
+    "be48-code-donker-390.png (dark, 390x844)",
+    "be48-claim-licht-390.png (light, 390x844)",
+    "be48-claim-donker-390.png (dark, 390x844)"
+  ],
+  "limits": "Fixture evidence: a real browser against a fictional Supabase. Not a real Supabase project, authenticator app, e-mail, or production acceptance.",
+  "result": "passed"
+}

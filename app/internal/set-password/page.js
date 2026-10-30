@@ -33,14 +33,6 @@ import StatusIcon from '@/src/components/StatusIcon'
 
 const REDIRECT_DELAY_MS = 2000
 
-const inputStyle = {
-  padding: 10,
-  borderRadius: 8,
-  border: '1px solid var(--border)',
-  background: 'var(--bg-card)',
-  color: 'var(--text-primary)',
-}
-
 export default function SetPasswordPage() {
   const router = useRouter()
   // 'checking' | 'invalid' | 'ready' | 'success' — see
@@ -129,86 +121,88 @@ export default function SetPasswordPage() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: 360,
-        margin: '80px auto',
-        padding: '0 20px',
-        fontFamily: 'system-ui, sans-serif',
-        color: 'var(--text-primary)',
-      }}
-    >
-      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Stel je wachtwoord in</h1>
+    <main className="auth-main">
+      <div className="auth-card">
+        <h1 className="auth-title">Stel je wachtwoord in</h1>
 
-      {viewState === 'checking' && (
-        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Je uitnodiging wordt gecontroleerd…</p>
-      )}
+        {viewState === 'checking' && (
+          <p className="auth-intro">Je uitnodiging wordt gecontroleerd…</p>
+        )}
 
-      {viewState === 'invalid' && (
-        <div>
-          <p style={{ color: 'var(--danger)', fontSize: 14, marginBottom: 12 }}>
-            Deze uitnodiging of deze herstellink is ongeldig of verlopen.
-          </p>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Vraag degene die de interne accounts beheert om een nieuwe link.
-          </p>
-        </div>
-      )}
+        {viewState === 'invalid' && (
+          <div>
+            <p className="auth-error" role="alert">
+              Deze uitnodiging of deze herstellink is ongeldig of verlopen.
+            </p>
+            <p className="auth-intro">
+              Vraag een nieuwe link aan via{' '}
+              <a className="auth-link" href="/internal/wachtwoord-vergeten">
+                wachtwoord vergeten
+              </a>{' '}
+              of vraag degene die de interne accounts beheert om een nieuwe uitnodiging.
+            </p>
+          </div>
+        )}
 
-      {viewState === 'ready' && (
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
-          <input
-            type="password"
-            placeholder="Nieuw wachtwoord"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            required
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Herhaal het nieuwe wachtwoord"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            autoComplete="new-password"
-            required
-            style={inputStyle}
-          />
-          {fieldError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{fieldError}</div>}
-          {submitError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{submitError}</div>}
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{
-              padding: 10,
-              borderRadius: 8,
-              border: 'none',
-              background: 'var(--accent-fill)',
-              color: 'var(--on-accent-fill)',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            {submitting ? 'Bezig met opslaan…' : 'Wachtwoord opslaan'}
-          </button>
-        </form>
-      )}
+        {viewState === 'ready' && (
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+            <div className="auth-field">
+              <label className="auth-label" htmlFor="auth-new-password">
+                Nieuw wachtwoord
+              </label>
+              <input
+                id="auth-new-password"
+                className="auth-input"
+                type="password"
+                name="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+                aria-describedby={fieldError || submitError ? 'auth-error' : undefined}
+                required
+              />
+            </div>
+            <div className="auth-field">
+              <label className="auth-label" htmlFor="auth-confirm-password">
+                Herhaal het nieuwe wachtwoord
+              </label>
+              <input
+                id="auth-confirm-password"
+                className="auth-input"
+                type="password"
+                name="confirm-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                aria-describedby={fieldError || submitError ? 'auth-error' : undefined}
+                required
+              />
+            </div>
+            {(fieldError || submitError) && (
+              <p className="auth-error" id="auth-error" role="alert">
+                {fieldError || submitError}
+              </p>
+            )}
+            <button type="submit" className="auth-submit" disabled={submitting}>
+              {submitting ? 'Bezig met opslaan…' : 'Wachtwoord opslaan'}
+            </button>
+          </form>
+        )}
 
-      {viewState === 'success' && (
-        <div>
-          <p className="status-badge status-badge--positive" style={{ fontSize: 14, marginBottom: 12 }}>
-            <StatusIcon name="check" size={14} />
-            Je wachtwoord is ingesteld.
-          </p>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            Je gaat naar inloggen…{' '}
-            <a href="/internal/login" style={{ color: 'var(--accent)' }}>
-              Klik hier als er niets gebeurt.
-            </a>
-          </p>
-        </div>
-      )}
+        {viewState === 'success' && (
+          <div>
+            <p className="auth-notice" role="status">
+              <StatusIcon name="check" size={14} /> Je wachtwoord is ingesteld.
+            </p>
+            <p className="auth-help">
+              Je gaat naar inloggen…{' '}
+              <a className="auth-link" href="/internal/login">
+                Klik hier als er niets gebeurt.
+              </a>
+            </p>
+          </div>
+        )}
+      </div>
     </main>
   )
 }
