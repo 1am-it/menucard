@@ -47,6 +47,7 @@ import {
   KIES_VOTED_MESSAGE,
   KIES_VOTE_FAILED_MESSAGE,
   generateStemmerId,
+  kiesLekkerShare,
   kiesProgressLabel,
   nextDishIndex,
   normalizeRoepnaam,
@@ -66,6 +67,37 @@ function timeLabel(value) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return null
   return date.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+}
+
+// ─── Iconen ───────────────────────────────────────────────────────────────────
+//
+// De mockup toont een X bij "Liever niet", een vinkje bij "Lekker" en een
+// terug-pijl bij "Vorige stem ongedaan maken". Kleine inline SVG's: geen
+// dependency (contract, grenzen) en ze nemen de kleur van de knop over.
+
+function CrossIcon() {
+  return (
+    <svg className="kies-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg className="kies-btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4.5 12.5l5 5 10-11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BackIcon() {
+  return (
+    <svg className="kies-btn-icon kies-undo-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M9 5L4 10l5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 10h8a5.5 5.5 0 0 1 0 11H8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
 }
 
 export default function KiesView({ code }) {
@@ -88,6 +120,11 @@ export default function KiesView({ code }) {
   const canUndo = phase === 'stemmen' && votedKeys.length > 0
   const feedback = swipeFeedback({ dx, width: 1 })
   const sluitLabel = stemming ? timeLabel(stemming.sluitOm) : null
+  // De dunne balk naast "Gerecht 2 van 4" (mockup, scherm 4): hoeveel van de
+  // stapel is geweest, inclusief het gerecht dat nu vooraan staat.
+  const stackShare = index >= 0 && dishes.length > 0
+    ? Math.round(((index + 1) / dishes.length) * 100)
+    : 0
 
   /** De stemming ophalen en de eigen stand terugzetten (localStorage). */
   const load = useCallback(async () => {
@@ -350,15 +387,17 @@ export default function KiesView({ code }) {
 
         {phase === 'stemmen' && currentDish ? (
           <section className="kies-stack" onKeyDown={onKeyDown} tabIndex={0} role="group" aria-label="Kaartenstapel">
-            <p className="kies-progress" role="status">{kiesProgressLabel(index, dishes.length)}</p>
+            <div className="kies-progress-row">
+              <p className="kies-progress" role="status">{kiesProgressLabel(index, dishes.length)}</p>
+              <span className="kies-progress-bar" aria-hidden="true">
+                <span className="kies-progress-fill" style={{ width: `${stackShare}%` }} />
+              </span>
+            </div>
             {sluitLabel ? <p className="kies-hint">{`Stemmen tot ${sluitLabel}`}</p> : null}
 
             <div className="kies-card-wrap">
-              {feedback.label ? (
-                <span className={`kies-swipe-label kies-swipe-${feedback.direction}`} aria-hidden="true">
-                  {feedback.label}
-                </span>
-              ) : null}
+              {/* De tweede kaart, iets kleiner en lager: de stapel uit de mockup. */}
+              <div className="kies-card-ghost" aria-hidden="true" />
               <div
                 ref={cardRef}
                 className={`kies-card kies-dish-card${dragging ? ' is-dragging' : ''}`}
@@ -368,9 +407,14 @@ export default function KiesView({ code }) {
                 onPointerUp={(event) => finishDrag(event, false)}
                 onPointerCancel={(event) => finishDrag(event, true)}
               >
-                {currentDish.category ? <span className="kies-cat">{currentDish.category}</span> : null}
-                <h2 className="kies-dish">{currentDish.name}</h2>
+                {/* Het label staat op de kaart zelf, waar de mockup het toont. */}
+                {feedback.label ? (
+                  <span className={`kies-swipe-label kies-swipe-${feedback.direction}`} aria-hidden="true">
+                    {feedback.label}
+                  </span>
+                ) : null}
                 <span className="kies-rest">{currentDish.restaurant}</span>
+                <h2 className="kies-dish">{currentDish.name}</h2>
                 <span className="kies-price">{currentDish.price}</span>
                 {currentDish.description ? <p className="kies-desc">{currentDish.description}</p> : null}
               </div>
@@ -384,7 +428,8 @@ export default function KiesView({ code }) {
                 disabled={busy}
                 aria-label={`${KIES_LIEVER_NIET_LABEL}: ${currentDish.name}`}
               >
-                ← {KIES_LIEVER_NIET_LABEL}
+                <CrossIcon />
+                <span>{KIES_LIEVER_NIET_LABEL}</span>
               </button>
               <button
                 type="button"
@@ -393,12 +438,15 @@ export default function KiesView({ code }) {
                 disabled={busy}
                 aria-label={`${KIES_LEKKER_LABEL}: ${currentDish.name}`}
               >
-                {KIES_LEKKER_LABEL} →
+                <CheckIcon />
+                <span>{KIES_LEKKER_LABEL}</span>
               </button>
             </div>
 
+            {/* Een tekstlink met een terug-pijl, geen grote knop (mockup). */}
             <button type="button" className="kies-undo" onClick={undoVote} disabled={!canUndo || busy}>
-              {KIES_UNDO_LABEL}
+              <BackIcon />
+              <span>{KIES_UNDO_LABEL}</span>
             </button>
             <p className="kies-status" role="status">{message}</p>
           </section>
@@ -428,6 +476,12 @@ export default function KiesView({ code }) {
                       <span className="kies-uitslag-meta">{row.restaurant}</span>
                       <span className="kies-uitslag-count">
                         {`${row.lekker}× ${KIES_LEKKER_LABEL.toLowerCase()} · ${row.lieverNiet}× ${KIES_LIEVER_NIET_LABEL.toLowerCase()}`}
+                      </span>
+                      {/* De balk met het aandeel "lekker" (mockup, scherm 6). De
+                          tekst hierboven zegt hetzelfde, dus de balk zelf is
+                          decoratief voor schermlezers. */}
+                      <span className="kies-uitslag-bar" aria-hidden="true">
+                        <span className="kies-uitslag-bar-fill" style={{ width: `${kiesLekkerShare(row)}%` }} />
                       </span>
                       {row.kiezers.length > 0 ? <span className="kies-uitslag-names">{row.kiezers.join(', ')}</span> : null}
                       {favourite ? <span className="kies-favoriet">{KIES_RESULT_FAVOURITE}</span> : null}

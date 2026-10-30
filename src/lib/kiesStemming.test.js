@@ -36,6 +36,7 @@ const {
   kiesHref,
   kiesImageHref,
   kiesImageTitle,
+  kiesLekkerShare,
   kiesMetadata,
   kiesProgressLabel,
   lastVoteOf,
@@ -255,6 +256,30 @@ test('een gelijke stand houdt de volgorde van de stemming, ook bij twee keer lez
   const second = stemmingResult({ dishes, votes: votes.slice().reverse() });
   assert.deepEqual(first.uitslag.map((row) => row.id), ['x', 'y']);
   assert.deepEqual(second.uitslag.map((row) => row.id), ['x', 'y']);
+});
+
+test('de balk in de uitslag toont het aandeel "lekker" per gerecht', () => {
+  // Het aandeel, niet het absolute aantal: een gerecht met twee stemmen is niet
+  // automatisch kleiner dan een gerecht met tien stemmen (mockup, scherm 6).
+  assert.equal(kiesLekkerShare({ lekker: 3, lieverNiet: 1 }), 75);
+  assert.equal(kiesLekkerShare({ lekker: 2, lieverNiet: 2 }), 50);
+  assert.equal(kiesLekkerShare({ lekker: 0, lieverNiet: 4 }), 0);
+  assert.equal(kiesLekkerShare({ lekker: 4, lieverNiet: 0 }), 100);
+  // Zonder stemmen: geen balk, en nooit een verkeerde deling.
+  assert.equal(kiesLekkerShare({ lekker: 0, lieverNiet: 0 }), 0);
+  assert.equal(kiesLekkerShare(null), 0);
+  assert.equal(kiesLekkerShare({}), 0);
+  // Onzin telt niet mee als stem.
+  assert.equal(kiesLekkerShare({ lekker: -2, lieverNiet: 1 }), 0);
+  // Afronden op hele procenten, zodat de balk altijd tussen 0 en 100 past.
+  assert.equal(kiesLekkerShare({ lekker: 1, lieverNiet: 2 }), 33);
+  assert.equal(kiesLekkerShare({ lekker: 2, lieverNiet: 1 }), 67);
+  // En de uitslag levert precies de velden die de balk nodig heeft.
+  const result = stemmingResult({
+    dishes: [{ id: 'a' }],
+    votes: [vote(STEMMER, 'Sam', 'a', true), vote('c'.repeat(22), 'Noa', 'a', false)],
+  });
+  assert.equal(kiesLekkerShare(result.uitslag[0]), 50);
 });
 
 test('de roepnamen staan zichtbaar bij de stemmen, het maximum is 50 stemmers', () => {

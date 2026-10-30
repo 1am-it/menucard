@@ -19,7 +19,13 @@
 //   - "Vorige stem ongedaan maken" brengt het vorige gerecht terug;
 //   - de staat zonder migratie: "Samen kiezen is nog niet beschikbaar";
 //   - de uitslag als echte lijst, met de favoriet en "Reserveer"/"Route";
-//   - licht en donker op 390 px, met schermafdrukken;
+//   - de opbouw van de goedgekeurde mockup: een kaart van ±85% breed en 440 px
+//     hoog met een tweede kaart erachter, een dunne voortgangsbalk, twee knoppen
+//     van ±132 × 56 px met een icoon, "Vorige stem ongedaan maken" als
+//     tekstlink met een terug-pijl en per gerecht een balk met het aandeel;
+//   - licht en donker op 390 px: het thema wordt per opname expliciet gezet en
+//     vóór de opname gecontroleerd (data-theme, de actieve themaknop en de
+//     helderheid van de achtergrond staan in het bewijs bij elke schermafdruk);
 //   - geen geblokkeerde netwerkopdracht en geen onafgevangen fout.
 //
 // Gebruik: `node ops/browser/run-be46-browser-check.js`,
@@ -135,6 +141,9 @@ async function setViewport(cdp, width, height) {
   });
 }
 
+const THEME_KEY = 'bredaeats_theme';
+const PROGRESS_KEY = 'bredaeats_kies';
+
 async function shot(cdp, name, meta = {}) {
   fs.mkdirSync(SHOT_DIR, { recursive: true });
   const file = await screenshot(cdp, SHOT_DIR, name);
@@ -142,17 +151,72 @@ async function shot(cdp, name, meta = {}) {
     ...file,
     viewport: `${viewport.width}x${viewport.height}`,
     theme: meta.theme || null,
+    // Het bewijs dat bij de opname hoort: het thema zoals de pagina het toont.
+    themeProof: meta.themeProof || null,
     state: meta.state || null,
   });
   return file;
 }
 
-async function setTheme(cdp, theme) {
+/**
+ * Het thema zoals de pagina het echt toont: het `data-theme`-attribuut op
+ * <html>, de achtergrondkleur van de body (het token `--bg`) met zijn helderheid
+ * en de knop die de app zelf actief noemt. Een bestandsnaam met "-light" is
+ * daarmee geen bewijs meer op zichzelf.
+ */
+async function themeProof(cdp) {
+  return evalJs(cdp, `(() => {
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const numbers = (bg || '').match(/[0-9]+/g) || [];
+    const luminance = numbers.length >= 3
+      ? Math.round(0.2126 * Number(numbers[0]) + 0.7152 * Number(numbers[1]) + 0.0722 * Number(numbers[2]))
+      : null;
+    const active = [...document.querySelectorAll('.theme-btn')]
+      .filter((button) => button.classList.contains('active'))
+      .map((button) => (button.textContent || '').trim());
+    return {
+      attr: document.documentElement.getAttribute('data-theme'),
+      bodyBackground: bg,
+      luminance,
+      active,
+    };
+  })()`);
+}
+
+/**
+ * Het thema van een scenario expliciet zetten: de opslag, de knop van de app
+ * zelf (zodat "Licht"/"Donker" ook echt actief staat) en het attribuut op
+ * <html>. Geeft het bewijs terug waarmee de opname wordt gecontroleerd.
+ */
+async function setTheme(cdp, want) {
+  const label = want === 'light' ? 'Licht' : 'Donker';
   await evalJs(cdp, `(() => {
-    document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)});
-    try { localStorage.setItem('bredaeats_theme', ${JSON.stringify(theme)}); } catch (error) {}
+    try { localStorage.setItem(${JSON.stringify(THEME_KEY)}, ${JSON.stringify(want)}); } catch (error) {}
+    const target = [...document.querySelectorAll('.theme-btn')]
+      .find((button) => (button.textContent || '').trim() === ${JSON.stringify(label)});
+    if (target && !target.classList.contains('active')) target.click();
+    document.documentElement.setAttribute('data-theme', ${JSON.stringify(want)});
     return document.documentElement.getAttribute('data-theme');
   })()`);
+  await new Promise((resolve) => setTimeout(resolve, 220));
+  return themeProof(cdp);
+}
+
+/**
+ * Een opname in een expliciet thema, met een controle vóór de opname: het
+ * attribuut is het gevraagde thema, de app noemt precies die knop actief en de
+ * achtergrond is echt licht (helderheid > 200) of echt donker (< 80).
+ */
+async function shotInTheme(cdp, name, want, state) {
+  const proof = await setTheme(cdp, want);
+  const isLight = want === 'light';
+  const activeLabel = isLight ? 'Licht' : 'Donker';
+  const ok = proof.attr === want
+    && Array.isArray(proof.active) && proof.active.length === 1 && proof.active[0] === activeLabel
+    && Number.isFinite(proof.luminance)
+    && (isLight ? proof.luminance > 200 : proof.luminance < 80);
+  check(`thema: ${name} staat echt in ${want}`, ok, JSON.stringify(proof));
+  return shot(cdp, name, { theme: want, themeProof: proof, state });
 }
 
 // ─── De gestubde API ─────────────────────────────────────────────────────────
@@ -365,9 +429,11 @@ async function voteByLabel(cdp, prefix) {
   })()`);
 }
 
-/** Een schone start: geen eigen voortgang uit een vorige stap. */
+/** Een schone start: geen eigen voortgang uit een vorige stap. Het thema van de
+ *  pagina blijft staan — anders valt de pagina terug op donker en is een
+ *  "lichte" opname dat niet. */
 async function resetProgress(cdp) {
-  await evalJs(cdp, `(() => { try { localStorage.clear(); } catch (error) {} return true; })()`);
+  await evalJs(cdp, `(() => { try { localStorage.removeItem(${JSON.stringify(PROGRESS_KEY)}); } catch (error) {} return true; })()`);
 }
 
 // De serverpagina toont al "Bezig…" vóór React werkt; wie daarop wacht leest te
@@ -383,12 +449,14 @@ async function join(cdp, name = 'Sam') {
   return waitFor(cdp, `Boolean(document.querySelector('.kies-dish-card'))`, 15000);
 }
 
-async function openFresh(cdp, query = '') {
+async function openFresh(cdp, query = '', want = 'light') {
   await navigate(cdp, PAGE_URL(query), HYDRATED);
   await resetProgress(cdp);
   // Opnieuw laden zodat de pagina de schone opslag ziet.
   await cdp.send('Page.reload', { ignoreCache: false });
   await waitFor(cdp, PAGE_READY, 30000);
+  // Het thema hoort bij het scenario, niet bij de vorige pagina.
+  await setTheme(cdp, want);
 }
 
 /** Slepen met de muis: van het midden naar `ratio` × de kaartbreedte. */
@@ -411,6 +479,98 @@ async function dragCard(cdp, ratio) {
   return { width: box.width, label: during.swipeLabel, calls: await callsOf(cdp) };
 }
 
+/**
+ * De maten en de opbouw van de kaartenstapel, voor de mockup-controle: de kaart
+ * (breedte, hoogte, volgorde van de inhoud), de kaart erachter, de dunne
+ * voortgangsbalk, de twee knoppen met hun icoon en kleur, de undo-link en de
+ * balken in de uitslag.
+ */
+async function readStack(cdp) {
+  return evalJs(cdp, `(() => {
+    const card = document.querySelector('.kies-dish-card');
+    const ghost = document.querySelector('.kies-card-ghost');
+    const wrap = document.querySelector('.kies-card-wrap');
+    const bar = document.querySelector('.kies-progress-bar');
+    const fill = document.querySelector('.kies-progress-fill');
+    const undo = document.querySelector('.kies-undo');
+    const undoStyle = undo ? getComputedStyle(undo) : null;
+    const rectOf = (el) => (el ? el.getBoundingClientRect() : null);
+    const cardRect = rectOf(card);
+    const ghostRect = rectOf(ghost);
+    // De primaire knopkleur als rgb, zodat hij met de echte knop te vergelijken is.
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--button-primary-bg)';
+    document.body.appendChild(probe);
+    const primaryColor = getComputedStyle(probe).color;
+    probe.remove();
+    return {
+      viewportWidth: window.innerWidth,
+      cardWidth: cardRect ? Math.round(cardRect.width) : null,
+      cardHeight: cardRect ? Math.round(cardRect.height) : null,
+      cardRatio: cardRect ? Math.round((cardRect.width / window.innerWidth) * 100) : null,
+      contentOrder: card ? [...card.children].map((el) => el.className).join(' ') : '',
+      ghostBehind: Boolean(cardRect) && Boolean(ghostRect)
+        && Math.round(ghostRect.top) > Math.round(cardRect.top)
+        && Math.round(ghostRect.width) < Math.round(cardRect.width),
+      wrapTouchAction: wrap ? getComputedStyle(wrap).touchAction : null,
+      hasBar: Boolean(bar) && Boolean(fill),
+      barWidth: bar ? Math.round(bar.getBoundingClientRect().width) : 0,
+      fillShare: fill ? fill.style.width : null,
+      buttons: [...document.querySelectorAll('.kies-vote-btn')].map((button) => {
+        const rect = button.getBoundingClientRect();
+        return {
+          text: (button.textContent || '').trim(),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height),
+          icon: Boolean(button.querySelector('svg')),
+          background: getComputedStyle(button).backgroundColor,
+        };
+      }),
+      primaryColor,
+      undo: undo
+        ? {
+          text: (undo.textContent || '').trim(),
+          height: Math.round(undo.getBoundingClientRect().height),
+          icon: Boolean(undo.querySelector('svg')),
+          underline: undoStyle.textDecorationLine,
+          background: undoStyle.backgroundColor,
+          borderWidth: undoStyle.borderTopWidth,
+        }
+        : null,
+      resultBars: [...document.querySelectorAll('.kies-uitslag-bar-fill')].map((el) => el.style.width),
+    };
+  })()`);
+}
+
+/**
+ * De kaart vasthouden tijdens het slepen: drukken, naar `ratio` × de breedte
+ * schuiven en daar blijven. De opname gebeurt terwijl het label zichtbaar is;
+ * `release()` laat pas daarna los (en stemt dus pas dan).
+ */
+async function holdCard(cdp, ratio) {
+  const box = await evalJs(cdp, `(() => {
+    const el = document.querySelector('.kies-dish-card');
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    return { x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + 140), width: rect.width };
+  })()`);
+  if (!box) return null;
+  const targetX = Math.round(box.x + box.width * ratio);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: targetX, y: box.y, button: 'left', buttons: 1 });
+  await new Promise((resolve) => setTimeout(resolve, 220));
+  return {
+    width: box.width,
+    label: (await readState(cdp)).swipeLabel,
+    release: async () => {
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: targetX, y: box.y, button: 'left', clickCount: 1 });
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    },
+  };
+}
+
+
 
 // ─── Scenario's ─────────────────────────────────────────────────────────────
 
@@ -423,16 +583,18 @@ async function dragCard(cdp, ratio) {
  */
 async function createScenario(cdp) {
   await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
   await navigate(cdp, `${APP}/mijn-lijstje`, `Boolean(document.querySelector('.lijst-title'))`);
 
   // Het lijstje van de maker en de deelvoorkeur op het klembord, in dezelfde
-  // opslag als BE-44 ("bredaeats_bewaard") en BE-49 ("deelvoorkeur").
+  // opslag als BE-44 ("bredaeats_bewaard") en BE-49 ("deelvoorkeur"). De
+  // themakeuze gaat mee: anders valt de pagina na het laden terug op donker en
+  // is een "lichte" opname dat niet.
   const seeded = await evalJs(cdp, `(() => {
     try {
       localStorage.clear();
       localStorage.setItem('bredaeats_bewaard', ${JSON.stringify(JSON.stringify(SAVED_ENTRIES))});
       localStorage.setItem('deelvoorkeur', ${JSON.stringify(JSON.stringify({ methods: ['copy'] }))});
+      localStorage.setItem(${JSON.stringify(THEME_KEY)}, 'light');
       return true;
     } catch (error) {
       return false;
@@ -442,6 +604,7 @@ async function createScenario(cdp) {
   await cdp.send('Page.reload', { ignoreCache: false });
   const listed = await waitFor(cdp, `Boolean(document.querySelector('.kies-start-btn'))`, 30000);
   check('maken: "Samen kiezen" staat in Mijn lijstje', listed);
+  await setTheme(cdp, 'light');
 
   const neighbours = await evalJs(cdp, `(() => {
     const start = document.querySelector('.kies-start-btn');
@@ -486,9 +649,8 @@ async function createScenario(cdp) {
   check('maken: het blad vraagt "Tot wanneer mag er gestemd worden?"', sheet && dialog.title === 'Tot wanneer mag er gestemd worden?', JSON.stringify(dialog));
   check('maken: het blad is een echt dialoogvenster', dialog.role === 'dialog' && dialog.modal === 'true', JSON.stringify(dialog));
   check('maken: zonder tijd geldt "Geen sluitingstijd"', dialog.noTime, String(dialog.noTime));
-  await shot(cdp, 'be46-sluitingstijd-390-light.png', { theme: 'light', state: 'sluitingstijd' });
-  await setTheme(cdp, 'dark');
-  await shot(cdp, 'be46-sluitingstijd-390-dark.png', { theme: 'dark', state: 'sluitingstijd' });
+  await shotInTheme(cdp, 'be46-sluitingstijd-390-light.png', 'light', 'sluitingstijd');
+  await shotInTheme(cdp, 'be46-sluitingstijd-390-dark.png', 'dark', 'sluitingstijd');
   await setTheme(cdp, 'light');
 
   const time = await setInputValue(cdp, '#kies-sluit-tijd', '18:00');
@@ -529,7 +691,7 @@ async function createScenario(cdp) {
     JSON.stringify({ href: panel.href, text: panel.text }),
   );
   check('maken: het blad noemt de gekozen tijd', panel.body.indexOf('18:00') >= 0, panel.body.slice(0, 120));
-  await shot(cdp, 'be46-gemaakt-390-light.png', { theme: 'light', state: 'gemaakt' });
+  await shotInTheme(cdp, 'be46-gemaakt-390-light.png', 'light', 'gemaakt');
 
   // Delen via de bestaande deelroute van BE-49, met de voorkeur op het klembord.
   check('maken: "Deel de stemlink" deelt de link', await clickButtonByText(cdp, 'Deel de stemlink'));
@@ -586,14 +748,15 @@ async function createScenario(cdp) {
     Boolean(result.rows[0]) && result.rows[0].text.indexOf('Sam') >= 0,
     result.rows[0] ? result.rows[0].text : '',
   );
-  await shot(cdp, 'be46-uitslag-na-maken-390-light.png', { theme: 'light', state: 'uitslag-na-maken' });
+  await shotInTheme(cdp, 'be46-uitslag-na-maken-390-light.png', 'light', 'uitslag-na-maken');
 }
 
 /** De hele route: roepnaam, vier gerechten, de uitslag, licht en donker. */
 async function routeScenario(cdp) {
-  await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
-  await openFresh(cdp, '');
+  // 900 px hoog: de kaart van 440 px plus de knoppen en de undo-link passen dan
+  // in één opname. De breedte blijft 390 px.
+  await setViewport(cdp, 390, 900);
+  await openFresh(cdp, '', 'light');
 
   const start = await readState(cdp);
   check('route: de stemlink begint met de roepnaam', start.hasNameInput, String(start.hasNameInput));
@@ -612,7 +775,54 @@ async function routeScenario(cdp) {
   check('route: de knoppen zijn minstens 44 px hoog', first.buttons.every((button) => button.height >= 44), JSON.stringify(first.buttons.map((button) => button.height)));
   check('route: "Vorige stem ongedaan maken" is uit zonder stem', first.undoDisabled === true, String(first.undoDisabled));
   check('route: verticaal scrollen blijft werken (touch-action: pan-y)', first.touchAction === 'pan-y', first.touchAction);
-  await shot(cdp, 'be46-stapel-390-light.png', { theme: 'light', state: 'stapel' });
+
+  // De mockup (schermen 4 en 5): kaart, stapel, voortgangsbalk en knoppen.
+  const stack = await readStack(cdp);
+  check(
+    'mockup: de kaart is ±85% van de breedte op 390 px',
+    Number(stack.cardRatio) >= 80 && Number(stack.cardRatio) <= 95,
+    JSON.stringify({ cardWidth: stack.cardWidth, ratio: stack.cardRatio }),
+  );
+  check('mockup: de kaart is ±440 px hoog', Number(stack.cardHeight) >= 430 && Number(stack.cardHeight) <= 450, String(stack.cardHeight));
+  check('mockup: er staat een tweede kaart achter de stapel', stack.ghostBehind, String(stack.ghostBehind));
+  check(
+    'mockup: de kaart toont restaurant, gerecht, prijs en beschrijving, in die volgorde',
+    /kies-rest[\s\S]*kies-dish[\s\S]*kies-price[\s\S]*kies-desc/.test(stack.contentOrder),
+    stack.contentOrder,
+  );
+  check(
+    'mockup: naast "Gerecht 1 van 4" staat een dunne voortgangsbalk',
+    stack.hasBar && stack.barWidth > 40 && /%$/.test(String(stack.fillShare)),
+    JSON.stringify({ hasBar: stack.hasBar, width: stack.barWidth, fill: stack.fillShare }),
+  );
+  check(
+    'mockup: twee knoppen naast elkaar van ±132 px breed en 56 px hoog, met een icoon',
+    stack.buttons.length === 2
+      && stack.buttons.every((button) => button.width >= 120 && button.width <= 140 && button.height >= 56 && button.icon),
+    JSON.stringify(stack.buttons),
+  );
+  check(
+    'mockup: "Lekker" heeft de primaire knopkleur, "Liever niet" een rand',
+    stack.buttons.length === 2
+      && stack.buttons[1].background === stack.primaryColor
+      && stack.buttons[0].background !== stack.primaryColor,
+    JSON.stringify({ primary: stack.primaryColor, buttons: stack.buttons.map((button) => button.background) }),
+  );
+  const undo = stack.undo;
+  check(
+    'mockup: "Vorige stem ongedaan maken" is een tekstlink met een terug-pijl',
+    Boolean(undo)
+      && undo.text === 'Vorige stem ongedaan maken'
+      && undo.icon
+      && /underline/.test(undo.underline)
+      && undo.background === 'rgba(0, 0, 0, 0)'
+      && undo.borderWidth === '0px'
+      && undo.height >= 44,
+    JSON.stringify(undo),
+  );
+  await shotInTheme(cdp, 'be46-stapel-390-light.png', 'light', 'stapel');
+  await shotInTheme(cdp, 'be46-stapel-390-dark.png', 'dark', 'stapel');
+  await setTheme(cdp, 'light');
 
   // Vier stemmen: lekker, lekker, liever niet, liever niet.
   const votes = [
@@ -651,7 +861,16 @@ async function routeScenario(cdp) {
       && result.favouriteActions[1].href.indexOf('google.com/maps') > 0,
     JSON.stringify(result.favouriteActions.map((action) => action.href)),
   );
-  await shot(cdp, 'be46-uitslag-390-light.png', { theme: 'light', state: 'uitslag' });
+  // De uitslag (mockup, scherm 6): per gerecht een balk met het aandeel "lekker".
+  const stackAfter = await readStack(cdp);
+  check(
+    'mockup: elk gerecht in de uitslag heeft een balk met het aandeel "lekker"',
+    stackAfter.resultBars.length === FIXTURE_DISHES.length
+      && stackAfter.resultBars.every((width) => /^[0-9]+%$/.test(String(width)))
+      && stackAfter.resultBars[0] === '100%',
+    JSON.stringify(stackAfter.resultBars),
+  );
+  await shotInTheme(cdp, 'be46-uitslag-390-light.png', 'light', 'uitslag');
 
   // De stemmen van deze sessie, nog vóór de herlaadbeurt: de gestubde API
   // begint in een nieuwe pagina leeg, dus dit is het enige juiste moment.
@@ -662,11 +881,10 @@ async function routeScenario(cdp) {
   const reopened = await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 20000);
   check('route: opnieuw openen toont meteen de uitslag', reopened);
 
-  await setTheme(cdp, 'dark');
-  await new Promise((resolve) => setTimeout(resolve, 250));
   const dark = await readState(cdp);
   check('route: de uitslag staat er ook in donker', dark.resultIsList && dark.rows.length === 4, String(dark.rows.length));
-  await shot(cdp, 'be46-uitslag-390-dark.png', { theme: 'dark', state: 'uitslag' });
+  await shotInTheme(cdp, 'be46-uitslag-390-dark.png', 'dark', 'uitslag');
+  await setTheme(cdp, 'light');
 
   const posts = calls.filter((call) => call.method === 'POST');
   check(
@@ -681,10 +899,21 @@ async function routeScenario(cdp) {
 
 /** Swipen met de muis: over de drempel, onder de drempel, en het label. */
 async function swipeScenario(cdp) {
-  await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
-  await openFresh(cdp, '');
+  await setViewport(cdp, 390, 900);
+  await openFresh(cdp, '', 'light');
   await join(cdp, 'Sam');
+
+  // Een opname terwijl de kaart vasthangt: het label staat op de kaart, in
+  // licht én donker. 15% is onder de drempel, dus loslaten stemt hier niet.
+  const held = await holdCard(cdp, 0.15);
+  check('swipen: het label "Lekker →" staat op de kaart tijdens het slepen', Boolean(held) && (held.label || '').indexOf('Lekker') >= 0, held && held.label);
+  await shotInTheme(cdp, 'be46-sleep-390-light.png', 'light', 'sleep-lekker');
+  await shotInTheme(cdp, 'be46-sleep-390-dark.png', 'dark', 'sleep-lekker');
+  await setTheme(cdp, 'light');
+  if (held) await held.release();
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const afterHold = await readState(cdp);
+  check('swipen: onder de drempel blijft het eerste gerecht staan', afterHold.dish === FIXTURE_DISHES[0].name, afterHold.dish);
 
   const right = await dragCard(cdp, 0.4);
   check('swipen: slepen naar rechts toont "Lekker →"', Boolean(right) && right.label.indexOf('Lekker') >= 0 && right.label.indexOf('→') >= 0, right && right.label);
@@ -716,17 +945,14 @@ async function swipeScenario(cdp) {
   const third = await readState(cdp);
   check('swipen: na links staat het derde gerecht vooraan', third.dish === FIXTURE_DISHES[2].name, third.dish);
 
-  await setTheme(cdp, 'dark');
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  await shot(cdp, 'be46-stapel-390-dark.png', { theme: 'dark', state: 'stapel' });
+  await shotInTheme(cdp, 'be46-stapel-390-dark.png', 'dark', 'stapel-na-swipen');
   await setTheme(cdp, 'light');
 }
 
 /** De pijltjestoetsen doen hetzelfde als de knoppen. */
 async function keyboardScenario(cdp) {
   await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
-  await openFresh(cdp, '');
+  await openFresh(cdp, '', 'light');
   await join(cdp, 'Noa');
 
   const focused = await evalJs(cdp, `(() => {
@@ -753,8 +979,7 @@ async function keyboardScenario(cdp) {
 /** "Vorige stem ongedaan maken" brengt het vorige gerecht terug. */
 async function undoScenario(cdp) {
   await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
-  await openFresh(cdp, '');
+  await openFresh(cdp, '', 'light');
   await join(cdp, 'Pip');
 
   await voteByLabel(cdp, 'Lekker:');
@@ -781,13 +1006,13 @@ async function undoScenario(cdp) {
 /** Zonder migratie: één nette melding, geen crash en geen lege pagina. */
 async function withoutMigrationScenario(cdp) {
   await setViewport(cdp, 390, 780);
-  await setTheme(cdp, 'light');
   await navigate(cdp, PAGE_URL('?zonder=migratie'), PAGE_READY);
   const ready = await waitFor(cdp, `(document.body.innerText || '').indexOf('Samen kiezen is nog niet beschikbaar') >= 0`, 20000);
   const state = await readState(cdp);
   check('zonder migratie: de pagina toont de ene melding', ready && state.unavailable, String(state.unavailable));
   check('zonder migratie: er is geen kaartenstapel', state.hasCard === false, String(state.hasCard));
-  await shot(cdp, 'be46-zonder-migratie-390-light.png', { theme: 'light', state: 'zonder-migratie' });
+  await shotInTheme(cdp, 'be46-zonder-migratie-390-light.png', 'light', 'zonder-migratie');
+  await shotInTheme(cdp, 'be46-zonder-migratie-390-dark.png', 'dark', 'zonder-migratie');
 }
 
 
@@ -814,7 +1039,7 @@ function writeEvidence(extra = {}) {
       note: 'the API answers come from stubSource() in this file, with the shape of src/lib/kiesHandlers.js; the database and the migration are not involved',
     },
     mockupComparison:
-      'not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots in evidence/be-46/ are saved for the Lead/human visual comparison',
+      'niet machinaal te vergelijken: de goedgekeurde mockup is een extern Claude-artifact. De opnames in evidence/be-46/ zijn voor de visuele vergelijking door de Lead/eigenaar; elke opname heeft daarnaast themeProof (data-theme, de helderheid van de achtergrond en de actieve themaknop) en de gemeten maten van de kaart, de knoppen en de balken.',
     // BE-43 (#101): een gefilterde run noemt zijn keuze en is nooit het volledige bewijs.
     filter: SELECTION.filter,
     scenarios: scenarioRuns,

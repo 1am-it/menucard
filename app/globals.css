@@ -5943,32 +5943,82 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   border-radius: var(--radius-card);
 }
 
+/* De voortgang uit criterium 6, naast de dunne balk uit de mockup. */
+.kies-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 6px;
+}
+
 .kies-progress {
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  white-space: nowrap;
   color: var(--text-secondary);
 }
 
+.kies-progress-bar {
+  flex: 1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+}
+
+.kies-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+}
+
+/* De stapel uit de mockup: een grote kaart (±85% van de breedte, 440 px hoog
+   op een scherm van 390 px) met daarachter een tweede kaart, iets kleiner en
+   lager. De stapel is precies zo hoog als de twee kaarten samen. */
 .kies-card-wrap {
   position: relative;
-  margin: 14px 0 18px;
+  width: 100%;
+  max-width: 360px;
+  height: 454px;
+  margin: 14px auto 18px;
   /* Verticaal scrollen en het terug-gebaar van de telefoon blijven werken;
      alleen horizontaal slepen is van de kaart. */
   touch-action: pan-y;
 }
 
+.kies-card-ghost {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 14px;
+  height: 436px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .kies-dish-card {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  height: 440px;
+  padding: 22px 22px 24px;
   /* Dezelfde kaart als de menukaart, zonder foto's (src/CONTEXT.md). */
+  border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--card-surface);
   box-shadow: var(--card-shadow);
+  color: var(--text-primary);
   cursor: grab;
   user-select: none;
+  will-change: transform;
 }
 
 .kies-dish-card.is-dragging { cursor: grabbing; }
@@ -5980,28 +6030,27 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   .kies-dish-card.is-dragging { transition: none; }
 }
 
-.kies-cat {
-  font-size: 12px;
+.kies-rest {
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--text-secondary);
 }
 
 .kies-dish {
   margin: 0;
-  font-size: 26px;
-  line-height: 1.2;
+  font-size: 30px;
+  line-height: 1.15;
   font-weight: 800;
   color: var(--text-primary);
 }
 
-.kies-rest { font-size: 14px; color: var(--text-secondary); }
-
+/* De prijs als pil onder de gerechtnaam (mockup, scherm 4). */
 .kies-price {
   align-self: flex-start;
   padding: 4px 12px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: var(--surface-soft);
   font-size: 15px;
   font-weight: 700;
@@ -6010,19 +6059,20 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 }
 
 .kies-desc {
-  margin: 6px 0 0;
-  font-size: 14px;
+  margin: 0;
+  overflow-y: auto;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--text-secondary);
 }
 
-/* Het label dat tijdens het slepen de richting toont. */
+/* Het label dat tijdens het slepen de richting toont, op de kaart zelf. */
 .kies-swipe-label {
   position: absolute;
-  top: 12px;
+  top: 16px;
   z-index: 2;
   padding: 6px 14px;
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-pill);
   background: var(--bg-elevated);
   font-size: 14px;
@@ -6030,23 +6080,34 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   color: var(--text-primary);
 }
 
-.kies-swipe-lekker { right: 12px; }
-.kies-swipe-liever-niet { left: 12px; }
-
-.kies-vote-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.kies-swipe-lekker {
+  right: 16px;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.kies-vote-btn,
-.kies-undo {
+.kies-swipe-liever-niet {
+  left: 16px;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Twee knoppen naast elkaar, elk ±132 px breed en 56 px hoog (mockup). */
+.kies-vote-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 132px));
+  justify-content: center;
+  gap: 16px;
+}
+
+.kies-vote-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
-  padding: 0 16px;
-  border: 1px solid var(--border);
+  gap: 8px;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-pill);
   background: var(--surface-soft);
   color: var(--text-primary);
@@ -6055,6 +6116,8 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   font-weight: 700;
   cursor: pointer;
 }
+
+.kies-btn-icon { width: 20px; height: 20px; flex: none; }
 
 .kies-vote-lekker {
   border-color: var(--button-primary-bg);
@@ -6068,15 +6131,32 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   outline-offset: 2px;
 }
 
-.kies-vote-btn:disabled,
-.kies-undo:disabled { opacity: 0.55; cursor: default; }
+.kies-vote-btn:disabled { opacity: 0.55; cursor: default; }
 
+/* "Vorige stem ongedaan maken" is een tekstlink met een terug-pijl onder de
+   knoppen (mockup), geen grote knop — maar wel een tikvlak van 44 px. */
 .kies-undo {
-  width: 100%;
-  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 44px;
+  margin: 10px auto 0;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: inherit;
   font-size: 14px;
   font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
 }
+
+.kies-undo-icon { width: 16px; height: 16px; }
+
+.kies-undo:disabled { opacity: 0.55; cursor: default; }
 
 
 /* De uitslag: een echte lijst, met de favoriet bovenaan. */
@@ -6127,6 +6207,23 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 .kies-uitslag-count { font-size: 14px; font-weight: 600; }
 
 .kies-uitslag-names { font-size: 13px; color: var(--text-secondary); }
+
+/* De balk met het aandeel "lekker" per gerecht (mockup, scherm 6). */
+.kies-uitslag-bar {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  margin-top: 2px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+}
+
+.kies-uitslag-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--button-primary-bg);
+}
 
 .kies-favoriet {
   align-self: flex-start;

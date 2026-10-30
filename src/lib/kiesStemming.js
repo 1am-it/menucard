@@ -327,6 +327,20 @@ function stemmingResult({ dishes, votes } = {}) {
   };
 }
 
+/**
+ * Het aandeel "lekker" op dit gerecht, als heel percentage (0-100). De balk in
+ * de uitslag toont het aandeel, niet het absolute aantal: zo is een gerecht met
+ * twee stemmen niet automatisch kleiner dan een gerecht met tien stemmen.
+ * Zonder stemmen is het aandeel 0.
+ */
+function kiesLekkerShare(row) {
+  const lekker = Math.max(0, Math.floor(Number(row && row.lekker) || 0));
+  const lieverNiet = Math.max(0, Math.floor(Number(row && row.lieverNiet) || 0));
+  const total = lekker + lieverNiet;
+  if (total === 0) return 0;
+  return Math.round((lekker / total) * 100);
+}
+
 // ─── De sluitingstijd ───────────────────────────────────────────────────────
 
 /**
@@ -610,6 +624,7 @@ module.exports = {
   kiesHref,
   kiesImageHref,
   kiesImageTitle,
+  kiesLekkerShare,
   kiesMetadata,
   kiesProgressLabel,
   lastVoteOf,
