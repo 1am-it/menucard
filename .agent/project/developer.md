@@ -74,3 +74,22 @@ stappen en stopte met `aborted`. Daarom, in elke ronde:
    `--alleen`, aan het eind één volledige run. Een gefilterde run schrijft naar
    een eigen, gitignored bewijsbestand en noemt zijn keuze in `filter: [...]`;
    alleen de volledige run vervangt het bewijs dat bij de levering hoort.
+
+## Paginagebonden CSS (BE-52, Lead-besluit 30 okt)
+
+Elk ticket zette zijn opmaak onderaan `app/globals.css`; dat bestand groeide
+naar 6591 regels en parallelle PR's botsten bij elke merge. Daarom:
+
+- Nieuwe opmaak voor één pagina of één component staat in een eigen
+  CSS-bestand naast die code, geïmporteerd door die pagina of component.
+- `app/globals.css` is alleen voor tokens, thema's, de basis en echt gedeelde
+  onderdelen. Een blok dat ook gedeelde klassen raakt, blijft daar.
+- Kleuren altijd via de bestaande tokens. Geen CSS-modules en geen nieuwe
+  klassennamen voor bestaande blokken.
+- De bewaker `app/globals-css.test.js` faalt als `app/globals.css` meer dan 40
+  regels groeit boven het vastgezette aantal (5807) of als een verplaatst
+  klasseblok ergens anders opduikt. Verhoog dat aantal alleen bewust, met een
+  reden in de commit — niet stilzwijgend met een nieuw blok onderaan.
+
+Bij een merge: voeg geen tweede stijlblok onderaan `globals.css` toe, maar
+los het op in het bestand dat al bij die pagina hoort.
