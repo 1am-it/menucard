@@ -228,6 +228,112 @@ test('REGRESSION (review 6253408889): an explicitly unheaded PDF row is a review
   assert.equal(accepted.lines.find((l) => l.id === '0.1.1').status, 'missing_price');
 });
 
+const RENAME_MENUS = [
+  {
+    title: 'Menukaart',
+    categories: [
+      {
+        name: 'Proef het beste van het seizoen — Hoofd',
+        path: ['Proef het beste van het seizoen — Hoofd'],
+        items: [
+          { name: 'Fictieve zeebaars', price: '24,50' },
+          { name: 'Fictieve lam', price: '26,00' },
+        ],
+      },
+      { name: 'Dessert', path: ['Dessert'], items: [{ name: 'Fictieve taart', price: '8,50' }] },
+    ],
+  },
+];
+
+test('BE-53 rename: every dish under the menukopje gets the path edit, nothing else moves', () => {
+  const { renameSectionEdits, sanitizeEdits, mergeEdits, storedConceptInput } = require('./menuConcept');
+  const concept = buildMenuConcept({ menus: RENAME_MENUS, liveLines: [], edits: {} });
+  const section = concept.content.categories[0];
+  const sectionPath = section.path || [section.name];
+  assert.deepEqual(sectionPath, ['Proef het beste van het seizoen — Hoofd']);
+
+  const result = renameSectionEdits(concept.lines, sectionPath, '  Hoofdgerechten ');
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.path, ['Hoofdgerechten']);
+  // Exactly the two dishes of that menukopje, each with the existing path edit.
+  assert.deepEqual(result.edits, {
+    lines: { '0.0.0': { path: ['Hoofdgerechten'] }, '0.0.1': { path: ['Hoofdgerechten'] } },
+  });
+  assert.deepEqual(result.lineIds.sort(), ['0.0.0', '0.0.1']);
+
+  // The server reduces the same payload to the same edits and the concept
+  // really shows the new name with both dishes still under it.
+  const clean = sanitizeEdits(result.edits);
+  assert.deepEqual(clean.lines, result.edits.lines);
+  const renamed = buildMenuConcept({ menus: RENAME_MENUS, liveLines: [], edits: mergeEdits({}, clean) });
+  assert.deepEqual(renamed.content.categories.map((c) => c.name), ['Hoofdgerechten', 'Dessert']);
+  assert.deepEqual(renamed.content.categories[0].items.map((i) => i.name), ['Fictieve zeebaars', 'Fictieve lam']);
+
+  // A stored version keeps the choices: a second reviewer renames the stored
+  // menukopje again without any dish moving to another menukopje.
+  const stored = storedConceptInput(renamed.content);
+  const storedConcept = buildMenuConcept({ menus: stored.menus, liveLines: [], edits: stored.edits });
+  const storedSection = storedConcept.content.categories[0];
+  const again = renameSectionEdits(storedConcept.lines, storedSection.path || [storedSection.name], 'Hoofd');
+  assert.deepEqual(again.path, ['Hoofd']);
+  assert.deepEqual(Object.keys(again.edits.lines).sort(), ['0.0.0', '0.0.1']);
+});
+
+test('BE-53 rename: only the last label changes; parent labels stay', () => {
+  const { renameSectionEdits } = require('./menuConcept');
+  const lines = [
+    { id: '0.0.0', categoryPath: ['Lunch', 'Proef het beste', 'Hoofd'] },
+    { id: '0.1.0', categoryPath: ['Diner', 'Hoofd'] },
+  ];
+  const result = renameSectionEdits(lines, ['Lunch', 'Proef het beste', 'Hoofd'], 'Hoofdgerechten');
+  assert.deepEqual(result.edits, { lines: { '0.0.0': { path: ['Lunch', 'Proef het beste', 'Hoofdgerechten'] } } });
+  // The same last label under another parent is a different menukopje: untouched.
+  assert.equal(result.edits.lines['0.1.0'], undefined);
+});
+
+test('BE-53 rename: empty, blank and too long names are refused with a clear message', () => {
+  const { renameSectionEdits, MAX_SECTION_NAME } = require('./menuConcept');
+  const lines = [{ id: '0.0.0', categoryPath: ['Hoofd'] }];
+  const refused = (name) => {
+    const result = renameSectionEdits(lines, ['Hoofd'], name);
+    assert.equal(result.ok, false);
+    assert.equal(typeof result.error, 'string');
+    assert.ok(result.error.endsWith('.') && result.error.length > 10, result.error);
+    return result;
+  };
+  assert.equal(refused('').reason, 'empty_name');
+  assert.equal(refused('   ').reason, 'empty_name');
+  assert.equal(refused('\n\t ').reason, 'empty_name');
+  assert.equal(refused(null).reason, 'empty_name');
+  // Names above MAX_EDIT_TEXT are refused, and so is the longest name that
+  // would be silently truncated to a shorter stored label.
+  const tooLong = refused('x'.repeat(MAX_SECTION_NAME + 1));
+  assert.equal(tooLong.reason, 'name_too_long');
+  assert.match(tooLong.error, new RegExp(String(MAX_SECTION_NAME)));
+  assert.equal(refused('x'.repeat(201)).reason, 'name_too_long');
+  // Exactly the limit is fine and stored unchanged.
+  const atLimit = renameSectionEdits(lines, ['Hoofd'], 'y'.repeat(MAX_SECTION_NAME));
+  assert.equal(atLimit.ok, true);
+  assert.equal(atLimit.path[0].length, MAX_SECTION_NAME);
+});
+
+test('BE-53 rename: a rename never merges, moves or rewrites the hierarchy', () => {
+  const { renameSectionEdits } = require('./menuConcept');
+  const lines = [
+    { id: '0.0.0', categoryPath: ['Hoofd'] },
+    { id: '0.1.0', categoryPath: ['Dessert'] },
+  ];
+  // Same name as the current one: nothing to correct.
+  assert.equal(renameSectionEdits(lines, ['Hoofd'], 'Hoofd').reason, 'unchanged');
+  // The path separator would create a new level instead of a new name.
+  assert.equal(renameSectionEdits(lines, ['Hoofd'], 'Diner › Hoofd').reason, 'path_separator');
+  // A name that already exists would merge two menukopjes.
+  assert.equal(renameSectionEdits(lines, ['Hoofd'], 'Dessert').reason, 'duplicate_section');
+  // A menukopje without dishes has nothing to rename (never an invented edit).
+  assert.equal(renameSectionEdits([], ['Hoofd'], 'Hoofdgerechten').reason, 'no_dishes');
+  assert.equal(renameSectionEdits(lines, [], 'Hoofdgerechten').reason, 'unknown_section');
+});
+
 test('browser edits are reduced to known keys and short values', () => {
   const { sanitizeEdits } = require('./menuConcept');
   const clean = sanitizeEdits({

@@ -334,6 +334,60 @@ function mergeEdits(base, delta) {
   return { lines, removed };
 }
 
+// BE-53 (#130): a menukopje is renamed, never merged or moved, so a name is
+// one path label. `cleanLabels` (src/lib/menuGroups.js) already bounds a label
+// at 160 characters; refusing longer names here means the stored path is
+// exactly what the reviewer typed instead of a silently truncated label.
+const MAX_SECTION_NAME = Math.min(MAX_EDIT_TEXT, 160);
+
+/**
+ * BE-53 — rename exactly one existing menukopje, and nothing else.
+ *
+ * `lines` are the concept's own lines (buildMenuConcept().lines: `id` plus the
+ * section path currently shown, after the edits already applied). Every dish
+ * under `sectionPath` gets the existing per-line `path` edit that
+ * `sanitizeEdits` already understands; the parents of the path never change and
+ * no dish moves to another menukopje. Returns:
+ *   { ok: true, path, edits: { lines: { [lineId]: { path } } }, lineIds }
+ * or { ok: false, reason, error } with a Dutch message for the reviewer.
+ *
+ * Refusals that keep the contract: an empty or blank name, a name above
+ * MAX_EDIT_TEXT, a name that is already the name, a name containing the path
+ * separator (that would silently rewrite the hierarchy) and a name that already
+ * exists next to it (that would merge two menukopjes).
+ */
+function renameSectionEdits(lines, sectionPath, rawName) {
+  const target = cleanLabels(sectionPath);
+  if (target.length === 0) return { ok: false, reason: 'unknown_section', error: 'Dit menukopje hoort niet bij dit concept.' };
+  const raw = typeof rawName === 'string' ? rawName.replace(/\s+/g, ' ').trim() : '';
+  if (raw === '') return { ok: false, reason: 'empty_name', error: 'Vul een naam voor dit menukopje in.' };
+  if (raw.length > MAX_SECTION_NAME) {
+    return { ok: false, reason: 'name_too_long', error: `Gebruik voor een menukopje hoogstens ${MAX_SECTION_NAME} tekens.` };
+  }
+  if (raw.indexOf('›') !== -1) {
+    return { ok: false, reason: 'path_separator', error: 'Gebruik geen › in de naam: dit corrigeert alleen de naam van dit menukopje.' };
+  }
+  const key = pathKey(target);
+  const nextPath = [...target.slice(0, -1), raw];
+  if (pathKey(nextPath) === key) return { ok: false, reason: 'unchanged', error: 'Dit is al de naam van dit menukopje.' };
+
+  const list = Array.isArray(lines) ? lines : [];
+  const nextKey = pathKey(nextPath);
+  if (list.some((line) => line && typeof line.id === 'string' && pathKey(cleanLabels(line.categoryPath)) === nextKey)) {
+    return { ok: false, reason: 'duplicate_section', error: 'Er is al een menukopje met deze naam; menukopjes samenvoegen kan hier niet.' };
+  }
+  const edits = {};
+  for (const line of list) {
+    if (!line || typeof line.id !== 'string') continue;
+    if (pathKey(cleanLabels(line.categoryPath)) !== key) continue;
+    edits[line.id] = { path: nextPath };
+  }
+  if (Object.keys(edits).length === 0) {
+    return { ok: false, reason: 'no_dishes', error: 'Onder dit menukopje staan geen gerechten om te hernoemen.' };
+  }
+  return { ok: true, path: nextPath, edits: { lines: edits }, lineIds: Object.keys(edits) };
+}
+
 /**
  * A saved concept version (captured_content) as concept input: its dishes
  * (with their reference to the original analysis) and the choices stored
@@ -675,6 +729,8 @@ module.exports = {
   liveEntryLabel,
   sanitizeEdits,
   mergeEdits,
+  renameSectionEdits,
+  MAX_SECTION_NAME,
   storedConceptInput,
   publicMenu,
   REJECT_REASONS,
