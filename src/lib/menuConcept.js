@@ -334,6 +334,223 @@ function mergeEdits(base, delta) {
   return { lines, removed };
 }
 
+// BE-53 (#130): a menukopje is renamed, never merged or moved, so a name is
+// one path label. `cleanLabels` (src/lib/menuGroups.js) already bounds a label
+// at 160 characters; refusing longer names here means the stored path is
+// exactly what the reviewer typed instead of a silently truncated label.
+const MAX_SECTION_NAME = Math.min(MAX_EDIT_TEXT, 160);
+
+/**
+ * BE-53 — rename exactly one existing menukopje, and nothing else.
+ *
+ * `lines` are the concept's own lines (buildMenuConcept().lines: `id` plus the
+ * section path currently shown, after the edits already applied). Every dish
+ * under `sectionPath` gets the existing per-line `path` edit that
+ * `sanitizeEdits` already understands; the parents of the path never change and
+ * no dish moves to another menukopje. Returns:
+ *   { ok: true, path, edits: { lines: { [lineId]: { path } } }, lineIds }
+ * or { ok: false, reason, error } with a Dutch message for the reviewer.
+ *
+ * Refusals that keep the contract: an empty or blank name, a name above
+ * MAX_EDIT_TEXT, a name that is already the name, a name containing the path
+ * separator (that would silently rewrite the hierarchy) and a name that already
+ * exists next to it (that would merge two menukopjes).
+ */
+function renameSectionEdits(lines, sectionPath, rawName) {
+  const target = cleanLabels(sectionPath);
+  if (target.length === 0) return { ok: false, reason: 'unknown_section', error: 'Dit menukopje hoort niet bij dit concept.' };
+  const raw = typeof rawName === 'string' ? rawName.replace(/\s+/g, ' ').trim() : '';
+  if (raw === '') return { ok: false, reason: 'empty_name', error: 'Vul een naam voor dit menukopje in.' };
+  if (raw.length > MAX_SECTION_NAME) {
+    return { ok: false, reason: 'name_too_long', error: `Gebruik voor een menukopje hoogstens ${MAX_SECTION_NAME} tekens.` };
+  }
+  if (raw.indexOf('›') !== -1) {
+    return { ok: false, reason: 'path_separator', error: 'Gebruik geen › in de naam: dit corrigeert alleen de naam van dit menukopje.' };
+  }
+  const key = pathKey(target);
+  const nextPath = [...target.slice(0, -1), raw];
+  if (pathKey(nextPath) === key) return { ok: false, reason: 'unchanged', error: 'Dit is al de naam van dit menukopje.' };
+
+  const list = Array.isArray(lines) ? lines : [];
+  const nextKey = pathKey(nextPath);
+  if (list.some((line) => line && typeof line.id === 'string' && pathKey(cleanLabels(line.categoryPath)) === nextKey)) {
+    return { ok: false, reason: 'duplicate_section', error: 'Er is al een menukopje met deze naam; menukopjes samenvoegen kan hier niet.' };
+  }
+  const edits = {};
+  for (const line of list) {
+    if (!line || typeof line.id !== 'string') continue;
+    if (pathKey(cleanLabels(line.categoryPath)) !== key) continue;
+    edits[line.id] = { path: nextPath };
+  }
+  if (Object.keys(edits).length === 0) {
+    return { ok: false, reason: 'no_dishes', error: 'Onder dit menukopje staan geen gerechten om te hernoemen.' };
+  }
+  return { ok: true, path: nextPath, edits: { lines: edits }, lineIds: Object.keys(edits) };
+}
+
+/**
+ * BE-53 deel 2 (#130) — apply more than one menukopje rename as one correction.
+ *
+ * Each rename is still the single rule of `renameSectionEdits`, in order, on the
+ * section paths as they are after the previous rename. So two shortenings can
+ * never merge into an existing name unnoticed: the second is refused exactly as
+ * it would be on its own. Nothing else moves; every rename keeps its own
+ * per-line `path` edit, so each menukopje stays separately undoable.
+ *
+ * `renames` is `[{ path, name }]`. Returns
+ *   { ok, edits: { lines: { [lineId]: { path } } }, lineIds, applied: [path],
+ *     refused: [{ path, name, reason, error }] }
+ * and `ok: false` when nothing was applied at all.
+ */
+function renameSectionsEdits(lines, renames) {
+  const list = (Array.isArray(lines) ? lines : [])
+    .filter((line) => line && typeof line.id === 'string')
+    .map((line) => ({ ...line }));
+  const edits = {};
+  const lineIds = [];
+  const applied = [];
+  const refused = [];
+  for (const rename of Array.isArray(renames) ? renames : []) {
+    const sectionPath = rename && rename.path;
+    const result = renameSectionEdits(list, sectionPath, rename && rename.name);
+    if (!result.ok) {
+      refused.push({ path: cleanLabels(sectionPath), name: (rename && rename.name) || '', reason: result.reason, error: result.error });
+      continue;
+    }
+    applied.push(result.path);
+    const key = pathKey(cleanLabels(sectionPath));
+    for (const line of list) if (pathKey(cleanLabels(line.categoryPath)) === key) line.categoryPath = result.path;
+    for (const [id, edit] of Object.entries(result.edits.lines)) {
+      edits[id] = edit;
+      if (!lineIds.includes(id)) lineIds.push(id);
+    }
+  }
+  return { ok: lineIds.length > 0, edits: { lines: edits }, lineIds, applied, refused };
+}
+
+// BE-53 deel 2: the separators a repeated opening of a menukopje can end with.
+// Longest first, so "—" is matched before a plain "-" inside the same name.
+const SECTION_PREFIX_SEPARATORS = [' — ', ' - ', ': '];
+
+/** The name as the reviewer sees it: single spaces, no outer whitespace. */
+function cleanSectionName(name) {
+  return typeof name === 'string' ? name.replace(/\s+/g, ' ').trim() : '';
+}
+
+/**
+ * Every "opening" of a menukopje: the text up to and including one of the
+ * separators, with a non-empty remainder after it. "A — B — C" offers "A — "
+ * and "A — B — ".
+ */
+function sectionPrefixCandidates(name) {
+  const text = cleanSectionName(name);
+  const out = [];
+  for (const separator of SECTION_PREFIX_SEPARATORS) {
+    let at = text.indexOf(separator);
+    while (at > 0) {
+      const prefix = text.slice(0, at + separator.length);
+      const rest = text.slice(at + separator.length).trim();
+      if (rest !== '') out.push({ prefix, rest });
+      at = text.indexOf(separator, at + separator.length);
+    }
+  }
+  return out;
+}
+
+/** The separator a detected prefix ends with, or null. */
+function sectionPrefixSeparator(prefix) {
+  for (const separator of SECTION_PREFIX_SEPARATORS) {
+    if (String(prefix || '').endsWith(separator)) return separator;
+  }
+  return null;
+}
+
+/**
+ * BE-53 deel 2 — one proposal for menukopjes that repeat the same opening.
+ *
+ * Two or more names that start with the same text followed by " — ", " - " or
+ * ": " are one finding. The most frequent opening wins; on a tie the longest
+ * (most specific) opening wins, then the alphabetically first, so the proposal
+ * is the same on every render. Returns
+ *   { prefix, separator, count, names, shorten: { [name]: shortenedName } }
+ * or null when no opening repeats. `prefix` is shown with its separator, as in
+ * '4 kopjes beginnen met "PROEF HET BESTE VAN HET SEIZOEN —". Weghalen?'.
+ */
+function sharedSectionPrefix(names) {
+  const list = [...new Set((Array.isArray(names) ? names : []).map(cleanSectionName).filter(Boolean))];
+  const groups = new Map();
+  for (const name of list) {
+    for (const { prefix, rest } of sectionPrefixCandidates(name)) {
+      if (!groups.has(prefix)) groups.set(prefix, { prefix, rest: new Map() });
+      groups.get(prefix).rest.set(name, rest);
+    }
+  }
+  const candidates = [...groups.values()].filter((group) => group.rest.size >= 2);
+  if (candidates.length === 0) return null;
+  candidates.sort(
+    (a, b) => b.rest.size - a.rest.size || b.prefix.length - a.prefix.length || (a.prefix < b.prefix ? -1 : a.prefix > b.prefix ? 1 : 0)
+  );
+  const best = candidates[0];
+  const shorten = {};
+  for (const [name, rest] of best.rest) shorten[name] = rest;
+  return { prefix: best.prefix, separator: sectionPrefixSeparator(best.prefix), count: best.rest.size, names: [...best.rest.keys()], shorten };
+}
+
+/** True for a menukopje written entirely in capitals ("VOOR", "PROEF — HOOFD"). */
+function isCapsSectionName(name) {
+  const text = cleanSectionName(name);
+  const letters = [...text].filter((character) => /\p{L}/u.test(character));
+  if (letters.length === 0) return false;
+  return text === text.toUpperCase();
+}
+
+/**
+ * BE-53 deel 2 — "normale hoofdletters": sentence case, so "VOOR" becomes
+ * "Voor" and "PROEF HET BESTE VAN HET SEIZOEN" becomes "Proef het beste van
+ * het seizoen". A word with a digit or a single letter keeps its spelling
+ * ("MENU 2026" keeps "2026", "A LA CARTE" keeps "A"); only the first word that
+ * really changes receives the capital. An already normal name is returned
+ * unchanged, so the caller can compare and only offer a real change.
+ */
+function normalCaseSectionName(name) {
+  const text = cleanSectionName(name);
+  if (text === '') return '';
+  let capitalised = false;
+  return text
+    .split(' ')
+    .map((word) => {
+      const letters = [...word].filter((character) => /\p{L}/u.test(character));
+      if (letters.length === 0) return word;
+      const firstLetter = word[word.search(/\p{L}/u)];
+      const startsUpper = firstLetter === firstLetter.toUpperCase();
+      // Digits and single letters stay exactly as the source wrote them; a word
+      // that already starts with a capital still counts as the sentence's capital.
+      if (/\d/.test(word) || letters.length <= 1) {
+        if (!capitalised && startsUpper) capitalised = true;
+        return word;
+      }
+      if (capitalised) return word.toLowerCase();
+      capitalised = true;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
+// BE-53 deel 2 — the standard menukopje names offered as a quick pick in the
+// rename field. A fixed list in code (contract point 7): no database, no guess
+// from the source, and the reviewer still confirms the name in the field.
+const DEFAULT_SECTION_NAMES = Object.freeze([
+  'Voorgerechten',
+  'Tussengerechten',
+  'Hoofdgerechten',
+  'Bijgerechten',
+  'Desserts',
+  'Dranken',
+  'Lunch',
+  'Diner',
+  'Kindermenu',
+]);
+
 /**
  * A saved concept version (captured_content) as concept input: its dishes
  * (with their reference to the original analysis) and the choices stored
@@ -675,6 +892,15 @@ module.exports = {
   liveEntryLabel,
   sanitizeEdits,
   mergeEdits,
+  renameSectionEdits,
+  renameSectionsEdits,
+  sharedSectionPrefix,
+  normalCaseSectionName,
+  isCapsSectionName,
+  cleanSectionName,
+  DEFAULT_SECTION_NAMES,
+  SECTION_PREFIX_SEPARATORS,
+  MAX_SECTION_NAME,
   storedConceptInput,
   publicMenu,
   REJECT_REASONS,

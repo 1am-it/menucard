@@ -17,28 +17,86 @@
 
 import { useMemo, useState } from 'react'
 import StatusIcon from '@/src/components/StatusIcon'
-import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey } from '@/src/lib/menuConcept'
+import { STATUS, buildMenuConcept, displayPrice, mergeEdits, removalKey, renameSectionEdits, renameSectionsEdits, sharedSectionPrefix, isCapsSectionName, normalCaseSectionName, cleanSectionName, DEFAULT_SECTION_NAMES } from '@/src/lib/menuConcept'
 import { formatPath, pathKey } from '@/src/lib/menuHierarchy'
 import { parsePathText, reviewKey } from '@/src/lib/menuStructureReview'
 
 /**
  * The proposed section structure next to its original source route, for
  * internal review (src/lib/menuHierarchy.js). Uncertain sections say so.
+ *
+ * BE-53 (#130): with `rename`, every menukopje also offers "Wijzig": a labelled
+ * field with the current name, "Opslaan in deze correctie" and "Annuleren". A
+ * renamed menukopje shows its previous name and "Ongedaan maken". Only the name
+ * changes; merging, moving sections or moving dishes is not offered.
  */
-export function ConceptStructure({ captured }) {
+export function ConceptStructure({ captured, rename, idPrefix = 'mcr-structure' }) {
   const categories = (captured && Array.isArray(captured.categories) && captured.categories) || []
   if (categories.length === 0) return null
   const title = captured && typeof captured.title === 'string' ? captured.title : null
+  const editable = Boolean(rename) && !rename.readOnly
+  // BE-53 deel 2: one proposal for kopjes that repeat the same opening, and the
+  // normal-capitals button only for kopjes that are entirely in capitals. Both
+  // act on the whole list at once; every kopje keeps its own Ongedaan maken.
+  const sectionNames = categories.map((category) => category.name)
+  const proposal = editable ? sharedSectionPrefix(sectionNames) : null
+  const capsTargets = editable
+    ? categories.filter((category) => isCapsSectionName(category.name) && normalCaseSectionName(category.name) !== cleanSectionName(category.name))
+    : []
+  function shortenAll() {
+    if (!proposal) return
+    rename.applyMany(
+      categories
+        .filter((category) => Object.prototype.hasOwnProperty.call(proposal.shorten, category.name))
+        .map((category) => ({ path: sectionPathOf(category), name: proposal.shorten[category.name] }))
+    )
+  }
+  function normaliseAll() {
+    rename.applyMany(capsTargets.map((category) => ({ path: sectionPathOf(category), name: normalCaseSectionName(category.name) })))
+  }
   return (
     <details className="bta-category">
       <summary>
         <span className="bta-category-name">Structuur</span>
         <span className="bta-muted"> · {plural(categories.length, 'menukopje', 'menukopjes')}{title ? ` onder "${title}"` : ''}</span>
       </summary>
+      {(proposal || capsTargets.length > 0 || (rename && rename.batchError)) && (
+        <div className="mcr-structure-hints">
+          {proposal && (
+            <p className="mcr-structure-hint">
+              {proposal.count} kopjes beginnen met &quot;{proposal.prefix.trim()}&quot;. Weghalen?{' '}
+              <button type="button" className="stg-btn-secondary bta-btn mcr-structure-btn" onClick={shortenAll}>
+                Weghalen
+                <span className="bta-sr-only"> van dat gedeelde voorvoegsel bij {proposal.count} kopjes</span>
+              </button>
+            </p>
+          )}
+          {capsTargets.length > 0 && (
+            <p className="mcr-structure-hint">
+              {plural(capsTargets.length, 'kopje staat', 'kopjes staan')} geheel in hoofdletters.{' '}
+              <button type="button" className="stg-btn-secondary bta-btn mcr-structure-btn" onClick={normaliseAll}>
+                Normale hoofdletters
+                <span className="bta-sr-only"> voor {capsTargets.length === 1 ? 'dit kopje' : 'deze kopjes'}</span>
+              </button>
+            </p>
+          )}
+          {rename && rename.batchError && (
+            <p className="mcr-batch-error" role="alert">
+              {rename.batchError}
+            </p>
+          )}
+        </div>
+      )}
       <ul className="bta-structure">
         {categories.map((category, i) => {
-          const proposed = formatPath(Array.isArray(category.path) && category.path.length > 0 ? category.path : [category.name])
+          const path = sectionPathOf(category)
+          const key = pathKey(path)
+          const proposed = formatPath(path)
           const source = Array.isArray(category.sourcePath) ? formatPath(category.sourcePath) : null
+          const open = Boolean(rename) && rename.openKey === key
+          const previous = rename && rename.previous ? rename.previous.get(key) : null
+          const canUndo = Boolean(rename) && rename.canUndo ? rename.canUndo(key) : false
+          const fieldId = `${idPrefix}-rename-${i}`
           return (
             <li key={i}>
               <span className="bta-dish">{title ? `${title} › ${proposed}` : proposed}</span>
@@ -48,6 +106,86 @@ export function ConceptStructure({ captured }) {
                   <span>Menukopjes onzeker</span>
                 </span>
               )}
+              {previous && (
+                <span className="mcr-rename-previous">
+                  Was: <s>{previous}</s>
+                </span>
+              )}
+              {rename && !rename.readOnly && (
+                <span className="mcr-rename-actions">
+                  <button
+                    type="button"
+                    className="stg-btn-secondary bta-btn mcr-rename-open"
+                    aria-expanded={open ? 'true' : 'false'}
+                    aria-controls={fieldId}
+                    onClick={() => rename.start(category)}
+                  >
+                    Wijzig
+                    <span className="bta-sr-only"> het menukopje {proposed}</span>
+                  </button>
+                  {canUndo && (
+                    <button type="button" className="stg-btn-secondary bta-btn" onClick={() => rename.undo(category)}>
+                      Ongedaan maken
+                      <span className="bta-sr-only"> van de nieuwe naam van {proposed}</span>
+                    </button>
+                  )}
+                </span>
+              )}
+              <div id={fieldId} className="mcr-rename-field">
+                {open && (
+                  <form
+                    className="mcr-rename"
+                    onSubmit={(event) => {
+                      event.preventDefault()
+                      rename.save(category)
+                    }}
+                  >
+                    <label htmlFor={`${fieldId}-input`}>Nieuwe naam voor dit menukopje</label>
+                    <input
+                      id={`${fieldId}-input`}
+                      className="stg-input mcr-rename-input"
+                      value={rename.text}
+                      autoFocus
+                      autoComplete="off"
+                      aria-describedby={`${fieldId}-hint`}
+                      aria-invalid={rename.error ? 'true' : undefined}
+                      onChange={(event) => rename.change(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
+                          event.preventDefault()
+                          rename.cancel()
+                        }
+                      }}
+                    />
+                    <p id={`${fieldId}-hint`} className={rename.error ? 'mcr-rename-error' : 'bta-muted'} role={rename.error ? 'alert' : undefined}>
+                      {rename.error || 'Alleen de naam van dit menukopje verandert; de indeling en de gerechten blijven.'}
+                    </p>
+                    <span className="mcr-rename-buttons">
+                      <button type="submit" className="di-btn-primary bta-btn">
+                        Opslaan in deze correctie
+                      </button>
+                      <button type="button" className="stg-btn-secondary bta-btn" onClick={rename.cancel}>
+                        Annuleren
+                      </button>
+                    </span>
+                    {/* BE-53 deel 2: standaardnamen als snelkeuze. Ze vullen het
+                        veld; opslaan blijft een eigen, bewuste klik. */}
+                    <span className="mcr-rename-presets" role="group" aria-label="Standaardnamen">
+                      <span className="mcr-rename-presets-title">Standaardnaam:</span>
+                      {DEFAULT_SECTION_NAMES.map((name) => (
+                        <button
+                          key={name}
+                          type="button"
+                          className="stg-btn-secondary bta-btn mcr-rename-preset"
+                          onClick={() => rename.change(name)}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                    </span>
+                  </form>
+                )}
+              </div>
               <span className="bta-source-route">Bronroute: {source || 'niet vastgelegd'}</span>
             </li>
           )
@@ -790,6 +928,26 @@ export function useConceptEdits() {
     if (!('exclude' in patch)) setTouched((prev) => (prev.has(lineId) ? prev : new Set(prev).add(lineId)))
     setEdits((prev) => ({ ...prev, lines: { ...prev.lines, [lineId]: { ...(prev.lines[lineId] || {}), ...patch } } }))
   }
+  // BE-53: one menukopje rename touches several lines at once. It is a
+  // correction, not an attention point, so the dishes do not move into the
+  // editing list.
+  function setLineEdits(patches) {
+    setEdits((prev) => ({ ...prev, lines: { ...prev.lines, ...patches } }))
+  }
+  // Undoing a rename removes only its `path` edit, never another correction
+  // (a corrected price or name) on the same dish.
+  function clearLinePaths(lineIds) {
+    setEdits((prev) => {
+      const lines = { ...prev.lines }
+      for (const id of lineIds) {
+        if (!lines[id]) continue
+        const { path, ...rest } = lines[id]
+        if (Object.keys(rest).length === 0) delete lines[id]
+        else lines[id] = rest
+      }
+      return { ...prev, lines }
+    })
+  }
   function decideRemoved(key, decision) {
     setEdits((prev) => ({ ...prev, removed: { ...prev.removed, [key]: decision } }))
   }
@@ -798,7 +956,73 @@ export function useConceptEdits() {
     setTouched(new Set())
   }
   const dirty = Object.keys(edits.lines).length > 0 || Object.keys(edits.removed).length > 0
-  return { edits, touched, setLineEdit, decideRemoved, reset, dirty }
+  return { edits, touched, setLineEdit, setLineEdits, clearLinePaths, decideRemoved, reset, dirty }
+}
+
+/** The path a section is shown and stored with (`name` for a flat, older section). */
+export function sectionPathOf(category) {
+  return Array.isArray(category && category.path) && category.path.length > 0 ? category.path : [category && category.name]
+}
+
+/**
+ * BE-53 — the one open rename field of the structure card. Only holds the open
+ * field and its message; whether a name may be used and which `path` edits it
+ * becomes is the pure `renameSectionEdits` (src/lib/menuConcept.js), the same
+ * rule the server applies.
+ */
+export function useSectionRename({ lines, readOnly, onApply }) {
+  const [openKey, setOpenKey] = useState(null)
+  const [text, setText] = useState('')
+  const [error, setError] = useState(null)
+  // BE-53 deel 2: the message of a whole-list help action (remove a shared
+  // opening, normal capitals). A refused kopje is named instead of hidden.
+  const [batchError, setBatchError] = useState(null)
+  function start(category) {
+    if (readOnly) return
+    setOpenKey(pathKey(sectionPathOf(category)))
+    setText(category.name || '')
+    setError(null)
+    setBatchError(null)
+  }
+  function change(value) {
+    setText(value)
+    if (error) setError(null)
+  }
+  function cancel() {
+    setOpenKey(null)
+    setText('')
+    setError(null)
+  }
+  function save(category) {
+    const result = renameSectionEdits(lines, sectionPathOf(category), text)
+    if (!result.ok) {
+      setError(result.error)
+      return
+    }
+    onApply(result)
+    cancel()
+  }
+  /**
+   * One click for several kopjes at once (shared opening, normal capitals).
+   * The batch rule lives in `renameSectionsEdits`; a refused kopje keeps its
+   * name and its reason is shown, so the reviewer always sees the result first.
+   */
+  function applyMany(renames) {
+    if (readOnly) return
+    const result = renameSectionsEdits(lines, renames)
+    if (!result.ok) {
+      setBatchError(result.refused.length > 0 ? result.refused[0].error : 'Deze wijziging kon niet worden toegepast.')
+      return
+    }
+    onApply(result)
+    cancel()
+    setBatchError(
+      result.refused.length > 0
+        ? `${plural(result.refused.length, 'kopje is', 'kopjes zijn')} niet aangepast: ${result.refused[0].error}`
+        : null
+    )
+  }
+  return { openKey, text, error, batchError, start, change, cancel, save, applyMany }
 }
 
 /** The human structure decisions that were part of the confirmed source version. */
