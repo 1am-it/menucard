@@ -192,7 +192,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
 
   return (
     <>
-      {/* BE-57 herstel (#139): dezelfde kop-opbouw als /mijn-restaurant/claimen
+      {/* BE-57 herstel (issue 139): dezelfde kop-opbouw als /mijn-restaurant/claimen
           (BE-54). Woordmerk en themaknop staan op één regel; PrimaryNav zit
           binnen .header-right en is daarmee op de telefoon verborgen
           (@media max-width 720px in app/globals.css), waar MobileTabBar onderaan
