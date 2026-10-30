@@ -6469,7 +6469,9 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
    smalste schermen wordt de gerechtnaam een maat kleiner. */
 @media (max-width: 360px) {
   .kies-dish { font-size: 26px; }
+}
 
+/* ─────────────────────────────────────────────────────────────────────────────
    BE-51 (issue 121) — toegankelijkheid van de publieke pagina's
    Alleen tokens, semantiek en ARIA: geen nieuwe kleuren, geen herontwerp.
    Wat hier staat is gevonden door ops/browser/run-a11y-public-check.js en per
