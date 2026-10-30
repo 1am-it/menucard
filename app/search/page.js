@@ -660,11 +660,12 @@ function SearchPageInner() {
             type="text"
             className="search-input flagship"
             placeholder="Zoek steak, sushi, een restaurant of een buurt…"
+            aria-label="Zoek een gerecht, restaurant of buurt"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
           {inputValue && (
-            <button type="button" className="search-clear" onClick={() => setInputValue('')}>×</button>
+            <button type="button" className="search-clear" aria-label="Zoekveld wissen" onClick={() => setInputValue('')}>×</button>
           )}
         </form>
 

@@ -91,3 +91,19 @@ test('BE-43: de README legt beide vlaggen uit', () => {
   assert.match(readme, /--alleen=<naam>\[,<naam>\]/);
   assert.match(readme, /\.filtered\.json/);
 });
+
+// BE-51 (#121): de check start zijn eigen server. Stond de app-URL vast op de
+// standaardpoort, dan startte `--poort=3171` de server op 3171 terwijl de check
+// op 3170 bleef wachten — een run die oneindig bleef hangen in plaats van te
+// meten. De poort van de vlag geldt daarom voor de server én voor de pagina's.
+test('BE-51: de a11y-check gebruikt --poort voor de server én voor de pagina', () => {
+  const source = read('ops/browser/run-a11y-public-check.js');
+  assert.match(source, /const PORT_ARG = Number\(argValue\('--poort', PORT\)\)/);
+  assert.match(source, /const APP = `http:\/\/localhost:\$\{PORT_ARG\}`/);
+  assert.ok(
+    source.indexOf('const PORT_ARG') < source.indexOf('const APP'),
+    'APP moet pas na PORT_ARG bepaald worden'
+  );
+  assert.match(source, /startServer\(\{ port: PORT_ARG, appUrl: APP/);
+  assert.doesNotMatch(source, /http:\/\/localhost:\$\{PORT\}/, 'geen tweede app-URL op de standaardpoort');
+});

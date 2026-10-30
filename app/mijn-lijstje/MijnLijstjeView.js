@@ -105,7 +105,9 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
                 weg naar de home laadt de home niet vooruit. De meting liet zien
                 dat juist deze prefetch (5,9 KB RSC + 8,8 KB routechunk) op
                 /mijn-lijstje als enige overbleef. */}
-            <Link href="/" className="back-btn" prefetch={false}>← Home</Link>
+            <nav className="lijst-back" aria-label="Terug">
+              <Link href="/" className="back-btn" prefetch={false}>← Home</Link>
+            </nav>
           </div>
         </div>
       </header>
