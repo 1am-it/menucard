@@ -57,23 +57,17 @@ function viewBody({ restaurant } = {}) {
  * dan versturen we niets, ook geen anoniem aantal.
  */
 function isTrackingOptedOut(navigatorLike) {
-  const nav = navigatorLike && typeof navigatorLike === 'object' ? navigatorLike : null;
-  if (!nav) return false;
-  if (nav.globalPrivacyControl === true) return true;
-  for (const value of [nav.doNotTrack, nav.msDoNotTrack]) {
-    const text = textOf(value).toLowerCase();
-    if (text === '1' || text === 'yes') return true;
-  }
-  return false;
+  if (!navigatorLike || typeof navigatorLike !== 'object') return false;
+  if (navigatorLike.globalPrivacyControl === true) return true;
+  return [navigatorLike.doNotTrack, navigatorLike.msDoNotTrack]
+    .some((value) => /^(1|yes)$/i.test(textOf(value)));
 }
 
 /** De al getelde restaurant-ids van deze sessie (leeg bij elke fout). */
 function sessionViewedIds(storage) {
-  if (!storage || typeof storage.getItem !== 'function') return [];
   try {
-    const raw = storage.getItem(VIEW_SESSION_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((value) => typeof value === 'string') : [];
+    const parsed = JSON.parse((storage && storage.getItem(VIEW_SESSION_KEY)) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     return [];
   }
@@ -81,13 +75,12 @@ function sessionViewedIds(storage) {
 
 /** Onthoudt in deze sessie dat dit restaurant geteld is. Faalt stil. */
 function rememberInSession(storage, restaurantId) {
-  if (!storage || typeof storage.setItem !== 'function') return false;
   try {
     const ids = sessionViewedIds(storage);
-    if (ids.includes(restaurantId)) return true;
-    ids.push(restaurantId);
-    // Alleen de ids van bezochte pagina's, nooit meer dan een handvol.
-    storage.setItem(VIEW_SESSION_KEY, JSON.stringify(ids.slice(-50)));
+    if (!ids.includes(restaurantId)) {
+      // Alleen de ids van bezochte pagina's, nooit meer dan een handvol.
+      storage.setItem(VIEW_SESSION_KEY, JSON.stringify(ids.concat(restaurantId).slice(-50)));
+    }
     return true;
   } catch (error) {
     // Volle of geblokkeerde opslag: de pagina-Set voorkomt alsnog dubbel tellen
@@ -149,21 +142,16 @@ function sendRestaurantView({
     if (nav && typeof nav.sendBeacon === 'function') {
       // Een Blob met application/json: sendBeacon stuurt anders een tekst/plain
       // body die de route niet als JSON leest.
-      const queued = nav.sendBeacon(VIEW_ENDPOINT, new Blob([payload], { type: 'application/json' }));
-      if (queued !== false) return true;
+      if (nav.sendBeacon(VIEW_ENDPOINT, new Blob([payload], { type: 'application/json' })) !== false) return true;
     }
-    const doFetch = typeof fetchRef === 'function'
-      ? fetchRef
-      : (typeof fetch === 'function' ? fetch : null);
+    const doFetch = typeof fetchRef === 'function' ? fetchRef : (typeof fetch === 'function' ? fetch : null);
     if (!doFetch) return false;
+    // Terugval zonder sendBeacon: keepalive, geen cookie en geen verwijzer.
     const pending = doFetch(VIEW_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: payload,
-      // Geen cookie, geen herkomst en geen wachttijd: de teller is anoniem.
       credentials: 'omit',
-      referrerPolicy: 'no-referrer',
-      cache: 'no-store',
       keepalive: true,
     });
     // De pagina wacht hier niet op; een afwijzing is geen fout voor de bezoeker.
@@ -187,7 +175,6 @@ function scheduleRestaurantView({
   pageSent = pageSends,
   window: windowLike,
   fetchRef,
-  delayMs = 0,
 } = {}) {
   const count = () => sendRestaurantView({ restaurantId, navigator: navigatorLike, storage, pageSent, fetchRef });
   const win = windowLike && typeof windowLike === 'object' ? windowLike : null;
@@ -196,7 +183,7 @@ function scheduleRestaurantView({
     return true;
   }
   if (typeof setTimeout === 'function') {
-    setTimeout(count, Number.isFinite(delayMs) && delayMs > 0 ? delayMs : 0);
+    setTimeout(count, 0);
     return true;
   }
   return count() !== false;
