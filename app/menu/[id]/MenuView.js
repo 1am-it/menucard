@@ -535,8 +535,8 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
       {/* ── Menu items ── */}
       <main className="page-main page-with-tabbar">
-        {/* BE-55 stap B (#135) — "Vandaag": het actieve aanbod van dit restaurant,
-            los van de filters hieronder, en weg als er niets online staat. */}
+        {/* BE-55: "Vandaag" met het actieve aanbod van dit restaurant, los van
+            de filters hieronder, en weg als er niets online staat. */}
         <DaghapVandaag restaurantId={id.split('-')[0]} />
         {filteredCategories.length === 0 ? (
           <div className="empty-state">
