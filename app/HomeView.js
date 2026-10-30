@@ -179,7 +179,7 @@ export default function HomeView({ candidates = [] }) {
         </section>
 
 
-        {/* BE-55 (#135): "Daghappen vandaag" — maximaal drie, in willekeurige
+        {/* BE-55: "Daghappen vandaag" — maximaal drie, in willekeurige
             volgorde, met een link "Alle" naar het filter "Vandaag". De sectie
             haalt het aanbod zelf op na het laden (browserklok) en verschijnt
             niet als er niets is. */}
