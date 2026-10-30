@@ -1,0 +1,520 @@
+{
+  "category": "fixture evidence (stubbed /api/v1/kies*; not real acceptance)",
+  "issue": "#106",
+  "script": "run-be46-browser-check.js",
+  "generatedAt": "2026-10-30T08:20:51.792Z",
+  "port": 3166,
+  "head": "2d77038a26fe30326741c42d2bc3b2c9ea333682",
+  "stub": {
+    "dishes": [
+      "Fictieve pasta",
+      "Fictieve burger",
+      "Fictieve salade",
+      "Fictieve soep"
+    ],
+    "note": "the API answers come from stubSource() in this file, with the shape of src/lib/kiesHandlers.js; the database and the migration are not involved"
+  },
+  "mockupComparison": "not machine-verifiable here: the approved mockup is an external Claude artifact; the screenshots in evidence/be-46/ are saved for the Lead/human visual comparison",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "maken",
+      "checks": 27,
+      "passed": 27,
+      "failed": 0,
+      "durationMs": 6830,
+      "error": null
+    },
+    {
+      "name": "route",
+      "checks": 25,
+      "passed": 25,
+      "failed": 0,
+      "durationMs": 4672,
+      "error": null
+    },
+    {
+      "name": "swipen",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 4959,
+      "error": null
+    },
+    {
+      "name": "toetsenbord",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "durationMs": 2641,
+      "error": null
+    },
+    {
+      "name": "ongedaan",
+      "checks": 5,
+      "passed": 5,
+      "failed": 0,
+      "durationMs": 3087,
+      "error": null
+    },
+    {
+      "name": "zonder-migratie",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 1282,
+      "error": null
+    }
+  ],
+  "checks": [
+    {
+      "name": "warm-up: de pagina en de gestubde API antwoorden",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: het lijstje van de maker staat klaar",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "maken: \"Samen kiezen\" staat in Mijn lijstje",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de knop heet \"Samen kiezen\", naast \"Lijstje delen\", en opent een blad",
+      "passed": true,
+      "detail": "{\"label\":\"Samen kiezen\",\"hasPopup\":\"dialog\",\"neighbour\":true}"
+    },
+    {
+      "name": "maken: een tik opent het blad met de sluitingstijd",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: het blad vraagt \"Tot wanneer mag er gestemd worden?\"",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"title\":\"Tot wanneer mag er gestemd worden?\",\"noTime\":true}"
+    },
+    {
+      "name": "maken: het blad is een echt dialoogvenster",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"title\":\"Tot wanneer mag er gestemd worden?\",\"noTime\":true}"
+    },
+    {
+      "name": "maken: zonder tijd geldt \"Geen sluitingstijd\"",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "maken: de sluitingstijd is in te vullen",
+      "passed": true,
+      "detail": "18:00"
+    },
+    {
+      "name": "maken: \"Maak de stemlink\" maakt de stemming",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stemming is gemaakt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de POST draagt de id's van het lijstje en een sluitingstijd, niets anders",
+      "passed": true,
+      "detail": "{\"dish_keys\":[\"77-diner-0-0\",\"77-diner-0-1\",\"77-diner-1-0\",\"77-diner-1-1\"],\"sluit_om\":\"2026-10-30T17:00:00.000Z\"}"
+    },
+    {
+      "name": "maken: de gekozen sluitingstijd gaat als ISO-tijd mee",
+      "passed": true,
+      "detail": "2026-10-30T17:00:00.000Z"
+    },
+    {
+      "name": "maken: \"Open de stemlink\" wijst naar /kies/<code>",
+      "passed": true,
+      "detail": "{\"href\":\"/kies/FictieStemCode00000022\",\"text\":\"Open de stemlink\"}"
+    },
+    {
+      "name": "maken: het blad noemt de gekozen tijd",
+      "passed": true,
+      "detail": "Samen kiezen\n\nStemlink gemaakt\n\nOpen de stemlink\n\nStemmen tot 18:00\n\nDeel de stemlink\nAnnuleren"
+    },
+    {
+      "name": "maken: \"Deel de stemlink\" deelt de link",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: het klembord krijgt de stemlink en niets anders",
+      "passed": true,
+      "detail": "[\"http://localhost:3166/kies/FictieStemCode00000022?stand=licht\"]"
+    },
+    {
+      "name": "maken: de melding is \"Link gekopieerd\"",
+      "passed": true,
+      "detail": "Link gekopieerd"
+    },
+    {
+      "name": "maken: de teller \"gedeeld\" telt elk gerecht van de stemlink één keer",
+      "passed": true,
+      "detail": "[{\"dish\":\"77-diner-0-0\",\"event\":\"gedeeld\"},{\"dish\":\"77-diner-0-1\",\"event\":\"gedeeld\"},{\"dish\":\"77-diner-1-0\",\"event\":\"gedeeld\"},{\"dish\":\"77-diner-1-1\",\"event\":\"gedeeld\"}]"
+    },
+    {
+      "name": "maken: \"Open de stemlink\" opent de stemming",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stemlink begint met de roepnaam",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: \"Meedoen\" opent de kaartenstapel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stem \"Lekker\" gaat naar de server",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stem \"Lekker\" gaat naar de server",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stem \"Liever niet\" gaat naar de server",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de stem \"Liever niet\" gaat naar de server",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "maken: de gemaakte stemming eindigt in de uitslag",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "maken: de uitslag noemt de stemmer bij de stemmen",
+      "passed": true,
+      "detail": "Fictieve pasta\n€14,50\nFictief Restaurant Een\n1× lekker · 0× liever niet\nSam\nFAVORIET\nReserveer\nRoute"
+    },
+    {
+      "name": "route: de stemlink begint met de roepnaam",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "route: \"Meedoen\" opent de kaartenstapel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de stapel begint bij het eerste gerecht",
+      "passed": true,
+      "detail": "Fictieve pasta"
+    },
+    {
+      "name": "route: de voortgang staat in role=\"status\"",
+      "passed": true,
+      "detail": "Gerecht 1 van 4"
+    },
+    {
+      "name": "route: de knoppen noemen het gerecht in hun aria-label",
+      "passed": true,
+      "detail": "[{\"label\":\"Liever niet: Fictieve pasta\",\"text\":\"← Liever niet\",\"height\":52},{\"label\":\"Lekker: Fictieve pasta\",\"text\":\"Lekker →\",\"height\":52}]"
+    },
+    {
+      "name": "route: de knoppen zijn minstens 44 px hoog",
+      "passed": true,
+      "detail": "[52,52]"
+    },
+    {
+      "name": "route: \"Vorige stem ongedaan maken\" is uit zonder stem",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "route: verticaal scrollen blijft werken (touch-action: pan-y)",
+      "passed": true,
+      "detail": "pan-y"
+    },
+    {
+      "name": "route: de knop \"Lekker\" werkt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de voortgang staat op \"Gerecht 2 van 4\"",
+      "passed": true,
+      "detail": "Gerecht 2 van 4"
+    },
+    {
+      "name": "route: de knop \"Lekker\" werkt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de voortgang staat op \"Gerecht 3 van 4\"",
+      "passed": true,
+      "detail": "Gerecht 3 van 4"
+    },
+    {
+      "name": "route: de knop \"Liever niet\" werkt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de voortgang staat op \"Gerecht 4 van 4\"",
+      "passed": true,
+      "detail": "Gerecht 4 van 4"
+    },
+    {
+      "name": "route: de knop \"Liever niet\" werkt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de uitslag is een echte lijst",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "route: alle vier gerechten staan in de uitslag",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "route: de favoriet staat bovenaan met \"Favoriet\"",
+      "passed": true,
+      "detail": "Fictieve pasta\n€14,50\nFictief Restaurant Een\n1× lekker · 0× liever niet\nSam\nFAVORIET\nReserveer\nRoute"
+    },
+    {
+      "name": "route: de favoriet is \"Fictieve pasta\"",
+      "passed": true,
+      "detail": "Fictieve pasta\n€14,50\nFictief Restaurant Een\n1× lekker · 0× liever niet\nSam\nFAVORIET\nReserveer\nRoute"
+    },
+    {
+      "name": "route: de favoriet heeft \"Reserveer\" en \"Route\"",
+      "passed": true,
+      "detail": "[{\"label\":\"Reserveer: Fictieve pasta\",\"href\":\"tel:0760000001\"},{\"label\":\"Route: Fictieve pasta\",\"href\":\"https://www.google.com/maps/search/?api=1&query=Fictief+1%2C+Breda\"}]"
+    },
+    {
+      "name": "route: de knoppen leiden naar de eigen route van het restaurant en naar Maps",
+      "passed": true,
+      "detail": "[\"tel:0760000001\",\"https://www.google.com/maps/search/?api=1&query=Fictief+1%2C+Breda\"]"
+    },
+    {
+      "name": "route: opnieuw openen toont meteen de uitslag",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "route: de uitslag staat er ook in donker",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "route: elke stem is precies één POST met alleen de vier velden",
+      "passed": true,
+      "detail": "[{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":true},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-0\",\"lekker\":false},{\"stemmer\":\"MEpRQnfPoKKqLY1qcrde3g\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-1\",\"lekker\":false}]"
+    },
+    {
+      "name": "route: de pagina leest de stemming via GET",
+      "passed": true,
+      "detail": "5"
+    },
+    {
+      "name": "swipen: slepen naar rechts toont \"Lekker →\"",
+      "passed": true,
+      "detail": "Lekker →"
+    },
+    {
+      "name": "swipen: 40% naar rechts is een stem \"lekker\"",
+      "passed": true,
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+    },
+    {
+      "name": "swipen: na de stem staat het tweede gerecht vooraan",
+      "passed": true,
+      "detail": "Fictieve burger"
+    },
+    {
+      "name": "swipen: slepen naar links toont \"← Liever niet\"",
+      "passed": true,
+      "detail": "← Liever niet"
+    },
+    {
+      "name": "swipen: 10% is onder de drempel en telt niet",
+      "passed": true,
+      "detail": "2 -> 2"
+    },
+    {
+      "name": "swipen: onder de drempel blijft dezelfde kaart staan",
+      "passed": true,
+      "detail": "Fictieve burger"
+    },
+    {
+      "name": "swipen: 45% naar links is een stem \"liever niet\"",
+      "passed": true,
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"BTyBTdnkBLU-l-cxAIObYw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+    },
+    {
+      "name": "swipen: na links staat het derde gerecht vooraan",
+      "passed": true,
+      "detail": "Fictieve salade"
+    },
+    {
+      "name": "toetsenbord: de kaartenstapel is met het toetsenbord te bereiken",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "toetsenbord: ArrowRight stemt \"lekker\"",
+      "passed": true,
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+    },
+    {
+      "name": "toetsenbord: ArrowLeft stemt \"liever niet\"",
+      "passed": true,
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"iID0EUbHX0zbR9Url--2rA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+    },
+    {
+      "name": "toetsenbord: de voortgang telt mee",
+      "passed": true,
+      "detail": "Gerecht 3 van 4"
+    },
+    {
+      "name": "ongedaan: na een stem is de undo-knop actief",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "ongedaan: de undo-knop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "52"
+    },
+    {
+      "name": "ongedaan: het eerste gerecht staat weer vooraan",
+      "passed": true,
+      "detail": "Fictieve pasta"
+    },
+    {
+      "name": "ongedaan: de knop is weer uit",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "ongedaan: de pagina stuurt één DELETE met alleen de stemmer",
+      "passed": true,
+      "detail": "[{\"method\":\"DELETE\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"2dCl2qoyvSDSOyYNPujIUg\"}}]"
+    },
+    {
+      "name": "zonder migratie: de pagina toont de ene melding",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zonder migratie: er is geen kaartenstapel",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "be46-sluitingstijd-390-light.png",
+      "sha256": "77e3a6edced59a33dae98b8d76a2ad5966b8097d3207ea1a5b1524cbf7e2e5fb",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "sluitingstijd"
+    },
+    {
+      "file": "be46-sluitingstijd-390-dark.png",
+      "sha256": "50cd5739167e1f42867664f40682357e3e1fd4b2f30e02be90fc571812e4730b",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "state": "sluitingstijd"
+    },
+    {
+      "file": "be46-gemaakt-390-light.png",
+      "sha256": "7ee40a56f406b8c1e00a38ca7ac250a2cb477ffe25247da4ea2ee5298215a12c",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "gemaakt"
+    },
+    {
+      "file": "be46-uitslag-na-maken-390-light.png",
+      "sha256": "00ff22934d1bbfff56e9e824d90f5ea9094981577797525688edc61f4323b3f8",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "uitslag-na-maken"
+    },
+    {
+      "file": "be46-stapel-390-light.png",
+      "sha256": "f432d5b33372f5ac0377158c2dab0f793c2ba985ea83853efe50c0231368e089",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "stapel"
+    },
+    {
+      "file": "be46-uitslag-390-light.png",
+      "sha256": "799443309158c622c3af4c7d9e7414a3d7da39f93cf207b87cf0ce52417fa109",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "uitslag"
+    },
+    {
+      "file": "be46-uitslag-390-dark.png",
+      "sha256": "8a14ae5e84676f0466675e063273c9b3c1bdd9c44cf0e5e5d1ddab26b307a8b4",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "state": "uitslag"
+    },
+    {
+      "file": "be46-stapel-390-dark.png",
+      "sha256": "100285112233d7f1f34dd5979dbd930cb6cfedb26cba3d61033b1299c49ff677",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "dark",
+      "state": "stapel"
+    },
+    {
+      "file": "be46-zonder-migratie-390-light.png",
+      "sha256": "bc1fbf2882c9b91be32d929ae5b956bf207a25619aef9b21a8e814da9501a2fc",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "theme": "light",
+      "state": "zonder-migratie"
+    }
+  ],
+  "passed": true
+}
