@@ -12,6 +12,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
 const {
+  CLAIM_SEARCH_HREF,
   INTERNAL_LOGIN_HREF,
   OWNER_ACCESS_MESSAGES,
   OWNER_HOME_HREF,
@@ -32,6 +33,9 @@ test('ownerAccess: the three hrefs are the contract paths', () => {
   assert.equal(OWNER_LOGIN_HREF, '/mijn-restaurant/inloggen');
   assert.equal(OWNER_HOME_HREF, '/mijn-restaurant');
   assert.equal(INTERNAL_LOGIN_HREF, '/internal/login');
+  // BE-54 (#133): "Claim je restaurant" gaat naar het zoekscherm, niet meer
+  // naar de volledige lijst /alle-restaurants.
+  assert.equal(CLAIM_SEARCH_HREF, '/mijn-restaurant/claimen');
 });
 
 test('ownerAccess: an internal or editor account continues to /internal/login', () => {

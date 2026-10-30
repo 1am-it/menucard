@@ -1,0 +1,1108 @@
+{
+  "issue": "#130",
+  "ticket": "BE-53 — menukopje wijzigen",
+  "fixtureOnly": true,
+  "passed": true,
+  "error": null,
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "wijzigen",
+      "checks": 184,
+      "passed": 184,
+      "failed": 0,
+      "durationMs": 70220,
+      "error": null
+    }
+  ],
+  "head": "40aefa4a4917d60edb82c0025ce6249cc17a120f",
+  "worktreeDirty": false,
+  "worktreeChanges": [],
+  "generatedAt": "2026-10-30T19:39:53.022Z",
+  "environment": {
+    "node": "v22.22.3",
+    "loopback": "http://localhost:3193 (own next dev) + own local browser over CDP",
+    "browser": "auto-detected Edge/Chrome",
+    "fixture": "concepts-section-rename",
+    "fixtureWriteRoutes": [
+      "POST /api/internal/v1/menu-concepts/concept-be53-0100/versions",
+      "POST /api/internal/v1/menu-concepts/concept-be53-0200/versions"
+    ]
+  },
+  "covered": [
+    "Structuur: every menukopje offers Wijzig; the field has a label and the current name",
+    "keyboard: Enter opens, Tab reaches \"Opslaan in deze correctie\"; visible focus on field and buttons",
+    "refused with a clear message: an unchanged name and an empty name",
+    "rename shows the new name with the old one struck through, plus Ongedaan maken",
+    "Ongedaan maken restores the previous name and removes the unsaved correction",
+    "rename again, then \"Correcties opslaan als versie 2\" posts only path edits via the existing route",
+    "version 2 shows the new heading in Structuur and in the Publicatievoorbeeld",
+    "1280 px and 390 px, light and dark"
+  ],
+  "checks": [
+    {
+      "name": "BE-53 1280px/light: de Structuur-lijst met de bestaande menukopjes staat open",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "BE-53 1280px/light: elk menukopje krijgt een knop Wijzig",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/light: het lange kopje uit het voorbeeld staat in de lijst",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: geen horizontale overloop met de Wijzig-knoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 1280px/light: Wijzig is met het toetsenbord te openen",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 1280px/light: het tekstveld heeft een label en de huidige naam",
+      "passed": true,
+      "detail": "[\"Nieuwe naam voor dit menukopje\",\"Proef het beste van het seizoen — Hoofd\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: het tekstveld heeft zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 1280px/light: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 1280px/light: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
+      "name": "BE-53 1280px/light: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 1280px/light: een ongewijzigde naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Dit is al de naam van dit menukopje.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: een lege naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Vul een naam voor dit menukopje in.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: de nieuwe naam is met het toetsenbord ingevuld",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 1280px/light: het menukopje toont de nieuwe naam",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: de oude naam staat doorgestreept onder de nieuwe",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: er is een Ongedaan maken per kopje",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "BE-53 1280px/light: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 1280px/light: Ongedaan maken is met het toetsenbord bereikbaar met zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Ongedaan maken\\nvan de nieuwe naam van Hoofdgerechten\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 1280px/light: Ongedaan maken zet de oude naam terug",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: na Ongedaan maken is er geen Ongedaan maken en geen open correctie meer",
+      "passed": true,
+      "detail": "[0,null]"
+    },
+    {
+      "name": "BE-53 1280px/light: opnieuw wijzigen werkt",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/light: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 390px/light: de Structuur-lijst met de bestaande menukopjes staat open",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "BE-53 390px/light: elk menukopje krijgt een knop Wijzig",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/light: het lange kopje uit het voorbeeld staat in de lijst",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/light: geen horizontale overloop met de Wijzig-knoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 390px/light: Wijzig is met het toetsenbord te openen",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 390px/light: het tekstveld heeft een label en de huidige naam",
+      "passed": true,
+      "detail": "[\"Nieuwe naam voor dit menukopje\",\"Proef het beste van het seizoen — Hoofd\"]"
+    },
+    {
+      "name": "BE-53 390px/light: het tekstveld heeft zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 390px/light: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 390px/light: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
+      "name": "BE-53 390px/light: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 390px/light: een ongewijzigde naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Dit is al de naam van dit menukopje.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 390px/light: een lege naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Vul een naam voor dit menukopje in.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 390px/light: de nieuwe naam is met het toetsenbord ingevuld",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 390px/light: het menukopje toont de nieuwe naam",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/light: de oude naam staat doorgestreept onder de nieuwe",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/light: er is een Ongedaan maken per kopje",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "BE-53 390px/light: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 390px/light: Ongedaan maken is met het toetsenbord bereikbaar met zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Ongedaan maken\\nvan de nieuwe naam van Hoofdgerechten\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 390px/light: Ongedaan maken zet de oude naam terug",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/light: na Ongedaan maken is er geen Ongedaan maken en geen open correctie meer",
+      "passed": true,
+      "detail": "[0,null]"
+    },
+    {
+      "name": "BE-53 390px/light: opnieuw wijzigen werkt",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/light: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: de Structuur-lijst met de bestaande menukopjes staat open",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "BE-53 1280px/dark: elk menukopje krijgt een knop Wijzig",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/dark: het lange kopje uit het voorbeeld staat in de lijst",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: geen horizontale overloop met de Wijzig-knoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 1280px/dark: Wijzig is met het toetsenbord te openen",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 1280px/dark: het tekstveld heeft een label en de huidige naam",
+      "passed": true,
+      "detail": "[\"Nieuwe naam voor dit menukopje\",\"Proef het beste van het seizoen — Hoofd\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: het tekstveld heeft zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 1280px/dark: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 1280px/dark: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
+      "name": "BE-53 1280px/dark: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 1280px/dark: een ongewijzigde naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Dit is al de naam van dit menukopje.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: een lege naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Vul een naam voor dit menukopje in.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: de nieuwe naam is met het toetsenbord ingevuld",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 1280px/dark: het menukopje toont de nieuwe naam",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: de oude naam staat doorgestreept onder de nieuwe",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: er is een Ongedaan maken per kopje",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "BE-53 1280px/dark: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 1280px/dark: Ongedaan maken is met het toetsenbord bereikbaar met zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Ongedaan maken\\nvan de nieuwe naam van Hoofdgerechten\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 1280px/dark: Ongedaan maken zet de oude naam terug",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: na Ongedaan maken is er geen Ongedaan maken en geen open correctie meer",
+      "passed": true,
+      "detail": "[0,null]"
+    },
+    {
+      "name": "BE-53 1280px/dark: opnieuw wijzigen werkt",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: de Structuur-lijst met de bestaande menukopjes staat open",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "BE-53 390px/dark: elk menukopje krijgt een knop Wijzig",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/dark: het lange kopje uit het voorbeeld staat in de lijst",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: geen horizontale overloop met de Wijzig-knoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 390px/dark: Wijzig is met het toetsenbord te openen",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 390px/dark: het tekstveld heeft een label en de huidige naam",
+      "passed": true,
+      "detail": "[\"Nieuwe naam voor dit menukopje\",\"Proef het beste van het seizoen — Hoofd\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: het tekstveld heeft zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 390px/dark: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 390px/dark: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
+      "name": "BE-53 390px/dark: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 390px/dark: een ongewijzigde naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Dit is al de naam van dit menukopje.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: een lege naam wordt met een melding geweigerd",
+      "passed": true,
+      "detail": "[true,\"Vul een naam voor dit menukopje in.\",\"true\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: de nieuwe naam is met het toetsenbord ingevuld",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 390px/dark: het menukopje toont de nieuwe naam",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: de oude naam staat doorgestreept onder de nieuwe",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: er is een Ongedaan maken per kopje",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "BE-53 390px/dark: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 390px/dark: Ongedaan maken is met het toetsenbord bereikbaar met zichtbare focus",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"text\":\"Ongedaan maken\\nvan de nieuwe naam van Hoofdgerechten\",\"value\":null}"
+    },
+    {
+      "name": "BE-53 390px/dark: Ongedaan maken zet de oude naam terug",
+      "passed": true,
+      "detail": "[\"Menukaart › Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Proef het beste van het seizoen — Hoofd\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: na Ongedaan maken is er geen Ongedaan maken en geen open correctie meer",
+      "passed": true,
+      "detail": "[0,null]"
+    },
+    {
+      "name": "BE-53 390px/dark: opnieuw wijzigen werkt",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWas: Proef het beste van het seizoen — Hoofd\\nWijzig\\nhet menukopje Hoofdgerechten\\nOngedaan maken\\nvan de nieuwe naam van Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 390px/dark: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 opslaan: elke ronde postte precies één nieuwe versie",
+      "passed": true,
+      "detail": "[1,1,1,1]"
+    },
+    {
+      "name": "BE-53 opslaan: elke post verwachtte versie 1",
+      "passed": true,
+      "detail": "[1,1,1,1]"
+    },
+    {
+      "name": "BE-53 opslaan: de post bevat voor elk gerecht onder het kopje het bestaande path-veld",
+      "passed": true,
+      "detail": "[[[\"0.0.0\",\"Hoofdgerechten\"],[\"0.0.1\",\"Hoofdgerechten\"]],[[\"0.0.0\",\"Hoofdgerechten\"],[\"0.0.1\",\"Hoofdgerechten\"]],[[\"0.0.0\",\"Hoofdgerechten\"],[\"0.0.1\",\"Hoofdgerechten\"]],[[\"0.0.0\",\"Hoofdgerechten\"],[\"0.0.1\",\"Hoofdgerechten\"]]]"
+    },
+    {
+      "name": "BE-53 opslaan: alleen de twee gerechten van dat kopje zijn geraakt",
+      "passed": true,
+      "detail": "[[\"0.0.0\",\"0.0.1\"],[\"0.0.0\",\"0.0.1\"],[\"0.0.0\",\"0.0.1\"],[\"0.0.0\",\"0.0.1\"]]"
+    },
+    {
+      "name": "BE-53 versie 2: de Structuur-lijst toont het nieuwe kopje",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWijzig\\nhet menukopje Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 versie 2: de oude naam is geen kopje meer in deze versie",
+      "passed": true,
+      "detail": "[\"Menukaart › Hoofdgerechten\\nWijzig\\nhet menukopje Hoofdgerechten\\nBronroute: niet vastgelegd\",\"Menukaart › Dessert\\nWijzig\\nhet menukopje Dessert\\nBronroute: NAGERECHTEN\"]"
+    },
+    {
+      "name": "BE-53 versie 2: het Publicatievoorbeeld toont de nieuwe kopjesnaam",
+      "passed": true,
+      "detail": "Fictief Concept Proef\nVoorvertoning zoals publiek\nNieuw concept\nHuidige publieke kaart\n\nPrecies wat de review-PR voor versie 2 schrijft. Nog niet gepubliceerd.\n\nLunchkaart\nHOOFDGERECHTEN\nFictieve zeebaars\n24.50\nFictief, met venkel\nFictieve "
+    },
+    {
+      "name": "BE-53 versie 2: het Publicatievoorbeeld toont de oude kopjesnaam niet meer",
+      "passed": true,
+      "detail": "Fictief Concept Proef\nVoorvertoning zoals publiek\nNieuw concept\nHuidige publieke kaart\n\nPrecies wat de review-PR voor versie 2 schrijft. Nog niet gepubliceerd.\n\nLunchkaart\nHOOFDGERECHTEN\nFictieve zeebaars\n24.50\nFictief, met venkel\nFictieve "
+    },
+    {
+      "name": "BE-53 versie 2: geen horizontale overloop op 1280 px",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de Structuur-lijst toont de drie kopjes",
+      "passed": true,
+      "detail": "true [\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › DESSERT\",\"Menukaart › VOOR\\nWijzig\\nhet menukopje VOOR\\nBronroute: VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: één voorstel voor het gedeelde voorvoegsel",
+      "passed": true,
+      "detail": "[\"2 kopjes beginnen met \\\"PROEF HET BESTE VAN HET SEIZOEN —\\\". Weghalen? Weghalen\\nvan dat gedeelde voorvoegsel bij 2 kopjes\",\"3 kopjes staan geheel in hoofdletters. Normale hoofdletters\\nvoor deze kopjes\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de knoppen Weghalen en Normale hoofdletters staan klaar",
+      "passed": true,
+      "detail": "[\"Weghalen\",\"Normale hoofdletters\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: geen horizontale overloop met de hulpknoppen",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: Weghalen is met het toetsenbord te bedienen",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: na Weghalen is het voorvoegsel weg bij beide kopjes",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: elk ingekort kopje is los ongedaan te maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: geen foutmelding bij het weghalen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: Normale hoofdletters maakt Hoofd, Dessert en Voor",
+      "passed": true,
+      "detail": "[\"Hoofd\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de knop Normale hoofdletters verdwijnt als er geen kopje meer in hoofdletters staat",
+      "passed": true,
+      "detail": "[[],[]]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de drie kopjes zijn los ongedaan te maken",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: het tekstveld biedt de negen standaardnamen als snelkeuze",
+      "passed": true,
+      "detail": "[\"Voorgerechten\",\"Tussengerechten\",\"Hoofdgerechten\",\"Bijgerechten\",\"Desserts\",\"Dranken\",\"Lunch\",\"Diner\",\"Kindermenu\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: een snelkeuze vult het tekstveld met de standaardnaam",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 1280px/light hulp: het veld houdt zijn label bij een snelkeuze",
+      "passed": true,
+      "detail": "\"Nieuwe naam voor dit menukopje\""
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de snelkeuze staat als nieuwe kopjesnaam in de lijst",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: Ongedaan maken raakt alleen dat ene kopje",
+      "passed": true,
+      "detail": "[\"PROEF HET BESTE VAN HET SEIZOEN — HOOFD\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: de twee andere kopjes houden hun Ongedaan maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: opnieuw kiezen en opslaan werkt",
+      "passed": true,
+      "detail": "[[\"Hoofdgerechten\",\"Dessert\",\"Voor\"],3]"
+    },
+    {
+      "name": "BE-53 1280px/light hulp: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de Structuur-lijst toont de drie kopjes",
+      "passed": true,
+      "detail": "true [\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › DESSERT\",\"Menukaart › VOOR\\nWijzig\\nhet menukopje VOOR\\nBronroute: VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: één voorstel voor het gedeelde voorvoegsel",
+      "passed": true,
+      "detail": "[\"2 kopjes beginnen met \\\"PROEF HET BESTE VAN HET SEIZOEN —\\\". Weghalen? Weghalen\\nvan dat gedeelde voorvoegsel bij 2 kopjes\",\"3 kopjes staan geheel in hoofdletters. Normale hoofdletters\\nvoor deze kopjes\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de knoppen Weghalen en Normale hoofdletters staan klaar",
+      "passed": true,
+      "detail": "[\"Weghalen\",\"Normale hoofdletters\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: geen horizontale overloop met de hulpknoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 390px/light hulp: Weghalen is met het toetsenbord te bedienen",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: na Weghalen is het voorvoegsel weg bij beide kopjes",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: elk ingekort kopje is los ongedaan te maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/light hulp: geen foutmelding bij het weghalen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "BE-53 390px/light hulp: Normale hoofdletters maakt Hoofd, Dessert en Voor",
+      "passed": true,
+      "detail": "[\"Hoofd\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de knop Normale hoofdletters verdwijnt als er geen kopje meer in hoofdletters staat",
+      "passed": true,
+      "detail": "[[],[]]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de drie kopjes zijn los ongedaan te maken",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "name": "BE-53 390px/light hulp: het tekstveld biedt de negen standaardnamen als snelkeuze",
+      "passed": true,
+      "detail": "[\"Voorgerechten\",\"Tussengerechten\",\"Hoofdgerechten\",\"Bijgerechten\",\"Desserts\",\"Dranken\",\"Lunch\",\"Diner\",\"Kindermenu\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: een snelkeuze vult het tekstveld met de standaardnaam",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 390px/light hulp: het veld houdt zijn label bij een snelkeuze",
+      "passed": true,
+      "detail": "\"Nieuwe naam voor dit menukopje\""
+    },
+    {
+      "name": "BE-53 390px/light hulp: de snelkeuze staat als nieuwe kopjesnaam in de lijst",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 390px/light hulp: Ongedaan maken raakt alleen dat ene kopje",
+      "passed": true,
+      "detail": "[\"PROEF HET BESTE VAN HET SEIZOEN — HOOFD\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: de twee andere kopjes houden hun Ongedaan maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/light hulp: opnieuw kiezen en opslaan werkt",
+      "passed": true,
+      "detail": "[[\"Hoofdgerechten\",\"Dessert\",\"Voor\"],3]"
+    },
+    {
+      "name": "BE-53 390px/light hulp: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de Structuur-lijst toont de drie kopjes",
+      "passed": true,
+      "detail": "true [\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › DESSERT\",\"Menukaart › VOOR\\nWijzig\\nhet menukopje VOOR\\nBronroute: VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: één voorstel voor het gedeelde voorvoegsel",
+      "passed": true,
+      "detail": "[\"2 kopjes beginnen met \\\"PROEF HET BESTE VAN HET SEIZOEN —\\\". Weghalen? Weghalen\\nvan dat gedeelde voorvoegsel bij 2 kopjes\",\"3 kopjes staan geheel in hoofdletters. Normale hoofdletters\\nvoor deze kopjes\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de knoppen Weghalen en Normale hoofdletters staan klaar",
+      "passed": true,
+      "detail": "[\"Weghalen\",\"Normale hoofdletters\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: geen horizontale overloop met de hulpknoppen",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: Weghalen is met het toetsenbord te bedienen",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: na Weghalen is het voorvoegsel weg bij beide kopjes",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: elk ingekort kopje is los ongedaan te maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: geen foutmelding bij het weghalen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: Normale hoofdletters maakt Hoofd, Dessert en Voor",
+      "passed": true,
+      "detail": "[\"Hoofd\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de knop Normale hoofdletters verdwijnt als er geen kopje meer in hoofdletters staat",
+      "passed": true,
+      "detail": "[[],[]]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de drie kopjes zijn los ongedaan te maken",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: het tekstveld biedt de negen standaardnamen als snelkeuze",
+      "passed": true,
+      "detail": "[\"Voorgerechten\",\"Tussengerechten\",\"Hoofdgerechten\",\"Bijgerechten\",\"Desserts\",\"Dranken\",\"Lunch\",\"Diner\",\"Kindermenu\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: een snelkeuze vult het tekstveld met de standaardnaam",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: het veld houdt zijn label bij een snelkeuze",
+      "passed": true,
+      "detail": "\"Nieuwe naam voor dit menukopje\""
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de snelkeuze staat als nieuwe kopjesnaam in de lijst",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: Ongedaan maken raakt alleen dat ene kopje",
+      "passed": true,
+      "detail": "[\"PROEF HET BESTE VAN HET SEIZOEN — HOOFD\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: de twee andere kopjes houden hun Ongedaan maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: opnieuw kiezen en opslaan werkt",
+      "passed": true,
+      "detail": "[[\"Hoofdgerechten\",\"Dessert\",\"Voor\"],3]"
+    },
+    {
+      "name": "BE-53 1280px/dark hulp: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de Structuur-lijst toont de drie kopjes",
+      "passed": true,
+      "detail": "true [\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — HOOFD\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › HOOFD\",\"Menukaart › PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nWijzig\\nhet menukopje PROEF HET BESTE VAN HET SEIZOEN — DESSERT\\nBronroute: PROEF HET BESTE VAN HET SEIZOEN › DESSERT\",\"Menukaart › VOOR\\nWijzig\\nhet menukopje VOOR\\nBronroute: VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: één voorstel voor het gedeelde voorvoegsel",
+      "passed": true,
+      "detail": "[\"2 kopjes beginnen met \\\"PROEF HET BESTE VAN HET SEIZOEN —\\\". Weghalen? Weghalen\\nvan dat gedeelde voorvoegsel bij 2 kopjes\",\"3 kopjes staan geheel in hoofdletters. Normale hoofdletters\\nvoor deze kopjes\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de knoppen Weghalen en Normale hoofdletters staan klaar",
+      "passed": true,
+      "detail": "[\"Weghalen\",\"Normale hoofdletters\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: geen horizontale overloop met de hulpknoppen",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: Weghalen is met het toetsenbord te bedienen",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: na Weghalen is het voorvoegsel weg bij beide kopjes",
+      "passed": true,
+      "detail": "[\"HOOFD\",\"DESSERT\",\"VOOR\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: elk ingekort kopje is los ongedaan te maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: geen foutmelding bij het weghalen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: Normale hoofdletters maakt Hoofd, Dessert en Voor",
+      "passed": true,
+      "detail": "[\"Hoofd\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de knop Normale hoofdletters verdwijnt als er geen kopje meer in hoofdletters staat",
+      "passed": true,
+      "detail": "[[],[]]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de drie kopjes zijn los ongedaan te maken",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: het tekstveld biedt de negen standaardnamen als snelkeuze",
+      "passed": true,
+      "detail": "[\"Voorgerechten\",\"Tussengerechten\",\"Hoofdgerechten\",\"Bijgerechten\",\"Desserts\",\"Dranken\",\"Lunch\",\"Diner\",\"Kindermenu\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: een snelkeuze vult het tekstveld met de standaardnaam",
+      "passed": true,
+      "detail": "\"Hoofdgerechten\""
+    },
+    {
+      "name": "BE-53 390px/dark hulp: het veld houdt zijn label bij een snelkeuze",
+      "passed": true,
+      "detail": "\"Nieuwe naam voor dit menukopje\""
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de snelkeuze staat als nieuwe kopjesnaam in de lijst",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de correctie telt mee voor \"Correcties opslaan als versie 2\"",
+      "passed": true,
+      "detail": "{\"text\":\"Correcties opslaan als versie 2\",\"ariaDisabled\":null}"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: Ongedaan maken raakt alleen dat ene kopje",
+      "passed": true,
+      "detail": "[\"PROEF HET BESTE VAN HET SEIZOEN — HOOFD\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: de twee andere kopjes houden hun Ongedaan maken",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: opnieuw kiezen en opslaan werkt",
+      "passed": true,
+      "detail": "[[\"Hoofdgerechten\",\"Dessert\",\"Voor\"],3]"
+    },
+    {
+      "name": "BE-53 390px/dark hulp: \"Correcties opslaan als versie 2\" opent de nieuwe versie 2",
+      "passed": true,
+      "detail": "[true,\"2\"]"
+    },
+    {
+      "name": "BE-53 hulp opslaan: elke hulp-ronde postte precies één nieuwe versie",
+      "passed": true,
+      "detail": "[1,1,1,1]"
+    },
+    {
+      "name": "BE-53 hulp opslaan: de post bevat voor elk gerecht het nieuwe kopje als bestaand path-veld",
+      "passed": true,
+      "detail": "[{\"0.0.0\":\"Hoofdgerechten\",\"0.0.1\":\"Hoofdgerechten\",\"0.1.0\":\"Dessert\",\"0.2.0\":\"Voor\"},{\"0.0.0\":\"Hoofdgerechten\",\"0.0.1\":\"Hoofdgerechten\",\"0.1.0\":\"Dessert\",\"0.2.0\":\"Voor\"},{\"0.0.0\":\"Hoofdgerechten\",\"0.0.1\":\"Hoofdgerechten\",\"0.1.0\":\"Dessert\",\"0.2.0\":\"Voor\"},{\"0.0.0\":\"Hoofdgerechten\",\"0.0.1\":\"Hoofdgerechten\",\"0.1.0\":\"Dessert\",\"0.2.0\":\"Voor\"}]"
+    },
+    {
+      "name": "BE-53 versie 2 hulp: de Structuur-lijst toont de drie nieuwe kopjesnamen",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 versie 2 hulp: het oude voorvoegsel staat niet meer in de Structuur-lijst",
+      "passed": true,
+      "detail": "[\"Hoofdgerechten\",\"Dessert\",\"Voor\"]"
+    },
+    {
+      "name": "BE-53 versie 2 hulp: het Publicatievoorbeeld toont de nieuwe kopjesnaam",
+      "passed": true,
+      "detail": "Fictief Concept Herhaling\nVoorvertoning zoals publiek\nNieuw concept\nHuidige publieke kaart\n\nPrecies wat de review-PR voor versie 2 schrijft. Nog niet gepubliceerd.\n\nLunch\nHOOFDGERECHTEN\nFictieve kabeljauw\n23.50\nFictief, met prei\nFictieve ee"
+    },
+    {
+      "name": "BE-53 versie 2 hulp: het Publicatievoorbeeld toont het oude voorvoegsel niet meer",
+      "passed": true,
+      "detail": "Fictief Concept Herhaling\nVoorvertoning zoals publiek\nNieuw concept\nHuidige publieke kaart\n\nPrecies wat de review-PR voor versie 2 schrijft. Nog niet gepubliceerd.\n\nLunch\nHOOFDGERECHTEN\nFictieve kabeljauw\n23.50\nFictief, met prei\nFictieve ee"
+    },
+    {
+      "name": "BE-53 hulp versie 2: geen horizontale overloop op 1280 px",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "BE-53 netwerk: geen onverwacht verkeer vanuit de app",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "BE-53: geen onafgevangen browser-exception",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "BE-53: de fixture is zonder fout gestart",
+      "passed": true,
+      "detail": "ok"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "be-53/be53-rename-1280-light.png",
+      "sha256": "f5744ea03e9d07916ec93b64762e48fb140b9e4e7c33b9c58c84f1087ce1f85a",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be-53/be53-rename-390-light.png",
+      "sha256": "24fd83fe769608ee68c3d3dc8c18160021d8f4e1bd1da60e9a0cba105f859911",
+      "width": 390,
+      "height": 1424
+    },
+    {
+      "file": "be-53/be53-rename-1280-dark.png",
+      "sha256": "376414d7c32a5c35f47db6c64fbb4500a81c2b6169e6db79abc3a931828522cf",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be-53/be53-rename-390-dark.png",
+      "sha256": "5d4f25c326929993eb90b93cb3d7ea4708dccca4d07335a14f788283469019da",
+      "width": 390,
+      "height": 1424
+    },
+    {
+      "file": "be-53/be53-versie-2-1280-light.png",
+      "sha256": "7263b7579505e491c8906eeca1e5db59bcdadc681a32557bce3214e4c8c6dbf7",
+      "width": 1274,
+      "height": 1064
+    },
+    {
+      "file": "be-53/be53-hulp-1280-light.png",
+      "sha256": "9e916853b0279f3a199894a35ef84702fbdc1f1de53c1bd6ba0ba77d8613c809",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be-53/be53-hulp-390-light.png",
+      "sha256": "74b63257ed592f60b45f1909b9dfa487087946d5d4707796b9a7db10c20df617",
+      "width": 390,
+      "height": 1590
+    },
+    {
+      "file": "be-53/be53-hulp-1280-dark.png",
+      "sha256": "b7cd07ce2affd08559145b3f51ec36353233f7917114fd3ea6be560161cf104d",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "file": "be-53/be53-hulp-390-dark.png",
+      "sha256": "723ee8da3aed11a93f4f73085399bb155e21482150757fc64c05172971cc335d",
+      "width": 390,
+      "height": 1590
+    },
+    {
+      "file": "be-53/be53-hulp-versie-2-1280.png",
+      "sha256": "d64ff45a374ac1216bb7b48560102fdadf57e5fff79a78351ff9ca15c1e7bcd3",
+      "width": 1274,
+      "height": 1274
+    }
+  ],
+  "versions": [
+    {
+      "shotRenamed": {
+        "file": "be-53/be53-rename-1280-light.png",
+        "sha256": "f5744ea03e9d07916ec93b64762e48fb140b9e4e7c33b9c58c84f1087ce1f85a",
+        "width": 1280,
+        "height": 900
+      },
+      "rows": [
+        "",
+        ""
+      ],
+      "version": "2",
+      "theme": "light",
+      "width": 1280
+    },
+    {
+      "shotRenamed": {
+        "file": "be-53/be53-rename-390-light.png",
+        "sha256": "24fd83fe769608ee68c3d3dc8c18160021d8f4e1bd1da60e9a0cba105f859911",
+        "width": 390,
+        "height": 1424
+      },
+      "rows": [
+        "",
+        ""
+      ],
+      "version": "2",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "shotRenamed": {
+        "file": "be-53/be53-rename-1280-dark.png",
+        "sha256": "376414d7c32a5c35f47db6c64fbb4500a81c2b6169e6db79abc3a931828522cf",
+        "width": 1280,
+        "height": 900
+      },
+      "rows": [
+        "",
+        ""
+      ],
+      "version": "2",
+      "theme": "dark",
+      "width": 1280
+    },
+    {
+      "shotRenamed": {
+        "file": "be-53/be53-rename-390-dark.png",
+        "sha256": "5d4f25c326929993eb90b93cb3d7ea4708dccca4d07335a14f788283469019da",
+        "width": 390,
+        "height": 1424
+      },
+      "rows": [
+        "",
+        ""
+      ],
+      "version": "2",
+      "theme": "dark",
+      "width": 390
+    }
+  ],
+  "network": {
+    "guard": "in-page fetch/XHR/WebSocket/EventSource/beacon + CDP Fetch + DNS lockdown",
+    "appViolations": [],
+    "deliberateViolations": []
+  }
+}

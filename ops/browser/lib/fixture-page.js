@@ -395,6 +395,32 @@ function fixtureBootstrap(scenarios, options = {}) {
         const detail = (scenario.detail || {})[id];
         return detail ? jsonResponse(detail) : jsonResponse({ error: 'Menuconcept niet gevonden.' }, 404);
       }
+      if (verdict.routeId === 'menu-concepts-versions') {
+        // BE-53 (#130): the only fictional write of the concept pages. The
+        // scenario answers with its new version; the posted edits are kept in
+        // localStorage so the browser check can prove what was really sent.
+        const scenario = fixtures[fixture];
+        if (!scenario || (!scenario.versionResponse && !scenario.versionResponses)) return jsonResponse({ error: 'Fictief versiescenario ontbreekt.' }, 500);
+        try {
+          const posted = verdict.body ? JSON.parse(verdict.body) : null;
+          const storageKey = 'be53-version-posts';
+          const postedList = JSON.parse(window.localStorage.getItem(storageKey) || '[]');
+          postedList.push({ expectedVersion: posted ? posted.expected_version : null, edits: posted && posted.edits ? posted.edits : null });
+          window.localStorage.setItem(storageKey, JSON.stringify(postedList));
+        } catch (ignored) {
+          // An unreadable request body is not evidence; the check reports it.
+        }
+        // A scenario may hold more than one fictional concept; the answer then
+        // comes from versionResponses, keyed by the concept id in the real
+        // request path. A single-concept scenario keeps its one answer.
+        const prefix = '/api/internal/v1/menu-concepts/';
+        let conceptId = decodeURIComponent(new URL(verdict.url).pathname.slice(prefix.length));
+        if (conceptId.slice(-9) === '/versions') conceptId = conceptId.slice(0, -9);
+        const byId = scenario.versionResponses || {};
+        const answer = byId[conceptId] || scenario.versionResponse;
+        if (!answer) return jsonResponse({ error: 'Fictief versieantwoord ontbreekt.' }, 500);
+        return jsonResponse(answer, 201);
+      }
       return jsonResponse({ error: 'fixture route not implemented' }, 500);
     }
 

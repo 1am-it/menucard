@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import { MESSAGES } from '@/src/lib/authErrors'
 import {
+  CLAIM_SEARCH_HREF,
   INTERNAL_LOGIN_HREF,
   OWNER_ACCESS_MESSAGES,
   OWNER_LOGIN_HREF,
@@ -34,7 +35,6 @@ import './mijn-restaurant.css'
 import Wordmark from '@/src/components/Wordmark'
 import OwnerAccountDeletion from './OwnerAccountDeletion'
 
-const CLAIM_ROUTE_HREF = '/alle-restaurants'
 // BE-55 stap B (#135) — de houder beheert zijn daghap en seizoensgerechten op
 // een eigen pagina; het dashboard linkt daarheen.
 const AANBOD_HREF = '/mijn-restaurant/aanbod'
@@ -175,7 +175,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
               {overview.restaurants.length === 0 ? (
                 <p className="owner-note">
                   {OWNER_OVERVIEW_MESSAGES.noRestaurants} {OWNER_OVERVIEW_MESSAGES.noRestaurantsHelp}{' '}
-                  <Link className="owner-link" href={CLAIM_ROUTE_HREF}>
+                  <Link className="owner-link" href={CLAIM_SEARCH_HREF}>
                     {OWNER_ACCESS_MESSAGES.claimRouteLabel}
                   </Link>
                 </p>

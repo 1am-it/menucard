@@ -900,6 +900,52 @@ database, the migration 0022 and the real counter table are not involved, and
 the approved mockup (an external Claude artifact) can only be compared by the
 Lead or the owner against these screenshots. This is not acceptance.
 
+## BE-53 (#130) — menukopje wijzigen in "Beoordeel menuconcept"
+
+`node ops/browser/run-be53-browser-check.js` (of
+`npm run test:browser:be53`; `--lijst` toont het scenario `wijzigen`, `--alleen`
+draait alleen dat scenario) start de echte app met `next dev` op poort 3193
+(`BROWSER_FIXTURE_PORT`) en bestuurt een lokaal geïnstalleerde Edge/Chrome via
+CDP. De fixture `concepts-section-rename` bevat één fictief concept met het
+kopje "Proef het beste van het seizoen — Hoofd"; versie 2 wordt met dezelfde
+pure regel (`renameSectionEdits`) gebouwd als het scherm gebruikt.
+
+Per thema en breedte (1280 en 390 px, licht en donker) wordt bewezen:
+Wijzig opent met het toetsenbord (Enter) een gelabeld tekstveld met de huidige
+naam en zichtbare focus; Tab gaat naar "Opslaan in deze correctie"; een
+ongewijzigde en een lege naam geven een melding; opslaan toont de nieuwe naam
+met de oude doorgestreept en een "Ongedaan maken" per kopje; ongedaan maken zet
+de oude naam terug; opnieuw wijzigen werkt; "Correcties opslaan als versie 2"
+opent de nieuwe versie, die in Structuur én in het Publicatievoorbeeld
+"Hoofdgerechten" toont.
+
+BE-53 deel 2 (contractpunten 5-7) gebruikt het tweede fictieve concept
+`concept-be53-0200` in dezelfde fixture: twee kopjes beginnen met
+"PROEF HET BESTE VAN HET SEIZOEN — " en één kopje heet "VOOR". Per thema en
+breedte wordt bewezen: het voorstel met de knop **Weghalen** (met het
+toetsenbord, Enter), waarna beide kopjes "HOOFD" en "DESSERT" heten en los
+ongedaan te maken zijn; de knop **Normale hoofdletters**, waarna "Hoofd",
+"Dessert" en "Voor" ontstaan en de knop verdwijnt; de negen standaardnamen als
+snelkeuze in het Wijzig-veld; ongedaan maken van één kopje terwijl de andere
+twee hun correctie houden; opnieuw kiezen en opslaan; en versie 2
+(`concept-be53-0201`) met de drie nieuwe kopjesnamen in Structuur en
+Publicatievoorbeeld. Versie 2 wordt met dezelfde pure regels
+(`renameSectionsEdits`) gebouwd als het scherm: het voorvoegsel, de
+hoofdletters en de snelkeuze in die volgorde.
+
+Eén schrijfroute is fictioneel beantwoord: `POST
+/api/internal/v1/menu-concepts/concept-be53-0100/versions`, exact dat pad en
+alleen in dit script (de gedeelde lijst blijft ongewijzigd). Voor het tweede
+concept geldt precies zo'n route voor `concept-be53-0200`; de fixture antwoordt
+per concept-id (`versionResponses`). Het antwoord is de
+nieuwe versie uit de fixture; de verstuurde edits worden in `localStorage`
+bewaard en in het bewijs samengevat. Elke andere schrijf-, export- en
+publicatieroute blijft geweigerd. Bewijs:
+`evidence/be53-browser-evidence.json`; screenshots in het gitignorde
+`output/be-53/`. Dit is ontwikkelaarsbewijs op een lokale machine, geen echte
+database, geen merge en geen publicatie.
+
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real
@@ -952,3 +998,40 @@ nonce can only be redeemed by `updateUser({ nonce })` and no server route can
 verify it, so deletion asks a fresh sign-in code that the route verifies itself
 (see src/lib/ownerAccountDeletion.js). The "Reauthentication" template is
 therefore not needed for this flow.
+
+## BE-54 (#133) — "Claim je restaurant": zoeken en direct naar de claim
+
+`npm run test:browser:be54` (of `node ops/browser/run-be54-browser-check.js`).
+Eén scenario, dus geen `--alleen`/`--lijst`; de poort is 3186 (uit 3180-3189) en
+via `BE54_PORT` te wijzigen. De check start zijn eigen `next dev` en een lokale
+Edge/Chrome via CDP; er is geen productie, geen account en geen externe host bij
+betrokken.
+
+Wat hij meet:
+
+- **de link** — "Claim je restaurant" op `/mijn-restaurant/inloggen` wijst naar
+  `/mijn-restaurant/claimen` (het houderoverzicht wordt alleen met een bronregressie
+  bewezen: daarvoor is een ingelogde houder nodig);
+- **zoeken tijdens het typen** — "Wolfslaar" geeft precies één regel met naam,
+  adres en buurt, de knop "Dit is mijn restaurant" naar `/claim/1`, en
+  `role="status"` met "1 restaurant gevonden.", op 1280, 390 en 320 px in licht
+  en donker, met een tikdoel van minimaal 44 px en zonder horizontale overloop;
+- **de knop zelf** — die opent de bestaande claimpagina `/claim/1` en verandert
+  daar niets;
+- **niets gevonden** — "zzzzzz" geeft de lege stand met de tip en, omdat
+  `NEXT_PUBLIC_CONTACT_EMAIL` hier niet gezet is, géén `mailto:`-link;
+- **toetsenbord** — een tabwandeling met een zichtbare focusring op elke stap,
+  inclusief het zoekveld en de resultaatknop;
+- **a11y** — de bestaande audit (`lib/a11y-audit.js`) voor deze ene pagina in
+  licht en donker: contrast, toegankelijke namen, tikdoelen, koppen, landmarks en
+  taal.
+
+Bewijs: `ops/browser/evidence/be-54/` (zeven schermafdrukken, in git) en
+`ops/browser/evidence/be54-browser-evidence.json`. De laatste volledige run gaf
+71 checks en 0 fouten. Grenzen: dit is lokale ontwikkelaarsbewijs, geen
+onafhankelijke review en geen acceptatie; de visuele vergelijking met de
+goedgekeurde mockup blijft mensenwerk (de schermafdrukken staan er daarom in).
+De pagina zoekt in dezelfde gegevens als `/alle-restaurants`
+(`GET /api/restaurants`, dezelfde paginering) met de geteste regel uit
+`src/lib/claimSearch.js`; er is geen nieuwe API, database of dependency.
+
