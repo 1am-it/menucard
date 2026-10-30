@@ -5955,6 +5955,12 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   min-height: 44px;
 }
 
+/* 4. Semantiek: de terugknop op "Mijn lijstje" zit in een echt `nav`-landmark
+   (criterium 1, "er zijn landmarks (main, nav)"). De knop ziet er hetzelfde uit;
+   alleen het element eromheen is nu een navigatiegebied, en dat mag geen regel
+   hoogte toevoegen. */
+.lijst-back { display: flex; }
+
 @media (max-width: 720px) {
   .home-tile-grid { grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); }
   /* De twee kolommen van de menu- en restaurantkop passen bij 320 px niet naast

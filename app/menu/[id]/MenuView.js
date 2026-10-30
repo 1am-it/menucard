@@ -319,21 +319,22 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
             {/* Meal type switch */}
             {availableMeals.length > 1 && (
-              <div className="meal-switch">
+              <nav className="meal-switch" aria-label="Menukaarten">
                 {availableMeals.map(m => (
                   <Link
                     key={m}
                     href={`/menu/${baseId}-${m}`}
                     className={`meal-btn ${m === mealType ? 'active' : ''}`}
+                    aria-current={m === mealType ? 'page' : undefined}
                   >
                     <EmojiText value={MEAL_CONFIG[m]?.label || m} />
                   </Link>
                 ))}
-              </div>
+              </nav>
             )}
 
             {/* Category navigation */}
-            <div className="cat-nav">
+            <nav className="cat-nav" aria-label="Gerechten op deze kaart">
               {r.categories.map((cat, i) => (
                 <a
                   key={i}
@@ -344,7 +345,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                   {cat.name}
                 </a>
               ))}
-            </div>
+            </nav>
           </div>
 
           {/* Restaurant panel */}
@@ -418,12 +419,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
               type="text"
               className="mf-search"
               placeholder="Zoek gerecht of ingrediënt..."
+              aria-label="Zoek gerecht of ingrediënt"
               value={query}
               onChange={e => setQuery(e.target.value)}
               autoComplete="off"
             />
             {query && (
-              <button className="mf-clear" onClick={() => setQuery('')}>×</button>
+              <button className="mf-clear" aria-label="Zoekveld wissen" onClick={() => setQuery('')}>×</button>
             )}
           </div>
 
@@ -460,6 +462,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
                 value={maxPrice}
                 onChange={e => setMaxPrice(Number(e.target.value))}
                 className="mf-price-slider"
+                aria-label="Maximale prijs"
               />
             </div>
           )}

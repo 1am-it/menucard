@@ -100,7 +100,9 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
           <div className="lijst-header-actions">
             <ThemeToggle />
             <ShareSettingsButton />
-            <Link href="/" className="back-btn">← Home</Link>
+            <nav className="lijst-back" aria-label="Terug">
+              <Link href="/" className="back-btn">← Home</Link>
+            </nav>
           </div>
         </div>
       </header>

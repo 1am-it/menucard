@@ -69,3 +69,34 @@ test('de twee kleine tekstlinks hebben een echt tikdoel', () => {
   // De restaurantnaam op "Alle restaurants": 24 px met vrije ruimte eromheen.
   assert.match(block, /\.ar-name-link \{\s*display: inline-flex;\s*align-items: center;\s*min-height: 24px;/);
 });
+
+test('de taal van het document staat vast op Nederlands', () => {
+  assert.match(read('app/layout.js'), /<html lang="nl"/);
+});
+
+test('het zoekveld op /search heeft een toegankelijke naam', () => {
+  const source = read('app/search/page.js');
+  assert.match(source, /className="search-input flagship"[\s\S]{0,200}aria-label="Zoek een gerecht, restaurant of buurt"/);
+  assert.match(source, /className="search-clear" aria-label="Zoekveld wissen"/);
+});
+
+test('de zoekvelden op de menukaart hebben een naam en de wissen-knop ook', () => {
+  const source = read('app/menu/[id]/MenuView.js');
+  assert.match(source, /className="mf-search"[\s\S]{0,200}aria-label="Zoek gerecht of ingrediënt"/);
+  assert.match(source, /className="mf-price-slider"[\s\S]{0,80}aria-label="Maximale prijs"/);
+  assert.match(source, /className="mf-clear" aria-label="Zoekveld wissen"/);
+});
+
+test('de menukaart heeft echte navigatiegebieden in plaats van losse divs', () => {
+  const source = read('app/menu/[id]/MenuView.js');
+  assert.match(source, /<nav className="cat-nav" aria-label="Gerechten op deze kaart">/);
+  assert.match(source, /<nav className="meal-switch" aria-label="Menukaarten">/);
+  assert.doesNotMatch(source, /<div className="cat-nav">/);
+  assert.doesNotMatch(source, /<div className="meal-switch">/);
+});
+
+test('Mijn lijstje heeft een nav-landmark voor de terugweg', () => {
+  const source = read('app/mijn-lijstje/MijnLijstjeView.js');
+  assert.match(source, /<nav className="lijst-back" aria-label="Terug">\s*<Link href="\/" className="back-btn">/);
+  assert.match(be51Block(), /\.lijst-back \{ display: flex; \}/);
+});
