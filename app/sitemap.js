@@ -7,10 +7,11 @@
 
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
-import { sitemapEntries } from '@/src/lib/seo'
+import { isIndexable, sitemapEntries } from '@/src/lib/seo'
 import { siteUrl } from '@/src/lib/siteUrl'
 
 export default function sitemap() {
+  if (!isIndexable(process.env.NEXT_PUBLIC_SITE_INDEXABLE)) return []
   return sitemapEntries({
     siteUrl: siteUrl(),
     restaurants: Object.keys(restaurantsData),

@@ -82,7 +82,21 @@ function sitemapEntries({ siteUrl: configuredUrl, restaurants = [], menus = [] }
   return paths.map((path) => ({ url: `${base}${path}` }));
 }
 
+// Zolang de site niet publiek is (eigenaarsbesluit 30 okt) zijn robots.txt en de
+// sitemap dicht. Pas als NEXT_PUBLIC_SITE_INDEXABLE precies 'true' is, gelden de
+// regels hierboven. Dezelfde vlag stuurt de noindex-kop in middleware.js.
+function isIndexable(value) {
+  return String(value === undefined || value === null ? '' : value).trim() === 'true';
+}
+
+/** robots.txt zolang de site nog niet publiek is: niets indexeren. */
+function closedRobotsMetadata() {
+  return { rules: { userAgent: '*', disallow: '/' } };
+}
+
 module.exports = {
+  closedRobotsMetadata,
+  isIndexable,
   PRIVATE_PATHS,
   PUBLIC_PATHS,
   SITEMAP_PATH,

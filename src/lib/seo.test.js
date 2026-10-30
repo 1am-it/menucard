@@ -129,3 +129,15 @@ test('zonder eigen domein is de sitemap leeg', () => {
   assert.deepEqual(sitemapEntries({ siteUrl: 'niet-een-url', restaurants: RESTAURANTS, menus: MENUS }), []);
   assert.deepEqual(sitemapEntries(), []);
 });
+
+test('niet publiek: alleen NEXT_PUBLIC_SITE_INDEXABLE "true" opent robots en sitemap', () => {
+  const { isIndexable, closedRobotsMetadata } = require('./seo');
+  assert.equal(isIndexable('true'), true);
+  for (const value of [undefined, null, '', 'false', '1', 'yes']) assert.equal(isIndexable(value), false, String(value));
+  assert.deepEqual(closedRobotsMetadata(), { rules: { userAgent: '*', disallow: '/' } });
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const root = path.join(__dirname, '..', '..');
+  assert.match(fs.readFileSync(path.join(root, 'app', 'robots.js'), 'utf8'), /isIndexable\(process\.env\.NEXT_PUBLIC_SITE_INDEXABLE\)\) return closedRobotsMetadata\(\)/);
+  assert.match(fs.readFileSync(path.join(root, 'app', 'sitemap.js'), 'utf8'), /isIndexable\(process\.env\.NEXT_PUBLIC_SITE_INDEXABLE\)\) return \[\]/);
+});

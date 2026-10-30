@@ -5,9 +5,10 @@
 // geldige NEXT_PUBLIC_SITE_URL is (src/lib/siteUrl.js): zonder eigen domein
 // wijst de regel nergens naar.
 
-import { robotsMetadata } from '@/src/lib/seo'
+import { closedRobotsMetadata, isIndexable, robotsMetadata } from '@/src/lib/seo'
 import { siteUrl } from '@/src/lib/siteUrl'
 
 export default function robots() {
+  if (!isIndexable(process.env.NEXT_PUBLIC_SITE_INDEXABLE)) return closedRobotsMetadata()
   return robotsMetadata({ siteUrl: siteUrl() })
 }
