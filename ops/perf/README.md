@@ -11,14 +11,14 @@ staat in `ops/perf/evidence/public-pages.json`; de budgettest
 `ops/perf/public-pages-budget.test.js` gebruikt die grenzen.
 
 <!-- meting:begin -->
-Gemeten: 2026-10-30T07:31:15.082Z · commit `20b060d1b325` · poort 3177 · koude cache.
+Gemeten: 2026-10-30T07:40:17.025Z · commit `2086bdc5d083` · poort 3170 · koude cache.
 
 | Pagina | HTML | JS | CSS | JSON/data | Totaal | Verzoeken | Grootste script |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Home (`/`) | 8.1 | 134.5 | 25.9 | 7.3 | **176.5** | 18 | 53.5 KB |
 | Zoeken (q=pasta) (`/search?q=pasta`) | 3.1 | 125.7 | 25.9 | 4.1 | **159.5** | 15 | 53.5 KB |
 | Alle restaurants (`/alle-restaurants`) | 3.1 | 125.7 | 25.9 | 4.1 | **159.6** | 14 | 53.5 KB |
-| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 132.4 | 25.9 | 4.5 | **175.1** | 19 | 53.5 KB |
+| Restaurant (Bardot, 4 kaarten) (`/restaurant/6`) | 11.6 | 132.4 | 25.9 | 2.4 | **173.1** | 15 | 53.5 KB |
 | Menu (T-Huis borrel, 138 gerechten) (`/menu/23-borrel`) | 26.3 | 129.7 | 25.9 | 0 | **182.6** | 13 | 53.5 KB |
 | Mijn lijstje (`/mijn-lijstje`) | 5.1 | 121.6 | 25.9 | 2.4 | **155.7** | 13 | 53.5 KB |
 
