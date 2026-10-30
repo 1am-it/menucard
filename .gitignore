@@ -16,3 +16,7 @@ ops/browser/evidence/*.filtered.json
 # the measurement itself is committed in ops/perf/evidence/.
 ops/perf/output/
 
+# BE-50 (#120) — logs of a local run belong outside git. The evidence that does
+# belong to the delivery stays in ops/browser/evidence/ and ops/perf/evidence/.
+/*.log
+
