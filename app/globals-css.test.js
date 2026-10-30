@@ -150,11 +150,14 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
   assert.deepEqual(stylesheets, [
     'app/globals.css',
     'app/internal/menu-concepts/menu-concepts.css',
+    'app/internal/menukaart-wijzigingen/wijzigingen.css',
     'app/internal/tellers/tellers.css',
     'app/kies/kies.css',
     'app/mijn-restaurant/claimen/claimen.css',
+    'app/mijn-restaurant/menukaart/menukaart.css',
     'app/mijn-restaurant/mijn-restaurant.css',
     'src/components/kies-start.css',
+    'src/components/menu-body.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });

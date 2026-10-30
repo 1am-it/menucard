@@ -195,6 +195,11 @@ export default function OwnerDashboard({ restaurantIndex }) {
                             {OWNER_OVERVIEW_MESSAGES.menuLink}
                           </Link>
                         )}
+                        {restaurant.known && (
+                          <Link className="owner-link" href="/mijn-restaurant/menukaart">
+                            Menukaart bijwerken
+                          </Link>
+                        )}
                         {restaurant.known && !restaurant.menuHref && (
                           <span className="owner-note">{OWNER_OVERVIEW_MESSAGES.noMenuLink}</span>
                         )}
