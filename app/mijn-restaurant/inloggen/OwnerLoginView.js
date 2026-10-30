@@ -29,15 +29,17 @@ import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import { isSmsLoginEnabled, requestOwnerSignInCode, verifyOwnerSignInCode } from '@/src/lib/claimEmailCodeFlow'
 import { MESSAGES } from '@/src/lib/authErrors'
-import { INTERNAL_LOGIN_HREF, OWNER_ACCESS_MESSAGES, resolveOwnerEntry } from '@/src/lib/ownerAccess'
+import { CLAIM_SEARCH_HREF, INTERNAL_LOGIN_HREF, OWNER_ACCESS_MESSAGES, resolveOwnerEntry } from '@/src/lib/ownerAccess'
 
 // Zonder Supabase-configuratie (bijvoorbeeld een lokale build zonder
 // .env.local) blijft het scherm eerlijk staan in plaats van eindeloos te wachten.
 const CONFIG_ERROR_TEXT =
   'Inloggen is in deze omgeving niet geconfigureerd. Probeer het later opnieuw of open deze pagina op de echte site.'
 
-// De route waarlangs iemand zonder account zich als houder kan aanmelden.
-const CLAIM_ROUTE_HREF = '/alle-restaurants'
+// De route waarlangs iemand zonder account zich als houder kan aanmelden:
+// sinds BE-54 (#133) het zoekscherm /mijn-restaurant/claimen, uit één bron in
+// src/lib/ownerAccess.js zodat inloggen en het houderoverzicht dezelfde link
+// houden.
 
 export default function OwnerLoginView() {
   // Build-time flag: zonder NEXT_PUBLIC_OWNER_SMS_LOGIN=1 is dit false en
@@ -273,7 +275,7 @@ export default function OwnerLoginView() {
         )}
 
         <div className="auth-actions">
-          <Link className="auth-link" href={CLAIM_ROUTE_HREF}>
+          <Link className="auth-link" href={CLAIM_SEARCH_HREF}>
             {OWNER_ACCESS_MESSAGES.claimRouteLabel}
           </Link>
           <Link className="auth-link" href={INTERNAL_LOGIN_HREF}>
