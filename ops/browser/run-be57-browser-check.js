@@ -209,6 +209,36 @@ async function setViewport(width, height) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * Wachten tot het document stil blijft staan (BE-57 integratie, #139).
+ *
+ * `performance.timeOrigin` verandert bij elke echte documentherlaadbeurt en
+ * blijft gelijk bij gewone React-navigaties. Zolang de waarde binnen het venster
+ * niet meer wijzigt, is de pagina klaar met herladen. Een pagina die blijft
+ * herladen levert `false`: dat is een echte fout en geen reden om te wachten.
+ */
+async function waitForStableDocument(maxMs = 25000, quietMs = 2500) {
+  const deadline = Date.now() + maxMs;
+  let last = null;
+  let since = Date.now();
+  while (Date.now() < deadline) {
+    let origin = null;
+    try {
+      origin = await evalJs(cdp, 'performance.timeOrigin');
+    } catch (error) {
+      origin = null; // tijdens een herlaadbeurt is er geen document
+    }
+    if (origin !== last) {
+      last = origin;
+      since = Date.now();
+    } else if (Date.now() - since >= quietMs) {
+      return true;
+    }
+    await sleep(400);
+  }
+  return false;
+}
+
+/**
  * Het thema zoals de pagina het echt toont: `data-theme` op <html>, de knop die
  * de app zelf actief noemt (aria-pressed/`active` in ThemeToggle), de
  * achtergrondkleur van de body met zijn helderheid, en de hoogte van de kop.
@@ -631,11 +661,18 @@ async function run() {
   if (!browserPath) throw new Error('browser_unavailable: set BROWSER_PATH to an installed Edge/Chrome');
 
   console.log(`starting the local app on ${APP}`);
+  // BE-57 integratie (#139): een verse productieopbouw (`next build` +
+  // `next start`) in plaats van `next dev`. Deze check logt in en meet daarna
+  // het paneel; een dev-server doet na de eerste keer laden nog een volledige
+  // herlaadbeurt, waardoor de sessie wegvalt en de meting wisselt tussen het
+  // overzicht en de inlogpagina. `next start` heeft geen HMR en is dus
+  // deterministisch.
   server = await startServer({
     port: PORT,
     appUrl: APP,
     outputDir: path.join(__dirname, 'output', 'be-57'),
     readyPath: '/mijn-restaurant/inloggen',
+    mode: 'start',
   });
   browser = await startBrowser(browserPath);
   cdp = new CdpClient(browser.target.webSocketDebuggerUrl);
@@ -649,6 +686,17 @@ async function run() {
   if (warm && warm.identifier) injectedScripts.push(warm.identifier);
   await navigate(cdp, LOGIN_URL, `document.readyState === 'complete'`);
   await navigate(cdp, DASHBOARD_URL, `document.readyState === 'complete'`);
+  // BE-57 integratie (#139): een koude `next dev` compilet de houderpagina pas
+  // bij dit eerste bezoek en doet daarna één volledige herlaadbeurt
+  // ("Fast Refresh had to perform a full reload" in next-dev.log). Valt die
+  // herlaadbeurt midden in het inloggen, dan raakt de gestubde sessie kwijt en
+  // wisselt de pagina tussen het overzicht en de inlogpagina; het cijferblok
+  // verschijnt dan nooit. Daarom eerst laten landen, dan nog één keer laden en
+  // wachten tot het document echt stil blijft staan — vóór de metingen.
+  await sleep(2500);
+  await navigate(cdp, DASHBOARD_URL, `document.readyState === 'complete'`);
+  const settled = await waitForStableDocument();
+  if (!settled) throw new Error('document_onrustig: de pagina herlaadt steeds opnieuw');
 
   const stateResults = [];
   for (const state of STATES) {

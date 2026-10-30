@@ -225,6 +225,11 @@ The harness starts and stops its own `next dev` process on
 Edge/Chrome process with a temporary profile, controlled over CDP. It only
 exercises those two processes; no remote host is contacted. The evidence names
 this boundary under `environment.loopback` and marks the run `fixtureOnly`.
+Sinds BE-57 integratie (#139) krijgt zo'n `next dev` een eigen bouwmap
+(`NEXT_DIST_DIR=.next-browser-<poort>`, zie `next.config.js`), zodat hij nooit de
+`.next` van een net gedraaide `next build` hergebruikt en halverwege de controle
+volledig herlaadt. Zonder die variabele blijft de productieopbouw `.next`
+gebruiken.
 
 ## Run
 
@@ -1039,9 +1044,12 @@ De pagina zoekt in dezelfde gegevens als `/alle-restaurants`
 
 `npm run test:browser:be57` (of `node ops/browser/run-be57-browser-check.js`).
 Eén run, drie standen; de poort is 3187 (uit 3180-3189) en via
-`BE57_FIXTURE_PORT` te wijzigen. De check start zijn eigen `next dev` en een
-lokale Edge/Chrome via CDP, met de fictieve Supabase uit
-`lib/be48-auth-stub.js`. Nieuw is de `ownerStats`-map in die stub: per pad een
+`BE57_FIXTURE_PORT` te wijzigen. De check bouwt één keer vers (`next build`) en
+serveert die opbouw met `next start`, plus een lokale Edge/Chrome via CDP, met de
+fictieve Supabase uit `lib/be48-auth-stub.js`. `next start` heeft geen HMR: een
+`next dev` deed na de eerste keer laden nog een volledige herlaadbeurt, waardoor
+de gestubde sessie wegviel en de pagina tussen het overzicht en de inlogpagina
+wisselde. Nieuw is de `ownerStats`-map in die stub: per pad een
 fictief antwoord voor `GET /api/mijn-restaurant/<id>/cijfers` (alleen GET, alleen
 met een sessie). Er is geen productie, geen echt account en geen externe host
 bij betrokken.
