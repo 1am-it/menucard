@@ -112,6 +112,14 @@ export default function DaghapVandaag({ restaurantId }) {
         {aanbod.map((item) => {
           const seizoen = item.soort === 'seizoensgerecht'
           const melding = meldingen[item.id]
+          // De bestaande bewaar- en deelknop werken met een gerecht-entry; een
+          // daghap krijgt er een met precies de velden die die knoppen gebruiken.
+          const entry = {
+            id: `daghap-${restaurantId}-${item.id}`,
+            name: item.naam,
+            price: item.prijs,
+            href: `/restaurant/${encodeURIComponent(restaurantId)}`,
+          }
           return (
             <li className="daghap-vandaag-card" key={item.id}>
               <div className="daghap-vandaag-head">
@@ -134,11 +142,12 @@ export default function DaghapVandaag({ restaurantId }) {
                 </p>
               )}
               <div className="daghap-vandaag-actions">
-                <DishSaveButton name={item.naam} />
+                <DishSaveButton entry={entry} name={item.naam} />
                 <DishShareButton
+                  entry={entry}
                   name={item.naam}
                   title={item.naam}
-                  href={`/restaurant/${encodeURIComponent(restaurantId)}`}
+                  href={entry.href}
                   dishKey={`daghap-${item.id}`}
                 />
               </div>

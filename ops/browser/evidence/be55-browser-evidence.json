@@ -1,0 +1,649 @@
+{
+  "script": "run-be55-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "startedAt": "2026-10-30T20:40:42.707Z",
+  "port": 3195,
+  "scenarioRuns": [
+    {
+      "name": "vandaag",
+      "checks": 93,
+      "passed": 87,
+      "failed": 6,
+      "durationMs": 43822,
+      "error": null
+    },
+    {
+      "name": "melden",
+      "checks": 9,
+      "passed": 6,
+      "failed": 3,
+      "durationMs": 4606,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "vandaag light/1280: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "vandaag light/1280: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag light/1280: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag light/1280: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag light/1280: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag light/1280: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag light/1280: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag light/1280: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag light/1280: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag light/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "vandaag light/1280: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag light/1280: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag light/1280: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag light/1280: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/1280: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/390: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "vandaag light/390: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag light/390: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag light/390: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag light/390: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag light/390: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag light/390: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag light/390: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag light/390: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag light/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "vandaag light/390: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag light/390: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag light/390: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag light/390: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/390: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/320: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "vandaag light/320: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag light/320: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag light/320: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag light/320: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag light/320: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag light/320: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag light/320: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag light/320: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag light/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "vandaag light/320: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag light/320: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag light/320: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag light/320: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag light/320: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "18.23760686396433"
+    },
+    {
+      "name": "vandaag dark/1280: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "vandaag dark/1280: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag dark/1280: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag dark/1280: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag dark/1280: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag dark/1280: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag dark/1280: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag dark/1280: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag dark/1280: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag dark/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "vandaag dark/1280: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag dark/1280: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag dark/1280: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag dark/1280: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "vandaag dark/1280: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "12.144216065351369"
+    },
+    {
+      "name": "vandaag dark/390: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "vandaag dark/390: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag dark/390: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag dark/390: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag dark/390: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag dark/390: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag dark/390: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag dark/390: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag dark/390: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag dark/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "vandaag dark/390: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag dark/390: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag dark/390: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag dark/390: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "vandaag dark/390: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "12.144216065351369"
+    },
+    {
+      "name": "vandaag dark/320: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "vandaag dark/320: het blok heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag dark/320: twee kaarten (daghap en seizoensgerecht)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag dark/320: de namen staan op de kaart",
+      "passed": true,
+      "detail": "Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "vandaag dark/320: de prijs staat in de prijspil",
+      "passed": true,
+      "detail": "€ 6,50"
+    },
+    {
+      "name": "vandaag dark/320: de labels staan als chips",
+      "passed": true,
+      "detail": "Veganistisch,Glutenvrij"
+    },
+    {
+      "name": "vandaag dark/320: de seizoensregel noemt de einddatum",
+      "passed": true,
+      "detail": "Seizoensgerecht · Online tot en met 30 december"
+    },
+    {
+      "name": "vandaag dark/320: de meldlink staat er",
+      "passed": true,
+      "detail": "Klopt dit aanbod niet? Meld het"
+    },
+    {
+      "name": "vandaag dark/320: de kaart heeft een rand van 2 px",
+      "passed": true,
+      "detail": "2px"
+    },
+    {
+      "name": "vandaag dark/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "vandaag dark/320: de meldknop is minstens 44 px hoog",
+      "passed": true,
+      "detail": "44"
+    },
+    {
+      "name": "vandaag dark/320: het blok is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghap-vandaag-title/daghap-vandaag-title"
+    },
+    {
+      "name": "vandaag dark/320: \"Bewaar\" en \"Deel\" staan op de kaart",
+      "passed": false,
+      "detail": "false/true"
+    },
+    {
+      "name": "vandaag dark/320: de prijs haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "vandaag dark/320: de naam haalt 4,5:1",
+      "passed": true,
+      "detail": "12.144216065351369"
+    },
+    {
+      "name": "menu light: het blok \"Vandaag\" staat ook op de menupagina",
+      "passed": true,
+      "detail": "2/Vandaag"
+    },
+    {
+      "name": "menu dark: het blok \"Vandaag\" staat ook op de menupagina",
+      "passed": true,
+      "detail": "2/Vandaag"
+    },
+    {
+      "name": "zonder aanbod: er is geen blok \"Vandaag\"",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "melden: de meldknop is met het toetsenbord bereikbaar",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "melden: de focusring is zichtbaar",
+      "passed": true,
+      "detail": "{\"breedte\":\"2px\",\"stijl\":\"solid\"}"
+    },
+    {
+      "name": "melden: de bevestiging verschijnt",
+      "passed": false,
+      "detail": null
+    },
+    {
+      "name": "melden: de bevestiging is een status voor hulpsoftware",
+      "passed": false,
+      "detail": null
+    },
+    {
+      "name": "melden: een tweede tik zegt dat het al gemeld is",
+      "passed": false,
+      "detail": "true"
+    },
+    {
+      "name": "melden: er zijn twee verzoeken verstuurd",
+      "passed": true,
+      "detail": "[{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"},{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"}]"
+    },
+    {
+      "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
+      "passed": true,
+      "detail": "{\"apparaat\":\"924a775b5b2f6e2a7fc9e943\"}"
+    },
+    {
+      "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
+      "passed": true,
+      "detail": "924a775b5b2f6e2a7fc9e943"
+    },
+    {
+      "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
+      "passed": true,
+      "detail": "924a775b5b2f6e2a7fc9e943"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be55-vandaag-restaurant-1280-light.png",
+      "sha256": "ae8817f9f9c3805952331aed5ee199bc7a5a7f2a3d3ce4bc753d08170aebab6b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-restaurant-390-light.png",
+      "sha256": "4a846c8e6332a37380b3b3a60c8551ddba94f25449fabec2ecded7deaf884d2b",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-restaurant-320-light.png",
+      "sha256": "ed4d6a6e7a1fd8572ab8c5135c2b99d594135383a212fdf7e48e4273d0ad7aaa",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-restaurant-1280-dark.png",
+      "sha256": "f6e18aa52798a559c245389b90c79a7fd12f25ffaa6d0aa70bd0da39bd167886",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-restaurant-390-dark.png",
+      "sha256": "0b1ac85e6c600fa88499a6dbf1725f30c396b2860ad754597cdd8c988ed4a202",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-restaurant-320-dark.png",
+      "sha256": "4291cd3108a15c05cb799f7bcae29c591ade2be640f0a5214a9a2a35d05f8f79",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "aanbod"
+    },
+    {
+      "file": "be55-vandaag-menu-1280-light.png",
+      "sha256": "2b3dbc6301d3fd75128067e58d4bd1663bc199f8531aec7e9503414c2babf37a",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "menu"
+    },
+    {
+      "file": "be55-vandaag-menu-1280-dark.png",
+      "sha256": "98bdeb313caf5a30964244d9dee3082951f5987586132ff135c1757b9ac302a8",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "menu"
+    },
+    {
+      "file": "be55-vandaag-leeg-390-light.png",
+      "sha256": "4a846c8e6332a37380b3b3a60c8551ddba94f25449fabec2ecded7deaf884d2b",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "leeg"
+    },
+    {
+      "file": "be55-melden-bevestiging-390-dark.png",
+      "sha256": "1c9c0c60a7d3e59306076493457a8fad03f118f2e130cf497e2eac530204983a",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "bevestiging"
+    }
+  ],
+  "failed": 9,
+  "passed": false
+}
