@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import AccountMenu from '@/src/components/AccountMenu'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -63,6 +64,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
           <div className="header-actions">
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenu />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>

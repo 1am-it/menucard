@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import AccountMenu from '@/src/components/AccountMenu'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
@@ -165,6 +166,7 @@ function AlleRestaurantsPageInner() {
             <PrimaryNav />
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenu />
           </div>
         </div>
       </header>

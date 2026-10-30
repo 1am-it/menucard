@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import AccountMenu from '@/src/components/AccountMenu'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -101,6 +102,7 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
           <div className="lijst-header-actions">
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenu />
             {/* BE-50 (issue 120) — dezelfde regel als het woordmerk: deze tweede
                 weg naar de home laadt de home niet vooruit. De meting liet zien
                 dat juist deze prefetch (5,9 KB RSC + 8,8 KB routechunk) op
