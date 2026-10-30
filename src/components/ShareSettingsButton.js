@@ -10,6 +10,7 @@
 // gedraagt het delen zich als het telefoonmenu (contract criterium 2).
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { safeBrowserStorage } from '@/src/lib/dishList'
 import {
   SHARE_SETTINGS_LABEL,
@@ -17,7 +18,16 @@ import {
   readSharePreference,
   writeSharePreference,
 } from '@/src/lib/sharePreference'
-import { ShareDialog } from '@/src/components/ShareDialog'
+
+// BE-50 (#120) — het deelblad komt pas in beeld na een tik op "Delen via" en
+// wordt daarom pas dan geladen (criterium 3, "componenten die pas na een tik
+// nodig zijn dynamisch laden"). De meting liet zien dat het blad anders op elke
+// publieke pagina in het eerste JS-pakket zat terwijl niemand het zag. De knop,
+// zijn label, aria-expanded en het gedrag na openen blijven gelijk.
+const ShareDialog = dynamic(
+  () => import('@/src/components/ShareDialog').then((module) => module.ShareDialog),
+  { ssr: false }
+)
 
 export default function ShareSettingsButton() {
   const [open, setOpen] = useState(false)
@@ -48,14 +58,16 @@ export default function ShareSettingsButton() {
       >
         {SHARE_SETTINGS_LABEL}
       </button>
-      <ShareDialog
-        open={open}
-        mode="settings"
-        value={value}
-        onSave={handleSave}
-        onClose={() => setOpen(false)}
-        idPrefix="deel-voorkeur"
-      />
+      {open ? (
+        <ShareDialog
+          open={open}
+          mode="settings"
+          value={value}
+          onSave={handleSave}
+          onClose={() => setOpen(false)}
+          idPrefix="deel-voorkeur"
+        />
+      ) : null}
     </div>
   )
 }

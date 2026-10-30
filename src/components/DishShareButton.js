@@ -24,6 +24,7 @@
 // via welke manier ook; de manier zelf wordt niet opgeslagen of verstuurd.
 
 import { useCallback, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { absoluteShareUrl } from '@/src/lib/dishShare'
 import { SHARED_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
 import { safeBrowserStorage } from '@/src/lib/dishList'
@@ -36,7 +37,19 @@ import {
   writeSharePreference,
 } from '@/src/lib/sharePreference'
 import DishSaveButton from '@/src/components/DishSaveButton'
-import { ShareDialog, ShareMenu } from '@/src/components/ShareDialog'
+
+// BE-50 (#120) — het deelblad en het kleine deelmenu verschijnen pas na een tik
+// op "Delen"; ze worden daarom pas dan geladen. De meting liet zien dat het blad
+// anders op /menu en op de restaurantpagina in het eerste JS-pakket zat terwijl
+// niemand het zag. Knoppen, labels, aria-expanded en het gedrag blijven gelijk.
+const ShareDialog = dynamic(
+  () => import('@/src/components/ShareDialog').then((module) => module.ShareDialog),
+  { ssr: false }
+)
+const ShareMenu = dynamic(
+  () => import('@/src/components/ShareDialog').then((module) => module.ShareMenu),
+  { ssr: false }
+)
 
 function currentTheme() {
   return typeof document !== 'undefined' && document.documentElement
@@ -179,22 +192,26 @@ export default function DishShareButton({ href, title, entry = null, dishKey = n
         {entry ? <DishSaveButton entry={entry} name={shareName} /> : null}
       </div>
       <span className="dish-share-status" role="status">{message}</span>
-      <ShareDialog
-        open={panel === 'choose'}
-        mode="choose"
-        onSave={handlePreferenceSaved}
-        onClose={() => setPanel(null)}
-        idPrefix={`${panelPrefix}-blad`}
-      />
-      <ShareMenu
-        open={panel === 'menu'}
-        methods={menuMethods}
-        label={`Deel ${shareName}`}
-        onPick={handlePick}
-        onMore={handleMore}
-        onClose={() => setPanel(null)}
-        idPrefix={`${panelPrefix}-menu`}
-      />
+      {panel === 'choose' ? (
+        <ShareDialog
+          open
+          mode="choose"
+          onSave={handlePreferenceSaved}
+          onClose={() => setPanel(null)}
+          idPrefix={`${panelPrefix}-blad`}
+        />
+      ) : null}
+      {panel === 'menu' ? (
+        <ShareMenu
+          open
+          methods={menuMethods}
+          label={`Deel ${shareName}`}
+          onPick={handlePick}
+          onMore={handleMore}
+          onClose={() => setPanel(null)}
+          idPrefix={`${panelPrefix}-menu`}
+        />
+      ) : null}
     </div>
   )
 }

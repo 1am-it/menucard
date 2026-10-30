@@ -192,7 +192,9 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
   const { primary, openWork, secondary } = groupModulesByPlacement(modules)
   const openWorkRows = sortOpenWork(openWork, counts || null)
   const total = resolveOpenWorkTotal(openWorkRows)
-  const showOwnerNote = roles !== undefined && isOwnerRole(roles)
+  // BE-47 (#111): an owner has a real destination now — /mijn-restaurant — so the
+  // old static "Beheerdersfuncties — nog niet beschikbaar" note became a link.
+  const showOwnerLink = roles !== undefined && isOwnerRole(roles)
   const noAccess = roles !== undefined && !hasAnyKnownRole(roles)
 
   // One request per shell load, only for an account that actually has open
@@ -369,7 +371,11 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
         <span className="internal-nav-add-text">Restaurant of menu toevoegen</span>
       </a>
 
-      {showOwnerNote && <span className="internal-nav-note">Beheerdersfuncties — nog niet beschikbaar</span>}
+      {showOwnerLink && (
+        <a className="internal-nav-link" href="/mijn-restaurant">
+          Mijn restaurant
+        </a>
+      )}
       {noAccess && <span className="internal-nav-note">Dit account heeft geen interne toegang</span>}
 
       {!narrow && (

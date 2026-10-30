@@ -11,6 +11,17 @@
 // and this API's own role checks, not by secrecy. This is categorically
 // different from the service-role key in supabaseAdmin.js, which must
 // never reach the browser.
+//
+// BE-47 (#111), criterium 3 — "lang ingelogd", zonder eigen tokenopslag:
+// deze client is de enige plek waar de sessie leeft en hij gebruikt de
+// standaard Supabase-opslag en het standaard verversen in de browser. In de
+// praktijk (Supabase-standaardinstellingen) geldt: het access token is 1 uur
+// geldig, het refresh token heeft geen vaste eindtijd zolang "Time-box user
+// sessions" in het project uit staat en het token binnen de reuse-interval
+// wordt gebruikt; de client ververst het access token zelf vóór het verloopt.
+// Een houder blijft dus ingelogd tot hij zelf uitlogt of zijn account
+// verwijdert — ook na een dag niet gebruiken — en niets daarvan komt in een
+// eigen cookie of localStorage-sleutel van deze app terecht.
 
 import { createClient } from '@supabase/supabase-js'
 

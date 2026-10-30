@@ -366,3 +366,66 @@ test('the stub: the SDK sends and verifies a claim code exactly like the page do
   assert.equal(jwtPayload(good.data.session.access_token).aal, 'aal1');
 });
 
+
+// ── BE-47 (#111): claims op /api/claims/mine en de verwijderroute ────────────
+
+test('the stub: /api/claims/mine answers with the fictional claims from the settings', async () => {
+  const claims = [{ id: 1, restaurant_id: '1', status: 'pending', created_at: '2026-10-28T10:00:00.000Z' }];
+  const { fetch, api } = install({ roles: [{ role: 'owner', restaurant_id: '1' }], claims });
+
+  const res = await fetch(`${APP}/api/claims/mine`, { headers: { Authorization: 'Bearer fixture' } });
+  assert.equal(res.status, 200);
+  assert.deepEqual((await res.json()).claims, claims);
+
+  // A different scenario without claims gets an honest empty list.
+  const empty = install({ roles: [{ role: 'owner', restaurant_id: '1' }] });
+  const emptyRes = await empty.fetch(`${APP}/api/claims/mine`);
+  assert.deepEqual((await emptyRes.json()).claims, []);
+  assert.deepEqual(api.violations, []);
+});
+
+test('the stub: the delete route accepts only the fictional code and records the request', async () => {
+  const { fetch, api } = install({ roles: [{ role: 'owner', restaurant_id: '1' }] });
+
+  const wrong = await fetch(`${APP}/api/mijn-restaurant/account-verwijderen`, {
+    method: 'POST',
+    body: JSON.stringify({ code: '000000' }),
+  });
+  assert.equal(wrong.status, 400);
+  assert.match((await wrong.json()).error, /ongeldig of verlopen/i);
+  assert.equal(api.deletedAccount(), false);
+
+  const good = await fetch(`${APP}/api/mijn-restaurant/account-verwijderen`, {
+    method: 'POST',
+    body: JSON.stringify({ code: DEFAULT_SETTINGS.emailCode }),
+  });
+  assert.equal(good.status, 200);
+  assert.equal((await good.json()).deleted, true);
+  assert.equal(api.deletedAccount(), true);
+
+  // What the client sent is recorded, so the check can prove it sent only a code.
+  // One attempt per request: the log must not double-count.
+  assert.deepEqual(
+    api.deleteLog().map((entry) => entry.code),
+    ['000000', DEFAULT_SETTINGS.emailCode],
+  );
+  assert.deepEqual(api.violations, []);
+});
+
+test('the stub: a scenario can give the deletion its own code', async () => {
+  const { fetch, api } = install({ roles: [{ role: 'owner', restaurant_id: '1' }], deleteCode: '121212' });
+  const wrong = await fetch(`${APP}/api/mijn-restaurant/account-verwijderen`, {
+    method: 'POST',
+    body: JSON.stringify({ code: DEFAULT_SETTINGS.emailCode }),
+  });
+  assert.equal(wrong.status, 400);
+  assert.equal(api.deletedAccount(), false);
+
+  const good = await fetch(`${APP}/api/mijn-restaurant/account-verwijderen`, {
+    method: 'POST',
+    body: JSON.stringify({ code: '121212' }),
+  });
+  assert.equal(good.status, 200);
+  assert.equal(api.deletedAccount(), true);
+});
+

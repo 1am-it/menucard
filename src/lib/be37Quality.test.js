@@ -216,10 +216,18 @@ test('BE-37 slordigheden: the internal sign-in screens are Dutch', () => {
   assert.doesNotMatch(nav, /Sign out/);
   assert.doesNotMatch(nav, /Owner tools|not available yet|No internal access/);
   const home = read('app/internal/page.js');
+  const homeCode = home
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('//'))
+    .join('\n');
   assert.match(home, /Uitloggen/);
-  assert.match(home, /Beheerdersfuncties/);
+  // BE-47 (#111, criterium 5): de owner-only tak is nu een doorsturing naar
+  // /mijn-restaurant; de oude owner-notitie bestaat daar niet meer. De
+  // statuspagina blijft Nederlands.
+  assert.match(homeCode, /resolveInternalOwnerRedirect\(roles\)/);
+  assert.doesNotMatch(homeCode, /Beheerdersfuncties|Nog niets te openen/);
   assert.match(home, /Dit account heeft geen interne toegang\./);
-  assert.doesNotMatch(home, /Sign out|Owner tools|Nothing to open yet|Your account has no internal role/);
+  assert.doesNotMatch(homeCode, /Sign out|Owner tools|Nothing to open yet|Your account has no internal role/);
 });
 
 // ── criterium 2 en 6: meten en bewijs ─────────────────────────────────────
