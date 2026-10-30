@@ -21,7 +21,11 @@ function read(relative) {
 
 test('vercel.json holds exactly three daily crons and no other setting', () => {
   const config = JSON.parse(read('vercel.json'));
-  assert.deepEqual(Object.keys(config), ['crons']);
+  // Naast de crons alleen git.deploymentEnabled: werkbranches niet uitrollen
+  // (Hobby-limiet van 100 deploys per dag, 30 okt). Nooit een plan- of functie-instelling.
+  assert.deepEqual(Object.keys(config), ['crons', 'git']);
+  assert.deepEqual(Object.keys(config.git), ['deploymentEnabled']);
+  assert.ok(Object.values(config.git.deploymentEnabled).every((value) => value === false));
   assert.equal(config.crons.length, 3);
   // BE-46 (#106, criterium 3) voegt het dagelijkse opruimen van stemmingen toe.
   assert.deepEqual(

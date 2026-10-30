@@ -22,6 +22,7 @@
 
 const { buildDishDeepLink } = require('./dishDeepLink');
 const { honestPriceLabel } = require('./menuPrice');
+const { normalizeSiteUrl } = require('./siteUrl');
 
 const SHARE_THEME_PARAM = 'stand';
 const SHARE_THEME_LIGHT = 'licht';
@@ -55,10 +56,16 @@ function stripTrailingSlash(value) {
 /**
  * De basis-URL voor metadata en deellinks: NEXT_PUBLIC_SITE_URL als die er is,
  * anders de host van het huidige verzoek, anders de lokale ontwikkelhost.
+ *
+ * BE-56 (#137): de omgevingswaarde wordt gelezen via `normalizeSiteUrl()` uit
+ * src/lib/siteUrl.js, dezelfde helper als app/layout.js, app/robots.js en
+ * app/sitemap.js. Alleen een geldig https-adres telt daar (zonder slash aan het
+ * eind); een lege of ongeldige waarde valt hier terug op wat deze pagina al
+ * deed: de host van het verzoek.
  */
 function siteBaseUrl({ envUrl, host, proto } = {}) {
-  const configured = typeof envUrl === 'string' ? envUrl.trim() : '';
-  if (/^https?:\/\//i.test(configured)) return stripTrailingSlash(configured);
+  const configured = normalizeSiteUrl(envUrl);
+  if (configured) return configured;
   const hostValue = typeof host === 'string' ? host.trim() : '';
   if (hostValue) {
     // Achter een proxy zegt de header het; lokaal (development, de browsercheck)
