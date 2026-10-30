@@ -1,23 +1,162 @@
 {
-  "generatedAt": "2026-10-28T21:01:31.029Z",
+  "generatedAt": "2026-10-30T07:24:50.598Z",
   "label": "after",
   "kind": "developer evidence â€” local production build, no production data or credentials",
-  "app": "http://localhost:3144",
+  "app": "http://localhost:3175",
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "contrast",
+      "checks": 26,
+      "passed": 26,
+      "failed": 0,
+      "durationMs": 7031,
+      "error": null
+    },
+    {
+      "name": "page-home",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 6988,
+      "error": null
+    },
+    {
+      "name": "page-search-results",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 7696,
+      "error": null
+    },
+    {
+      "name": "page-alle-restaurants",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 8159,
+      "error": null
+    },
+    {
+      "name": "page-restaurant-with-menu",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 8940,
+      "error": null
+    },
+    {
+      "name": "page-restaurant-without-menu",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 7228,
+      "error": null
+    },
+    {
+      "name": "page-menu",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 8064,
+      "error": null
+    },
+    {
+      "name": "page-claim",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 6958,
+      "error": null
+    },
+    {
+      "name": "page-nvwa",
+      "checks": 24,
+      "passed": 24,
+      "failed": 0,
+      "durationMs": 8888,
+      "error": null
+    },
+    {
+      "name": "search-card",
+      "checks": 4,
+      "passed": 4,
+      "failed": 0,
+      "durationMs": 1140,
+      "error": null
+    },
+    {
+      "name": "alle-restaurants",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 4205,
+      "error": null
+    },
+    {
+      "name": "nvwa-layout",
+      "checks": 1,
+      "passed": 1,
+      "failed": 0,
+      "durationMs": 1020,
+      "error": null
+    },
+    {
+      "name": "be29",
+      "checks": 94,
+      "passed": 94,
+      "failed": 0,
+      "durationMs": 36898,
+      "error": null
+    },
+    {
+      "name": "tap-target",
+      "checks": 5,
+      "passed": 5,
+      "failed": 0,
+      "durationMs": 2069,
+      "error": null
+    },
+    {
+      "name": "keyboard",
+      "checks": 1,
+      "passed": 1,
+      "failed": 0,
+      "durationMs": 1238,
+      "error": null
+    },
+    {
+      "name": "internal-coverage",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 4649,
+      "error": null
+    },
+    {
+      "name": "internal-login",
+      "checks": 2,
+      "passed": 2,
+      "failed": 0,
+      "durationMs": 3043,
+      "error": null
+    }
+  ],
   "transfer": [
     {
       "label": "after",
       "page": "/",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 169613,
-      "totalKb": 165.6,
-      "documentBytes": 8051,
-      "resourceCount": 16,
+      "totalBytes": 180754,
+      "totalKb": 176.5,
+      "documentBytes": 8293,
+      "resourceCount": 18,
       "byType": {
-        "Document": 8051,
-        "Script": 129329,
-        "Stylesheet": 24261,
-        "Fetch": 7310,
+        "Document": 8293,
+        "Stylesheet": 26563,
+        "Script": 137730,
+        "Fetch": 7506,
         "Other": 662
       },
       "biggest": [
@@ -32,34 +171,34 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/421c3c629156c486.css",
+          "url": "/_next/static/css/c420d58390fa255a.css",
           "type": "Stylesheet",
-          "bytes": 24261
+          "bytes": 26563
         },
         {
-          "url": "/_next/static/chunks/app/page-f2ec5af38927599a.js",
+          "url": "/_next/static/chunks/app/page-e5b7f090b613275e.js",
           "type": "Script",
-          "bytes": 9032
+          "bytes": 9016
         },
         {
           "url": "/",
           "type": "Document",
-          "bytes": 8051
+          "bytes": 8293
         },
         {
-          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
+          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
           "type": "Script",
-          "bytes": 7100
+          "bytes": 7384
         },
         {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-da927686ccd8f8fb.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
           "type": "Script",
-          "bytes": 4969
+          "bytes": 5270
         },
         {
-          "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
+          "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
           "type": "Script",
-          "bytes": 3861
+          "bytes": 4781
         }
       ]
     },
@@ -68,15 +207,15 @@
       "page": "/alle-restaurants",
       "theme": "dark",
       "viewport": "1280x900",
-      "totalBytes": 167435,
-      "totalKb": 163.5,
-      "documentBytes": 3078,
-      "resourceCount": 14,
+      "totalBytes": 165478,
+      "totalKb": 161.6,
+      "documentBytes": 3205,
+      "resourceCount": 18,
       "byType": {
-        "Document": 3078,
-        "Script": 129329,
-        "Stylesheet": 24261,
-        "Fetch": 10105,
+        "Document": 3205,
+        "Script": 128714,
+        "Stylesheet": 26563,
+        "Fetch": 6334,
         "Other": 662
       },
       "biggest": [
@@ -91,34 +230,34 @@
           "bytes": 46499
         },
         {
-          "url": "/_next/static/css/421c3c629156c486.css",
+          "url": "/_next/static/css/c420d58390fa255a.css",
           "type": "Stylesheet",
-          "bytes": 24261
+          "bytes": 26563
         },
         {
-          "url": "/_next/static/chunks/app/page-f2ec5af38927599a.js",
+          "url": "/_next/static/chunks/app/search/page-404ee8e3ad534765.js",
           "type": "Script",
-          "bytes": 9032
+          "bytes": 7384
         },
         {
-          "url": "/_next/static/chunks/app/search/page-f0750e93f2b73c80.js",
+          "url": "/_next/static/chunks/app/alle-restaurants/page-548817ab0cd25f53.js",
           "type": "Script",
-          "bytes": 7100
+          "bytes": 5270
         },
         {
-          "url": "/?_rsc=1tikd",
-          "type": "Fetch",
-          "bytes": 5942
-        },
-        {
-          "url": "/_next/static/chunks/app/alle-restaurants/page-da927686ccd8f8fb.js",
+          "url": "/_next/static/chunks/214-807403e7bf278f2e.js",
           "type": "Script",
-          "bytes": 4969
+          "bytes": 4781
         },
         {
           "url": "/_next/static/chunks/176-b1374ab33d855c73.js",
           "type": "Script",
           "bytes": 3861
+        },
+        {
+          "url": "/alle-restaurants",
+          "type": "Document",
+          "bytes": 3205
         }
       ]
     }
@@ -827,7 +966,7 @@
       {
         "name": "restaurant-with-menu light 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
+        "detail": "scrollWidth 369 vs innerWidth 369"
       },
       {
         "name": "restaurant-with-menu light 320px: tab bar visible",
@@ -884,7 +1023,7 @@
       {
         "name": "restaurant-with-menu dark 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 320 vs innerWidth 320"
+        "detail": "scrollWidth 369 vs innerWidth 369"
       },
       {
         "name": "restaurant-with-menu dark 320px: tab bar visible",
@@ -941,7 +1080,7 @@
       {
         "name": "restaurant-without-menu light 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 330 vs innerWidth 330"
+        "detail": "scrollWidth 369 vs innerWidth 369"
       },
       {
         "name": "restaurant-without-menu light 320px: tab bar visible",
@@ -998,7 +1137,7 @@
       {
         "name": "restaurant-without-menu dark 320px: no horizontal overflow",
         "passed": true,
-        "detail": "scrollWidth 330 vs innerWidth 330"
+        "detail": "scrollWidth 369 vs innerWidth 369"
       },
       {
         "name": "restaurant-without-menu dark 320px: tab bar visible",
@@ -1958,12 +2097,12 @@
       {
         "name": "internal/coverage light: captured without production credentials",
         "passed": true,
-        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
+        "detail": "{\"path\":\"/internal/login\",\"text\":\"Inloggen (intern)\\n\\nLog in met je werkmail en je wachtwoord. Daarna vraag je een code uit je authenticator-app.\\n\\nE-mailadres\\nWachtwoord\\nToon\\nInloggen\\nWachtwoord \",\"theme\":\"light\"}"
       },
       {
         "name": "internal/coverage dark: captured without production credentials",
         "passed": true,
-        "detail": "{\"path\":\"/internal/coverage\",\"text\":\"Application error: a client-side exception has occurred while loading localhost (see the browser console for more information).\",\"theme\":null}"
+        "detail": "{\"path\":\"/internal/login\",\"text\":\"Inloggen (intern)\\n\\nLog in met je werkmail en je wachtwoord. Daarna vraag je een code uit je authenticator-app.\\n\\nE-mailadres\\nWachtwoord\\nToon\\nInloggen\\nWachtwoord \",\"theme\":\"dark\"}"
       },
       {
         "name": "internal/login light: renders with the new tokens",
@@ -1980,520 +2119,520 @@
   "screenshots": [
     {
       "file": "ops/browser/output/be-28/home-light-1280.png",
-      "bytes": 118610,
+      "bytes": 115628,
       "width": 1274,
-      "height": 1324,
+      "height": 1273,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-light-390.png",
-      "bytes": 54450,
+      "bytes": 53481,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/home-light-320.png",
-      "bytes": 46417,
+      "bytes": 44072,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-1280.png",
-      "bytes": 107888,
+      "bytes": 104864,
       "width": 1274,
-      "height": 1324,
+      "height": 1273,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-390.png",
-      "bytes": 48933,
+      "bytes": 47989,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/home-dark-320.png",
-      "bytes": 42442,
+      "bytes": 40128,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-1280.png",
-      "bytes": 62867,
+      "bytes": 64609,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390.png",
-      "bytes": 49249,
+      "bytes": 49737,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-320.png",
-      "bytes": 45217,
+      "bytes": 44142,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-1280.png",
-      "bytes": 60308,
+      "bytes": 62127,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-390.png",
-      "bytes": 50042,
+      "bytes": 51098,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-dark-320.png",
-      "bytes": 47222,
+      "bytes": 45813,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-1280.png",
-      "bytes": 249360,
+      "bytes": 250914,
       "width": 1274,
       "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-390.png",
-      "bytes": 55553,
+      "bytes": 56201,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-light-320.png",
-      "bytes": 52399,
+      "bytes": 49980,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-1280.png",
-      "bytes": 243423,
+      "bytes": 245306,
       "width": 1274,
       "height": 2410,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-390.png",
-      "bytes": 56566,
+      "bytes": 58008,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/alle-restaurants-dark-320.png",
-      "bytes": 53589,
+      "bytes": 51081,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-1280.png",
-      "bytes": 313000,
+      "bytes": 322617,
       "width": 1274,
-      "height": 3601,
+      "height": 4061,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-390.png",
-      "bytes": 44370,
+      "bytes": 46144,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-light-320.png",
-      "bytes": 38381,
+      "bytes": 37497,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-1280.png",
-      "bytes": 296176,
+      "bytes": 306037,
       "width": 1274,
-      "height": 3601,
+      "height": 4061,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-390.png",
-      "bytes": 45500,
+      "bytes": 47424,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-with-menu-dark-320.png",
-      "bytes": 39185,
+      "bytes": 37341,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-1280.png",
-      "bytes": 80932,
+      "bytes": 83009,
       "width": 1274,
       "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-390.png",
-      "bytes": 39700,
+      "bytes": 41156,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-light-320.png",
-      "bytes": 37948,
+      "bytes": 35555,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-1280.png",
-      "bytes": 79433,
+      "bytes": 81370,
       "width": 1274,
       "height": 1408,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-390.png",
-      "bytes": 40405,
+      "bytes": 41898,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/restaurant-without-menu-dark-320.png",
-      "bytes": 38409,
+      "bytes": 35085,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-1280.png",
-      "bytes": 282367,
+      "bytes": 299315,
       "width": 1274,
-      "height": 2707,
+      "height": 3185,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-390.png",
-      "bytes": 43076,
+      "bytes": 44823,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-light-320.png",
-      "bytes": 42788,
+      "bytes": 41440,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-1280.png",
-      "bytes": 272096,
+      "bytes": 288754,
       "width": 1274,
-      "height": 2707,
+      "height": 3185,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-390.png",
-      "bytes": 46641,
+      "bytes": 48548,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/menu-dark-320.png",
-      "bytes": 46436,
+      "bytes": 44993,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-1280.png",
-      "bytes": 28793,
+      "bytes": 34825,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-390.png",
-      "bytes": 26427,
+      "bytes": 31722,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-light-320.png",
-      "bytes": 25935,
+      "bytes": 31261,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-1280.png",
-      "bytes": 27988,
+      "bytes": 34086,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-390.png",
-      "bytes": 26660,
+      "bytes": 32140,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/claim-dark-320.png",
-      "bytes": 26226,
+      "bytes": 31671,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-1280.png",
-      "bytes": 342615,
+      "bytes": 344362,
       "width": 1274,
       "height": 5000,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-390.png",
-      "bytes": 43527,
+      "bytes": 45218,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-light-320.png",
-      "bytes": 42554,
+      "bytes": 45537,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-1280.png",
-      "bytes": 350786,
+      "bytes": 352551,
       "width": 1274,
       "height": 5000,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-390.png",
-      "bytes": 45483,
+      "bytes": 47320,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/nvwa-dark-320.png",
-      "bytes": 44519,
+      "bytes": 47560,
       "width": 320,
       "height": 820,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/search-results-light-390-detail.png",
-      "bytes": 49610,
+      "bytes": 50044,
       "width": 390,
       "height": 820,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-1280.png",
-      "bytes": 117258,
+      "bytes": 118911,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-390.png",
-      "bytes": 95866,
+      "bytes": 99645,
       "width": 390,
-      "height": 1603,
+      "height": 1659,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-light-320.png",
-      "bytes": 101027,
+      "bytes": 101216,
       "width": 320,
-      "height": 2018,
+      "height": 2074,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-1280.png",
-      "bytes": 106631,
+      "bytes": 108331,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-390.png",
-      "bytes": 87415,
+      "bytes": 91154,
       "width": 390,
-      "height": 1603,
+      "height": 1659,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-lunch-dark-320.png",
-      "bytes": 92390,
+      "bytes": 92175,
       "width": 320,
-      "height": 2018,
+      "height": 2074,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-1280.png",
-      "bytes": 120026,
+      "bytes": 121680,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-390.png",
-      "bytes": 97016,
+      "bytes": 100772,
       "width": 390,
-      "height": 1597,
+      "height": 1653,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-light-320.png",
-      "bytes": 103370,
+      "bytes": 103475,
       "width": 320,
-      "height": 2066,
+      "height": 2122,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-1280.png",
-      "bytes": 109384,
+      "bytes": 111109,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-390.png",
-      "bytes": 88460,
+      "bytes": 92173,
       "width": 390,
-      "height": 1597,
+      "height": 1653,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-borrel-dark-320.png",
-      "bytes": 94604,
+      "bytes": 94376,
       "width": 320,
-      "height": 2066,
+      "height": 2122,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-1280.png",
-      "bytes": 117228,
+      "bytes": 118901,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-390.png",
-      "bytes": 95112,
+      "bytes": 98905,
       "width": 390,
-      "height": 1583,
+      "height": 1639,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-light-320.png",
-      "bytes": 100522,
+      "bytes": 100700,
       "width": 320,
-      "height": 2032,
+      "height": 2088,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-1280.png",
-      "bytes": 106515,
+      "bytes": 108221,
       "width": 1274,
       "height": 1324,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-390.png",
-      "bytes": 86622,
+      "bytes": 90347,
       "width": 390,
-      "height": 1583,
+      "height": 1639,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-home-diner-dark-320.png",
-      "bytes": 91875,
+      "bytes": 91671,
       "width": 320,
-      "height": 2032,
+      "height": 2088,
       "viewport": "320x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-390.png",
-      "bytes": 250676,
+      "bytes": 222000,
       "width": 390,
       "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-dark-390.png",
-      "bytes": 239802,
+      "bytes": 215472,
       "width": 390,
       "height": 5000,
       "viewport": "390x820"
     },
     {
       "file": "ops/browser/output/be-28/be29-menu-marked-light-1280.png",
-      "bytes": 223980,
+      "bytes": 242022,
       "width": 1274,
-      "height": 2506,
+      "height": 2867,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-coverage-light-1280.png",
-      "bytes": 9370,
+      "bytes": 26126,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-coverage-dark-1280.png",
-      "bytes": 9370,
+      "bytes": 22913,
       "width": 1280,
       "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-login-light-1280.png",
-      "bytes": 11934,
-      "width": 1274,
-      "height": 980,
+      "bytes": 26126,
+      "width": 1280,
+      "height": 900,
       "viewport": "1280x900"
     },
     {
       "file": "ops/browser/output/be-28/internal-login-dark-1280.png",
-      "bytes": 12412,
-      "width": 1274,
-      "height": 980,
+      "bytes": 22913,
+      "width": 1280,
+      "height": 900,
       "viewport": "1280x900"
     }
   ],

@@ -29,6 +29,8 @@ references; Claude Design may be the tool, not an autonomous release approver.
 | #59 / PR #60 menu extraction | Claude Code | DeepSeek, local Cline runner (`menucard-local-runner`) | Claude Code: content complete and accepted locally (BE-21, 2026-10-24); release in progress (migration-only PR #61 for 0020, then PR #60); runner active, waiting for orders |
 | #53 / PR #56 compact intake flow | Claude Code (read-only follow-up) | Claude Code (separate branch) | Open/draft; real browser acceptance outstanding |
 
+| Parallel runner 2 | Claude Code | DeepSeek, second local Cline runner (`menucard-local-runner-2`) | Owner decision 2026-10-30: a second runner may work in parallel on a different issue/PR/branch, in its own workspace clone; never two runners on the same PR or on overlapping files |
+
 The table records the owner at the time of the last edit; the live GitHub
 thread and the start check in `.agent/START.md` decide the actual state.
 

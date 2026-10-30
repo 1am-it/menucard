@@ -17,10 +17,17 @@ const {
   CLAIM_MESSAGES,
   CODE_LENGTH,
   OTP_TYPE,
+  OTP_TYPE_SMS,
+  OWNER_SIGN_IN_MESSAGES,
+  SMS_LOGIN_FLAG,
+  isSmsLoginEnabled,
   requestEmailCode,
+  requestOwnerSignInCode,
   validateCode,
   validateEmail,
+  validatePhone,
   verifyEmailCode,
+  verifyOwnerSignInCode,
 } = require('./claimEmailCodeFlow');
 const { MESSAGES } = require('./authErrors');
 
@@ -182,3 +189,114 @@ test('claimEmailCodeFlow: the claim failure text is Dutch and free of API wordin
   assert.match(CLAIM_MESSAGES.submitFailed, /claim/i);
   assert.doesNotMatch(CLAIM_MESSAGES.submitFailed, /failed|error/i);
 });
+
+// ── BE-47 (#111): dezelfde flow voor houders, met `shouldCreateUser: false` ──
+
+const PHONE = '+31 6 12345678';
+
+test('ownerSignIn: de vlag staat standaard uit en opent alleen op precies 1', () => {
+  assert.equal(SMS_LOGIN_FLAG, 'NEXT_PUBLIC_OWNER_SMS_LOGIN');
+  for (const off of [undefined, null, '', '0', 'true', 'yes', 0, false]) {
+    assert.equal(isSmsLoginEnabled(off), false, `${String(off)} must leave sms off`);
+  }
+  assert.equal(isSmsLoginEnabled('1'), true);
+  assert.equal(isSmsLoginEnabled(true), true);
+});
+
+test('ownerSignIn: validatePhone wants a plausible number and keeps the typed form', () => {
+  assert.equal(validatePhone('').reason, 'missing');
+  assert.equal(validatePhone('12345').reason, 'format');
+  assert.equal(validatePhone('abcdefgh').reason, 'format');
+  assert.match(validatePhone('12345').message, /geldig telefoonnummer/);
+  assert.deepEqual(validatePhone(` ${PHONE} `), { valid: true, phone: PHONE });
+});
+
+test('ownerSignIn: the e-mail code never creates an account (shouldCreateUser: false)', async () => {
+  const auth = fakeAuth();
+  const result = await requestOwnerSignInCode(auth, { email: ` ${EMAIL} ` });
+  assert.equal(result.ok, true);
+  assert.equal(result.channel, 'email');
+  assert.equal(result.email, EMAIL);
+  assert.equal(result.notice, OWNER_SIGN_IN_MESSAGES.codeSentEmail);
+  assert.deepEqual(auth.calls, [
+    { method: 'signInWithOtp', credentials: { email: EMAIL, options: { shouldCreateUser: false } } },
+  ]);
+});
+
+test('ownerSignIn: the neutral notice reveals nothing about the address', async () => {
+  // The same call for a known and an unknown address: GoTrue answers 200 for
+  // both, so the screen must show the same text and never "bestaat niet".
+  const known = await requestOwnerSignInCode(fakeAuth(), { email: EMAIL });
+  const unknown = await requestOwnerSignInCode(fakeAuth(), { email: 'onbekend@example.invalid' });
+  assert.equal(known.notice, unknown.notice);
+  assert.doesNotMatch(known.notice, /bestaat|onbekend|geen account/i);
+  assert.match(known.notice, /als dit e-mailadres bij ons bekend is/i);
+});
+
+test('ownerSignIn: without the flag there is no phone path at all', async () => {
+  const auth = fakeAuth();
+  const request = await requestOwnerSignInCode(auth, { channel: 'sms', phone: PHONE });
+  assert.deepEqual(request, { ok: false, message: OWNER_SIGN_IN_MESSAGES.smsDisabled });
+  const verify = await verifyOwnerSignInCode(auth, { channel: 'sms', phone: PHONE, code: CODE });
+  assert.deepEqual(verify, { ok: false, message: OWNER_SIGN_IN_MESSAGES.smsDisabled });
+  assert.deepEqual(auth.calls, [], 'nothing may reach Supabase without the flag');
+});
+
+test('ownerSignIn: with the flag the flow sends and verifies sms with type "sms"', async () => {
+  const auth = fakeAuth();
+  const request = await requestOwnerSignInCode(auth, {
+    channel: 'sms',
+    phone: PHONE,
+    smsLoginFlag: '1',
+  });
+  assert.equal(request.ok, true);
+  assert.equal(request.channel, 'sms');
+  assert.equal(request.phone, PHONE);
+  assert.equal(request.notice, OWNER_SIGN_IN_MESSAGES.codeSentPhone);
+
+  const verify = await verifyOwnerSignInCode(auth, {
+    channel: 'sms',
+    phone: PHONE,
+    code: CODE,
+    smsLoginFlag: '1',
+  });
+  assert.equal(verify.ok, true);
+  assert.equal(verify.channel, 'sms');
+  assert.equal(OTP_TYPE_SMS, 'sms');
+  assert.deepEqual(auth.calls[0], {
+    method: 'signInWithOtp',
+    credentials: { phone: PHONE, options: { shouldCreateUser: false } },
+  });
+  assert.deepEqual(auth.calls[1], { method: 'verifyOtp', credentials: { phone: PHONE, token: CODE, type: 'sms' } });
+});
+
+test('ownerSignIn: a rejected code gives Dutch text, never Supabase wording', async () => {
+  const auth = fakeAuth({
+    verifyOtp: () => ({ data: null, error: { code: 'otp_expired', status: 403, message: 'Token has expired' } }),
+  });
+  const result = await verifyOwnerSignInCode(auth, { email: EMAIL, code: CODE });
+  assert.equal(result.ok, false);
+  assert.equal(result.message, MESSAGES.invalidEmailCode);
+  assert.doesNotMatch(result.message, /token|expired/i);
+});
+
+test('ownerSignIn: an empty code never reaches Supabase', async () => {
+  const auth = fakeAuth();
+  const result = await verifyOwnerSignInCode(auth, { email: EMAIL, code: '  ' });
+  assert.equal(result.ok, false);
+  assert.deepEqual(auth.calls, []);
+});
+
+test('ownerSignIn: a verify without a session never pretends to be signed in', async () => {
+  const auth = fakeAuth({ verifyOtp: () => ({ data: {}, error: null }) });
+  const result = await verifyOwnerSignInCode(auth, { email: EMAIL, code: CODE });
+  assert.deepEqual(result, { ok: false, message: MESSAGES.generic });
+});
+
+test('ownerSignIn: the claim flow keeps its own, account-creating behaviour', async () => {
+  // The owner branch must not change BE-48's claim: no shouldCreateUser there.
+  const auth = fakeAuth();
+  await requestEmailCode(auth, { email: EMAIL });
+  assert.deepEqual(auth.calls[0], { method: 'signInWithOtp', credentials: { email: EMAIL } });
+});
+

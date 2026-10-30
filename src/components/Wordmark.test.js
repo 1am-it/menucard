@@ -121,10 +121,12 @@ test('InternalNav: the home link shows the shared wordmark instead of the BredaE
 });
 
 // Zonder expliciete naam berekende Edge "ONZE Menukaarten" (text-transform).
+// BE-50 (#120): de link laadt de home niet meer vooruit (`prefetch={false}`);
+// doel, class en toegankelijke naam blijven gelijk.
 test('Wordmark: links carry an explicit accessible name that starts with the visible name', () => {
   const src = read('src/components/Wordmark.js');
   assert.match(src, /WORDMARK_HOME_LABEL = 'Onze Menukaarten, naar de startpagina'/);
-  assert.match(src, /<Link href=\{href\} className="wordmark" aria-label=\{label\}>/);
+  assert.match(src, /<Link href=\{href\} className="wordmark" aria-label=\{label\} prefetch=\{false\}>/);
   const nav = read('src/components/InternalNav.js');
   assert.match(nav, /className="internal-nav-home"\s+aria-label="Onze Menukaarten, naar het meeste open werk of Dekking"/);
 });
