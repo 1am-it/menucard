@@ -50,7 +50,7 @@ test('0023: één nieuw, uniek migratienummer na 0022', () => {
   assert.match(SQL, /NOT YET APPLIED/i, 'het bestand wordt niet uitgevoerd in deze PR');
 });
 
-test('0023: drie tabellen — aanbod, meldingen en geschiedenis', () => {
+test('0023: vier tabellen — aanbod, meldingen, geschiedenis en plaatsrecht', () => {
   assert.deepEqual(kolommen(tableBlock('daghap_aanbod')), [
     'id', 'restaurant_id', 'user_id', 'soort', 'naam', 'prijs_cent', 'beschrijving',
     'labels', 'status', 'filter_reden', 'verloopt_op', 'created_at', 'updated_at',
@@ -60,7 +60,18 @@ test('0023: drie tabellen — aanbod, meldingen en geschiedenis', () => {
     'gebeurtenis_id', 'aanbod_id', 'restaurant_id', 'actie', 'door', 'apparaat', 'gegevens', 'moment',
   ]);
   // De geschiedenis hangt aan het aanbod: verwijderen ruimt de regels mee op.
-  assert.match(flat, /aanbod_id bigint not null references daghap_aanbod \(id\) on delete cascade/);
+  // Sinds de interne werkvoorraad (stap B) mag hij leeg zijn: een ontnomen of
+  // teruggegeven plaatsrecht hoort bij een restaurant, niet bij één aanbod.
+  // Elke plaatsing, wijziging, melding en goedkeuring vult hem nog steeds.
+  assert.match(flat, /aanbod_id bigint references daghap_aanbod \(id\) on delete cascade/);
+  assert.doesNotMatch(tableBlock('daghap_gebeurtenissen'), /aanbod_id\s+bigint not null/, 'een rechtactie heeft geen aanbod');
+  // De vierde tabel: één rij per houder die per restaurant geen aanbod meer
+  // mag plaatsen. De API leest hem bij plaatsen en wijzigen.
+  assert.deepEqual(kolommen(tableBlock('daghap_plaatsrecht')), [
+    'restaurant_id', 'user_id', 'door', 'ingetrokken_op',
+  ]);
+  assert.match(tableBlock('daghap_plaatsrecht'), /primary key \(restaurant_id, user_id\)/);
+  assert.match(tableBlock('daghap_plaatsrecht'), /user_id\s+uuid not null references auth\.users \(id\) on delete cascade/);
 });
 
 test('0023: de regels uit het contract staan als check in de tabel', () => {
@@ -85,7 +96,7 @@ test('0023: de regels uit het contract staan als check in de tabel', () => {
 
   // De geschiedenis kent alleen de acties uit het contract.
   const geschiedenis = tableBlock('daghap_gebeurtenissen');
-  for (const actie of ['geplaatst', 'gewijzigd', 'offline', 'in_controle', 'gemeld', 'goedgekeurd', 'verwijderd', 'verlopen']) {
+  for (const actie of ['geplaatst', 'gewijzigd', 'offline', 'in_controle', 'gemeld', 'goedgekeurd', 'verwijderd', 'verlopen', 'recht_afgenomen', 'recht_teruggegeven']) {
     assert.ok(geschiedenis.includes(`'${actie}'`), `de actie ${actie} ontbreekt`);
   }
 });
@@ -98,7 +109,7 @@ test('0023: maximaal één actieve daghap per restaurant in de database', () => 
 });
 
 test('0023: RLS aan en geen toegang voor public, anon of authenticated', () => {
-  for (const tabel of ['daghap_aanbod', 'daghap_meldingen', 'daghap_gebeurtenissen']) {
+  for (const tabel of ['daghap_aanbod', 'daghap_meldingen', 'daghap_gebeurtenissen', 'daghap_plaatsrecht']) {
     assert.match(flat, new RegExp(`alter table ${tabel} enable row level security`));
     assert.match(flat, new RegExp(`revoke all on public\\.${tabel} from public, anon, authenticated`));
     assert.match(flat, new RegExp(`grant select, insert, update, delete on public\\.${tabel} to service_role`));

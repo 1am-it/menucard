@@ -26,6 +26,7 @@ const {
   DAGHAP_TABLE_AANBOD,
   DAGHAP_TABLE_GEBEURTENISSEN,
   DAGHAP_TABLE_MELDINGEN,
+  DAGHAP_TABLE_PLAATSRECHT,
   createDaghapHandlers,
 } = require('./daghapHandlers');
 
@@ -86,11 +87,13 @@ function daghapBody(overrides = {}) {
  * meer tabellen ontbreken (42P01), precies de fout van een nog niet toegepaste
  * 0023.
  */
-function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
+function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaatsrecht = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
   const tables = {
     [DAGHAP_TABLE_AANBOD]: aanbod.map((rij) => aanbodRij(rij)),
     [DAGHAP_TABLE_GEBEURTENISSEN]: gebeurtenissen.map((rij, index) => ({ gebeurtenis_id: index + 1, ...rij })),
     [DAGHAP_TABLE_MELDINGEN]: meldingen.map((rij, index) => ({ melding_id: index + 1, ...rij })),
+    // Sinds stap B: een rij hier ontneemt de houder zijn plaatsrecht.
+    [DAGHAP_TABLE_PLAATSRECHT]: plaatsrecht.map((rij) => ({ ...rij })),
     staff_roles: eigenaren.map((rij, index) => ({ id: index + 1, ...rij })),
   };
   const calls = [];
@@ -300,6 +303,36 @@ test('BE-55: zonder sessie is het 401 en zonder claim op dit restaurant 403', as
   });
   const derde = await handlersFor(anderRestaurant).plaatsAanbod(request(daghapBody()));
   assert.equal(derde.status, 403);
+});
+
+test('BE-55: een houder zonder plaatsrecht krijgt 403 bij plaatsen en wijzigen', async () => {
+  // De interne werkvoorraad nam dit account het recht af (tabel 0023).
+  const client = fakeSupabase({
+    aanbod: [aanbodRij()],
+    plaatsrecht: [{ restaurant_id: RESTAURANT_ID, user_id: OWNER_ID }],
+  });
+  const handlers = handlersFor(client);
+
+  const geplaatst = await handlers.plaatsAanbod(request(daghapBody({ naam: 'Erwtensoep met roggebrood' })));
+  assert.equal(geplaatst.status, 403);
+  assert.equal(geplaatst.body.error, 'geen_plaatsrecht');
+  assert.match(geplaatst.body.message, /geen aanbod meer plaatsen/);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD].length, 1, 'er komt niets bij');
+
+  const gewijzigd = await handlers.wijzigAanbod(
+    request({ naam: 'Pompoensoep met croutons', prijs: '6,50' }, { url: 'http://localhost/api/v1/daghap/1' }),
+    { id: '1' },
+  );
+  assert.equal(gewijzigd.status, 403);
+  assert.equal(gewijzigd.body.error, 'geen_plaatsrecht');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].naam, 'Pompoensoep met brood', 'niets gewijzigd');
+
+  // Alleen voor dít restaurant: hetzelfde account blijft elders welkom.
+  const elders = fakeSupabase({
+    plaatsrecht: [{ restaurant_id: '6', user_id: OWNER_ID }],
+  });
+  const welkom = await handlersFor(elders).plaatsAanbod(request(daghapBody()));
+  assert.equal(welkom.status, 201);
 });
 
 test('BE-55: een filtertreffer gaat naar in_controle, niet online', async () => {

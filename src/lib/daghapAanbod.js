@@ -72,6 +72,7 @@ const DAGHAP_MESSAGES = Object.freeze({
   daglimiet: `Je kunt per dag maximaal ${DAGHAP_MAX_WIJZIGINGEN_PER_DAG} keer iets plaatsen of wijzigen.`,
   verlopen: 'Dit aanbod is verlopen en kan niet meer gewijzigd worden.',
   geenEigenaar: 'Je bent geen houder van dit restaurant.',
+  geenPlaatsrecht: 'Je mag voor dit restaurant geen aanbod meer plaatsen. Neem contact op met BredaEats.',
   inloggen: 'Log in om je aanbod te beheren.',
 });
 
@@ -94,6 +95,7 @@ const DAGHAP_FOUTEN = Object.freeze({
   seizoenVol: 'seizoenslimiet',
   daglimiet: 'daglimiet',
   verlopen: 'verlopen',
+  geenPlaatsrecht: 'geen_plaatsrecht',
 });
 
 function tekst(value) {

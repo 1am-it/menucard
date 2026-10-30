@@ -52,6 +52,9 @@ const {
 const DAGHAP_TABLE_AANBOD = 'daghap_aanbod';
 const DAGHAP_TABLE_MELDINGEN = 'daghap_meldingen';
 const DAGHAP_TABLE_GEBEURTENISSEN = 'daghap_gebeurtenissen';
+// De vierde tabel uit 0023: een rij betekent dat de interne werkvoorraad deze
+// houder voor dit restaurant het plaatsrecht ontnam (stap B).
+const DAGHAP_TABLE_PLAATSRECHT = 'daghap_plaatsrecht';
 const DAGHAP_CLEANUP_FUNCTION = 'ruim_verlopen_daghap_op';
 // Na zoveel meldingen van verschillende apparaten gaat het aanbod op
 // `in_controle` (contract). Eén melding per apparaat telt.
@@ -207,6 +210,38 @@ function createDaghapHandlers({
     return { ok: true };
   }
 
+  /**
+   * Mag deze houder nog plaatsen? De interne werkvoorraad kan hem dat recht
+   * ontnemen (tabel daghap_plaatsrecht). Een rij betekent 403; geen rij, geen
+   * sessie of een oudere database zonder de tabel betekent: welkom.
+   */
+  async function controleerPlaatsrecht(supabase, userId, restaurantId) {
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_PLAATSRECHT)
+        .select('user_id')
+        .eq('restaurant_id', restaurantId)
+        .eq('user_id', userId)
+        .maybeSingle(),
+    );
+    if (gevonden.error) {
+      if (missingStorage(gevonden.error)) return { ok: true };
+      return { response: failed() };
+    }
+    if (gevonden.data) {
+      return {
+        response: {
+          status: 403,
+          body: {
+            error: DAGHAP_FOUTEN.geenPlaatsrecht,
+            message: DAGHAP_MESSAGES.geenPlaatsrecht,
+          },
+        },
+      };
+    }
+    return { ok: true };
+  }
+
   /** Het aanbod van één restaurant, zonder verlopen aanbod. */
   async function laadAanbod(supabase, restaurantId) {
     const gevonden = await ask(
@@ -357,6 +392,9 @@ function createDaghapHandlers({
     const eigenaar = await controleerEigenaar(supabase, auth.userId, restaurantId);
     if (eigenaar.response) return eigenaar.response;
 
+    const recht = await controleerPlaatsrecht(supabase, auth.userId, restaurantId);
+    if (recht.response) return recht.response;
+
     const validatie = normaliseerAanbod({ ...body, nu: now() });
     if (!validatie.ok) {
       return invalid('invalid_aanbod', {
@@ -442,6 +480,9 @@ function createDaghapHandlers({
 
     const eigenaar = await controleerEigenaar(supabase, auth.userId, huidig.restaurant_id);
     if (eigenaar.response) return eigenaar.response;
+
+    const recht = await controleerPlaatsrecht(supabase, auth.userId, huidig.restaurant_id);
+    if (recht.response) return recht.response;
 
     if (huidig.status === DAGHAP_STATUS_VERLOPEN || isVerlopen(huidig.verloopt_op, now())) {
       return geweigerd(DAGHAP_FOUTEN.verlopen);
@@ -785,6 +826,7 @@ module.exports = {
   DAGHAP_TABLE_AANBOD,
   DAGHAP_TABLE_GEBEURTENISSEN,
   DAGHAP_TABLE_MELDINGEN,
+  DAGHAP_TABLE_PLAATSRECHT,
   PUBLIEK_KOLOMMEN,
   createDaghapHandlers,
 };

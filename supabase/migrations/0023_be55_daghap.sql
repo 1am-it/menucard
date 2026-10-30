@@ -10,7 +10,7 @@
 -- (label "Vandaag" and a filter) and on the home page, and it expires by
 -- itself. Every placement and every change is kept.
 --
--- Three tables:
+-- Four tables:
 --   daghap_aanbod          one row per placement: which restaurant, which kind,
 --                          name, price in cents, description, labels, status,
 --                          the moment it expires and why it is held (if it is);
@@ -19,7 +19,11 @@
 --                          report from the same device does not count twice. No
 --                          account, no IP address, no user agent, no cookie;
 --   daghap_gebeurtenissen   the history: every placement, change, offline
---                          action, filter hit, report, approval and expiry.
+--                          action, filter hit, report, approval and expiry;
+--   daghap_plaatsrecht     the holder who may no longer place offer for one
+--                          restaurant. A row here is the internal workqueue's
+--                          "plaatsrecht ontnemen"; removing it gives the right
+--                          back. Nothing else in the schema changes.
 --
 -- The checks below repeat the contract rules so that no writer can bypass
 -- them, whatever the caller sends: name 3-80 characters, price 50-15000 cents
@@ -38,7 +42,7 @@
 -- Rights: row level security on, and deliberately NO policy for anon or
 -- authenticated, so neither can read or write anything here. Everything goes
 -- through the server routes under /api/v1/daghap with the service role.
--- service_role gets select/insert/update/delete on the three tables and execute
+-- service_role gets select/insert/update/delete on the four tables and execute
 -- on the cleanup function, and nothing else. Without the explicit revoke,
 -- PostgreSQL would give PUBLIC execute on the new function.
 --
@@ -121,12 +125,16 @@ create index if not exists daghap_meldingen_aanbod_idx
 
 create table if not exists daghap_gebeurtenissen (
   gebeurtenis_id bigint generated always as identity primary key,
-  aanbod_id      bigint not null references daghap_aanbod (id) on delete cascade,
+  -- Nullable since the internal workqueue acts on a holder's posting right and
+  -- not on one offer (0023 step B): that row has a restaurant and an action,
+  -- but no offer. A placement, change, report or approval always sets it.
+  aanbod_id      bigint references daghap_aanbod (id) on delete cascade,
   -- Repeated here so the history stays readable per restaurant without a join.
   restaurant_id  text not null check (char_length(btrim(restaurant_id)) between 1 and 64),
   actie          text not null check (actie in (
                    'geplaatst', 'gewijzigd', 'offline', 'in_controle',
-                   'gemeld', 'goedgekeurd', 'verwijderd', 'verlopen'
+                   'gemeld', 'goedgekeurd', 'verwijderd', 'verlopen',
+                   'recht_afgenomen', 'recht_teruggegeven'
                  )),
   -- The holder account for a placement or change; empty for a guest report and
   -- for the automatic expiry.
@@ -152,21 +160,42 @@ create index if not exists daghap_gebeurtenissen_dag_idx
   on daghap_gebeurtenissen (door, moment)
   where actie in ('geplaatst', 'gewijzigd');
 
+-- The internal workqueue's "plaatsrecht ontnemen": one row per holder who may no
+-- longer place offer for one restaurant. The placing and changing routes read
+-- this table and answer 403 while a row exists (src/lib/daghapHandlers.js).
+-- Giving the right back deletes the row; nothing is ever hard-deleted from the
+-- history, which keeps its own recht_afgenomen / recht_teruggegeven rows.
+create table if not exists daghap_plaatsrecht (
+  restaurant_id  text not null check (char_length(btrim(restaurant_id)) between 1 and 64),
+  user_id        uuid not null references auth.users (id) on delete cascade,
+  -- The internal account that took the right; for the trail only.
+  door           uuid,
+  ingetrokken_op timestamptz not null default now(),
+  primary key (restaurant_id, user_id)
+);
+
+comment on table daghap_plaatsrecht is
+  'BE-55: houders die van de interne werkvoorraad geen daghap of seizoensgerecht meer mogen plaatsen. Een rij weghalen geeft het recht terug.';
+
 alter table daghap_aanbod enable row level security;
 alter table daghap_meldingen enable row level security;
 alter table daghap_gebeurtenissen enable row level security;
+alter table daghap_plaatsrecht enable row level security;
 
 revoke all on public.daghap_aanbod from public, anon, authenticated;
 revoke all on public.daghap_meldingen from public, anon, authenticated;
 revoke all on public.daghap_gebeurtenissen from public, anon, authenticated;
+revoke all on public.daghap_plaatsrecht from public, anon, authenticated;
 
 revoke all on public.daghap_aanbod from service_role;
 revoke all on public.daghap_meldingen from service_role;
 revoke all on public.daghap_gebeurtenissen from service_role;
+revoke all on public.daghap_plaatsrecht from service_role;
 
 grant select, insert, update, delete on public.daghap_aanbod to service_role;
 grant select, insert, update, delete on public.daghap_meldingen to service_role;
 grant select, insert, update, delete on public.daghap_gebeurtenissen to service_role;
+grant select, insert, update, delete on public.daghap_plaatsrecht to service_role;
 
 -- The identity columns need their sequences, nothing else.
 grant usage, select on sequence public.daghap_aanbod_id_seq to service_role;
