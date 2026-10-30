@@ -2,9 +2,9 @@
   "category": "fixture evidence (stubbed /api/v1/kies*; not real acceptance)",
   "issue": "#106",
   "script": "run-be46-browser-check.js",
-  "generatedAt": "2026-10-30T10:29:23.736Z",
+  "generatedAt": "2026-10-30T10:32:31.232Z",
   "port": 3166,
-  "head": "81d41e0457a5bab41535d7fb8dc92084d2224f65",
+  "head": "32f25dfb449a8e87e201531e7b64633e313b205e",
   "stub": {
     "dishes": [
       "Fictieve pasta",
@@ -22,7 +22,7 @@
       "checks": 31,
       "passed": 31,
       "failed": 0,
-      "durationMs": 7154,
+      "durationMs": 7197,
       "error": null
     },
     {
@@ -30,7 +30,7 @@
       "checks": 38,
       "passed": 38,
       "failed": 0,
-      "durationMs": 6072,
+      "durationMs": 5707,
       "error": null
     },
     {
@@ -38,7 +38,7 @@
       "checks": 13,
       "passed": 13,
       "failed": 0,
-      "durationMs": 7411,
+      "durationMs": 7772,
       "error": null
     },
     {
@@ -46,7 +46,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 3135,
+      "durationMs": 4450,
       "error": null
     },
     {
@@ -54,7 +54,7 @@
       "checks": 5,
       "passed": 5,
       "failed": 0,
-      "durationMs": 4433,
+      "durationMs": 2963,
       "error": null
     },
     {
@@ -62,7 +62,7 @@
       "checks": 4,
       "passed": 4,
       "failed": 0,
-      "durationMs": 1959,
+      "durationMs": 3174,
       "error": null
     }
   ],
@@ -393,11 +393,6 @@
       "detail": "{\"attr\":\"light\",\"bodyBackground\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"]}"
     },
     {
-      "name": "route: opnieuw openen toont meteen de uitslag",
-      "passed": true,
-      "detail": null
-    },
-    {
       "name": "route: de uitslag staat er ook in donker",
       "passed": true,
       "detail": "4"
@@ -408,9 +403,14 @@
       "detail": "{\"attr\":\"dark\",\"bodyBackground\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"]}"
     },
     {
+      "name": "route: opnieuw openen toont meteen de uitslag",
+      "passed": true,
+      "detail": null
+    },
+    {
       "name": "route: elke stem is precies één POST met alleen de vier velden",
       "passed": true,
-      "detail": "[{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":true},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-0\",\"lekker\":false},{\"stemmer\":\"LbB6IQMO4LsQvD5z-V9RXw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-1\",\"lekker\":false}]"
+      "detail": "[{\"stemmer\":\"eI0jJuXj4NYkxmoDod3TPw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true},{\"stemmer\":\"eI0jJuXj4NYkxmoDod3TPw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":true},{\"stemmer\":\"eI0jJuXj4NYkxmoDod3TPw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-0\",\"lekker\":false},{\"stemmer\":\"eI0jJuXj4NYkxmoDod3TPw\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-1-1\",\"lekker\":false}]"
     },
     {
       "name": "route: de pagina leest de stemming via GET",
@@ -445,7 +445,7 @@
     {
       "name": "swipen: 40% naar rechts is een stem \"lekker\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"Kwhoq3VHfjqBY6Rj3RpgCQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
     },
     {
       "name": "swipen: na de stem staat het tweede gerecht vooraan",
@@ -470,7 +470,7 @@
     {
       "name": "swipen: 45% naar links is een stem \"liever niet\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"ZbALb6CteiBcAbbMqifFBQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"Kwhoq3VHfjqBY6Rj3RpgCQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"Kwhoq3VHfjqBY6Rj3RpgCQ\",\"roepnaam\":\"Sam\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
     },
     {
       "name": "swipen: na links staat het derde gerecht vooraan",
@@ -490,12 +490,12 @@
     {
       "name": "toetsenbord: ArrowRight stemt \"lekker\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"PA3iHwTS5DsK97Aa9wrvQA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}}]"
     },
     {
       "name": "toetsenbord: ArrowLeft stemt \"liever niet\"",
       "passed": true,
-      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VjQ_hMq_N6AH-eTtkYevAg\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
+      "detail": "[{\"method\":\"GET\",\"url\":\"/api/v1/kies/FictieStemCode00000022\",\"body\":null},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"PA3iHwTS5DsK97Aa9wrvQA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-0\",\"lekker\":true}},{\"method\":\"POST\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"PA3iHwTS5DsK97Aa9wrvQA\",\"roepnaam\":\"Noa\",\"dishKey\":\"77-diner-0-1\",\"lekker\":false}}]"
     },
     {
       "name": "toetsenbord: de voortgang telt mee",
@@ -525,7 +525,7 @@
     {
       "name": "ongedaan: de pagina stuurt één DELETE met alleen de stemmer",
       "passed": true,
-      "detail": "[{\"method\":\"DELETE\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"VdR-yuXvt6-YKZqpIMByBQ\"}}]"
+      "detail": "[{\"method\":\"DELETE\",\"url\":\"/api/v1/kies/FictieStemCode00000022/stem\",\"body\":{\"stemmer\":\"JRYPBa8cxwpZVVS4gkiTQA\"}}]"
     },
     {
       "name": "zonder migratie: de pagina toont de ene melding",
@@ -556,10 +556,10 @@
   "screenshots": [
     {
       "file": "be46-sluitingstijd-390-light.png",
-      "sha256": "77577c2f1e4d868fc20f110ee518fe50e585fcc4dfce9e62ddab1ced9f2d91af",
+      "sha256": "c2ca00f61a47faf1b8adde8dafa8ee9dd7c5a33bdee37bd3f7a3ddac22cb5729",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "light",
       "themeProof": {
         "attr": "light",
@@ -573,10 +573,10 @@
     },
     {
       "file": "be46-sluitingstijd-390-dark.png",
-      "sha256": "b304caf982b48b4f8a4f0bbaf9a995dc349fd77eabad13ae1730058bdcb11df3",
+      "sha256": "9b8b6819f76d014d5c3ca48feabb27a6ab62e66cbc7d4d35e821e50d6877f08c",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "dark",
       "themeProof": {
         "attr": "dark",
@@ -590,10 +590,10 @@
     },
     {
       "file": "be46-gemaakt-390-light.png",
-      "sha256": "8a0ca6d25a785ba07d0badec1899ed6aeedad4e821b19546438cdd9cc3e30e86",
+      "sha256": "c3975aa451ba208778db5c3609396a280e2068e0ed2bb302e62908241ea1ddb0",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "light",
       "themeProof": {
         "attr": "light",
@@ -607,10 +607,10 @@
     },
     {
       "file": "be46-uitslag-na-maken-390-light.png",
-      "sha256": "5d1ab9885aafdf8b504cea7466991f5fb9a5f5039c3f6ab4f8c35a65a0f53d60",
+      "sha256": "10259e7c0d8e3c47ce302b01962bbf99d411afa47cc997fba28f879d718e9d10",
       "width": 390,
-      "height": 780,
-      "viewport": "390x780",
+      "height": 900,
+      "viewport": "390x900",
       "theme": "light",
       "themeProof": {
         "attr": "light",
@@ -675,7 +675,7 @@
     },
     {
       "file": "be46-uitslag-390-dark.png",
-      "sha256": "c0af81b49238a2dbd72d885ed271c00b9c8c4fb15763c4f9ea75e643db8cf4e3",
+      "sha256": "2486f2d52821644fc2aa1d9539d9a900d036307942af0dfb4bfa122c5d693524",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -692,7 +692,7 @@
     },
     {
       "file": "be46-sleep-390-light.png",
-      "sha256": "113ef7df8de1dd374e2fae3af4400165f1b720ee9eaaf4c933f8b556b485ff8b",
+      "sha256": "4e42925c54eef15dd274ea4f44a9835f75d18dd884a9db9bdc3bc1774eab478a",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
