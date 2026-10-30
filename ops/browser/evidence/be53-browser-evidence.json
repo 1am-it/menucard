@@ -8,28 +8,19 @@
   "scenarios": [
     {
       "name": "wijzigen",
-      "checks": 89,
-      "passed": 89,
+      "checks": 97,
+      "passed": 97,
       "failed": 0,
-      "durationMs": 37791,
+      "durationMs": 37168,
       "error": null
     }
   ],
-  "head": "0942bd917faf6c78d6444d984da8347dcc2d12d0",
+  "head": "9a992cb9cfa67b6d78e796232c1c1a5113ded08b",
   "worktreeDirty": true,
   "worktreeChanges": [
-    " M app/internal/bronnen/batch/MenuReview.js",
-    " M app/internal/menu-concepts/MenuConceptsView.js",
-    " M ops/browser/README.md",
-    " M ops/browser/fixtures/menuReviewFixtures.js",
-    " M ops/browser/lib/fixture-page.js",
-    " M package.json",
-    " M src/lib/menuConceptReviewHandlers.test.js",
-    " M src/lib/menuConceptReviewSurface.test.js",
-    "?? app/internal/menu-concepts/menu-concepts.css",
-    "?? ops/browser/run-be53-browser-check.js"
+    " M ops/browser/run-be53-browser-check.js"
   ],
-  "generatedAt": "2026-10-30T19:03:26.189Z",
+  "generatedAt": "2026-10-30T19:09:05.435Z",
   "environment": {
     "node": "v22.22.3",
     "loopback": "http://localhost:3193 (own next dev) + own local browser over CDP",
@@ -84,6 +75,16 @@
       "name": "BE-53 1280px/light: het tekstveld heeft zichtbare focus",
       "passed": true,
       "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 1280px/light: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 1280px/light: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
     },
     {
       "name": "BE-53 1280px/light: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
@@ -186,6 +187,16 @@
       "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
     },
     {
+      "name": "BE-53 390px/light: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 390px/light: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
       "name": "BE-53 390px/light: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
       "passed": true,
       "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
@@ -286,6 +297,16 @@
       "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
     },
     {
+      "name": "BE-53 1280px/dark: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 1280px/dark: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
+    },
+    {
       "name": "BE-53 1280px/dark: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
       "passed": true,
       "detail": "{\"tag\":\"BUTTON\",\"text\":\"Opslaan in deze correctie\",\"value\":null}"
@@ -384,6 +405,16 @@
       "name": "BE-53 390px/dark: het tekstveld heeft zichtbare focus",
       "passed": true,
       "detail": "{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}"
+    },
+    {
+      "name": "BE-53 390px/dark: Escape sluit het veld zonder correctie",
+      "passed": true,
+      "detail": "[false,0,null]"
+    },
+    {
+      "name": "BE-53 390px/dark: opnieuw openen toont weer de huidige naam met focus in het veld",
+      "passed": true,
+      "detail": "[\"Proef het beste van het seizoen — Hoofd\",{\"tag\":\"INPUT\",\"text\":\"\",\"value\":\"Proef het beste van het seizoen — Hoofd\"}]"
     },
     {
       "name": "BE-53 390px/dark: Tab gaat van het veld naar \"Opslaan in deze correctie\"",
@@ -526,7 +557,7 @@
     },
     {
       "file": "be-53/be53-rename-1280-dark.png",
-      "sha256": "78059872ba290c6d82c9cd6554477ef2a873874db267206f4e5df3667eaab8b8",
+      "sha256": "376414d7c32a5c35f47db6c64fbb4500a81c2b6169e6db79abc3a931828522cf",
       "width": 1280,
       "height": 900
     },
@@ -577,7 +608,7 @@
     {
       "shotRenamed": {
         "file": "be-53/be53-rename-1280-dark.png",
-        "sha256": "78059872ba290c6d82c9cd6554477ef2a873874db267206f4e5df3667eaab8b8",
+        "sha256": "376414d7c32a5c35f47db6c64fbb4500a81c2b6169e6db79abc3a931828522cf",
         "width": 1280,
         "height": 900
       },

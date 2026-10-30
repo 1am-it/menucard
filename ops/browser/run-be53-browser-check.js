@@ -235,6 +235,17 @@ async function correctionRound(cdp, { theme, width }) {
   check(`BE-53 ${label}: het tekstveld heeft een label en de huidige naam`, open.label === 'Nieuwe naam voor dit menukopje' && open.value === SECTION, JSON.stringify([open.label, open.value]));
   check(`BE-53 ${label}: het tekstveld heeft zichtbare focus`, Boolean(open.active && open.active.tag === 'INPUT' && open.active.outlineStyle !== 'none' && open.active.outlineWidth !== '0px'), JSON.stringify(open.active));
 
+  // Escape closes the field without changing anything; reopening starts clean.
+  await pressKey(cdp, 'Escape', 'Escape', 27);
+  await sleep(200);
+  const escaped = await state(cdp);
+  check(`BE-53 ${label}: Escape sluit het veld zonder correctie`, !escaped.fieldOpen && escaped.undoButtons === 0 && escaped.saveVersionButton === null, JSON.stringify([escaped.fieldOpen, escaped.undoButtons, escaped.saveVersionButton]));
+  await focusByText(cdp, '.mcr-rename-open', 'Wijzig');
+  await pressKey(cdp, 'Enter', 'Enter', 13, '\r');
+  await sleep(200);
+  const reopened = await state(cdp);
+  check(`BE-53 ${label}: opnieuw openen toont weer de huidige naam met focus in het veld`, reopened.fieldOpen && reopened.value === SECTION && Boolean(reopened.active && reopened.active.tag === 'INPUT'), JSON.stringify([reopened.value, reopened.active]));
+
   // Tab moves from the field to the save button; an unchanged name is refused
   // with a message instead of an empty correction.
   await pressKey(cdp, 'Tab', 'Tab', 9);
