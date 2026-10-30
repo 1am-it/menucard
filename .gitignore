@@ -11,3 +11,8 @@ ops/browser/output/
 # BE-43 (#101) — a filtered browser run (`--alleen`) writes its own record and
 # must never replace the full evidence file that belongs with the delivery.
 ops/browser/evidence/*.filtered.json
+
+# BE-50 (#120) — the local logs of the perf measurement (next build/next start);
+# the measurement itself is committed in ops/perf/evidence/.
+ops/perf/output/
+
