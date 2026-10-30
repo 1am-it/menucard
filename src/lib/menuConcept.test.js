@@ -344,3 +344,123 @@ test('browser edits are reduced to known keys and short values', () => {
   assert.deepEqual(clean, { lines: { '0.0.1': { exclude: false, price: '9' } }, removed: { 'fictieve mousse': 'keep' } });
   assert.deepEqual(sanitizeEdits(null), { lines: {}, removed: null });
 });
+test('BE-53 hulp: een gedeeld voorvoegsel wordt bij twee of meer kopjes herkend, met elk scheidingsteken', () => {
+  const { sharedSectionPrefix } = require('./menuConcept');
+  const dash = sharedSectionPrefix(['PROEF HET BESTE VAN HET SEIZOEN — HOOFD', 'PROEF HET BESTE VAN HET SEIZOEN — DESSERT', 'Dranken']);
+  assert.equal(dash.prefix, 'PROEF HET BESTE VAN HET SEIZOEN — ');
+  assert.equal(dash.separator, ' — ');
+  assert.equal(dash.count, 2);
+  assert.deepEqual(dash.shorten, {
+    'PROEF HET BESTE VAN HET SEIZOEN — HOOFD': 'HOOFD',
+    'PROEF HET BESTE VAN HET SEIZOEN — DESSERT': 'DESSERT',
+  });
+  const hyphen = sharedSectionPrefix(['Lunch - Koud', 'Lunch - Warm']);
+  assert.equal(hyphen.prefix, 'Lunch - ');
+  assert.deepEqual(hyphen.shorten, { 'Lunch - Koud': 'Koud', 'Lunch - Warm': 'Warm' });
+  const colon = sharedSectionPrefix(['Diner: vis', 'Diner: vlees', 'Diner: vegan']);
+  assert.equal(colon.prefix, 'Diner: ');
+  assert.equal(colon.separator, ': ');
+  assert.equal(colon.count, 3);
+  // Without a separator, with a single kopje or with an empty remainder there is
+  // no proposal: shortening would invent a name instead of removing an opening.
+  assert.equal(sharedSectionPrefix(['HOOFD', 'DESSERT']), null);
+  assert.equal(sharedSectionPrefix(['PROEF — HOOFD']), null);
+  assert.equal(sharedSectionPrefix(['PROEF — ', 'PROEF — DESSERT']), null);
+  assert.equal(sharedSectionPrefix([]), null);
+  assert.equal(sharedSectionPrefix(null), null);
+  // The most frequent opening wins; on a tie the longer (more specific) one.
+  const frequent = sharedSectionPrefix(['A — B — HOOFD', 'A — B — DESSERT', 'A — ANDERS']);
+  assert.equal(frequent.prefix, 'A — ');
+  assert.equal(frequent.count, 3);
+  const tie = sharedSectionPrefix(['A — B — HOOFD', 'A — B — DESSERT']);
+  assert.equal(tie.prefix, 'A — B — ');
+  assert.equal(tie.count, 2);
+});
+
+test('BE-53 hulp: normale hoofdletters, met cijfers en losse letters ongemoeid', () => {
+  const { normalCaseSectionName, isCapsSectionName } = require('./menuConcept');
+  assert.equal(normalCaseSectionName('VOOR'), 'Voor');
+  assert.equal(normalCaseSectionName('PROEF HET BESTE VAN HET SEIZOEN'), 'Proef het beste van het seizoen');
+  assert.equal(normalCaseSectionName('VOOR  —  HOOFD'), 'Voor — hoofd');
+  // Words with a digit and single letters keep their spelling.
+  assert.equal(normalCaseSectionName('MENU 2026'), 'Menu 2026');
+test('BE-53 hulp: een gedeeld voorvoegsel wegknippen levert per kopje een eigen path-edit', () => {
+  const { renameSectionsEdits, sharedSectionPrefix, buildMenuConcept } = require('./menuConcept');
+  const menus = [
+    {
+      title: 'Menukaart',
+      categories: [
+        { name: 'Lunch - Koud', path: ['Lunch - Koud'], items: [{ name: 'Fictieve soep', price: '6,50' }] },
+        { name: 'Lunch - Warm', path: ['Lunch - Warm'], items: [{ name: 'Fictieve pasta', price: '14,00' }, { name: 'Fictieve curry', price: '15,00' }] },
+        { name: 'Dranken', path: ['Dranken'], items: [{ name: 'Fictieve thee', price: '3,00' }] },
+      ],
+    },
+  ];
+  const concept = buildMenuConcept({ menus, liveLines: [], edits: {} });
+  const proposal = sharedSectionPrefix(concept.content.categories.map((category) => category.name));
+  const renames = concept.content.categories
+    .filter((category) => Object.prototype.hasOwnProperty.call(proposal.shorten, category.name))
+    .map((category) => ({ path: category.path || [category.name], name: proposal.shorten[category.name] }));
+  const result = renameSectionsEdits(concept.lines, renames);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.applied, [['Koud'], ['Warm']]);
+  assert.deepEqual(result.refused, []);
+  // Every dish under each shortened kopje carries its own path; Dranken is untouched.
+  assert.deepEqual(result.edits.lines, {
+    '0.0.0': { path: ['Koud'] },
+    '0.1.0': { path: ['Warm'] },
+    '0.1.1': { path: ['Warm'] },
+  });
+  assert.deepEqual([...result.lineIds].sort(), ['0.0.0', '0.1.0', '0.1.1']);
+  const after = buildMenuConcept({ menus, liveLines: [], edits: result.edits });
+  assert.deepEqual(after.content.categories.map((category) => category.name), ['Koud', 'Warm', 'Dranken']);
+  // A batch never merges two kopjes into one name: the second rename is refused
+  // with the same reason the single rename gives.
+  const merge = renameSectionsEdits(concept.lines, [
+    { path: ['Lunch - Koud'], name: 'Warm' },
+    { path: ['Lunch - Warm'], name: 'Warm' },
+  ]);
+  assert.deepEqual(merge.applied, [['Warm']]);
+  assert.equal(merge.refused.length, 1);
+  assert.equal(merge.refused[0].reason, 'duplicate_section');
+  assert.equal(merge.refused[0].error, 'Er is al een menukopje met deze naam; menukopjes samenvoegen kan hier niet.');
+  // Nothing applicable: no empty correction is offered.
+  assert.equal(renameSectionsEdits(concept.lines, [{ path: ['Onbekend'], name: 'Koud' }]).ok, false);
+  assert.equal(renameSectionsEdits(concept.lines, []).ok, false);
+});
+
+  assert.equal(normalCaseSectionName('4 GANGEN'), '4 Gangen');
+  assert.equal(normalCaseSectionName('A LA CARTE'), 'A la carte');
+  // An already normal name is unchanged, so a caller can skip it.
+  assert.equal(normalCaseSectionName('Hoofdgerechten'), 'Hoofdgerechten');
+  assert.equal(normalCaseSectionName(''), '');
+  assert.equal(normalCaseSectionName(null), '');
+  // Only kopjes entirely in capitals offer the button.
+  assert.equal(isCapsSectionName('VOOR'), true);
+  assert.equal(isCapsSectionName('PROEF — HOOFD'), true);
+  assert.equal(isCapsSectionName('Voor'), false);
+  assert.equal(isCapsSectionName('Hoofd EN'), false);
+  assert.equal(isCapsSectionName(' — '), false);
+  assert.equal(isCapsSectionName(''), false);
+});
+
+test('BE-53 hulp: de standaardnamen voor de snelkeuze zijn vast en compleet', () => {
+  const { DEFAULT_SECTION_NAMES } = require('./menuConcept');
+  assert.deepEqual([...DEFAULT_SECTION_NAMES], [
+    'Voorgerechten',
+    'Tussengerechten',
+    'Hoofdgerechten',
+    'Bijgerechten',
+    'Desserts',
+    'Dranken',
+    'Lunch',
+    'Diner',
+    'Kindermenu',
+  ]);
+  // A quick pick is a normal name the rename rule accepts as it is.
+  for (const name of DEFAULT_SECTION_NAMES) {
+    assert.equal(name, name.trim());
+    assert.equal(name.length <= 160, true, name);
+  }
+});
+
