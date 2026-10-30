@@ -45,12 +45,20 @@ const {
   magSoortToevoegen,
   magVandaagWijzigen,
   normaliseerAanbod,
+  publiekAanbodVoorScherm,
 } = require('./daghapAanbod');
 
 // De tabellen en de functie uit supabase/migrations/0023.
 const DAGHAP_TABLE_AANBOD = 'daghap_aanbod';
+const DAGHAP_TABLE_MELDINGEN = 'daghap_meldingen';
 const DAGHAP_TABLE_GEBEURTENISSEN = 'daghap_gebeurtenissen';
 const DAGHAP_CLEANUP_FUNCTION = 'ruim_verlopen_daghap_op';
+// Na zoveel meldingen van verschillende apparaten gaat het aanbod op
+// `in_controle` (contract). Eén melding per apparaat telt.
+const DAGHAP_MELDINGEN_TOT_CONTROLE = 3;
+// Het apparaatkenmerk is een willekeurige waarde uit de browser van de gast,
+// nooit het IP-adres; dezelfde vorm als constraint in 0023.
+const DAGHAP_APPARAAT_PATROON = /^[A-Za-z0-9_-]{16,64}$/;
 // Een aanbod is klein; alles groter is geen aanbod.
 const DAGHAP_MAX_BODY_BYTES = 4096;
 // De database is één insert of één update. Duurt hij langer, dan antwoordt de
@@ -58,6 +66,9 @@ const DAGHAP_MAX_BODY_BYTES = 4096;
 const DAGHAP_TIMEOUT_MS = 4000;
 
 const AANBOD_KOLOMMEN = 'id, restaurant_id, soort, naam, prijs_cent, beschrijving, labels, status, filter_reden, verloopt_op, created_at, updated_at';
+// De publieke kant krijgt alleen deze kolommen: geen account, geen status, geen
+// filterreden. Zo gaat er nooit een interne kolom naar de browser van een gast.
+const PUBLIEK_KOLOMMEN = 'id, soort, naam, prijs_cent, beschrijving, labels, verloopt_op';
 
 const DAGHAP_NOT_AVAILABLE_MESSAGE = 'Daghappen zijn nog niet beschikbaar.';
 
@@ -224,7 +235,7 @@ function createDaghapHandlers({
   }
 
   /** Eén geschiedenisregel; de momentopname gaat mee, nooit overschreven. */
-  async function schrijfGeschiedenis(supabase, { rij, actie, door = null }) {
+  async function schrijfGeschiedenis(supabase, { rij, actie, door = null, apparaat = null }) {
     const geschreven = await ask(
       supabase
         .from(DAGHAP_TABLE_GEBEURTENISSEN)
@@ -233,6 +244,7 @@ function createDaghapHandlers({
           restaurant_id: rij.restaurant_id,
           actie,
           door,
+          apparaat,
           gegevens: {
             naam: rij.naam,
             prijs_cent: rij.prijs_cent,
@@ -596,21 +608,184 @@ function createDaghapHandlers({
     return { status: 200, body: { ok: true, verlopen: Number.isFinite(aantal) ? aantal : 0 } };
   }
 
+  /**
+   * GET /api/v1/daghap/publiek?restaurant_id=<id> — wat een gast van dít ene
+   * restaurant nu mag zien: alleen `online` aanbod dat nog niet verlopen is, en
+   * alleen de velden voor de weergave. Geen sessie nodig, geen lijst van meer
+   * dan één restaurant, niets cachebaar lang.
+   */
+  async function publiekAanbod(request) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+
+    const restaurantId = restaurantIdUit(request, null);
+    if (!restaurantId) return invalid('restaurant_required', { message: 'Kies eerst een restaurant.' });
+
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_AANBOD)
+        .select(PUBLIEK_KOLOMMEN)
+        .eq('restaurant_id', restaurantId)
+        .eq('status', DAGHAP_STATUS_ONLINE)
+        .gt('verloopt_op', new Date(Number(now())).toISOString())
+        .order('verloopt_op', { ascending: true }),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+
+    const rijen = Array.isArray(gevonden.data) ? gevonden.data : [];
+    // De query filtert al op verloop; deze regel houdt de belofte ook als de
+    // databank en de klok van de server even uit elkaar lopen.
+    const aanbod = rijen
+      .filter((rij) => !isVerlopen(rij.verloopt_op, now()))
+      .map((rij) => publiekAanbodVoorScherm(rij))
+      .filter(Boolean);
+
+    return { status: 200, body: { ok: true, aanbod } };
+  }
+
+  /** Hoeveel meldingen dit aanbod heeft (elk apparaat telt één keer). */
+  async function telMeldingen(supabase, aanbodId) {
+    const gevonden = await ask(
+      supabase.from(DAGHAP_TABLE_MELDINGEN).select('melding_id').eq('aanbod_id', aanbodId),
+    );
+    if (gevonden.error) return { response: missingStorage(gevonden.error) ? UNAVAILABLE : failed() };
+    return { aantal: Array.isArray(gevonden.data) ? gevonden.data.length : 0 };
+  }
+
+  /**
+   * POST /api/v1/daghap/<id>/meld — een gast meldt een aanbod, zonder account.
+   * Opgeslagen wordt alleen het aanbod en een willekeurig browserkenmerk; geen
+   * IP-adres, geen user agent, geen account. Per apparaat telt de melding één
+   * keer (de unieke constraint in 0023), en na drie meldingen gaat het aanbod
+   * automatisch op `in_controle`.
+   */
+  async function meldAanbod(request, context = {}) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+    const id = normaliseerId(context && context.id);
+    if (!id) return NOT_FOUND;
+
+    const body = await readBody(request);
+    const apparaat = tekst(body && body.apparaat);
+    if (!body || !DAGHAP_APPARAAT_PATROON.test(apparaat)) {
+      return invalid('invalid_apparaat', { message: 'Meld het aanbod opnieuw vanaf deze pagina.' });
+    }
+
+    const gevonden = await ask(
+      supabase.from(DAGHAP_TABLE_AANBOD).select(AANBOD_KOLOMMEN).eq('id', id).maybeSingle(),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+    const aanbod = gevonden.data;
+    if (!aanbod) return NOT_FOUND;
+
+    if (aanbod.status === DAGHAP_STATUS_OFFLINE
+        || aanbod.status === DAGHAP_STATUS_VERLOPEN
+        || isVerlopen(aanbod.verloopt_op, now())) {
+      return {
+        status: 409,
+        body: { error: 'daghap_not_online', message: 'Dit aanbod staat niet meer online.' },
+      };
+    }
+
+    // Al in controle: de melding telt niet meer mee, maar de gast krijgt geen
+    // fout — zijn melding is ontvangen en er wordt al gekeken.
+    if (aanbod.status === DAGHAP_STATUS_CONTROLE) {
+      const telling = await telMeldingen(supabase, id);
+      if (telling.response) return telling.response;
+      return {
+        status: 200,
+        body: {
+          ok: true,
+          gemeld: true,
+          alGemeld: false,
+          aantal: telling.aantal,
+          inControle: true,
+          message: 'Dit aanbod wordt al gecontroleerd. Bedankt voor je melding.',
+        },
+      };
+    }
+
+    const geschreven = await ask(
+      supabase.from(DAGHAP_TABLE_MELDINGEN).insert({ aanbod_id: id, apparaat }).select('melding_id'),
+    );
+    let alGemeld = false;
+    if (geschreven.error) {
+      if (missingStorage(geschreven.error)) return UNAVAILABLE;
+      // 23505 is de unieke constraint per (aanbod, apparaat): dit apparaat
+      // meldde dit aanbod al. Dat is geen fout, en het telt niet opnieuw.
+      if (tekst(geschreven.error.code) !== '23505') return failed();
+      alGemeld = true;
+    }
+
+    const telling = await telMeldingen(supabase, id);
+    if (telling.response) return telling.response;
+    const aantal = telling.aantal;
+
+    if (!alGemeld) {
+      const geschiedenis = await schrijfGeschiedenis(supabase, {
+        rij: aanbod,
+        actie: 'gemeld',
+        apparaat,
+      });
+      if (geschiedenis.response) return geschiedenis.response;
+    }
+
+    let inControle = false;
+    if (aantal >= DAGHAP_MELDINGEN_TOT_CONTROLE) {
+      const bijgewerkt = await ask(
+        supabase
+          .from(DAGHAP_TABLE_AANBOD)
+          .update({
+            status: DAGHAP_STATUS_CONTROLE,
+            filter_reden: 'meldingen',
+            updated_at: new Date(Number(now())).toISOString(),
+          })
+          .eq('id', id)
+          .select(AANBOD_KOLOMMEN)
+          .single(),
+      );
+      if (bijgewerkt.error) return missingStorage(bijgewerkt.error) ? UNAVAILABLE : failed();
+      const rij = rijUit(bijgewerkt);
+      if (!rij) return failed();
+      inControle = true;
+      const geschiedenis = await schrijfGeschiedenis(supabase, { rij, actie: 'in_controle' });
+      if (geschiedenis.response) return geschiedenis.response;
+    }
+
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        gemeld: !alGemeld,
+        alGemeld,
+        aantal,
+        inControle,
+        message: alGemeld ? 'Je had dit al gemeld. We kijken ernaar.' : 'Bedankt, we kijken ernaar.',
+      },
+    };
+  }
+
   return {
     lijstAanbod,
+    meldAanbod,
     offlineAanbod,
     plaatsAanbod,
+    publiekAanbod,
     ruimVerlopenOp,
     wijzigAanbod,
   };
 }
 
 module.exports = {
+  DAGHAP_APPARAAT_PATROON,
   DAGHAP_CLEANUP_FUNCTION,
   DAGHAP_MAX_BODY_BYTES,
+  DAGHAP_MELDINGEN_TOT_CONTROLE,
   DAGHAP_NOT_AVAILABLE_MESSAGE,
   DAGHAP_TABLE_AANBOD,
   DAGHAP_TABLE_GEBEURTENISSEN,
+  DAGHAP_TABLE_MELDINGEN,
+  PUBLIEK_KOLOMMEN,
   createDaghapHandlers,
 };
 

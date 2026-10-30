@@ -632,6 +632,26 @@ function aanbodVoorScherm(rij) {
   };
 }
 
+/**
+ * Het aanbod zoals een gast het ziet (stap B): alleen wat de weergave nodig
+ * heeft, nooit het account, de status of de filterreden. Een gast krijgt dus
+ * geen enkele interne kolom en ook geen volledige lijst van alle restaurants.
+ */
+function publiekAanbodVoorScherm(rij) {
+  if (!rij || typeof rij !== 'object') return null;
+  const prijsCent = Number(rij.prijs_cent);
+  return {
+    id: rij.id === undefined ? null : rij.id,
+    soort: rij.soort || null,
+    naam: rij.naam || '',
+    prijsCent: Number.isFinite(prijsCent) ? prijsCent : null,
+    prijs: centenNaarPrijs(prijsCent),
+    beschrijving: rij.beschrijving || '',
+    labels: normaliseerLabels(rij.labels),
+    verlooptOp: rij.verloopt_op || null,
+  };
+}
+
 module.exports = {
   DAGHAP_ACTIEVE_STATUSSEN,
   DAGHAP_BESCHRIJVING_MAX,
@@ -681,6 +701,7 @@ module.exports = {
   normaliseerVoorFilter,
   opschonen,
   prijsNaarCenten,
+  publiekAanbodVoorScherm,
   staatInHoofdletters,
   telActief,
   tijdzoneNaarInstant,

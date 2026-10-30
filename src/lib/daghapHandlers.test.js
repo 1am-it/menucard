@@ -22,8 +22,10 @@ const restaurantsData = require('../../data/restaurants.json');
 const { duursteKaartPrijsCent } = require('./daghapAanbod');
 const {
   DAGHAP_CLEANUP_FUNCTION,
+  DAGHAP_MELDINGEN_TOT_CONTROLE,
   DAGHAP_TABLE_AANBOD,
   DAGHAP_TABLE_GEBEURTENISSEN,
+  DAGHAP_TABLE_MELDINGEN,
   createDaghapHandlers,
 } = require('./daghapHandlers');
 
@@ -84,10 +86,11 @@ function daghapBody(overrides = {}) {
  * meer tabellen ontbreken (42P01), precies de fout van een nog niet toegepaste
  * 0023.
  */
-function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
+function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
   const tables = {
     [DAGHAP_TABLE_AANBOD]: aanbod.map((rij) => aanbodRij(rij)),
     [DAGHAP_TABLE_GEBEURTENISSEN]: gebeurtenissen.map((rij, index) => ({ gebeurtenis_id: index + 1, ...rij })),
+    [DAGHAP_TABLE_MELDINGEN]: meldingen.map((rij, index) => ({ melding_id: index + 1, ...rij })),
     staff_roles: eigenaren.map((rij, index) => ({ id: index + 1, ...rij })),
   };
   const calls = [];
@@ -144,6 +147,13 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id
         rij.id = volgendeId;
         volgendeId += 1;
         rij.created_at = rij.created_at || '2026-10-30T11:00:00.000Z';
+      } else if (query.table === DAGHAP_TABLE_MELDINGEN) {
+        // De unieke constraint van 0023: één melding per (aanbod, apparaat).
+        const dubbel = rijen.some((bestaand) => String(bestaand.aanbod_id) === String(rij.aanbod_id)
+          && bestaand.apparaat === rij.apparaat);
+        if (dubbel) return Promise.resolve({ data: null, error: { code: '23505', message: 'duplicate key value' } });
+        rij.melding_id = rijen.length + 1;
+        rij.created_at = '2026-10-30T11:00:00.000Z';
       } else {
         rij.gebeurtenis_id = rijen.length + 1;
       }
@@ -564,6 +574,133 @@ test('BE-55: de opruiming roept de functie uit 0023 aan', async () => {
   assert.deepEqual(client.rpcCalls.map((call) => call.naam), ['ruim_verlopen_daghap_op']);
 });
 
+test('BE-55: de publieke GET geeft alleen online, niet-verlopen aanbod zonder interne velden', async () => {
+  const client = fakeSupabase({
+    aanbod: [
+      { id: 1, naam: 'Pompoensoep', status: 'online' },
+      { id: 2, naam: 'Griekse salade', status: 'in_controle', soort: 'seizoensgerecht' },
+      { id: 3, naam: 'Erwtensoep', status: 'online', verloopt_op: VERLOOPT_GISTEREN },
+      { id: 4, naam: 'Herfststoof', status: 'offline', soort: 'seizoensgerecht' },
+    ],
+  });
+  const resultaat = await handlersFor(client).publiekAanbod(
+    request(undefined, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+
+  assert.equal(resultaat.status, 200);
+  assert.deepEqual(resultaat.body.aanbod.map((rij) => rij.naam), ['Pompoensoep']);
+  const rij = resultaat.body.aanbod[0];
+  assert.deepEqual(Object.keys(rij).sort(), [
+    'beschrijving', 'id', 'labels', 'naam', 'prijs', 'prijsCent', 'soort', 'verlooptOp',
+  ]);
+  assert.equal(rij.status, undefined);
+  assert.equal(rij.filter_reden, undefined);
+  assert.equal(rij.restaurant_id, undefined);
+});
+
+test('BE-55: de publieke GET vraagt om één restaurant en werkt zonder migratie', async () => {
+  const client = fakeSupabase();
+  const zonderId = await handlersFor(client).publiekAanbod(request(undefined, { url: 'http://localhost/api/v1/daghap/publiek' }));
+  assert.equal(zonderId.status, 400);
+
+  const zonderTabel = fakeSupabase({ failing: { [DAGHAP_TABLE_AANBOD]: true } });
+  const uitkomst = await handlersFor(zonderTabel).publiekAanbod(
+    request(undefined, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+  assert.equal(uitkomst.status, 503);
+});
+
+function meldRequest(apparaat, { id = 1 } = {}) {
+  return request({ apparaat }, { url: `http://localhost/api/v1/daghap/${id}/meld` });
+}
+
+const APPARAAT_A = 'apparaat-aaaaaaaaaaaa-1';
+const APPARAAT_B = 'apparaat-bbbbbbbbbbbb-2';
+const APPARAAT_C = 'apparaat-cccccccccccc-3';
+
+
+
+test('BE-55: na drie meldingen van drie apparaten gaat het aanbod op in_controle', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1, status: 'online' }] });
+  const handlers = handlersFor(client);
+
+  const eerste = await handlers.meldAanbod(meldRequest(APPARAAT_A), { id: '1' });
+  assert.equal(eerste.status, 200);
+  assert.equal(eerste.body.gemeld, true);
+  assert.equal(eerste.body.inControle, false);
+  assert.equal(eerste.body.aantal, 1);
+
+  const tweede = await handlers.meldAanbod(meldRequest(APPARAAT_B), { id: '1' });
+  assert.equal(tweede.body.aantal, 2);
+  assert.equal(tweede.body.inControle, false);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].status, 'online');
+
+  const derde = await handlers.meldAanbod(meldRequest(APPARAAT_C), { id: '1' });
+  assert.equal(derde.status, 200);
+  assert.equal(derde.body.aantal, DAGHAP_MELDINGEN_TOT_CONTROLE);
+  assert.equal(derde.body.inControle, true);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].status, 'in_controle');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].filter_reden, 'meldingen');
+
+  const acties = geschiedenis(client).map((rij) => rij.actie);
+  assert.deepEqual(acties, ['gemeld', 'gemeld', 'gemeld', 'in_controle']);
+  assert.equal(client.tables[DAGHAP_TABLE_MELDINGEN].length, 3);
+  // Van de gast blijft alleen het apparaatkenmerk over: geen account, geen IP.
+  assert.deepEqual(Object.keys(client.tables[DAGHAP_TABLE_MELDINGEN][0]).sort(), [
+    'aanbod_id', 'apparaat', 'created_at', 'melding_id',
+  ]);
+  assert.equal(geschiedenis(client)[0].door, null);
+  assert.equal(geschiedenis(client)[0].apparaat, APPARAAT_A);
+});
+
+test('BE-55: dubbel melden vanaf hetzelfde apparaat telt één keer', async () => {
+  const client = fakeSupabase({
+    aanbod: [{ id: 1, status: 'online' }],
+    meldingen: [
+      { aanbod_id: 1, apparaat: APPARAAT_A },
+      { aanbod_id: 1, apparaat: APPARAAT_B },
+    ],
+  });
+  const handlers = handlersFor(client);
+
+  const dubbel = await handlers.meldAanbod(meldRequest(APPARAAT_A), { id: '1' });
+  assert.equal(dubbel.status, 200, 'dubbel melden is geen fout');
+  assert.equal(dubbel.body.alGemeld, true);
+  assert.equal(dubbel.body.gemeld, false);
+  assert.equal(dubbel.body.aantal, 2, 'de tweede melding telt niet op');
+  assert.equal(dubbel.body.inControle, false);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].status, 'online');
+
+  const derde = await handlers.meldAanbod(meldRequest(APPARAAT_C), { id: '1' });
+  assert.equal(derde.body.aantal, 3, 'pas het derde apparaat haalt de grens');
+  assert.equal(derde.body.inControle, true);
+  assert.equal(client.tables[DAGHAP_TABLE_MELDINGEN].length, 3);
+});
+
+test('BE-55: melden kan niet op verlopen of offline aanbod en vraagt een apparaatkenmerk', async () => {
+  const verlopen = fakeSupabase({ aanbod: [{ id: 1, verloopt_op: VERLOOPT_GISTEREN }] });
+  const uitkomst = await handlersFor(verlopen).meldAanbod(meldRequest(APPARAAT_A), { id: '1' });
+  assert.equal(uitkomst.status, 409);
+  assert.equal(verlopen.tables[DAGHAP_TABLE_MELDINGEN].length, 0);
+
+  const offline = fakeSupabase({ aanbod: [{ id: 1, status: 'offline' }] });
+  assert.equal((await handlersFor(offline).meldAanbod(meldRequest(APPARAAT_A), { id: '1' })).status, 409);
+
+  const online = fakeSupabase({ aanbod: [{ id: 1, status: 'online' }] });
+  const handlers = handlersFor(online);
+  assert.equal((await handlers.meldAanbod(meldRequest('kort'), { id: '1' })).status, 400);
+  assert.equal((await handlers.meldAanbod(meldRequest(APPARAAT_A), { id: '999' })).status, 404);
+  assert.equal((await handlers.meldAanbod(null, { id: '1' })).status, 400);
+
+  const alInControle = fakeSupabase({ aanbod: [{ id: 1, status: 'in_controle' }] });
+  const alUitkomst = await handlersFor(alInControle).meldAanbod(meldRequest(APPARAAT_A), { id: '1' });
+  assert.equal(alUitkomst.status, 200);
+  assert.equal(alUitkomst.body.inControle, true);
+  assert.equal(alInControle.tables[DAGHAP_TABLE_MELDINGEN].length, 0, 'een melding na controle telt niet meer');
+
+  const zonderMigratie = fakeSupabase({ aanbod: [{ id: 1, status: 'online' }], failing: { [DAGHAP_TABLE_MELDINGEN]: true } });
+  assert.equal((await handlersFor(zonderMigratie).meldAanbod(meldRequest(APPARAAT_A), { id: '1' })).status, 503);
+});
 
 
 
