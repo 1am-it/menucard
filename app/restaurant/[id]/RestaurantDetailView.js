@@ -95,6 +95,11 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
               </div>
             )}
 
+            {/* BE-55 (#135, herstel na review deel 2) — "Vandaag" hoort direct
+                onder de kop met naam en beschrijving en vóór de menuknoppen,
+                zoals in de mockup; niet onderaan de pagina. */}
+            <DaghapVandaag restaurantId={id} />
+
             {/* Menu links */}
             {menuLinks.length > 0 && (
               <div className="detail-menu-links">
@@ -210,7 +215,6 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
 
       {/* ── Menukaarten (BE-42 2A) ── */}
       <main className="page-main page-with-tabbar">
-        <DaghapVandaag restaurantId={id} />
         {menus ? (
           <section aria-labelledby="menukaarten-title">
             <div className="rpm-head">

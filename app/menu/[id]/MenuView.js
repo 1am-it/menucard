@@ -410,6 +410,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
         </div>
       </div>
 
+      {/* BE-55 (#135, herstel na review deel 2) — "Vandaag" direct onder de
+          kop en boven de zoek- en filterbalk; het staat los van de filters en
+          verdwijnt als er niets online staat. */}
+      <div className="daghap-band">
+        <DaghapVandaag restaurantId={id.split('-')[0]} />
+      </div>
+
       {/* ── Filter bar ── */}
       <div className="menu-filter-bar">
         <div className="menu-filter-inner">
@@ -535,9 +542,6 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
 
       {/* ── Menu items ── */}
       <main className="page-main page-with-tabbar">
-        {/* BE-55: "Vandaag" met het actieve aanbod van dit restaurant, los van
-            de filters hieronder, en weg als er niets online staat. */}
-        <DaghapVandaag restaurantId={id.split('-')[0]} />
         {filteredCategories.length === 0 ? (
           <div className="empty-state">
             <div style={{ fontSize: 36, marginBottom: 12 }}><Emoji glyph="🔍" /></div>

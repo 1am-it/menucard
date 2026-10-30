@@ -9,6 +9,19 @@
   margin: 24px 0;
 }
 
+/* BE-55 (#135, herstel na review deel 2) — de band tussen de kop en de
+ * zoek- en filterbalk van de menupagina: dezelfde breedte en zijmarge als
+ * .page-main, zonder de pagina-opmaak van globals.css te raken. */
+.daghap-band {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 8px 24px 0;
+}
+
+.daghap-band:empty {
+  display: none;
+}
+
 .daghap-vandaag-title {
   margin: 0 0 12px;
   font-size: 1.15rem;

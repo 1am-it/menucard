@@ -15,7 +15,6 @@
 // Opmaak staat in ./daghap-vandaag.css (BE-52); globals.css blijft ongemoeid.
 
 import { useEffect, useState } from 'react'
-import DishSaveButton from '@/src/components/DishSaveButton'
 import DishShareButton from '@/src/components/DishShareButton'
 import { FORM_MESSAGES, LABEL_LABELS, verloopTekst } from '@/src/lib/daghapFormulier'
 import './daghap-vandaag.css'
@@ -142,7 +141,11 @@ export default function DaghapVandaag({ restaurantId }) {
                 </p>
               )}
               <div className="daghap-vandaag-actions">
-                <DishSaveButton entry={entry} name={item.naam} />
+                {/* BE-55 (#135, herstel na review deel 2) — DishShareButton
+                    rendert zelf de bewaarknop zodra hij een `entry` krijgt.
+                    Een losse DishSaveButton ernaast gaf twee bladwijzers;
+                    daarom staat hier alleen de deelknop, net als op de
+                    gerechtkaart (MenuItem). */}
                 <DishShareButton
                   entry={entry}
                   name={item.naam}
