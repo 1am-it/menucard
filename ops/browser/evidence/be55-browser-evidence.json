@@ -1,7 +1,7 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T21:14:57.246Z",
+  "startedAt": "2026-10-30T22:00:35.247Z",
   "port": 3195,
   "scenarioRuns": [
     {
@@ -9,7 +9,7 @@
       "checks": 109,
       "passed": 109,
       "failed": 0,
-      "durationMs": 57436,
+      "durationMs": 27146,
       "error": null
     },
     {
@@ -17,7 +17,23 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 4658,
+      "durationMs": 5509,
+      "error": null
+    },
+    {
+      "name": "zoeken",
+      "checks": 66,
+      "passed": 66,
+      "failed": 0,
+      "durationMs": 17006,
+      "error": null
+    },
+    {
+      "name": "home",
+      "checks": 36,
+      "passed": 36,
+      "failed": 0,
+      "durationMs": 11188,
       "error": null
     }
   ],
@@ -599,22 +615,532 @@
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"},{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"}]"
+      "detail": "[{\"apparaat\":\"ad3cbb17b439c746b9882f98\"},{\"apparaat\":\"ad3cbb17b439c746b9882f98\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"3ec954aebd8598c5fd10c07f\"}"
+      "detail": "{\"apparaat\":\"ad3cbb17b439c746b9882f98\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "3ec954aebd8598c5fd10c07f"
+      "detail": "ad3cbb17b439c746b9882f98"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "3ec954aebd8598c5fd10c07f"
+      "detail": "ad3cbb17b439c746b9882f98"
+    },
+    {
+      "name": "zoeken light/1280: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "zoeken light/1280: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken light/1280: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken light/1280: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken light/1280: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken light/1280: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/1280: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken light/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/1280: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.377290168401435"
+    },
+    {
+      "name": "zoeken light/1280: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":319,\"onder\":537,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken light/390: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "zoeken light/390: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken light/390: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken light/390: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken light/390: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken light/390: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/390: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken light/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/390: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.377290168401435"
+    },
+    {
+      "name": "zoeken light/390: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":479,\"onder\":697,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken light/320: het thema is toegepast",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "zoeken light/320: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken light/320: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken light/320: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken light/320: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken light/320: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/320: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken light/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/320: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.377290168401435"
+    },
+    {
+      "name": "zoeken light/320: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":479,\"onder\":724,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken dark/1280: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "zoeken dark/1280: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken dark/1280: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken dark/1280: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken dark/1280: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken dark/1280: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/1280: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken dark/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/1280: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "zoeken dark/1280: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":319,\"onder\":537,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken dark/390: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "zoeken dark/390: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken dark/390: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken dark/390: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken dark/390: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken dark/390: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/390: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken dark/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/390: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "zoeken dark/390: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":479,\"onder\":697,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken dark/320: het thema is toegepast",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "zoeken dark/320: alleen de treffer staat er nog",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "zoeken dark/320: het label heet \"Vandaag · daghap\"",
+      "passed": true,
+      "detail": "Vandaag · daghap"
+    },
+    {
+      "name": "zoeken dark/320: het label staat bij de juiste groep",
+      "passed": true,
+      "detail": "Brasserie Bardot"
+    },
+    {
+      "name": "zoeken dark/320: de filterknop heet \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "zoeken dark/320: de filterknop staat aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/320: de filterknop is een echte knop met toetsenbordfocus",
+      "passed": true,
+      "detail": "BUTTON/0"
+    },
+    {
+      "name": "zoeken dark/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/320: het label haalt 4,5:1",
+      "passed": true,
+      "detail": "6.946559942869543"
+    },
+    {
+      "name": "zoeken dark/320: het label staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"labelInBeeld\":true,\"boven\":479,\"onder\":724,\"scherm\":900}"
+    },
+    {
+      "name": "zoeken: zonder filter geen enkel label",
+      "passed": true,
+      "detail": "2/0"
+    },
+    {
+      "name": "zoeken: de knop staat zonder filter uit",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "zoeken: de knop zet ?vandaag=1 in de URL",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken: na de klik alleen de treffer, met label",
+      "passed": true,
+      "detail": "1/1"
+    },
+    {
+      "name": "zoeken: de knop staat dan aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken: de zoekvraag ging met vandaag=1 naar de API",
+      "passed": true,
+      "detail": "/api/search?q=soep&vandaag=1&group=restaurant"
+    },
+    {
+      "name": "home light/1280: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home light/1280: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home light/1280: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home light/1280: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home light/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home light/1280: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home light/390: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home light/390: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home light/390: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home light/390: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home light/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/390: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home light/320: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home light/320: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home light/320: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home light/320: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home light/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/320: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/1280: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home dark/1280: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home dark/1280: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home dark/1280: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home dark/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home dark/1280: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/390: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home dark/390: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home dark/390: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home dark/390: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home dark/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/390: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/320: de sectie \"Daghappen vandaag\" staat er",
+      "passed": true,
+      "detail": "true/Daghappen vandaag"
+    },
+    {
+      "name": "home dark/320: twee kaarten met naam en prijs",
+      "passed": true,
+      "detail": "2/Pompoensoep met brood|Herfststoof met paddenstoelen"
+    },
+    {
+      "name": "home dark/320: \"Alle\" gaat naar het filter Vandaag",
+      "passed": true,
+      "detail": "/search?vandaag=1"
+    },
+    {
+      "name": "home dark/320: de sectie is gelabeld door zijn kop",
+      "passed": true,
+      "detail": "daghappen-vandaag-titel/daghappen-vandaag-titel"
+    },
+    {
+      "name": "home dark/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/320: de sectie staat in beeld bij de opname",
+      "passed": true,
+      "detail": "true"
     },
     {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
@@ -707,7 +1233,7 @@
     },
     {
       "file": "be55-vandaag-leeg-390-light.png",
-      "sha256": "4a846c8e6332a37380b3b3a60c8551ddba94f25449fabec2ecded7deaf884d2b",
+      "sha256": "276e408e94302752b56d361e7c3f792ddfaa52d744c23dd3767db6659ec2432c",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -716,12 +1242,129 @@
     },
     {
       "file": "be55-melden-bevestiging-390-dark.png",
-      "sha256": "312979599066f08766906543add47eed25bbc9b3feaf5532e12054fce437ff1c",
+      "sha256": "de20a90101745bb13099f15b0cb636251f6d385c6e77f913815dffa1f6e91dac",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
       "theme": "dark",
       "state": "bevestiging"
+    },
+    {
+      "file": "be55-zoeken-1280-light.png",
+      "sha256": "952974b138092abcbd6c2c788bd9ddae5da23e14f871daa1ac54702ba7247410",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-390-light.png",
+      "sha256": "8e629390d896ce6f721ddca87941b7630828ee5d4743e4e86b4c01a6e39225eb",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-320-light.png",
+      "sha256": "06ef75518833ef54600a2bf89296e968968a5f7e53615477b8d2a2dc22e6ada0",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-1280-dark.png",
+      "sha256": "f51bac657f57430055d4a976467cb14e93efece2dff7cefd7ddb9123d3d546af",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-390-dark.png",
+      "sha256": "94448fcfe7330372ef3ebef8d5823b81adfb41ffeb3e14fd9a653b9b84021830",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-320-dark.png",
+      "sha256": "e2fa414c4e9f187096bca1bda8660cc656ea67d49f5e57af0d1b045ba712a5a0",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "vandaag"
+    },
+    {
+      "file": "be55-zoeken-filter-aan-390-dark.png",
+      "sha256": "2779c69834806b2903d0429bf38b93c91250f52e36606f7b6a8488ab3d30e07a",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "filter-aan"
+    },
+    {
+      "file": "be55-home-daghappen-1280-light.png",
+      "sha256": "ee0a76eca5e5e70d8c5f383647a5a3774900ad0150bd3f87690a0785d70d061c",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "daghappen-vandaag"
+    },
+    {
+      "file": "be55-home-daghappen-390-light.png",
+      "sha256": "193cf31330e0f583453455766ad36e2869ae007dc6216980693394544212ad0d",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "daghappen-vandaag"
+    },
+    {
+      "file": "be55-home-daghappen-320-light.png",
+      "sha256": "0a53eebfe7600a711f7bb8afd7c5d5132ac832f8e91038f4cda92a5008c8e910",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "daghappen-vandaag"
+    },
+    {
+      "file": "be55-home-daghappen-1280-dark.png",
+      "sha256": "c0a2380481f6fee44cc0cd0eadda93b6148b5a93784371d7c361a903cbc34915",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "daghappen-vandaag"
+    },
+    {
+      "file": "be55-home-daghappen-390-dark.png",
+      "sha256": "81cb5d6be4ed480ada04b211235140f7c7af55d9a55484def5781bcf189238ba",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "daghappen-vandaag"
+    },
+    {
+      "file": "be55-home-daghappen-320-dark.png",
+      "sha256": "9db716c588e8366c9c8b6878375f5c39b17198f70c5e9eb508a69ef71f5f7c99",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "daghappen-vandaag"
     }
   ],
   "failed": 0,

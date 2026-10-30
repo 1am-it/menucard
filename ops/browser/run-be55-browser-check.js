@@ -372,7 +372,7 @@ const HOME_STAAT = `(() => {
   const kaarten = Array.from(sectie.querySelectorAll('.daghappen-vandaag-kaart'));
   const titel = sectie.querySelector('#daghappen-vandaag-titel');
   const alle = sectie.querySelector('.daghappen-vandaag-alle');
-  sectie.scrollIntoView({ block: 'center' });
+  sectie.scrollIntoView({ block: 'center', behavior: 'instant' });
   const r = sectie.getBoundingClientRect();
   return {
     bestaat: true,
@@ -477,8 +477,10 @@ async function main() {
       // De in-page stub antwoordt zelf; de guard moet de route alleen toestaan.
       fixtureRoutes: [
         { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET', 'POST'] },
-        // BE-55 deel 5 (#135): het zoekresultaat met label en filter.
+        // BE-55 deel 5 (#135): het zoekresultaat met label en filter, en de
+        // restaurantgroep die de zoekpagina zelf ook ophaalt.
         { id: 'zoeken', match: 'prefix', path: '/api/search', methods: ['GET'] },
+        { id: 'restaurants', match: 'prefix', path: '/api/restaurants', methods: ['GET'] },
       ],
     });
     await enableFetchGuard(cdp, guard);

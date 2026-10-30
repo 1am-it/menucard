@@ -16,9 +16,9 @@
 .vandaag-label {
   display: inline-block;
   padding: 2px 8px;
-  border: 1px solid var(--accent-border);
+  border: 1px solid var(--card-border-color);
   border-radius: 999px;
-  background: var(--accent-faint);
+  background: var(--surface-soft);
   color: var(--accent);
   font-size: 0.75rem;
   font-weight: 700;
@@ -30,8 +30,8 @@
 /* De filterknop erft de vorm van "Nu open"; alleen de actieve stand krijgt
    dezelfde accentkleur als het label, zodat filter en label bij elkaar horen. */
 .vandaag-filter-btn.active {
-  border-color: var(--accent-border);
-  background: var(--accent-faint);
+  border-color: var(--card-border-color);
+  background: var(--surface-soft);
   color: var(--accent);
 }
 
