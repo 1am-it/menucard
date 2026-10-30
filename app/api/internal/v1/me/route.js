@@ -27,6 +27,15 @@ export async function GET(request) {
     return NextResponse.json({ roles: auth.roles })
   }
 
+  // BE-48 (#112): "second step still missing" is *not* the same as "no internal
+  // access". The login screen needs to tell them apart to show the right screen
+  // (enrol a new app, or enter a code from the linked app), so this one 403 is
+  // passed through with its own machine-readable reason. The error text is the
+  // same Dutch text every internal route already returns.
+  if (auth.status === 403 && auth.reason === 'aal2_required') {
+    return NextResponse.json({ error: auth.error, reason: auth.reason }, { status: 403 })
+  }
+
   if (auth.status === 403) {
     return NextResponse.json({ roles: [] })
   }

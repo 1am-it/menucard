@@ -43,14 +43,6 @@ import {
   performActivation,
 } from '@/src/lib/activationFlow'
 
-const inputStyle = {
-  padding: 10,
-  borderRadius: 8,
-  border: '1px solid var(--border)',
-  background: 'var(--bg-card)',
-  color: 'var(--text-primary)',
-}
-
 export default function ActivatePage() {
   const router = useRouter()
   const [type, setType] = useState('recovery')
@@ -100,58 +92,59 @@ export default function ActivatePage() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: 360,
-        margin: '80px auto',
-        padding: '0 20px',
-        fontFamily: 'system-ui, sans-serif',
-        color: 'var(--text-primary)',
-      }}
-    >
-      <h1 style={{ fontSize: 22, marginBottom: 16 }}>Je account activeren</h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
-        Vul het e-mailadres en de code in uit {type === 'invite' ? 'je uitnodiging' : 'de e-mail over je wachtwoord'}.
-      </p>
+    <main className="auth-main">
+      <div className="auth-card">
+        <h1 className="auth-title">Je account activeren</h1>
+        <p className="auth-intro">
+          Vul het e-mailadres en de code in uit {type === 'invite' ? 'je uitnodiging' : 'de e-mail over je wachtwoord'}.
+        </p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
-        <input
-          type="email"
-          placeholder="E-mailadres"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          required
-          style={inputStyle}
-        />
-        <input
-          type="text"
-          placeholder="Code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          autoComplete="one-time-code"
-          inputMode="numeric"
-          required
-          style={inputStyle}
-        />
-        {fieldError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{fieldError}</div>}
-        {activationError && <div style={{ color: 'var(--danger)', fontSize: 13 }}>{activationError}</div>}
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            padding: 10,
-            borderRadius: 8,
-            border: 'none',
-            background: 'var(--accent-fill)',
-            color: 'var(--on-accent-fill)',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          {submitting ? 'Bezig met activeren…' : 'Account activeren'}
-        </button>
-      </form>
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="auth-email">
+              E-mailadres
+            </label>
+            <input
+              id="auth-email"
+              className="auth-input"
+              type="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              aria-describedby={fieldError || activationError ? 'auth-error' : undefined}
+              required
+            />
+          </div>
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="auth-code">
+              Code uit de e-mail
+            </label>
+            <input
+              id="auth-code"
+              className="auth-input auth-input--code"
+              type="text"
+              name="code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              autoComplete="one-time-code"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={10}
+              aria-describedby={fieldError || activationError ? 'auth-error' : undefined}
+              required
+            />
+          </div>
+          {(fieldError || activationError) && (
+            <p className="auth-error" id="auth-error" role="alert">
+              {fieldError || activationError}
+            </p>
+          )}
+          <button type="submit" className="auth-submit" disabled={submitting}>
+            {submitting ? 'Bezig met activeren…' : 'Account activeren'}
+          </button>
+        </form>
+      </div>
     </main>
   )
 }
