@@ -34,6 +34,7 @@ import ThemeToggle from '@/src/components/ThemeToggle'
 import './mijn-restaurant.css'
 
 import Wordmark from '@/src/components/Wordmark'
+import PrimaryNav from '@/src/components/PrimaryNav'
 import OwnerAccountDeletion from './OwnerAccountDeletion'
 import OwnerStatsPanel from './OwnerStatsPanel'
 
@@ -193,6 +194,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
       <header className="site-header">
         <div className="header-inner">
           <Wordmark />
+          <PrimaryNav />
           <div className="header-right">
             <ThemeToggle />
           </div>

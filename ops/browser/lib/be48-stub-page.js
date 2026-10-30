@@ -149,6 +149,14 @@ function installBe48AuthStub(settings) {
 
   function appResponse(url, method, body) {
     const authorized = assurance === 'aal2' || !needsSecondStep();
+    // BE-57 (#139): a route the check wants to stub itself (the owner's figures).
+    // Only for this origin, only for GET, and only with a session — exactly the
+    // shape the real route has.
+    const ownStats = settings.ownerStats && settings.ownerStats[url.pathname];
+    if (ownStats && method === 'GET') {
+      if (!authorized) return jsonResponse({ error: 'Niet ingelogd.' }, 401);
+      return jsonResponse((ownStats && ownStats.body) || {}, (ownStats && ownStats.status) || 200);
+    }
     const known =
       url.pathname === '/api/internal/v1/me' ||
       url.pathname === '/api/internal/v1/workqueue-counts' ||

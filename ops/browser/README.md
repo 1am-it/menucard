@@ -1011,3 +1011,44 @@ De pagina zoekt in dezelfde gegevens als `/alle-restaurants`
 (`GET /api/restaurants`, dezelfde paginering) met de geteste regel uit
 `src/lib/claimSearch.js`; er is geen nieuwe API, database of dependency.
 
+## BE-57 (#139, deel 2) — de cijfers op "Mijn restaurant"
+
+`npm run test:browser:be57` (of `node ops/browser/run-be57-browser-check.js`).
+Eén run, drie standen; de poort is 3187 (uit 3180-3189) en via
+`BE57_FIXTURE_PORT` te wijzigen. De check start zijn eigen `next dev` en een
+lokale Edge/Chrome via CDP, met de fictieve Supabase uit
+`lib/be48-auth-stub.js`. Nieuw is de `ownerStats`-map in die stub: per pad een
+fictief antwoord voor `GET /api/mijn-restaurant/<id>/cijfers` (alleen GET, alleen
+met een sessie). Er is geen productie, geen echt account en geen externe host
+bij betrokken.
+
+Wat hij meet, per stand ("het overzicht", "Net geclaimd" en "nog geen cijfers"):
+
+- **de vier cijfers** van "Deze week" in vaste volgorde, met de verandering ten
+  opzichte van vorige week ("32 meer", "4 minder", "gelijk aan vorige week");
+- **de drempel** — elk getal onder 5 heet in de browser "minder dan 5", ook in de
+  top en in het maandcijfer, en de verandering valt dan terug op "te weinig
+  gegevens om te vergelijken";
+- **de top 4** met de naam uit de statische index en balkjes die echt smaller
+  worden (100% → 50% → 27% → 9%);
+- **de privacyregel** "Alleen totalen, nooit wie.";
+- **"Je menukaart"** met "Laatst bijgewerkt op 25 maart 2026." en een link naar
+  `/menu/1-lunch` van minimaal 44 px;
+- **"Net geclaimd"** met de welkomstmelding, vier maandcijfers en precies drie
+  dingen om mee te beginnen, zonder één link in dat blok;
+- **niets uit een volgend ticket**: geen "Bevestigd", geen "Menukaart
+  bijwerken", geen QR;
+- **licht en donker op 1280, 390 en 320 px**, met het cijferblok in beeld, zonder
+  horizontale overloop en met het thema echt toegepast;
+- **toetsenbord** — een tabwandeling met een zichtbare focusring op elke stap,
+  inclusief de link naar de menukaart;
+- **a11y** — de bestaande audit (`lib/a11y-audit.js`) voor deze pagina in licht
+  en donker, per stand: contrast, namen, tikdoelen, koppen, landmarks en taal.
+
+Bewijs: `ops/browser/evidence/be-57/` (achttien schermafdrukken, in git) en
+`ops/browser/evidence/be57-browser-evidence.json`. Grenzen: dit is lokale
+ontwikkelaarsbewijs met een gestubde API, geen onafhankelijke review en geen
+echte acceptatie; de visuele vergelijking met de goedgekeurde mockup blijft
+mensenwerk (daarom staan de schermafdrukken erin).
+
+
