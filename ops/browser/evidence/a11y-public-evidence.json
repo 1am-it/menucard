@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-30T11:21:35.845Z",
+  "generatedAt": "2026-10-30T18:44:49.303Z",
   "ticket": "#121 BE-51 — toegankelijkheid van de publieke pagina's",
   "category": "developer evidence — local build, no production data or credentials",
-  "head": "8ab1a2cf48cf5f1a39b691c7f8f4d643f136627f",
-  "app": "http://localhost:3175",
-  "port": 3175,
+  "head": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
+  "app": "http://localhost:3170",
+  "port": 3170,
   "phase": "na",
   "filter": null,
   "themes": [
@@ -4852,8 +4852,8 @@
       }
     },
     "na": {
-      "head": "8ab1a2cf48cf5f1a39b691c7f8f4d643f136627f",
-      "generatedAt": "2026-10-30T11:21:35.840Z",
+      "head": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
+      "generatedAt": "2026-10-30T18:44:49.296Z",
       "themes": [
         "licht",
         "donker"
@@ -4878,11 +4878,11 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 40,
+                  "measuredTexts": 44,
                   "minRatio": 5.99,
-                  "interactive": 22,
-                  "tabStops": 22,
-                  "tabbables": 22,
+                  "interactive": 25,
+                  "tabStops": 25,
+                  "tabbables": 25,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -5125,11 +5125,11 @@
                   "checks": 11,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 22,
-                  "minRatio": 8.25,
-                  "interactive": 16,
+                  "measuredTexts": 43,
+                  "minRatio": 5.99,
+                  "interactive": 25,
                   "tabStops": 25,
-                  "tabbables": 16,
+                  "tabbables": 25,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -5211,9 +5211,9 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 16,
+                  "measuredTexts": 14,
                   "minRatio": 5.99,
-                  "interactive": 13,
+                  "interactive": 11,
                   "tabStops": 13,
                   "tabbables": 13,
                   "skippedFocusSteps": 0,
@@ -6373,11 +6373,11 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 199,
+                  "measuredTexts": 197,
                   "minRatio": 5.99,
-                  "interactive": 21,
+                  "interactive": 19,
                   "tabStops": 21,
-                  "tabbables": 21,
+                  "tabbables": 19,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -6876,11 +6876,11 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 13,
+                  "measuredTexts": 14,
                   "minRatio": 5.99,
-                  "interactive": 8,
-                  "tabStops": 8,
-                  "tabbables": 8,
+                  "interactive": 9,
+                  "tabStops": 9,
+                  "tabbables": 9,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -6913,6 +6913,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     }
                   ],
@@ -6944,11 +6948,11 @@
                   "checks": 11,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 14,
+                  "measuredTexts": 15,
                   "minRatio": 5.99,
-                  "interactive": 10,
-                  "tabStops": 10,
-                  "tabbables": 10,
+                  "interactive": 11,
+                  "tabStops": 11,
+                  "tabbables": 11,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -6981,6 +6985,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     },
                     {
@@ -7015,11 +7023,11 @@
                   "checks": 17,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 13,
+                  "measuredTexts": 14,
                   "minRatio": 5.99,
-                  "interactive": 8,
-                  "tabStops": 8,
-                  "tabbables": 8,
+                  "interactive": 9,
+                  "tabStops": 9,
+                  "tabbables": 9,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -7052,6 +7060,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     }
                   ],
@@ -7083,11 +7095,11 @@
                   "checks": 11,
                   "failedChecks": 0,
                   "errors": 0,
-                  "measuredTexts": 14,
+                  "measuredTexts": 15,
                   "minRatio": 5.99,
-                  "interactive": 10,
-                  "tabStops": 10,
-                  "tabbables": 10,
+                  "interactive": 11,
+                  "tabStops": 11,
+                  "tabbables": 11,
                   "skippedFocusSteps": 0,
                   "focusPath": [
                     {
@@ -7120,6 +7132,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     },
                     {
@@ -7173,6 +7189,14 @@
                       "indicator": "outline"
                     },
                     {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
+                      "indicator": "outline"
+                    },
+                    {
                       "selector": "button.share-settings-btn",
                       "indicator": "outline"
                     },
@@ -7194,14 +7218,6 @@
                     },
                     {
                       "selector": "a.cat-nav-item.active",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.cat-nav-item",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.cat-nav-item",
                       "indicator": "outline"
                     },
                     {
@@ -7336,6 +7352,14 @@
                       "indicator": "outline"
                     },
                     {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
+                      "indicator": "outline"
+                    },
+                    {
                       "selector": "button.share-settings-btn",
                       "indicator": "outline"
                     },
@@ -7357,14 +7381,6 @@
                     },
                     {
                       "selector": "a.cat-nav-item.active",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.cat-nav-item",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "a.cat-nav-item",
                       "indicator": "outline"
                     },
                     {
@@ -7497,12 +7513,20 @@
                   "measuredTexts": 8,
                   "minRatio": 8.25,
                   "interactive": 4,
-                  "tabStops": 6,
+                  "tabStops": 9,
                   "tabbables": 4,
-                  "skippedFocusSteps": 1,
+                  "skippedFocusSteps": 0,
                   "focusPath": [
                     {
                       "selector": "a.wordmark",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
                       "indicator": "outline"
                     },
                     {
@@ -7523,6 +7547,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     }
                   ],
@@ -7557,12 +7585,20 @@
                   "measuredTexts": 9,
                   "minRatio": 8.25,
                   "interactive": 6,
-                  "tabStops": 8,
+                  "tabStops": 11,
                   "tabbables": 6,
-                  "skippedFocusSteps": 1,
+                  "skippedFocusSteps": 0,
                   "focusPath": [
                     {
                       "selector": "a.wordmark",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
                       "indicator": "outline"
                     },
                     {
@@ -7583,6 +7619,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     },
                     {
@@ -7620,9 +7660,9 @@
                   "measuredTexts": 8,
                   "minRatio": 8.25,
                   "interactive": 4,
-                  "tabStops": 6,
+                  "tabStops": 4,
                   "tabbables": 4,
-                  "skippedFocusSteps": 1,
+                  "skippedFocusSteps": 0,
                   "focusPath": [
                     {
                       "selector": "a.wordmark",
@@ -7637,15 +7677,7 @@
                       "indicator": "outline"
                     },
                     {
-                      "selector": "a.lijst-row-link",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.lijst-remove",
-                      "indicator": "outline"
-                    },
-                    {
-                      "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "selector": "a.lijst-link",
                       "indicator": "outline"
                     }
                   ],
@@ -7680,12 +7712,20 @@
                   "measuredTexts": 9,
                   "minRatio": 8.25,
                   "interactive": 6,
-                  "tabStops": 8,
+                  "tabStops": 11,
                   "tabbables": 6,
-                  "skippedFocusSteps": 1,
+                  "skippedFocusSteps": 0,
                   "focusPath": [
                     {
                       "selector": "a.wordmark",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.theme-btn.active",
                       "indicator": "outline"
                     },
                     {
@@ -7706,6 +7746,10 @@
                     },
                     {
                       "selector": "button.lijst-primary-btn.lijst-share-btn",
+                      "indicator": "outline"
+                    },
+                    {
+                      "selector": "button.lijst-primary-btn.kies-start-btn",
                       "indicator": "outline"
                     },
                     {

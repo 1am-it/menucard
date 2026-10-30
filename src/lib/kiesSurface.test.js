@@ -45,7 +45,11 @@ const IMAGE = read('app/kies/[code]/share-image/route.js');
 const START_BUTTON = read('src/components/KiesStartButton.js');
 const SHARE_BUTTON = read('src/components/KiesShareButton.js');
 const LIST_VIEW = read('app/mijn-lijstje/MijnLijstjeView.js');
-const CSS = read('app/globals.css');
+// BE-52 (#128): de kies-opmaak staat naast de view en de component, niet meer in
+// app/globals.css. De regels zelf zijn ongewijzigd verhuisd.
+const KIES_CSS = read('app/kies/kies.css');
+const KIES_START_CSS = read('src/components/kies-start.css');
+const CSS = `${KIES_CSS}\n${KIES_START_CSS}`;
 const BROWSER_CHECK = read('ops/browser/run-be46-browser-check.js');
 
 test('kies: vier routes met de methoden uit het contract, elk zonder cache', () => {

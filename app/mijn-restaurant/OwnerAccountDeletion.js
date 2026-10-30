@@ -20,6 +20,9 @@ import { requestOwnerSignInCode } from '@/src/lib/claimEmailCodeFlow'
 import { DELETION_MESSAGES } from '@/src/lib/ownerAccountDeletion'
 import { MESSAGES } from '@/src/lib/authErrors'
 import { OWNER_OVERVIEW_MESSAGES } from '@/src/lib/ownerRestaurantOverview'
+// BE-52 (#128): de eigen opmaak van deze pagina staat naast de pagina.
+import './mijn-restaurant.css'
+
 
 const DELETE_ENDPOINT = '/api/mijn-restaurant/account-verwijderen'
 

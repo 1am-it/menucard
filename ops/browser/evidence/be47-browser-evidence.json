@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T06:52:14.136Z",
+  "generatedAt": "2026-10-30T18:26:39.092Z",
   "kind": "developer evidence — local app with a fictional Supabase, no production data or credentials",
   "contract": "issue #111 BE-47 (inloggen met e-mailcode voor restauranthouders)",
-  "head": "fcf1ee198bb40d6cbf4df6ec14d90021632d46f0",
+  "head": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
   "app": "http://localhost:3147",
   "filter": null,
   "scenarios": [
@@ -11,7 +11,7 @@
       "checks": 20,
       "passed": 20,
       "failed": 0,
-      "durationMs": 8978,
+      "durationMs": 7994,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 10,
       "passed": 10,
       "failed": 0,
-      "durationMs": 6194,
+      "durationMs": 7000,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 15,
       "passed": 15,
       "failed": 0,
-      "durationMs": 9067,
+      "durationMs": 6425,
       "error": null
     },
     {
@@ -35,7 +35,7 @@
       "checks": 11,
       "passed": 11,
       "failed": 0,
-      "durationMs": 15929,
+      "durationMs": 10717,
       "error": null
     }
   ],
@@ -300,7 +300,7 @@
       {
         "name": "doorsturen: \"Nog niets te openen\" bestaat niet meer voor de houder",
         "passed": true,
-        "detail": "onze\nmenukaarten\nMenukaarten in Breda\nLicht\nDonker\nMijn restaurant\n\nDit is je eigen overzicht. Wijzigingen aan je pagina en menukaart lopen nu via de redactie; "
+        "detail": "onze\nmenukaarten\nMenukaarten in Breda\n\nBezig met laden…"
       },
       {
         "name": "doorsturen (beheerder): the form is interactive (React hydration) before typing",
@@ -518,7 +518,7 @@
       "viewport": "390x844",
       "path": "ops/browser/evidence/be-47/be47-verwijderen-390-donker.png",
       "file": "be47-verwijderen-390-donker.png",
-      "sha256": "0de67ea9aa63ee2c5379af4a51e76edfba342bf2a913a8fc275876d4a2184a55",
+      "sha256": "6c0a5165d0ad74ef88bda646b5fe6463d7b87add9bd571e00b7baf652ae837ee",
       "width": 390,
       "height": 844
     }

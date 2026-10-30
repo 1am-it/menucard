@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-30T07:17:56.150Z",
+  "generatedAt": "2026-10-30T18:28:57.576Z",
   "ticket": "#115 BE-49 — rustiger gerechtkaart en snel delen",
   "category": "developer evidence — local build, no production data or credentials",
-  "head": "ea2a56f2be2092a9467efaf8551bb657d31ec187",
-  "app": "http://localhost:3174",
+  "head": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
+  "app": "http://localhost:3158",
   "filter": null,
   "scenarios": [
     {
@@ -11,7 +11,7 @@
       "checks": 124,
       "passed": 124,
       "failed": 0,
-      "durationMs": 27647,
+      "durationMs": 29825,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 18,
       "passed": 18,
       "failed": 0,
-      "durationMs": 5132,
+      "durationMs": 5600,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 8660,
+      "durationMs": 7007,
       "error": null
     },
     {
@@ -35,7 +35,7 @@
       "checks": 12,
       "passed": 12,
       "failed": 0,
-      "durationMs": 6861,
+      "durationMs": 5884,
       "error": null
     },
     {
@@ -43,7 +43,7 @@
       "checks": 15,
       "passed": 15,
       "failed": 0,
-      "durationMs": 20927,
+      "durationMs": 28223,
       "error": null
     },
     {
@@ -51,7 +51,7 @@
       "checks": 7,
       "passed": 7,
       "failed": 0,
-      "durationMs": 7306,
+      "durationMs": 7190,
       "error": null
     },
     {
@@ -59,7 +59,7 @@
       "checks": 18,
       "passed": 18,
       "failed": 0,
-      "durationMs": 11021,
+      "durationMs": 9187,
       "error": null
     }
   ],
@@ -100,12 +100,12 @@
       {
         "name": "kaart (1280/light): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":723.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":723.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":613.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":613.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (1280/light): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":735.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":735.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":625.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":625.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (1280/light): geen gevulde achtergrond",
@@ -165,7 +165,7 @@
       {
         "name": "kaart (1280/light): de kaart is volledig in beeld voor de opname",
         "passed": true,
-        "detail": "{\"x\":55,\"y\":673,\"width\":293,\"height\":282}"
+        "detail": "{\"x\":55,\"y\":677,\"width\":293,\"height\":323}"
       },
       {
         "name": "kaart (390/light): het gerecht staat bovenaan met zijn prijs",
@@ -200,12 +200,12 @@
       {
         "name": "kaart (390/light): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":592.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":592.96875,\"left\":305,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":593.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":593.96875,\"left\":305,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (390/light): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":604.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":604.96875,\"left\":317,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":605.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":605.96875,\"left\":317,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (390/light): geen gevulde achtergrond",
@@ -265,7 +265,7 @@
       {
         "name": "kaart (390/light): de kaart is volledig in beeld voor de opname",
         "passed": true,
-        "detail": "{\"x\":10,\"y\":1263,\"width\":370,\"height\":192}"
+        "detail": "{\"x\":10,\"y\":1267,\"width\":370,\"height\":192}"
       },
       {
         "name": "kaart (390/light): bewaard is de bladwijzer gevuld met aria-pressed=\"true\"",
@@ -310,12 +310,12 @@
       {
         "name": "kaart (320/light): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":659.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":659.96875,\"left\":235,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":634.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":634.96875,\"left\":235,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (320/light): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":671.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":671.96875,\"left\":247,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":646.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":646.96875,\"left\":247,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (320/light): geen gevulde achtergrond",
@@ -375,7 +375,7 @@
       {
         "name": "kaart (320/light): de kaart is volledig in beeld voor de opname",
         "passed": true,
-        "detail": "{\"x\":10,\"y\":1367,\"width\":300,\"height\":188}"
+        "detail": "{\"x\":10,\"y\":1371,\"width\":300,\"height\":188}"
       },
       {
         "name": "kaart (1280/dark): het gerecht staat bovenaan met zijn prijs",
@@ -410,12 +410,12 @@
       {
         "name": "kaart (1280/dark): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":552.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":552.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":842.703125,\"left\":224.5,\"width\":44,\"height\":44},\"save\":{\"top\":842.703125,\"left\":272.5,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (1280/dark): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":564.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":564.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":854.703125,\"left\":236.5,\"width\":20,\"height\":20},\"save\":{\"top\":854.703125,\"left\":284.5,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (1280/dark): geen gevulde achtergrond",
@@ -475,7 +475,7 @@
       {
         "name": "kaart (1280/dark): de kaart is volledig in beeld voor de opname",
         "passed": true,
-        "detail": "{\"x\":55,\"y\":673,\"width\":293,\"height\":282}"
+        "detail": "{\"x\":55,\"y\":673,\"width\":293,\"height\":323}"
       },
       {
         "name": "kaart (390/dark): het gerecht staat bovenaan met zijn prijs",
@@ -510,12 +510,12 @@
       {
         "name": "kaart (390/dark): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":589.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":589.96875,\"left\":305,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":1335.96875,\"left\":257,\"width\":44,\"height\":44},\"save\":{\"top\":1335.96875,\"left\":305,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (390/dark): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":601.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":601.96875,\"left\":317,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":1347.96875,\"left\":269,\"width\":20,\"height\":20},\"save\":{\"top\":1347.96875,\"left\":317,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (390/dark): geen gevulde achtergrond",
@@ -620,12 +620,12 @@
       {
         "name": "kaart (320/dark): beide knoppen zijn minstens 44 × 44 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":759.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":759.96875,\"left\":235,\"width\":44,\"height\":44}}"
+        "detail": "{\"share\":{\"top\":825.96875,\"left\":187,\"width\":44,\"height\":44},\"save\":{\"top\":825.96875,\"left\":235,\"width\":44,\"height\":44}}"
       },
       {
         "name": "kaart (320/dark): het zichtbare icoon is ±20 px",
         "passed": true,
-        "detail": "{\"share\":{\"top\":771.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":771.96875,\"left\":247,\"width\":20,\"height\":20}}"
+        "detail": "{\"share\":{\"top\":837.96875,\"left\":199,\"width\":20,\"height\":20},\"save\":{\"top\":837.96875,\"left\":247,\"width\":20,\"height\":20}}"
       },
       {
         "name": "kaart (320/dark): geen gevulde achtergrond",
@@ -685,7 +685,7 @@
       {
         "name": "kaart (320/dark): de kaart is volledig in beeld voor de opname",
         "passed": true,
-        "detail": "{\"x\":10,\"y\":1367,\"width\":300,\"height\":188}"
+        "detail": "{\"x\":10,\"y\":1315,\"width\":300,\"height\":188}"
       },
       {
         "name": "eerste keer: zonder voorkeur opent het blad \"Hoe deel je meestal?\"",
@@ -715,12 +715,12 @@
       {
         "name": "eerste keer: \"Liever altijd het telefoonmenu\" is er ook, als checkbox",
         "passed": true,
-        "detail": "{\"type\":\"checkbox\",\"value\":\"on\",\"name\":\"deelvoorkeur-telefoonmenu\",\"checked\":false,\"disabled\":false,\"box\":{\"top\":729.8079223632812,\"left\":37,\"width\":20,\"height\":20}}"
+        "detail": "{\"type\":\"checkbox\",\"value\":\"on\",\"name\":\"deelvoorkeur-telefoonmenu\",\"checked\":false,\"disabled\":false,\"box\":{\"top\":732.1640625,\"left\":37,\"width\":20,\"height\":20}}"
       },
       {
         "name": "eerste keer: de checkboxen zijn minstens 20 px",
         "passed": true,
-        "detail": "[{\"top\":493.30792236328125,\"left\":37,\"width\":20,\"height\":20},{\"top\":539.3079223632812,\"left\":37,\"width\":20,\"height\":20},{\"top\":585.3079223632812,\"left\":37,\"width\":20,\"height\":20},{\"top\":631.3079223632812,\"left\":37,\"width\":20,\"height\":20},{\"top\":677.3079223632812,\"left\":37,\"width\":20,\"height\":20}]"
+        "detail": "[{\"top\":495.6640930175781,\"left\":37,\"width\":20,\"height\":20},{\"top\":541.6640625,\"left\":37,\"width\":20,\"height\":20},{\"top\":587.6640625,\"left\":37,\"width\":20,\"height\":20},{\"top\":633.6640625,\"left\":37,\"width\":20,\"height\":20},{\"top\":679.6640625,\"left\":37,\"width\":20,\"height\":20}]"
       },
       {
         "name": "eerste keer: zonder keuze kan er niets bewaard worden",
@@ -765,7 +765,7 @@
       {
         "name": "eerste keer: WhatsApp opent de link uit het contract",
         "passed": true,
-        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "eerste keer: het menu is daarna dicht",
@@ -780,7 +780,7 @@
       {
         "name": "een favoriet (390/light): één tik deelt meteen via Telegram",
         "passed": true,
-        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "een favoriet (390/light): er opent geen blad of menu",
@@ -800,7 +800,7 @@
       {
         "name": "een favoriet (1280/dark): één tik deelt meteen via Telegram",
         "passed": true,
-        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"}"
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Ddonker\"}"
       },
       {
         "name": "een favoriet (1280/dark): er opent geen blad of menu",
@@ -880,7 +880,7 @@
       {
         "name": "links (whatsapp): de link is exact de link uit het contract",
         "passed": true,
-        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://wa.me/?text=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "links (whatsapp): de link opent geen systeemmenu",
@@ -895,7 +895,7 @@
       {
         "name": "links (telegram): de link is exact de link uit het contract",
         "passed": true,
-        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"https://t.me/share/url?url=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "links (telegram): de link opent geen systeemmenu",
@@ -910,7 +910,7 @@
       {
         "name": "links (sms): de link is exact de link uit het contract",
         "passed": true,
-        "detail": "{\"opened\":[\"sms:?&body=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"sms:?&body=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"sms:?&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"sms:?&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "links (sms): de link opent geen systeemmenu",
@@ -925,7 +925,7 @@
       {
         "name": "links (email): de link is exact de link uit het contract",
         "passed": true,
-        "detail": "{\"opened\":[\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3174%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
+        "detail": "{\"opened\":[\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"],\"expected\":\"mailto:?subject=Poussin%20%C2%B7%20Brasserie%20Bardot&body=http%3A%2F%2Flocalhost%3A3158%2Fmenu%2F6-diner%3Fdish%3D6-diner-0-0%26name%3DPoussin%26cat%3DSpecialiteiten%2Bvan%2BBardot%26stand%3Dlicht\"}"
       },
       {
         "name": "links (email): de link opent geen systeemmenu",
@@ -940,7 +940,7 @@
       {
         "name": "links (copy): het klembord krijgt de deeplink met de stand",
         "passed": true,
-        "detail": "{\"copied\":\"http://localhost:3174/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"expected\":\"http://localhost:3174/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
+        "detail": "{\"copied\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\",\"expected\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
       },
       {
         "name": "links (copy): \"Link gekopieerd\" verschijnt in de statusmelding",
@@ -960,7 +960,7 @@
       {
         "name": "meer (desktop): \"Meer…\" valt terug op kopiëren",
         "passed": true,
-        "detail": "{\"copied\":\"http://localhost:3174/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
+        "detail": "{\"copied\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=licht\"}"
       },
       {
         "name": "meer (desktop): met de melding \"Link gekopieerd\"",
@@ -975,12 +975,12 @@
       {
         "name": "meer (telefoon): \"Meer…\" gebruikt het systeemmenu",
         "passed": true,
-        "detail": "{\"url\":\"http://localhost:3174/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}"
+        "detail": "{\"url\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}"
       },
       {
         "name": "meer (telefoon): met alleen url en title, zonder tekst",
         "passed": true,
-        "detail": "{\"keys\":[\"title\",\"url\"],\"payload\":{\"url\":\"http://localhost:3174/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}}"
+        "detail": "{\"keys\":[\"title\",\"url\"],\"payload\":{\"url\":\"http://localhost:3158/menu/6-diner?dish=6-diner-0-0&name=Poussin&cat=Specialiteiten+van+Bardot&stand=donker\",\"title\":\"Poussin · Brasserie Bardot\"}}"
       },
       {
         "name": "meer (telefoon): en de teller telt één keer",
@@ -1087,7 +1087,7 @@
       "file": "ops/browser/evidence/be-49/be49-kaart-1280-light.png",
       "viewport": "1280x950",
       "pngWidth": 293,
-      "pngHeight": 282
+      "pngHeight": 323
     },
     {
       "scenario": "kaart",
@@ -1151,7 +1151,7 @@
       "file": "ops/browser/evidence/be-49/be49-kaart-1280-dark.png",
       "viewport": "1280x950",
       "pngWidth": 293,
-      "pngHeight": 282
+      "pngHeight": 323
     },
     {
       "scenario": "kaart",
