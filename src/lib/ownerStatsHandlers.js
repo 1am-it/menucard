@@ -136,7 +136,7 @@ function createOwnerStatsHandlers({
 
     const clock = typeof now === 'function' ? now() : new Date();
     const range = weekWindow(clock);
-    if (!range.week.van || !range.week.tot || !range.vorigeWeek.van) return unavailable();
+    if (!range.week.van || !range.week.tot || !range.vorigeWeek.van || !range.maand.van) return unavailable();
 
     let supabase;
     try {
@@ -147,8 +147,11 @@ function createOwnerStatsHandlers({
     if (!supabase || typeof supabase.from !== 'function') return unavailable();
 
     const prefix = `${restaurantId}-`;
+    // Tot de maand terug: de welkomststand "net geclaimd" noemt het cijfer van
+    // de afgelopen maand (contract punt 4), de weekcijfers komen uit dezelfde
+    // rijen.
     const dayFilters = [
-      ['gte', 'day', range.vorigeWeek.van],
+      ['gte', 'day', range.maand.van],
       ['lte', 'day', range.week.tot],
     ];
 
@@ -162,7 +165,7 @@ function createOwnerStatsHandlers({
       });
       // Zonder 0024 is er nog geen bekeken-teller: de eerlijke stand, geen fout.
       if (views.error && isMissingViewStorage(views.error)) {
-        return { status: 200, body: noDataState(NO_DATA_MESSAGE) };
+        return { status: 200, body: noDataState(NO_DATA_MESSAGE, range) };
       }
       if (views.error) return unavailable();
 
@@ -174,7 +177,7 @@ function createOwnerStatsHandlers({
         maxRows: cap,
       });
       if (counters.error && isMissingCounterStorage(counters.error)) {
-        return { status: 200, body: noDataState(NO_DATA_MESSAGE) };
+        return { status: 200, body: noDataState(NO_DATA_MESSAGE, range) };
       }
       if (counters.error) return unavailable();
 
@@ -184,13 +187,13 @@ function createOwnerStatsHandlers({
         filters: [
           ['like', 'dish_key', `${prefix}%`],
           ['eq', 'lekker', true],
-          ['gte', 'gestemd_op', range.vorigeWeek.van],
+          ['gte', 'gestemd_op', range.maand.van],
         ],
         pageSize: page,
         maxRows: cap,
       });
       if (votes.error && isMissingCounterStorage(votes.error)) {
-        return { status: 200, body: noDataState(NO_DATA_MESSAGE) };
+        return { status: 200, body: noDataState(NO_DATA_MESSAGE, range) };
       }
       if (votes.error) return unavailable();
 
@@ -207,7 +210,7 @@ function createOwnerStatsHandlers({
     } catch (error) {
       // Een netwerk- of clientfout is dezelfde nette foutstaat als een storing.
       if (isMissingViewStorage(error) || isMissingCounterStorage(error)) {
-        return { status: 200, body: noDataState(NO_DATA_MESSAGE) };
+        return { status: 200, body: noDataState(NO_DATA_MESSAGE, range) };
       }
       return unavailable();
     }

@@ -38,6 +38,9 @@ const READY_STATUS = 'cijfers';
 
 // Zeven dagen, vandaag meegerekend, in UTC — dezelfde daggrens als de tellers.
 const WEEK_DAYS = 7;
+// De "afgelopen maand" van de stand "net geclaimd" (contract punt 4): dertig
+// dagen, vandaag meegerekend, in dezelfde UTC-dagen.
+const MONTH_DAYS = 30;
 // De top 4 uit het contract.
 const TOP_LIMIT = 4;
 
@@ -81,15 +84,21 @@ function shiftDay(day, daysAgo) {
 }
 
 /**
- * De twee periodes van "Deze week": de laatste zeven UTC-dagen (vandaag
- * meegerekend) en de zeven daarvoor. `{ week: {van, tot}, vorigeWeek: {van, tot} }`.
+ * De twee periodes van "Deze week" — de laatste zeven UTC-dagen (vandaag
+ * meegerekend) en de zeven daarvoor — plus de maand van de stand "net geclaimd"
+ * (dertig dagen, vandaag meegerekend):
+ * `{ week: {van, tot}, vorigeWeek: {van, tot}, maand: {van, tot} }`.
  */
 function weekWindow(now = new Date()) {
   const today = utcDayOf(now);
-  if (!today) return { week: { van: null, tot: null }, vorigeWeek: { van: null, tot: null } };
+  if (!today) {
+    const empty = { van: null, tot: null };
+    return { week: { ...empty }, vorigeWeek: { ...empty }, maand: { ...empty } };
+  }
   return {
     week: { van: shiftDay(today, WEEK_DAYS - 1), tot: today },
     vorigeWeek: { van: shiftDay(today, WEEK_DAYS * 2 - 1), tot: shiftDay(today, WEEK_DAYS) },
+    maand: { van: shiftDay(today, MONTH_DAYS - 1), tot: today },
   };
 }
 
@@ -210,9 +219,49 @@ function topDishes(rows, { limit = TOP_LIMIT } = {}) {
   }));
 }
 
-/** De stand "nog geen cijfers": de migratie ontbreekt of er is nog niets geteld. */
-function noDataState(message = NO_DATA_MESSAGE) {
-  return { status: NO_DATA_STATUS, message, hasData: false, week: [], top: [] };
+/**
+ * De vier cijfers van de afgelopen maand, met dezelfde ids en labels als "Deze
+ * week" en met dezelfde privacydrempel.
+ */
+function monthFigures(totals) {
+  const source = totals && typeof totals === 'object' ? totals : {};
+  return WEEK_METRICS.map((metric) => {
+    const value = countOf(source[metric.key]);
+    return {
+      id: metric.id,
+      label: metric.label,
+      value,
+      shown: formatCount(value),
+      enough: isVisibleCount(value),
+    };
+  });
+}
+
+/**
+ * De stand "nog geen cijfers": de migratie ontbreekt of er is nog geen week aan
+ * gegevens. `monthTotal` (de tellingen van de afgelopen maand) gaat mee, zodat
+ * de welkomststand "net geclaimd" tóch een echt cijfer kan noemen.
+ */
+function noDataState(message = NO_DATA_MESSAGE, range = null, monthTotal = null) {
+  const totals = {
+    viewed: countOf(monthTotal && monthTotal.viewed),
+    saved: countOf(monthTotal && monthTotal.saved),
+    shared: countOf(monthTotal && monthTotal.shared),
+    favourite: countOf(monthTotal && monthTotal.favourite),
+  };
+  return {
+    status: NO_DATA_STATUS,
+    message,
+    hasData: false,
+    period: range || null,
+    week: [],
+    top: [],
+    month: {
+      period: (range && range.maand) || null,
+      totals,
+      figures: monthFigures(totals),
+    },
+  };
 }
 
 /**
@@ -238,6 +287,7 @@ function buildWeekOverview({
   const dayOf = (row) => (row && (row.day || row.gestemd_op)) || null;
   const inWeek = (row) => dayInRange(dayOf(row), range.week);
   const inPreviousWeek = (row) => dayInRange(dayOf(row), range.vorigeWeek);
+  const inMonth = (row) => dayInRange(dayOf(row), range.maand);
 
   const current = periodTotals({
     viewRows: pick(viewRows, inWeek),
@@ -249,6 +299,13 @@ function buildWeekOverview({
     counterRows: pick(counterRows, inPreviousWeek),
     votes: pick(votes, inPreviousWeek),
   });
+  // De afgelopen maand: dezelfde rijen, ruimere grens (contract punt 4).
+  const monthTotal = periodTotals({
+    viewRows: pick(viewRows, inMonth),
+    counterRows: pick(counterRows, inMonth),
+    votes: pick(votes, inMonth),
+  });
+  const month = { period: range.maand, totals: monthTotal, figures: monthFigures(monthTotal) };
 
   const week = WEEK_METRICS.map((metric) => {
     const value = current[metric.key] || 0;
@@ -270,7 +327,9 @@ function buildWeekOverview({
   const hasData = Object.values(current).concat(Object.values(previous)).some((value) => value > 0)
     || rowsInWeek.length > 0;
 
-  if (!hasData) return noDataState();
+  // Geen week aan gegevens: de welkomststand, met de cijfers van de afgelopen
+  // maand erbij in plaats van een leeg scherm.
+  if (!hasData) return noDataState(NO_DATA_MESSAGE, range, monthTotal);
 
   return {
     status: READY_STATUS,
@@ -279,12 +338,14 @@ function buildWeekOverview({
     hasData: true,
     week,
     top,
+    month,
   };
 }
 
 module.exports = {
   COMPARE_UNAVAILABLE_LABEL,
   MINIMUM_VISIBLE,
+  MONTH_DAYS,
   NO_DATA_MESSAGE,
   NO_DATA_STATUS,
   READY_STATUS,
@@ -299,6 +360,7 @@ module.exports = {
   dayInRange,
   formatCount,
   isVisibleCount,
+  monthFigures,
   noDataState,
   periodTotals,
   restaurantOfDishKey,

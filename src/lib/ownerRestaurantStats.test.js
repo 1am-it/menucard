@@ -79,8 +79,11 @@ test('cijfers: deze week is zeven UTC-dagen, vorige week de zeven daarvoor', () 
   const range = weekWindow(NOW);
   assert.deepEqual(range.week, { van: DAYS.weekStart, tot: DAYS.today });
   assert.deepEqual(range.vorigeWeek, { van: DAYS.lastWeekStart, tot: DAYS.lastWeekEnd });
+  // BE-57 deel 2: de afgelopen maand loopt dertig UTC-dagen terug tot vandaag.
+  assert.deepEqual(range.maand, { van: '2026-09-30', tot: DAYS.today });
   // Een onbruikbare klok levert geen periode op (en dus geen cijfers).
-  assert.deepEqual(weekWindow('geen datum'), { week: { van: null, tot: null }, vorigeWeek: { van: null, tot: null } });
+  const empty = { van: null, tot: null };
+  assert.deepEqual(weekWindow('geen datum'), { week: { ...empty }, vorigeWeek: { ...empty }, maand: { ...empty } });
 });
 
 test('cijfers: de vergelijking met vorige week', () => {
@@ -221,4 +224,45 @@ test('cijfers: alleen vorige week telt ook als gegevens (met deze week op nul)',
   assert.equal(bekeken.value, 0);
   assert.equal(bekeken.shown, UNDER_MINIMUM_LABEL);
   assert.equal(bekeken.change.label, COMPARE_UNAVAILABLE_LABEL);
+});
+
+test('cijfers: de stand "net geclaimd" noemt het cijfer van de afgelopen maand', () => {
+  // Geen rij in deze of vorige week, wel één van drie weken geleden: nog geen
+  // week aan gegevens, dus de welkomststand met een maandcijfer.
+  const overview = buildWeekOverview({
+    restaurantId: '6',
+    viewRows: [{ restaurant_id: '6', day: '2026-10-08', viewed: 12 }],
+    counterRows: [{ dish_key: '6-diner-0-0', day: '2026-10-08', saved: 6, shared: 3 }],
+    votes: [],
+    now: NOW,
+  });
+  assert.equal(overview.status, NO_DATA_STATUS);
+  assert.equal(overview.hasData, false);
+  assert.deepEqual(overview.week, []);
+  assert.deepEqual(overview.month.period, { van: '2026-09-30', tot: DAYS.today });
+  assert.equal(overview.month.totals.viewed, 12);
+  assert.equal(overview.month.totals.saved, 6);
+  assert.equal(overview.month.totals.shared, 3);
+  const byId = Object.fromEntries(overview.month.figures.map((figure) => [figure.id, figure]));
+  assert.equal(byId.bekeken.shown, '12');
+  assert.equal(byId.bewaard.shown, '6');
+  // Ook onder de drempel: nooit een klein getal.
+  assert.equal(byId.gedeeld.shown, UNDER_MINIMUM_LABEL);
+  assert.equal(byId.favoriet.shown, UNDER_MINIMUM_LABEL);
+});
+
+test('cijfers: een maandcijfer ouder dan de maand telt niet mee', () => {
+  const overview = buildWeekOverview({
+    restaurantId: '6',
+    viewRows: [{ restaurant_id: '6', day: '2026-09-01', viewed: 40 }],
+    counterRows: [],
+    votes: [],
+    now: NOW,
+  });
+  assert.equal(overview.status, NO_DATA_STATUS);
+  assert.equal(overview.month.totals.viewed, 0);
+  assert.equal(overview.month.figures.find((figure) => figure.id === 'bekeken').shown, UNDER_MINIMUM_LABEL);
+  // Zonder enige invoer bestaat de maand altijd, met nullen.
+  assert.equal(noDataState().month.totals.viewed, 0);
+  assert.equal(noDataState().month.figures.length, 4);
 });

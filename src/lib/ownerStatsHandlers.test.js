@@ -160,23 +160,50 @@ test('houdercijfers: alleen de eigen rijen en kolommen worden gelezen', async ()
   assert.deepEqual(fake.queries.map((query) => query.table), ['restaurant_views', 'dish_counters', 'kies_stemmen']);
   assert.deepEqual(fake.queries[0].filters, [
     ['eq', 'restaurant_id', '6'],
-    ['gte', 'day', '2026-10-16'],
+    // BE-57 deel 2: tot de maand terug, voor de stand "net geclaimd".
+    ['gte', 'day', '2026-09-30'],
     ['lte', 'day', '2026-10-29'],
   ]);
   assert.deepEqual(fake.queries[1].filters, [
     ['like', 'dish_key', '6-%'],
-    ['gte', 'day', '2026-10-16'],
+    ['gte', 'day', '2026-09-30'],
     ['lte', 'day', '2026-10-29'],
   ]);
   assert.deepEqual(fake.queries[2].filters, [
     ['like', 'dish_key', '6-%'],
     ['eq', 'lekker', true],
-    ['gte', 'gestemd_op', '2026-10-16'],
+    ['gte', 'gestemd_op', '2026-09-30'],
   ]);
   // Geen roepnaam, geen stemmer, geen identiteit: alleen deze kolommen.
   assert.equal(fake.queries[0].columns, 'day, viewed');
   assert.equal(fake.queries[1].columns, 'dish_key, day, saved, shared');
   assert.equal(fake.queries[2].columns, 'dish_key, lekker, gestemd_op');
+});
+
+test('houdercijfers: het maandcijfer telt dezelfde rijen over dertig dagen', async () => {
+  const fake = fakeSupabase({
+    restaurant_views: {
+      data: [
+        { day: '2026-10-29', viewed: 6 },
+        { day: '2026-10-08', viewed: 9 },
+      ],
+      error: null,
+    },
+    dish_counters: {
+      data: [{ dish_key: '6-diner-0-0', day: '2026-10-08', saved: 2, shared: 1 }],
+      error: null,
+    },
+    kies_stemmen: { data: [], error: null },
+  });
+  const outcome = await handlerFor({ supabase: fake.client }).getOwnerStats({}, '6');
+  assert.equal(outcome.status, 200);
+  assert.equal(outcome.body.status, READY_STATUS);
+  // Deze week: 6 keer bekeken; de maand: 15.
+  assert.equal(outcome.body.week.find((metric) => metric.id === 'bekeken').value, 6);
+  assert.equal(outcome.body.month.totals.viewed, 15);
+  assert.equal(outcome.body.month.figures.find((figure) => figure.id === 'bekeken').shown, '15');
+  // Bewaard 2 en gedeeld 1 blijven onder de drempel, ook in de maand.
+  assert.equal(outcome.body.month.figures.find((figure) => figure.id === 'bewaard').shown, UNDER_MINIMUM_LABEL);
 });
 
 test('houdercijfers: zonder migratie de stand "nog geen cijfers", zonder fout', async () => {
