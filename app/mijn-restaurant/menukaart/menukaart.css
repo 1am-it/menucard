@@ -8,11 +8,19 @@
 }
 
 .mk-back {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-bottom: 12px;
+  padding: 0 4px;
   color: var(--text-secondary);
   font-size: 13px;
   text-decoration: none;
+}
+
+/* De teruglink staat in een nav-landmark; het blok zelf houdt geen marge. */
+.mk-nav {
+  display: block;
 }
 
 .mk-title {
@@ -51,7 +59,8 @@
 }
 
 .mk-menu-button {
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   border: 1px solid var(--accent-border);
   border-radius: 999px;
   background: transparent;
@@ -107,7 +116,7 @@
 
 .mk-form {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   margin-top: 12px;
 }
 
@@ -134,17 +143,27 @@
 .mk-check {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
+}
+
+/* BE-58 ijking: het vakje zelf is een tikdoel van 24 px (WCAG 2.2, 2.5.8);
+   het label eromheen houdt de klikbare tekst. */
+.mk-check input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .mk-save {
   justify-self: start;
-  padding: 8px 16px;
+  min-height: 44px;
+  padding: 10px 16px;
   border: 1px solid var(--accent);
   border-radius: 8px;
   background: var(--accent);
-  color: var(--text-on-accent, var(--background));
+  color: var(--on-accent);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;

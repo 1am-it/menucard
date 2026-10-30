@@ -28,7 +28,8 @@
 }
 
 .mw-filter {
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 10px 14px;
   border: 1px solid var(--accent-border);
   border-radius: 999px;
   background: transparent;
@@ -106,7 +107,8 @@
 
 .mw-approve,
 .mw-reject {
-  padding: 7px 14px;
+  min-height: 44px;
+  padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -116,7 +118,7 @@
 .mw-approve {
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: var(--text-on-accent, var(--background));
+  color: var(--on-accent);
 }
 
 .mw-reject {

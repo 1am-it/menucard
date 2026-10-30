@@ -305,9 +305,11 @@ export default function MenukaartBeheer({ restaurantIndex }) {
       </header>
 
       <main className="mk-main">
-        <Link className="mk-back" href="/mijn-restaurant">
-          {TEKST.back}
-        </Link>
+        <nav className="mk-nav" aria-label="Mijn restaurant">
+          <Link className="mk-back" href="/mijn-restaurant">
+            {TEKST.back}
+          </Link>
+        </nav>
         <h1 className="mk-title">{TEKST.title}</h1>
         {restaurantId && index[restaurantId] && (
           <p className="mk-subtitle">{index[restaurantId].name}</p>
