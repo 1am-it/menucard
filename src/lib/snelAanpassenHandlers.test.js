@@ -438,3 +438,53 @@ test('BE-58: de eigen lijst toont alleen eigen wijzigingen en het resterende dag
   assert.deepEqual(uitkomst.body.daglimiet, { maximum: 30, resterend: 29 });
   assert.equal(uitkomst.body.wijzigingen[0].user_id, undefined, 'geen onbewerkte kolomnamen');
 });
+
+// ─── BE-58 deel 2 (#143): de gerechten van de eigen kaart ────────────────────
+
+test('BE-58: de houder krijgt de gerechten van zijn eigen kaart met de positie', async () => {
+  const client = createFakeSupabase();
+  const handlers = handlersVoor(client);
+  const uitkomst = await handlers.menuGerechten(
+    request({ url: 'https://example.test/api/v1/menukaart/gerechten?menuId=9-lunch' }),
+  );
+
+  assert.equal(uitkomst.status, 200);
+  assert.equal(uitkomst.body.menuId, '9-lunch');
+  assert.equal(uitkomst.body.restaurantId, '9');
+  assert.deepEqual(uitkomst.body.gerechten.map((rij) => rij.naam), ['Tomatensoep', 'Bruschetta']);
+  assert.equal(uitkomst.body.gerechten[0].categorieIndex, 0);
+  assert.equal(uitkomst.body.gerechten[1].gerechtIndex, 1);
+  assert.equal(uitkomst.body.gerechten[0].prijs, '€10');
+  assert.equal(uitkomst.body.gerechten[0].tijdelijkNietBeschikbaar, false);
+  assert.equal(uitkomst.body.bevestiging.actief, false);
+});
+
+test('BE-58: zonder eigenaarschap of met ingetrokken plaatsrecht geen gerechten', async () => {
+  const geenEigenaar = await handlersVoor(createFakeSupabase({ staffRoles: [] })).menuGerechten(
+    request({ url: 'https://example.test/api/v1/menukaart/gerechten?menuId=9-lunch' }),
+  );
+  assert.equal(geenEigenaar.status, 403);
+
+  const zonderRecht = await handlersVoor(
+    createFakeSupabase({ plaatsrecht: [{ user_id: 'houder-1', restaurant_id: '9' }] }),
+  ).menuGerechten(request({ url: 'https://example.test/api/v1/menukaart/gerechten?menuId=9-lunch' }));
+  assert.equal(zonderRecht.status, 403);
+  assert.equal(zonderRecht.body.error, 'geen_plaatsrecht');
+
+  const zonderSessie = await handlersVoor(createFakeSupabase(), { houder: false }).menuGerechten(
+    request({ url: 'https://example.test/api/v1/menukaart/gerechten?menuId=9-lunch' }),
+  );
+  assert.equal(zonderSessie.status, 401);
+});
+
+test('BE-58: een onbekende of ontbrekende menukaart geeft 404 of 400', async () => {
+  const handlers = handlersVoor(createFakeSupabase());
+  const onbekend = await handlers.menuGerechten(
+    request({ url: 'https://example.test/api/v1/menukaart/gerechten?menuId=9-onbekend' }),
+  );
+  assert.equal(onbekend.status, 404);
+
+  const zonder = await handlers.menuGerechten(request({ url: 'https://example.test/api/v1/menukaart/gerechten' }));
+  assert.equal(zonder.status, 400);
+});
+

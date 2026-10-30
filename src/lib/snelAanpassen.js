@@ -229,10 +229,15 @@ function bevestigingVoorScherm({ bevestigdOp, now = Date.now() } = {}) {
   };
 }
 
-/** De positie van een wijziging in de statische kaart. */
+/**
+ * De positie van een wijziging in de statische kaart. Werkt zowel op de
+ * databaserij (`categorie_index`) als op de publieke overlayvorm
+ * (`categorieIndex`, zie overlayVoorScherm), zodat er één implementatie is.
+ */
 function gerechtSleutel(wijziging) {
-  const categorie = Number(wijziging && wijziging.categorie_index);
-  const gerecht = Number(wijziging && wijziging.gerecht_index);
+  const bron = wijziging || {};
+  const categorie = Number(bron.categorie_index !== undefined ? bron.categorie_index : bron.categorieIndex);
+  const gerecht = Number(bron.gerecht_index !== undefined ? bron.gerecht_index : bron.gerechtIndex);
   if (!Number.isInteger(categorie) || !Number.isInteger(gerecht) || categorie < 0 || gerecht < 0) return null;
   return `${categorie}:${gerecht}`;
 }
@@ -253,7 +258,11 @@ function pasWijzigingToeOpGerecht(item, wijziging) {
     };
   }
   if (wijziging.soort === SOORT_BESCHIKBAARHEID) {
-    const beschikbaar = wijziging.beschikbaar;
+    // De databaserij geeft `beschikbaar`, de publieke overlayvorm alleen het
+    // afgeleide `tijdelijkNietBeschikbaar`. Beide komen hier samen.
+    const beschikbaar = wijziging.beschikbaar === undefined || wijziging.beschikbaar === null
+      ? (wijziging.tijdelijkNietBeschikbaar === true ? false : true)
+      : wijziging.beschikbaar;
     if (beschikbaar === false) return { ...item, tijdelijkNietBeschikbaar: true };
     if (beschikbaar === true) {
       if (!item.tijdelijkNietBeschikbaar) return item;
@@ -270,11 +279,19 @@ function pasWijzigingToeOpGerecht(item, wijziging) {
  * Laatste wijziging per gerecht wint; een wijziging buiten deze kaart of met een
  * onbekende positie wordt genegeerd. Zonder raakvlak komt hetzelfde object
  * terug, zodat een pagina niets onnodigs opnieuw rendert.
+ *
+ * `menuId` (optioneel) beperkt de overlay tot één menukaart: de
+ * categorie/gerecht-indices van een andere kaart mogen nooit op deze kaart
+ * terechtkomen.
  */
-function pasOverlayToe(menu, wijzigingen) {
+function pasOverlayToe(menu, wijzigingen, { menuId = null } = {}) {
   if (!menu || typeof menu !== 'object' || !Array.isArray(menu.categories)) return menu;
+  const gevraagdMenu = tekst(menuId);
   const perGerecht = new Map();
   for (const wijziging of Array.isArray(wijzigingen) ? wijzigingen : []) {
+    if (!wijziging) continue;
+    const vanMenu = tekst(wijziging.menu_id !== undefined ? wijziging.menu_id : wijziging.menuId);
+    if (gevraagdMenu && vanMenu && vanMenu !== gevraagdMenu) continue;
     const key = gerechtSleutel(wijziging);
     if (key) perGerecht.set(key, wijziging);
   }
@@ -320,6 +337,58 @@ function overlayVoorScherm(wijzigingen) {
     });
 }
 
+/**
+ * De gerechten van één kaart voor de houderpagina: positie, categorie, naam,
+ * huidige prijs en of het gerecht nu tijdelijk niet beschikbaar is. Alleen
+ * weergavevelden; de statische kaart blijft de bron.
+ */
+function menuGerechtenVoorScherm(menu) {
+  if (!menu || typeof menu !== 'object' || !Array.isArray(menu.categories)) return [];
+  const rijen = [];
+  menu.categories.forEach((categorie, categorieIndex) => {
+    if (!categorie || !Array.isArray(categorie.items)) return;
+    categorie.items.forEach((item, gerechtIndex) => {
+      if (!item || typeof item !== 'object') return;
+      const cent = parsePrijsCent(item.price);
+      rijen.push({
+        categorieIndex,
+        gerechtIndex,
+        categorie: tekst(categorie.name),
+        naam: tekst(item.name),
+        prijs: tekst(item.price),
+        prijsCent: cent,
+        tijdelijkNietBeschikbaar: item.tijdelijkNietBeschikbaar === true,
+      });
+    });
+  });
+  return rijen;
+}
+
+const STATUS_LABELS = Object.freeze({
+  [STATUS_IN_CONTROLE]: 'In controle',
+  [STATUS_GOEDGEKEURD]: 'Goedgekeurd',
+  [STATUS_AFGEWEZEN]: 'Afgewezen',
+});
+
+/** Wat een wijziging verandert, in één regel: "€ 12,50" of "Tijdelijk niet beschikbaar". */
+function wijzigingSamenvatting(wijziging) {
+  const bron = wijziging || {};
+  if (bron.soort === SOORT_PRIJS) {
+    const cent = Number(bron.prijs_cent !== undefined && bron.prijs_cent !== null ? bron.prijs_cent : bron.prijsCent);
+    return Number.isFinite(cent) ? `Nieuwe prijs: ${formatPrijsCent(cent)}` : 'Nieuwe prijs';
+  }
+  const beschikbaar = bron.beschikbaar === undefined || bron.beschikbaar === null
+    ? (bron.tijdelijkNietBeschikbaar === true ? false : true)
+    : bron.beschikbaar;
+  return beschikbaar === false ? TIJDELIJK_NIET_BESCHIKBAAR_LABEL : 'Weer beschikbaar';
+}
+
+/** Het Nederlandse statuslabel; een onbekende status blijft eerlijk onbekend. */
+function statusLabel(status) {
+  const waarde = tekst(status);
+  return STATUS_LABELS[waarde] || 'Onbekende status';
+}
+
 module.exports = {
   PRIJS_MIN_CENT,
   PRIJS_MAX_CENT,
@@ -358,4 +427,8 @@ module.exports = {
   pasWijzigingToeOpGerecht,
   pasOverlayToe,
   overlayVoorScherm,
+  menuGerechtenVoorScherm,
+  STATUS_LABELS,
+  wijzigingSamenvatting,
+  statusLabel,
 };

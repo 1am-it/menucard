@@ -48,6 +48,7 @@ const {
   beginVanDagAmsterdam,
   formatPrijsCent,
   magWijzigenVandaag,
+  menuGerechtenVoorScherm,
   overlayVoorScherm,
   parsePrijsCent,
   resterendVandaag,
@@ -560,6 +561,48 @@ function createSnelAanpassenHandlers({
     };
   }
 
+  /**
+   * GET /api/v1/menukaart/gerechten?menuId=<id> — de gerechten van de eigen
+   * kaart voor de houderpagina, plus de laatste bevestiging. Alleen positie,
+   * naam en huidige prijs: nooit de volledige dataset en nooit een schrijfactie.
+   */
+  async function menuGerechten(request) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+    const query = queryVan(request);
+    const menuId = tekst(query && (query.get('menuId') || query.get('menu')));
+    const restaurantId = restaurantVan(menuId);
+    if (!restaurantId) return invalid('menu_required', 'Kies eerst een menukaart.');
+    const menu = menus && menus[menuId];
+    if (!menu || !Array.isArray(menu.categories)) {
+      return {
+        status: 404,
+        body: { error: 'menu_niet_gevonden', message: 'Deze menukaart bestaat niet (meer).' },
+      };
+    }
+
+    const houderResult = await houder(request, restaurantId);
+    if (houderResult.response) return houderResult.response;
+
+    const bevestiging = await laadBevestiging(supabase, restaurantId);
+    if (bevestiging.response) return bevestiging.response;
+
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        restaurantId,
+        menuId,
+        menuNaam: tekst(menu.name),
+        gerechten: menuGerechtenVoorScherm(menu),
+        bevestiging: bevestigingVoorScherm({
+          bevestigdOp: bevestiging.rij && bevestiging.rij.bevestigd_op,
+          now: now(),
+        }),
+      },
+    };
+  }
+
   /** POST /api/v1/menukaart/bevestigen — de houder bevestigt zijn kaart. */
   async function bevestigMenukaart(request) {
     const supabase = client();
@@ -816,6 +859,7 @@ function createSnelAanpassenHandlers({
   return {
     diendeWijzigingIn,
     eigenWijzigingen,
+    menuGerechten,
     bevestigMenukaart,
     publiekeOverlay,
     interneLijst,

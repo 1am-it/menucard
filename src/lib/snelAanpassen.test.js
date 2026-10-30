@@ -33,11 +33,14 @@ const {
   isBevestigingGeldig,
   isGroteWijziging,
   magWijzigenVandaag,
+  menuGerechtenVoorScherm,
   overlayVoorScherm,
   parsePrijsCent,
   pasOverlayToe,
   resterendVandaag,
+  statusLabel,
   valideerWijziging,
+  wijzigingSamenvatting,
 } = require('./snelAanpassen');
 
 const MENU = {
@@ -228,4 +231,55 @@ test('BE-58: de publieke overlay bevat alleen weergavevelden', () => {
   ]);
   const velden = Object.keys(scherm[0]).sort();
   assert.deepEqual(velden, ['categorieIndex', 'gerechtIndex', 'gerechtNaam', 'menuId', 'prijs', 'prijsCent', 'soort', 'tijdelijkNietBeschikbaar']);
+});
+
+// â”€â”€â”€ 
+// ─── BE-58 deel 2 (#143): de houderlijst en de publieke labels ───────────────
+
+test('BE-58: de gerechtenlijst van de houder bevat positie, prijs en beschikbaarheid', () => {
+  const rijen = menuGerechtenVoorScherm({
+    categories: [
+      { name: 'Lunch', items: [
+        { name: 'Soep', price: '€ 6,50' },
+        { name: 'Salade', price: '€ 9', tijdelijkNietBeschikbaar: true },
+      ] },
+      { name: 'Diner', items: [{ name: 'Stoofvlees', price: 'op aanvraag' }] },
+    ],
+  });
+
+  assert.equal(rijen.length, 3);
+  assert.deepEqual(rijen[0], {
+    categorieIndex: 0, gerechtIndex: 0, categorie: 'Lunch', naam: 'Soep',
+    prijs: '€ 6,50', prijsCent: 650, tijdelijkNietBeschikbaar: false,
+  });
+  assert.equal(rijen[1].tijdelijkNietBeschikbaar, true);
+  assert.equal(rijen[2].categorieIndex, 1);
+  assert.equal(rijen[2].prijsCent, null);
+});
+
+test('BE-58: zonder kaart geen gerechten', () => {
+  assert.deepEqual(menuGerechtenVoorScherm(null), []);
+  assert.deepEqual(menuGerechtenVoorScherm({}), []);
+  assert.deepEqual(menuGerechtenVoorScherm({ categories: 'geen lijst' }), []);
+});
+
+test('BE-58: statuslabels en de samenvatting van een wijziging', () => {
+  assert.equal(statusLabel('in_controle'), 'In controle');
+  assert.equal(statusLabel('goedgekeurd'), 'Goedgekeurd');
+  assert.equal(statusLabel('afgewezen'), 'Afgewezen');
+  assert.equal(statusLabel('iets-anders'), 'Onbekende status');
+
+  assert.equal(wijzigingSamenvatting({ soort: 'prijs', prijsCent: 1250 }), 'Nieuwe prijs: €12,50');
+  assert.equal(
+    wijzigingSamenvatting({ soort: 'beschikbaarheid', beschikbaar: false }),
+    TIJDELIJK_NIET_BESCHIKBAAR_LABEL,
+  );
+  assert.equal(wijzigingSamenvatting({ soort: 'beschikbaarheid', beschikbaar: true }), 'Weer beschikbaar');
+});
+
+test('BE-58: de overlayvorm met camelCase-posities werkt op dezelfde manier', () => {
+  const menu = { categories: [{ items: [{ name: 'Soep', price: '€ 6,50' }] }] };
+  const uit = pasOverlayToe(menu, [{ categorieIndex: 0, gerechtIndex: 0, soort: 'prijs', prijsCent: 700 }], { menuId: '9-lunch' });
+  assert.equal(uit.categories[0].items[0].price, '€7');
+  assert.equal(menu.categories[0].items[0].price, '€ 6,50');
 });

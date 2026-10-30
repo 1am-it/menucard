@@ -15,7 +15,7 @@ import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 // BE-42 (#98) 2A — de hele kaart van het actieve tabblad is exact dezelfde
 // opbouw als op /menu/<id> (src/components/MenuBody.js). Geen tweede
 // weergave van gerechten.
-import { StaticMenu } from '@/src/components/MenuBody'
+import { StaticMenu, MenuConfirmation } from '@/src/components/MenuBody'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -29,7 +29,7 @@ function getTodayKey() {
   return map[new Date().getDay()]
 }
 
-export default function RestaurantDetailView({ id, restaurant, menus }) {
+export default function RestaurantDetailView({ id, restaurant, menus, bevestiging = null }) {
   const todayKey = getTodayKey()
   const [activeDay, setActiveDay] = useState(todayKey)
   // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
@@ -80,6 +80,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
               <div className="detail-badge"><EmojiText value={restaurant.badge} /></div>
             )}
             <h1 className="detail-name">{restaurant.name}</h1>
+            <MenuConfirmation bevestiging={bevestiging} />
             <div className="detail-cuisine">{restaurant.cuisineLabel || restaurant.cuisine}</div>
 
             <p className="detail-desc">{restaurant.description}</p>
