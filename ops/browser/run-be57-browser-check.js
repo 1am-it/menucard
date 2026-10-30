@@ -336,12 +336,25 @@ async function measureFraming(wantTitle) {
 /**
  * De kop zelf: hoe hoog is hij, welk nav-landmark is zichtbaar, en begint de
  * inhoud onder de kop in plaats van eronder te verdwijnen?
+ *
+ * Eerst echt naar boven scrollen en even wachten: met `scroll-behavior: smooth`
+ * uit app/globals.css meet je anders nog de oude scrollpositie en zegt de
+ * uitkomst niets over de bovenkant van de pagina.
  */
 async function measureHeader() {
+  await evalJs(
+    cdp,
+    `(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      return true;
+    })()`,
+  );
+  await sleep(300);
   return evalJs(
     cdp,
     `(() => {
-      window.scrollTo(0, 0);
       const header = document.querySelector('.site-header');
       const box = header ? header.getBoundingClientRect() : null;
       const navs = [...document.querySelectorAll('nav')]
@@ -355,6 +368,7 @@ async function measureHeader() {
       const first = document.querySelector('.owner-main > *');
       const firstBox = first ? first.getBoundingClientRect() : null;
       return {
+        scrollY: Math.round(window.scrollY),
         headerHeight: box ? Math.round(box.height) : null,
         headerBottom: box ? Math.round(box.bottom) : null,
         position: header ? getComputedStyle(header).position : null,
