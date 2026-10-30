@@ -101,16 +101,19 @@ test('open work has the contract order and the contract labels, each with its re
   );
 });
 
-test('below the separating line: Stadsoverzicht (was Bronwerkvoorraad) and Restaurantgegevens (concept) (was Profielconcepten), routes and ids unchanged, never counted', () => {
+test('below the separating line: Stadsoverzicht (was Bronwerkvoorraad), Restaurantgegevens (concept) (was Profielconcepten) and Tellers (BE-45), routes and ids unchanged, never counted', () => {
   const secondary = INTERNAL_MODULES.filter((m) => m.placement === 'secondary');
   assert.deepEqual(
     secondary.map((m) => [m.id, m.label, m.href]),
     [
       ['source-workqueue', 'Stadsoverzicht', '/internal/source-workqueue'],
       ['profile-drafts', 'Restaurantgegevens (concept)', '/internal/profile-drafts'],
+      ['tellers', 'Tellers', '/internal/tellers'],
     ],
   );
   for (const module of secondary) assert.ok(!('countKey' in module), `${module.id} must never show a count`);
+  const tellers = secondary.find((m) => m.id === 'tellers');
+  assert.equal(tellers.requiredRole, 'internal', 'BE-45: only the internal role sees Tellers');
 });
 
 test('every module keeps an existing internal route, a non-empty label, a recognized role and a recognized placement', () => {
@@ -133,13 +136,17 @@ test('every open-work entry carries a subtitle for the menu; a module without a 
   assert.deepEqual([primary, openWork, secondary], [[], [], []]);
 });
 
-test('resolveVisibleModules: an internal-only account sees Dekking, the three internal open-work sections and the two secondary ones — not Beoordelen', () => {
+test('resolveVisibleModules: an internal-only account sees Dekking, the three internal open-work sections and the three secondary ones — not Beoordelen', () => {
   const ids = resolveVisibleModules([{ role: 'internal' }]).map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'profile-drafts', 'source-triage', 'source-workqueue', 'tellers']);
 });
 
 test('resolveVisibleModules: an editor-only account sees exactly Beoordelen (moderation)', () => {
   assert.deepEqual(resolveVisibleModules([{ role: 'editor' }]).map((m) => m.id), ['moderation']);
+  // BE-45 (#114): Tellers staat niet in de navigatie van een editor of owner.
+  assert.ok(!resolveVisibleModules([{ role: 'editor' }]).some((m) => m.id === 'tellers'));
+  assert.ok(!resolveVisibleModules([{ role: 'owner', restaurant_id: '6' }]).some((m) => m.id === 'tellers'));
+  assert.deepEqual(groupModulesByPlacement(resolveVisibleModules([{ role: 'owner' }])), { primary: [], openWork: [], secondary: [] });
 });
 
 test('resolveVisibleModules: an owner-only account and a role-less account see zero modules — no invented destination', () => {
@@ -150,7 +157,7 @@ test('resolveVisibleModules: an owner-only account and a role-less account see z
 
 test('resolveVisibleModules: a multi-role (internal + editor) account sees the full union, not one role\'s subset', () => {
   const ids = resolveVisibleModules([{ role: 'internal' }, { role: 'editor' }]).map((m) => m.id).sort();
-  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'moderation', 'profile-drafts', 'source-triage', 'source-workqueue']);
+  assert.deepEqual(ids, ['coverage', 'import-inbox', 'menu-concepts', 'moderation', 'profile-drafts', 'source-triage', 'source-workqueue', 'tellers']);
 });
 
 test('onboarding-menu stays out of the shared nav for every role (route and deep links untouched)', () => {
@@ -167,7 +174,7 @@ test('groupModulesByPlacement: splits the role-filtered list into primary, open 
   const { primary, openWork, secondary } = groupModulesByPlacement(modules);
   assert.deepEqual(primary.map((m) => m.id), ['coverage']);
   assert.deepEqual(openWork.map((m) => m.id), ['menu-concepts', 'source-triage', 'import-inbox', 'moderation']);
-  assert.deepEqual(secondary.map((m) => m.id), ['source-workqueue', 'profile-drafts']);
+  assert.deepEqual(secondary.map((m) => m.id), ['source-workqueue', 'profile-drafts', 'tellers']);
 });
 
 test('groupModulesByPlacement: never throws and returns empty groups for non-array input', () => {
@@ -383,8 +390,11 @@ test('structural safety net (criterion 5): the trigger, every menu row, the add 
 });
 
 test('structural safety net (criterion 5): at 640 px and below the bar keeps Dekking, Werk (N) and a + button, and the menu gets Licht/Donker + Sign out at the bottom', () => {
-  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8');
-  const start = css.lastIndexOf('@media (max-width: 640px)');
+  // BE-45 (#114) adds a second 640 px block at the end of app/globals.css for the
+  // Tellers page, so this safety net finds the navigation block by its own first
+  // rule instead of "the last 640 px block in the file".
+  const css = fs.readFileSync(GLOBALS_CSS_PATH, 'utf8').replace(/\r\n/g, '\n');
+  const start = css.lastIndexOf('@media (max-width: 640px) {\n  .internal-nav {');
   assert.ok(start >= 0, 'expected the 640 px telephone breakpoint (covers 390 and 320)');
   const block = css.slice(start, css.indexOf('\n}', start) + 2);
   assert.match(block, /\.internal-nav-workqueue-title-full \{ display: none; \}/);

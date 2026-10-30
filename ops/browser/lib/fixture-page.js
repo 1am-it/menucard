@@ -29,6 +29,17 @@ const NAV62_COUNTS = Object.freeze({
   moderation: 1,
 });
 
+// BE-45 (#114): fictional teller rows for the Tellers screen. Two real-looking
+// dish keys and one key that no longer exists in the fixture menus, so the
+// browser can prove the honest "onbekend gerecht" row. Only numbers, never an
+// identity — exactly the shape the real API returns.
+const BE45_TELLERS_ROWS = Object.freeze([
+  { dishKey: '7-diner-0-0', gerecht: 'Stoofvlees met friet', restaurant: 'Fictief Restaurant', restaurantId: '7', gedeeld: 12, bewaard: 5, reserveren: 3, href: '/menu/7-diner?dish=7-diner-0-0&name=Stoofvlees+met+friet&cat=Hoofdgerechten', onbekend: false },
+  { dishKey: '8-lunch-1-0', gerecht: 'Tosti ham-kaas', restaurant: 'Fictief Lunchcafé', restaurantId: '8', gedeeld: 7, bewaard: 2, reserveren: 0, href: '/menu/8-lunch?dish=8-lunch-1-0&name=Tosti+ham-kaas&cat=Lunchgerechten', onbekend: false },
+  { dishKey: '7-diner-0-1', gerecht: 'Vegetarische lasagne', restaurant: 'Fictief Restaurant', restaurantId: '7', gedeeld: 4, bewaard: 9, reserveren: 1, href: '/menu/7-diner?dish=7-diner-0-1&name=Vegetarische+lasagne&cat=Hoofdgerechten', onbekend: false },
+  { dishKey: '8-lunch-9-9', gerecht: '8-lunch-9-9', restaurant: 'Fictief Lunchcafé', restaurantId: '8', gedeeld: 2, bewaard: 1, reserveren: 1, href: null, onbekend: true },
+]);
+
 function fixtureBootstrap(scenarios, options = {}) {
   const config = {
     appOrigins: options.appOrigins,
@@ -135,6 +146,7 @@ function fixtureBootstrap(scenarios, options = {}) {
     }
     const fixtureState = { manualStep: 0, manualState: 0, aiRead: false };
     const navCounts = ${JSON.stringify(NAV62_COUNTS)};
+    const tellersRows = ${JSON.stringify(BE45_TELLERS_ROWS)};
     // #59 variant 5: which fictional API routes the screen actually called, so
     // the browser check can prove that a card page is only fetched on request.
     const calls = (window.__FIXTURE_CALLS__ = window.__FIXTURE_CALLS__ || []);
@@ -160,6 +172,24 @@ function fixtureBootstrap(scenarios, options = {}) {
         return jsonResponse({ counts: navCounts });
       }
       if (verdict.routeId === 'batch-analysis-process') return jsonResponse({ outcome: 'done' });
+      // BE-45 (#114): de tellertabel. De queryparameter tellers=leeg geeft een
+      // lege periode en tellers=fout de nette foutstaat; de periode komt uit het
+      // verzoek zelf, zodat de browser kan zien dat een periodeknop echt opnieuw
+      // vraagt. (Geen backticks in dit commentaar: dit is een template-string.)
+      if (verdict.routeId === 'tellers') {
+        const tellersUrl = new URL(verdict.url, 'http://localhost');
+        const periode = tellersUrl.searchParams.get('periode') || '7';
+        if (params.get('tellers') === 'fout') {
+          return jsonResponse({ error: 'Tellers zijn nu niet beschikbaar.' }, 503);
+        }
+        const rows = params.get('tellers') === 'leeg' ? [] : tellersRows;
+        const totalen = rows.reduce((sum, row) => ({
+          gedeeld: sum.gedeeld + row.gedeeld,
+          bewaard: sum.bewaard + row.bewaard,
+          reserveren: sum.reserveren + row.reserveren,
+        }), { gedeeld: 0, bewaard: 0, reserveren: 0 });
+        return jsonResponse({ periode, totalen, rijen: rows, aantalGerechten: rows.length });
+      }
       if (typeof verdict.routeId === 'string' && verdict.routeId.indexOf('manual-') === 0) {
         const scenario = fixtures[fixture];
         const manual = scenario && scenario.manual;

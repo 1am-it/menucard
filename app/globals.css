@@ -5455,6 +5455,182 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
   outline-offset: 2px;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   BE-45 — Tellers in het interne beheer (issue 114). Presentatie alleen; de
+   rekenregels staan in src/lib/dishCounterReport.js. Alle kleuren, randen,
+   vlakken en radii komen uit de tokens hierboven, dus licht en donker werken
+   zonder eigen regels (zelfde uitgangspunt als de rest van .di-*).
+   Sorteerbare koppen zijn echte knoppen met aria-sort op de th; op een breed
+   scherm een tabel, op een telefoon dezelfde rijen als lijst met een keuze.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.tellers-periods { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.tellers-period {
+  min-height: 44px;
+  padding: 8px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.tellers-period:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.tellers-period[aria-pressed="true"] {
+  background: var(--accent-surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tellers-period:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+.tellers-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.tellers-totals { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 20px; }
+.tellers-total {
+  flex: 1 1 140px;
+  min-width: 140px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+}
+.tellers-total-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.tellers-total-value {
+  margin: 2px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tellers-status,
+.tellers-empty,
+.tellers-note {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 16px 0;
+}
+.tellers-note { font-size: 12px; }
+
+
+/* Desktop: the table. The phone list is display: none, so it is never in the
+   accessibility tree or the tab order on a wide screen. */
+.tellers-table-wrap { overflow-x: auto; }
+.tellers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 13px;
+}
+.tellers-caption {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+  padding: 0 0 6px;
+}
+.tellers-table th,
+.tellers-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.tellers-table thead th {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+.tellers-table tbody tr:last-child td { border-bottom: none; }
+.tellers-table tbody tr:hover { background: var(--bg-hover); }
+.tellers-table .tellers-col-number { text-align: right; font-variant-numeric: tabular-nums; }
+.tellers-table .tellers-col-restaurant { color: var(--text-secondary); }
+
+.tellers-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  min-height: 32px;
+  cursor: pointer;
+}
+.tellers-sort:hover { color: var(--accent); }
+.tellers-sort:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.tellers-sort-arrow { font-size: 11px; color: var(--accent); }
+.tellers-table th[aria-sort="none"] .tellers-sort-arrow { color: var(--text-secondary); }
+.tellers-col-number .tellers-sort { flex-direction: row-reverse; }
+
+.tellers-dish-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.tellers-dish-link:hover { border-bottom-color: var(--accent); }
+.tellers-dish-link:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+.tellers-dish-unknown { display: inline-flex; flex-direction: column; gap: 2px; }
+.tellers-dish-key { font-weight: 600; color: var(--text-secondary); }
+.tellers-dish-unknown-label { font-size: 11px; color: var(--text-secondary); font-style: italic; }
+
+/* Phone only: the list. */
+.tellers-list { display: none; }
+.tellers-sort-choice { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tellers-sort-choice label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+.tellers-sort-choice .di-select { flex: 1 1 auto; min-height: 44px; }
+.tellers-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tellers-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+}
+.tellers-card-name { font-size: 15px; font-weight: 700; }
+.tellers-card-restaurant { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.tellers-card-numbers {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.tellers-card-numbers dt { font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.4px; }
+.tellers-card-numbers dd { margin: 2px 0 0; font-size: 16px; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .tellers-table-wrap { display: none; }
+  .tellers-list { display: block; }
+  .tellers-total { flex: 1 1 100px; min-width: 100px; padding: 10px 12px; }
+  .tellers-total-value { font-size: 20px; }
+}
+
 
 /* ── BE-48 (issue 112): inloggen, tweede stap en wachtwoord vergeten ─────────
    The four internal auth screens (login, code from the app, link an app,

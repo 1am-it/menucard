@@ -62,6 +62,9 @@ const FIXTURE_API_ROUTES = [
   // with one unavailable number and ?countsState=error refuses the whole call,
   // so the check can prove that no number (and certainly not 0) is invented.
   { id: 'workqueue-counts', match: 'exact', path: '/api/internal/v1/workqueue-counts', methods: ['GET'] },
+  // BE-45 (#114): de tellertabel. Alleen de leesroute; elke schrijfactie blijft
+  // onbekend en wordt dus geweigerd.
+  { id: 'tellers', match: 'exact', path: '/api/internal/v1/tellers', methods: ['GET'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];

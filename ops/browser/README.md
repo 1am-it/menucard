@@ -745,6 +745,34 @@ sms app, or a private-mode failure. The approved mockup is an external artifact;
 the screenshots are for the visual comparison by the Lead or the owner.
 Developer evidence on a local build — not production, not independent review.
 
+
+## BE-45 (#114) — the counter table in the internal admin
+
+`run-be45-browser-check.js` (also `npm run test:browser:be45`) starts its own
+local dev server and headless browser through the shared runtime and drives the
+real `/internal/tellers` page with a fictional session and fictional teller rows
+(`ops/browser/lib/fixture-page.js`, route `tellers` in
+`ops/browser/lib/network-policy.js`). Scenarios, each a named step:
+
+- `desktop` (1280, light and dark): the three period buttons with `aria-pressed`
+  (7 dagen active by default), the three totals, the five column headers as real
+  buttons with `aria-sort`, the default "Gedeeld, aflopend" order, a real re-sort
+  on "Bewaard", a period change that reloads, the dish name as a public deep link
+  and the unknown key with "onbekend gerecht" and no link;
+- `mobiel` (390 light, 390 dark, 320 light): the table is replaced by the list
+  with a single sort choice (column + direction) that really re-orders it, the
+  same four dishes, 44 px targets and no horizontal overflow;
+- `leeg`: `?tellers=leeg` — "Nog geen tellingen in deze periode.", zero totals,
+  no table, light and dark;
+- `fout`: `?tellers=fout` (a 503 from the fixture) — "Tellers zijn nu niet
+  beschikbaar.", no table and no invented 0.
+
+Ten small screenshots stay in `ops/browser/evidence/be-45/` (in git), the
+record in `ops/browser/evidence/be45-browser-evidence.json` (a filtered run
+writes `*.filtered.json`, which is git-ignored). The approved mockup is an
+external Claude artifact this check cannot fetch; the screenshots are for the
+Lead/owner visual comparison. Fixture evidence on a local build — not a real
+Supabase table, not production and not independent review.
 ## BE-48 internal sign-in with a second step (#112)
 
 `run-be48-browser-check.js` drives the real `/internal/login` and the new

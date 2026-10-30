@@ -130,6 +130,15 @@ const WORKQUEUE_ICONS = {
       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
   ),
+  // BE-45 (#114): de tellers — een eenvoudige staafgrafiek, geen beeldmerk.
+  tellers: (
+    <svg {...iconProps}>
+      <path d="M3 3v18h18" />
+      <path d="M8 17v-5" />
+      <path d="M13 17V7" />
+      <path d="M18 17v-8" />
+    </svg>
+  ),
 };
 
 
