@@ -87,7 +87,7 @@ naar 6591 regels en parallelle PR's botsten bij elke merge. Daarom:
 - Kleuren altijd via de bestaande tokens. Geen CSS-modules en geen nieuwe
   klassennamen voor bestaande blokken.
 - De bewaker `app/globals-css.test.js` faalt als `app/globals.css` meer dan 40
-  regels groeit boven het vastgezette aantal (5807) of als een verplaatst
+  regels groeit boven het vastgezette aantal (5806) of als een verplaatst
   klasseblok ergens anders opduikt. Verhoog dat aantal alleen bewust, met een
   reden in de commit — niet stilzwijgend met een nieuw blok onderaan.
 

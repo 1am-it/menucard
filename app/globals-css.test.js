@@ -24,10 +24,10 @@ const { test } = require('node:test');
 const ROOT = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\r\n/g, '\n');
 
-// Vastgezet na de verhuizing van BE-52 (30 okt): 5807 regels. De 40 regels
+// Vastgezet na de verhuizing van BE-52 (30 okt): 5806 regels. De 40 regels
 // ruimte zijn voor een kleine, echt gedeelde aanvulling; nieuwe opmaak voor één
 // pagina hoort naast de pagina.
-const GLOBALS_LINES = 5807;
+const GLOBALS_LINES = 5806;
 const BUDGET = 40;
 
 // Wat er verhuisd is, met het bestand waar het nu staat en de code die het
