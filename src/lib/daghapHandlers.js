@@ -391,7 +391,13 @@ function createDaghapHandlers({
     const rij = rijUit(geschreven);
     if (!rij) return failed();
     const geschiedenis = await schrijfGeschiedenis(supabase, { rij, actie: 'geplaatst', door: auth.userId });
-    if (geschiedenis.response) return geschiedenis.response;
+    if (geschiedenis.response) {
+      // Geen geschiedenis betekent geen plaatsing: elke plaatsing moet bewaard
+      // blijven, dus halen we de zojuist geschreven rij weer weg. Anders staat
+      // er aanbod online dat niemand kan herleiden.
+      await ask(supabase.from(DAGHAP_TABLE_AANBOD).delete().eq('id', rij.id));
+      return geschiedenis.response;
+    }
 
     return bewaard(rij, {
       status: 201,

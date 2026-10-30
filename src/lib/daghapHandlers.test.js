@@ -84,7 +84,7 @@ function daghapBody(overrides = {}) {
  * meer tabellen ontbreken (42P01), precies de fout van een nog niet toegepaste
  * 0023.
  */
-function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, rpcResult = 2, rpcError = null } = {}) {
+function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
   const tables = {
     [DAGHAP_TABLE_AANBOD]: aanbod.map((rij) => aanbodRij(rij)),
     [DAGHAP_TABLE_GEBEURTENISSEN]: gebeurtenissen.map((rij, index) => ({ gebeurtenis_id: index + 1, ...rij })),
@@ -131,6 +131,9 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id
     }
 
     if (query.action === 'insert') {
+      if (failingInsert.includes(query.table)) {
+        return Promise.resolve({ data: null, error: { code: '23514', message: 'insert geweigerd' } });
+      }
       const rij = { ...query.payload };
       if (query.table === DAGHAP_TABLE_AANBOD) {
         const botsing = rijen.some((bestaand) => bestaand.restaurant_id === rij.restaurant_id
@@ -154,6 +157,12 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id
       return Promise.resolve({ data: one ? gevonden[0] || null : gevonden, error: null });
     }
 
+    if (query.action === 'delete') {
+      const verwijderd = rijen.filter((rij) => query.filters.every((filter) => past(rij, filter)));
+      for (const rij of verwijderd) rijen.splice(rijen.indexOf(rij), 1);
+      return Promise.resolve({ data: null, error: null });
+    }
+
     return Promise.resolve({ data: null, error: { message: 'onbekende actie' } });
   }
 
@@ -172,6 +181,7 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], eigenaren = [{ user_id
       order(kolom, { ascending = true } = {}) { query.order = { kolom, oplopend: ascending }; return query; },
       insert(rij) { query.action = 'insert'; query.payload = Array.isArray(rij) ? rij[0] : { ...rij }; return query; },
       update(patch) { query.action = 'update'; query.payload = { ...patch }; return query; },
+      delete() { query.action = 'delete'; return query; },
       single() { return execute(query, true); },
       maybeSingle() { return execute(query, true); },
       then(onFulfilled, onRejected) { return execute(query, false).then(onFulfilled, onRejected); },
@@ -531,6 +541,18 @@ test('BE-55: zonder de migratie antwoordt elke route 503 en blijft de app werken
   });
   assert.equal((await zonderClient.plaatsAanbod(request(daghapBody()))).status, 503);
   assert.equal((await zonderClient.ruimVerlopenOp()).status, 503);
+});
+
+test('BE-55: geen geschiedenis betekent geen plaatsing', async () => {
+  // De geschiedenistabel weigert de insert: dan mag het aanbod er niet blijven
+  // staan, want elke plaatsing moet te herleiden zijn.
+  const client = fakeSupabase({ failingInsert: [DAGHAP_TABLE_GEBEURTENISSEN] });
+  const resultaat = await handlersFor(client).plaatsAanbod(request(daghapBody()));
+
+  assert.equal(resultaat.status, 500);
+  assert.equal(resultaat.body.error, 'daghap_failed');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD].length, 0, 'de rij is weer weggehaald');
+  assert.equal(geschiedenis(client).length, 0);
 });
 
 test('BE-55: de opruiming roept de functie uit 0023 aan', async () => {
