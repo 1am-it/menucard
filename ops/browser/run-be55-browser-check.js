@@ -477,6 +477,10 @@ async function main() {
       // De in-page stub antwoordt zelf; de guard moet de route alleen toestaan.
       fixtureRoutes: [
         { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET', 'POST'] },
+        // BE-57 (#139): de anonieme bezoekteller die de publieke pagina's na het
+        // laden één keer per sessie afvuren. Alleen deze ene schrijfroute komt
+        // erbij; alle andere schrijfacties blijven onbekend en geweigerd.
+        { id: 'bekeken', match: 'exact', path: '/api/v1/bekeken', methods: ['POST'] },
         // BE-55 deel 5 (#135): het zoekresultaat met label en filter, en de
         // restaurantgroep die de zoekpagina zelf ook ophaalt.
         { id: 'zoeken', match: 'prefix', path: '/api/search', methods: ['GET'] },

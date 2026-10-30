@@ -1,15 +1,15 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T22:20:24.324Z",
-  "port": 3195,
+  "startedAt": "2026-10-30T23:41:20.808Z",
+  "port": 3186,
   "scenarioRuns": [
     {
       "name": "vandaag",
       "checks": 109,
       "passed": 109,
       "failed": 0,
-      "durationMs": 29356,
+      "durationMs": 39516,
       "error": null
     },
     {
@@ -17,7 +17,7 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 5026,
+      "durationMs": 10387,
       "error": null
     },
     {
@@ -25,7 +25,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 28605,
+      "durationMs": 24096,
       "error": null
     },
     {
@@ -33,7 +33,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 40186,
+      "durationMs": 21690,
       "error": null
     }
   ],
@@ -615,22 +615,22 @@
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"},{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"}]"
+      "detail": "[{\"apparaat\":\"23917c8c382dbd03f62d09f7\"},{\"apparaat\":\"23917c8c382dbd03f62d09f7\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"12d0ec2e50d12db6d83d5d0c\"}"
+      "detail": "{\"apparaat\":\"23917c8c382dbd03f62d09f7\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "12d0ec2e50d12db6d83d5d0c"
+      "detail": "23917c8c382dbd03f62d09f7"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "12d0ec2e50d12db6d83d5d0c"
+      "detail": "23917c8c382dbd03f62d09f7"
     },
     {
       "name": "zoeken light/1280: het thema is toegepast",
@@ -1161,7 +1161,7 @@
   "shots": [
     {
       "file": "be55-vandaag-restaurant-1280-light.png",
-      "sha256": "74a7daf88a0f34ae750da7a70659056d95d10857209cbc0adf40a57b316245e0",
+      "sha256": "7c3bc965c263faa41aaa3bdb20b5cee47340f608d2f81328ce6da6f6a3c0341b",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1188,7 +1188,7 @@
     },
     {
       "file": "be55-vandaag-restaurant-1280-dark.png",
-      "sha256": "c7545088b2dd9fa4033fa3e21108b9f4b4ad0616de0bc86c09d7e7270154b58a",
+      "sha256": "3ff40fa5df970891dd852f41c22481fd10ebf17b49ba1d2d7fc986e374e66429",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1215,7 +1215,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-light.png",
-      "sha256": "302824464151f6fe50599ef914e9fe45457ea16dbe5aff81461f9bed285e7819",
+      "sha256": "b100707b576f1caf11c21ce4b26ae03c1307772065d08bd2d5d9fc7a4d8b5b13",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1224,7 +1224,7 @@
     },
     {
       "file": "be55-vandaag-menu-1280-dark.png",
-      "sha256": "553db7a87ef90836e425b7efb663b042e1e630ed6fa7d0a803b35ff268bd0796",
+      "sha256": "2801b7e5b9d50dc521521f6948de8df4d6043bfdfe02327c9e633226f7a358a3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1233,7 +1233,7 @@
     },
     {
       "file": "be55-vandaag-leeg-390-light.png",
-      "sha256": "46d847b84ea417bcbc99078047f05ff388ff1a6f0d368824a95b7126ac4911a8",
+      "sha256": "2942ed117f9accc4e66df696920b4d8038cbbc3523b7b0d0ad307a258e3c0914",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1296,7 +1296,7 @@
     },
     {
       "file": "be55-zoeken-320-dark.png",
-      "sha256": "b038f27f27668334660ef159775ef628d98a406bbe09692547b1507e56222314",
+      "sha256": "b9823c84a0c6d476036adc9a947f9511605e5c7c84a79f5f562db54275b20ac5",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1305,7 +1305,7 @@
     },
     {
       "file": "be55-zoeken-filter-aan-390-dark.png",
-      "sha256": "15f5c37b60ef8de80bae5ea193a3085555b29a39db750e2b497a62d71c067820",
+      "sha256": "a3d4f6d5b7902341729d8b1fe6c5c69a119e15cab6d09867030896e2d47ec1d9",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1314,7 +1314,7 @@
     },
     {
       "file": "be55-home-daghappen-1280-light.png",
-      "sha256": "b82e260c1f81fb79fea5638de47a7f1fe3f7fc83b177b3ff4beec3078132e04f",
+      "sha256": "264723a7a1ef89f94316abb8717c018081f09ed58209a9a3e7f0064b26978b56",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1341,7 +1341,7 @@
     },
     {
       "file": "be55-home-daghappen-1280-dark.png",
-      "sha256": "701770164e6b256af9d17870c3fcfbc8303bb45b3ae96a4802b98282ed654026",
+      "sha256": "1ca36a9ec070a2e842757c3a79d2dffed90d2d869521ad27bed2acfc6dc23a56",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
