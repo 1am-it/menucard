@@ -20,7 +20,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 /** Het BE-51-blok onderaan globals.css, zodat een regel elders niet telt. */
 const be51Block = () => {
   const css = read('app/globals.css');
-  const start = css.indexOf('BE-51 (#121) — toegankelijkheid van de publieke pagina');
+  const start = css.indexOf('BE-51 (issue 121) — toegankelijkheid van de publieke pagina');
   assert.ok(start > 0, 'verwacht het BE-51-blok in app/globals.css');
   return css.slice(start);
 };
@@ -57,4 +57,15 @@ test('de restaurantpagina houdt zijn kopknoppen in een klasse die mag wrappen', 
   assert.match(source, /<div className="header-actions">/);
   assert.doesNotMatch(source, /style=\{\{ display: 'flex', gap: 8, alignItems: 'center' \}\}/);
   assert.match(be51Block(), /\.header-actions \{[^}]*flex-wrap: wrap/);
+});
+
+test('de twee kleine tekstlinks hebben een echt tikdoel', () => {
+  const block = be51Block();
+  // De naam in een zoekresultaat: een vol tikvlak van 44 px.
+  assert.match(
+    block,
+    /\.dish-result-card-row \.dish-group-example-link \{\s*display: inline-flex;\s*align-items: center;\s*min-height: 44px;/
+  );
+  // De restaurantnaam op "Alle restaurants": 24 px met vrije ruimte eromheen.
+  assert.match(block, /\.ar-name-link \{\s*display: inline-flex;\s*align-items: center;\s*min-height: 24px;/);
 });

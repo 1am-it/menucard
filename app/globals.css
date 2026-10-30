@@ -5861,7 +5861,7 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   BE-51 (#121) — toegankelijkheid van de publieke pagina's
+   BE-51 (issue 121) — toegankelijkheid van de publieke pagina's
    Alleen tokens, semantiek en ARIA: geen nieuwe kleuren, geen herontwerp.
    Wat hier staat is gevonden door ops/browser/run-a11y-public-check.js en per
    punt in beide thema's opnieuw gemeten.
@@ -5938,6 +5938,22 @@ a.internal-nav-home { min-width: 44px; min-height: 44px; }
 /* 2e. De vaste "Mijn lijstje"-balk is gecentreerd en stond op één regel; bij
    200% tekst werd hij breder dan het venster en duwde hij de pagina opzij. */
 .saved-list-bar { max-width: calc(100% - 24px); white-space: normal; justify-content: center; }
+
+/* 3. Tikdoelen (criterium 1, "≥ 44 px, of 24 px met voldoende ruimte"). Twee
+   tekstlinks in een lijst hadden alleen de regelhoogte als doel. De naam in een
+   zoekresultaat krijgt een vol tikvlak van 44 px; de restaurantnaam op "Alle
+   restaurants" 24 px, met vrije ruimte eromheen — wat het criterium toestaat.
+   De rest van de kaart blijft ongewijzigd. */
+.ar-name-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+.dish-result-card-row .dish-group-example-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
 
 @media (max-width: 720px) {
   .home-tile-grid { grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr)); }
