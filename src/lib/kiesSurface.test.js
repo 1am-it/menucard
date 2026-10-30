@@ -46,6 +46,7 @@ const START_BUTTON = read('src/components/KiesStartButton.js');
 const SHARE_BUTTON = read('src/components/KiesShareButton.js');
 const LIST_VIEW = read('app/mijn-lijstje/MijnLijstjeView.js');
 const CSS = read('app/globals.css');
+const BROWSER_CHECK = read('ops/browser/run-be46-browser-check.js');
 
 test('kies: vier routes met de methoden uit het contract, elk zonder cache', () => {
   assert.match(CREATE_ROUTE, /export async function POST\(request\)/);
@@ -184,6 +185,22 @@ test('kies: de voorvertoning is "Kies mee: <n> gerechten" in de stijl van BE-44'
   assert.match(IMAGE, /shareThemeFor\(url\.searchParams\.get\('stand'\)\)/);
   assert.match(IMAGE, /width: 1200, height: 630/);
   assert.equal(STEMS.match(/const KIES_IMAGE_PREFIX = '([^']+)'/)[1], 'Kies mee:');
+});
+
+test('kies: de browsercheck wacht op de clientkant en leest de stemmen vóór de herlaadbeurt', () => {
+  // Twee fouten die de eerste volledige run lieten zakken (30 oktober): de check
+  // las de SSR-tekst "Bezig…" nog voordat React werkte, en las de gestubde
+  // oproepen pas na een herlaadbeurt (waarna de stub leeg begint).
+  assert.match(BROWSER_CHECK, /const HYDRATED = `Boolean\(\(window\.__KIES_CALLS__ \|\| \[\]\)\.length\)`;/);
+  assert.match(BROWSER_CHECK, /const PAGE_READY = `\$\{HYDRATED\} && Boolean\(document\.querySelector\('#kies-roepnaam'\)/);
+  assert.match(BROWSER_CHECK, /async function openFresh\(cdp, query = ''\) \{\n {2}await navigate\(cdp, PAGE_URL\(query\), HYDRATED\);/);
+  assert.match(BROWSER_CHECK, /async function warmUp\(cdp\) \{[\s\S]*?await waitFor\(cdp, PAGE_READY, 120000\);/);
+  const calls = BROWSER_CHECK.indexOf('const calls = await callsOf(cdp);');
+  const reload = BROWSER_CHECK.indexOf("await cdp.send('Page.reload', { ignoreCache: false });\n  const reopened");
+  assert.ok(calls > 0 && reload > 0 && calls < reload, 'de stemmen worden vóór de herlaadbeurt gelezen');
+  // De route van maken tot uitslag is een eigen scenario, met de gedeeld-teller.
+  assert.match(BROWSER_CHECK, /\{ name: 'maken', run: \(cdp\) => createScenario\(cdp\) \}/);
+  assert.match(BROWSER_CHECK, /window\.__KIES_TELLERS__/);
 });
 
 test('kies: privacy — geen ip, user agent, cookie of account, en geen nieuwe dependency', () => {
