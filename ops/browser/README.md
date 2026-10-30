@@ -876,6 +876,36 @@ database, the migration 0022 and the real counter table are not involved, and
 the approved mockup (an external Claude artifact) can only be compared by the
 Lead or the owner against these screenshots. This is not acceptance.
 
+## BE-53 (#130) — menukopje wijzigen in "Beoordeel menuconcept"
+
+`node ops/browser/run-be53-browser-check.js` (of
+`npm run test:browser:be53`; `--lijst` toont het scenario `wijzigen`, `--alleen`
+draait alleen dat scenario) start de echte app met `next dev` op poort 3193
+(`BROWSER_FIXTURE_PORT`) en bestuurt een lokaal geïnstalleerde Edge/Chrome via
+CDP. De fixture `concepts-section-rename` bevat één fictief concept met het
+kopje "Proef het beste van het seizoen — Hoofd"; versie 2 wordt met dezelfde
+pure regel (`renameSectionEdits`) gebouwd als het scherm gebruikt.
+
+Per thema en breedte (1280 en 390 px, licht en donker) wordt bewezen:
+Wijzig opent met het toetsenbord (Enter) een gelabeld tekstveld met de huidige
+naam en zichtbare focus; Tab gaat naar "Opslaan in deze correctie"; een
+ongewijzigde en een lege naam geven een melding; opslaan toont de nieuwe naam
+met de oude doorgestreept en een "Ongedaan maken" per kopje; ongedaan maken zet
+de oude naam terug; opnieuw wijzigen werkt; "Correcties opslaan als versie 2"
+opent de nieuwe versie, die in Structuur én in het Publicatievoorbeeld
+"Hoofdgerechten" toont.
+
+Eén schrijfroute is fictioneel beantwoord: `POST
+/api/internal/v1/menu-concepts/concept-be53-0100/versions`, exact dat pad en
+alleen in dit script (de gedeelde lijst blijft ongewijzigd). Het antwoord is de
+nieuwe versie uit de fixture; de verstuurde edits worden in `localStorage`
+bewaard en in het bewijs samengevat. Elke andere schrijf-, export- en
+publicatieroute blijft geweigerd. Bewijs:
+`evidence/be53-browser-evidence.json`; screenshots in het gitignorde
+`output/be-53/`. Dit is ontwikkelaarsbewijs op een lokale machine, geen echte
+database, geen merge en geen publicatie.
+
+
 ## Limits
 
 This is fixture evidence. It does not prove a live Supabase session, a real

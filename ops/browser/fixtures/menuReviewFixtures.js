@@ -6,7 +6,7 @@
 // browser sees the same shapes the server sends. No production data, identity,
 // credential or URL is used; every URL is on the .invalid TLD.
 
-const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines } = require('../../../src/lib/menuConcept');
+const { summarizeRecognisedMenu, buildMenuConcept, storedConceptInput, recognisedLines, renameSectionEdits } = require('../../../src/lib/menuConcept');
 const { uncertainSections } = require('../../../src/lib/menuStructureReview');
 const {
   adviceRecord,
@@ -699,7 +699,7 @@ function blockedReason(info) {
   };
 }
 
-function conceptDetail({ id, key, name, captured, info, product, status, githubConfigured = false, publication = null, exportInfo = null, sourceUrl = SOURCE_URL, source = { confirmed: true, blocked: null } }) {
+function conceptDetail({ id, key, name, captured, info, product, status, githubConfigured = false, publication = null, exportInfo = null, sourceUrl = SOURCE_URL, source = { confirmed: true, blocked: null }, preview = null }) {
   const blocked = Boolean(info && info.kind !== 'v1');
   const createdAt = CONCEPT_CREATED[key];
   return {
@@ -732,7 +732,7 @@ function conceptDetail({ id, key, name, captured, info, product, status, githubC
     export: exportInfo,
     preview: blocked
       ? { concept: null, current: [], blocked: info.reason, blockers: info.view ? info.view.blockers : [] }
-      : v1Preview,
+      : preview || v1Preview,
     githubConfigured,
     publication,
   };
@@ -1045,8 +1045,101 @@ const publicationDetails = {
   }),
 };
 
+// ─── BE-53 (#130) — menukopje wijzigen ──────────────────────────────────────
+// One fictional concept in exactly the situation of the issue: a menukopje
+// that reads like a sentence instead of "Hoofdgerechten". Both versions are
+// built with the product's own pure rules; version 2 exists only as the answer
+// of the fictional versions route, built from the edits the browser posted.
+const RENAME_IDS = { v1: 'concept-be53-0100', v2: 'concept-be53-0101' };
+const RENAME_RESTAURANT = 'Fictief Concept Proef';
+const RENAME_SECTION = 'Proef het beste van het seizoen — Hoofd';
+const RENAME_NEW = 'Hoofdgerechten';
+const RENAME_SOURCE = 'https://fictief-proef.invalid/menukaart';
+
+const renameMenus = [
+  {
+    title: 'Menukaart',
+    categories: [
+      {
+        name: RENAME_SECTION,
+        path: [RENAME_SECTION],
+        sourcePath: ['PROEF HET BESTE VAN HET SEIZOEN', 'HOOFD'],
+        items: [
+          { name: 'Fictieve zeebaars', desc: 'Fictief, met venkel', price: '24,50' },
+          { name: 'Fictieve lam', price: '26,00' },
+        ],
+      },
+      { name: 'Dessert', path: ['Dessert'], sourcePath: ['NAGERECHTEN'], items: [{ name: 'Fictieve taart', price: '8,50' }] },
+    ],
+  },
+];
+const renameV1Concept = buildMenuConcept({ menus: renameMenus, liveLines: [], edits: {} });
+// The fixture never hand-writes the `path` edits: the rename uses the same
+// helper the screen uses, so the stub cannot answer with a shape the product
+// does not produce.
+const renamePaths = renameSectionEdits(renameV1Concept.lines, [RENAME_SECTION], RENAME_NEW);
+const renameV2Concept = buildMenuConcept({ menus: renameMenus, liveLines: [], edits: renamePaths.edits });
+
+function renameDetail({ id, version, content, history }) {
+  const base = conceptDetail({
+    id,
+    key: 'v1',
+    name: RENAME_RESTAURANT,
+    captured: content,
+    info: { kind: 'v1' },
+    product: null,
+    status: 'waiting',
+    sourceUrl: RENAME_SOURCE,
+    preview: { concept: { key: 'be53-lunch', entry: { title: 'Lunch', categories: content.categories } }, current: [] },
+  });
+  return {
+    ...base,
+    concept: { ...base.concept, version, latestVersion: version, latestId: id, sourceUrl: RENAME_SOURCE },
+    history,
+  };
+}
+
+const RENAME_HISTORY_V1 = {
+  id: RENAME_IDS.v1,
+  version: 1,
+  createdAt: '2026-10-29T09:00:00.000Z',
+  createdBySelf: true,
+  basedOnVersion: null,
+  status: 'waiting',
+  reviews: [],
+};
+
+const renameScenario = {
+  list: {
+    items: [
+      conceptRow({
+        id: RENAME_IDS.v1,
+        key: 'v1',
+        name: RENAME_RESTAURANT,
+        counts: { dishCount: renameV1Concept.lines.length, attentionCount: 0, blockerCount: 0 },
+        readOnly: false,
+        schemaVersion: null,
+      }),
+    ],
+  },
+  detail: {
+    [RENAME_IDS.v1]: renameDetail({ id: RENAME_IDS.v1, version: 1, content: renameV1Concept.content, history: [RENAME_HISTORY_V1] }),
+    [RENAME_IDS.v2]: renameDetail({
+      id: RENAME_IDS.v2,
+      version: 2,
+      content: renameV2Concept.content,
+      history: [{ ...RENAME_HISTORY_V1, id: RENAME_IDS.v2, version: 2, basedOnVersion: 1, createdAt: '2026-10-29T09:05:00.000Z' }, RENAME_HISTORY_V1],
+    }),
+  },
+  // The real POST …/<id>/versions answers 201 with the new version's identity.
+  versionResponse: { concept: { id: RENAME_IDS.v2, version: 2, unchanged: false } },
+};
+
 const conceptScenarios = {
   concepts: { list: conceptList, detail: conceptDetails },
+  // BE-53: one editable concept whose menukopje can be renamed; the versions
+  // route is answered by this scenario only (see the BE-53 browser check).
+  'concepts-section-rename': renameScenario,
   // BE-39: one approved card per publication state plus a waiting card. The
   // publication object comes from the product's own pure rule, so the
   // screenshot shows exactly what the server would return.
@@ -1090,6 +1183,11 @@ module.exports = {
   publicationList,
   publicationDetails,
   PR_URL,
+  RENAME_IDS,
+  RENAME_RESTAURANT,
+  RENAME_SECTION,
+  RENAME_NEW,
+  renameScenario,
   scenarios: {
     review: overview(reviewDetail),
     readonly: overview(readOnlyDetail()),
