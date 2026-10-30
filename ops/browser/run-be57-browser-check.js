@@ -206,17 +206,164 @@ async function setViewport(width, height) {
   await waitFor(cdp, `window.innerWidth === ${width}`, 8000);
 }
 
-async function applyTheme(theme) {
-  const applied = await evalJs(
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Het thema zoals de pagina het echt toont: `data-theme` op <html>, de knop die
+ * de app zelf actief noemt (aria-pressed/`active` in ThemeToggle), de
+ * achtergrondkleur van de body met zijn helderheid, en de hoogte van de kop.
+ * Een bestandsnaam met "-donker" is daarmee geen bewijs meer op zichzelf.
+ */
+async function themeProof() {
+  return evalJs(
     cdp,
     `(() => {
-      try { localStorage.setItem('bredaeats_theme', ${JSON.stringify(theme)}); } catch (error) {}
-      document.documentElement.setAttribute('data-theme', ${JSON.stringify(theme)});
-      return document.documentElement.getAttribute('data-theme');
+      const bg = getComputedStyle(document.body).backgroundColor;
+      const numbers = (bg || '').match(/[0-9]+/g) || [];
+      const luminance = numbers.length >= 3
+        ? Math.round(0.2126 * Number(numbers[0]) + 0.7152 * Number(numbers[1]) + 0.0722 * Number(numbers[2]))
+        : null;
+      const buttons = [...document.querySelectorAll('.theme-btn')];
+      const active = buttons
+        .filter((button) => button.getAttribute('aria-pressed') === 'true' || button.classList.contains('active'))
+        .map((button) => (button.textContent || '').trim());
+      const header = document.querySelector('.site-header');
+      return {
+        attr: document.documentElement.getAttribute('data-theme'),
+        bg,
+        luminance,
+        active,
+        buttons: buttons.map((button) => (button.textContent || '').trim()),
+        headerHeight: header ? Math.round(header.getBoundingClientRect().height) : null,
+      };
     })()`,
   );
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  return applied === theme;
+}
+
+/**
+ * Het thema zetten via de themaknop van de app zelf (BE-46 deel 2): een klik op
+ * "Licht" of "Donker" in ThemeToggle, geen los attribuut. Geeft het bewijs terug
+ * waarmee de opname wordt gecontroleerd.
+ */
+async function applyTheme(theme) {
+  const label = theme === 'light' ? 'Licht' : 'Donker';
+  const clicked = await evalJs(
+    cdp,
+    `(() => {
+      const target = [...document.querySelectorAll('.theme-btn')]
+        .find((button) => (button.textContent || '').trim() === ${JSON.stringify(label)});
+      if (!target) return 'missing';
+      target.click();
+      return 'clicked';
+    })()`,
+  );
+  if (clicked !== 'clicked') throw new Error(`theme_button_missing: ${label}`);
+  await sleep(260);
+  return themeProof();
+}
+
+/** Het bewijs moet kloppen: attribuut, actieve knop én de helderheid van --bg. */
+function themeOk(proof, want) {
+  const label = want === 'light' ? 'Licht' : 'Donker';
+  return Boolean(proof)
+    && proof.attr === want
+    && Array.isArray(proof.active)
+    && proof.active.length === 1
+    && proof.active[0] === label
+    && Number.isFinite(proof.luminance)
+    && (want === 'light' ? proof.luminance > 200 : proof.luminance < 80);
+}
+
+/** De pagina zo ver scrollen dat het cijferblok direct onder de vaste kop begint. */
+async function framePanel() {
+  return evalJs(
+    cdp,
+    `(() => {
+      const panel = document.querySelector('.owner-stats');
+      if (!panel) return null;
+      const header = document.querySelector('.site-header');
+      const headerHeight = header ? header.getBoundingClientRect().height : 0;
+      const target = panel.getBoundingClientRect().top + window.scrollY - headerHeight - 8;
+      window.scrollTo(0, Math.max(0, Math.round(target)));
+      return Math.round(headerHeight);
+    })()`,
+  );
+}
+
+/**
+ * Wat de opname echt laat zien: staat de titel van deze stand volledig in beeld,
+ * en (bij het overzicht) ook de vier cijfers? "In beeld" betekent: onder de
+ * vaste kop en boven de vaste tabbar, dus niet weggeschoven of bedekt.
+ */
+async function measureFraming(wantTitle) {
+  return evalJs(
+    cdp,
+    `(() => {
+      const panel = document.querySelector('.owner-stats');
+      if (!panel) return null;
+      const header = document.querySelector('.site-header');
+      const tabbar = document.querySelector('.mobile-tabbar');
+      const headerHeight = header ? Math.round(header.getBoundingClientRect().height) : 0;
+      const tabbarVisible = tabbar ? getComputedStyle(tabbar).display !== 'none' : false;
+      const safeBottom = tabbarVisible
+        ? Math.min(window.innerHeight, Math.round(tabbar.getBoundingClientRect().top))
+        : window.innerHeight;
+      const fully = (element) => {
+        const box = element.getBoundingClientRect();
+        return box.top >= headerHeight - 1 && box.bottom <= safeBottom + 1;
+      };
+      const titles = [...panel.querySelectorAll('.owner-stats-subtitle')]
+        .map((element) => ({ text: element.innerText.trim(), ok: fully(element) }));
+      const figures = [...panel.querySelectorAll('.owner-figure')];
+      const wanted = titles.find((title) => title.text === ${JSON.stringify(wantTitle)});
+      return {
+        wantTitle: ${JSON.stringify(wantTitle)},
+        headerHeight,
+        tabbarVisible,
+        safeBottom,
+        viewportHeight: window.innerHeight,
+        titleInView: Boolean(wanted && wanted.ok),
+        titles,
+        figureCount: figures.length,
+        figuresInView: figures.filter(fully).length,
+        allFiguresInView: figures.length === 4 && figures.every(fully),
+        panelTop: Math.round(panel.getBoundingClientRect().top),
+      };
+    })()`,
+  );
+}
+
+/**
+ * De kop zelf: hoe hoog is hij, welk nav-landmark is zichtbaar, en begint de
+ * inhoud onder de kop in plaats van eronder te verdwijnen?
+ */
+async function measureHeader() {
+  return evalJs(
+    cdp,
+    `(() => {
+      window.scrollTo(0, 0);
+      const header = document.querySelector('.site-header');
+      const box = header ? header.getBoundingClientRect() : null;
+      const navs = [...document.querySelectorAll('nav')]
+        .filter((nav) => {
+          const style = getComputedStyle(nav);
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          const rect = nav.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        })
+        .map((nav) => nav.getAttribute('aria-label') || '');
+      const first = document.querySelector('.owner-main > *');
+      const firstBox = first ? first.getBoundingClientRect() : null;
+      return {
+        headerHeight: box ? Math.round(box.height) : null,
+        headerBottom: box ? Math.round(box.bottom) : null,
+        position: header ? getComputedStyle(header).position : null,
+        navs,
+        firstContentTop: firstBox ? Math.round(firstBox.top) : null,
+        firstContentTag: first ? first.tagName.toLowerCase() + '.' + (first.className || '') : null,
+      };
+    })()`,
+  );
 }
 
 async function fillField(selector, value) {
@@ -279,7 +426,18 @@ async function resetStorage(theme) {
       return stale.length;
     })()`,
   );
-  if (theme) await applyTheme(theme);
+  // De keuze van de bezoeker staat in dezelfde opslag die ThemeToggle gebruikt.
+  // Bewijs dat het thema echt staat komt pas op de pagina zelf, via de themaknop
+  // van de app (applyTheme); de inlogpagina heeft geen themaknop.
+  if (theme) {
+    await evalJs(
+      cdp,
+      `(() => {
+        try { localStorage.setItem('bredaeats_theme', ${JSON.stringify(theme)}); } catch (error) {}
+        return true;
+      })()`,
+    );
+  }
 }
 
 /** De pagina openen voor één stand: eigen stub, eigen sessie, eigen thema. */
@@ -370,30 +528,30 @@ async function readState() {
 }
 
 
-/** Elke schermafdruk toont het cijferblok zelf, niet een lege bovenkant. */
+/**
+ * Eén opname van het cijferblok: eerst het thema via de themaknop van de app met
+ * het bewijs daarvan, dan zo scrollen dat de titel van deze stand direct onder
+ * de vaste kop staat, en dan pas de opname. De opname bewijst zichzelf: het
+ * themabewijs en wat er in beeld staat, staan ernaast in het bewijsbestand.
+ */
 async function shotOfPanel(state, width, theme) {
   await setViewport(width.width, width.height);
-  await applyTheme(theme);
-  await evalJs(cdp, `(() => { const panel = document.querySelector('.owner-stats'); if (panel) panel.scrollIntoView({ block: 'center' }); return Boolean(panel); })()`);
-  await new Promise((resolve) => setTimeout(resolve, 250));
-  const visible = await evalJs(
-    cdp,
-    `(() => {
-      const panel = document.querySelector('.owner-stats');
-      if (!panel) return null;
-      const box = panel.getBoundingClientRect();
-      return {
-        top: Math.round(box.top),
-        bottom: Math.round(box.bottom),
-        height: Math.round(box.height),
-        inView: box.top < window.innerHeight && box.bottom > 0,
-      };
-    })()`,
-  );
+  const proof = await applyTheme(theme);
+  await framePanel();
+  await sleep(260);
+  const framing = await measureFraming(state.expected);
   const name = `be57-${state.name}-${width.name}-${theme === 'light' ? 'licht' : 'donker'}.png`;
   const file = await screenshot(cdp, SHOT_DIR, name);
-  shots.push({ name, state: state.name, theme, viewport: `${width.width}x${width.height}`, panel: visible, ...file });
-  return visible;
+  shots.push({
+    name,
+    state: state.name,
+    theme,
+    viewport: `${width.width}x${width.height}`,
+    themeProof: proof,
+    framing,
+    ...file,
+  });
+  return { framing, proof };
 }
 
 function checkReadyState(state, measured) {
@@ -514,7 +672,12 @@ async function run() {
 
     // De bestaande a11y-audit voor deze pagina, in licht en donker.
     for (const theme of ['light', 'dark']) {
-      await applyTheme(theme);
+      const proof = await applyTheme(theme);
+      add(
+        `a11y ${state.name}: het thema ${theme} staat echt voor de audit`,
+        themeOk(proof, theme),
+        JSON.stringify(proof),
+      );
       await setViewport(1280, 900);
       const measuredA11y = await evalJs(cdp, audit.inPageSource('auditPage', [{ minTarget: 44 }]));
       const review = audit.checksFromAudit(`mijn-restaurant-cijfers/${state.name}`, theme === 'light' ? 'licht' : 'donker', measuredA11y, {
@@ -527,18 +690,61 @@ async function run() {
     }
     await applyTheme('light');
 
-    // Dezelfde stand in licht en donker op 1280, 390 en 320 px, met het
-    // cijferblok echt in beeld.
+    // Dezelfde stand in licht en donker op 1280, 390 en 320 px, met de titel van
+    // de stand en (bij het overzicht) de vier cijfers volledig in beeld.
     const shotResults = [];
     for (const width of WIDTHS) {
+      // Eerst de breedte zetten: anders meet de kop hierboven nog de vorige
+      // breedte en zegt de check niets over deze breedte.
+      await setViewport(width.width, width.height);
+      // Het herstelpunt van de review: de kop zelf, per breedte gemeten.
+      const header = await measureHeader();
+      add(
+        `mijn-restaurant: de kop is op ${width.name}px niet hoger dan 96 px`,
+        Number.isFinite(header.headerHeight) && header.headerHeight <= 96,
+        JSON.stringify(header),
+      );
+      add(
+        `mijn-restaurant: het nav-landmark is zichtbaar op ${width.name}px`,
+        header.navs.length >= 1 && header.navs.every((label) => label.length > 0),
+        JSON.stringify(header.navs),
+      );
+      add(
+        `mijn-restaurant: de inhoud begint onder de kop op ${width.name}px`,
+        header.firstContentTop >= header.headerBottom - 1,
+        JSON.stringify({ first: header.firstContentTag, top: header.firstContentTop, headerBottom: header.headerBottom }),
+      );
+
       for (const theme of ['light', 'dark']) {
-        const visible = await shotOfPanel(state, width, theme);
-        shotResults.push({ viewport: width.name, theme, visible });
+        const { framing, proof } = await shotOfPanel(state, width, theme);
+        shotResults.push({ viewport: width.name, theme, themeProof: proof, framing });
         add(
-          `${state.name}: de schermafdruk ${width.name}/${theme} toont het cijferblok zelf`,
-          visible && visible.inView && visible.height > 0,
-          JSON.stringify(visible),
+          `${state.name}: het thema ${theme} is via de themaknop van de app gezet bij ${width.name}px`,
+          themeOk(proof, theme),
+          JSON.stringify(proof),
         );
+        add(
+          `${state.name}: de opname ${width.name}/${theme} toont "${state.expected}" volledig in beeld`,
+          Boolean(framing && framing.titleInView),
+          JSON.stringify(framing && {
+            titles: framing.titles,
+            panelTop: framing.panelTop,
+            headerHeight: framing.headerHeight,
+            safeBottom: framing.safeBottom,
+          }),
+        );
+        if (state.name === 'overzicht') {
+          add(
+            `${state.name}: de vier cijfers staan volledig in beeld bij ${width.name}/${theme}`,
+            Boolean(framing && framing.allFiguresInView && framing.figureCount === 4),
+            JSON.stringify(framing && {
+              figuresInView: framing.figuresInView,
+              figureCount: framing.figureCount,
+              safeBottom: framing.safeBottom,
+              viewportHeight: framing.viewportHeight,
+            }),
+          );
+        }
         const reflow = await readState();
         add(`${state.name}: geen horizontale scroll bij ${width.name}/${theme}`, reflow.overflowX <= 0, String(reflow.overflowX));
         add(`${state.name}: het thema is echt ${theme}`, reflow.theme === theme, String(reflow.theme));
