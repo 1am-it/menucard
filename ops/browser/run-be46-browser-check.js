@@ -9,7 +9,10 @@
 // serverkant is met een nep-client getest in src/lib/kiesHandlers.test.js.
 //
 // Wat deze check in de browser bewijst:
-//   - de hele route van maken tot uitslag: roepnaam, kaartenstapel, uitslag;
+//   - de hele route van maken tot uitslag: "Samen kiezen" in Mijn lijstje, de
+//     sluitingstijd, de stemlink delen via BE-49 met de gedeeld-teller,
+//     roepnaam, kaartenstapel en uitslag;
+//   - de stemlink zelf: roepnaam, kaartenstapel, uitslag;
 //   - swipen met de muis/vinger (pointer-events) over de drempel van 30%, met
 //     het label "Lekker →" tijdens het slepen en niets onder de drempel;
 //   - de pijltjestoetsen links en rechts doen hetzelfde als de knoppen;
@@ -103,6 +106,16 @@ const FIXTURE_DISHES = [
   },
 ];
 
+// Het lijstje van de maker in "Mijn lijstje": dezelfde vier gerechten, in de
+// vorm die `readSavedList` (src/lib/dishList.js) bewaart.
+const SAVED_ENTRIES = FIXTURE_DISHES.map((dish) => ({
+  id: dish.id,
+  name: dish.name,
+  category: dish.category,
+  price: dish.price,
+  restaurant: dish.restaurant,
+}));
+
 const checks = [];
 const shots = [];
 let viewport = { width: 390, height: 780 };
@@ -158,6 +171,10 @@ function stubSource() {
   const withoutMigration = search.get('zonder') === 'migratie';
   const votes = [];
   const calls = (window.__KIES_CALLS__ = []);
+  // De anonieme \`gedeeld\`-teller van BE-44 komt hier ook langs: hij wordt
+  // vastgelegd en met 204 beantwoord, zodat het delen van de stemlink te
+  // controleren is zonder de echte tellerroute.
+  const shared = (window.__KIES_TELLERS__ = []);
   let sequence = 0;
 
   function outcome() {
@@ -195,6 +212,10 @@ function stubSource() {
   window.fetch = function (input, init) {
     const options = init || {};
     const raw = typeof input === 'string' ? input : (input && input.url) || '';
+    if (raw.indexOf('/api/v1/tellers') === 0) {
+      if (shared.length < 100) shared.push(options.body ? JSON.parse(options.body) : null);
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
     if (raw.indexOf('/api/v1/kies') !== 0) return native(input, init);
     const method = String(options.method || 'GET').toUpperCase();
     const body = options.body ? JSON.parse(options.body) : null;
@@ -206,6 +227,18 @@ function stubSource() {
       return Promise.resolve(json(Object.assign({ code: code, dishes: dishes, sluitOm: null, gesloten: false }, outcome())));
     }
     if (method === 'POST') {
+      // De maker: een stemming uit de id's van het lijstje. Zelfde antwoord als
+      // createStemming in src/lib/kiesHandlers.js (201 met code, href en
+      // sluitOm).
+      if (body && Array.isArray(body.dish_keys)) {
+        return Promise.resolve(json({
+          code: code,
+          href: '/kies/' + code,
+          dishKeys: body.dish_keys,
+          dishes: body.dish_keys.length,
+          sluitOm: body.sluit_om || null,
+        }, 201));
+      }
       const index = votes.findIndex((vote) => vote.stemmer === body.stemmer && vote.dishKey === body.dishKey);
       const replaced = index >= 0;
       sequence += 1;
@@ -298,6 +331,31 @@ async function clickButtonByText(cdp, needle) {
   })()`);
 }
 
+/** Op het eerste element met deze selector klikken; false als het er niet is. */
+async function clickSelector(cdp, selector) {
+  return evalJs(cdp, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)});
+    if (!el) return false;
+    el.click();
+    return true;
+  })()`);
+}
+
+/** Een waarde in een invoerveld zetten zoals React hem leest. */
+async function setInputValue(cdp, selector, value) {
+  return evalJs(cdp, `(() => {
+    const input = document.querySelector(${JSON.stringify(selector)});
+    if (!input) return null;
+    const proto = input instanceof window.HTMLTextAreaElement
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    setter.call(input, ${JSON.stringify(value)});
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return input.value;
+  })()`);
+}
+
 async function voteByLabel(cdp, prefix) {
   return evalJs(cdp, `(() => {
     const button = [...document.querySelectorAll('.kies-vote-btn')].find((entry) => (entry.getAttribute('aria-label') || '').indexOf(${JSON.stringify(prefix)}) === 0);
@@ -312,6 +370,13 @@ async function resetProgress(cdp) {
   await evalJs(cdp, `(() => { try { localStorage.clear(); } catch (error) {} return true; })()`);
 }
 
+// De serverpagina toont al "Bezig…" vóór React werkt; wie daarop wacht leest te
+// vroeg (de SSR-HTML heeft immers ook een `.kies-status`). De pagina doet altijd
+// één GET naar de gestubde API, dus een gevulde `__KIES_CALLS__` is het bewijs
+// dat de clientkant echt draait.
+const HYDRATED = `Boolean((window.__KIES_CALLS__ || []).length)`;
+const PAGE_READY = `${HYDRATED} && Boolean(document.querySelector('#kies-roepnaam') || document.querySelector('.kies-dish-card') || document.querySelector('.kies-uitslag') || document.querySelector('.kies-status'))`;
+
 async function join(cdp, name = 'Sam') {
   await typeName(cdp, name);
   await clickButtonByText(cdp, 'Meedoen');
@@ -319,11 +384,11 @@ async function join(cdp, name = 'Sam') {
 }
 
 async function openFresh(cdp, query = '') {
-  await navigate(cdp, PAGE_URL(query), `Boolean(document.querySelector('#kies-roepnaam') || document.querySelector('.kies-dish-card') || document.querySelector('.kies-status'))`);
+  await navigate(cdp, PAGE_URL(query), HYDRATED);
   await resetProgress(cdp);
   // Opnieuw laden zodat de pagina de schone opslag ziet.
   await cdp.send('Page.reload', { ignoreCache: false });
-  await waitFor(cdp, `Boolean(document.querySelector('#kies-roepnaam') || document.querySelector('.kies-uitslag') || document.querySelector('.kies-status'))`, 30000);
+  await waitFor(cdp, PAGE_READY, 30000);
 }
 
 /** Slepen met de muis: van het midden naar `ratio` × de kaartbreedte. */
@@ -348,6 +413,181 @@ async function dragCard(cdp, ratio) {
 
 
 // ─── Scenario's ─────────────────────────────────────────────────────────────
+
+/**
+ * De hele route van maken tot uitslag: "Samen kiezen" in Mijn lijstje, de
+ * sluitingstijd, de stemlink delen via de bestaande deelroute van BE-49, de
+ * roepnaam, de kaartenstapel en de uitslag. De maker en de stemmer zijn hier
+ * dezelfde browser; de gestubde API onthoudt de stemmen in het venster, ook na
+ * de client-side navigatie naar de stemlink.
+ */
+async function createScenario(cdp) {
+  await setViewport(cdp, 390, 780);
+  await setTheme(cdp, 'light');
+  await navigate(cdp, `${APP}/mijn-lijstje`, `Boolean(document.querySelector('.lijst-title'))`);
+
+  // Het lijstje van de maker en de deelvoorkeur op het klembord, in dezelfde
+  // opslag als BE-44 ("bredaeats_bewaard") en BE-49 ("deelvoorkeur").
+  const seeded = await evalJs(cdp, `(() => {
+    try {
+      localStorage.clear();
+      localStorage.setItem('bredaeats_bewaard', ${JSON.stringify(JSON.stringify(SAVED_ENTRIES))});
+      localStorage.setItem('deelvoorkeur', ${JSON.stringify(JSON.stringify({ methods: ['copy'] }))});
+      return true;
+    } catch (error) {
+      return false;
+    }
+  })()`);
+  check('maken: het lijstje van de maker staat klaar', seeded === true, String(seeded));
+  await cdp.send('Page.reload', { ignoreCache: false });
+  const listed = await waitFor(cdp, `Boolean(document.querySelector('.kies-start-btn'))`, 30000);
+  check('maken: "Samen kiezen" staat in Mijn lijstje', listed);
+
+  const neighbours = await evalJs(cdp, `(() => {
+    const start = document.querySelector('.kies-start-btn');
+    const labels = [...document.querySelectorAll('button, a')].map((el) => (el.textContent || '').trim());
+    return {
+      label: start ? (start.textContent || '').trim() : null,
+      hasPopup: start ? start.getAttribute('aria-haspopup') : null,
+      neighbour: labels.some((label) => label.indexOf('Lijstje delen') >= 0),
+    };
+  })()`);
+  check(
+    'maken: de knop heet "Samen kiezen", naast "Lijstje delen", en opent een blad',
+    neighbours.label === 'Samen kiezen' && neighbours.hasPopup === 'dialog' && neighbours.neighbour,
+    JSON.stringify(neighbours),
+  );
+
+  // De gestubde API en een klembord dat de gedeelde link bewaart.
+  await evalJs(cdp, stubSource());
+  await evalJs(cdp, `(() => {
+    window.__KIES_CLIPBOARD__ = [];
+    try {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: (text) => { window.__KIES_CLIPBOARD__.push(String(text)); return Promise.resolve(); } },
+      });
+    } catch (error) {}
+    return true;
+  })()`);
+
+  check('maken: een tik opent het blad met de sluitingstijd', await clickSelector(cdp, '.kies-start-btn'));
+  const sheet = await waitFor(cdp, `Boolean(document.querySelector('#kies-sluit-tijd'))`, 15000);
+  const dialog = await evalJs(cdp, `(() => {
+    const panel = document.querySelector('.kies-panel');
+    const title = panel ? panel.querySelector('.share-panel-title') : null;
+    return {
+      role: panel ? panel.getAttribute('role') : null,
+      modal: panel ? panel.getAttribute('aria-modal') : null,
+      title: title ? (title.textContent || '').trim() : null,
+      noTime: (document.body.innerText || '').indexOf('Geen sluitingstijd') >= 0,
+    };
+  })()`);
+  check('maken: het blad vraagt "Tot wanneer mag er gestemd worden?"', sheet && dialog.title === 'Tot wanneer mag er gestemd worden?', JSON.stringify(dialog));
+  check('maken: het blad is een echt dialoogvenster', dialog.role === 'dialog' && dialog.modal === 'true', JSON.stringify(dialog));
+  check('maken: zonder tijd geldt "Geen sluitingstijd"', dialog.noTime, String(dialog.noTime));
+  await shot(cdp, 'be46-sluitingstijd-390-light.png', { theme: 'light', state: 'sluitingstijd' });
+  await setTheme(cdp, 'dark');
+  await shot(cdp, 'be46-sluitingstijd-390-dark.png', { theme: 'dark', state: 'sluitingstijd' });
+  await setTheme(cdp, 'light');
+
+  const time = await setInputValue(cdp, '#kies-sluit-tijd', '18:00');
+  check('maken: de sluitingstijd is in te vullen', time === '18:00', String(time));
+
+  check('maken: "Maak de stemlink" maakt de stemming', await clickButtonByText(cdp, 'Maak de stemlink'));
+  const started = await waitFor(cdp, `(document.body.innerText || '').indexOf('Stemlink gemaakt') >= 0`, 15000);
+  check('maken: de stemming is gemaakt', started);
+
+  const calls = await callsOf(cdp);
+  const created = calls.find((call) => call.method === 'POST' && call.body && Array.isArray(call.body.dish_keys));
+  check(
+    'maken: de POST draagt de id\'s van het lijstje en een sluitingstijd, niets anders',
+    Boolean(created)
+      && created.url === '/api/v1/kies'
+      && JSON.stringify(created.body.dish_keys) === JSON.stringify(SAVED_ENTRIES.map((entry) => entry.id))
+      && Object.keys(created.body).sort().join(',') === 'dish_keys,sluit_om',
+    JSON.stringify(created && created.body),
+  );
+  check(
+    'maken: de gekozen sluitingstijd gaat als ISO-tijd mee',
+    Boolean(created) && typeof created.body.sluit_om === 'string' && !Number.isNaN(Date.parse(created.body.sluit_om)),
+    created && created.body.sluit_om,
+  );
+
+  const panel = await evalJs(cdp, `(() => {
+    const link = document.querySelector('.kies-started-link a');
+    const sheetEl = document.querySelector('.kies-panel');
+    return {
+      href: link ? link.getAttribute('href') : null,
+      text: link ? (link.textContent || '').trim() : null,
+      body: sheetEl ? (sheetEl.innerText || '') : '',
+    };
+  })()`);
+  check(
+    'maken: "Open de stemlink" wijst naar /kies/<code>',
+    panel.href === `/kies/${CODE}` && panel.text === 'Open de stemlink',
+    JSON.stringify({ href: panel.href, text: panel.text }),
+  );
+  check('maken: het blad noemt de gekozen tijd', panel.body.indexOf('18:00') >= 0, panel.body.slice(0, 120));
+  await shot(cdp, 'be46-gemaakt-390-light.png', { theme: 'light', state: 'gemaakt' });
+
+  // Delen via de bestaande deelroute van BE-49, met de voorkeur op het klembord.
+  check('maken: "Deel de stemlink" deelt de link', await clickButtonByText(cdp, 'Deel de stemlink'));
+  const copied = await waitFor(cdp, `(window.__KIES_CLIPBOARD__ || []).length > 0`, 15000);
+  const clipboard = await evalJs(cdp, 'window.__KIES_CLIPBOARD__ || []');
+  check(
+    'maken: het klembord krijgt de stemlink en niets anders',
+    copied && clipboard.length === 1 && clipboard[0].indexOf(`/kies/${CODE}`) > 0,
+    JSON.stringify(clipboard),
+  );
+  const shareMessage = await evalJs(cdp, `(() => {
+    const status = document.querySelector('.kies-share .lijst-status');
+    return status ? (status.textContent || '').trim() : null;
+  })()`);
+  check('maken: de melding is "Link gekopieerd"', shareMessage === 'Link gekopieerd', String(shareMessage));
+
+  const counted = await evalJs(cdp, 'window.__KIES_TELLERS__ || []');
+  check(
+    'maken: de teller "gedeeld" telt elk gerecht van de stemlink één keer',
+    counted.length === SAVED_ENTRIES.length
+      && counted.every((entry) => entry
+        && entry.event === 'gedeeld'
+        && SAVED_ENTRIES.some((saved) => saved.id === entry.dish)),
+    JSON.stringify(counted),
+  );
+
+  // Door naar de stemlink: dezelfde browser stemt en ziet daarna de uitslag.
+  check('maken: "Open de stemlink" opent de stemming', await clickSelector(cdp, '.kies-started-link a'));
+  const arrived = await waitFor(cdp, `Boolean(document.querySelector('#kies-roepnaam') || document.querySelector('.kies-dish-card'))`, 30000);
+  check('maken: de stemlink begint met de roepnaam', arrived);
+  check('maken: "Meedoen" opent de kaartenstapel', await join(cdp, 'Sam'));
+
+  const order = [
+    [`Lekker: ${FIXTURE_DISHES[0].name}`, 'Gerecht 2 van 4'],
+    [`Lekker: ${FIXTURE_DISHES[1].name}`, 'Gerecht 3 van 4'],
+    [`Liever niet: ${FIXTURE_DISHES[2].name}`, 'Gerecht 4 van 4'],
+    [`Liever niet: ${FIXTURE_DISHES[3].name}`, null],
+  ];
+  for (const [label, expectedProgress] of order) {
+    check(`maken: de stem "${label.split(':')[0]}" gaat naar de server`, await voteByLabel(cdp, label));
+    if (expectedProgress) {
+      await waitFor(cdp, `(document.querySelector('.kies-progress') || {}).textContent === ${JSON.stringify(expectedProgress)}`, 15000);
+    }
+  }
+  await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 15000);
+  const result = await readState(cdp);
+  check(
+    'maken: de gemaakte stemming eindigt in de uitslag',
+    result.resultIsList && result.rows.length === FIXTURE_DISHES.length,
+    String(result.rows.length),
+  );
+  check(
+    'maken: de uitslag noemt de stemmer bij de stemmen',
+    Boolean(result.rows[0]) && result.rows[0].text.indexOf('Sam') >= 0,
+    result.rows[0] ? result.rows[0].text : '',
+  );
+  await shot(cdp, 'be46-uitslag-na-maken-390-light.png', { theme: 'light', state: 'uitslag-na-maken' });
+}
 
 /** De hele route: roepnaam, vier gerechten, de uitslag, licht en donker. */
 async function routeScenario(cdp) {
@@ -393,10 +633,11 @@ async function routeScenario(cdp) {
   await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 15000);
 
   const result = await readState(cdp);
+  const top = result.rows[0] || { favourite: false, text: '' };
   check('route: de uitslag is een echte lijst', result.resultIsList, String(result.resultIsList));
   check('route: alle vier gerechten staan in de uitslag', result.rows.length === 4, String(result.rows.length));
-  check('route: de favoriet staat bovenaan met "Favoriet"', result.rows[0].favourite && result.rows[0].text.indexOf('Favoriet') >= 0, result.rows[0].text);
-  check('route: de favoriet is "Fictieve pasta"', result.rows[0].text.indexOf(FIXTURE_DISHES[0].name) >= 0, result.rows[0].text);
+  check('route: de favoriet staat bovenaan met "Favoriet"', top.favourite && /favoriet/i.test(top.text), top.text);
+  check('route: de favoriet is "Fictieve pasta"', top.text.indexOf(FIXTURE_DISHES[0].name) >= 0, top.text);
   check(
     'route: de favoriet heeft "Reserveer" en "Route"',
     result.favouriteActions.length === 2
@@ -412,6 +653,10 @@ async function routeScenario(cdp) {
   );
   await shot(cdp, 'be46-uitslag-390-light.png', { theme: 'light', state: 'uitslag' });
 
+  // De stemmen van deze sessie, nog vóór de herlaadbeurt: de gestubde API
+  // begint in een nieuwe pagina leeg, dus dit is het enige juiste moment.
+  const calls = await callsOf(cdp);
+
   // De eigen stem is bewaard: opnieuw openen geeft meteen de uitslag.
   await cdp.send('Page.reload', { ignoreCache: false });
   const reopened = await waitFor(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`, 20000);
@@ -423,7 +668,6 @@ async function routeScenario(cdp) {
   check('route: de uitslag staat er ook in donker', dark.resultIsList && dark.rows.length === 4, String(dark.rows.length));
   await shot(cdp, 'be46-uitslag-390-dark.png', { theme: 'dark', state: 'uitslag' });
 
-  const calls = await callsOf(cdp);
   const posts = calls.filter((call) => call.method === 'POST');
   check(
     'route: elke stem is precies één POST met alleen de vier velden',
@@ -471,6 +715,11 @@ async function swipeScenario(cdp) {
   await waitFor(cdp, `(document.querySelector('.kies-progress') || {}).textContent === 'Gerecht 3 van 4'`, 15000);
   const third = await readState(cdp);
   check('swipen: na links staat het derde gerecht vooraan', third.dish === FIXTURE_DISHES[2].name, third.dish);
+
+  await setTheme(cdp, 'dark');
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  await shot(cdp, 'be46-stapel-390-dark.png', { theme: 'dark', state: 'stapel' });
+  await setTheme(cdp, 'light');
 }
 
 /** De pijltjestoetsen doen hetzelfde als de knoppen. */
@@ -533,7 +782,7 @@ async function undoScenario(cdp) {
 async function withoutMigrationScenario(cdp) {
   await setViewport(cdp, 390, 780);
   await setTheme(cdp, 'light');
-  await navigate(cdp, PAGE_URL('?zonder=migratie'), `Boolean(document.querySelector('.kies-status'))`);
+  await navigate(cdp, PAGE_URL('?zonder=migratie'), PAGE_READY);
   const ready = await waitFor(cdp, `(document.body.innerText || '').indexOf('Samen kiezen is nog niet beschikbaar') >= 0`, 20000);
   const state = await readState(cdp);
   check('zonder migratie: de pagina toont de ene melding', ready && state.unavailable, String(state.unavailable));
@@ -582,13 +831,14 @@ function writeEvidence(extra = {}) {
 async function warmUp(cdp) {
   await setViewport(cdp, 390, 780);
   await navigate(cdp, PAGE_URL(), `Boolean(document.querySelector('.kies-main'))`);
-  const ready = await waitFor(cdp, `Boolean(document.querySelector('#kies-roepnaam') || document.querySelector('.kies-status'))`, 120000);
+  const ready = await waitFor(cdp, PAGE_READY, 120000);
   check('warm-up: de pagina en de gestubde API antwoorden', ready);
   await resetProgress(cdp);
 }
 
 // Elk scenario is één benoemde stap; `--alleen=<naam>` draait alleen die stap.
 const KIES_SCENARIOS = [
+  { name: 'maken', run: (cdp) => createScenario(cdp) },
   { name: 'route', run: (cdp) => routeScenario(cdp) },
   { name: 'swipen', run: (cdp) => swipeScenario(cdp) },
   { name: 'toetsenbord', run: (cdp) => keyboardScenario(cdp) },
