@@ -160,7 +160,7 @@
   .owner-main { padding-bottom: 112px; }
 }
 
-/* BE-59 integratie (#146): op 320 px paste de kop niet meer op één regel sinds
+/* BE-59 integratie (issue 146): op 320 px paste de kop niet meer op één regel sinds
    de accountknop (44 px) in `.header-right` staat. Gemeten hoogte werd 141 px,
    terwijl BE-57 eist dat de kop niet hoger wordt dan 96 px en dat "Deze week"
    met de vier cijfers volledig in beeld blijft.
