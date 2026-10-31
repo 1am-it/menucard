@@ -19,8 +19,9 @@ const SEARCH_CSS = read('app/search/search.css');
 
 test('/search: elk resultaat krijgt de bestaande bewaar- en deelknoppen', () => {
   assert.match(SEARCH, /import DishShareButton from '@\/src\/components\/DishShareButton'/);
-  assert.match(SEARCH, /import \{ entryFromDish \} from '@\/src\/lib\/dishList'/);
-  assert.match(SEARCH, /import \{ dishShareTitle \} from '@\/src\/lib\/dishShare'/);
+  // BE-65 ronde 2 — /search laadt de deellogica niet meer zelf (zie de knop).
+  assert.doesNotMatch(SEARCH, /from '@\/src\/lib\/dishList'/);
+  assert.doesNotMatch(SEARCH, /from '@\/src\/lib\/dishShare'/);
   assert.match(SEARCH, /<DishShareButton\n(\s+[^\n]+\n)*?\s+withLabel\n/);
 });
 
@@ -34,8 +35,7 @@ test('/search: de knoppen staan naast de link, met de echte gegevens van het res
   const linkEnd = row.lastIndexOf('</Link>');
   assert.ok(linkEnd > -1 && linkEnd < row.indexOf('className="dish-result-actions"'));
   assert.match(SEARCH, /href=\{buildExampleDishHref\(example, menu, filters\.q\)\}/);
-  assert.match(SEARCH, /title=\{dishShareTitle\(\{ name: example\.name, restaurantName: group\.restaurantName \}\)\}/);
-  assert.match(SEARCH, /entry=\{entryFromDish\(\{[\s\S]*?dishId: example\.dishId,[\s\S]*?price: example\.priceDisplay,[\s\S]*?restaurantName: group\.restaurantName,/);
+  assert.match(SEARCH, /dish=\{\{[\s\S]*?dishId: example\.dishId,[\s\S]*?price: example\.priceDisplay,[\s\S]*?restaurantName: group\.restaurantName,/);
   assert.match(SEARCH, /dishKey=\{example\.dishId\}/);
 });
 

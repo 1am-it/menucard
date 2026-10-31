@@ -16,8 +16,7 @@ import useClientNow from '@/src/components/useClientNow'
 // deelknoppen bij elk gerecht van "Vanavond op de kaart".
 import ShareHeroCard from '@/src/components/ShareHeroCard'
 import DishShareButton from '@/src/components/DishShareButton'
-import { entryFromDish } from '@/src/lib/dishList'
-import { dishShareTitle } from '@/src/lib/dishShare'
+import SavedDishesBar from '@/src/components/SavedDishesBar'
 // BE-52 — opmaak die alleen bij deze pagina hoort, in een eigen bestand naast
 // de pagina in plaats van onderaan app/globals.css.
 import './home.css'
@@ -307,14 +306,13 @@ export default function HomeView({ candidates = [] }) {
                     <div className="tonight-actions">
                       <DishShareButton
                         href={dish.href}
-                        title={dishShareTitle({ name: dish.name, restaurantName: dish.restaurantName })}
-                        entry={entryFromDish({
+                        dish={{
                           dishId: dish.dishId,
                           name: dish.name,
                           category: dish.category,
                           price: dish.priceDisplay,
                           restaurantName: dish.restaurantName,
-                        })}
+                        }}
                         dishKey={dish.dishId}
                         name={dish.name}
                         withLabel
@@ -343,6 +341,7 @@ export default function HomeView({ candidates = [] }) {
       </main>
 
       <PublicFooter />
+      <SavedDishesBar />
       <MobileTabBar />
     </>
   )

@@ -37,14 +37,16 @@ test('home: de deelkaart staat in de hero, naast zoeken en chips', () => {
 
 test('home: elk gerecht van "Vanavond op de kaart" heeft Bewaren en Delen', () => {
   assert.match(HOME, /import DishShareButton from '@\/src\/components\/DishShareButton'/);
-  assert.match(HOME, /import \{ entryFromDish \} from '@\/src\/lib\/dishList'/);
-  assert.match(HOME, /import \{ dishShareTitle \} from '@\/src\/lib\/dishShare'/);
+  // BE-65 ronde 2 — de home laadt de deellogica niet meer zelf: de knop krijgt
+  // de compacte gerechtregel en importeert dis[List|hShare] pas bij de klik.
+  assert.doesNotMatch(HOME, /from '@\/src\/lib\/dishList'/);
+  assert.doesNotMatch(HOME, /from '@\/src\/lib\/dishShare'/);
   // De knoppen staan in een eigen cel naast de link, niet in de link.
   const item = HOME.slice(HOME.indexOf('className="tonight-item"'), HOME.indexOf('</li>', HOME.indexOf('className="tonight-item"')));
   assert.ok(item.includes('className="tonight-actions"'), 'de knoppen hebben een eigen cel');
   assert.ok(item.indexOf('</Link>') < item.indexOf('className="tonight-actions"'), 'de knoppen staan na de link');
   assert.match(HOME, /<DishShareButton\n(\s+[^\n]+\n)*?\s+withLabel\n/);
-  assert.match(HOME, /entry=\{entryFromDish\(\{[\s\S]*?dishId: dish\.dishId,[\s\S]*?name: dish\.name,[\s\S]*?category: dish\.category,[\s\S]*?price: dish\.priceDisplay,[\s\S]*?restaurantName: dish\.restaurantName,/);
+  assert.match(HOME, /dish=\{\{[\s\S]*?dishId: dish\.dishId,[\s\S]*?name: dish\.name,[\s\S]*?category: dish\.category,[\s\S]*?price: dish\.priceDisplay,[\s\S]*?restaurantName: dish\.restaurantName,/);
   assert.match(HOME, /dishKey=\{dish\.dishId\}/);
   assert.match(HOME, /href=\{dish\.href\}/);
   assert.match(HOME_CSS, /\.tonight-item \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto;/);

@@ -1,0 +1,102 @@
+/* BE-65 (#157, uitkomst 3) — de balk na het bewaren, naast de component
+   (BE-52). Alleen tokens: een donker vlak met lichte tekst, in licht
+   `--text-primary` als achtergrond en in donker precies omgekeerd; de knop
+   "Versturen" staat in `--accent-fill` met `--on-accent-fill`.
+
+   Positie: op desktop rechtsonder, hooguit 420 px breed. Op de telefoon over de
+   volle breedte en boven de tabbalk van BE-28 (die staat op 12 px van onderen
+   en is 60 px hoog, dus de balk begint op 80 px). De balk zit onder de tabbalk
+   in z-index (119 tegen 120): de tabbalk blijft altijd aanklikbaar. */
+
+.saved-bar {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 119;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--text-primary);
+  color: var(--bg);
+  box-shadow: var(--shadow-lg);
+}
+
+.saved-bar-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.35;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.saved-bar-send {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.saved-bar-send:hover {
+  background: var(--accent-fill-hover);
+}
+
+.saved-bar-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.saved-bar-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.saved-bar-send:focus-visible,
+.saved-bar-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Telefoon: volle breedte, boven de tabbalk (12 + 60 + 8 = 80 px). */
+@media (max-width: 720px) {
+  .saved-bar {
+    left: 12px;
+    right: 12px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    max-width: none;
+  }
+}
+
+/* 320 px: de tekst en de knop mogen niet naast elkaar blijven staan. */
+@media (max-width: 360px) {
+  .saved-bar {
+    flex-wrap: wrap;
+  }
+
+  .saved-bar-text {
+    flex-basis: 100%;
+  }
+}

@@ -15,8 +15,7 @@ import StatusIcon from '@/src/components/StatusIcon'
 // BE-65 (#157) — dezelfde bewaar- en deelknoppen als op de home, bij elk
 // zoekresultaat.
 import DishShareButton from '@/src/components/DishShareButton'
-import { entryFromDish } from '@/src/lib/dishList'
-import { dishShareTitle } from '@/src/lib/dishShare'
+import SavedDishesBar from '@/src/components/SavedDishesBar'
 // BE-55 stap B, deel 5 (issue 135) — eigen opmaak voor het label en het filter
 // "Vandaag" in de zoekresultaten, naast deze pagina (BE-52).
 import './search.css'
@@ -604,14 +603,13 @@ function SearchPageInner() {
                             <span className="dish-result-actions">
                               <DishShareButton
                                 href={buildExampleDishHref(example, menu, filters.q)}
-                                title={dishShareTitle({ name: example.name, restaurantName: group.restaurantName })}
-                                entry={entryFromDish({
+                                dish={{
                                   dishId: example.dishId,
                                   name: example.name,
                                   category: example.category,
                                   price: example.priceDisplay,
                                   restaurantName: group.restaurantName,
-                                })}
+                                }}
                                 dishKey={example.dishId}
                                 name={example.name}
                                 withLabel
@@ -900,6 +898,7 @@ function SearchPageInner() {
       </main>
 
       <PublicFooter />
+      <SavedDishesBar />
       <MobileTabBar />
     </>
   )
