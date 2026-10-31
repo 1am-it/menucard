@@ -299,14 +299,12 @@
   }
 }
 
+/* Onder 360 px: minder zijmarge en knoppen over de volle breedte. De h1 blijft
+   hier op de basisgrootte van 32 px; dat is de ondergrens uit de browsercheck. */
 @media (max-width: 359px) {
   .vr-main {
     padding-left: 14px;
     padding-right: 14px;
-  }
-
-  .vr-title {
-    font-size: 28px;
   }
 
   .vr-actions .vr-cta-primary,

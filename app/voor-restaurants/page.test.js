@@ -332,6 +332,14 @@ test('de desktopopmaak volgt de Lead-review: hero twee kolommen, kaarten in drie
   assert.match(regelIn(rules, '.vr-hero'), /gap:/);
   assert.doesNotMatch(regelIn(rules, '.vr-hero'), /grid-template-columns/);
   assert.match(regelIn(rules, '.vr-feature-grid'), /grid-template-columns: minmax\(0, 1fr\);/);
+
+  // De h1 zakt nergens onder 32 px: dat is de ondergrens uit de browsercheck.
+  // In ronde 1 stond hier in de smalste stand 28 px, maar die regel was door het
+  // ontbrekende sluitende blok nooit actief. Nu hij dat wel is, blijft hij 32 px.
+  const titelMaten = [...rules.matchAll(/\.vr-title \{([^}]*)\}/g)]
+    .flatMap((match) => [...match[1].matchAll(/font-size: (\d+)px/g)].map((maat) => Number(maat[1])));
+  assert.ok(titelMaten.length > 0, 'de h1 heeft een eigen font-size');
+  assert.ok(titelMaten.every((maat) => maat >= 32), `de h1 zakt onder 32 px: ${titelMaten.join(', ')}`);
 });
 
 test('de sitemap en robots blijven dicht, ook voor deze pagina', () => {

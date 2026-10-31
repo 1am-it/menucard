@@ -18,6 +18,9 @@
 //    voorbeeld" naar /nvwa/<id> van een bestaand restaurant;
 //  - de twee knoppen onderaan;
 //  - de link "Voor restaurants" in de kop leidt naar deze pagina;
+//  - de opmaak: vanaf 960 px staat het weekoverzicht rechts naast de h1-kolom,
+//    staan de eerste drie kaarten in één rij en staat de allergenenknop rechts
+//    van de tekst; op 390 en 320 px staat alles onder elkaar;
 //  - geen horizontale overloop en alle onderdelen passen in beeld.
 //
 // Het thema van elke opname is aangetoond, niet aangenomen: vóór de opname gaat
@@ -190,6 +193,26 @@ const VR_STATE = `(() => {
   probe.remove();
   const icon = document.querySelector('.vr-feature-icon');
   const restaurantsLink = document.querySelector('.pha-restaurants');
+  // De opmaak zelf (Lead-review ronde 2): waar staan de blokken ten opzichte
+  // van elkaar. top is absoluut, met de scrollpositie erbij, zodat de meting
+  // niet afhangt van waar de pagina op dat moment staat.
+  const rect = (sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      left: Math.round(r.left), right: Math.round(r.right),
+      top: Math.round(r.top + window.scrollY), bottom: Math.round(r.bottom + window.scrollY),
+    };
+  };
+  const layout = {
+    heroText: rect('.vr-hero-text'),
+    preview: rect('.vr-preview'),
+    // offsetTop: de eerste drie kaarten in dezelfde rij hebben dezelfde waarde.
+    featureTops: [...document.querySelectorAll('.vr-feature')].map((el) => el.offsetTop),
+    allergensText: rect('.vr-allergens-text'),
+    allergensAction: rect('.vr-allergens-action'),
+  };
   return {
     overflow: document.documentElement.scrollWidth - window.innerWidth,
     h1: tekst('.vr-title'),
@@ -220,6 +243,7 @@ const VR_STATE = `(() => {
     footerLinks: [...document.querySelectorAll('.public-footer-link')].map((el) => ({
       tekst: (el.innerText || '').trim(), href: el.getAttribute('href'), height: Math.round(el.getBoundingClientRect().height),
     })),
+    layout,
   };
 })()`;
 
@@ -366,6 +390,47 @@ async function paginaScenario(cdp) {
       `${licht.attr}/${donker.attr}`,
     );
     check(`${prefix}: de h1 is minimaal 32 px`, state.h1Size >= 32, `${state.h1Size}px`);
+
+    // De opmaak die de Lead in ronde 2 voorschreef. Vanaf 960 px het
+    // desktopontwerp, daaronder alles onder elkaar.
+    const { heroText, preview, featureTops, allergensText, allergensAction } = state.layout;
+    if (size.width >= 960) {
+      check(
+        `${prefix}: het weekoverzicht staat rechts naast de h1-kolom, op dezelfde hoogte`,
+        Boolean(heroText) && Boolean(preview)
+          && preview.left > heroText.right
+          && Math.abs(preview.top - heroText.top) <= 200,
+        `weekoverzicht ${JSON.stringify(preview)} naast de h1-kolom ${JSON.stringify(heroText)}`,
+      );
+      check(
+        `${prefix}: de eerste drie kaarten staan in één rij`,
+        featureTops.length === 6 && featureTops[0] === featureTops[1] && featureTops[1] === featureTops[2],
+        `offsetTop: ${featureTops.join(', ')}`,
+      );
+      check(
+        `${prefix}: de allergenenknop staat rechts van de tekst`,
+        Boolean(allergensText) && Boolean(allergensAction) && allergensAction.left > allergensText.right,
+        `knop ${JSON.stringify(allergensAction)} naast de tekst ${JSON.stringify(allergensText)}`,
+      );
+    } else {
+      check(
+        `${prefix}: het weekoverzicht staat onder de h1 in plaats van ernaast`,
+        Boolean(heroText) && Boolean(preview)
+          && preview.top >= heroText.bottom - 1
+          && Math.abs(preview.left - heroText.left) <= 1,
+        `weekoverzicht ${JSON.stringify(preview)} onder de h1-kolom ${JSON.stringify(heroText)}`,
+      );
+      check(
+        `${prefix}: de kaarten staan onder elkaar`,
+        featureTops.length === 6 && featureTops[1] > featureTops[0],
+        `offsetTop: ${featureTops.join(', ')}`,
+      );
+      check(
+        `${prefix}: de allergenenknop staat onder de tekst`,
+        Boolean(allergensText) && Boolean(allergensAction) && allergensAction.top >= allergensText.bottom - 1,
+        `knop ${JSON.stringify(allergensAction)} onder de tekst ${JSON.stringify(allergensText)}`,
+      );
+    }
 
     // De blokken die in één keer in beeld passen, één voor één gemeten.
     for (const [selector, label] of [
