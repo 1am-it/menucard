@@ -164,6 +164,57 @@ test('BE-70: de paginasamenvatting neemt de eerste meting en de zwaarste', () =>
   assert.equal(report.summaryOf(rijen).length, 1);
 });
 
+test('BE-70: de zwaarste antwoorden dragen de onderbouwing van "waar de bytes zaten"', () => {
+  const antwoorden = report.topResponses([
+    { type: 'Script', url: 'http://localhost:3198/_next/static/chunks/app.js?v=1', bytes: 70000 },
+    { type: 'Document', url: 'http://localhost:3198/inloggen', bytes: 12000 },
+    { type: 'Script', url: 'http://localhost:3198/_next/static/chunks/polyfills.js', bytes: 30000 },
+    { type: 'Other', url: 'http://localhost:3198/x', bytes: 0 },
+    { type: 'Image', url: 'not a url', bytes: 5000 },
+  ], 3);
+  assert.equal(antwoorden.length, 3, 'hooguit drie, en een antwoord zonder bytes telt niet mee');
+  assert.deepEqual(antwoorden.map((entry) => entry.bytes), [70000, 30000, 12000]);
+  assert.equal(antwoorden[0].path, '/_next/static/chunks/app.js', 'het pad zonder host en zonder query');
+  assert.equal(antwoorden[0].kb, 68.4);
+  assert.equal(antwoorden[2].type, 'Document');
+  assert.equal(antwoorden[1].kb, 29.3);
+  assert.equal(antwoorden.some((entry) => entry.path === 'not a url' && entry.bytes > 0), false, 'de kleinste valt buiten de grens');
+  assert.deepEqual(report.topResponses(null), []);
+  assert.equal(report.pathOf('http://localhost:3198/a/b?c=1#d'), '/a/b');
+  assert.equal(report.pathOf(''), '');
+});
+
+test('BE-70: het rapport laat per pagina zien waar de bytes zaten', () => {
+  const md = report.markdownReport({
+    rows: [
+      {
+        ...report.comboRow(groen({ page: 'inloggen', path: '/inloggen', bytes: 240 * 1024 })),
+        topResponses: [
+          { type: 'Script', path: '/_next/static/chunks/app/inloggen/page.js', bytes: 80 * 1024, kb: 80 },
+          { type: 'Document', path: '/inloggen', bytes: 30 * 1024, kb: 29.3 },
+        ],
+      },
+    ],
+  });
+  assert.match(md, /## Waar de bytes zaten/);
+  assert.match(md, /`\/inloggen` · 1280 px · light · 240 kB/);
+  assert.match(md, /80 kB · Script · `\/_next\/static\/chunks\/app\/inloggen\/page\.js`/);
+  assert.match(md, /29\.3 kB · Document · `\/inloggen`/);
+});
+
+test('BE-70: de open gegevens van de eigenaar staan in hun eigen lijst, niet als rood punt', () => {
+  const md = report.markdownReport({
+    rows: [report.comboRow(groen())],
+    openPoints: ['`/restaurants` stuurt door naar `/alle-restaurants`.'],
+    ownerOpenPoints: ['`/privacy` en `/colofon` meten groen; nog open: `[DATUM]`, `[ADRES]`.'],
+  });
+  assert.match(md, /## Open punten \(eigenaar\)/);
+  assert.match(md, /`\/privacy` en `\/colofon` meten groen; nog open: `\[DATUM\]`, `\[ADRES\]`\./);
+  assert.match(md, /## Open punten\n\n- `\/restaurants` stuurt door/);
+  assert.match(md, /Alle pagina's zijn groen op alle controles\./);
+  assert.match(report.markdownReport({ rows: [report.comboRow(groen())] }), /Geen open punten voor de eigenaar\./);
+});
+
 test('BE-70: het rapport noemt per pagina de laadgrootte en groen of rood', () => {
   const goed = report.comboRow(groen());
   const fout = report.comboRow(groen({ page: 'menu', path: '/menu/6-diner', bytes: 260 * 1024, a11yErrors: [{ criterion: 'contrast', reason: 'contrast-te-laag', name: 'p.prijs' }] }));
@@ -209,6 +260,8 @@ test('BE-70: de check neemt alle pagina\'s uit het contract op', () => {
     "path: '/r/6'",
     "path: '/voor-restaurants'",
     "path: '/inloggen'",
+    "path: '/privacy'",
+    "path: '/colofon'",
   ]) {
     assert.ok(source.includes(pad), `de check mist ${pad}`);
   }
@@ -270,6 +323,28 @@ test('BE-70: de check gebruikt de gedeelde scenariofilter en schrijft het bewijs
   const guard = source.indexOf('scenarioSelectionOutcome({ selection: SELECTION');
   const start = source.indexOf('await startServer(');
   assert.ok(guard > 0 && guard < start, 'de vlag wordt gelezen nadat de check al is gestart');
+});
+
+test('BE-70: de placeholders van /privacy en /colofon komen uit de bron van de teksten', () => {
+  const source = read(CHECK);
+  const legalCopy = require('../../src/lib/legalCopy');
+  assert.ok(Array.isArray(legalCopy.LEGAL_PLACEHOLDERS) && legalCopy.LEGAL_PLACEHOLDERS.length > 0, 'de bron heeft placeholders');
+  assert.match(source, /require\('\.\.\/\.\.\/src\/lib\/legalCopy'\)/, 'de check leest de lijst uit src/lib/legalCopy.js');
+  assert.match(source, /LEGAL_PLACEHOLDERS\.map\(/, 'elke placeholder komt in het rapport');
+  assert.match(source, /ownerOpenPoints: OWNER_OPEN_PUNTEN/);
+  // De eigenaarspunten zijn geen rood punt: ze staan niet in de meting.
+  assert.doesNotMatch(source, /ownerOpenPoints: OWNER_OPEN_PUNTEN[\s\S]{0,80}controls/);
+  for (const placeholder of legalCopy.LEGAL_PLACEHOLDERS) {
+    assert.match(placeholder, /^\[[^\]]+\]$/, `${placeholder} is een [...] plaatshouder`);
+  }
+});
+
+test('BE-70: de check bewaart per meting waar de bytes zaten', () => {
+  const source = read(CHECK);
+  assert.match(source, /stand\.perRequest\.push\(\{ type: aanvraag\.type, url: aanvraag\.url, bytes \}\)/);
+  assert.match(source, /perTypeBytes/);
+  assert.match(source, /topResponses: report\.topResponses\(stand\.perRequest\)/);
+  assert.match(source, /topResponses: load\.topResponses/);
 });
 
 test('BE-70: het bewijs noemt elke pagina met zes metingen', { skip: !fs.existsSync(path.join(ROOT, 'ops/browser/evidence/launch-check.json')) }, () => {

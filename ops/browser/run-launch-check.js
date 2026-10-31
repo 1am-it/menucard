@@ -59,6 +59,7 @@ const {
 const { THEME_LABELS, THEME_LUMINANCE, themeProofScript, clickThemeScript, themeProofValue, themeOk } = require('./lib/theme-proof');
 const { be67StubScript } = require('./lib/be67-daghap-stub');
 const { be62KiesStubScript, BE62_KIES_CODE } = require('./lib/be62-kies-stub');
+const { LEGAL_PLACEHOLDERS } = require('../../src/lib/legalCopy');
 const audit = require('./lib/a11y-audit');
 const report = require('./lib/launch-check-report');
 
@@ -118,6 +119,8 @@ const PAGES = [
   { name: 'deellink', path: '/r/6', ready: "!!document.querySelector('.detail-name')" },
   { name: 'voor-restaurants', path: '/voor-restaurants', ready: "!!document.querySelector('.vr-title')" },
   { name: 'inloggen', path: '/inloggen', ready: "!!document.querySelector('.inloggen-title')" },
+  { name: 'privacy', path: '/privacy', ready: "!!document.querySelector('h1')" },
+  { name: 'colofon', path: '/colofon', ready: "!!document.querySelector('h1')" },
 ];
 
 const checks = [];
@@ -241,7 +244,18 @@ async function applyTheme(cdp, theme, label) {
  * aan, dus elke meting is een koude eerste lading en niet de tweede keer.
  */
 function attachMeter(cdp) {
-  const stand = { actief: false, bytes: 0, verzoeken: 0, open: 0, laatst: 0, afbeeldingen: [], perType: {} };
+  const stand = {
+    actief: false,
+    bytes: 0,
+    verzoeken: 0,
+    open: 0,
+    laatst: 0,
+    afbeeldingen: [],
+    perType: {},
+    perTypeBytes: {},
+    perRequest: [],
+    aanvragen: {},
+  };
   cdp.on('Network.requestWillBeSent', (params) => {
     if (!stand.actief) return;
     const type = params.type || 'Other';
@@ -249,11 +263,20 @@ function attachMeter(cdp) {
     stand.open += 1;
     stand.laatst = Date.now();
     stand.perType[type] = (stand.perType[type] || 0) + 1;
-    if (type === 'Image' && params.request && params.request.url) stand.afbeeldingen.push(params.request.url);
+    const url = params.request && params.request.url ? params.request.url : '';
+    // Onthouden per aanvraag, zodat de afgeronde bytes aan een type en een pad
+    // te koppelen zijn: dat is wat "waar de bytes zaten" in het rapport nodig heeft.
+    stand.aanvragen[params.requestId] = { type, url };
+    if (type === 'Image' && url) stand.afbeeldingen.push(url);
   });
   cdp.on('Network.loadingFinished', (params) => {
     if (!stand.actief) return;
-    stand.bytes += Number(params.encodedDataLength) || 0;
+    const bytes = Number(params.encodedDataLength) || 0;
+    stand.bytes += bytes;
+    const aanvraag = stand.aanvragen[params.requestId] || { type: 'Other', url: '' };
+    stand.perTypeBytes[aanvraag.type] = (stand.perTypeBytes[aanvraag.type] || 0) + bytes;
+    stand.perRequest.push({ type: aanvraag.type, url: aanvraag.url, bytes });
+    delete stand.aanvragen[params.requestId];
     stand.open = Math.max(0, stand.open - 1);
     stand.laatst = Date.now();
   });
@@ -272,6 +295,9 @@ async function measureLoad(cdp, stand, url, ready) {
   stand.open = 0;
   stand.afbeeldingen = [];
   stand.perType = {};
+  stand.perTypeBytes = {};
+  stand.perRequest = [];
+  stand.aanvragen = {};
   stand.laatst = Date.now();
   stand.actief = true;
   await navigate(cdp, url, ready);
@@ -281,7 +307,14 @@ async function measureLoad(cdp, stand, url, ready) {
     await sleep(120);
   }
   stand.actief = false;
-  return { bytes: stand.bytes, requests: stand.verzoeken, images: stand.afbeeldingen.slice(), perType: { ...stand.perType } };
+  return {
+    bytes: stand.bytes,
+    requests: stand.verzoeken,
+    images: stand.afbeeldingen.slice(),
+    perType: { ...stand.perType },
+    perTypeBytes: { ...stand.perTypeBytes },
+    topResponses: report.topResponses(stand.perRequest),
+  };
 }
 
 // ─── Stubs en de stand van localStorage ─────────────────────────────────────
@@ -407,6 +440,8 @@ async function meetPagina(cdp, page) {
         scrollWidth: overflow.scrollWidth,
         innerWidth: overflow.innerWidth,
         perType: load.perType,
+        perTypeBytes: load.perTypeBytes,
+        topResponses: load.topResponses,
         themeProof: proof,
         panelClosed,
         tipClosed: tip,
@@ -433,8 +468,13 @@ const SCENARIOS = PAGES.map((page) => ({ name: page.name, run: (cdp) => meetPagi
 const OPEN_PUNTEN = [
   '`/restaurants` stuurt permanent door naar `/alle-restaurants` (BE-29); de meting is de doorverwijzing plus de doelpagina, dus dezelfde bytes als `/alle-restaurants`.',
   '`/r/[id]` is een korte QR-doorverwijzing naar `/restaurant/[id]` (BE-56): de meting is de doorverwijzing plus de restaurantpagina.',
-  '`/privacy` en `/colofon` bestaan nog niet en staan daarom niet in de check (contract #173).',
-  '`/inloggen` wordt alleen gemeten: `app/inloggen/` is van runner 1 (BE-69) en is in deze ronde niet aangepast.',
+];
+
+// De open gegevens van de eigenaar, geen rood punt in de meting (contract #173
+// en de Lead-opdracht van ronde 2). De lijst komt uit de bron van de teksten
+// zelf (src/lib/legalCopy.js), zodat een nieuwe placeholder hier vanzelf staat.
+const OWNER_OPEN_PUNTEN = [
+  `\`/privacy\` en \`/colofon\` staan in de check en meten groen; de tekst bevat nog ${LEGAL_PLACEHOLDERS.length} placeholders die de eigenaar vóór de lancering invult (bron: \`src/lib/legalCopy.js\`, \`LEGAL_PLACEHOLDERS\`): ${LEGAL_PLACEHOLDERS.map((placeholder) => `\`${placeholder}\``).join(', ')}.`,
 ];
 
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
@@ -464,6 +504,7 @@ function writeEvidence(extra = {}) {
     themes: themeLog,
     network: networkEvidence,
     openPoints: OPEN_PUNTEN,
+    ownerOpenPoints: OWNER_OPEN_PUNTEN,
     checks,
     shots,
     failed: failed.length,

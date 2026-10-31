@@ -37,6 +37,40 @@ const CONTROLS = [
   { key: 'a11y', label: 'a11y', column: 'a11y' },
 ];
 
+/** Alleen het pad van een URL, zodat het bewijs geen host of query herhaalt. */
+function pathOf(url) {
+  const value = String(url || '');
+  if (!value) return '';
+  try {
+    return new URL(value).pathname;
+  } catch (error) {
+    return value.slice(0, 120);
+  }
+}
+
+/**
+ * De zwaarste antwoorden van één eerste lading, aflopend op bytes. Dit is de
+ * onderbouwing van "waar de bytes zaten" in het rapport; het bewijs bewaart
+ * alleen het pad en het type, geen host en geen query.
+ */
+function topResponses(perRequest, limit = 8) {
+  const list = Array.isArray(perRequest) ? perRequest : [];
+  const grens = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : 8;
+  return list
+    .map((entry) => {
+      const bytes = Number(entry && entry.bytes);
+      return {
+        type: String((entry && entry.type) || 'Other'),
+        path: pathOf(entry && entry.url),
+        bytes: Number.isFinite(bytes) && bytes > 0 ? bytes : 0,
+      };
+    })
+    .filter((entry) => entry.bytes > 0)
+    .sort((left, right) => right.bytes - left.bytes)
+    .slice(0, grens)
+    .map((entry) => ({ type: entry.type, path: entry.path, bytes: entry.bytes, kb: roundKb(entry.bytes) }));
+}
+
 /** Bytes naar kB met één decimaal; onbruikbare waarden worden 0. */
 function roundKb(bytes) {
   const value = Number(bytes);
@@ -292,6 +326,33 @@ function markdownReport(evidence) {
     }
   }
   regels.push('');
+  regels.push('## Waar de bytes zaten');
+  regels.push('');
+  const zwaarste = [...rows].sort((left, right) => (Number(right.bytes) || 0) - (Number(left.bytes) || 0)).slice(0, 6);
+  if (zwaarste.length === 0) {
+    regels.push('Nog geen meting.');
+  } else {
+    regels.push('De zwaarste eerste ladingen, met de grootste antwoorden van die lading (CDP `Network.loadingFinished` → het pad en het type per respons).');
+    regels.push('');
+    for (const row of zwaarste) {
+      regels.push(`- \`${row.path}\` · ${row.viewport} px · ${row.theme} · ${roundKb(row.bytes)} kB · ${row.requests || 0} aanvragen`);
+      const antwoorden = Array.isArray(row.topResponses) ? row.topResponses.slice(0, 5) : [];
+      if (antwoorden.length === 0) {
+        regels.push(`  - geen antwoorden vastgelegd`);
+        continue;
+      }
+      for (const antwoord of antwoorden) {
+        regels.push(`  - ${antwoord.kb} kB · ${antwoord.type} · \`${antwoord.path || '(geen pad)'}\``);
+      }
+    }
+  }
+  regels.push('');
+  regels.push('## Open punten (eigenaar)');
+  regels.push('');
+  regels.push(Array.isArray(input.ownerOpenPoints) && input.ownerOpenPoints.length > 0
+    ? input.ownerOpenPoints.map((punt) => `- ${punt}`).join('\n')
+    : '- Geen open punten voor de eigenaar.');
+  regels.push('');
   regels.push('## Open punten');
   regels.push('');
   regels.push(Array.isArray(input.openPoints) && input.openPoints.length > 0
@@ -309,6 +370,8 @@ module.exports = {
   MAIN_BUTTON,
   CONTROLS,
   roundKb,
+  pathOf,
+  topResponses,
   imageAllowed,
   loadVerdict,
   imageVerdict,
