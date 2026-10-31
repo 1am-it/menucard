@@ -53,6 +53,27 @@ test('de kop gebruikt dezelfde opbouw als /mijn-restaurant/claimen: PrimaryNav e
   );
 });
 
+test('onder 360 px blijft de kop één regel: eigen smalle regel, geen verborgen accountknop', () => {
+  const css = read(CSS);
+  assert.match(
+    read(DASHBOARD),
+    /<header className="site-header owner-header">/,
+    'de smalle kopregels moeten aan deze pagina hangen, niet aan de gedeelde kop',
+  );
+  const narrow = css.match(/@media \(max-width: 360px\) \{[\s\S]*?\n\}/);
+  assert.ok(narrow, 'de pagina hoort een eigen regel onder 360 px te hebben');
+  assert.match(
+    narrow[0],
+    /\.owner-header \.wordmark-text \{ display: none; \}/,
+    'op 320 px past woordmerk + themablok + avatar niet naast elkaar; de tekst vervalt, de tegel blijft',
+  );
+  assert.doesNotMatch(
+    narrow[0],
+    /account-menu|theme-switch|theme-btn/,
+    'de accountknop en het themablok mogen op smalle schermen niet verdwijnen of kleiner worden',
+  );
+});
+
 test('op mobiel doet de bestaande MobileTabBar de navigatie, na de main', () => {
   const source = read(DASHBOARD);
   assert.match(source, /import MobileTabBar from ['"]@\/src\/components\/MobileTabBar['"]/);

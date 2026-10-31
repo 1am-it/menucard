@@ -206,7 +206,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
           "Deze week" niet onder de vaste kop. Het nav-landmark blijft altijd
           aanwezig: PrimaryNav op desktop, MobileTabBar (aria-label "Hoofdmenu")
           op mobiel. */}
-      <header className="site-header">
+      <header className="site-header owner-header">
         <div className="header-inner">
           <Wordmark />
           <div className="header-right">
