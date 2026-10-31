@@ -23,8 +23,8 @@
       "route": "/menu/[id]/page",
       "label": "/menu/[id]",
       "baseGzipBytes": 140676,
-      "headGzipBytes": 141621,
-      "deltaBytes": 945,
+      "headGzipBytes": 140852,
+      "deltaBytes": 176,
       "withinLimit": true
     },
     {

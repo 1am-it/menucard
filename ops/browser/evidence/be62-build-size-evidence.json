@@ -6,7 +6,7 @@
   "ranAt": "2026-10-31",
   "baseRef": "origin/main",
   "baseSha": "8f9d2896dceb09f1382a7c0e431e29511e3741ad",
-  "headSha": "3ba303a9a82f6d32d77c0994869e9c2891a81a8d",
+  "headSha": "d78698e49e594b6ca3a6569f67d97da498e12d06",
   "limitBytes": 1024,
   "routes": [
     {
@@ -21,8 +21,8 @@
       "route": "/menu/[id]",
       "routeKey": "/menu/[id]/page",
       "baseGzipBytes": 140676,
-      "headGzipBytes": 141621,
-      "deltaBytes": 945,
+      "headGzipBytes": 140852,
+      "deltaBytes": 176,
       "withinLimit": true
     },
     {

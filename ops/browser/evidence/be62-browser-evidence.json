@@ -2,7 +2,7 @@
   "script": "run-be62-browser-check.js",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde kies-API; geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T11:56:31.017Z",
+  "startedAt": "2026-10-31T12:16:14.956Z",
   "port": 3196,
   "filter": null,
   "scenarioRuns": [
@@ -11,7 +11,7 @@
       "checks": 70,
       "passed": 70,
       "failed": 0,
-      "durationMs": 16872,
+      "durationMs": 17702,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 84,
       "passed": 84,
       "failed": 0,
-      "durationMs": 18036,
+      "durationMs": 34899,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 15,
       "passed": 15,
       "failed": 0,
-      "durationMs": 9250,
+      "durationMs": 10853,
       "error": null
     }
   ],
@@ -1049,7 +1049,7 @@
     },
     {
       "file": "be62-gerecht-1280-light.png",
-      "sha256": "d840f37f836f43f240f30cdb64469d6b7035ebb198bfb91dfe8372a31803b1fa",
+      "sha256": "89c949b251b65dd36557d2d7e1b2d7413453460eea30a5fb8164e32e8278344f",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1121,7 +1121,7 @@
     },
     {
       "file": "be62-gerecht-1280-dark.png",
-      "sha256": "f3ffb424f1c01d27a5c62375ee1c7b3a8a0fd4e64dcba9e13bcdf029fa0ed6c8",
+      "sha256": "26e4390dbecc2610ad2472984fde07e1e082f66ceae878866e6c43e8dc5273c0",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1265,7 +1265,7 @@
     },
     {
       "file": "be62-tip-390-donker.png",
-      "sha256": "98613e6d11fd9f99e56ae32d37aa0d72b0b4f37d0c4ff5104eca0532a187d6b5",
+      "sha256": "ff9d3f9f48377c00fadbef32cb22828ee222833a4255c09bec9867efd9a79c97",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
