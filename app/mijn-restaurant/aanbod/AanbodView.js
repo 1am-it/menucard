@@ -326,11 +326,11 @@ export default function AanbodView({ restaurantIndex }) {
       </header>
 
       <main className="owner-main">
-        <p className="aanbod-back">
+        <nav className="aanbod-back" aria-label="Terug naar het overzicht">
           <Link className="owner-link" href={DASHBOARD_HREF}>
             ← Terug naar Mijn restaurant
           </Link>
-        </p>
+        </nav>
 
         <h1 className="owner-title">{FORM_MESSAGES.title}</h1>
         <p className="owner-intro">{FORM_MESSAGES.intro}</p>

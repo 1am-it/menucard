@@ -112,6 +112,19 @@
   flex-wrap: wrap;
 }
 
+/* BE-67, a11y (ronde 3): het keuzerondje en het vinkje zijn zelf het tikdoel.
+   Op de standaardmaat (13 px) haalt geen enkel doel de 24 px van WCAG 2.2 AA
+   (de browsercheck meldde "te-klein" op de houderpagina). Het rondje of vinkje
+   is nu 24 px; de omliggende kaart van 44 px blijft het zichtbare doel. */
+.aanbod-soort-keuze input,
+.aanbod-chip input,
+.aanbod-weekdag input {
+  inline-size: 24px;
+  block-size: 24px;
+  margin: 0;
+  flex: none;
+}
+
 .aanbod-chips {
   display: flex;
   flex-wrap: wrap;

@@ -54,7 +54,7 @@ const {
 } = require('./lib/scenario-filter');
 const { authStubScript } = require('./lib/be48-auth-stub');
 const { be67StubScript } = require('./lib/be67-daghap-stub');
-const { THEME_LABELS, themeProofScript, clickThemeScript, themeProofValue, themeOk } = require('./lib/theme-proof');
+const { THEME_LABELS, THEME_LUMINANCE, themeProofScript, clickThemeScript, themeProofValue, themeOk } = require('./lib/theme-proof');
 const audit = require('./lib/a11y-audit');
 
 const OUT_DIR = path.join(__dirname, 'output', 'be-67');
@@ -123,6 +123,19 @@ async function themeProof() {
   return themeProofValue(await evalJs(cdp, themeProofScript()));
 }
 
+/**
+ * Het bewijs ná het sluiten van het instellingenpaneel. Op de publieke pagina's
+ * staat de themaknop zelf in dat paneel, dus na het sluiten is er geen actieve
+ * knop meer om te lezen; het thema blijft dan bewezen door `data-theme` plus de
+ * helderheid van `--bg`, met dezelfde grenzen als themeOk.
+ */
+function themeStillApplied(proof, theme) {
+  if (!proof || proof.attr !== theme || !Number.isFinite(proof.luminance)) return false;
+  return theme === 'light'
+    ? proof.luminance > THEME_LUMINANCE.light.above
+    : proof.luminance < THEME_LUMINANCE.dark.below;
+}
+
 const SETTINGS_BUTTON = '.pha-settings';
 const SETTINGS_PANEL = '.pha-panel';
 
@@ -184,7 +197,7 @@ async function applyTheme(theme, { paneel = true } = {}) {
     if (!gesloten) throw new Error(`settings_panel_still_open: ${label}`);
     // Het paneel kan focus en het thema hebben teruggezet; lees opnieuw.
     proof = await themeProof();
-    if (!themeOk(proof, theme)) throw new Error(`theme_lost_after_close: ${label}`);
+    if (!themeStillApplied(proof, theme)) throw new Error(`theme_lost_after_close: ${label}`);
   }
   themeLog.push({
     theme,
