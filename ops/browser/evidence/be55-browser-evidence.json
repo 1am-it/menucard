@@ -1,15 +1,15 @@
 {
   "script": "run-be55-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "startedAt": "2026-10-30T23:41:20.808Z",
-  "port": 3186,
+  "startedAt": "2026-10-31T00:09:11.319Z",
+  "port": 3181,
   "scenarioRuns": [
     {
       "name": "vandaag",
       "checks": 109,
       "passed": 109,
       "failed": 0,
-      "durationMs": 39516,
+      "durationMs": 67551,
       "error": null
     },
     {
@@ -17,7 +17,7 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 10387,
+      "durationMs": 5354,
       "error": null
     },
     {
@@ -25,7 +25,7 @@
       "checks": 66,
       "passed": 66,
       "failed": 0,
-      "durationMs": 24096,
+      "durationMs": 25516,
       "error": null
     },
     {
@@ -33,7 +33,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 21690,
+      "durationMs": 17641,
       "error": null
     }
   ],
@@ -615,22 +615,22 @@
     {
       "name": "melden: er zijn twee verzoeken verstuurd",
       "passed": true,
-      "detail": "[{\"apparaat\":\"23917c8c382dbd03f62d09f7\"},{\"apparaat\":\"23917c8c382dbd03f62d09f7\"}]"
+      "detail": "[{\"apparaat\":\"d190980b837969c5c254ac37\"},{\"apparaat\":\"d190980b837969c5c254ac37\"}]"
     },
     {
       "name": "melden: elk verzoek heeft alleen een apparaatkenmerk",
       "passed": true,
-      "detail": "{\"apparaat\":\"23917c8c382dbd03f62d09f7\"}"
+      "detail": "{\"apparaat\":\"d190980b837969c5c254ac37\"}"
     },
     {
       "name": "melden: het apparaatkenmerk heeft de vorm uit 0023",
       "passed": true,
-      "detail": "23917c8c382dbd03f62d09f7"
+      "detail": "d190980b837969c5c254ac37"
     },
     {
       "name": "melden: het bewaarde kenmerk is hetzelfde als wat verstuurd is",
       "passed": true,
-      "detail": "23917c8c382dbd03f62d09f7"
+      "detail": "d190980b837969c5c254ac37"
     },
     {
       "name": "zoeken light/1280: het thema is toegepast",
@@ -1242,7 +1242,7 @@
     },
     {
       "file": "be55-melden-bevestiging-390-dark.png",
-      "sha256": "de20a90101745bb13099f15b0cb636251f6d385c6e77f913815dffa1f6e91dac",
+      "sha256": "17b781d45d6225979f0953b511ac2716f1beab803d7271c5ecaab543c7b6afd1",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1287,7 +1287,7 @@
     },
     {
       "file": "be55-zoeken-390-dark.png",
-      "sha256": "c1b3be668ceef74c3a9eff1eb0c434a9a26f73e77b76d38d5e2d6116ce53c92a",
+      "sha256": "0b921a0e3b69f8a5e3b6e4f90462f7c59d69b66b6d09d08c96ec6e5475125c95",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1305,7 +1305,7 @@
     },
     {
       "file": "be55-zoeken-filter-aan-390-dark.png",
-      "sha256": "a3d4f6d5b7902341729d8b1fe6c5c69a119e15cab6d09867030896e2d47ec1d9",
+      "sha256": "96be4108b9d45b073e2b29deeb406d75f88d6c936f5f2a129b98926b2a7a0476",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
