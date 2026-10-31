@@ -44,6 +44,15 @@ test('de pagina heeft dezelfde kop als de publieke pagina\'s, met het accountmen
   assert.match(source, /<h1 className="inloggen-title">Inloggen<\/h1>/);
 });
 
+test('de kop heeft het navigatielandmark van de publieke pagina\'s', () => {
+  // BE-59 deel 3: zonder <nav> faalde de a11y-check van de publieke pagina's
+  // (ops/browser/lib/a11y-audit.js) op een ontbrekend nav-landmark.
+  const source = read(PAGE);
+  assert.match(source, /<nav className="inloggen-nav" aria-label="Naar de site">\s*<Wordmark \/>\s*<\/nav>/);
+  const css = read(CSS);
+  assert.match(css, /\.inloggen-nav \{[^}]*display: flex/);
+});
+
 test('de opmaak gebruikt alleen tokens en geen harde kleuren', () => {
   const css = read(CSS);
   const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');

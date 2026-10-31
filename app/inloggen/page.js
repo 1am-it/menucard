@@ -26,7 +26,15 @@ export default function InloggenPage() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Wordmark />
+          {/* BE-59 deel 3: de publieke pagina's hebben een navigatielandmark
+              (ops/browser/lib/a11y-audit.js, BE-51). /inloggen had er geen: het
+              woordmerk is de enige echte weg terug naar de site, dus die link
+              staat hier in een eigen <nav> met een naam. De opmaak blijft
+              gelijk; zonder deze nav faalde de toegankelijkheidscheck op een
+              ontbrekend nav-landmark. */}
+          <nav className="inloggen-nav" aria-label="Naar de site">
+            <Wordmark />
+          </nav>
           <div className="header-right">
             <ThemeToggle />
             <AccountMenuButton />

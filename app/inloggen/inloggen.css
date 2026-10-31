@@ -5,6 +5,18 @@
    (schermen 4 en 5): twee grote keuzekaarten onder elkaar, elk minimaal 44 px
    hoog, en op een brede kaart naast elkaar. */
 
+/* BE-59 deel 3 (#146) — het navigatielandmark van deze pagina. De enige echte
+   navigatie is het woordmerk naar de startpagina; die link staat in een <nav>
+   met een naam, zodat de publieke pagina's allemaal hetzelfde landmark hebben
+   (ops/browser/lib/a11y-audit.js). De maat en plaats blijven gelijk aan de kop
+   van de andere publieke pagina's. */
+.inloggen-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
 .inloggen-main {
   box-sizing: border-box;
   width: 100%;
