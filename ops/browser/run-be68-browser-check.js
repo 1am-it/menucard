@@ -69,7 +69,10 @@ const QR_ROUTE = '/mijn-restaurant/qr';
 const OWNER_EMAIL = 'houder@example.invalid';
 const EMAIL_CODE = '654321';
 const ROLES = [{ role: 'owner', restaurant_id: '1' }];
-const RESTAURANT_NAME = 'Pata Negra';
+// De naam komt uit dezelfde statische index als de pagina gebruikt, zodat de
+// check niet zijn eigen waarheid naast de data zet.
+const RESTAURANTS = require('../../data/restaurants.json');
+const RESTAURANT_NAME = (RESTAURANTS['1'] || {}).name || '';
 
 // De vaste teksten van src/lib/qrKaartje.js, hier alleen om te vergelijken.
 const TITLE = 'QR-kaartje voor op tafel';
@@ -341,50 +344,6 @@ async function readPage() {
   );
 }
 
-    errors,
-    shots,
-
-/** De afdrukstand van de pagina: wat is zichtbaar op papier, en hoe groot? */
-async function readPrint() {
-  return evalJs(
-    cdp,
-    `(() => {
-      const state = (selector) => {
-        const el = document.querySelector(selector);
-        if (!el) return null;
-        const style = getComputedStyle(el);
-        const r = el.getBoundingClientRect();
-        return { display: style.display, width: Math.round(r.width), height: Math.round(r.height) };
-      };
-      const sheet = document.querySelector('.qr-kaartje-afdruk');
-      const cards = [...document.querySelectorAll('.qr-kaartje-kaart--afdruk')];
-      const svgs = cards.map((card) => {
-        const svg = card.querySelector('svg.qr-kaartje-code-svg');
-        const modulePath = svg ? svg.querySelector('path') : null;
-        const d = modulePath ? modulePath.getAttribute('d') || '' : '';
-        return { hasSvg: Boolean(svg), modules: d ? d.split('M').length - 1 : 0 };
-      });
-      return {
-        header: state('.site-header'),
-        main: state('main.owner-main'),
-        preview: state('.qr-kaartje-voorbeeld'),
-        keuzes: state('#qr-kaartje-keuzes'),
-        actions: state('.qr-kaartje-acties'),
-        adjust: state('.qr-kaartje-aanpassen'),
-        sheet: state('.qr-kaartje-afdruk'),
-        formaat: sheet ? sheet.getAttribute('data-formaat') : null,
-        columns: sheet ? getComputedStyle(sheet).gridTemplateColumns : null,
-        count: cards.length,
-        cards: cards.map((card) => {
-          const r = card.getBoundingClientRect();
-          return { width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), left: Math.round(r.left) };
-        }),
-        svgs,
-      };
-    })()`,
-  );
-}
-
 /** Een keuze in de pagina zelf aanklikken (radio, knop of label). */
 async function clickSelector(selector) {
   const clicked = await evalJs(
@@ -408,6 +367,7 @@ async function typeText(value) {
 
 /** Een opname met het themabewijs ernaast; het paneel is dicht voor de opname. */
 async function shot(name, meta) {
+  fs.mkdirSync(SHOT_DIR, { recursive: true });
   const file = await screenshot(cdp, SHOT_DIR, name);
   shots.push({ name, ...meta, ...file });
   return file;
@@ -645,7 +605,7 @@ async function runAfdruk() {
 
   await cdp.send('Emulation.setEmulatedMedia', { media: 'print' });
   await sleep(400);
-  const a6 = await readPrint();
+  const a6 = await leesAfdrukStand();
   add(
     'afdruk a6: kop, keuzes, voorbeeld en knoppen zijn verborgen',
     Boolean(a6.header) &&
@@ -682,7 +642,7 @@ async function runAfdruk() {
   await clickSelector('.qr-kaartje-formaat input[value="a4"]');
   await cdp.send('Emulation.setEmulatedMedia', { media: 'print' });
   await sleep(400);
-  const a4 = await readPrint();
+  const a4 = await leesAfdrukStand();
   add(
     'afdruk a4: vier kaartjes in twee kolommen op één vel',
     a4.formaat === 'a4' &&
@@ -734,6 +694,51 @@ async function runA11y() {
     a11yResults.push({ route: QR_ROUTE, theme, errors: review.errors.length });
   }
   await applyTheme('light');
+}
+
+/**
+ * De afdrukstand van de pagina: wat is zichtbaar op papier, en hoe groot?
+ * (Staat bewust hier, vlak bij de scenario's: deze plek in het bestand is
+ * aantoonbaar de hoogste scope, zie de probe in de commit.)
+ */
+async function leesAfdrukStand() {
+  return evalJs(
+    cdp,
+    `(() => {
+      const state = (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return null;
+        const style = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return { display: style.display, width: Math.round(r.width), height: Math.round(r.height) };
+      };
+      const sheet = document.querySelector('.qr-kaartje-afdruk');
+      const cards = [...document.querySelectorAll('.qr-kaartje-kaart--afdruk')];
+      const svgs = cards.map((card) => {
+        const svg = card.querySelector('svg.qr-kaartje-code-svg');
+        const modulePath = svg ? svg.querySelector('path') : null;
+        const d = modulePath ? modulePath.getAttribute('d') || '' : '';
+        return { hasSvg: Boolean(svg), modules: d ? d.split('M').length - 1 : 0 };
+      });
+      return {
+        header: state('.site-header'),
+        main: state('main.owner-main'),
+        preview: state('.qr-kaartje-voorbeeld'),
+        keuzes: state('#qr-kaartje-keuzes'),
+        actions: state('.qr-kaartje-acties'),
+        adjust: state('.qr-kaartje-aanpassen'),
+        sheet: state('.qr-kaartje-afdruk'),
+        formaat: sheet ? sheet.getAttribute('data-formaat') : null,
+        columns: sheet ? getComputedStyle(sheet).gridTemplateColumns : null,
+        count: cards.length,
+        cards: cards.map((card) => {
+          const r = card.getBoundingClientRect();
+          return { width: Math.round(r.width), height: Math.round(r.height), top: Math.round(r.top), left: Math.round(r.left) };
+        }),
+        svgs,
+      };
+    })()`,
+  );
 }
 
 const SCENARIOS = [
@@ -827,4 +832,6 @@ const timeout = setTimeout(() => {
   }
   if (errors.length > 0) process.exitCode = 1;
 })();
+
+
 

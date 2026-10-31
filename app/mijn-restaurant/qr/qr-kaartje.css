@@ -97,7 +97,9 @@
 .qr-kaartje-aanpassen:focus-visible,
 .qr-kaartje-doel input:focus-visible,
 .qr-kaartje-formaat input:focus-visible {
-
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
 /* ── De twee keuzekaarten (doel) ─────────────────────────────────────────── */
 
 .qr-kaartje-doelen {
@@ -227,6 +229,16 @@
 
 .qr-kaartje-aanpassen {
   justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 /* ── Het kaartje: altijd papier ──────────────────────────────────────────── */
 
@@ -354,22 +366,6 @@
   color: var(--text-primary);
 }
 
-  min-height: 44px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font: inherit;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-
 /* Op het scherm bestaat het afdrukvel niet; bij printen is het het enige dat
  * overblijft. */
 .qr-kaartje-afdruk {
@@ -394,6 +390,12 @@
 
   .qr-kaartje-doelen {
     grid-template-columns: 1fr;
+  }
+
+  /* `hidden` moet op mobiel echt verbergen: `.qr-kaartje-keuzes` zet display,
+   * en een eigen display-regel wint van de standaardregel van de browser. */
+  .qr-kaartje-keuzes[hidden] {
+    display: none;
   }
 
   .qr-kaartje-knop {

@@ -213,3 +213,67 @@ test('BE-68: zonder build blijft de chunkcontrole over aan de buildronde', (t) =
     }
   }
 });
+test('BE-68: het kaartje draagt de URL en de teruglink heeft geen kapotte tekens', () => {
+  // De browsercheck leest de URL achter de QR-code uit `data-url`; zonder dat
+  // haakje kan een controle alleen naar de afbeelding raden.
+  assert.match(VIEW, /data-url=\{url \|\| ''\}/);
+  // De teruglink naar Mijn restaurant hoort een echt pijltje te tonen. In een
+  // eerdere versie stond hier een kapot teken (â†), dat de browser ook zo laat
+  // zien: de bron is UTF-8 en bevat daarom geen vervangingstekens.
+  const terug = VIEW.split(/\r?\n/).find((regel) => regel.includes('Terug naar Mijn restaurant')) || '';
+  assert.ok(terug.includes('\u2190'), `de teruglink bevat geen pijltje: ${terug.trim()}`);
+  assert.equal(/\u00e2\u2020/.test(VIEW), false, 'de pagina bevat een dubbel gecodeerd teken');
+});
+
+/**
+ * BE-68 ronde 2 (#168) — de opmaak van deze pagina is gewone CSS, geen nesting.
+ *
+ * In ronde 1 waren twee regelopeningen weggevallen: de focusregel en
+ * `.qr-kaartje-aanpassen` sloten nooit, waardoor de browser alles erna als
+ * geneste regel las. De pagina zag er daardoor half onopgemaakt uit (knoppen van
+ * 21 px, kaartje zonder papier) terwijl de broncontroles groen bleven: het
+ * bestand had even veel `{` als `}`. Daarom kijkt deze test naar de structuur:
+ * een regel binnen een regel mag niet, en een declaratie buiten een blok mag
+ * niet.
+ */
+function cssStructuurFouten(css) {
+  const fouten = [];
+  const stapel = [];
+  const regels = css.split(/\r?\n/);
+  regels.forEach((regel, index) => {
+    const tekst = regel.trim();
+    if (!tekst) return;
+    const opent = tekst.includes('{');
+    const sluit = tekst.includes('}');
+    if (opent) {
+      const atRegel = tekst.startsWith('@');
+      if (!atRegel && stapel.includes('regel')) {
+        fouten.push(`regel ${index + 1}: een regel binnen een regel (${tekst.slice(0, 60)})`);
+      }
+      stapel.push(atRegel ? 'at' : 'regel');
+      return;
+    }
+    if (sluit) {
+      if (stapel.length === 0) fouten.push(`regel ${index + 1}: sluit een blok dat niet open staat`);
+      else stapel.pop();
+      return;
+    }
+    if (stapel.length === 0 && tekst.includes(':') && tekst.endsWith(';')) {
+      fouten.push(`regel ${index + 1}: declaratie buiten een blok (${tekst.slice(0, 60)})`);
+    }
+  });
+  if (stapel.length > 0) fouten.push(`aan het eind staan ${stapel.length} blokken nog open`);
+  return fouten;
+}
+
+test('BE-68: de opmaak van het QR-kaartje heeft geen geneste of losse regels', () => {
+  assert.deepEqual(cssStructuurFouten(cssZonderCommentaar), []);
+  // De twee blokken die in ronde 1 open bleven, staan er nu compleet.
+  assert.match(cssZonderCommentaar, /\.qr-kaartje-formaat input:focus-visible \{\s*outline: 2px solid var\(--border-focus\);\s*outline-offset: 2px;\s*\}/);
+  assert.match(cssZonderCommentaar, /\.qr-kaartje-aanpassen \{[^}]*min-height: 44px;[^}]*cursor: pointer;\s*\}/);
+  // En `hidden` verbergt de keuzes ook op mobiel, waar de pagina ze zelf op
+  // display zet.
+  assert.match(cssZonderCommentaar, /@media \(max-width: 640px\) \{[\s\S]*\.qr-kaartje-keuzes\[hidden\] \{\s*display: none;\s*\}/);
+});
+
+
