@@ -241,6 +241,14 @@
   min-width: 0;
 }
 
+/* Het eerste prijsveld staat los in het raster en werd anders uitgerekt tot de
+   hoogte van de buurkolom (label + veld + hint). Het schuift zo ver omlaag als
+   het label boven het tweede veld, zodat beide velden op één lijn staan. */
+.aanbod-prijzen > .aanbod-input {
+  align-self: start;
+  margin-top: calc(1.5em + 6px);
+}
+
 .aanbod-weekdag-knoppen {
   display: flex;
   flex-wrap: wrap;
