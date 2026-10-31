@@ -30,4 +30,5 @@ ops/perf/output/
 
 # BE-65 (#157) - eigen bouwmappen voor de laadgrootte-meting (next build met
 # NEXT_DIST_DIR). Ze horen nooit in git; na de meting worden ze verwijderd.
-.next-head/.next-base/
+.next-head/
+.next-base/
