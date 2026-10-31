@@ -41,14 +41,12 @@ function functionBlock() {
   return code.slice(start, end);
 }
 
-test('0024: een uniek migratienummer, en 0024 is het hoogste', () => {
+test('0024: een uniek migratienummer', () => {
   const files = fs.readdirSync(MIGRATIONS).filter((name) => name.endsWith('.sql')).sort();
   assert.deepEqual(files.filter((name) => name.startsWith('0024')), [FILE]);
   const numbers = files.map((name) => name.slice(0, 4));
   assert.equal(new Set(numbers).size, numbers.length, 'elk nummer is uniek');
-  // 0023 hoort bij BE-55 en staat hier bewust nog niet: geen sluitende reeks
-  // eisen, wel dat deze migratie het hoogste nummer is.
-  assert.equal(numbers[numbers.length - 1], '0024');
+  // Latere migraties (0025 van BE-58 en verder) mogen volgen.
   assert.match(SQL, /^-- 0024 /);
   assert.match(SQL, /NOT YET APPLIED/i, 'het bestand wordt niet uitgevoerd in deze PR');
 });

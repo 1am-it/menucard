@@ -67,7 +67,8 @@ test('BE-57: niets uit een volgend ticket staat op dit scherm', () => {
   // Commentaar mag een grens benoemen; wat telt is de code die het scherm tekent.
   const stripComments = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   const code = { paneel: stripComments(PANEL), dashboard: stripComments(DASHBOARD), model: stripComments(VIEW) };
-  for (const forbidden of ['Bevestigd', 'Menukaart bijwerken', 'QR-code', 'qr-code']) {
+  // 'Bevestigd' en 'Menukaart bijwerken' kwamen met BE-58 (#143) en mogen nu.
+  for (const forbidden of ['QR-code', 'qr-code']) {
     for (const [name, source] of Object.entries(code)) {
       assert.equal(source.includes(forbidden), false, `${forbidden} hoort niet in ${name}`);
     }
