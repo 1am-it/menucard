@@ -1,0 +1,238 @@
+/* BE-58 (#143) — de houderpagina "Menukaart bijwerken".
+   Eigen bestand naast de pagina (BE-52); kleuren alleen uit de tokens. */
+
+.mk-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.mk-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+/* De teruglink staat in een nav-landmark; het blok zelf houdt geen marge. */
+.mk-nav {
+  display: block;
+}
+
+.mk-title {
+  margin: 0 0 4px;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.mk-subtitle {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.mk-note {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mk-section {
+  margin-top: 32px;
+}
+
+.mk-section-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.mk-menu-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mk-menu-button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mk-menu-button[aria-pressed='true'] {
+  background: var(--accent-faint);
+  color: var(--text-primary);
+}
+
+.mk-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.mk-card {
+  padding: 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.mk-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mk-dish-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mk-dish-category {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.mk-current {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.mk-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.mk-field {
+  display: grid;
+  gap: 4px;
+  max-width: 220px;
+}
+
+.mk-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.mk-input {
+  padding: 8px 10px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  background: var(--background, transparent);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.mk-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* BE-58 ijking: het vakje zelf is een tikdoel van 24 px (WCAG 2.2, 2.5.8);
+   het label eromheen houdt de klikbare tekst. */
+.mk-check input[type='checkbox'] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.mk-save {
+  justify-self: start;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mk-save[disabled] {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.mk-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  background: var(--accent-faint);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.mk-chip {
+  padding: 2px 8px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.mk-status {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.mk-status--error {
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+.mk-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.mk-history-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.mk-confirm {
+  padding: 16px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--accent-faint);
+}
+
+.mk-confirmed-label {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}

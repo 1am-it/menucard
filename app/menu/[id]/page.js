@@ -24,6 +24,8 @@ import {
   siteBaseUrl,
 } from '@/src/lib/dishShare'
 import MenuView from './MenuView'
+import { overlayVoorMenu } from '@/src/lib/menukaartOverlay'
+import { laadPubliekeOverlay } from '@/src/lib/menukaartOverlayServer'
 
 function menuData(id) {
   const r = menusData[id] || null
@@ -77,6 +79,20 @@ export default async function MenuPage({ params }) {
     ? ['lunch', 'diner', 'borrel', 'specialiteiten'].filter(m => menusData[`${baseId}-${m}`])
     : []
 
-  return <MenuView id={id} r={r} restaurant={restaurant} availableMeals={availableMeals} />
+  // BE-58 deel 2 (#143): alleen de goedgekeurde wijzigingen van dít restaurant,
+  // als overlay op de statische kaart. De statische data blijft ongewijzigd; is
+  // er geen migratie of geen wijziging, dan is dit exact dezelfde kaart.
+  const overlay = await laadPubliekeOverlay(baseId)
+  const menu = r ? overlayVoorMenu(r, overlay, id) : r
+
+  return (
+    <MenuView
+      id={id}
+      r={menu}
+      restaurant={restaurant}
+      availableMeals={availableMeals}
+      bevestiging={overlay.bevestiging}
+    />
+  )
 }
 

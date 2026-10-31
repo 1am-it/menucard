@@ -20,6 +20,8 @@
 import restaurantsData from '@/data/restaurants.json'
 import menusData from '@/data/menus.json'
 import { restaurantMenus, restaurantForView } from '@/src/lib/menuTabs'
+import { overlayVoorMenu } from '@/src/lib/menukaartOverlay'
+import { laadPubliekeOverlay } from '@/src/lib/menukaartOverlayServer'
 import RestaurantDetailView from './RestaurantDetailView'
 
 export default async function RestaurantPage({ params, searchParams }) {
@@ -35,7 +37,23 @@ export default async function RestaurantPage({ params, searchParams }) {
       })
     : null
 
-  return <RestaurantDetailView id={id} restaurant={restaurantForView(restaurant)} menus={menus} />
+  // BE-58 deel 2 (#143): het label "Bevestigd door het restaurant" en de
+  // goedgekeurde wijzigingen, alleen voor dit ene restaurant. De overlay raakt
+  // uitsluitend prijs en beschikbaarheid van de getoonde kaart.
+  const overlay = restaurant ? await laadPubliekeOverlay(id) : null
+  const metOverlay =
+    menus && menus.activeMenu && overlay
+      ? { ...menus, activeMenu: overlayVoorMenu(menus.activeMenu, overlay, menus.activeMenu.id) }
+      : menus
+
+  return (
+    <RestaurantDetailView
+      id={id}
+      restaurant={restaurantForView(restaurant)}
+      menus={metOverlay}
+      bevestiging={overlay ? overlay.bevestiging : null}
+    />
+  )
 }
 
 

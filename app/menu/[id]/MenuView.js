@@ -21,7 +21,7 @@ import useClientNow from '@/src/components/useClientNow'
 import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
-import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings } from '@/src/components/MenuBody'
+import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation } from '@/src/components/MenuBody'
 // BE-57 (#139): de anonieme teller "bekeken" voor dit restaurant, één keer per
 // pagina en per sessie, na het laden en zonder dat deze pagina erop wacht.
 import ViewBeacon from '@/src/components/ViewBeacon'
@@ -73,7 +73,7 @@ function itemMatchesPrice(item, maxPrice) {
 
 // ─── Main View ────────────────────────────────────────────────────────────────
 
-export default function MenuView({ id, r, restaurant, availableMeals }) {
+export default function MenuView({ id, r, restaurant, availableMeals, bevestiging = null }) {
   const searchParams = useSearchParams()
 
   // Read URL params (doorgegeven vanuit homepage)
@@ -315,6 +315,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <div>
             <div className="hero-eyebrow">{r.name || restaurant.name}</div>
             <h1 className="hero-title">{subtitle}</h1>
+            <MenuConfirmation bevestiging={bevestiging} />
             {menuSeason && (
               <div>
                 <span className="menu-season-label">

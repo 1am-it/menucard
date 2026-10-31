@@ -81,6 +81,12 @@ const INTERNAL_MODULES = [
   // rol `internal` — de pagina en de API weigeren een editor of owner ook zelf
   // (403), dus dit item is hooguit de vindbaarheid, nooit de beveiliging.
   { id: 'tellers', label: 'Tellers', href: '/internal/tellers', requiredRole: 'internal', placement: 'secondary', subtitle: 'Gedeeld, bewaard en reserveerkliks per gerecht' },
+
+  // BE-58 (#143): de wijzigingen die houders zelf doorgeven (prijs of tijdelijk
+  // niet beschikbaar). In het Werkvoorraad-menu, onder de scheidingslijn: de
+  // teller van de werkvoorraad kent deze lijst nog niet, en een item zonder
+  // echte telling mag het totaal bovenaan nooit op "onbekend" zetten.
+  { id: 'menukaart-wijzigingen', label: 'Wijzigingen van houders', href: '/internal/menukaart-wijzigingen', requiredRole: 'internal', placement: 'secondary', subtitle: 'Prijs en beschikbaarheid van houders' },
 ];
 
 

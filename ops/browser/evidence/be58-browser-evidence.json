@@ -1,0 +1,1179 @@
+{
+  "ticket": "BE-58 (#143)",
+  "routes": [
+    "/mijn-restaurant/menukaart",
+    "/internal/menukaart-wijzigingen"
+  ],
+  "category": "lokale browsercheck met gestubde sessie en API (next dev op poort 3191); geen productie en geen echte acceptatie",
+  "ranAt": "2026-10-30T23:49:42.107Z",
+  "passed": true,
+  "filter": null,
+  "checks": [
+    {
+      "name": "houder: blijft op /mijn-restaurant/menukaart (geen omleiding)",
+      "passed": true,
+      "detail": "/mijn-restaurant/menukaart"
+    },
+    {
+      "name": "houder: titel \"Menukaart bijwerken\"",
+      "passed": true,
+      "detail": "Menukaart bijwerken"
+    },
+    {
+      "name": "houder: de eigen kaart staat er (3 gerechten)",
+      "passed": true,
+      "detail": "3"
+    },
+    {
+      "name": "houder: de huidige prijs staat als beginwaarde in het veld",
+      "passed": true,
+      "detail": "7,50"
+    },
+    {
+      "name": "houder: de prijs is in het veld gewijzigd",
+      "passed": true,
+      "detail": "8,95"
+    },
+    {
+      "name": "houder: na opslaan ziet de houder de regel \"We controleren een wijziging kort …\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder: de wijziging staat op \"In controle\" in \"Je wijzigingen\"",
+      "passed": true,
+      "detail": "[\"Pompoensoep met rozemarijnolie\\nNieuwe prijs: €8,95\\nIn controle\",\"Gegrilde zeebaars\\nNieuwe prijs: €42\\nIn controle\",\"Pompoensoep met rozemarijnolie\\nNieuwe prijs: €8,95\\nIn controle\"]"
+    },
+    {
+      "name": "houder: \"Tijdelijk niet beschikbaar\" staat in de statuslijst met een badge",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder: \"Bevestig je menukaart\" toont het label op de pagina",
+      "passed": true,
+      "detail": "Bevestigd door het restaurant · 31 oktober 2026"
+    },
+    {
+      "name": "houder: het label noemt de datum",
+      "passed": true,
+      "detail": "Bevestigd door het restaurant · 31 oktober 2026"
+    },
+    {
+      "name": "houder: de prijswijziging ging met menu en gerecht naar de API",
+      "passed": true,
+      "detail": "{\"menuId\":\"1-lunch\",\"categorieIndex\":0,\"gerechtIndex\":0,\"soort\":\"prijs\",\"prijs\":\"8,95\"}"
+    },
+    {
+      "name": "houder: de beschikbaarheid ging als \"niet beschikbaar\" naar de API",
+      "passed": true,
+      "detail": "{\"menuId\":\"1-lunch\",\"categorieIndex\":0,\"gerechtIndex\":1,\"soort\":\"beschikbaarheid\",\"beschikbaar\":false}"
+    },
+    {
+      "name": "houder: de nieuwe wijzigingen staan op in_controle en de bevestiging is actief",
+      "passed": true,
+      "detail": "{\"statussen\":[\"in_controle\",\"in_controle\",\"in_controle\",\"in_controle\"],\"bevestiging\":{\"actief\":true,\"label\":\"Bevestigd door het restaurant\",\"datum\":\"31 oktober 2026\",\"verlooptOp\":\"2027-01-29\"}}"
+    },
+    {
+      "name": "houder: geen enkele externe of onbekende API-aanroep",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "houder (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "houder: toetsenbord, minstens vijf stappen met een zichtbare focusring",
+      "passed": true,
+      "detail": "[{\"name\":\"Onze Menukaarten, naar de startpagina\",\"selector\":\"a.wordmark\",\"visible\":true},{\"name\":\"Licht\",\"selector\":\"button.theme-btn.active\",\"visible\":true},{\"name\":\"Donker\",\"selector\":\"button.theme-btn\",\"visible\":true},{\"name\":\"← Terug naar Mijn restaurant\",\"selector\":\"a.mk-back\",\"visible\":true},{\"name\":\"lunch\",\"selector\":\"button.mk-menu-button\",\"visible\":true},{\"name\":\"diner\",\"selector\":\"button.mk-menu-button\",\"visible\":true},{\"name\":\"Prijs voor Pompoensoep met rozemarijnolie\",\"selector\":\"input#prijs-0:0.mk-input\",\"visible\":true},{\"name\":\"Tijdelijk niet beschikbaar\",\"selector\":\"input#niet-beschikbaar-0:0\",\"visible\":true},{\"name\":\"Wijzigingen opslaan\",\"selector\":\"button.mk-save\",\"visible\":true},{\"name\":\"Prijs voor Bouillon van gevogelte\",\"selector\":\"input#prijs-0:1.mk-input\",\"visible\":true},{\"name\":\"Tijdelijk niet beschikbaar\",\"selector\":\"input#niet-beschikbaar-0:1\",\"visible\":true},{\"name\":\"Wijzigingen opslaan\",\"selector\":\"button.mk-save\",\"visible\":true},{\"name\":\"Prijs voor Gegrilde zeebaars\",\"selector\":\"input#prijs-1:0.mk-input\",\"visible\":true},{\"name\":\"Tijdelijk niet beschikbaar\",\"selector\":\"input#niet-beschikbaar-1:0\",\"visible\":true},{\"name\":\"Wijzigingen opslaan\",\"selector\":\"button.mk-save\",\"visible\":true},{\"name\":\"Bevestig je menukaart\",\"selector\":\"button.mk-save\",\"visible\":true}]"
+    },
+    {
+      "name": "houder: toetsenbord, verwachte bediening komt langs",
+      "passed": true,
+      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Licht\",\"Donker\",\"← Terug naar Mijn restaurant\",\"lunch\",\"diner\",\"Prijs voor Pompoensoep met rozemarijnolie\",\"Tijdelijk niet beschikbaar\",\"Wijzigingen opslaan\",\"Prijs voor Bouillon van gevogelte\",\"Tijdelijk niet beschikbaar\",\"Wijzigingen opslaan\",\"Prijs voor Gegrilde zeebaars\",\"Tijdelijk niet beschikbaar\",\"Wijzigingen opslaan\",\"Bevestig je menukaart\"]"
+    },
+    {
+      "name": "houder (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "houder (licht) · contrast: 43 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.37:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "houder (licht) · naam: 16 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "houder (licht) · tikdoel: 16 doelen, 6 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "houder (licht) · koppen: één h1 bij 7 koppen",
+      "passed": true,
+      "detail": "h1: \"Menukaart bijwerken\""
+    },
+    {
+      "name": "houder (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "houder (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "houder (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "houder (licht) · formulier: 6 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "houder (dark/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "houder (donker) · contrast: 43 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.04:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "houder (donker) · naam: 16 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "houder (donker) · tikdoel: 16 doelen, 6 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "houder (donker) · koppen: één h1 bij 7 koppen",
+      "passed": true,
+      "detail": "h1: \"Menukaart bijwerken\""
+    },
+    {
+      "name": "houder (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "houder (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "houder (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "houder (donker) · formulier: 6 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "houder (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-houder-1280-light-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":355,\"width\":828,\"height\":283},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-1280-light-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":1221,\"width\":828,\"height\":132},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-1280-light-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":1385,\"width\":828,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "houder (light/390): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-houder-390-light-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":390,\"width\":358,\"height\":283},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-390-light-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1257,\"width\":358,\"height\":157},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-390-light-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1446,\"width\":358,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "houder (light/320): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-houder-320-light-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":390,\"width\":288,\"height\":307},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-320-light-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1300,\"width\":288,\"height\":182},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-320-light-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1514,\"width\":288,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "houder (dark/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-houder-1280-dark-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":355,\"width\":828,\"height\":283},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-1280-dark-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":1221,\"width\":828,\"height\":132},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-1280-dark-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":223,\"y\":1385,\"width\":828,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "houder (dark/390): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-houder-390-dark-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":390,\"width\":358,\"height\":283},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-390-dark-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1257,\"width\":358,\"height\":157},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-390-dark-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1446,\"width\":358,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "houder (dark/320): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-houder-320-dark-gerecht: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":390,\"width\":288,\"height\":307},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-320-dark-wijzigingen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1300,\"width\":288,\"height\":182},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-houder-320-dark-bevestigen: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":1514,\"width\":288,\"height\":134},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "houder (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "intern: blijft op /internal/menukaart-wijzigingen",
+      "passed": true,
+      "detail": "/internal/menukaart-wijzigingen"
+    },
+    {
+      "name": "intern: titel \"Wijzigingen van houders\"",
+      "passed": true,
+      "detail": "Wijzigingen van houders"
+    },
+    {
+      "name": "intern: twee wijzigingen in de werkvoorraad",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "intern: de markering \"Grote wijziging\" staat bij de grote wijziging",
+      "passed": true,
+      "detail": "[\"Grote wijziging\"]"
+    },
+    {
+      "name": "intern: de samenvatting noemt één grote wijziging",
+      "passed": true,
+      "detail": "Een houder wijzigde een prijs of zette een gerecht tijdelijk niet beschikbaar. Keur goed of wijs af met een reden. | 1 van deze wijzigingen is een grote wijziging (meer dan 50% prijsverschil)."
+    },
+    {
+      "name": "intern: na goedkeuren blijft één wijziging over",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "intern: de goedgekeurde wijziging staat op goedgekeurd en telt als bevestiging",
+      "passed": true,
+      "detail": "{\"kaarten\":1,\"status\":[[101,\"goedgekeurd\"],[102,\"in_controle\"]],\"bevestiging\":{\"actief\":true,\"label\":\"Bevestigd door het restaurant\",\"datum\":\"31 oktober 2026\",\"verlooptOp\":\"2027-01-29\"}}"
+    },
+    {
+      "name": "intern: \"Afwijzen\" opent het formulier met een redenveld",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "intern: na afwijzen is de werkvoorraad leeg",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "intern: de afgewezen wijziging staat met reden onder \"Afgewezen\"",
+      "passed": true,
+      "detail": "Gegrilde zeebaars\nAfgewezen\n\nNieuwe prijs: €42\n\nRestaurant 1 · 1-lunch\n\nGrote wijziging\n\nReden: Prijs past niet bij de kaart"
+    },
+    {
+      "name": "intern: de wijziging staat op afgewezen in de fictieve server",
+      "passed": true,
+      "detail": "[[101,\"goedgekeurd\"],[102,\"afgewezen\"]]"
+    },
+    {
+      "name": "intern: geen enkele externe of onbekende API-aanroep",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "intern (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "intern: toetsenbord, minstens vijf stappen met een zichtbare focusring",
+      "passed": true,
+      "detail": "[{\"name\":\"Onze Menukaarten, naar het meeste open werk of Dekking\",\"selector\":\"a.internal-nav-home\",\"visible\":true},{\"name\":\"Dekking\",\"selector\":\"a.internal-nav-link\",\"visible\":true},{\"name\":\"Werkvoorraad(0)\",\"selector\":\"button.internal-nav-workqueue-trigger\",\"visible\":true},{\"name\":\"Restaurant of menu toevoegen\",\"selector\":\"a.internal-nav-add\",\"visible\":true},{\"name\":\"Licht\",\"selector\":\"button.theme-btn.active\",\"visible\":true},{\"name\":\"Donker\",\"selector\":\"button.theme-btn\",\"visible\":true},{\"name\":\"Uitloggen\",\"selector\":\"button.internal-nav-signout\",\"visible\":true},{\"name\":\"Te beoordelen\",\"selector\":\"button.mw-filter\",\"visible\":true},{\"name\":\"Goedgekeurd\",\"selector\":\"button.mw-filter\",\"visible\":true},{\"name\":\"Afgewezen\",\"selector\":\"button.mw-filter\",\"visible\":true},{\"name\":\"Goedkeuren\",\"selector\":\"button.mw-approve\",\"visible\":true},{\"name\":\"Afwijzen\",\"selector\":\"button.mw-reject\",\"visible\":true},{\"name\":\"Goedkeuren\",\"selector\":\"button.mw-approve\",\"visible\":true},{\"name\":\"Afwijzen\",\"selector\":\"button.mw-reject\",\"visible\":true}]"
+    },
+    {
+      "name": "intern: toetsenbord, verwachte bediening komt langs",
+      "passed": true,
+      "detail": "[\"Onze Menukaarten, naar het meeste open werk of Dekking\",\"Dekking\",\"Werkvoorraad(0)\",\"Restaurant of menu toevoegen\",\"Licht\",\"Donker\",\"Uitloggen\",\"Te beoordelen\",\"Goedgekeurd\",\"Afgewezen\",\"Goedkeuren\",\"Afwijzen\",\"Goedkeuren\",\"Afwijzen\"]"
+    },
+    {
+      "name": "intern (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "intern (licht) · contrast: 28 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.37:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "intern (licht) · naam: 14 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "intern (licht) · tikdoel: 14 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "intern (licht) · koppen: één h1 bij 3 koppen",
+      "passed": true,
+      "detail": "h1: \"Wijzigingen van houders\""
+    },
+    {
+      "name": "intern (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "intern (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "intern (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "intern (licht) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "intern (dark/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "intern (donker) · contrast: 28 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "intern (donker) · naam: 14 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "intern (donker) · tikdoel: 14 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "intern (donker) · koppen: één h1 bij 3 koppen",
+      "passed": true,
+      "detail": "h1: \"Wijzigingen van houders\""
+    },
+    {
+      "name": "intern (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "intern (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "intern (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "intern (donker) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "intern (light/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-intern-1280-light-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":168,\"width\":868,\"height\":44},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-1280-light-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":248,\"width\":868,\"height\":150},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-1280-light-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":248,\"width\":868,\"height\":340},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "intern (light/390): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-intern-390-light-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":180,\"width\":358,\"height\":44},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-390-light-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":279,\"width\":358,\"height\":150},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-390-light-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":279,\"width\":358,\"height\":340},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "intern (light/320): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=light"
+    },
+    {
+      "name": "opname be58-intern-320-light-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":199,\"width\":288,\"height\":96},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-320-light-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":350,\"width\":288,\"height\":178},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-320-light-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":350,\"width\":288,\"height\":368},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "intern (dark/1280): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-intern-1280-dark-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":168,\"width\":868,\"height\":44},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-1280-dark-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":248,\"width\":868,\"height\":150},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-1280-dark-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":206,\"y\":248,\"width\":868,\"height\":340},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "intern (dark/390): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-intern-390-dark-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":180,\"width\":358,\"height\":44},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-390-dark-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":279,\"width\":358,\"height\":150},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-390-dark-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":279,\"width\":358,\"height\":340},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "intern (dark/320): thema via de themaknop van de app",
+      "passed": true,
+      "detail": "data-theme=dark"
+    },
+    {
+      "name": "opname be58-intern-320-dark-filters: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":199,\"width\":288,\"height\":96},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-320-dark-wijziging: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":350,\"width\":288,\"height\":178},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "opname be58-intern-320-dark-lijst: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":16,\"y\":350,\"width\":288,\"height\":368},\"fitsHorizontally\":true}"
+    },
+    {
+      "name": "intern (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    }
+  ],
+  "errors": [],
+  "shots": [
+    {
+      "file": "be58-houder-1280-light-gerecht.png",
+      "sha256": "b6b479d6e199bb7c146b665b0a0ad5640e7189f5617103d2301e016dc41cef63",
+      "width": 828,
+      "height": 283,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 223,
+        "y": 355,
+        "width": 828,
+        "height": 283
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-1280-light-wijzigingen.png",
+      "sha256": "7504f7459f8ed733419a9e3d94e3daa96ba3c4066ec59888f52b9e7ecdeeeb53",
+      "width": 828,
+      "height": 132,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 223,
+        "y": 1221,
+        "width": 828,
+        "height": 132
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-1280-light-bevestigen.png",
+      "sha256": "b6c0551c25018d115ca793de3203ada4b85119f591592f262b05e3aa6550433a",
+      "width": 828,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 223,
+        "y": 1385,
+        "width": 828,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-light-gerecht.png",
+      "sha256": "1a858d73296f74de4ec472575b70a9220067b45a3be975b1e1641824780fdfcb",
+      "width": 358,
+      "height": 283,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 16,
+        "y": 390,
+        "width": 358,
+        "height": 283
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-light-wijzigingen.png",
+      "sha256": "1570417b540ef8ba5c1d693f57d46928cd06ad2ea6c404b2c3ce91f8887fb2d4",
+      "width": 358,
+      "height": 157,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 16,
+        "y": 1257,
+        "width": 358,
+        "height": 157
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-light-bevestigen.png",
+      "sha256": "8c186f2d4ffe78cf161b70b733e3fe4f0e242ddd0d70999f9e1e52c390510ce2",
+      "width": 358,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 16,
+        "y": 1446,
+        "width": 358,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-light-gerecht.png",
+      "sha256": "002bec9e158b8079681a5d59a1283c455983dc7dcfa90b72688b83bec591b936",
+      "width": 288,
+      "height": 307,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 16,
+        "y": 390,
+        "width": 288,
+        "height": 307
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-light-wijzigingen.png",
+      "sha256": "13ee25bc23151331125297f3f5b37b289c5d76a1d5cc7ca33df6356040b3f9d2",
+      "width": 288,
+      "height": 182,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 16,
+        "y": 1300,
+        "width": 288,
+        "height": 182
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-light-bevestigen.png",
+      "sha256": "a518a6d0eec4041a73185d6d9e6bad4387d895f79e8a945d64ec750d88a8d392",
+      "width": 288,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 16,
+        "y": 1514,
+        "width": 288,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-1280-dark-gerecht.png",
+      "sha256": "2fbd918a34f6d9a003a70011f22bfee8a10259ae1eeb84a53948a281b4996167",
+      "width": 828,
+      "height": 283,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 223,
+        "y": 355,
+        "width": 828,
+        "height": 283
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-1280-dark-wijzigingen.png",
+      "sha256": "edeca95849e1643e61f6d632df66110a18dc150120e2e25c5c53e61a38f8f3d4",
+      "width": 828,
+      "height": 132,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 223,
+        "y": 1221,
+        "width": 828,
+        "height": 132
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-1280-dark-bevestigen.png",
+      "sha256": "bc4f0e25533dfe0bf98c5f39b37b18f932aba0aa7253ece384baaa2e979e65e0",
+      "width": 828,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 223,
+        "y": 1385,
+        "width": 828,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-dark-gerecht.png",
+      "sha256": "5bfec7e9100a20daf47c6590d59be9ac4c730f962434e87b612c4afd0c725d58",
+      "width": 358,
+      "height": 283,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 16,
+        "y": 390,
+        "width": 358,
+        "height": 283
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-dark-wijzigingen.png",
+      "sha256": "afa9de014e2899401f88c0c6078f5dbcd5d2f88a9623c2926c0d49b8f4eeba07",
+      "width": 358,
+      "height": 157,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 16,
+        "y": 1257,
+        "width": 358,
+        "height": 157
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-390-dark-bevestigen.png",
+      "sha256": "26a6f104a814d6d8415f31e1342becdaa7331afe48478325de88e576b7e9fce5",
+      "width": 358,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 16,
+        "y": 1446,
+        "width": 358,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-dark-gerecht.png",
+      "sha256": "355daa011a27bdf8765177421fe4234d57fcbcc127905aaaf6d0f3b4e6b19905",
+      "width": 288,
+      "height": 307,
+      "selector": "section[aria-labelledby=\"mk-dishes-title\"] .mk-card",
+      "clip": {
+        "x": 16,
+        "y": 390,
+        "width": 288,
+        "height": 307
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-dark-wijzigingen.png",
+      "sha256": "8e89aad3b0929f5b51e702f686a66c43ee70fb68ead33bb68493faf4adfbcf40",
+      "width": 288,
+      "height": 182,
+      "selector": "section[aria-labelledby=\"mk-history-title\"]",
+      "clip": {
+        "x": 16,
+        "y": 1300,
+        "width": 288,
+        "height": 182
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-houder-320-dark-bevestigen.png",
+      "sha256": "fa769202ef4a1884b7a5fd044d4e03152190d39c548ca33a2bb0d40e6af24b1f",
+      "width": 288,
+      "height": 134,
+      "selector": "section.mk-confirm",
+      "clip": {
+        "x": 16,
+        "y": 1514,
+        "width": 288,
+        "height": 134
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-light-filters.png",
+      "sha256": "0eebd698776ef90b0016383c23c013f8bcec1dd678c7c7ee4eca385c50dd5c30",
+      "width": 868,
+      "height": 44,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 206,
+        "y": 168,
+        "width": 868,
+        "height": 44
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-light-wijziging.png",
+      "sha256": "50175d45fbb55463a705b7a412e87970b7569c4fde0164b7fb01b7e392f38017",
+      "width": 868,
+      "height": 150,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 206,
+        "y": 248,
+        "width": 868,
+        "height": 150
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-light-lijst.png",
+      "sha256": "47956a55285766b7a0315999276ba7e0b5d08154ac1d5849b68fd094527fe07e",
+      "width": 868,
+      "height": 340,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 206,
+        "y": 248,
+        "width": 868,
+        "height": 340
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-light-filters.png",
+      "sha256": "0930364080bd9ed3336a5f3cae110bd3dca49a9c8c60824e17cd74c0a751ed5d",
+      "width": 358,
+      "height": 44,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 16,
+        "y": 180,
+        "width": 358,
+        "height": 44
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-light-wijziging.png",
+      "sha256": "97b67a25515a7fd733f6108436f198a212cd2774f593791a00812dfb6c42f182",
+      "width": 358,
+      "height": 150,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 16,
+        "y": 279,
+        "width": 358,
+        "height": 150
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-light-lijst.png",
+      "sha256": "e038b45281c97d49af77f9978915276b67eff93cf650c96bfc571d4c2f80fd83",
+      "width": 358,
+      "height": 340,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 16,
+        "y": 279,
+        "width": 358,
+        "height": 340
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-light-filters.png",
+      "sha256": "b3fb2271d616cd538dee9b0feca4224bf36f49d6281d0b7d679a5236eaf9c357",
+      "width": 288,
+      "height": 96,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 16,
+        "y": 199,
+        "width": 288,
+        "height": 96
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-light-wijziging.png",
+      "sha256": "59105e89a2749461328b22e71dff08af67c7e797765406cb8ecc65f3bd807991",
+      "width": 288,
+      "height": 178,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 16,
+        "y": 350,
+        "width": 288,
+        "height": 178
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-light-lijst.png",
+      "sha256": "096541ebe684196f10b0b7f37d8f80be14b5d1dd2c5e1de2bbb5ede2010d70ee",
+      "width": 288,
+      "height": 368,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 16,
+        "y": 350,
+        "width": 288,
+        "height": 368
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-dark-filters.png",
+      "sha256": "239125518c593591749e1cc026618cb9855f87a7a49affb28b85210dca5eef92",
+      "width": 868,
+      "height": 44,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 206,
+        "y": 168,
+        "width": 868,
+        "height": 44
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-dark-wijziging.png",
+      "sha256": "2963c9e6ffd233fda4144e231b92b31d262ff355499f19da6e518fbd4a048a5c",
+      "width": 868,
+      "height": 150,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 206,
+        "y": 248,
+        "width": 868,
+        "height": 150
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-1280-dark-lijst.png",
+      "sha256": "172f4646cba5b28f5ba05c2ff75abeb3853f161d3787247ec86097917cd3b969",
+      "width": 868,
+      "height": 340,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 206,
+        "y": 248,
+        "width": 868,
+        "height": 340
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-dark-filters.png",
+      "sha256": "ebd773d42c928155ad11c6baae6cc3123a7f6585d44bbf18507c68ff1efccc1a",
+      "width": 358,
+      "height": 44,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 16,
+        "y": 180,
+        "width": 358,
+        "height": 44
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-dark-wijziging.png",
+      "sha256": "050a76e41a80425563fb102e1b67bc8a4268cb7399827d5f8acf9e05adebdf3d",
+      "width": 358,
+      "height": 150,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 16,
+        "y": 279,
+        "width": 358,
+        "height": 150
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-390-dark-lijst.png",
+      "sha256": "c068fcf7e4ceb69d5a7d79338cef0c04cc5ce4aeb029a75557605f1855124ae9",
+      "width": 358,
+      "height": 340,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 16,
+        "y": 279,
+        "width": 358,
+        "height": 340
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-dark-filters.png",
+      "sha256": "fbd2d98f23fe0f5886f23ae76c1dd6fb7cd42916863d4292ea0be7b4f8eaa26e",
+      "width": 288,
+      "height": 96,
+      "selector": ".mw-filters",
+      "clip": {
+        "x": 16,
+        "y": 199,
+        "width": 288,
+        "height": 96
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-dark-wijziging.png",
+      "sha256": "93ff83c06afaac721e4a65461107d5c0a4ecf688c1c41fcb6f20129d3d50e178",
+      "width": 288,
+      "height": 178,
+      "selector": ".mw-list .mw-card",
+      "clip": {
+        "x": 16,
+        "y": 350,
+        "width": 288,
+        "height": 178
+      },
+      "fitsHorizontally": true
+    },
+    {
+      "file": "be58-intern-320-dark-lijst.png",
+      "sha256": "dfb16778f2be72d1f142e264f07e89920d5c9e59464d60279c4d22e247a04183",
+      "width": 288,
+      "height": 368,
+      "selector": ".mw-list",
+      "clip": {
+        "x": 16,
+        "y": 350,
+        "width": 288,
+        "height": 368
+      },
+      "fitsHorizontally": true
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "houder-menukaart",
+      "checks": 65,
+      "passed": 65,
+      "failed": 0,
+      "durationMs": 34496,
+      "error": null
+    },
+    {
+      "name": "interne-wijzigingen",
+      "checks": 63,
+      "passed": 63,
+      "failed": 0,
+      "durationMs": 24206,
+      "error": null
+    }
+  ],
+  "port": 3191
+}
