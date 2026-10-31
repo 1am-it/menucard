@@ -2,7 +2,7 @@
   "script": "run-be61-browser-check.js",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3188); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T08:32:59.917Z",
+  "startedAt": "2026-10-31T08:36:28.486Z",
   "port": 3188,
   "page": "/mijn-lijstje",
   "filter": null,
@@ -12,15 +12,15 @@
       "checks": 89,
       "passed": 89,
       "failed": 0,
-      "durationMs": 11362,
+      "durationMs": 12052,
       "error": null
     },
     {
       "name": "kiezen",
       "checks": 13,
-      "passed": 12,
-      "failed": 1,
-      "durationMs": 2182,
+      "passed": 13,
+      "failed": 0,
+      "durationMs": 2179,
       "error": null
     },
     {
@@ -28,7 +28,7 @@
       "checks": 6,
       "passed": 6,
       "failed": 0,
-      "durationMs": 2172,
+      "durationMs": 2505,
       "error": null
     }
   ],
@@ -534,8 +534,8 @@
     },
     {
       "name": "telefoonmenu: de hele lijst is uitgeschakeld en gedimd",
-      "passed": false,
-      "detail": "{\"uit\":[false,true,false,true,false],\"opacity\":0.55}"
+      "passed": true,
+      "detail": "{\"uit\":[true,true,true,true,true],\"opacity\":0.553211}"
     },
     {
       "name": "telefoonmenu: \"Opslaan\" blijft bruikbaar",
@@ -596,7 +596,7 @@
   "shots": [
     {
       "file": "be61-paneel-1280-light.png",
-      "sha256": "c5dbba1c694237cd0f4976dbc391bf3231db131b93a1e79cd29b492cb1e30c0d",
+      "sha256": "7a2872fef470d763859610a703996d67dabfdd5c7ff3794342189a2eb79cec57",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -619,7 +619,7 @@
     },
     {
       "file": "be61-paneel-390-light.png",
-      "sha256": "a76ffcf1610a03a8d1273c00a298155a7d99da6cf5ba6d8979144ee0d541c95a",
+      "sha256": "44bab336c6822ecd2395ff61688c6394ba5962119f25ec492abb15936103c53c",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -642,7 +642,7 @@
     },
     {
       "file": "be61-paneel-320-light.png",
-      "sha256": "b48f6605dbb85fa00cff42f62814ff6672938a982d30ddab3dae996b7f468668",
+      "sha256": "27575bff55a99f400816dea936f1a729d2f8c645baebfe07ee1142770d72f597",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -665,7 +665,7 @@
     },
     {
       "file": "be61-paneel-1280-dark.png",
-      "sha256": "1c638d8c1f315fa717dfa14e5ecf9709c4b43db5908dda728aecbec60a4a800c",
+      "sha256": "efc6027e4c78ff574f6b46753b8f8b793f1c3782f37f33157c9436694bea35bb",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -688,7 +688,7 @@
     },
     {
       "file": "be61-paneel-390-dark.png",
-      "sha256": "3e4264116024e222f2341cb129cce3837d601840c3341b7f98c90536a712bc17",
+      "sha256": "b53580d0e2ec87853f868bd549b7c8e6f0f1c25c00b5a999abac2a9973c93b47",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -711,7 +711,7 @@
     },
     {
       "file": "be61-paneel-320-dark.png",
-      "sha256": "db6ae3007ba2a60d52c1e8e49356205622475659d16adf812120b29b2cf7add3",
+      "sha256": "2bfe87e2e7427327a37980cd6d16ede83f7ec30b343581cc9f2cf0478b286115",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -734,7 +734,7 @@
     },
     {
       "file": "be61-kiezen-390-light.png",
-      "sha256": "d4107859d8c190b3c8ea93f024386a3ce8792d7160870bb4bc738bef11fb12b8",
+      "sha256": "8b466cfec75784049b7d8c065ed6cb2084cb2ea77b3101b64d9c71a56fb36134",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -757,7 +757,7 @@
     },
     {
       "file": "be61-telefoonmenu-390-light.png",
-      "sha256": "b980298479b7924dca0c28daf99faae1df58ae331a605e0af4fbe6cf1a8e3de6",
+      "sha256": "dfc9e7d941375a96398fbb25e6c1f88ebbefe0a124c4fef253148750d52db06c",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -779,6 +779,6 @@
       }
     }
   ],
-  "failed": 1,
-  "passed": false
+  "failed": 0,
+  "passed": true
 }
