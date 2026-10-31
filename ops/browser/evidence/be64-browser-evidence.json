@@ -1,0 +1,585 @@
+{
+  "script": "run-be64-browser-check.js",
+  "ticket": "BE-64 (#156)",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3188); geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T10:41:32.067Z",
+  "port": 3188,
+  "pages": [
+    "/voor-restaurants"
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "voor-restaurants 1280: de h1 uit het contract staat er",
+      "passed": true,
+      "detail": "Gasten zoeken op gerecht. Zorg dat ze jóuw kaart vinden."
+    },
+    {
+      "name": "voor-restaurants 1280: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "Op onze menukaarten zoekt Breda op wat ze willen eten, met prijs erbij. Beheer zelf je kaart, je prijzen en je daghap, en zie wat gasten interessant vinden."
+    },
+    {
+      "name": "voor-restaurants 1280: de regel over claimen en de e-mailcode staat er",
+      "passed": true,
+      "detail": "Claimen kost niets · inloggen met een e-mailcode, zonder wachtwoord"
+    },
+    {
+      "name": "voor-restaurants 1280: \"Claim je restaurant\" is minstens 44 px hoog en gaat naar claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":242,\"bottom\":294}}"
+    },
+    {
+      "name": "voor-restaurants 1280: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":1665,\"bottom\":1717}}"
+    },
+    {
+      "name": "voor-restaurants 1280: de twee knoppen staan in de hero en nog eens onderaan",
+      "passed": true,
+      "detail": "2/2"
+    },
+    {
+      "name": "voor-restaurants 1280: het weekoverzicht toont vier tegels met \"—\" en geen cijfers",
+      "passed": true,
+      "detail": "keer in de top, keer bekeken, keer bewaard, keer gedeeld = —, —, —, —"
+    },
+    {
+      "name": "voor-restaurants 1280: het weekoverzicht zegt dat het een voorbeeld is",
+      "passed": true,
+      "detail": "Deze week · jouw restaurant / Voorbeeld van je eigen overzicht in Mijn restaurant"
+    },
+    {
+      "name": "voor-restaurants 1280: \"Wat je krijgt\" heeft de zes kaarten met de titels uit het contract",
+      "passed": true,
+      "detail": "Gevonden op gerecht / Zelf prijzen aanpassen / Daghap en seizoen / Zien wat werkt / Gasten delen je gerechten / QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 1280: alleen het QR-kaartje draagt \"Binnenkort\"",
+      "passed": true,
+      "detail": "QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 1280: de iconen staan in --accent",
+      "passed": true,
+      "detail": "rgb(122, 78, 0) = rgb(122, 78, 0)"
+    },
+    {
+      "name": "voor-restaurants 1280: het allergenenblok heeft de titel en de momentopname-tekst",
+      "passed": true,
+      "detail": "Allergenenoverzicht om te downloaden"
+    },
+    {
+      "name": "voor-restaurants 1280: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
+      "passed": true,
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":1621,\"bottom\":1665}}"
+    },
+    {
+      "name": "voor-restaurants 1280: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
+      "passed": true,
+      "detail": "Voor restaurants -> /voor-restaurants"
+    },
+    {
+      "name": "voor-restaurants 1280: de footer linkt naar deze pagina en naar /inloggen",
+      "passed": true,
+      "detail": "[{\"tekst\":\"Voor restaurants\",\"href\":\"/voor-restaurants\",\"height\":44},{\"tekst\":\"Inloggen\",\"href\":\"/inloggen\",\"height\":44}]"
+    },
+    {
+      "name": "voor-restaurants 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "voor-restaurants 1280: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "voor-restaurants 1280: de h1 is minimaal 32 px",
+      "passed": true,
+      "detail": "32px"
+    },
+    {
+      "name": "voor-restaurants 1280: het weekoverzicht past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":315,\"bottom\":585,\"height\":271,\"viewportHeight\":900,\"onderkant\":900}"
+    },
+    {
+      "name": "voor-restaurants 1280: het allergenenblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":605,\"bottom\":739,\"height\":134,\"viewportHeight\":900,\"onderkant\":900}"
+    },
+    {
+      "name": "voor-restaurants 1280: de knoppen onderaan past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":739,\"bottom\":791,\"height\":52,\"viewportHeight\":900,\"onderkant\":900}"
+    },
+    {
+      "name": "voor-restaurants 390: de h1 uit het contract staat er",
+      "passed": true,
+      "detail": "Gasten zoeken op gerecht. Zorg dat ze jóuw kaart vinden."
+    },
+    {
+      "name": "voor-restaurants 390: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "Op onze menukaarten zoekt Breda op wat ze willen eten, met prijs erbij. Beheer zelf je kaart, je prijzen en je daghap, en zie wat gasten interessant vinden."
+    },
+    {
+      "name": "voor-restaurants 390: de regel over claimen en de e-mailcode staat er",
+      "passed": true,
+      "detail": "Claimen kost niets · inloggen met een e-mailcode, zonder wachtwoord"
+    },
+    {
+      "name": "voor-restaurants 390: \"Claim je restaurant\" is minstens 44 px hoog en gaat naar claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":353,\"bottom\":405}}"
+    },
+    {
+      "name": "voor-restaurants 390: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":2168,\"bottom\":2220}}"
+    },
+    {
+      "name": "voor-restaurants 390: de twee knoppen staan in de hero en nog eens onderaan",
+      "passed": true,
+      "detail": "2/2"
+    },
+    {
+      "name": "voor-restaurants 390: het weekoverzicht toont vier tegels met \"—\" en geen cijfers",
+      "passed": true,
+      "detail": "keer in de top, keer bekeken, keer bewaard, keer gedeeld = —, —, —, —"
+    },
+    {
+      "name": "voor-restaurants 390: het weekoverzicht zegt dat het een voorbeeld is",
+      "passed": true,
+      "detail": "Deze week · jouw restaurant / Voorbeeld van je eigen overzicht in Mijn restaurant"
+    },
+    {
+      "name": "voor-restaurants 390: \"Wat je krijgt\" heeft de zes kaarten met de titels uit het contract",
+      "passed": true,
+      "detail": "Gevonden op gerecht / Zelf prijzen aanpassen / Daghap en seizoen / Zien wat werkt / Gasten delen je gerechten / QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 390: alleen het QR-kaartje draagt \"Binnenkort\"",
+      "passed": true,
+      "detail": "QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 390: de iconen staan in --accent",
+      "passed": true,
+      "detail": "rgb(122, 78, 0) = rgb(122, 78, 0)"
+    },
+    {
+      "name": "voor-restaurants 390: het allergenenblok heeft de titel en de momentopname-tekst",
+      "passed": true,
+      "detail": "Allergenenoverzicht om te downloaden"
+    },
+    {
+      "name": "voor-restaurants 390: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
+      "passed": true,
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":2060,\"bottom\":2104}}"
+    },
+    {
+      "name": "voor-restaurants 390: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
+      "passed": true,
+      "detail": "Voor restaurants -> /voor-restaurants"
+    },
+    {
+      "name": "voor-restaurants 390: de footer linkt naar deze pagina en naar /inloggen",
+      "passed": true,
+      "detail": "[{\"tekst\":\"Voor restaurants\",\"href\":\"/voor-restaurants\",\"height\":44},{\"tekst\":\"Inloggen\",\"href\":\"/inloggen\",\"height\":44}]"
+    },
+    {
+      "name": "voor-restaurants 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "voor-restaurants 390: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "voor-restaurants 390: de h1 is minimaal 32 px",
+      "passed": true,
+      "detail": "32px"
+    },
+    {
+      "name": "voor-restaurants 390: het weekoverzicht past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":287,\"bottom\":557,\"height\":271,\"viewportHeight\":844,\"onderkant\":844}"
+    },
+    {
+      "name": "voor-restaurants 390: het allergenenblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":302,\"bottom\":555,\"height\":253,\"viewportHeight\":844,\"onderkant\":844}"
+    },
+    {
+      "name": "voor-restaurants 390: de knoppen onderaan past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":555,\"bottom\":671,\"height\":116,\"viewportHeight\":844,\"onderkant\":844}"
+    },
+    {
+      "name": "voor-restaurants 320: de h1 uit het contract staat er",
+      "passed": true,
+      "detail": "Gasten zoeken op gerecht. Zorg dat ze jóuw kaart vinden."
+    },
+    {
+      "name": "voor-restaurants 320: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "Op onze menukaarten zoekt Breda op wat ze willen eten, met prijs erbij. Beheer zelf je kaart, je prijzen en je daghap, en zie wat gasten interessant vinden."
+    },
+    {
+      "name": "voor-restaurants 320: de regel over claimen en de e-mailcode staat er",
+      "passed": true,
+      "detail": "Claimen kost niets · inloggen met een e-mailcode, zonder wachtwoord"
+    },
+    {
+      "name": "voor-restaurants 320: \"Claim je restaurant\" is minstens 44 px hoog en gaat naar claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":468,\"bottom\":520}}"
+    },
+    {
+      "name": "voor-restaurants 320: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":2480,\"bottom\":2532}}"
+    },
+    {
+      "name": "voor-restaurants 320: de twee knoppen staan in de hero en nog eens onderaan",
+      "passed": true,
+      "detail": "2/2"
+    },
+    {
+      "name": "voor-restaurants 320: het weekoverzicht toont vier tegels met \"—\" en geen cijfers",
+      "passed": true,
+      "detail": "keer in de top, keer bekeken, keer bewaard, keer gedeeld = —, —, —, —"
+    },
+    {
+      "name": "voor-restaurants 320: het weekoverzicht zegt dat het een voorbeeld is",
+      "passed": true,
+      "detail": "Deze week · jouw restaurant / Voorbeeld van je eigen overzicht in Mijn restaurant"
+    },
+    {
+      "name": "voor-restaurants 320: \"Wat je krijgt\" heeft de zes kaarten met de titels uit het contract",
+      "passed": true,
+      "detail": "Gevonden op gerecht / Zelf prijzen aanpassen / Daghap en seizoen / Zien wat werkt / Gasten delen je gerechten / QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 320: alleen het QR-kaartje draagt \"Binnenkort\"",
+      "passed": true,
+      "detail": "QR-kaartje op tafel Binnenkort"
+    },
+    {
+      "name": "voor-restaurants 320: de iconen staan in --accent",
+      "passed": true,
+      "detail": "rgb(122, 78, 0) = rgb(122, 78, 0)"
+    },
+    {
+      "name": "voor-restaurants 320: het allergenenblok heeft de titel en de momentopname-tekst",
+      "passed": true,
+      "detail": "Allergenenoverzicht om te downloaden"
+    },
+    {
+      "name": "voor-restaurants 320: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
+      "passed": true,
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":2372,\"bottom\":2416}}"
+    },
+    {
+      "name": "voor-restaurants 320: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
+      "passed": true,
+      "detail": "Voor restaurants -> /voor-restaurants"
+    },
+    {
+      "name": "voor-restaurants 320: de footer linkt naar deze pagina en naar /inloggen",
+      "passed": true,
+      "detail": "[{\"tekst\":\"Voor restaurants\",\"href\":\"/voor-restaurants\",\"height\":44},{\"tekst\":\"Inloggen\",\"href\":\"/inloggen\",\"height\":44}]"
+    },
+    {
+      "name": "voor-restaurants 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "voor-restaurants 320: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "voor-restaurants 320: de h1 is minimaal 32 px",
+      "passed": true,
+      "detail": "32px"
+    },
+    {
+      "name": "voor-restaurants 320: het weekoverzicht past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":216,\"bottom\":504,\"height\":289,\"viewportHeight\":720,\"onderkant\":720}"
+    },
+    {
+      "name": "voor-restaurants 320: het allergenenblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":211,\"bottom\":509,\"height\":298,\"viewportHeight\":720,\"onderkant\":720}"
+    },
+    {
+      "name": "voor-restaurants 320: de knoppen onderaan past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":431,\"bottom\":547,\"height\":116,\"viewportHeight\":720,\"onderkant\":720}"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be64-voor-restaurants-1280-licht.png",
+      "sha256": "05507ca0b7c6d05c4dc350c0ad8002fa4696a23c326465f35165c87cf506daa2",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-1280-donker.png",
+      "sha256": "06e9951bf4f96d40ce980221244805ff6c93576688387d0d69e55e9d3636f4be",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-1280-vrpreview.png",
+      "sha256": "7f922bcefb2c35120c7d1a689b3036839a6913e18a5c562da71959a0cb50da59",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-1280-vrallergens.png",
+      "sha256": "84e29a2f2792231978af5fbfe9010915fb5397df1ee70a6dd551eb72ecb49f43",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-1280-vrbottomactions.png",
+      "sha256": "84e29a2f2792231978af5fbfe9010915fb5397df1ee70a6dd551eb72ecb49f43",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-390-licht.png",
+      "sha256": "71c9a4407650472b569c65398bf8a4c9871c298cb4ccf80222b147b54d3c9036",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-390-donker.png",
+      "sha256": "012bfc400edf9da351c00b7f173798a158e865905edb65895b02118b43aaed2a",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-390-vrpreview.png",
+      "sha256": "3e14e99ae9a324f97d3e66b84fc88517ff35240d6e0c3c6d4f581522fa87271b",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-390-vrallergens.png",
+      "sha256": "dc6bdb6f908b2060aef7866b119e69dd088ad8102df5e01ca11aad74d0cd67e1",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-390-vrbottomactions.png",
+      "sha256": "dc6bdb6f908b2060aef7866b119e69dd088ad8102df5e01ca11aad74d0cd67e1",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-320-licht.png",
+      "sha256": "03ded653aab243b695d5c5f840f268af18cf72cf9bd018b7dc40d007b1dcc08c",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-320-donker.png",
+      "sha256": "0308b1cb15974bcc58bad63af0a714b34a131a4a69d86ec449fe4b08876a203d",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "pagina",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be64-voor-restaurants-320-vrpreview.png",
+      "sha256": "63ce6c9a850b4ff74dfff843a902116eb585280e31593e9e11867543ada98719",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-320-vrallergens.png",
+      "sha256": "8ad3132243228d98b933dd2849e76b4220309036f5727f83299acf25c7f2d538",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    },
+    {
+      "file": "be64-voor-restaurants-320-vrbottomactions.png",
+      "sha256": "dfd7016128017f874616891decb9a1da133895a4ba19e5e4d53bd5f7cb3b47f4",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": null,
+      "state": "detail",
+      "themeProof": null
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}
