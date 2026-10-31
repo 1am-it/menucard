@@ -32,3 +32,4 @@ ops/perf/output/
 # NEXT_DIST_DIR). Ze horen nooit in git; na de meting worden ze verwijderd.
 .next-head/
 .next-base/
+.next-be65/
