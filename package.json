@@ -33,6 +33,7 @@
     "test:browser:be55": "node ops/browser/run-be55-browser-check.js",
     "test:browser:be57": "node ops/browser/run-be57-browser-check.js",
     "test:browser:be58": "node ops/browser/run-be58-browser-check.js",
+    "test:browser:be60": "node ops/browser/run-be60-browser-check.js",
     "benchmark:menu-structure": "node ops/benchmark/runStructureCorpus.js",
     "worker:analysis": "node ops/scripts/process-analysis-jobs.js"
   },
