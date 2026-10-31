@@ -41,13 +41,10 @@ const DAGHAP_IN_CONTROLE_MESSAGE = 'Wordt kort gecontroleerd.';
 
 /** De meldingen van de API: één zin per weigering, nooit een technische fout. */
 // BE-67: de korte labels die een bezoeker ziet (het blok "Vandaag" en de home).
-// Ze staan hier en niet in daghapFormulier, zodat de eerste lading van de
-// publieke routes niet met het formulier groeit (zie commit 6818fba).
-const DAGHAP_PUBLIEK = Object.freeze({
-  uitverkocht: 'Op = op · uitverkocht',
-  prijs2: '2 gangen',
-  prijs3: '3 gangen',
-});
+// Ze staan in ./daghapPubliek.js — een eigen, piepklein bestand — zodat de
+// eerste lading van de publieke routes niet met het formulier of deze lijst
+// groeit (zie commit 6818fba en de laadgrens van 1 KB). Hier alleen doorgeven.
+const { DAGHAP_PUBLIEK } = require('./daghapPubliek');
 
 const DAGHAP_MESSAGES = Object.freeze({
   naam: 'Gebruik een naam van 3 tot 80 tekens.',

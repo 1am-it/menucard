@@ -16,9 +16,9 @@
 // Opmaak staat in ./daghappen-vandaag.css (BE-52), kleuren via de tokens.
 
 import { useEffect, useState } from 'react'
-// BE-67: alleen het kleine labelbestand, niet het formulier: de eerste lading
-// van de home mag hooguit 1 KB groeien.
-import { DAGHAP_PUBLIEK } from '@/src/lib/daghapBerichten'
+// BE-67: alleen de drie korte bezoekerslabels, niet het formulier of de
+// meldingenlijst: de eerste lading van de home mag hooguit 1 KB groeien.
+import { DAGHAP_PUBLIEK } from '@/src/lib/daghapPubliek'
 import './daghappen-vandaag.css'
 
 const API = '/api/v1/daghap/vandaag'
