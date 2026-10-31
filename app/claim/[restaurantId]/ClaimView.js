@@ -26,8 +26,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import { CLAIM_MESSAGES, requestEmailCode, verifyEmailCode } from '@/src/lib/claimEmailCodeFlow'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -188,8 +187,7 @@ export default function ClaimView({ restaurantId, restaurant }) {
         <div className="header-inner">
           <Wordmark />
           <div className="header-right">
-            <ThemeToggle />
-            <ShareSettingsButton />
+            <PublicHeaderActions />
             {restaurant && (
               <Link href={`/restaurant/${restaurantId}`} className="back-btn">← {restaurant.name}</Link>
             )}

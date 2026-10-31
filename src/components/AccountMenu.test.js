@@ -189,10 +189,22 @@ test('geen nieuwe dependency, geen eigen inloglogica of TOTP', () => {
 test('het menu staat in elke kop waar het contract hem vraagt, via de goedkope voordeur', () => {
   for (const file of MOUNTED_IN) {
     const source = read(file);
-    assert.match(source, /import AccountMenuButton from '@\/src\/components\/AccountMenuButton'/, `${file} importeert de voordeur`);
-    assert.match(source, /<AccountMenuButton \/>/, `${file} toont het menu`);
+    // BE-63 (#155): de publieke koppen krijgen het menu via de ene gedeelde
+    // component; de interne kop en /mijn-restaurant mounten de voordeur zelf.
+    const viaHeader = /<PublicHeaderActions \/>/.test(source);
+    assert.ok(
+      viaHeader || /import AccountMenuButton from '@\/src\/components\/AccountMenuButton'/.test(source),
+      `${file} importeert de voordeur`
+    );
+    assert.ok(
+      viaHeader || /<AccountMenuButton \/>/.test(source),
+      `${file} toont het menu`
+    );
     assert.doesNotMatch(source, /import AccountMenu from/, `${file} laadt het menu zelf niet in de eerste lading`);
   }
+  const header = read('src/components/PublicHeaderActions.js');
+  assert.match(header, /import AccountMenuButton from '@\/src\/components\/AccountMenuButton'/);
+  assert.match(header, /<AccountMenuButton \/>/);
 });
 
 test('de voordeur laadt het menu pas na de sessiecontrole, met een dynamische import', () => {

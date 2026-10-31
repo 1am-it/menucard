@@ -1,0 +1,1241 @@
+{
+  "script": "run-be63-browser-check.js",
+  "ticket": "BE-63 (#155)",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3189); geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T10:17:30.168Z",
+  "port": 3189,
+  "pages": [
+    "/inloggen",
+    "/inloggen"
+  ],
+  "filter": null,
+  "scenarioRuns": [
+    {
+      "name": "gast",
+      "checks": 17,
+      "passed": 17,
+      "failed": 0,
+      "durationMs": 6410,
+      "error": null
+    },
+    {
+      "name": "instellingen",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 2251,
+      "error": null
+    },
+    {
+      "name": "menu",
+      "checks": 22,
+      "passed": 22,
+      "failed": 0,
+      "durationMs": 3251,
+      "error": null
+    },
+    {
+      "name": "inloggen",
+      "checks": 36,
+      "passed": 36,
+      "failed": 0,
+      "durationMs": 8502,
+      "error": null
+    },
+    {
+      "name": "ingelogd",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 6970,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "kop als gast 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als gast 1280: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 64px"
+    },
+    {
+      "name": "kop als gast 1280: het thema is aangetoond in licht en donker",
+      "passed": true,
+      "detail": "\"light\"/\"dark\""
+    },
+    {
+      "name": "kop als gast 1280: \"Voor restaurants\" staat in de kop",
+      "passed": true,
+      "detail": "Voor restaurants"
+    },
+    {
+      "name": "kop als gast 1280: Inloggen en de instellingenknop staan ernaast",
+      "passed": true,
+      "detail": "Inloggen / settings true"
+    },
+    {
+      "name": "kop als gast 1280: de menuknop is verborgen",
+      "passed": true,
+      "detail": "{\"visible\":false,\"top\":0,\"bottom\":0,\"left\":0,\"right\":0,\"width\":0,\"height\":0}"
+    },
+    {
+      "name": "kop als gast 1280: de drie knoppen staan op één regel",
+      "passed": true,
+      "detail": "23/10/10"
+    },
+    {
+      "name": "kop als gast 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als gast 390: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 64px"
+    },
+    {
+      "name": "kop als gast 390: het thema is aangetoond in licht en donker",
+      "passed": true,
+      "detail": "\"light\"/\"dark\""
+    },
+    {
+      "name": "kop als gast 390: alleen Inloggen en de menuknop in de kop",
+      "passed": true,
+      "detail": "login true menu true restaurants false settings false"
+    },
+    {
+      "name": "kop als gast 390: Inloggen en de menuknop staan op één regel",
+      "passed": true,
+      "detail": "18/18"
+    },
+    {
+      "name": "kop als gast 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als gast 320: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 120px"
+    },
+    {
+      "name": "kop als gast 320: het thema is aangetoond in licht en donker",
+      "passed": true,
+      "detail": "\"light\"/\"dark\""
+    },
+    {
+      "name": "kop als gast 320: alleen Inloggen en de menuknop in de kop",
+      "passed": true,
+      "detail": "login true menu true restaurants false settings false"
+    },
+    {
+      "name": "kop als gast 320: Inloggen en de menuknop staan op één regel",
+      "passed": true,
+      "detail": "74/74"
+    },
+    {
+      "name": "instellingen 1280: het paneel staat open in licht",
+      "passed": true,
+      "detail": "Instellingen"
+    },
+    {
+      "name": "instellingen 1280: \"Licht\" is de actieve keuze",
+      "passed": true,
+      "detail": "[{\"label\":\"Licht\",\"pressed\":true},{\"label\":\"Donker\",\"pressed\":false},{\"label\":\"Automatisch\",\"pressed\":false}]"
+    },
+    {
+      "name": "instellingen 1280: thema licht is aangetoond",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "instellingen 1280: \"Donker\" is de actieve keuze",
+      "passed": true,
+      "detail": "[{\"label\":\"Licht\",\"pressed\":false},{\"label\":\"Donker\",\"pressed\":true},{\"label\":\"Automatisch\",\"pressed\":false}]"
+    },
+    {
+      "name": "instellingen 1280: thema donker is aangetoond",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "instellingen 1280: \"Automatisch\" is te kiezen en volgt het systeem",
+      "passed": true,
+      "detail": "clicked / true / light"
+    },
+    {
+      "name": "instellingen 1280: \"Delen via\" opent het BE-61-venster",
+      "passed": true,
+      "detail": "true / true"
+    },
+    {
+      "name": "instellingen 1280: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "menu 390: het menu opent",
+      "passed": true,
+      "detail": "Menu"
+    },
+    {
+      "name": "menu 390: de titel is \"Menu\" en het paneel staat in beeld",
+      "passed": true,
+      "detail": "Menu / true"
+    },
+    {
+      "name": "menu 390: het blok \"Heb je een restaurant?\" staat er met Inloggen en Claim je zaak",
+      "passed": true,
+      "detail": "Heb je een restaurant? / Inloggen|Claim je zaak"
+    },
+    {
+      "name": "menu 390: de zin voor bezoekers staat er",
+      "passed": true,
+      "detail": "Als bezoeker heb je geen account nodig."
+    },
+    {
+      "name": "menu 390: de weergave biedt Licht, Donker en Automatisch",
+      "passed": true,
+      "detail": "Licht|Donker|Automatisch"
+    },
+    {
+      "name": "menu 390: \"Delen via\" staat er en is in beeld",
+      "passed": true,
+      "detail": "Delen via Nog niet gekozen"
+    },
+    {
+      "name": "menu 390: \"Mijn lijstje\" staat er",
+      "passed": true,
+      "detail": "Mijn lijstje 0 0 gerechten bewaard"
+    },
+    {
+      "name": "menu 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "menu 390: het menu ligt boven de tabbalk",
+      "passed": true,
+      "detail": "tabbalk null / laatste {\"top\":691,\"bottom\":743,\"left\":31,\"right\":359,\"width\":328,\"height\":52} / top {\"cls\":\"pha-row\",\"binnen\":true}"
+    },
+    {
+      "name": "menu 390: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "menu 390: Esc sluit het menu en de focus keert terug",
+      "passed": true,
+      "detail": "true / pha-menu"
+    },
+    {
+      "name": "menu 320: het menu opent",
+      "passed": true,
+      "detail": "Menu"
+    },
+    {
+      "name": "menu 320: de titel is \"Menu\" en het paneel staat in beeld",
+      "passed": true,
+      "detail": "Menu / true"
+    },
+    {
+      "name": "menu 320: het blok \"Heb je een restaurant?\" staat er met Inloggen en Claim je zaak",
+      "passed": true,
+      "detail": "Heb je een restaurant? / Inloggen|Claim je zaak"
+    },
+    {
+      "name": "menu 320: de zin voor bezoekers staat er",
+      "passed": true,
+      "detail": "Als bezoeker heb je geen account nodig."
+    },
+    {
+      "name": "menu 320: de weergave biedt Licht, Donker en Automatisch",
+      "passed": true,
+      "detail": "Licht|Donker|Automatisch"
+    },
+    {
+      "name": "menu 320: \"Delen via\" staat er en is in beeld",
+      "passed": true,
+      "detail": "Delen via Nog niet gekozen"
+    },
+    {
+      "name": "menu 320: \"Mijn lijstje\" staat er",
+      "passed": true,
+      "detail": "Mijn lijstje 0 0 gerechten bewaard"
+    },
+    {
+      "name": "menu 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "menu 320: het menu ligt boven de tabbalk",
+      "passed": true,
+      "detail": "tabbalk null / laatste {\"top\":567,\"bottom\":619,\"left\":31,\"right\":289,\"width\":258,\"height\":52} / top {\"cls\":\"pha-row\",\"binnen\":true}"
+    },
+    {
+      "name": "menu 320: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "menu 320: Esc sluit het menu en de focus keert terug",
+      "passed": true,
+      "detail": "true / pha-menu"
+    },
+    {
+      "name": "inloggen 1280: de titel, het label en de intro staan op de pagina",
+      "passed": true,
+      "detail": "VOOR RESTAURANTS / Inloggen bij je restaurant"
+    },
+    {
+      "name": "inloggen 1280: het e-mailveld van 52 px heeft een echt label",
+      "passed": true,
+      "detail": "E-mailadres / {\"type\":\"email\",\"box\":{\"top\":278,\"bottom\":330,\"left\":140,\"right\":740,\"width\":600,\"height\":52}}"
+    },
+    {
+      "name": "inloggen 1280: de knop \"Stuur mij een inlogcode\" is 52 px en staat in --button-primary-bg",
+      "passed": true,
+      "detail": "Stuur mij een inlogcode / 52px / rgb(246, 192, 87) = rgb(246, 192, 87)"
+    },
+    {
+      "name": "inloggen 1280: de uitleg over het geclaimde adres staat eronder",
+      "passed": true,
+      "detail": "Gebruik het adres waarmee je je restaurant hebt geclaimd."
+    },
+    {
+      "name": "inloggen 1280: het claimblok heeft de titel, de tekst en drie stappen",
+      "passed": true,
+      "detail": "[\"Zoek je restaurant\",\"Bevestig dat het van jou is\",\"Log in met je e-mailcode\"]"
+    },
+    {
+      "name": "inloggen 1280: de claimknop gaat naar /mijn-restaurant/claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\"}"
+    },
+    {
+      "name": "inloggen 1280: de teamlink gaat naar de bestaande interne inlog",
+      "passed": true,
+      "detail": "{\"tekst\":\"Werk je bij onze menukaarten? Team-inlog\",\"href\":\"/internal/login\"}"
+    },
+    {
+      "name": "inloggen 1280: de zin voor bezoekers staat er",
+      "passed": true,
+      "detail": "Bezoeker? Je hebt geen account nodig om te zoeken, te bewaren of samen te kiezen."
+    },
+    {
+      "name": "inloggen 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "inloggen 1280: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "inloggen 1280: het claimblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":113,\"bottom\":420,\"height\":307,\"viewportHeight\":900,\"onderkant\":900,\"scrollY\":0}"
+    },
+    {
+      "name": "inloggen 1280: de teamlink past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":496,\"bottom\":540,\"height\":44,\"viewportHeight\":900,\"onderkant\":900,\"scrollY\":0}"
+    },
+    {
+      "name": "inloggen 390: de titel, het label en de intro staan op de pagina",
+      "passed": true,
+      "detail": "VOOR RESTAURANTS / Inloggen bij je restaurant"
+    },
+    {
+      "name": "inloggen 390: het e-mailveld van 52 px heeft een echt label",
+      "passed": true,
+      "detail": "E-mailadres / {\"type\":\"email\",\"box\":{\"top\":335,\"bottom\":387,\"left\":20,\"right\":370,\"width\":350,\"height\":52}}"
+    },
+    {
+      "name": "inloggen 390: de knop \"Stuur mij een inlogcode\" is 52 px en staat in --button-primary-bg",
+      "passed": true,
+      "detail": "Stuur mij een inlogcode / 52px / rgb(246, 192, 87) = rgb(246, 192, 87)"
+    },
+    {
+      "name": "inloggen 390: de uitleg over het geclaimde adres staat eronder",
+      "passed": true,
+      "detail": "Gebruik het adres waarmee je je restaurant hebt geclaimd."
+    },
+    {
+      "name": "inloggen 390: het claimblok heeft de titel, de tekst en drie stappen",
+      "passed": true,
+      "detail": "[\"Zoek je restaurant\",\"Bevestig dat het van jou is\",\"Log in met je e-mailcode\"]"
+    },
+    {
+      "name": "inloggen 390: de claimknop gaat naar /mijn-restaurant/claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\"}"
+    },
+    {
+      "name": "inloggen 390: de teamlink gaat naar de bestaande interne inlog",
+      "passed": true,
+      "detail": "{\"tekst\":\"Werk je bij onze menukaarten? Team-inlog\",\"href\":\"/internal/login\"}"
+    },
+    {
+      "name": "inloggen 390: de zin voor bezoekers staat er",
+      "passed": true,
+      "detail": "Bezoeker? Je hebt geen account nodig om te zoeken, te bewaren of samen te kiezen."
+    },
+    {
+      "name": "inloggen 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "inloggen 390: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "inloggen 390: het claimblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":324,\"bottom\":631,\"height\":307,\"viewportHeight\":844,\"onderkant\":844,\"scrollY\":178}"
+    },
+    {
+      "name": "inloggen 390: de teamlink past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":728,\"bottom\":772,\"height\":44,\"viewportHeight\":844,\"onderkant\":844,\"scrollY\":178}"
+    },
+    {
+      "name": "inloggen 320: de titel, het label en de intro staan op de pagina",
+      "passed": true,
+      "detail": "VOOR RESTAURANTS / Inloggen bij je restaurant"
+    },
+    {
+      "name": "inloggen 320: het e-mailveld van 52 px heeft een echt label",
+      "passed": true,
+      "detail": "E-mailadres / {\"type\":\"email\",\"box\":{\"top\":381,\"bottom\":433,\"left\":20,\"right\":300,\"width\":280,\"height\":52}}"
+    },
+    {
+      "name": "inloggen 320: de knop \"Stuur mij een inlogcode\" is 52 px en staat in --button-primary-bg",
+      "passed": true,
+      "detail": "Stuur mij een inlogcode / 52px / rgb(246, 192, 87) = rgb(246, 192, 87)"
+    },
+    {
+      "name": "inloggen 320: de uitleg over het geclaimde adres staat eronder",
+      "passed": true,
+      "detail": "Gebruik het adres waarmee je je restaurant hebt geclaimd."
+    },
+    {
+      "name": "inloggen 320: het claimblok heeft de titel, de tekst en drie stappen",
+      "passed": true,
+      "detail": "[\"Zoek je restaurant\",\"Bevestig dat het van jou is\",\"Log in met je e-mailcode\"]"
+    },
+    {
+      "name": "inloggen 320: de claimknop gaat naar /mijn-restaurant/claimen",
+      "passed": true,
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\"}"
+    },
+    {
+      "name": "inloggen 320: de teamlink gaat naar de bestaande interne inlog",
+      "passed": true,
+      "detail": "{\"tekst\":\"Werk je bij onze menukaarten? Team-inlog\",\"href\":\"/internal/login\"}"
+    },
+    {
+      "name": "inloggen 320: de zin voor bezoekers staat er",
+      "passed": true,
+      "detail": "Bezoeker? Je hebt geen account nodig om te zoeken, te bewaren of samen te kiezen."
+    },
+    {
+      "name": "inloggen 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "inloggen 320: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "inloggen 320: het claimblok past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":196,\"bottom\":524,\"height\":328,\"viewportHeight\":720,\"onderkant\":720,\"scrollY\":372}"
+    },
+    {
+      "name": "inloggen 320: de teamlink past volledig in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"top\":604,\"bottom\":648,\"height\":44,\"viewportHeight\":720,\"onderkant\":720,\"scrollY\":389}"
+    },
+    {
+      "name": "kop als ingelogd 1280: het accountmenu staat in de kop",
+      "passed": true,
+      "detail": "true / {\"visible\":true,\"top\":10,\"bottom\":54,\"left\":1116,\"right\":1160,\"width\":44,\"height\":44}"
+    },
+    {
+      "name": "kop als ingelogd 1280: Inloggen is weg",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "kop als ingelogd 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als ingelogd 1280: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 64px"
+    },
+    {
+      "name": "kop als ingelogd 1280: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "kop als ingelogd 1280: \"Voor restaurants\" en de instellingenknop staan ernaast",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "kop als ingelogd 390: het accountmenu staat in de kop",
+      "passed": true,
+      "detail": "true / {\"visible\":true,\"top\":18,\"bottom\":62,\"left\":278,\"right\":322,\"width\":44,\"height\":44}"
+    },
+    {
+      "name": "kop als ingelogd 390: Inloggen is weg",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "kop als ingelogd 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als ingelogd 390: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 64px"
+    },
+    {
+      "name": "kop als ingelogd 390: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "kop als ingelogd 390: alleen de menuknop staat ernaast",
+      "passed": true,
+      "detail": "menu true settings false"
+    },
+    {
+      "name": "kop als ingelogd 320: het accountmenu staat in de kop",
+      "passed": true,
+      "detail": "true / {\"visible\":true,\"top\":18,\"bottom\":62,\"left\":208,\"right\":252,\"width\":44,\"height\":44}"
+    },
+    {
+      "name": "kop als ingelogd 320: Inloggen is weg",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "kop als ingelogd 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "kop als ingelogd 320: de kop staat op één regel (hoogte vastgelegd)",
+      "passed": true,
+      "detail": "hoogte 64px"
+    },
+    {
+      "name": "kop als ingelogd 320: het thema is in licht en donker aangetoond",
+      "passed": true,
+      "detail": "light/dark"
+    },
+    {
+      "name": "kop als ingelogd 320: alleen de menuknop staat ernaast",
+      "passed": true,
+      "detail": "menu true settings false"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be63-kop-gast-1280-licht.png",
+      "sha256": "1db09a10457e865e32003c08ca6d1e8c0dbf013a28de825ea9efe4c19fad8b43",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "gast",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-gast-1280-donker.png",
+      "sha256": "8bf07f6ecf1cefaac0d013ab2fa92bf4f8d173196a2b8f6fd5275a782ecd29fc",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "gast",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-gast-390-licht.png",
+      "sha256": "14cdb3dc7653bcf145aa0e7631d432fa1b561f6e855a9430d229ac4844542fbe",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "gast",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-gast-390-donker.png",
+      "sha256": "615f608068f16a257fd217e2e229a03e9d3f1fbee12d75104f56b4f0da067646",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "gast",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-gast-320-licht.png",
+      "sha256": "2172bae01ee412325e5e0ff90fe835bd0f351fe8348f431905aa07138a1b10c1",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "gast",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-gast-320-donker.png",
+      "sha256": "09a3b2cc03ecd3df48238f52cbe999744ebbae5075c96d37d41975b826faa0ea",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "gast",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-instellingen-1280-licht.png",
+      "sha256": "b2a610adb71d152103fe677bcf3a63241db9ec280b8e489bd7a6dfd12259bf33",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "settings",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-instellingen-1280-donker.png",
+      "sha256": "16af7d7aefb8bd680250ec44aad40b078aab91d4346bc30beadecc6543317f6f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "settings",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-instellingen-1280-automatisch.png",
+      "sha256": "0a4df3d0689572ec65e2f3ca3246dbf6ac778764ed5ceb83593e7195741de93b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "settings-auto",
+      "themeProof": null
+    },
+    {
+      "file": "be63-instellingen-1280-delen.png",
+      "sha256": "aae7d4cd452cd388562f15360213265c6f90bd0f93d667e825a08a51ccd9c5ee",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "settings-share",
+      "themeProof": null
+    },
+    {
+      "file": "be63-menu-390-licht.png",
+      "sha256": "c39e26d48cfb326ee4fc839d6386cfcaa85c4ec382c6cac14cb9837d318090cb",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "menu",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-menu-390-donker.png",
+      "sha256": "a2afb13a38125a8cfe8d2b489eb6ae69a693a674dca99e0ce22d5b16fe5faef1",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "menu",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-menu-320-licht.png",
+      "sha256": "ef87596d6ca819895e3aa9ed9cbc791ed8828a6c606c222e2226e8b3044c6be2",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "menu",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-menu-320-donker.png",
+      "sha256": "e0f704dd1c036910f578463734255c8ecc0640025b8960002eef3b564e65a4d9",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "menu",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-1280-licht.png",
+      "sha256": "2f3d97d9535af6290109614123bffc438e3f03f857312565418e89659c04931d",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "login",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-1280-donker.png",
+      "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "login",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-1280-claim.png",
+      "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "login-claim",
+      "themeProof": null
+    },
+    {
+      "file": "be63-inloggen-1280-team.png",
+      "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": null,
+      "state": "login-team",
+      "themeProof": null
+    },
+    {
+      "file": "be63-inloggen-390-licht.png",
+      "sha256": "14cdb3dc7653bcf145aa0e7631d432fa1b561f6e855a9430d229ac4844542fbe",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "login",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-390-donker.png",
+      "sha256": "615f608068f16a257fd217e2e229a03e9d3f1fbee12d75104f56b4f0da067646",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "login",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-390-claim.png",
+      "sha256": "83a225895fd946f9eb461f112ec3c39a42f245b4831ca3e8ea268a7ca56140c0",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": null,
+      "state": "login-claim",
+      "themeProof": null
+    },
+    {
+      "file": "be63-inloggen-390-team.png",
+      "sha256": "83a225895fd946f9eb461f112ec3c39a42f245b4831ca3e8ea268a7ca56140c0",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": null,
+      "state": "login-team",
+      "themeProof": null
+    },
+    {
+      "file": "be63-inloggen-320-licht.png",
+      "sha256": "2172bae01ee412325e5e0ff90fe835bd0f351fe8348f431905aa07138a1b10c1",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "login",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-320-donker.png",
+      "sha256": "09a3b2cc03ecd3df48238f52cbe999744ebbae5075c96d37d41975b826faa0ea",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "login",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-inloggen-320-claim.png",
+      "sha256": "5dd1f477f2561f2e4f6b1676cff7bcdbea1e346fb5f79546bcf23ed1e9898d93",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": null,
+      "state": "login-claim",
+      "themeProof": null
+    },
+    {
+      "file": "be63-inloggen-320-team.png",
+      "sha256": "96c14fd3cc28804593dcb013aef7a1a63e11ab87cb0fb73c0eb11ce4d146dc25",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": null,
+      "state": "login-team",
+      "themeProof": null
+    },
+    {
+      "file": "be63-kop-ingelogd-1280-licht.png",
+      "sha256": "bdfa7a7626497482d0472a4c8370f4bfe8d0e3ba6ff7b2af704d80f7001f950e",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-ingelogd-1280-donker.png",
+      "sha256": "0dabd4b1745331e559fefabf1c5e7809080c85fcc26338b23c14e594fb6ac861",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-ingelogd-390-licht.png",
+      "sha256": "a9ef85990317d940411b8c5c73e5b06399e700fc242be3d5dd25b7863e6b7732",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-ingelogd-390-donker.png",
+      "sha256": "79be983040a8e4dc0c9533402784f0dc6a02c69fddc559e6d0539e12f207f29b",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-ingelogd-320-licht.png",
+      "sha256": "9ba5457a99e3e701a97f470bf5e78f335aa1d83a6b764f80a00c769dc0df852a",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be63-kop-ingelogd-320-donker.png",
+      "sha256": "4ac3426eee0bbae9f219e86ce77c2dd659f34a580c887f73e757e18228911705",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "ingelogd",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}

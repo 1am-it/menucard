@@ -21,6 +21,9 @@ const code = (source) => source.split('\n').filter((line) => !line.trim().starts
 
 const LOGIN_PAGE = read('app/mijn-restaurant/inloggen/page.js');
 const LOGIN_VIEW = read('app/mijn-restaurant/inloggen/OwnerLoginView.js');
+// BE-63 (#155, ronde 4): de flow zelf staat in de gedeelde component, zodat
+// /inloggen en /mijn-restaurant/inloggen één bron hebben.
+const LOGIN_FORM = read('src/components/OwnerLoginCodeForm.js');
 const DASHBOARD_PAGE = read('app/mijn-restaurant/page.js');
 const DASHBOARD = read('app/mijn-restaurant/OwnerDashboard.js');
 const DELETION_VIEW = read('app/mijn-restaurant/OwnerAccountDeletion.js');
@@ -30,24 +33,25 @@ const CSS = read('app/globals.css');
 
 test('BE-47: /mijn-restaurant/inloggen gebruikt de gedeelde BE-48-flow', () => {
   assert.match(LOGIN_PAGE, /import OwnerLoginView from '\.\/OwnerLoginView'/);
-  assert.match(LOGIN_VIEW, /from '@\/src\/lib\/claimEmailCodeFlow'/);
-  assert.match(LOGIN_VIEW, /requestOwnerSignInCode\(/);
-  assert.match(LOGIN_VIEW, /verifyOwnerSignInCode\(/);
+  assert.match(LOGIN_VIEW, /from '@\/src\/components\/OwnerLoginCodeForm'/);
+  assert.match(LOGIN_FORM, /from '@\/src\/lib\/claimEmailCodeFlow'/);
+  assert.match(LOGIN_FORM, /requestOwnerSignInCode\(/);
+  assert.match(LOGIN_FORM, /verifyOwnerSignInCode\(/);
   // Criterion 1: the owner branch never creates an account.
   const flow = read('src/lib/claimEmailCodeFlow.js');
   assert.match(flow, /async function requestOwnerSignInCode/);
   assert.match(flow, /options: \{ shouldCreateUser: false \}/);
   // The internal/editor account is sent to /internal/login, never to this screen.
-  assert.match(LOGIN_VIEW, /resolveOwnerEntry\(/);
-  assert.match(LOGIN_VIEW, /INTERNAL_LOGIN_HREF/);
+  assert.match(LOGIN_FORM, /resolveOwnerEntry\(/);
+  assert.match(LOGIN_FORM, /INTERNAL_LOGIN_HREF/);
 });
 
 test('BE-47: het codescherm heeft de twee vervolgknoppen en neutrale tekst', () => {
-  assert.match(LOGIN_VIEW, /Nieuwe code sturen/);
-  assert.match(LOGIN_VIEW, /'Ander e-mailadres'/);
+  assert.match(LOGIN_FORM, /Nieuwe code sturen/);
+  assert.match(LOGIN_FORM, /'Ander e-mailadres'/);
   // The neutral notice comes straight from the flow module (never invented here).
-  assert.match(LOGIN_VIEW, /setNotice\(result\.notice\)/);
-  assert.match(LOGIN_VIEW, /\{noticeAlert\}/);
+  assert.match(LOGIN_FORM, /setNotice\(result\.notice\)/);
+  assert.match(LOGIN_FORM, /\{noticeAlert\}/);
   // The neutral "if this address is known to us" notice lives in the flow module.
   const flow = read('src/lib/claimEmailCodeFlow.js');
   assert.match(flow, /codeSentEmail: 'Als dit e-mailadres bij ons bekend is/);
@@ -83,25 +87,28 @@ test('BE-47: de verwijderroute is POST-only en gebruikt de geteste handler', () 
 });
 
 test('BE-47: toegankelijkheid — labels, autocomplete, inputmode, role=alert', () => {
-  for (const source of [LOGIN_VIEW, DELETION_VIEW]) {
+  // BE-63 ronde 4: de velden en foutmeldingen van de houder-inlog staan in de
+  // gedeelde component; de houderpagina zelf toont ze via dat component.
+  for (const source of [LOGIN_FORM, DELETION_VIEW]) {
     assert.match(source, /role="alert"/);
     assert.match(source, /autoComplete="one-time-code"/);
     assert.match(source, /inputMode="numeric"/);
     assert.match(source, /<label className="auth-label" htmlFor=/);
   }
-  assert.match(LOGIN_VIEW, /autoComplete="email"/);
+  assert.match(LOGIN_FORM, /autoComplete="email"/);
   // Every error paragraph is linked to its field through aria-describedby.
-  assert.match(LOGIN_VIEW, /aria-describedby=\{error \? 'owner-login-error'/);
+  assert.match(LOGIN_FORM, /aria-describedby=\{error \? 'owner-login-error'/);
   assert.match(DELETION_VIEW, /aria-describedby=\{error \? 'owner-delete-error'/);
 });
 
 test('BE-47: zonder de vlag is er nergens een telefoonveld', () => {
-  // The page renders the phone toggle and the phone input only inside `smsEnabled`.
-  assert.match(LOGIN_VIEW, /const smsEnabled = isSmsLoginEnabled\(process\.env\.NEXT_PUBLIC_OWNER_SMS_LOGIN\)/);
-  assert.match(LOGIN_VIEW, /\{smsEnabled && \(/);
-  assert.match(LOGIN_VIEW, /\{effectiveChannel === 'sms' \? \(/);
+  // The shared form renders the phone toggle and the phone input only inside
+  // `smsEnabled` (BE-63 ronde 4).
+  assert.match(LOGIN_FORM, /const smsEnabled = isSmsLoginEnabled\(process\.env\.NEXT_PUBLIC_OWNER_SMS_LOGIN\)/);
+  assert.match(LOGIN_FORM, /\{smsEnabled && \(/);
+  assert.match(LOGIN_FORM, /\{effectiveChannel === 'sms' \? \(/);
   // …and the channel can only become sms when the flag is on.
-  assert.match(LOGIN_VIEW, /const effectiveChannel = smsEnabled && channel === 'sms' \? 'sms' : 'email'/);
+  assert.match(LOGIN_FORM, /const effectiveChannel = smsEnabled && channel === 'sms' \? 'sms' : 'email'/);
   // No other owner screen offers a phone field.
   assert.doesNotMatch(DASHBOARD + DELETION_VIEW, /type="tel"/);
 });

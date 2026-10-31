@@ -44,12 +44,14 @@ test('NvwaView: the header actions group uses the new responsive class, not an i
   assert.equal(/style=\{\{ display: 'flex', gap: 8, alignItems: 'center' \}\}/.test(source), false);
 });
 
-test('NvwaView: ThemeToggle, back-link, and Export PDF are still all present inside the actions group', () => {
+test('NvwaView: de gedeelde kop, back-link en Export PDF staan nog in de acties', () => {
   const source = readNvwaViewSource();
   const actionsBlockMatch = source.match(/<div className="nvwa-header-actions">[\s\S]*?<\/div>/);
   assert.ok(actionsBlockMatch, 'nvwa-header-actions block must exist');
   const block = actionsBlockMatch[0];
-  assert.match(block, /<ThemeToggle \/>/);
+  // BE-63 (#155): de losse themakeuze en deelknop zijn vervangen door de ene
+  // gedeelde kopcomponent.
+  assert.match(block, /<PublicHeaderActions \/>/);
   assert.match(block, /className="back-btn"/);
   assert.match(block, /className="nvwa-export-btn"/);
 });
@@ -86,11 +88,11 @@ test('NvwaView: no new dependency or route — BE-28b only adds the in-repo Mobi
   const source = readNvwaViewSource();
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
   // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
-  // Menukaarten header) + the shared MobileTabBar + BE-49's in-repo
-  // ShareSettingsButton — still no external dependency.
-  assert.equal(importLines.length, 6);
+  // Menukaarten header) + the shared MobileTabBar + BE-63's in-repo
+  // PublicHeaderActions — still no external dependency.
+  assert.equal(importLines.length, 5);
   assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
   assert.ok(importLines.some((line) => line.includes('@/src/components/MobileTabBar')));
-  assert.ok(importLines.some((line) => line.includes('@/src/components/ShareSettingsButton')));
+  assert.ok(importLines.some((line) => line.includes('@/src/components/PublicHeaderActions')));
   assert.match(source, /const handlePrint = \(\) => window\.print\(\)/);
 });

@@ -1,0 +1,16 @@
+// De teller bij "Mijn lijstje" (BE-63, #155). Opmaak voor één component, dus
+// naast de component (BE-52): kleuren alleen via tokens.
+.primary-nav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}

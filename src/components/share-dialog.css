@@ -1,0 +1,316 @@
+/* BE-61 (#152, ontwerp variant A) — het deelblad "Delen via".
+ *
+ * Opmaak voor één component, dus naast de component (BE-52, Lead-besluit
+ * 30 okt): app/globals.css houdt alleen wat echt gedeeld is. De gedeelde
+ * onderdelen van het blad (.share-layer, .share-panel, .share-actions,
+ * .share-btn, het kleine menu) blijven in app/globals.css staan.
+ *
+ * Kleuren alleen via tokens uit app/globals.css, zodat licht en donker allebei
+ * kloppen; er staat hier geen vaste kleur in.
+ */
+
+/* ── Het paneel en zijn kop ─────────────────────────────────────────────── */
+
+.share-sheet {
+  padding: 8px 16px 16px;
+}
+
+.share-grabber {
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto 10px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+}
+
+.share-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.share-head-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.share-sheet .share-panel-hint {
+  margin-bottom: 12px;
+}
+
+.share-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.share-close:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.share-close:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.share-close-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ── De schakelaar: "Mijn favorieten" en "Telefoonmenu" ─────────────────── */
+
+.share-segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+}
+
+.share-segment-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.share-segment-option.is-active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  /* BE-61 review (#152, punt 2): de vulling alleen haalt in licht geen 3:1
+   * tegen de houder (#FFFFFF op #F6F4EF). De rand met --input-border doet dat
+   * wel (3,2:1), zonder de vulling of de tekst van licht te veranderen. */
+  border-color: var(--input-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* BE-61 review (#152, punt 2): in donker is --bg-card bijna gelijk aan de
+ * houder (--bg-elevated), waardoor "Mijn favorieten" nauwelijks te zien was.
+ * In donker gebruikt het actieve deel daarom het chip-paar uit de tokens;
+ * licht blijft precies zoals het was. */
+:root[data-theme="dark"] .share-segment-option.is-active {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .share-segment-option.is-active {
+    background: var(--chip-active-bg);
+    color: var(--chip-active-text);
+  }
+}
+
+/* De twee labels blijven ook op 320 px binnen hun eigen deel. */
+.share-segment-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Het keuzepunt zelf is een echt radio-input en blijft dus met het toetsenbord
+ * en de pijltjes te bedienen; alleen het ronde vakje is verborgen. */
+.share-segment-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.share-segment-option .share-segment-input:focus-visible + .share-segment-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.share-segment-option:has(.share-segment-input:focus-visible) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── De lijst met de vijf favorieten ───────────────────────────────────── */
+
+.share-fav-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.share-fav-title {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.share-fav-count {
+  color: var(--text-secondary);
+}
+
+.share-sheet .share-options {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+
+/* "Telefoonmenu": de lijst is uitgeschakeld en gedimd. */
+.share-options.is-muted {
+  opacity: 0.55;
+}
+
+.share-fav-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 0 12px;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.share-fav-row + .share-fav-row {
+  border-top: 1px solid var(--border);
+}
+
+.share-fav-row:hover,
+.share-fav-row.is-checked {
+  background: var(--bg-hover);
+}
+
+.share-fav-row:has(.share-fav-input:disabled) {
+  cursor: not-allowed;
+}
+
+.share-fav-row:has(.share-fav-input:focus-visible) {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.share-fav-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.share-fav-icon-box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.share-fav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.share-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Rechts: een gevuld rondje met het volgnummer, of een leeg rondje. */
+.share-fav-mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.share-fav-mark.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg-card);
+}
+
+/* ── De onderkant: "Wissen" links, "Opslaan" rechts ─────────────────────── */
+
+.share-sheet .share-actions {
+  align-items: center;
+  margin-top: 16px;
+}
+
+.share-clear {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.share-clear:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.share-clear:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.share-save {
+  margin-left: auto;
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+}

@@ -1,9 +1,12 @@
-/* BE-59 (#146, punt 4) — opmaak voor /inloggen.
-   Eigen bestand naast de pagina (BE-52), zodat app/globals.css ongemoeid blijft.
-   Alles is een token uit dat bestand: licht en donker volgen automatisch en er
-   staat nergens een hardgecodeerde kleur. Maten uit de goedgekeurde mockup
-   (schermen 4 en 5): twee grote keuzekaarten onder elkaar, elk minimaal 44 px
-   hoog, en op een brede kaart naast elkaar. */
+/* BE-63 (#155, ronde 4) — opmaak voor /inloggen volgens het goedgekeurde
+   ontwerp. Eigen bestand naast de pagina (BE-52), zodat app/globals.css
+   ongemoeid blijft. Alles is een token uit dat bestand: licht en donker volgen
+   automatisch en er staat nergens een hardgecodeerde kleur.
+
+   Links het formulier direct op de pagina (52 px hoge velden en knop), rechts
+   het claimblok in --bg-elevated; op mobiel staan ze onder elkaar, formulier
+   eerst. De formulierstijlen zelf (.auth-field, .auth-input, .auth-submit)
+   komen uit app/globals.css en worden hier alleen hoger gemaakt. */
 
 /* BE-59 deel 3 (#146) — het navigatielandmark van deze pagina. De enige echte
    navigatie is het woordmerk naar de startpagina; die link staat in een <nav>
@@ -20,7 +23,7 @@
 .inloggen-main {
   box-sizing: border-box;
   width: 100%;
-  max-width: 640px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 32px 20px 72px;
   color: var(--text-primary);
@@ -29,22 +32,83 @@
   line-height: 1.5;
 }
 
+.inloggen-columns {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+
+.inloggen-login {
+  min-width: 0;
+}
+
+.inloggen-eyebrow {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .inloggen-title {
-  margin: 0 0 8px;
-  font-size: 28px;
+  margin: 0 0 10px;
+  font-size: 30px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
 .inloggen-intro {
   margin: 0 0 24px;
+  max-width: 48ch;
   color: var(--text-secondary);
   font-size: 15px;
 }
 
-.inloggen-choices {
+/* Het ontwerp vraagt 52 px hoge velden en een 52 px hoge, ronde knop in
+   --button-primary-bg. De basis komt uit app/globals.css (.auth-*). */
+.inloggen-form .auth-input {
+  min-height: 52px;
+}
+
+.inloggen-form .auth-submit {
+  min-height: 52px;
+  border-color: var(--button-primary-bg);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 16px;
+}
+
+.inloggen-form .auth-submit:hover:not(:disabled) {
+  border-color: var(--button-primary-hover);
+  background: var(--button-primary-hover);
+}
+
+.inloggen-claim {
+  box-sizing: border-box;
+  padding: 24px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.inloggen-claim-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.inloggen-claim-body {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.inloggen-steps {
   display: grid;
   gap: 12px;
   margin: 0 0 20px;
@@ -52,82 +116,92 @@
   list-style: none;
 }
 
-.inloggen-choice {
+.inloggen-step {
   display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.inloggen-step-number {
+  flex: 0 0 auto;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  box-sizing: border-box;
-  min-height: 72px;
-  padding: 16px 18px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-soft);
   color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inloggen-step-text {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.inloggen-claim-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
   text-decoration: none;
 }
 
-.inloggen-choice:hover {
-  border-color: var(--border-hover);
-  background: var(--bg-elevated);
+.inloggen-claim-action:hover {
+  background: var(--surface-soft);
 }
 
-.inloggen-choice:focus-visible {
+.inloggen-claim-action:focus-visible,
+.inloggen-team-link:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
-.inloggen-choice-main {
+.inloggen-footer {
   display: grid;
   gap: 4px;
-  flex: 1 1 auto;
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
 }
 
-.inloggen-choice-label {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.inloggen-choice-detail {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.inloggen-choice-hint {
-  flex: 0 0 auto;
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  background: var(--surface-soft);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.inloggen-claim {
+.inloggen-visitor {
   margin: 0;
   color: var(--text-secondary);
   font-size: 14px;
 }
 
-.inloggen-claim-link {
+.inloggen-team {
+  margin: 0;
+}
+
+.inloggen-team-link {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  font-size: 13px;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.inloggen-claim-link:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-@media (min-width: 720px) {
-  .inloggen-choices {
-    grid-template-columns: 1fr;
+@media (min-width: 900px) {
+  .inloggen-columns {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 40px;
+    align-items: start;
   }
 
   .inloggen-main {
@@ -136,12 +210,11 @@
 }
 
 @media (max-width: 359px) {
-  .inloggen-choice {
-    flex-direction: column;
-    align-items: flex-start;
+  .inloggen-title {
+    font-size: 26px;
   }
 
-  .inloggen-choice-hint {
-    white-space: normal;
+  .inloggen-claim-action {
+    width: 100%;
   }
 }

@@ -1,8 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import MobileTabBar from '@/src/components/MobileTabBar'
 
@@ -117,8 +116,7 @@ export default function NvwaView({ id, restaurant, allItems }) {
         <div className="header-inner">
           <Wordmark />
           <div className="nvwa-header-actions">
-            <ThemeToggle />
-            <ShareSettingsButton />
+            <PublicHeaderActions />
             <Link href={`/restaurant/${id}`} className="back-btn">← {restaurant.name}</Link>
             <button onClick={handlePrint} className="nvwa-export-btn">⬇ Export PDF</button>
           </div>

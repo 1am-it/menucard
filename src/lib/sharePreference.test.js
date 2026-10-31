@@ -20,15 +20,22 @@ const {
   MAX_SHARE_FAVORITES,
   PHONE_MENU,
   SHARE_METHODS,
+  SHARE_PHONE_MENU_HINT,
   SHARE_PREFERENCE_KEY,
+  SHARE_SEGMENT_METHODS_LABEL,
+  SHARE_SEGMENT_PHONE_LABEL,
+  SHARE_SETTINGS_EMPTY_LABEL,
+  SHARE_SHEET_HINT,
   clearSharePreference,
   normalizeShareMethods,
   normalizeSharePreference,
   performShare,
   readSharePreference,
+  shareFavoriteCountLabel,
   shareMethodLabel,
   shareMethodLink,
   sharePlan,
+  sharePreferenceSummary,
   storageAvailable,
   writeSharePreference,
 } = require('./sharePreference');
@@ -55,6 +62,48 @@ test('de vijf manieren uit het contract, in de vaste volgorde, met een label', (
   assert.deepEqual(SHARE_METHODS.map((entry) => entry.label), ['WhatsApp', 'Link kopiëren', 'Sms', 'Telegram', 'E-mail']);
   assert.equal(shareMethodLabel('telegram'), 'Telegram');
   assert.equal(shareMethodLabel('onbekend'), null);
+});
+
+// BE-61 (#152, variant A): de teksten van het blad staan in deze module, zodat
+// component en tests één bron houden.
+// BE-61 review (#152, punt 1): bij "Telefoonmenu" hoort een eigen hint, want de
+// lijst met favorieten staat dan uit.
+test('BE-61 review: de hint bij "Telefoonmenu" gaat over het deelmenu van de telefoon', () => {
+  assert.equal(SHARE_PHONE_MENU_HINT, 'Je deelt altijd via het deelmenu van je telefoon.');
+  assert.notEqual(SHARE_PHONE_MENU_HINT, SHARE_SHEET_HINT);
+  assert.doesNotMatch(SHARE_PHONE_MENU_HINT, /favorieten/i);
+});
+
+// BE-63 (#155): de subtekst onder "Delen via" in het instellingenpaneel.
+test('BE-63: de subtekst bij "Delen via" noemt de huidige keuze', () => {
+  assert.equal(sharePreferenceSummary({ methods: ['whatsapp', 'copy'] }), 'WhatsApp, Link kopiëren');
+  assert.equal(sharePreferenceSummary({ methods: ['sms'] }), 'Sms');
+  assert.equal(sharePreferenceSummary({ phone: true }), SHARE_SEGMENT_PHONE_LABEL);
+  assert.equal(sharePreferenceSummary('telefoonmenu'), 'Telefoonmenu');
+  assert.equal(sharePreferenceSummary(null), SHARE_SETTINGS_EMPTY_LABEL);
+  assert.equal(sharePreferenceSummary({ methods: [] }), SHARE_SETTINGS_EMPTY_LABEL);
+  assert.equal(sharePreferenceSummary({ methods: ['onbekend'] }), SHARE_SETTINGS_EMPTY_LABEL);
+  // De volgorde blijft die van het contract, ook bij een omgekeerde invoer.
+  assert.equal(sharePreferenceSummary({ methods: ['copy', 'whatsapp'] }), 'WhatsApp, Link kopiëren');
+});
+
+// BE-61: de teller van het blad zegt "n van 3 gekozen".
+test('BE-61: de teller van het blad zegt "n van 3 gekozen"', () => {
+  assert.equal(shareFavoriteCountLabel(0), '0 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel(1), '1 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel(2), '2 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel(MAX_SHARE_FAVORITES), '3 van 3 gekozen');
+  // Boven het maximum, negatief of onbruikbaar: nooit een verkeerde teller.
+  assert.equal(shareFavoriteCountLabel(9), '3 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel(-2), '0 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel(undefined), '0 van 3 gekozen');
+  assert.equal(shareFavoriteCountLabel('2'), '2 van 3 gekozen');
+});
+
+test('BE-61: de hint en de twee delen van de schakelaar zijn de goedgekeurde teksten', () => {
+  assert.equal(SHARE_SHEET_HINT, 'Kies tot 3 favorieten. Daarna deel je met één tik.');
+  assert.equal(SHARE_SEGMENT_METHODS_LABEL, 'Mijn favorieten');
+  assert.equal(SHARE_SEGMENT_PHONE_LABEL, 'Telefoonmenu');
 });
 
 test('WhatsApp en Telegram krijgen exact de url, zonder begeleidende tekst', () => {

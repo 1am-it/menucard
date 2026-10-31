@@ -1,0 +1,128 @@
+/* BE-63 (#155, ronde 3) — alleen de knoppen van de publieke kop.
+ *
+ * Het paneel dat deze knoppen openen (weergave, "Delen via", het blok "Heb je
+ * een restaurant?" en "Mijn lijstje") heeft zijn eigen opmaak in
+ * src/components/public-header-menu.css, omdat het pas bij het openen wordt
+ * geladen. Zo blijft de eerste lading klein.
+ *
+ * Kleuren alleen via de bestaande tokens. */
+
+.public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* "Voor restaurants" is een gewone tekstlink, geen knop. */
+.pha-restaurants {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pha-restaurants:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pha-restaurants:focus-visible,
+.pha-login:focus-visible,
+.pha-settings:focus-visible,
+.pha-menu:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* "Inloggen": omlijnd, rond en 44 px hoog, naast de instellingenknop. */
+.pha-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pha-login:hover {
+  border-color: var(--border-hover);
+}
+
+/* Eén ronde instellingenknop van 44 × 44 px (desktop). */
+.pha-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pha-settings:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.pha-settings-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* De menuknop hoort bij de telefoon; op desktop staat er de navigatie. */
+.pha-menu {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.pha-menu:hover {
+  border-color: var(--border-hover);
+}
+
+.pha-menu-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Telefoon (tot en met 640 px): logo, "Inloggen" (of het accountmenu) en de
+ * menuknop. "Voor restaurants" en de instellingenknop zitten dan in het menu. */
+@media (max-width: 640px) {
+  .public-header-actions {
+    gap: 8px;
+  }
+
+  .pha-restaurants,
+  .pha-settings {
+    display: none;
+  }
+
+  .pha-login {
+    padding: 0 14px;
+  }
+
+  .pha-menu {
+    display: inline-flex;
+  }
+}
