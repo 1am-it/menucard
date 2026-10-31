@@ -2,7 +2,7 @@
   "issue": "#176 (BE-71)",
   "decision": "planning/decisions/021-breda-menu-bootstrap.md",
   "scraped": "2026-11-01",
-  "generatedAt": "2026-10-31T23:38:31.399Z",
+  "generatedAt": "2026-10-31T23:44:07.302Z",
   "totals": {
     "restaurants": 25,
     "done": 2,
@@ -35,6 +35,38 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.restaurantwolfslaar.com/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/menu",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurantwolfslaar.com/menu",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": true,
       "previousKeys": [
         "1-lunch",
@@ -63,6 +95,25 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://restaurantblossem.nl/nl",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://restaurantblossem.nl/nl/restaurant",
+          "kind": "html",
+          "dishCount": 43,
+          "pricedCount": 43,
+          "refusal": null
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -80,6 +131,18 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.restaurantconfuego.com/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,
@@ -117,6 +180,35 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.restaurantuijttewaal.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf",
+          "kind": "pdf",
+          "dishCount": 47,
+          "pricedCount": 47,
+          "refusal": null
+        },
+        {
+          "url": "https://www.restaurantuijttewaal.nl/_files/ugd/977c56_d9e17faa14c64417bc775bf8220f9b8c.pdf",
+          "kind": null,
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "not_read",
+            "reason": "response-too-large"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -131,6 +223,35 @@
       "pricedCount": 12,
       "pageCount": null,
       "reasons": [],
+      "candidates": [
+        {
+          "url": "https://www.restaurant-chocolat.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/menu/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurant-chocolat.nl/lunch/",
+          "kind": "html",
+          "dishCount": 12,
+          "pricedCount": 12,
+          "refusal": null
+        }
+      ],
       "hadCard": true,
       "previousKeys": [
         "5-menukaart"
@@ -150,6 +271,18 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://brasseriebardot.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": true,
@@ -177,6 +310,7 @@
           "detail": "https://www.restaurantruitersbosch.nl"
         }
       ],
+      "candidates": [],
       "hadCard": false,
       "previousKeys": []
     },
@@ -194,6 +328,38 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.aldentebreda.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.aldentebreda.nl/menukaart-restaurant-2/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.aldentebreda.nl/menu-classico/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,
@@ -215,6 +381,28 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.beersbarrels.nl/en/locations/breda/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.beersbarrels.nl/en/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -234,6 +422,18 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.salondeprovence.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -251,6 +451,38 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.beyerd.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.beyerd.nl/untappd-menu-location4321-theme13562/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.beyerd.nl/cafe-lunchkaart/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,
@@ -288,6 +520,15 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://pellens.nl/",
+          "kind": "html",
+          "dishCount": 36,
+          "pricedCount": 26,
+          "refusal": null
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -307,6 +548,28 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://gantauvillage.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "too_few_items"
+          }
+        },
+        {
+          "url": "https://gantauvillage.nl/afhaalmenu/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "too_few_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -324,6 +587,18 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://www.thechaiaffairs.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,
@@ -351,6 +626,45 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.andalous-breda.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.andalous-breda.nl/menukaart/",
+          "kind": "html",
+          "dishCount": 84,
+          "pricedCount": 84,
+          "refusal": null
+        },
+        {
+          "url": "https://www.andalous-breda.nl/ramadan-menu/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.andalous-breda.nl/ramadan-menu/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -368,6 +682,18 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://restaurantsmelt.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,
@@ -390,6 +716,25 @@
           "detail": "8 gerecht(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://restaurantzenza.nl/",
+          "kind": "html",
+          "dishCount": 72,
+          "pricedCount": 72,
+          "refusal": null
+        },
+        {
+          "url": "https://restaurantzenza.nl/menu/",
+          "kind": null,
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "not_read",
+            "reason": "bad-status"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -410,6 +755,7 @@
           "detail": "https://www.masalabreda.nl"
         }
       ],
+      "candidates": [],
       "hadCard": false,
       "previousKeys": []
     },
@@ -435,6 +781,42 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.restaurantzuyd.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/lunch",
+          "kind": "html",
+          "dishCount": 18,
+          "pricedCount": 18,
+          "refusal": null
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/diner",
+          "kind": "html",
+          "dishCount": 16,
+          "pricedCount": 16,
+          "refusal": null
+        },
+        {
+          "url": "https://www.restaurantzuyd.nl/kerstmenu",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": true,
       "previousKeys": [
         "19-lunch",
@@ -457,6 +839,28 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.klein-java.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.klein-java.nl/gerechten",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -476,6 +880,28 @@
           "text": "geen gerechten herkend"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.senangmakan.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.senangmakan.nl/afhaal-menu-nieuw/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -490,6 +916,25 @@
       "pricedCount": 22,
       "pageCount": null,
       "reasons": [],
+      "candidates": [
+        {
+          "url": "https://www.makananbreda.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/",
+          "kind": "html",
+          "dishCount": 22,
+          "pricedCount": 22,
+          "refusal": null
+        }
+      ],
       "hadCard": true,
       "previousKeys": [
         "22-menukaart"
@@ -509,6 +954,28 @@
         {
           "code": "no_dishes",
           "text": "geen gerechten herkend"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://t-huis.online/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://t-huis.online/menu/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": true,
@@ -545,6 +1012,35 @@
           "detail": "1 aandachtspunt(en)"
         }
       ],
+      "candidates": [
+        {
+          "url": "https://www.trattoriaperron.nl/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.trattoriaperron.nl/menu/",
+          "kind": "html",
+          "dishCount": 142,
+          "pricedCount": 131,
+          "refusal": null
+        },
+        {
+          "url": "https://www.trattoriaperron.nl/kerstavond-2026/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        }
+      ],
       "hadCard": false,
       "previousKeys": []
     },
@@ -568,6 +1064,39 @@
           "code": "excluded_sections",
           "text": "herkende sectie niet als gerechten opgeslagen",
           "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "candidates": [
+        {
+          "url": "https://dolceesalato.nl/",
+          "kind": "html",
+          "dishCount": 12,
+          "pricedCount": 12,
+          "refusal": null
+        },
+        {
+          "url": "https://dolceesalato.nl/menu/",
+          "kind": "html",
+          "dishCount": 87,
+          "pricedCount": 87,
+          "refusal": null
+        },
+        {
+          "url": "https://dolceesalato.nl/pizza-afhalen-breda/",
+          "kind": "html",
+          "dishCount": 10,
+          "pricedCount": 10,
+          "refusal": null
+        },
+        {
+          "url": "https://dolceesalato.nl/stempelkaart/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
         }
       ],
       "hadCard": false,

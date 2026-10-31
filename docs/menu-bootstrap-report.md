@@ -5,7 +5,7 @@ Eenmalige vulling volgens besluit 021 (BE-71, #176). Alleen de eigen websites va
 geen AI en geen betaalde dienst.
 
 - Ophaaldatum: 2026-11-01
-- Gegenereerd: 2026-10-31T23:38:31.399Z
+- Gegenereerd: 2026-10-31T23:44:07.302Z
 - Geslaagd: 2 · overgeslagen: 21 · geblokkeerd: 2 (van 25)
 
 ## Redenen, gegroepeerd

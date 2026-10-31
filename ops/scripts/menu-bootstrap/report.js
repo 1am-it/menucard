@@ -66,6 +66,10 @@ function buildReport({ results, previousMenus, scraped, generatedAt }) {
       pricedCount: result.pricedCount,
       pageCount: result.pageCount,
       reasons: result.reasons,
+      // What the engine actually tried: per candidate the URL, html or pdf, the
+      // dish count and the reader's own refusal. That is the input for the round
+      // that improves the readers or the discovery.
+      candidates: result.candidates || [],
       hadCard,
       previousKeys: Object.keys(previous),
     };
