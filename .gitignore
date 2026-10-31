@@ -24,3 +24,6 @@ ops/perf/output/
 # belong to the delivery stays in ops/browser/evidence/ and ops/perf/evidence/.
 /*.log
 
+
+# BE-65 (#157) - tijdelijke logs en meetbestanden van een ronde blijven buiten git.
+.tmp-*
