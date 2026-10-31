@@ -124,6 +124,10 @@ function useDialogFocus(open, panelRef, onClose) {
       } catch (error) {
         // De knop bestaat niet meer: dan valt er niets terug te zetten.
       }
+    }
+  }, [open, panelRef])
+}
+
 /** De laag eromheen: een klik naast het paneel sluit het, net als Esc. */
 function SendLayer({ onClose, children }) {
   // Een portal naar <body>: de pagina heeft een eigen stapelvolgorde en de
