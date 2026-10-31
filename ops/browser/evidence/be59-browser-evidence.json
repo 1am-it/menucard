@@ -1,0 +1,2593 @@
+{
+  "ticket": "BE-59 (#146)",
+  "routes": [
+    "/",
+    "/inloggen",
+    "/mijn-restaurant",
+    "/internal/tellers"
+  ],
+  "category": "lokale browsercheck met gestubde sessie en API (next dev op poort 3192); geen productie en geen echte acceptatie",
+  "ranAt": "2026-10-31T00:55:45.128Z",
+  "passed": true,
+  "filter": null,
+  "checks": [
+    {
+      "name": "gast home: geen accountknop",
+      "passed": true,
+      "detail": "{\"trigger\":false}"
+    },
+    {
+      "name": "gast home: geen accountmenu in de pagina",
+      "passed": true,
+      "detail": "{\"menu\":false}"
+    },
+    {
+      "name": "gast home: de footerlink heet \"Voor restaurants · Inloggen\"",
+      "passed": true,
+      "detail": "Voor restaurants · Inloggen"
+    },
+    {
+      "name": "gast home: de footerlink gaat naar /inloggen",
+      "passed": true,
+      "detail": "/inloggen"
+    },
+    {
+      "name": "gast home: geen sessiesleutel in de opslag",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "gast home: geen sessie- of rolopvraag en geen auth-verkeer",
+      "passed": true,
+      "detail": "{\"accountCalls\":[],\"alleAanroepen\":0}"
+    },
+    {
+      "name": "gast home: geen accountmenu-bestand geladen",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "gast home: het lichte thema staat aan",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "gast home (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "gast home (licht) · contrast: 24 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "gast home (licht) · naam: 17 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "gast home (licht) · tikdoel: 17 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "gast home (licht) · koppen: één h1 bij 2 koppen",
+      "passed": true,
+      "detail": "h1: \"Waar heb je vanavond zin in?\""
+    },
+    {
+      "name": "gast home (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "gast home (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "gast home (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "gast home (licht) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "opname be59-gast-home-1280-light-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":762,\"width\":1280,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":762.34375,\"innerHeight\":900}"
+    },
+    {
+      "name": "gast home (light): het thema staat aan",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "opname be59-gast-home-1280-light-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1123,\"width\":1274,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1123.4375,\"innerHeight\":900}"
+    },
+    {
+      "name": "gast home (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "opname be59-gast-home-390-light-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1404,\"width\":390,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1403.875,\"innerHeight\":844}"
+    },
+    {
+      "name": "gast home (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "opname be59-gast-home-320-light-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1755,\"width\":320,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1754.765625,\"innerHeight\":720}"
+    },
+    {
+      "name": "gast home (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "gast home (dark): het thema staat aan",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "gast home (donker) · contrast: 37 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "gast home (donker) · naam: 23 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "gast home (donker) · tikdoel: 23 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "gast home (donker) · koppen: één h1 bij 3 koppen",
+      "passed": true,
+      "detail": "h1: \"Waar heb je vanavond zin in?\""
+    },
+    {
+      "name": "gast home (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "gast home (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "gast home (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "gast home (donker) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "opname be59-gast-home-1280-dark-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1123,\"width\":1274,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1123.4375,\"innerHeight\":900}"
+    },
+    {
+      "name": "gast home (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "opname be59-gast-home-390-dark-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1404,\"width\":390,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1403.875,\"innerHeight\":844}"
+    },
+    {
+      "name": "gast home (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "opname be59-gast-home-320-dark-footer: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":1755,\"width\":320,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1754.765625,\"innerHeight\":720}"
+    },
+    {
+      "name": "gast home (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "inloggen: de pagina zelf is /inloggen",
+      "passed": true,
+      "detail": "/inloggen"
+    },
+    {
+      "name": "inloggen: de titel is \"Inloggen\"",
+      "passed": true,
+      "detail": "Inloggen"
+    },
+    {
+      "name": "inloggen: een korte uitleg staat er",
+      "passed": true,
+      "detail": "Kies hieronder hoe je inlogt. We raden niet aan je e-mailadres welke rol je hebt; elke route heeft zijn eigen beveiliging."
+    },
+    {
+      "name": "inloggen: precies twee keuzes",
+      "passed": true,
+      "detail": "[{\"label\":\"Ik heb een restaurant\",\"href\":\"/mijn-restaurant/inloggen\"},{\"label\":\"Ik werk bij onze menukaarten\",\"href\":\"/internal/login\"}]"
+    },
+    {
+      "name": "inloggen: \"Ik heb een restaurant\" gaat naar /mijn-restaurant/inloggen",
+      "passed": true,
+      "detail": "{\"label\":\"Ik heb een restaurant\",\"href\":\"/mijn-restaurant/inloggen\"}"
+    },
+    {
+      "name": "inloggen: \"Ik werk bij onze menukaarten\" gaat naar /internal/login",
+      "passed": true,
+      "detail": "{\"label\":\"Ik werk bij onze menukaarten\",\"href\":\"/internal/login\"}"
+    },
+    {
+      "name": "inloggen: de claimlink gaat naar /mijn-restaurant/claimen",
+      "passed": true,
+      "detail": "{\"text\":\"Nog geen account? Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\"}"
+    },
+    {
+      "name": "inloggen: een gast ziet hier ook geen accountknop",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "inloggen (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "inloggen (licht) · contrast: 14 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "inloggen (licht) · naam: 6 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "inloggen (licht) · tikdoel: 6 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "inloggen (licht) · koppen: één h1 bij 1 koppen",
+      "passed": true,
+      "detail": "h1: \"Inloggen\""
+    },
+    {
+      "name": "inloggen (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "inloggen (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "inloggen (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "inloggen (licht) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "opname be59-inloggen-1280-light-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":228,\"width\":600,\"height\":185},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":227.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "opname be59-inloggen-1280-light-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":433,\"width\":600,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":432.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "opname be59-inloggen-1280-light-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":228,\"width\":600,\"height\":185},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":227.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "opname be59-inloggen-1280-light-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":433,\"width\":600,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":432.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "inloggen (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "opname be59-inloggen-390-light-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":250,\"width\":350,\"height\":299},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":250.09375,\"innerHeight\":844}"
+    },
+    {
+      "name": "opname be59-inloggen-390-light-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":569,\"width\":350,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":569.09375,\"innerHeight\":844}"
+    },
+    {
+      "name": "inloggen (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "opname be59-inloggen-320-light-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":250,\"width\":280,\"height\":314},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":250.09375,\"innerHeight\":720}"
+    },
+    {
+      "name": "opname be59-inloggen-320-light-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":584,\"width\":280,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":584.09375,\"innerHeight\":720}"
+    },
+    {
+      "name": "inloggen (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "inloggen (donker) · contrast: 13 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "inloggen (donker) · naam: 6 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "inloggen (donker) · tikdoel: 6 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "inloggen (donker) · koppen: één h1 bij 1 koppen",
+      "passed": true,
+      "detail": "h1: \"Inloggen\""
+    },
+    {
+      "name": "inloggen (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "inloggen (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "inloggen (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "inloggen (donker) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "opname be59-inloggen-1280-dark-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":228,\"width\":600,\"height\":185},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":227.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "opname be59-inloggen-1280-dark-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":340,\"y\":433,\"width\":600,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":432.59375,\"innerHeight\":900}"
+    },
+    {
+      "name": "inloggen (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+    },
+    {
+      "name": "opname be59-inloggen-390-dark-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":250,\"width\":350,\"height\":299},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":250.09375,\"innerHeight\":844}"
+    },
+    {
+      "name": "opname be59-inloggen-390-dark-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":569,\"width\":350,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":569.09375,\"innerHeight\":844}"
+    },
+    {
+      "name": "inloggen (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "opname be59-inloggen-320-dark-keuzes: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":250,\"width\":280,\"height\":314},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":250.09375,\"innerHeight\":720}"
+    },
+    {
+      "name": "opname be59-inloggen-320-dark-claim: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":20,\"y\":584,\"width\":280,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":584.09375,\"innerHeight\":720}"
+    },
+    {
+      "name": "inloggen (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder: de initialen komen uit de naam (SD)",
+      "passed": true,
+      "detail": "SD"
+    },
+    {
+      "name": "beheerder: het schermlezerlabel noemt de naam en het aantal taken",
+      "passed": true,
+      "detail": "Account van Sanne de Vries, 7 openstaande taken"
+    },
+    {
+      "name": "beheerder: de knop is 44 bij 44 px",
+      "passed": true,
+      "detail": "{\"width\":44,\"height\":44}"
+    },
+    {
+      "name": "beheerder: de rol staat in gewone woorden",
+      "passed": true,
+      "detail": "Beheerder · Redacteur"
+    },
+    {
+      "name": "beheerder: de naam staat bovenin",
+      "passed": true,
+      "detail": "Sanne de Vries"
+    },
+    {
+      "name": "beheerder: \"Beheer · 7 open\" met de bestemming /internal",
+      "passed": true,
+      "detail": "{\"text\":\"Beheer 7 open\",\"label\":\"Beheer\",\"count\":\"7 open\",\"href\":\"/internal\"}"
+    },
+    {
+      "name": "beheerder: \"Mijn lijstje\" staat in het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder: \"Uitloggen\" staat in het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder: geen \"Mijn restaurant\" zonder owner-rol",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder: op een publieke pagina geen \"Bekijk de site\"",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder: alleen de items die bij de rol horen",
+      "passed": true,
+      "detail": "[\"Beheer\",\"Mijn lijstje\",\"Uitloggen\"]"
+    },
+    {
+      "name": "beheerder home: Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder toetsenbord: de accountknop kan de focus krijgen",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder toetsenbord: Enter op de knop opent het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder toetsenbord: de pijltoetsen verplaatsen de focus en blijven in het menu",
+      "passed": true,
+      "detail": "{\"eerste\":\"Beheer\\n7 open\",\"tweede\":\"Mijn lijstje\",\"terug\":\"Beheer\\n7 open\",\"binnen\":true}"
+    },
+    {
+      "name": "beheerder toetsenbord: Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder toetsenbord: de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 390: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder 390: het menu is het paneel van onderen",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "beheerder 390: het paneel heeft een sluitknop",
+      "passed": true,
+      "detail": "Sluiten"
+    },
+    {
+      "name": "beheerder mobiel 390: Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 390: de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 390 sluitknop: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder 390: de sluitknop sluit het paneel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 320: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder 320: het menu is het paneel van onderen",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "beheerder 320: het paneel heeft een sluitknop",
+      "passed": true,
+      "detail": "Sluiten"
+    },
+    {
+      "name": "beheerder mobiel 320: Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 320: de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder mobiel 320 sluitknop: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder 320: de sluitknop sluit het paneel",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder intern: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder intern: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "intern: \"Bekijk de site\" staat in het menu",
+      "passed": true,
+      "detail": "[\"Beheer\",\"Mijn lijstje\",\"Bekijk de site\",\"Uitloggen\"]"
+    },
+    {
+      "name": "intern: \"Bekijk de site\" gaat naar /",
+      "passed": true,
+      "detail": "/"
+    },
+    {
+      "name": "intern: de rol staat ook hier in gewone woorden",
+      "passed": true,
+      "detail": "Beheerder · Redacteur"
+    },
+    {
+      "name": "intern: geen enkele externe of schrijvende aanroep",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "opname be59-beheerder-intern-1280-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":566,\"y\":97,\"width\":232,\"height\":262},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":97,\"innerHeight\":900}"
+    },
+    {
+      "name": "beheerder intern: Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder intern: de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder a11y (light): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accountmenu open (licht) · contrast: 44 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.38:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "accountmenu open (licht) · naam: 27 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "accountmenu open (licht) · tikdoel: 27 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "accountmenu open (licht) · koppen: één h1 bij 3 koppen",
+      "passed": true,
+      "detail": "h1: \"Waar heb je vanavond zin in?\""
+    },
+    {
+      "name": "accountmenu open (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "accountmenu open (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "accountmenu open (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "accountmenu open (licht) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder a11y (dark): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "accountmenu open (donker) · contrast: 44 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "accountmenu open (donker) · naam: 27 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "accountmenu open (donker) · tikdoel: 27 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "accountmenu open (donker) · koppen: één h1 bij 3 koppen",
+      "passed": true,
+      "detail": "h1: \"Waar heb je vanavond zin in?\""
+    },
+    {
+      "name": "accountmenu open (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "accountmenu open (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "accountmenu open (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "accountmenu open (donker) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-1280-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":1169,\"y\":14,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":14,\"innerHeight\":900}"
+    },
+    {
+      "name": "beheerder opname (light/1280): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-1280-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":981,\"y\":66,\"width\":232,\"height\":216},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":66,\"innerHeight\":900}"
+    },
+    {
+      "name": "beheerder opname (light/1280): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (light/1280): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-390-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":330,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":844}"
+    },
+    {
+      "name": "beheerder opname (light/390): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-390-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":537,\"width\":390,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":537,\"innerHeight\":844}"
+    },
+    {
+      "name": "beheerder opname (light/390): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (light/390): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-320-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":260,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":720}"
+    },
+    {
+      "name": "beheerder opname (light/320): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-320-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":413,\"width\":320,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":413,\"innerHeight\":720}"
+    },
+    {
+      "name": "beheerder opname (light/320): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (light/320): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-1280-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":1169,\"y\":14,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":14,\"innerHeight\":900}"
+    },
+    {
+      "name": "beheerder opname (dark/1280): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-1280-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":981,\"y\":66,\"width\":232,\"height\":216},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":66,\"innerHeight\":900}"
+    },
+    {
+      "name": "beheerder opname (dark/1280): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (dark/1280): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-390-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":330,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":844}"
+    },
+    {
+      "name": "beheerder opname (dark/390): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-390-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":537,\"width\":390,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":537,\"innerHeight\":844}"
+    },
+    {
+      "name": "beheerder opname (dark/390): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (dark/390): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "beheerder home: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home: de knop heeft de stip (openstaand werk)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-320-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":260,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":720}"
+    },
+    {
+      "name": "beheerder opname (dark/320): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-beheerder-home-320-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":413,\"width\":320,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":413,\"innerHeight\":720}"
+    },
+    {
+      "name": "beheerder opname (dark/320): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder opname (dark/320): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "beheerder home (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home: het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder: geen stip zonder openstaand werk",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "houder: de initialen komen uit de naam (YK)",
+      "passed": true,
+      "detail": "YK"
+    },
+    {
+      "name": "houder: de rol staat in gewone woorden met de restaurantnaam",
+      "passed": true,
+      "detail": "Restauranthouder van Restaurant Wolfslaar"
+    },
+    {
+      "name": "houder: \"Mijn restaurant\" staat in het menu en gaat naar /mijn-restaurant",
+      "passed": true,
+      "detail": "{\"text\":\"Mijn restaurant\",\"label\":\"Mijn restaurant\",\"count\":\"\",\"href\":\"/mijn-restaurant\"}"
+    },
+    {
+      "name": "houder: geen \"Beheer\" zonder werkrol",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder: alleen de items die bij de rol horen",
+      "passed": true,
+      "detail": "[\"Mijn restaurant\",\"Mijn lijstje\",\"Uitloggen\"]"
+    },
+    {
+      "name": "houder: het schermlezerlabel noemt geen aantal taken",
+      "passed": true,
+      "detail": "Account van Youssef Kaddour"
+    },
+    {
+      "name": "houder /mijn-restaurant: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder: /mijn-restaurant blijft op zijn eigen pad",
+      "passed": true,
+      "detail": "/mijn-restaurant"
+    },
+    {
+      "name": "houder: de kop is \"Mijn restaurant · [naam]\"",
+      "passed": true,
+      "detail": "Mijn restaurant · Restaurant Wolfslaar"
+    },
+    {
+      "name": "houder: daar staat ook het accountmenu in de kop",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "opname be59-houder-owner-1280-light-kop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-1280-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":1169,\"y\":14,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":14,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder opname (light/1280): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-1280-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":981,\"y\":66,\"width\":232,\"height\":232},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":66,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder opname (light/1280): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (light/1280): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (light/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-390-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":330,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":844}"
+    },
+    {
+      "name": "houder opname (light/390): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-390-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":537,\"width\":390,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":537,\"innerHeight\":844}"
+    },
+    {
+      "name": "houder opname (light/390): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (light/390): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (light/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-320-light-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":260,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":720}"
+    },
+    {
+      "name": "houder opname (light/320): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-320-light-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":413,\"width\":320,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":413,\"innerHeight\":720}"
+    },
+    {
+      "name": "houder opname (light/320): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (light/320): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (light/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "houder /mijn-restaurant: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-owner-1280-light-kop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-1280-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":1169,\"y\":14,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":14,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder opname (dark/1280): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-1280-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":981,\"y\":66,\"width\":232,\"height\":232},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":66,\"innerHeight\":900}"
+    },
+    {
+      "name": "houder opname (dark/1280): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (dark/1280): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (dark/1280): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-390-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":330,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":844}"
+    },
+    {
+      "name": "houder opname (dark/390): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-390-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":537,\"width\":390,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":537,\"innerHeight\":844}"
+    },
+    {
+      "name": "houder opname (dark/390): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (dark/390): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (dark/390): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":390,\"scrollWidth\":390}"
+    },
+    {
+      "name": "houder /: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-320-dark-knop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":260,\"y\":76,\"width\":44,\"height\":44},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":76,\"innerHeight\":720}"
+    },
+    {
+      "name": "houder opname (dark/320): het menu opent met een klik op de avatar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-home-320-dark-menu: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":0,\"y\":413,\"width\":320,\"height\":307},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":true,\"pageY\":413,\"innerHeight\":720}"
+    },
+    {
+      "name": "houder opname (dark/320): Escape sluit het menu",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder opname (dark/320): de focus keert terug naar de accountknop",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "houder home (dark/320): geen horizontale overloop",
+      "passed": true,
+      "detail": "{\"innerWidth\":320,\"scrollWidth\":320}"
+    },
+    {
+      "name": "houder /mijn-restaurant: de accountknop verschijnt",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "opname be59-houder-owner-1280-dark-kop: hele onderdeel in beeld",
+      "passed": true,
+      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+    }
+  ],
+  "errors": [],
+  "shots": [
+    {
+      "file": "be59-gast-home-1280-light-footer.png",
+      "sha256": "1d98e6403d97e1b24616f9e06e210149adf8a2305c97391652603b0966fde5b2",
+      "width": 1280,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 762,
+        "width": 1280,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 1280,
+        "width": 1280,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 762.34375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-1280-light-footer.png",
+      "sha256": "312f20a69c2ef016e17c2081cb9c8c032996205227734bbc0f3e7c0b6f1d0b19",
+      "width": 1274,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1123,
+        "width": 1274,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 1274,
+        "width": 1274,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1123.4375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-390-light-footer.png",
+      "sha256": "a03948a850ff6b0253912c3d7359b57e4e0c47a3e3b1f61560ce93b77d1c9f41",
+      "width": 390,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1404,
+        "width": 390,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1403.875,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-320-light-footer.png",
+      "sha256": "d40a3c814e1763f23a1b4d9c63be033684100efb262dbc16c7b6ff0b992723fc",
+      "width": 320,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1755,
+        "width": 320,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1754.765625,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-1280-dark-footer.png",
+      "sha256": "92a8b51f477fbe157e22b8b5745abc9466d35a2a657d0229befe4a964ba454c2",
+      "width": 1274,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1123,
+        "width": 1274,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 1274,
+        "width": 1274,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1123.4375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-390-dark-footer.png",
+      "sha256": "ac57278e2d4e732b39aad425cd148ae7d28f66e8a90e387abcc0513d0a5c418f",
+      "width": 390,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1404,
+        "width": 390,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1403.875,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-gast-home-320-dark-footer.png",
+      "sha256": "89d1f62c899278267911f2170f754a443e4a6b7deab4153055df04b93ac7fdae",
+      "width": 320,
+      "height": 61,
+      "selector": ".public-footer",
+      "clip": {
+        "x": 0,
+        "y": 1755,
+        "width": 320,
+        "height": 61
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 61,
+        "pageX": 0,
+        "pageY": 1754.765625,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-light-keuzes.png",
+      "sha256": "a370abea68a5632e502223f6142cc5fc43840ccf68af909ebff963194c3395ac",
+      "width": 600,
+      "height": 185,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 340,
+        "y": 228,
+        "width": 600,
+        "height": 185
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 185,
+        "pageX": 340,
+        "pageY": 227.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-light-claim.png",
+      "sha256": "e6ca47bce1967c13137442dc6ad038dc5e8cdadc61c797af50c27fbd179f299f",
+      "width": 600,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 340,
+        "y": 433,
+        "width": 600,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 44,
+        "pageX": 340,
+        "pageY": 432.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-light-keuzes.png",
+      "sha256": "a370abea68a5632e502223f6142cc5fc43840ccf68af909ebff963194c3395ac",
+      "width": 600,
+      "height": 185,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 340,
+        "y": 228,
+        "width": 600,
+        "height": 185
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 185,
+        "pageX": 340,
+        "pageY": 227.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-light-claim.png",
+      "sha256": "e6ca47bce1967c13137442dc6ad038dc5e8cdadc61c797af50c27fbd179f299f",
+      "width": 600,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 340,
+        "y": 433,
+        "width": 600,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 44,
+        "pageX": 340,
+        "pageY": 432.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-390-light-keuzes.png",
+      "sha256": "55c3c50a9b4dc3640ff0f209e870a9ee677aae8be883fbd54981a5125c4b6f47",
+      "width": 350,
+      "height": 299,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 20,
+        "y": 250,
+        "width": 350,
+        "height": 299
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 370,
+        "width": 350,
+        "height": 299,
+        "pageX": 20,
+        "pageY": 250.09375,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-390-light-claim.png",
+      "sha256": "f8bd1cc7cf1e6afe8ab7d0f6ce016c9dc71aa43ba6427f71293606571c15387f",
+      "width": 350,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 20,
+        "y": 569,
+        "width": 350,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 370,
+        "width": 350,
+        "height": 44,
+        "pageX": 20,
+        "pageY": 569.09375,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-320-light-keuzes.png",
+      "sha256": "98ddbd057e02bd947c39b552fcb2de4e3d981d252b81439da05c8dcb74c6a25b",
+      "width": 280,
+      "height": 314,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 20,
+        "y": 250,
+        "width": 280,
+        "height": 314
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 300,
+        "width": 280,
+        "height": 314,
+        "pageX": 20,
+        "pageY": 250.09375,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-320-light-claim.png",
+      "sha256": "2167c7a7a0bce7a14b7623260900d9171761eb19122e334d6709b70eafbc6a43",
+      "width": 280,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 20,
+        "y": 584,
+        "width": 280,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 300,
+        "width": 280,
+        "height": 44,
+        "pageX": 20,
+        "pageY": 584.09375,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-dark-keuzes.png",
+      "sha256": "fd50490f7c53393fb60f127d8adeca9e4e89414bd008a87687f6c782b8134438",
+      "width": 600,
+      "height": 185,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 340,
+        "y": 228,
+        "width": 600,
+        "height": 185
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 185,
+        "pageX": 340,
+        "pageY": 227.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-1280-dark-claim.png",
+      "sha256": "5e65fd89e76244d415ae92f1649010c7415b3b0f7eec84e458d64a63fec897cb",
+      "width": 600,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 340,
+        "y": 433,
+        "width": 600,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 340,
+        "right": 940,
+        "width": 600,
+        "height": 44,
+        "pageX": 340,
+        "pageY": 432.59375,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-390-dark-keuzes.png",
+      "sha256": "352f0a155ff73ebf79444038c42dbd6400e605dfecf2c775aa8e41f0c64d0e3f",
+      "width": 350,
+      "height": 299,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 20,
+        "y": 250,
+        "width": 350,
+        "height": 299
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 370,
+        "width": 350,
+        "height": 299,
+        "pageX": 20,
+        "pageY": 250.09375,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-390-dark-claim.png",
+      "sha256": "0a90a4959e41f54c9261325cee0d72e050b90ea5abe116d423ac4e1fc846b02d",
+      "width": 350,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 20,
+        "y": 569,
+        "width": 350,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 370,
+        "width": 350,
+        "height": 44,
+        "pageX": 20,
+        "pageY": 569.09375,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-320-dark-keuzes.png",
+      "sha256": "39569f57f3d8d45265900cb53287cb580b304c655406c1b1d107f664a94182c3",
+      "width": 280,
+      "height": 314,
+      "selector": ".inloggen-choices",
+      "clip": {
+        "x": 20,
+        "y": 250,
+        "width": 280,
+        "height": 314
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 300,
+        "width": 280,
+        "height": 314,
+        "pageX": 20,
+        "pageY": 250.09375,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-inloggen-320-dark-claim.png",
+      "sha256": "1ba8e9b04f6062524cd7f71f34d8b0be13bc848c143e0d78dc2374837b160c5d",
+      "width": 280,
+      "height": 44,
+      "selector": ".inloggen-claim",
+      "clip": {
+        "x": 20,
+        "y": 584,
+        "width": 280,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 20,
+        "right": 300,
+        "width": 280,
+        "height": 44,
+        "pageX": 20,
+        "pageY": 584.09375,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-intern-1280-light-menu.png",
+      "sha256": "3ac4fc89515467b3f3ac35cd4c3a6e934b86a656d6148ce451b24710012626dc",
+      "width": 232,
+      "height": 262,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 566,
+        "y": 97,
+        "width": 232,
+        "height": 262
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 565.875,
+        "right": 797.875,
+        "width": 232,
+        "height": 262,
+        "pageX": 565.875,
+        "pageY": 97,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-1280-light-knop.png",
+      "sha256": "ccb2d14c7decb440a8d1cd144796ad6f6cdff87c60fed11c3beeb094868cd9b4",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 1169,
+        "y": 14,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 1169,
+        "right": 1213,
+        "width": 44,
+        "height": 44,
+        "pageX": 1169,
+        "pageY": 14,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-1280-light-menu.png",
+      "sha256": "202c2875ca98c966df750b4db9322ce4d2c8e2a2d8a3fa83fcd8ecc489d195e8",
+      "width": 232,
+      "height": 216,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 981,
+        "y": 66,
+        "width": 232,
+        "height": 216
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 981,
+        "right": 1213,
+        "width": 232,
+        "height": 216,
+        "pageX": 981,
+        "pageY": 66,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-390-light-knop.png",
+      "sha256": "ff55e9ce8a7be11377bedd48c7886350f3a81a383e8c7551b4e1a86b05a8b46b",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 330,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 330,
+        "right": 374,
+        "width": 44,
+        "height": 44,
+        "pageX": 330,
+        "pageY": 76,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-390-light-menu.png",
+      "sha256": "4c73129b397c8ce4078fba7b37e97d941a5aca560902ed0fb637c699f93f797e",
+      "width": 390,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 537,
+        "width": 390,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 537,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-beheerder-home-320-light-knop.png",
+      "sha256": "ff55e9ce8a7be11377bedd48c7886350f3a81a383e8c7551b4e1a86b05a8b46b",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 260,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 260,
+        "right": 304,
+        "width": 44,
+        "height": 44,
+        "pageX": 260,
+        "pageY": 76,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-320-light-menu.png",
+      "sha256": "71bc91829ebda457cecd2b4fb5af9c4397613a1a48aff2445149e497fd997f8d",
+      "width": 320,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 413,
+        "width": 320,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 413,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-beheerder-home-1280-dark-knop.png",
+      "sha256": "757ec2c9bd854c8d8ba8519272bc0c4fbf90e6966a91424f9fb1b989c5c39bb1",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 1169,
+        "y": 14,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 1169,
+        "right": 1213,
+        "width": 44,
+        "height": 44,
+        "pageX": 1169,
+        "pageY": 14,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-1280-dark-menu.png",
+      "sha256": "7f500dd7d634705d6a9ff393a1ab9df3727b2419f35674d9c58bc4392b51cad4",
+      "width": 232,
+      "height": 216,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 981,
+        "y": 66,
+        "width": 232,
+        "height": 216
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 981,
+        "right": 1213,
+        "width": 232,
+        "height": 216,
+        "pageX": 981,
+        "pageY": 66,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-390-dark-knop.png",
+      "sha256": "40dc42b39ddece7e448960f86e0489380ec06d98fb41f8595492127944277cfe",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 330,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 330,
+        "right": 374,
+        "width": 44,
+        "height": 44,
+        "pageX": 330,
+        "pageY": 76,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-390-dark-menu.png",
+      "sha256": "ae0bf61534877286d7d51470cc1d8e8839a8c22159562f180856179cad574eea",
+      "width": 390,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 537,
+        "width": 390,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 537,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-beheerder-home-320-dark-knop.png",
+      "sha256": "40dc42b39ddece7e448960f86e0489380ec06d98fb41f8595492127944277cfe",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 260,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 260,
+        "right": 304,
+        "width": 44,
+        "height": 44,
+        "pageX": 260,
+        "pageY": 76,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-beheerder-home-320-dark-menu.png",
+      "sha256": "043c7b41ed98a72d172817bf46b63baf314a4c8bf780a6bfc29ae791eb1ea1a0",
+      "width": 320,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 413,
+        "width": 320,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 413,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-houder-owner-1280-light-kop.png",
+      "sha256": "fc58a5419eb5146b70b64a97f5074916f34617ea76b1ad094e64d1e3770fd130",
+      "width": 820,
+      "height": 31,
+      "selector": ".owner-title",
+      "clip": {
+        "x": 230,
+        "y": 93,
+        "width": 820,
+        "height": 31
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 230,
+        "right": 1050,
+        "width": 820,
+        "height": 31.1875,
+        "pageX": 230,
+        "pageY": 93,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-1280-light-knop.png",
+      "sha256": "0072fb01015dd2601bbb5fe95f4f7f84359a0d95cdf72ef161134b58894c255d",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 1169,
+        "y": 14,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 1169,
+        "right": 1213,
+        "width": 44,
+        "height": 44,
+        "pageX": 1169,
+        "pageY": 14,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-1280-light-menu.png",
+      "sha256": "c95dba77d387ff119a14908a7ddb861aaaa5838470dd296b5f56b7e8c0dfb462",
+      "width": 232,
+      "height": 232,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 981,
+        "y": 66,
+        "width": 232,
+        "height": 232
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 981,
+        "right": 1213,
+        "width": 232,
+        "height": 232,
+        "pageX": 981,
+        "pageY": 66,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-390-light-knop.png",
+      "sha256": "0072fb01015dd2601bbb5fe95f4f7f84359a0d95cdf72ef161134b58894c255d",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 330,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 330,
+        "right": 374,
+        "width": 44,
+        "height": 44,
+        "pageX": 330,
+        "pageY": 76,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-390-light-menu.png",
+      "sha256": "26b0954fff8963b63ace6a7cc6138e98844e87896a8bf15aaa135e69f0b2c93f",
+      "width": 390,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 537,
+        "width": 390,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 537,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-houder-home-320-light-knop.png",
+      "sha256": "0072fb01015dd2601bbb5fe95f4f7f84359a0d95cdf72ef161134b58894c255d",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 260,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 260,
+        "right": 304,
+        "width": 44,
+        "height": 44,
+        "pageX": 260,
+        "pageY": 76,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-320-light-menu.png",
+      "sha256": "00c3815bb43a40e2fde10b4552a007e8a7becb03d530bae24dcc426d693a7857",
+      "width": 320,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 413,
+        "width": 320,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 413,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-houder-owner-1280-light-kop.png",
+      "sha256": "fc58a5419eb5146b70b64a97f5074916f34617ea76b1ad094e64d1e3770fd130",
+      "width": 820,
+      "height": 31,
+      "selector": ".owner-title",
+      "clip": {
+        "x": 230,
+        "y": 93,
+        "width": 820,
+        "height": 31
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 230,
+        "right": 1050,
+        "width": 820,
+        "height": 31.1875,
+        "pageX": 230,
+        "pageY": 93,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-1280-dark-knop.png",
+      "sha256": "acb7b5272211a32f9c908bdbf8be3155ef5dd7025e7849409fdbf6080284357b",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 1169,
+        "y": 14,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 1169,
+        "right": 1213,
+        "width": 44,
+        "height": 44,
+        "pageX": 1169,
+        "pageY": 14,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-1280-dark-menu.png",
+      "sha256": "1b90bf02c85aa88cbe013291b82abca39e5f3cace34311d7824307383e642e11",
+      "width": 232,
+      "height": 232,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 981,
+        "y": 66,
+        "width": 232,
+        "height": 232
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 981,
+        "right": 1213,
+        "width": 232,
+        "height": 232,
+        "pageX": 981,
+        "pageY": 66,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-390-dark-knop.png",
+      "sha256": "acb7b5272211a32f9c908bdbf8be3155ef5dd7025e7849409fdbf6080284357b",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 330,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 330,
+        "right": 374,
+        "width": 44,
+        "height": 44,
+        "pageX": 330,
+        "pageY": 76,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-390-dark-menu.png",
+      "sha256": "a1b4a703aac350e2ef3a9cfe0be5b469d67b98c1777f0b0d1e644fef31941e01",
+      "width": 390,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 537,
+        "width": 390,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 390,
+        "width": 390,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 537,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-houder-home-320-dark-knop.png",
+      "sha256": "acb7b5272211a32f9c908bdbf8be3155ef5dd7025e7849409fdbf6080284357b",
+      "width": 44,
+      "height": 44,
+      "selector": ".account-menu",
+      "clip": {
+        "x": 260,
+        "y": 76,
+        "width": 44,
+        "height": 44
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 260,
+        "right": 304,
+        "width": 44,
+        "height": 44,
+        "pageX": 260,
+        "pageY": 76,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": false
+      }
+    },
+    {
+      "file": "be59-houder-home-320-dark-menu.png",
+      "sha256": "b07fd1ff3fde80397e4a1a37d09111318c41f0af97d378a263eb2e8e48d3bcee",
+      "width": 320,
+      "height": 307,
+      "selector": "#account-menu-panel",
+      "clip": {
+        "x": 0,
+        "y": 413,
+        "width": 320,
+        "height": 307
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 0,
+        "right": 320,
+        "width": 320,
+        "height": 307,
+        "pageX": 0,
+        "pageY": 413,
+        "innerWidth": 320,
+        "innerHeight": 720,
+        "fixed": true
+      }
+    },
+    {
+      "file": "be59-houder-owner-1280-dark-kop.png",
+      "sha256": "3d185b92a8538ae0297cc4c29f746bebc4e73092d8381c60cb029e50e1e18648",
+      "width": 820,
+      "height": 31,
+      "selector": ".owner-title",
+      "clip": {
+        "x": 230,
+        "y": 93,
+        "width": 820,
+        "height": 31
+      },
+      "fitsHorizontally": true,
+      "info": {
+        "left": 230,
+        "right": 1050,
+        "width": 820,
+        "height": 31.1875,
+        "pageX": 230,
+        "pageY": 93,
+        "innerWidth": 1280,
+        "innerHeight": 900,
+        "fixed": false
+      }
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "gast",
+      "checks": 40,
+      "passed": 40,
+      "failed": 0,
+      "durationMs": 20280,
+      "error": null
+    },
+    {
+      "name": "inloggen",
+      "checks": 45,
+      "passed": 45,
+      "failed": 0,
+      "durationMs": 11014,
+      "error": null
+    },
+    {
+      "name": "beheerder",
+      "checks": 118,
+      "passed": 118,
+      "failed": 0,
+      "durationMs": 30105,
+      "error": null
+    },
+    {
+      "name": "houder",
+      "checks": 60,
+      "passed": 60,
+      "failed": 0,
+      "durationMs": 38256,
+      "error": null
+    }
+  ],
+  "port": 3192
+}
