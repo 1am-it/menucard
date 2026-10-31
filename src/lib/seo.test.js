@@ -73,8 +73,8 @@ test('een pad wordt alleen met een geldige https-basis een absolute link', () =>
   assert.equal(absoluteHref('http://onzemenukaarten.nl', '/sitemap.xml'), null);
 });
 
-test('de publieke lijst is de home plus de lijstpagina, zonder privépaden', () => {
-  assert.deepEqual(PUBLIC_PATHS, ['/', '/alle-restaurants']);
+test('de publieke lijst is de home, de lijstpagina en de twee tekstpagina\'s, zonder privépaden', () => {
+  assert.deepEqual(PUBLIC_PATHS, ['/', '/alle-restaurants', '/privacy', '/colofon']);
   for (const path of PUBLIC_PATHS) assert.equal(isPrivatePath(path), false);
 });
 
@@ -82,9 +82,13 @@ test('de sitemap bevat de home, de lijstpagina en elke echte restaurant- en menu
   const entries = sitemapEntries({ siteUrl: SITE, restaurants: RESTAURANTS, menus: MENUS });
   const urls = entries.map((entry) => entry.url);
 
-  assert.equal(entries.length, 2 + RESTAURANTS.length + MENUS.length, 'geen dubbele en geen ontbrekende pagina');
+  // BE-69 (#172): vier publieke pagina's zonder id, daarna de restaurants en de
+  // menukaarten.
+  assert.equal(entries.length, 4 + RESTAURANTS.length + MENUS.length, 'geen dubbele en geen ontbrekende pagina');
   assert.ok(urls.includes('https://onzemenukaarten.nl/'));
   assert.ok(urls.includes('https://onzemenukaarten.nl/alle-restaurants'));
+  assert.ok(urls.includes('https://onzemenukaarten.nl/privacy'));
+  assert.ok(urls.includes('https://onzemenukaarten.nl/colofon'));
   // De echte gegevens: elk restaurant en elke menukaart, met een id in het pad.
   for (const id of RESTAURANTS) {
     assert.ok(urls.includes(`https://onzemenukaarten.nl/restaurant/${id}`), `restaurant ${id} ontbreekt`);
