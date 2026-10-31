@@ -242,11 +242,13 @@ export default function QrKaartje({ restaurantIndex, siteUrl, siteIndexable }) {
       </header>
 
       <main className="owner-main">
-        <p className="qr-kaartje-back">
+        {/* Een nav-landmark, net als op /mijn-restaurant/menukaart: de pagina
+            hoort bij Mijn restaurant en heeft een weg terug. */}
+        <nav className="qr-kaartje-back" aria-label="Mijn restaurant">
           <Link className="owner-link" href={DASHBOARD_HREF}>
             ← Terug naar Mijn restaurant
           </Link>
-        </p>
+        </nav>
 
         <h1 className="owner-title">{QR_MESSAGES.title}</h1>
         <p className="owner-intro">{QR_MESSAGES.intro}</p>

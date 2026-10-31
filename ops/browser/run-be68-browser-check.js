@@ -325,6 +325,10 @@ async function readPage() {
         keuzes: keuzes ? { hidden: keuzes.hasAttribute('hidden'), visible: visible(keuzes), rect: rect(keuzes) } : null,
         previewTop: preview ? Math.round(preview.getBoundingClientRect().top + window.scrollY) : null,
         keuzesTop: keuzes ? Math.round(keuzes.getBoundingClientRect().top + window.scrollY) : null,
+        paneelTop: (() => {
+          const el = document.querySelector('.qr-kaartje-paneel');
+          return el ? Math.round(el.getBoundingClientRect().top + window.scrollY) : null;
+        })(),
         tekstFout: (() => {
           const el = document.querySelector('.qr-kaartje-veld .qr-kaartje-error');
           return el ? el.innerText.trim() : null;
@@ -542,8 +546,10 @@ async function runMobiel() {
     const label = `mobiel ${width.name}`;
     add(
       `${label}: het voorbeeld staat bovenaan, boven de keuzes`,
-      gemeten.previewTop !== null && gemeten.keuzesTop !== null && gemeten.previewTop < gemeten.keuzesTop,
-      JSON.stringify({ previewTop: gemeten.previewTop, keuzesTop: gemeten.keuzesTop }),
+      gemeten.previewTop !== null &&
+        gemeten.paneelTop !== null &&
+        gemeten.previewTop < gemeten.paneelTop,
+      JSON.stringify({ previewTop: gemeten.previewTop, paneelTop: gemeten.paneelTop }),
     );
     add(
       `${label}: de keuzes zijn dichtgeklapt`,
@@ -609,18 +615,18 @@ async function runAfdruk() {
   add(
     'afdruk a6: kop, keuzes, voorbeeld en knoppen zijn verborgen',
     Boolean(a6.header) &&
-      a6.header.display === 'none' &&
+      a6.header.visible === false &&
       Boolean(a6.main) &&
-      a6.main.display === 'none' &&
+      a6.main.visible === false &&
       Boolean(a6.preview) &&
-      a6.preview.display === 'none' &&
+      a6.preview.visible === false &&
       Boolean(a6.actions) &&
-      a6.actions.display === 'none',
+      a6.actions.visible === false,
     JSON.stringify({ header: a6.header, main: a6.main, preview: a6.preview, actions: a6.actions }),
   );
   add(
     'afdruk a6: alleen het afdrukvel met precies één kaartje blijft over',
-    Boolean(a6.sheet) && a6.sheet.display !== 'none' && a6.formaat === 'a6' && a6.count === 1,
+    Boolean(a6.sheet) && a6.sheet.visible === true && a6.formaat === 'a6' && a6.count === 1,
     JSON.stringify({ sheet: a6.sheet, formaat: a6.formaat, count: a6.count }),
   );
   add(
@@ -661,7 +667,7 @@ async function runAfdruk() {
   );
   add(
     'afdruk a4: de kop blijft ook hier verborgen',
-    Boolean(a4.header) && a4.header.display === 'none' && Boolean(a4.main) && a4.main.display === 'none',
+    Boolean(a4.header) && a4.header.visible === false && Boolean(a4.main) && a4.main.visible === false,
     JSON.stringify({ header: a4.header, main: a4.main }),
   );
   await shot('be68-afdruk-a4-1280-licht.png', { media: 'print', formaat: 'a4', measured: a4 });
@@ -710,7 +716,13 @@ async function leesAfdrukStand() {
         if (!el) return null;
         const style = getComputedStyle(el);
         const r = el.getBoundingClientRect();
-        return { display: style.display, width: Math.round(r.width), height: Math.round(r.height) };
+        // checkVisibility() kijkt ook naar een verborgen ouder: de printregel zet
+        // de kop en de main op display:none, maar een kind houdt zijn eigen
+        // display. Alleen naar display kijken zou hier dus een valse uitslag geven.
+        const zichtbaar = typeof el.checkVisibility === 'function'
+          ? el.checkVisibility({ checkVisibilityCSS: true })
+          : style.display !== 'none' && r.width > 0 && r.height > 0;
+        return { display: style.display, width: Math.round(r.width), height: Math.round(r.height), visible: zichtbaar };
       };
       const sheet = document.querySelector('.qr-kaartje-afdruk');
       const cards = [...document.querySelectorAll('.qr-kaartje-kaart--afdruk')];

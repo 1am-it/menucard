@@ -266,6 +266,13 @@ function cssStructuurFouten(css) {
   return fouten;
 }
 
+test('BE-68: de pagina heeft een nav-landmark met de weg terug', () => {
+  // De a11y-audit eist één main en minstens één nav per pagina; de pagina hoort
+  // bij Mijn restaurant, net als /mijn-restaurant/menukaart (mk-nav).
+  assert.match(VIEW, /<nav className="qr-kaartje-back" aria-label="Mijn restaurant">/);
+  assert.match(VIEW, /<Link className="owner-link" href=\{DASHBOARD_HREF\}>/);
+});
+
 test('BE-68: de opmaak van het QR-kaartje heeft geen geneste of losse regels', () => {
   assert.deepEqual(cssStructuurFouten(cssZonderCommentaar), []);
   // De twee blokken die in ronde 1 open bleven, staan er nu compleet.
