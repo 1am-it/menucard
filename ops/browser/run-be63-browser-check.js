@@ -21,15 +21,20 @@
 //    menu waarbij de focus terugkeert;
 //  - /inloggen: het formulier (label, e-mailveld van 52 px, knop "Stuur mij een
 //    inlogcode" van 52 px in --button-primary-bg), het claimblok met drie
-//    stappen en de teamlink, in licht en donker op de drie breedtes.
+//    stappen en de teamlink, in licht en donker op de drie breedtes;
+//  - sinds BE-66 (#162) ook de verzendstap: e-mail invullen, versturen en de
+//    codestap in beeld, in licht en donker. De Supabase-API is daarbij gestubt
+//    (ops/browser/lib/be66-otp-stub.js beantwoordt alleen POST /auth/v1/otp):
+//    geen echt Supabase-project en geen echte e-mail.
 //
 // Het thema van elke opname is aangetoond, niet aangenomen: vóór de opname gaat
 // het thema via de themakeuze in het paneel zelf en legt themeProof `data-theme`,
 // de actieve knop en de helderheid van `--bg` vast.
 //
-// Niet bewezen hier: de inlog zelf (geen Supabase-project) en de a11y-run (die
-// draait apart: ops/browser/run-a11y-public-check.js). Dit is
-// ontwikkelaarsbewijs, geen onafhankelijke review en geen productieacceptatie.
+// Niet bewezen hier: de inlog zelf met een echte Supabase (de verzendstap is
+// gestubt) en de a11y-run (die draait apart:
+// ops/browser/run-a11y-public-check.js). Dit is ontwikkelaarsbewijs, geen
+// onafhankelijke review en geen productieacceptatie.
 //
 // Gebruik: node ops/browser/run-be63-browser-check.js [--alleen=<scenario>] [--lijst]
 // Poort: BE63_PORT of 3189 (binnen 3180-3189). Draai deze check alleen.
@@ -58,6 +63,7 @@ const {
   themeOk,
 } = require('./lib/theme-proof');
 const { be59StubScript } = require('./lib/be59-stub-page');
+const { be66OtpStubScript } = require('./lib/be66-otp-stub');
 
 const SCRIPT_NAME = 'run-be63-browser-check.js';
 const PORT = Number(process.env.BE63_PORT || 3189);
@@ -618,11 +624,116 @@ async function ingelogdScenario(cdp) {
   await removeStub(cdp);
 }
 
+// BE-66 (#162) — de verzendstap, met een gestubde Supabase-API.
+//
+// De pagina laadt de client en de inloglogica pas bij het versturen; deze
+// controle bewijst dat die dynamische stap in de echte productieopbouw werkt:
+// e-mail invullen → versturen → de codestap staat in beeld, in licht en donker.
+// Alleen `POST /auth/v1/otp` wordt beantwoord (ops/browser/lib/be66-otp-stub.js);
+// elk ander netwerkverkeer wordt vastgelegd en is een fout.
+const CODE_STEP_STATE = `(() => {
+  const tekst = (el) => (el ? (el.innerText || '').replace(/\\s+/g, ' ').trim() : '');
+  const code = document.querySelector('.inloggen-form input#owner-code');
+  const submit = document.querySelector('.inloggen-form .auth-submit');
+  const otpStub = window.__BE66__ || null;
+  return {
+    titel: tekst(document.querySelector('.inloggen-form .auth-title')),
+    notice: tekst(document.querySelector('.inloggen-form .auth-notice')),
+    error: tekst(document.querySelector('.inloggen-form .auth-error')),
+    knop: tekst(submit),
+    formulier: tekst(document.querySelector('.inloggen-form')),
+    codeVeld: Boolean(code),
+    codeInputMode: code ? code.getAttribute('inputmode') : null,
+    codeMaxLength: code ? code.getAttribute('maxlength') : null,
+    submit: tekst(submit),
+    otp: otpStub ? otpStub.calls : [],
+    violations: otpStub ? otpStub.violations : [],
+    stubErrors: otpStub ? otpStub.stubErrors : [],
+    nativeFetch: otpStub ? otpStub.nativeFetchAvailable : null,
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+})()`;
+
+const vulEmailIn = (email) => `(() => {
+  const input = document.querySelector('.inloggen-form input[type="email"]');
+  if (!input) return false;
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+  setter.call(input, ${JSON.stringify(email)});
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+})()`;
+
+const VERSTUUR_KNOP = `(() => {
+  const knop = document.querySelector('.inloggen-form .auth-submit');
+  if (!knop) return false;
+  knop.click();
+  return true;
+})()`;
+
+let otpStubId = null;
+
+async function removeOtpStub(cdp) {
+  if (!otpStubId) return;
+  await cdp.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: otpStubId }).catch(() => {});
+  otpStubId = null;
+}
+
+async function inloggenVersturenScenario(cdp) {
+  await removeOtpStub(cdp);
+  const stub = await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: be66OtpStubScript({}),
+  });
+  otpStubId = stub.identifier || null;
+
+  try {
+    await setViewport(cdp, 1280, 900);
+    for (const theme of ['light', 'dark']) {
+      await navigate(cdp, `${APP}${LOGIN_PAGE}`, `Boolean(document.querySelector('.inloggen-form input[type="email"]'))`);
+      const proof = await applyTheme(cdp, theme, SETTINGS_BUTTON);
+      await closePanel(cdp);
+
+      const ingevuld = await evalJs(cdp, vulEmailIn('houder@example.invalid'));
+      const verstuurd = await evalJs(cdp, VERSTUUR_KNOP);
+      const klaar = await waitFor(cdp, `Boolean(document.querySelector('.inloggen-form input#owner-code'))`, 20000);
+      const state = await evalJs(cdp, CODE_STEP_STATE);
+      await shot(cdp, `be66-inloggen-versturen-${theme}`, {
+        theme,
+        themeProof: proof,
+        state: 'code-step',
+        otp: state.otp.length,
+      });
+
+      const prefix = `inloggen versturen (${theme})`;
+      check(`${prefix}: e-mail invullen en versturen lukt`, ingevuld === true && verstuurd === true, `${ingevuld}/${verstuurd}`);
+      check(`${prefix}: de codestap staat in beeld`,
+        klaar === true && state.codeVeld === true && state.titel === 'Vul de code in',
+        `${JSON.stringify(klaar)} / ${state.titel} / fout ${JSON.stringify(state.error)} / knop ${JSON.stringify(state.knop)} / vorm ${JSON.stringify(String(state.formulier).slice(0, 160))}`);
+      check(`${prefix}: de neutrale melding over de code staat erbij`,
+        /^Als dit e-mailadres bij ons bekend is/.test(state.notice), state.notice);
+      check(`${prefix}: het codeveld vraagt zes cijfers`,
+        state.codeInputMode === 'numeric' && state.codeMaxLength === '6',
+        `${state.codeInputMode}/${state.codeMaxLength}`);
+      check(`${prefix}: precies één gestubde oproep naar /auth/v1/otp`,
+        state.otp.length === 1 && state.otp[0].path === '/auth/v1/otp' && state.otp[0].method === 'POST',
+        JSON.stringify(state.otp));
+      check(`${prefix}: geen ander netwerkverkeer`, state.violations.length === 0,
+        JSON.stringify(state.violations.slice(0, 2)));
+      check(`${prefix}: de stub zelf faalt niet`, state.stubErrors.length === 0 && state.nativeFetch === true,
+        `stubfouten ${JSON.stringify(state.stubErrors)} / native fetch ${JSON.stringify(state.nativeFetch)}`);
+      check(`${prefix}: geen horizontale overloop`, state.overflow <= 0, state.overflow);
+      check(`${prefix}: het thema is aangetoond`, themeOk(proof, theme), proof.attr);
+    }
+  } finally {
+    await removeOtpStub(cdp);
+  }
+}
+
 const SCENARIOS = [
   { name: 'gast', run: (cdp) => gastScenario(cdp) },
   { name: 'instellingen', run: (cdp) => instellingenScenario(cdp) },
   { name: 'menu', run: (cdp) => menuScenario(cdp) },
   { name: 'inloggen', run: (cdp) => inloggenScenario(cdp) },
+  { name: 'inloggen-versturen', run: (cdp) => inloggenVersturenScenario(cdp) },
   { name: 'ingelogd', run: (cdp) => ingelogdScenario(cdp) },
 ];
 
@@ -642,7 +753,7 @@ function writeEvidence(extra = {}) {
   const failed = checks.filter((entry) => !entry.passed);
   const record = {
     script: SCRIPT_NAME,
-    ticket: 'BE-63 (#155)',
+    ticket: 'BE-63 (#155) + BE-66 (#162)',
     kind: 'fixture_browser_evidence',
     category: `lokale browsercheck op een verse productieopbouw (next build + next start op poort ${PORT}); geen productie en geen echte acceptatie`,
     startedAt: new Date().toISOString(),

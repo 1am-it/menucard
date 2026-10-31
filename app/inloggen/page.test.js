@@ -107,3 +107,97 @@ test('de opmaak gebruikt alleen tokens en geen harde kleuren', () => {
   assert.match(rules, /\.inloggen-claim \{[^}]*background: var\(--bg-elevated\)/, 'het claimblok staat op --bg-elevated');
   assert.match(rules, /min-height: 44px/, 'grote tikvlakken');
 });
+
+// BE-66 (#162) — de surface-test uit het contract: de Supabase-client mag niet
+// statisch in de importboom van /inloggen zitten. Geen browser en geen bundel:
+// deze test loopt de statische `import`/`require`-regels van de pagina zelf na
+// (dynamische `import()` is per definitie geen eerste lading).
+const STATIC_IMPORT_PATTERNS = [
+  /^[ \t]*import\s+[^'"\n]*?\bfrom\s*['"]([^'"]+)['"]/gm,
+  /^[ \t]*import\s*\{[\s\S]*?\}\s*from\s*['"]([^'"]+)['"]/gm,
+  /^[ \t]*import\s*['"]([^'"]+)['"]/gm,
+  /^[ \t]*(?:const|let|var)\s+\{[^}]*\}\s*=\s*require\(['"]([^'"]+)['"]\)/gm,
+  /^[ \t]*(?:const|let|var)\s+[\w$]+\s*=\s*require\(['"]([^'"]+)['"]\)/gm,
+];
+
+function staticImportsOf(file) {
+  const source = read(file).replace(/\/\*[\s\S]*?\*\//g, '');
+  const specifiers = new Set();
+  for (const pattern of STATIC_IMPORT_PATTERNS) {
+    pattern.lastIndex = 0;
+    let match = pattern.exec(source);
+    while (match) {
+      specifiers.add(match[1]);
+      match = pattern.exec(source);
+    }
+  }
+  return [...specifiers];
+}
+
+function resolveSourceFile(candidate) {
+  for (const option of [candidate, `${candidate}.js`, `${candidate}.css`, `${candidate}/index.js`]) {
+    if (fs.existsSync(path.join(ROOT, option))) return option;
+  }
+  return null;
+}
+
+function staticImportTree(entry) {
+  const files = new Set();
+  const packages = new Set();
+  const unresolved = [];
+  const queue = [entry];
+  while (queue.length > 0) {
+    const file = queue.shift();
+    if (files.has(file)) continue;
+    files.add(file);
+    if (!/\.js$/.test(file)) continue;
+    for (const specifier of staticImportsOf(file)) {
+      if (specifier.startsWith('@/')) {
+        const resolved = resolveSourceFile(specifier.slice(2));
+        if (resolved) queue.push(resolved);
+        else unresolved.push(specifier);
+      } else if (specifier.startsWith('.')) {
+        const joined = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
+        const resolved = resolveSourceFile(joined);
+        if (resolved) queue.push(resolved);
+        else unresolved.push(specifier);
+      } else {
+        packages.add(specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0]);
+      }
+    }
+  }
+  return { files, packages, unresolved };
+}
+
+test('BE-66: de Supabase-client wordt niet statisch in /inloggen geïmporteerd', () => {
+  const surface = staticImportTree(PAGE);
+  // De hele statische boom is nagelopen; een onopgeloste import zou deze test
+  // anders stil verzwakken.
+  assert.deepEqual(surface.unresolved, [], 'elke statische import is terug te vinden');
+  assert.deepEqual(
+    [...surface.files].filter((file) => /supabase/i.test(file)),
+    [],
+    'geen Supabase-clientbestand in de eerste lading',
+  );
+  assert.deepEqual([...surface.packages].filter((name) => name.startsWith('@supabase')), [], 'geen @supabase-pakket');
+  assert.ok(
+    !surface.files.has('src/lib/claimEmailCodeFlow.js'),
+    'de inloglogica zelf komt pas bij het versturen binnen',
+  );
+  // De kleine sessiesleutel-helper (BE-63) is wél statisch: die kost niets en
+  // houdt het accountmenu in de kop werken zonder client.
+  assert.ok(surface.files.has('src/lib/accountSession.js'), 'alleen de goedkope sessiesleutel-helper staat in de eerste lading');
+});
+
+test('BE-66: het formulier haalt de client en de logica alleen dynamisch binnen', () => {
+  const form = read('src/components/OwnerLoginCodeForm.js');
+  assert.match(form, /await import\('@\/src\/lib\/ownerLoginClient'\)/);
+  assert.doesNotMatch(form, /from '@\/src\/lib\/ownerLoginClient'/);
+  assert.doesNotMatch(form, /from '@\/src\/lib\/supabaseBrowser'/);
+
+  const client = read('src/lib/ownerLoginClient.js');
+  assert.match(client, /import\('\.\/supabaseBrowser\.js'\)/);
+  assert.match(client, /import\('\.\/claimEmailCodeFlow\.js'\)/);
+  // Geen eigen sessie, geen eigen client: alleen de bestaande modules.
+  assert.doesNotMatch(client, /createClient|localStorage|sessionStorage|document\.cookie/);
+});
