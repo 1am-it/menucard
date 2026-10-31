@@ -12,6 +12,15 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import useClientNow from '@/src/components/useClientNow'
+// BE-65 (#157) — de deelkaart in de hero en de bestaande bewaar- en
+// deelknoppen bij elk gerecht van "Vanavond op de kaart".
+import ShareHeroCard from '@/src/components/ShareHeroCard'
+import DishShareButton from '@/src/components/DishShareButton'
+import { entryFromDish } from '@/src/lib/dishList'
+import { dishShareTitle } from '@/src/lib/dishShare'
+// BE-52 — opmaak die alleen bij deze pagina hoort, in een eigen bestand naast
+// de pagina in plaats van onderaan app/globals.css.
+import './home.css'
 import { todayOpening } from '@/src/lib/openingStatus'
 import { selectTonight } from '@/src/lib/publicTonight'
 import { seasonTiles } from '@/src/lib/seasonCalendar'
@@ -139,27 +148,35 @@ export default function HomeView({ candidates = [] }) {
             Waar heb je vanavond zin in? <Emoji glyph="😋" />
           </h1>
 
-          <form className="home-search" role="search" onSubmit={handleSubmit}>
-            <label htmlFor="home-q" className="home-search-label">Zoek een gerecht</label>
-            <Emoji glyph="🔍" />
-            <input
-              id="home-q"
-              type="search"
-              className="home-search-input"
-              placeholder="Pizza, pasta, risotto…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button type="submit" className="home-search-btn">Zoeken</button>
-          </form>
+          {/* BE-65 (#157) — twee kolommen op een breed scherm: links zoeken en
+              de maaltijdchips, rechts de deelkaart. Op mobiel staat de kaart
+              onder de zoekbalk en de chips. */}
+          <div className="home-hero-grid">
+            <div className="home-hero-main">
+              <form className="home-search" role="search" onSubmit={handleSubmit}>
+                <label htmlFor="home-q" className="home-search-label">Zoek een gerecht</label>
+                <Emoji glyph="🔍" />
+                <input
+                  id="home-q"
+                  type="search"
+                  className="home-search-input"
+                  placeholder="Pizza, pasta, risotto…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+                <button type="submit" className="home-search-btn">Zoeken</button>
+              </form>
 
-          <div className="home-chips">
-            {MEAL_SHORTCUTS.map((meal) => (
-              <Link key={meal.value} href={`/search?meal=${meal.value}`} className="home-chip">
-                <Emoji glyph={meal.glyph} />
-                {meal.label}
-              </Link>
-            ))}
+              <div className="home-chips">
+                {MEAL_SHORTCUTS.map((meal) => (
+                  <Link key={meal.value} href={`/search?meal=${meal.value}`} className="home-chip">
+                    <Emoji glyph={meal.glyph} />
+                    {meal.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <ShareHeroCard />
           </div>
         </section>
 
@@ -233,7 +250,7 @@ export default function HomeView({ candidates = [] }) {
               {tonight.map((dish) => {
                 const isOpen = !!now && !!dish.openingHours && todayOpening(dish.openingHours, now).state === 'open'
                 return (
-                  <li key={dish.dishId}>
+                  <li key={dish.dishId} className="tonight-item">
                     <Link href={dish.href} className="tonight-card" data-dish={dish.dishId}>
                       <Emoji glyph={dish.emoji} className="tonight-emoji" />
                       <span className="tonight-main">
@@ -283,6 +300,26 @@ export default function HomeView({ candidates = [] }) {
                       </span>
                       <span className="tonight-price">{dish.priceDisplay}</span>
                     </Link>
+                    {/* BE-65 (#157) — de knoppen staan naast de link, nooit
+                        erin: een knop in een link is geen bediening. Ze
+                        gebruiken de bestaande componenten, dus dezelfde opslag
+                        en dezelfde deelfunctie met de voorkeur uit "Delen via". */}
+                    <div className="tonight-actions">
+                      <DishShareButton
+                        href={dish.href}
+                        title={dishShareTitle({ name: dish.name, restaurantName: dish.restaurantName })}
+                        entry={entryFromDish({
+                          dishId: dish.dishId,
+                          name: dish.name,
+                          category: dish.category,
+                          price: dish.priceDisplay,
+                          restaurantName: dish.restaurantName,
+                        })}
+                        dishKey={dish.dishId}
+                        name={dish.name}
+                        withLabel
+                      />
+                    </div>
                   </li>
                 )
               })}

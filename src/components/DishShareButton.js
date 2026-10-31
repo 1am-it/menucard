@@ -37,6 +37,9 @@ import {
   writeSharePreference,
 } from '@/src/lib/sharePreference'
 import DishSaveButton from '@/src/components/DishSaveButton'
+// BE-65 (#157) — de variant met het woord "Delen" ernaast, alleen voor de home
+// en de zoekresultaten (BE-52: eigen bestand naast de component).
+import './dish-share-button.css'
 
 // BE-50 (#120) — het deelblad en het kleine deelmenu verschijnen pas na een tik
 // op "Delen"; ze worden daarom pas dan geladen. De meting liet zien dat het blad
@@ -75,7 +78,7 @@ function openShareLink(link) {
   anchor.remove()
 }
 
-export default function DishShareButton({ href, title, entry = null, dishKey = null, name = null }) {
+export default function DishShareButton({ href, title, entry = null, dishKey = null, name = null, withLabel = false }) {
   const [message, setMessage] = useState('')
   // Welk paneel staat open: het blad ("choose") of het kleine menu ("menu").
   const [panel, setPanel] = useState(null)
@@ -169,14 +172,20 @@ export default function DishShareButton({ href, title, entry = null, dishKey = n
 
   const open = panel !== null
 
+  // BE-65 (#157) — `withLabel` toont op een breed scherm ook het woord
+  // "Delen" naast het icoon (home en /search); op mobiel blijft het een ronde
+  // icoonknop van 44 × 44 px. De toegankelijke naam bevat dat zichtbare woord
+  // dan letterlijk (WCAG 2.5.3); op de menukaart blijft het de bestaande
+  // "Deel <gerecht>".
+
   return (
     <div className="dish-share">
       <div className="dish-share-buttons" role="group" aria-label={`Delen en bewaren van ${shareName}`}>
         {href ? (
           <button
             type="button"
-            className="dish-share-btn"
-            aria-label={`Deel ${shareName}`}
+            className={`dish-share-btn${withLabel ? ' dish-share-btn--label' : ''}`}
+            aria-label={withLabel ? `Delen: ${shareName}` : `Deel ${shareName}`}
             aria-haspopup="dialog"
             aria-expanded={open}
             onClick={handleShare}
@@ -187,6 +196,7 @@ export default function DishShareButton({ href, title, entry = null, dishKey = n
               <path d="M8 7l4-4 4 4" />
               <path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1" />
             </svg>
+            {withLabel ? <span className="dish-share-btn-text">Delen</span> : null}
           </button>
         ) : null}
         {entry ? <DishSaveButton entry={entry} name={shareName} /> : null}
