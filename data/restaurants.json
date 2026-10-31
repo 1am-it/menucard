@@ -407,7 +407,13 @@
     "priceLevel": 3,
     "cuisineLabel": "Frans · Oosterse Fusion",
     "cardDescription": "In de spectaculaire Chassé Botaniquekassen. Vermengt op vernuftige wijze Franse en oosterse invloeden met een eigentijdse, artistieke presentatie.",
-    "phoneDisplay": "076 533 5975"
+    "phoneDisplay": "076 533 5975",
+    "menuLinks": [
+      {
+        "id": "5-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "6": {
     "name": "Brasserie Bardot",
@@ -2325,7 +2331,13 @@
     "badge": "🇮🇩 Indische Specialiteiten",
     "cuisineLabel": "Indonesisch · Afhaal",
     "cardDescription": "Verse Indonesische specialiteiten dagelijks vers bereid: nasi goreng, bami goreng, rendang en huisgemaakte loempia's en kroketten. Afhaal op bestelling, bellen aanbevolen.",
-    "phoneDisplay": "076 514 1712"
+    "phoneDisplay": "076 514 1712",
+    "menuLinks": [
+      {
+        "id": "22-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "23": {
     "name": "T-Huis",
