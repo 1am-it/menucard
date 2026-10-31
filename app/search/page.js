@@ -577,7 +577,7 @@ function SearchPageInner() {
                                   isWeakMatch()). A normal, visibly-matching
                                   example gets no hint at all. */}
                               {example.weakMatch && <span className="dish-result-match-hint">Gevonden in aanvullende menudetails</span>}
-                              {/* BE-60 (#150) — hetzelfde label als op de
+                              {/* BE-60 (issue 150) — hetzelfde label als op de
                                   menukaart (BE-58). Het gerecht blijft staan
                                   en houdt zijn plaats; alleen dit label komt
                                   erbij. */}

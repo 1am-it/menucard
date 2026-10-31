@@ -77,6 +77,8 @@ async function shot(cdp, name, meta = {}) {
 }
 
 async function kiesThema(cdp, theme) {
+  await evalJs(cdp, `(() => { try { localStorage.setItem('bredaeats_theme', '${theme}'); } catch (error) { return false; } return true; })()`);
+}
 
 // Leest de kaarten van de zoekresultaten en meet of prijs en label in beeld
 // staan. Eerst naar het label scrollen (met ruimte boven de plakkende kop),
@@ -136,7 +138,12 @@ const SCENARIOS = [
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
 
 function evidencePath() {
-  return SELECTION.filter ? path.join(EVIDENCE_DIR, 'be60-browser-evidence-gefilterd.json') : BASE_EVIDENCE_PATH;
+  // Een gefilterde run schrijft naar een eigen bestand dat git negeert
+  // (ops/browser/evidence/*.filtered.json); alleen de volledige run vervangt
+  // het bewijs dat bij de levering hoort.
+  return SELECTION.filter
+    ? path.join(EVIDENCE_DIR, 'be60-browser-evidence.filtered.json')
+    : BASE_EVIDENCE_PATH;
 }
 
 function writeEvidence(extra = {}) {
@@ -159,6 +166,7 @@ function writeEvidence(extra = {}) {
   };
   fs.writeFileSync(evidencePath(), JSON.stringify(record, null, 2));
   return record;
+}
 
 async function main() {
   const outcome = scenarioSelectionOutcome({ selection: SELECTION, entries: SCENARIOS, scriptName: SCRIPT_NAME });
@@ -246,7 +254,3 @@ async function main() {
 
 main();
 
-}
-
-  await evalJs(cdp, `(() => { try { localStorage.setItem('bredaeats_theme', '${theme}'); } catch (error) { return false; } return true; })()`);
-}
