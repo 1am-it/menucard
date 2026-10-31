@@ -1,0 +1,573 @@
+{
+  "issue": "#176 (BE-71)",
+  "decision": "planning/decisions/021-breda-menu-bootstrap.md",
+  "scraped": "2026-10-31",
+  "generatedAt": "2026-10-31T23:31:20.968Z",
+  "totals": {
+    "restaurants": 25,
+    "done": 2,
+    "skipped": 21,
+    "blocked": 2
+  },
+  "groups": {
+    "geen gerechten herkend": 13,
+    "dubbel gerecht binnen een categorie": 2,
+    "menukopje met onzekere structuur": 1,
+    "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.": 2,
+    "gerechten zonder prijs": 2,
+    "herkende sectie niet als gerechten opgeslagen": 2,
+    "prijs buiten € 1–€ 150": 1
+  },
+  "restaurants": [
+    {
+      "id": "1",
+      "name": "Restaurant Wolfslaar",
+      "website": "https://www.restaurantwolfslaar.com",
+      "status": "skipped",
+      "menuUrl": "https://www.restaurantwolfslaar.com/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": true,
+      "previousKeys": [
+        "1-lunch",
+        "1-diner"
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Restaurant Blossem",
+      "website": "https://www.restaurantblossem.nl",
+      "status": "skipped",
+      "menuUrl": "https://restaurantblossem.nl/nl/restaurant",
+      "kind": "html",
+      "dishCount": 43,
+      "pricedCount": 43,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "5 gerecht(en)"
+        },
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "3",
+      "name": "Con Fuego",
+      "website": "https://www.restaurantconfuego.com",
+      "status": "skipped",
+      "menuUrl": "https://www.restaurantconfuego.com/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "4",
+      "name": "Restaurant Uijttewaal",
+      "website": "https://www.restaurantuijttewaal.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf",
+      "kind": "pdf",
+      "dishCount": 47,
+      "pricedCount": 47,
+      "pageCount": 9,
+      "reasons": [
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "19 sectie(s)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "2 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "5",
+      "name": "Restaurant Chocolat",
+      "website": "https://www.restaurant-chocolat.nl",
+      "status": "done",
+      "menuUrl": "https://www.restaurant-chocolat.nl/lunch/",
+      "kind": "html",
+      "dishCount": 12,
+      "pricedCount": 12,
+      "pageCount": null,
+      "reasons": [],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "6",
+      "name": "Brasserie Bardot",
+      "website": "https://www.brasseriebardot.nl",
+      "status": "skipped",
+      "menuUrl": "https://brasseriebardot.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": true,
+      "previousKeys": [
+        "6-diner",
+        "6-lunch",
+        "6-borrel",
+        "6-specialiteiten"
+      ]
+    },
+    {
+      "id": "7",
+      "name": "Restaurant Ruitersbosch",
+      "website": "https://www.restaurantruitersbosch.nl",
+      "status": "blocked",
+      "menuUrl": null,
+      "kind": null,
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "https://www.restaurantruitersbosch.nl"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "8",
+      "name": "Al Dente Ristorante",
+      "website": "https://www.aldentebreda.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.aldentebreda.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "9",
+      "name": "Beers & Barrels",
+      "website": "https://www.beersbarrels.nl/en/locations/breda/",
+      "status": "skipped",
+      "menuUrl": "https://www.beersbarrels.nl/en/locations/breda/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "10",
+      "name": "Salon de Provence",
+      "website": "https://www.salondeprovence.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.salondeprovence.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "11",
+      "name": "De Beyerd",
+      "website": "https://www.beyerd.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.beyerd.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "12",
+      "name": "Pellens",
+      "website": "https://pellens.nl",
+      "status": "skipped",
+      "menuUrl": "https://pellens.nl/",
+      "kind": "html",
+      "dishCount": 36,
+      "pricedCount": 26,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "unpriced_dishes",
+          "text": "gerechten zonder prijs",
+          "detail": "10 gerecht(en)"
+        },
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "13 gerecht(en)"
+        },
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        },
+        {
+          "code": "price_variants",
+          "text": "gerecht met meerdere prijzen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "13",
+      "name": "Gantau Village",
+      "website": "https://www.gantauvillage.nl",
+      "status": "skipped",
+      "menuUrl": "https://gantauvillage.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "14",
+      "name": "The Chai Affairs",
+      "website": "https://www.thechaiaffairs.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.thechaiaffairs.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "15",
+      "name": "Andalous",
+      "website": "https://www.andalous-breda.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.andalous-breda.nl/menukaart/",
+      "kind": "html",
+      "dishCount": 84,
+      "pricedCount": 84,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        },
+        {
+          "code": "price_variants",
+          "text": "gerecht met meerdere prijzen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "16",
+      "name": "Restaurant Smelt",
+      "website": "https://www.restaurantsmelt.nl",
+      "status": "skipped",
+      "menuUrl": "https://restaurantsmelt.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "17",
+      "name": "Restaurant Zenza",
+      "website": "https://www.restaurantzenza.nl",
+      "status": "skipped",
+      "menuUrl": "https://restaurantzenza.nl/",
+      "kind": "html",
+      "dishCount": 72,
+      "pricedCount": 72,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "8 gerecht(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "18",
+      "name": "Masala",
+      "website": "https://www.masalabreda.nl",
+      "status": "blocked",
+      "menuUrl": null,
+      "kind": null,
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "https://www.masalabreda.nl"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "19",
+      "name": "Restaurant Zuyd",
+      "website": "https://www.restaurantzuyd.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.restaurantzuyd.nl/lunch",
+      "kind": "html",
+      "dishCount": 18,
+      "pricedCount": 18,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        },
+        {
+          "code": "price_variants",
+          "text": "gerecht met meerdere prijzen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": true,
+      "previousKeys": [
+        "19-lunch",
+        "19-diner"
+      ]
+    },
+    {
+      "id": "20",
+      "name": "Klein Java",
+      "website": "https://www.klein-java.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.klein-java.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "21",
+      "name": "Senang Makan",
+      "website": "https://www.senangmakan.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.senangmakan.nl/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "22",
+      "name": "Makanan",
+      "website": "https://www.makananbreda.nl",
+      "status": "done",
+      "menuUrl": "https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/",
+      "kind": "html",
+      "dishCount": 22,
+      "pricedCount": 22,
+      "pageCount": null,
+      "reasons": [],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "23",
+      "name": "T-Huis",
+      "website": "https://t-huis.online",
+      "status": "skipped",
+      "menuUrl": "https://t-huis.online/",
+      "kind": "html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "hadCard": true,
+      "previousKeys": [
+        "23-lunch",
+        "23-diner",
+        "23-borrel"
+      ]
+    },
+    {
+      "id": "24",
+      "name": "Trattoria Perron",
+      "website": "https://www.trattoriaperron.nl",
+      "status": "skipped",
+      "menuUrl": "https://www.trattoriaperron.nl/menu/",
+      "kind": "html",
+      "dishCount": 142,
+      "pricedCount": 131,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "unpriced_dishes",
+          "text": "gerechten zonder prijs",
+          "detail": "11 gerecht(en)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "price_variants",
+          "text": "gerecht met meerdere prijzen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    },
+    {
+      "id": "25",
+      "name": "Dolce e Salato",
+      "website": "https://dolceesalato.nl",
+      "status": "skipped",
+      "menuUrl": "https://dolceesalato.nl/menu/",
+      "kind": "html",
+      "dishCount": 87,
+      "pricedCount": 87,
+      "pageCount": null,
+      "reasons": [
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "hadCard": false,
+      "previousKeys": []
+    }
+  ]
+}
