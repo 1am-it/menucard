@@ -1083,4 +1083,37 @@ ontwikkelaarsbewijs met een gestubde API, geen onafhankelijke review en geen
 echte acceptatie; de visuele vergelijking met de goedgekeurde mockup blijft
 mensenwerk (daarom staan de schermafdrukken erin).
 
+## BE-60 (#150) — goedgekeurde houderwijzigingen in de zoekresultaten
+
+`npm run test:browser:be60` (of `node ops/browser/run-be60-browser-check.js`).
+Eén scenario, poort 3186 (uit 3180-3189, via `BE60_PORT` te wijzigen), `next dev`,
+een lokale Edge/Chrome via CDP en één in de pagina gestubde `/api/search`
+(`lib/be60-zoek-stub.js`): geen Supabase-project, geen productiesleutel, geen
+productiedata.
+
+Wat hij meet, per thema en breedte (1280, 390 en 320 px):
+
+- **de nieuwe prijs** (€ 18,50) van een goedgekeurde wijziging staat er;
+- **het label** "Tijdelijk niet beschikbaar" staat er precies één keer en het
+  gerecht blijft in de resultaten staan, met zijn prijs;
+- **de volgorde** blijft gelijk (twee gerechten);
+- **in beeld** — label en prijs passen bij de opname in de viewport, en er is
+  geen horizontale overloop;
+- **het thema is aangetoond, niet aangenomen**. Het thema gaat via een klik op
+  "Licht" of "Donker" in `ThemeToggle` (zoals BE-46 deel 2 en BE-57), en vóór
+  elke opname legt `themeProof` drie dingen vast: `data-theme`, de knop die de
+  app zelf actief noemt en de helderheid van `--bg` (licht > 200, donker < 80).
+  Die keuring zit in `lib/theme-proof.js` en is getest in
+  `lib/theme-proof.test.js`; `be60ThemeProof.test.js` bewaakt de bedrading. Een
+  opname zonder kloppend bewijs telt niet — de eerste levering van BE-60 noemde
+  een donkere pagina "light" en is daarop afgekeurd.
+
+Bewijs: `ops/browser/evidence/be-60/` (zes schermafdrukken, in git) en
+`ops/browser/evidence/be60-browser-evidence.json`, met per opname zijn
+`themeProof`. Grenzen: dit is ontwikkelaarsbewijs met een gestubde zoek-API, geen
+onafhankelijke review en geen echte acceptatie; de serverregels (overlay, filter,
+volgorde) staan in `src/lib/zoekOverlay.test.js` en
+`src/services/dishSearch.test.js`.
+
+
 
