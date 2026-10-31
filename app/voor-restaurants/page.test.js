@@ -232,6 +232,13 @@ test('de opmaak gebruikt alleen tokens en geen harde kleuren', () => {
   assert.match(rules, /\.vr-feature-icon \{[^}]*color: var\(--accent\)/, 'de iconen in --accent');
   assert.match(rules, /min-height: 44px/, 'grote tikvlakken');
   assert.match(rules, /@media \(min-width: 1000px\)/, 'twee kolommen op desktop');
+  // BE-64 ronde 1, na de a11y-run: bij 200% tekst werd de pagina 497 px breed
+  // door de lange kop "Allergenenoverzicht". Deze regel houdt hem binnen.
+  assert.match(rules, /\.vr-section-title \{[^}]*overflow-wrap: anywhere/);
+  // De a11y-run mat de gedeelde koplink op 19 px hoog; die is nu een tikvlak
+  // van 44 px (BE-51-norm), zonder de opmaak van de kop verder te veranderen.
+  const headerCss = read('src/components/public-header-actions.css');
+  assert.match(headerCss, /\.pha-restaurants \{[^}]*min-height: 44px/);
 });
 
 test('de sitemap en robots blijven dicht, ook voor deze pagina', () => {

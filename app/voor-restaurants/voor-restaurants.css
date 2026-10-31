@@ -113,6 +113,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
 }
 
 .vr-preview-stats {
@@ -164,6 +165,9 @@
   font-weight: 800;
   line-height: 1.2;
   color: var(--text-primary);
+  /* Bij 200% tekst past "Allergenenoverzicht" niet meer in een smalle kolom;
+     de reflow-check van BE-51 eist dat de pagina dan niet breder wordt. */
+  overflow-wrap: anywhere;
 }
 
 .vr-feature-grid {
@@ -203,6 +207,7 @@
   font-weight: 800;
   line-height: 1.3;
   color: var(--text-primary);
+  overflow-wrap: anywhere;
 }
 
 .vr-feature-body {
