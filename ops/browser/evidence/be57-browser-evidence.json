@@ -2,8 +2,8 @@
   "ticket": "BE-57 (#139, deel 2)",
   "route": "/mijn-restaurant",
   "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3197); geen productie, geen echte acceptatie",
-  "ranAt": "2026-10-31T01:50:00.667Z",
-  "passed": false,
+  "ranAt": "2026-10-31T01:54:21.796Z",
+  "passed": true,
   "checks": [
     {
       "name": "overzicht: geen extern of onbekend verzoek",
@@ -183,7 +183,7 @@
     {
       "name": "overzicht: de opname 1280/light toont \"Deze week\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":82,\"headerHeight\":73,\"safeBottom\":900}"
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
     },
     {
       "name": "overzicht: de vier cijfers staan volledig in beeld bij 1280/light",
@@ -292,8 +292,8 @@
     },
     {
       "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "passed": false,
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
     },
     {
       "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
@@ -303,17 +303,17 @@
     {
       "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
       "passed": true,
-      "detail": "{\"first\":\"h1.owner-title\",\"top\":159,\"headerBottom\":141}"
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
     },
     {
       "name": "overzicht: het thema light is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "overzicht: de opname 320/light toont \"Deze week\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":false},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":181,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":97,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "overzicht: de vier cijfers staan volledig in beeld bij 320/light",
@@ -333,12 +333,12 @@
     {
       "name": "overzicht: het thema dark is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "overzicht: de opname 320/dark toont \"Deze week\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":149,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "overzicht: de vier cijfers staan volledig in beeld bij 320/dark",
@@ -587,8 +587,8 @@
     },
     {
       "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "passed": false,
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
     },
     {
       "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
@@ -598,17 +598,17 @@
     {
       "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
       "passed": true,
-      "detail": "{\"first\":\"h1.owner-title\",\"top\":159,\"headerBottom\":141}"
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
     },
     {
       "name": "net-geclaimd: het thema light is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "net-geclaimd: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":153,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":125,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "net-geclaimd: geen horizontale scroll bij 320/light",
@@ -623,12 +623,12 @@
     {
       "name": "net-geclaimd: het thema dark is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "net-geclaimd: de opname 320/dark toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":149,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "net-geclaimd: geen horizontale scroll bij 320/dark",
@@ -838,7 +838,7 @@
     {
       "name": "geen-cijfers: de opname 390/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":109,\"headerHeight\":85,\"safeBottom\":772}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":116,\"headerHeight\":85,\"safeBottom\":772}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 390/light",
@@ -872,8 +872,8 @@
     },
     {
       "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "passed": false,
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
     },
     {
       "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
@@ -883,17 +883,17 @@
     {
       "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
       "passed": true,
-      "detail": "{\"first\":\"h1.owner-title\",\"top\":159,\"headerBottom\":141}"
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
     },
     {
       "name": "geen-cijfers: het thema light is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "geen-cijfers: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":181,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":125,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 320/light",
@@ -908,12 +908,12 @@
     {
       "name": "geen-cijfers: het thema dark is via de themaknop van de app gezet bij 320px",
       "passed": true,
-      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":141}"
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
     },
     {
       "name": "geen-cijfers: de opname 320/dark toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":149,\"headerHeight\":141,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 320/dark",
@@ -931,20 +931,7 @@
       "detail": "[]"
     }
   ],
-  "errors": [
-    {
-      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
-    },
-    {
-      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
-    },
-    {
-      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
-      "detail": "{\"scrollY\":0,\"headerHeight\":141,\"headerBottom\":141,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":159,\"firstContentTag\":\"h1.owner-title\"}"
-    }
-  ],
+  "errors": [],
   "shots": [
     {
       "name": "be57-overzicht-1280-licht.png",
@@ -988,7 +975,7 @@
         "figureCount": 4,
         "figuresInView": 4,
         "allFiguresInView": true,
-        "panelTop": 82
+        "panelTop": 81
       },
       "file": "be57-overzicht-1280-licht.png",
       "sha256": "41d63ccb01482f2ad1cadfcd9be6b514cc5bf8652f7e7a79cbb03292b1f16c63",
@@ -1158,11 +1145,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Deze week",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1174,7 +1161,7 @@
           },
           {
             "text": "Gerechten die het meest opvallen",
-            "ok": false
+            "ok": true
           },
           {
             "text": "Je menukaart",
@@ -1184,10 +1171,10 @@
         "figureCount": 4,
         "figuresInView": 4,
         "allFiguresInView": true,
-        "panelTop": 181
+        "panelTop": 97
       },
       "file": "be57-overzicht-320-licht.png",
-      "sha256": "dbca7694d50287677f1116b0b572f5f488e964f0aacb0ef34464117720b1d7a2",
+      "sha256": "d724bd9d64b48027dd91b8ed7af5a072c0e564a18ea08aec79d8f9bd32441d77",
       "width": 320,
       "height": 700
     },
@@ -1207,11 +1194,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Deze week",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1233,10 +1220,10 @@
         "figureCount": 4,
         "figuresInView": 4,
         "allFiguresInView": true,
-        "panelTop": 149
+        "panelTop": 93
       },
       "file": "be57-overzicht-320-donker.png",
-      "sha256": "8cd75f98747d9b04bcd9b7b56e74b9f61dc774cb46831f8e687f39f90ccfdafe",
+      "sha256": "beb92b07a561eca4d8511ffe6c3a8b37bf7e765a4dc322b020ae4c52ab91268e",
       "width": 320,
       "height": 700
     },
@@ -1436,11 +1423,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Net geclaimd",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1458,10 +1445,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 153
+        "panelTop": 125
       },
       "file": "be57-net-geclaimd-320-licht.png",
-      "sha256": "b9ba24b5cea953d7a210cb3752aed1f7e23f984aeafc7385cbb548c8acdee604",
+      "sha256": "ecf98d808956ebd2845bbfbe175223d157152d73525b470a349590eb77195246",
       "width": 320,
       "height": 700
     },
@@ -1481,11 +1468,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Net geclaimd",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1503,10 +1490,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 149
+        "panelTop": 93
       },
       "file": "be57-net-geclaimd-320-donker.png",
-      "sha256": "3095700800fd312cd23630634fb346f05f8f7079728caedea9bbeb45c09bfc02",
+      "sha256": "c5e4b3e4501f68f03a2d6506b623ddce5d7ed5d448c3b4ef534c2aa98198baef",
       "width": 320,
       "height": 700
     },
@@ -1638,10 +1625,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 109
+        "panelTop": 116
       },
       "file": "be57-geen-cijfers-390-licht.png",
-      "sha256": "d66bface1fff8264d0c5c7c5d22540abb7136467a4384100451f44fc7e419278",
+      "sha256": "f5c08ea4ae0b49a41fc1bd5e1894237e91a892f739187b822ec7f6573f6da251",
       "width": 390,
       "height": 844
     },
@@ -1706,11 +1693,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Net geclaimd",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1728,10 +1715,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 181
+        "panelTop": 125
       },
       "file": "be57-geen-cijfers-320-licht.png",
-      "sha256": "8094e5dddc84591aa3609e78d578694ae8578fb4398f5df23cad6ff3a6fcacf7",
+      "sha256": "cc237ed1e6680acfab5af5b7e1da032beced17ffd3c06b0ac338e028cb832d13",
       "width": 320,
       "height": 700
     },
@@ -1751,11 +1738,11 @@
           "Licht",
           "Donker"
         ],
-        "headerHeight": 141
+        "headerHeight": 85
       },
       "framing": {
         "wantTitle": "Net geclaimd",
-        "headerHeight": 141,
+        "headerHeight": 85,
         "tabbarVisible": true,
         "safeBottom": 628,
         "viewportHeight": 700,
@@ -1773,10 +1760,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 149
+        "panelTop": 93
       },
       "file": "be57-geen-cijfers-320-donker.png",
-      "sha256": "b31875e07dd9c77000688217b6b7e981ff0b4ddf9ae303d48a9db451fc45a94d",
+      "sha256": "b93370e0b99665a85d005d277f93b5d5aae5e2543167a0118cf8cfce6128da02",
       "width": 320,
       "height": 700
     }
@@ -1963,7 +1950,7 @@
             "figureCount": 4,
             "figuresInView": 4,
             "allFiguresInView": true,
-            "panelTop": 82
+            "panelTop": 81
           }
         },
         {
@@ -2109,11 +2096,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Deze week",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2125,7 +2112,7 @@
               },
               {
                 "text": "Gerechten die het meest opvallen",
-                "ok": false
+                "ok": true
               },
               {
                 "text": "Je menukaart",
@@ -2135,7 +2122,7 @@
             "figureCount": 4,
             "figuresInView": 4,
             "allFiguresInView": true,
-            "panelTop": 181
+            "panelTop": 97
           }
         },
         {
@@ -2152,11 +2139,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Deze week",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2178,7 +2165,7 @@
             "figureCount": 4,
             "figuresInView": 4,
             "allFiguresInView": true,
-            "panelTop": 149
+            "panelTop": 93
           }
         }
       ]
@@ -2402,11 +2389,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Net geclaimd",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2424,7 +2411,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 153
+            "panelTop": 125
           }
         },
         {
@@ -2441,11 +2428,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Net geclaimd",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2463,7 +2450,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 149
+            "panelTop": 93
           }
         }
       ]
@@ -2631,7 +2618,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 109
+            "panelTop": 116
           }
         },
         {
@@ -2687,11 +2674,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Net geclaimd",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2709,7 +2696,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 181
+            "panelTop": 125
           }
         },
         {
@@ -2726,11 +2713,11 @@
               "Licht",
               "Donker"
             ],
-            "headerHeight": 141
+            "headerHeight": 85
           },
           "framing": {
             "wantTitle": "Net geclaimd",
-            "headerHeight": 141,
+            "headerHeight": 85,
             "tabbarVisible": true,
             "safeBottom": 628,
             "viewportHeight": 700,
@@ -2748,7 +2735,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 149
+            "panelTop": 93
           }
         }
       ]
