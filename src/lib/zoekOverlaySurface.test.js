@@ -56,6 +56,6 @@ test('BE-60: het label heeft eigen opmaak in het CSS-bestand van de pagina', () 
 test('BE-60: geen migratie en geen nieuwe dependency', () => {
   const pkg = JSON.parse(bron(path.join(REPO_ROOT, 'package.json')));
   assert.deepEqual(Object.keys(pkg.dependencies).sort(), [
-    '@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'react', 'react-dom',
-  ], 'dezelfde afhankelijkheden als voor BE-60');
+    '@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'qrcode-generator', 'react', 'react-dom',
+  ], 'BE-68 voegde qrcode-generator toe; verder dezelfde afhankelijkheden als voor BE-60');
 });

@@ -277,7 +277,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
                             Menukaart bijwerken
                           </Link>
                         )}
-                        {/* BE-68 (#168): het QR-kaartje voor op tafel. */}
+                        {/* BE-68: het QR-kaartje voor op tafel. */}
                         {restaurant.known && ownedIds.includes(restaurant.id) && (
                           <Link className="owner-link" href={QR_KAARTJE_HREF}>
                             {QR_KAARTJE_LINK_LABEL}

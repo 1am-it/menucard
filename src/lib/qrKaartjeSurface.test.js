@@ -174,23 +174,42 @@ test('BE-68: de printmaten zijn A6 en 4×A6 op A4', () => {
 test('BE-68: zonder build blijft de chunkcontrole over aan de buildronde', (t) => {
   // De broncontrole hierboven is de harde grens. Staat er een build, dan kijken
   // we ook echt in de chunks van de publieke routes: daar mag geen enkel spoor
-  // van de QR-bibliotheek in zitten (marker `qr8BitByte` uit de bibliotheek).
-  const manifestPad = path.join(ROOT, '.next', 'app-build-manifest.json');
-  if (!fs.existsSync(manifestPad)) {
-    t.skip('geen .next/app-build-manifest.json; de buildronde doet deze controle');
+  // van de QR-bibliotheek in zitten (marker `getModuleCount` uit de bibliotheek).
+  const mappen = ['.next', '.next-head', '.next-base'].filter((map) =>
+    fs.existsSync(path.join(ROOT, map, 'app-build-manifest.json')),
+  );
+  if (mappen.length === 0) {
+    t.skip('geen build-manifest; de buildronde doet deze controle');
     return;
   }
-  const manifest = JSON.parse(fs.readFileSync(manifestPad, 'utf8'));
   const publiek = ['/page', '/menu/[id]/page', '/restaurant/[id]/page', '/search/page', '/alle-restaurants/page'];
-  const gezien = [];
-  for (const route of publiek) {
-    for (const bestand of manifest.pages[route] || []) {
-      const chunk = path.join(ROOT, '.next', bestand);
-      if (!fs.existsSync(chunk)) continue;
-      gezien.push(bestand);
-      const inhoud = fs.readFileSync(chunk, 'utf8');
-      assert.equal(inhoud.includes('qr8BitByte'), false, `${bestand} bevat de QR-bibliotheek`);
+  for (const map of mappen) {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, map, 'app-build-manifest.json'), 'utf8'));
+    const gezien = [];
+    for (const route of publiek) {
+      for (const bestand of manifest.pages[route] || []) {
+        const chunk = path.join(ROOT, map, bestand);
+        if (!fs.existsSync(chunk)) continue;
+        gezien.push(bestand);
+        const inhoud = fs.readFileSync(chunk, 'utf8');
+        assert.equal(inhoud.includes('getModuleCount'), false, `${map}/${bestand} bevat de QR-bibliotheek`);
+      }
+    }
+    assert.ok(gezien.length > 0, `${map}: de publieke routes hebben chunks`);
+    // En de bibliotheek is er wel, als losse (lazy) chunk van deze pagina: de
+    // uitzondering is dus echt en niet een teken dat de import verdween. Een
+    // build van vóór dit ticket kent de route niet en telt hier niet mee.
+    if (!manifest.pages['/mijn-restaurant/qr/page']) continue;
+    const chunkMap = path.join(ROOT, map, 'static', 'chunks');
+    const lazy = fs.existsSync(chunkMap)
+      ? fs.readdirSync(chunkMap, { withFileTypes: true })
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.js'))
+        .map((entry) => entry.name)
+        .filter((naam) => fs.readFileSync(path.join(chunkMap, naam), 'utf8').includes('getModuleCount'))
+      : [];
+    assert.ok(lazy.length > 0, `${map}: de QR-bibliotheek zit in een eigen chunk`);
+    for (const naam of lazy) {
+      assert.equal(gezien.includes(`static/chunks/${naam}`), false, `${map}: ${naam} hoort niet bij een publieke route`);
     }
   }
-  assert.ok(gezien.length > 0, 'de publieke routes hebben chunks');
 });
