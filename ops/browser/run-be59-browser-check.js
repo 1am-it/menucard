@@ -21,6 +21,15 @@
 // op de opname, geen horizontale overloop, plus de bestaande a11y-audit
 // (lib/a11y-audit.js, dezelfde als run-a11y-public-check.js) met 0 fouten.
 //
+// BE-59 herstel (#146, Lead-review #6537034100): het paneel van onderen lag
+// onder de vaste MobileTabBar. Sindsdien meet dit script met het paneel open op
+// 390 en 320 px in licht en donker dat "Uitloggen" volledig in beeld staat, dat
+// elementFromPoint in het midden van dat item het item zelf geeft, dat de
+// tabbalk op drie punten nergens zelf het bovenste element is (het paneel dekt
+// hem, anders de overlay) en dat een echte klik op de overlay het paneel sluit
+// zonder te navigeren. De opname van het mobiele paneel is daarom de volledige
+// viewport en geen uitsnede, zodat de tabbalk en het paneel samen te zien zijn.
+//
 // Het thema komt uit de opgeslagen voorkeur die de app zelf bij het laden leest
 // (localStorage `bredaeats_theme`, dezelfde sleutel als ThemeToggle en het
 // themascript in app/layout.js). Zo werkt licht en donker ook op een pagina waar
@@ -868,7 +877,17 @@ async function runHouder() {
       await openAsHolder(theme, HOME_ROUTE, FOOTER_READY);
       await capture('.account-menu', `be59-houder-home-${size.name}-${theme}-knop`);
       if (await openMenu(`houder opname (${theme}/${size.name})`)) {
-        await capture('#account-menu-panel', `be59-houder-home-${size.name}-${theme}-menu`);
+        if (size.name === '1280') {
+          await capture('#account-menu-panel', `be59-houder-home-${size.name}-${theme}-menu`);
+        } else {
+          // BE-59 herstel (#146): ook bij de houder is het mobiele paneel een
+          // volledige viewport, zodat de vaste tabbalk en het paneel samen op de
+          // opname staan.
+          await captureViewport(`be59-houder-home-${size.name}-${theme}-menu`, {
+            paneel: '#account-menu-panel',
+            tabbalk: '.mobile-tabbar',
+          });
+        }
         await closeMenuWithEscape(`houder opname (${theme}/${size.name})`);
       }
       await noHorizontalOverflow(`houder home (${theme}/${size.name})`);

@@ -1053,7 +1053,8 @@ Vier scenarios (`--lijst`, `--alleen=<naam>`):
 - **beheerder** - `internal` + `editor` met zeven openstaande taken: knop met
   stip, "Beheer - 7 open", de rol in gewone woorden, toetsenbord (openen,
   pijltoetsen, Escape, focus terug), op 390 en 320 px het paneel van onderen met
-  de sluitknop, en op `/internal/tellers` "Bekijk de site";
+  de sluitknop en de stapelvolgorde boven de vaste tabbalk, en op
+  `/internal/tellers` "Bekijk de site";
 - **houder** - `owner` zonder openstaand werk: geen stip, wel Mijn restaurant, en
   op `/mijn-restaurant` de kop "Mijn restaurant - [naam]".
 
@@ -1061,7 +1062,29 @@ Alles in licht en donker op 1280, 390 en 320 px, elk onderdeel volledig op de
 opname, geen horizontale overloop, plus de a11y-audit van de publieke pagina's
 op de home, `/inloggen` en het geopende menu. Bewijs:
 `ops/browser/evidence/be59-browser-evidence.json` en `evidence/be-59/*.png`
-(49 opnamen). De laatste volledige run gaf 263 checks en 0 fouten.
+**Het paneel van onderen boven de vaste tabbalk (herstel na Lead-review
+#6537034100).** In `be59-beheerder-home-390-light-menu.png` lag de vaste
+`MobileTabBar` ("Zoeken / Restaurants") over het paneel, waardoor "Uitloggen"
+niet te zien en niet aan te tikken was. Sindsdien meet de browsercheck met het
+paneel open op 390 en 320 px in licht en donker dat:
+
+- het laatste item ("Uitloggen") volledig in beeld staat;
+- `elementFromPoint` in het midden van dat item het item zelf geeft;
+- op drie punten over de tabbalk (links, midden, rechts) de balk zelf nooit het
+  bovenste element is: het paneel dekt hem, anders de overlay, dus er valt niet
+  door het paneel heen te klikken;
+- een echte klik op de overlay het paneel sluit zonder te navigeren.
+
+De opname van het mobiele paneel is daarvoor de volledige viewport en geen
+uitsnede, zodat de tabbalk en het paneel samen te zien zijn; de opname-eis
+controleert ook dat beide binnen het venster vallen. De stapelvolgorde zelf is
+een bronvergelijking in `src/components/AccountMenu.test.js`: de overlay staat
+boven de tabbalk en het paneel weer boven de overlay, met de echte z-indexwaarden
+uit `app/globals.css` en `src/components/account-menu.css`.
+
+Bewijs: `ops/browser/evidence/be59-browser-evidence.json` en
+`evidence/be-59/*.png` (49 opnamen). De laatste volledige run gaf 271 checks en
+0 fouten.
 `run-be59-load-size-check.js` meet de eerste laadgrootte van `/`, `/search`,
 `/restaurant/[id]` en `/menu/[id]` op twee lokale productiebuilds (basis
 `2b0e8b1` uit een losse worktree) en schrijft
