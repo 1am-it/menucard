@@ -12,6 +12,11 @@ import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import StatusIcon from '@/src/components/StatusIcon'
+// BE-65 (#157) — dezelfde bewaar- en deelknoppen als op de home, bij elk
+// zoekresultaat.
+import DishShareButton from '@/src/components/DishShareButton'
+import { entryFromDish } from '@/src/lib/dishList'
+import { dishShareTitle } from '@/src/lib/dishShare'
 // BE-55 stap B, deel 5 (issue 135) — eigen opmaak voor het label en het filter
 // "Vandaag" in de zoekresultaten, naast deze pagina (BE-52).
 import './search.css'
@@ -563,7 +568,7 @@ function SearchPageInner() {
                         const collision = hasExampleNameCollision(example, menu.examples)
                         const label = collision ? `${example.name} (${example.category})` : example.name
                         return (
-                          <li key={example.dishId} className="dish-result-card-row">
+                          <li key={example.dishId} className="dish-result-card-row dish-result-row--actions">
                             {/* BE-28 — decoratief maaltijdteken; het label
                                 en de prijs dragen de inhoud. */}
                             <Emoji glyph={MEAL_GLYPHS[menu.mealType] || '🍽️'} className="dish-result-emoji" />
@@ -592,6 +597,26 @@ function SearchPageInner() {
                             {example.priceOnRequest
                               ? <span className="price-label price-label--soft">op aanvraag</span>
                               : example.priceDisplay && <span className="price-label">{example.priceDisplay}</span>}
+                            {/* BE-65 (#157) — Bewaren en Delen met de bestaande
+                                componenten, naast de link van het gerecht en
+                                nooit erin. De deellink is dezelfde als de link
+                                van dit resultaat. */}
+                            <span className="dish-result-actions">
+                              <DishShareButton
+                                href={buildExampleDishHref(example, menu, filters.q)}
+                                title={dishShareTitle({ name: example.name, restaurantName: group.restaurantName })}
+                                entry={entryFromDish({
+                                  dishId: example.dishId,
+                                  name: example.name,
+                                  category: example.category,
+                                  price: example.priceDisplay,
+                                  restaurantName: group.restaurantName,
+                                })}
+                                dishKey={example.dishId}
+                                name={example.name}
+                                withLabel
+                              />
+                            </span>
                           </li>
                         )
                       })}
