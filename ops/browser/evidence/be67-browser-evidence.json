@@ -1,0 +1,1944 @@
+{
+  "script": "run-be67-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "startedAt": "2026-10-31T14:09:10.726Z",
+  "port": 3191,
+  "mode": "start",
+  "scenarioRuns": [
+    {
+      "name": "formulier",
+      "checks": 66,
+      "passed": 66,
+      "failed": 0,
+      "durationMs": 6710,
+      "error": null
+    },
+    {
+      "name": "overzicht",
+      "checks": 48,
+      "passed": 48,
+      "failed": 0,
+      "durationMs": 12120,
+      "error": null
+    },
+    {
+      "name": "vandaag",
+      "checks": 79,
+      "passed": 79,
+      "failed": 0,
+      "durationMs": 5596,
+      "error": null
+    },
+    {
+      "name": "a11y",
+      "checks": 8,
+      "passed": 8,
+      "failed": 0,
+      "durationMs": 13212,
+      "error": null
+    }
+  ],
+  "filter": null,
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "themes": [
+    {
+      "theme": "light",
+      "label": "Licht",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "dark",
+      "label": "Donker",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "light",
+      "label": "Licht",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "dark",
+      "label": "Donker",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "light",
+      "label": "Licht",
+      "source": "instellingenpaneel",
+      "panelClosed": true,
+      "proof": {
+        "attr": "light",
+        "active": [],
+        "buttons": [],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "dark",
+      "label": "Donker",
+      "source": "instellingenpaneel",
+      "panelClosed": true,
+      "proof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "light",
+      "label": "Licht",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "light",
+      "label": "Licht",
+      "source": "instellingenpaneel",
+      "panelClosed": true,
+      "proof": {
+        "attr": "light",
+        "active": [],
+        "buttons": [],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "dark",
+      "label": "Donker",
+      "source": "themaknop-in-de-kop",
+      "panelClosed": true,
+      "proof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "theme": "dark",
+      "label": "Donker",
+      "source": "instellingenpaneel",
+      "panelClosed": true,
+      "proof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "name": "formulier · 1280 · light: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 1280 · light: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 1280 · light: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 1280 · light: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 1280 · light: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 1280 · light: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 1280 · light: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 1280 · light: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 1280 · light: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 1280 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "formulier · 1280 · light: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1428,\"hoogte\":1420,\"scherm\":1701,\"scrollY\":270}"
+    },
+    {
+      "name": "formulier · 390 · light: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 390 · light: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 390 · light: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 390 · light: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 390 · light: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 390 · light: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 390 · light: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 390 · light: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 390 · light: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 390 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "formulier · 390 · light: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1610,\"hoogte\":1602,\"scherm\":1882,\"scrollY\":296}"
+    },
+    {
+      "name": "formulier · 320 · light: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 320 · light: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 320 · light: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 320 · light: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 320 · light: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 320 · light: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 320 · light: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 320 · light: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 320 · light: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 320 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "formulier · 320 · light: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1697,\"hoogte\":1689,\"scherm\":1970,\"scrollY\":317}"
+    },
+    {
+      "name": "formulier · 1280 · dark: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 1280 · dark: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 1280 · dark: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 1280 · dark: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 1280 · dark: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 1280 · dark: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 1280 · dark: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 1280 · dark: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 1280 · dark: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 1280 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "formulier · 1280 · dark: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1428,\"hoogte\":1420,\"scherm\":1701,\"scrollY\":270}"
+    },
+    {
+      "name": "formulier · 390 · dark: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 390 · dark: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 390 · dark: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 390 · dark: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 390 · dark: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 390 · dark: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 390 · dark: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 390 · dark: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 390 · dark: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 390 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "formulier · 390 · dark: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1610,\"hoogte\":1602,\"scherm\":1882,\"scrollY\":296}"
+    },
+    {
+      "name": "formulier · 320 · dark: de soort staat op dagmenu",
+      "passed": true,
+      "detail": "dagmenu"
+    },
+    {
+      "name": "formulier · 320 · dark: drie gangen met een naam",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "formulier · 320 · dark: twee prijzen (2 en 3 gangen)",
+      "passed": true,
+      "detail": "29,50 · 36,50"
+    },
+    {
+      "name": "formulier · 320 · dark: \"Elke week op\" staat aan",
+      "passed": true,
+      "detail": "elke_week"
+    },
+    {
+      "name": "formulier · 320 · dark: di en do zijn gekozen",
+      "passed": true,
+      "detail": "[\"di\",\"do\"]"
+    },
+    {
+      "name": "formulier · 320 · dark: zeven weekdagknoppen",
+      "passed": true,
+      "detail": "7"
+    },
+    {
+      "name": "formulier · 320 · dark: weekdagknoppen minstens 40 px",
+      "passed": true,
+      "detail": "44 px"
+    },
+    {
+      "name": "formulier · 320 · dark: elk veld is zichtbaar",
+      "passed": true,
+      "detail": "7/7"
+    },
+    {
+      "name": "formulier · 320 · dark: het formulier loopt niet over",
+      "passed": true,
+      "detail": "0 · []"
+    },
+    {
+      "name": "formulier · 320 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "formulier · 320 · dark: het formulier staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":1697,\"hoogte\":1689,\"scherm\":1970,\"scrollY\":317}"
+    },
+    {
+      "name": "overzicht: de cijfers staan bij het aanbod",
+      "passed": true,
+      "detail": "[{\"getal\":\"12\",\"label\":\"bekeken\"},{\"getal\":\"< 5\",\"label\":\"bewaard\"},{\"getal\":\"6\",\"label\":\"gedeeld\"}]"
+    },
+    {
+      "name": "overzicht: de cijferlijst heeft de titel \"Vandaag\"",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "overzicht: een getal onder de vijf staat er als \"< 5\"",
+      "passed": true,
+      "detail": "[\"12\",\"< 5\",\"6\"]"
+    },
+    {
+      "name": "overzicht: een getal vanaf vijf staat er voluit",
+      "passed": true,
+      "detail": "[\"12\",\"< 5\",\"6\"]"
+    },
+    {
+      "name": "overzicht: de knop zegt \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · light: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · light: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · light: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 1280 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 1280 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "overzicht · 1280 · light: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · light: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht · 390 · light: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · light: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · light: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 390 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 390 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "overzicht · 390 · light: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · light: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht · 320 · light: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · light: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · light: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 320 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 320 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "overzicht · 320 · light: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · light: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht · 1280 · dark: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · dark: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · dark: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 1280 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 1280 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "overzicht · 1280 · dark: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 1280 · dark: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht · 390 · dark: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · dark: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · dark: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 390 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 390 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "overzicht · 390 · dark: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 390 · dark: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht · 320 · dark: nog niet uitverkocht",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · dark: de knop wisselt van tekst",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Toch weer beschikbaar\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · dark: het label \"Uitverkocht\" verschijnt",
+      "passed": true,
+      "detail": "label zichtbaar"
+    },
+    {
+      "name": "overzicht · 320 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "overzicht · 320 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "overzicht · 320 · dark: de knop staat weer op \"Op = op\"",
+      "passed": true,
+      "detail": "[\"Aanpassen\",\"Op = op\",\"Offline halen\"]"
+    },
+    {
+      "name": "overzicht · 320 · dark: het label \"Uitverkocht\" verdwijnt weer",
+      "passed": true,
+      "detail": "label weg"
+    },
+    {
+      "name": "overzicht: elke klik ging naar de Op = op-route",
+      "passed": true,
+      "detail": "12"
+    },
+    {
+      "name": "vandaag · 1280 · light: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 1280 · light: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 1280 · light: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 1280 · light: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 1280 · light: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 1280 · light: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 1280 · light: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 1280 · light: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 1280 · light: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 1280 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 1280 · light: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 1280 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "vandaag · 1280 · light: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":623,\"hoogte\":615,\"scherm\":900,\"scrollY\":366}"
+    },
+    {
+      "name": "vandaag · 390 · light: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 390 · light: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 390 · light: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 390 · light: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 390 · light: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 390 · light: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 390 · light: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 390 · light: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 390 · light: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 390 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 390 · light: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 390 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "vandaag · 390 · light: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":681,\"hoogte\":673,\"scherm\":844,\"scrollY\":463}"
+    },
+    {
+      "name": "vandaag · 320 · light: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 320 · light: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 320 · light: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 320 · light: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 320 · light: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 320 · light: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 320 · light: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 320 · light: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 320 · light: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 320 · light: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 320 · light: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 320 · light: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "vandaag · 320 · light: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":814,\"hoogte\":806,\"scherm\":720,\"scrollY\":488}"
+    },
+    {
+      "name": "vandaag · 1280 · dark: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 1280 · dark: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 1280 · dark: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 1280 · dark: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 1280 · dark: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 1280 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = -6"
+    },
+    {
+      "name": "vandaag · 1280 · dark: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":623,\"hoogte\":615,\"scherm\":900,\"scrollY\":366}"
+    },
+    {
+      "name": "vandaag · 390 · dark: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 390 · dark: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 390 · dark: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 390 · dark: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 390 · dark: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 390 · dark: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 390 · dark: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 390 · dark: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 390 · dark: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 390 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 390 · dark: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 390 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "vandaag · 390 · dark: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":681,\"hoogte\":673,\"scherm\":844,\"scrollY\":463}"
+    },
+    {
+      "name": "vandaag · 320 · dark: het blok \"Vandaag\" staat er",
+      "passed": true,
+      "detail": "Vandaag"
+    },
+    {
+      "name": "vandaag · 320 · dark: het dagmenu toont drie gangen",
+      "passed": true,
+      "detail": "[\"Pompoensoep met gember\",\"Kabeljauw met venkel\",\"Appeltaart met kaneelijs\"]"
+    },
+    {
+      "name": "vandaag · 320 · dark: de gangen hebben een korte kop en een naam",
+      "passed": true,
+      "detail": "[{\"label\":\"Voor\",\"naam\":\"Pompoensoep met gember\"},{\"label\":\"Hoofd\",\"naam\":\"Kabeljauw met venkel\"},{\"label\":\"Na\",\"naam\":\"Appeltaart met kaneelijs\"}]"
+    },
+    {
+      "name": "vandaag · 320 · dark: twee prijschips (2 en 3 gangen)",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 320 · dark: de chips noemen beide prijzen",
+      "passed": true,
+      "detail": "[\"2 gangen € 29,50\",\"3 gangen € 36,50\"]"
+    },
+    {
+      "name": "vandaag · 320 · dark: het dagmenu heeft Bewaar en Delen",
+      "passed": true,
+      "detail": "bewaar 1 · deel 1"
+    },
+    {
+      "name": "vandaag · 320 · dark: de herhaling staat erbij",
+      "passed": true,
+      "detail": "elke di en do"
+    },
+    {
+      "name": "vandaag · 320 · dark: de uitverkochte daghap blijft in de lijst staan",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "vandaag · 320 · dark: de badge zegt \"Op = op · uitverkocht\"",
+      "passed": true,
+      "detail": "Op = op · uitverkocht"
+    },
+    {
+      "name": "vandaag · 320 · dark: de naam is doorgestreept",
+      "passed": true,
+      "detail": "text-decoration-line"
+    },
+    {
+      "name": "vandaag · 320 · dark: de kaart is gedempt",
+      "passed": true,
+      "detail": "opacity 0.65"
+    },
+    {
+      "name": "vandaag · 320 · dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "scrollWidth - innerWidth = 0"
+    },
+    {
+      "name": "vandaag · 320 · dark: het blok staat in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"boven\":8,\"onder\":814,\"hoogte\":806,\"scherm\":720,\"scrollY\":488}"
+    },
+    {
+      "name": "vandaag: de pagina haalde het aanbod bij de publieke route",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "houderpagina · 1280 · light · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "houderpagina · 390 · light · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "restaurantpagina · 1280 · light · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "restaurantpagina · 390 · light · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "houderpagina · 1280 · dark · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "houderpagina · 390 · dark · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "restaurantpagina · 1280 · dark · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "restaurantpagina · 390 · dark · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "formulier-1280-light",
+      "sha256": "32aeee334d3d43ea9ccf92ecec2bced9814bc6c64c4a9aaf37eca2f48f95a217",
+      "width": 1280,
+      "height": 1701,
+      "viewport": "1280x1701",
+      "theme": "light",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "formulier-390-light",
+      "sha256": "e7a85a35f864ddf63c8b7d18d3f4db4b7b0e4216207ce79a5baf0cc8a8e3c550",
+      "width": 390,
+      "height": 1882,
+      "viewport": "390x1882",
+      "theme": "light",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "formulier-320-light",
+      "sha256": "d0d4c2ec0710583a9467f2e0c2d1d1e03e7cb688af80e70b9a54562037e45015",
+      "width": 320,
+      "height": 1970,
+      "viewport": "320x1970",
+      "theme": "light",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "formulier-1280-dark",
+      "sha256": "dba9b507ce705a570e1d938838fec0110f86a094ee830ac7bbf2296ef4c0832e",
+      "width": 1280,
+      "height": 1701,
+      "viewport": "1280x1701",
+      "theme": "dark",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "formulier-390-dark",
+      "sha256": "805d902e8634914ae372cd3d58f405816929a70af6cafdfedb629d2564b16d33",
+      "width": 390,
+      "height": 1882,
+      "viewport": "390x1882",
+      "theme": "dark",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "formulier-320-dark",
+      "sha256": "accc6984c7f651f3ff0d0b33df937eae60443fc341c33e903a78a6d9f5beace3",
+      "width": 320,
+      "height": 1970,
+      "viewport": "320x1970",
+      "theme": "dark",
+      "state": "dagmenu-elke-week-di-do",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-1280-light",
+      "sha256": "afb87e897281619231ead63142ae2cd4d5a596dffff4676f6918e0b6315d9ac3",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-1280-light",
+      "sha256": "7ccab90f3a712c04c9af0a41b26b8b8032f6ccb5c1ab9ab00893453d18c0571e",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-1280-light",
+      "sha256": "69e0bd5afcbfb7088d1d7405a160e162dc7150fce2ca48d4b1b6fa5c80759077",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-390-light",
+      "sha256": "f9c3ae7215f3534c49f26b028c930a672557812328af68ab5ae778ded8d341a3",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-390-light",
+      "sha256": "00daeb8c3cef2c0912f317eb2ec46cec61904c9e6e70a6d352b581951bed2519",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-390-light",
+      "sha256": "f9c3ae7215f3534c49f26b028c930a672557812328af68ab5ae778ded8d341a3",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-320-light",
+      "sha256": "09d7b35aca3789172e539c6bc71a8ed416f363b27cfce662bd35420ff3834f4a",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-320-light",
+      "sha256": "897696ca676b07bebf52f588e819988b1d7f14bf3d2e2d001bd38b02fca2f707",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-320-light",
+      "sha256": "09d7b35aca3789172e539c6bc71a8ed416f363b27cfce662bd35420ff3834f4a",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-1280-dark",
+      "sha256": "49ebcad437c3cbe34b55238c9d4104a5efed6b75e0cee723e453697f9ac5acff",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-1280-dark",
+      "sha256": "3de0aa546c9adccb3539b9c9f118b2e8d13c17a7599c023a27a1f0a5576809df",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-1280-dark",
+      "sha256": "49ebcad437c3cbe34b55238c9d4104a5efed6b75e0cee723e453697f9ac5acff",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-390-dark",
+      "sha256": "cd8563a89e257e21c51600fd8dfe90fcfd3e889344d091339e01d4a439c1681c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-390-dark",
+      "sha256": "d19536086d55e152e4d1ddfc3f34b39f11ced50bbb7083a20d57b802d0847477",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-390-dark",
+      "sha256": "cd8563a89e257e21c51600fd8dfe90fcfd3e889344d091339e01d4a439c1681c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-beschikbaar-320-dark",
+      "sha256": "fb6f867ab11382b31d1f12632c3377273724e8944cee582761117972302bd316",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "op-is-op-uit",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-uitverkocht-320-dark",
+      "sha256": "4f9c49688a29ce63c49bd9a1f9773d629d0a14302295159e22612ef3f22fd5d1",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "op-is-op-aan",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "overzicht-terug-320-dark",
+      "sha256": "fb6f867ab11382b31d1f12632c3377273724e8944cee582761117972302bd316",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "op-is-op-terug",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-1280-light",
+      "sha256": "0d53dfeca83931143ed057edc73d92e7313628e37a1661363351da84fd3c2019",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "light",
+        "active": [],
+        "buttons": [],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-390-light",
+      "sha256": "d9c3bfc23e7622aa63ab82f29b972cd771775f42ee643fcdffcc8dc96263263f",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "light",
+        "active": [],
+        "buttons": [],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-320-light",
+      "sha256": "d5940ae86c3aa22f9e8e022015c3aa45677d04f6c8713b0bb8ab47f792ade17f",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "light",
+        "active": [],
+        "buttons": [],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-1280-dark",
+      "sha256": "f4ba44d499d8253c7012ae75cd008d70446963c65459693c6453db16715a7956",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-390-dark",
+      "sha256": "41c33ac95acb688713fd72f189f3ed7509ffc3087290b74334e28d2f4fee2b6f",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    },
+    {
+      "file": "vandaag-320-dark",
+      "sha256": "c015ab89e9dd7064490c64b976d0d89a76c4e4adf6fcc69df8e352c15556eb0c",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "dagmenu-en-uitverkochte-daghap",
+      "themeProof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "panelClosed": true
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}

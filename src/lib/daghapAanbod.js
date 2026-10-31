@@ -28,75 +28,46 @@
 
 'use strict';
 
-const DAGHAP_SOORTEN = Object.freeze(['daghap', 'seizoensgerecht']);
-const DAGHAP_LABELS = Object.freeze(['vegetarisch', 'veganistisch', 'glutenvrij']);
-const DAGHAP_ACTIEVE_STATUSSEN = Object.freeze(['online', 'in_controle']);
-const DAGHAP_STATUS_ONLINE = 'online';
-const DAGHAP_STATUS_CONTROLE = 'in_controle';
-const DAGHAP_STATUS_OFFLINE = 'offline';
-const DAGHAP_STATUS_VERLOPEN = 'verlopen';
+const {
+  DAGHAP_ACTIEVE_STATUSSEN,
+  DAGHAP_BESCHRIJVING_MAX,
+  DAGHAP_FOUTEN,
+  DAGHAP_GANGEN,
+  DAGHAP_GANG_NAAM_MAX,
+  DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_LABELS,
+  DAGHAP_MAX_DAGEN_VOORUIT,
+  DAGHAP_MAX_EMOJI,
+  DAGHAP_MAX_GANGEN,
+  DAGHAP_MAX_SEIZOEN,
+  DAGHAP_MAX_WIJZIGINGEN_PER_DAG,
+  DAGHAP_MESSAGES,
+  DAGHAP_MIN_GANGEN,
+  DAGHAP_SOORTEN,
+  DAGHAP_STATUS_CONTROLE,
+  DAGHAP_STATUS_OFFLINE,
+  DAGHAP_STATUS_ONLINE,
+  DAGHAP_STATUS_VERLOPEN,
+  DAGHAP_TIJDZONE,
+  DAGHAP_WEEKDAGEN,
+  berichtBij,
+  heeftOnbekendLabel,
+  normaliseerLabels,
+} = require('./daghapBerichten');
 
 const DAGHAP_NAAM_MIN = 3;
 const DAGHAP_NAAM_MAX = 80;
 const DAGHAP_PRIJS_MIN_CENT = 50;
 const DAGHAP_PRIJS_MAX_CENT = 15000;
-const DAGHAP_BESCHRIJVING_MAX = 140;
-const DAGHAP_MAX_EMOJI = 3;
 const DAGHAP_MAX_DAGHAP = 1;
-const DAGHAP_MAX_SEIZOEN = 3;
-const DAGHAP_MAX_WIJZIGINGEN_PER_DAG = 10;
-const DAGHAP_MAX_DAGEN_VOORUIT = 90;
+// Het dagmenu volgt dezelfde grens als de daghap (contract: "dezelfde controle
+// als de daghap"): één actief dagmenu per restaurant.
+// Het aantal vanaf welke een cijfer als getal getoond wordt; daaronder is het
+// "< 5" (uitkomst 4, dezelfde regel als BE-57).
+const DAGHAP_CIJFERS_MIN = 5;
+const DAGHAP_MAX_DAGMENU = 1;
 // Een prijs boven 3× de duurste prijs op de kaart is verdacht (contract).
 const DAGHAP_PRIJS_FACTOR = 3;
-const DAGHAP_TIJDZONE = 'Europe/Amsterdam';
-
-/** De zin die de houder ziet als het filter het aanbod tegenhoudt. */
-const DAGHAP_IN_CONTROLE_MESSAGE = 'Wordt kort gecontroleerd.';
-
-/** De meldingen van de API: één zin per weigering, nooit een technische fout. */
-const DAGHAP_MESSAGES = Object.freeze({
-  naam: 'Gebruik een naam van 3 tot 80 tekens.',
-  prijs: 'Vul een prijs tussen € 0,50 en € 150 in.',
-  beschrijving: `Gebruik maximaal ${DAGHAP_BESCHRIJVING_MAX} tekens in de beschrijving.`,
-  labels: 'Kies alleen vegetarisch, veganistisch of glutenvrij.',
-  geenUrl: 'Een link mag niet in de tekst staan.',
-  geenEmail: 'Een e-mailadres mag niet in de tekst staan.',
-  geenTelefoon: 'Een telefoonnummer mag niet in de tekst staan.',
-  hoofdletters: 'Schrijf de tekst niet helemaal in hoofdletters.',
-  leestekens: 'Gebruik geen herhaalde leestekens zoals "!!!".',
-  emoji: `Gebruik maximaal ${DAGHAP_MAX_EMOJI} emoji.`,
-  soort: 'Kies een daghap of een seizoensgerecht.',
-  einddatum: 'Vul een einddatum binnen 90 dagen in.',
-  daghapVol: 'Er staat al een daghap online voor vandaag.',
-  seizoenVol: `Er staan al ${DAGHAP_MAX_SEIZOEN} seizoensgerechten online.`,
-  daglimiet: `Je kunt per dag maximaal ${DAGHAP_MAX_WIJZIGINGEN_PER_DAG} keer iets plaatsen of wijzigen.`,
-  verlopen: 'Dit aanbod is verlopen en kan niet meer gewijzigd worden.',
-  geenEigenaar: 'Je bent geen houder van dit restaurant.',
-  geenPlaatsrecht: 'Je mag voor dit restaurant geen aanbod meer plaatsen. Neem contact op met BredaEats.',
-  inloggen: 'Log in om je aanbod te beheren.',
-});
-
-/** Eén foutcode per afgewezen regel; de API geeft ze terug als `errors`. */
-const DAGHAP_FOUTEN = Object.freeze({
-  soort: 'soort_ongeldig',
-  naamKort: 'naam_te_kort',
-  naamLang: 'naam_te_lang',
-  prijs: 'prijs_ongeldig',
-  beschrijving: 'beschrijving_te_lang',
-  labels: 'label_onbekend',
-  url: 'bevat_url',
-  email: 'bevat_email',
-  telefoon: 'bevat_telefoon',
-  hoofdletters: 'alles_in_hoofdletters',
-  leestekens: 'herhaalde_leestekens',
-  emoji: 'te_veel_emoji',
-  einddatum: 'einddatum_ongeldig',
-  daghapVol: 'daghap_limiet',
-  seizoenVol: 'seizoenslimiet',
-  daglimiet: 'daglimiet',
-  verlopen: 'verlopen',
-  geenPlaatsrecht: 'geen_plaatsrecht',
-});
 
 function tekst(value) {
   return String(value === undefined || value === null ? '' : value);
@@ -279,12 +250,30 @@ function dagenTotEinddatum(nu, einddatum) {
  *                    vooruit.
  * `{ ok: true, verlooptOp }` of `{ ok: false, fout }`.
  */
-function vervalmoment({ soort, nu, sluitingstijd, einddatum } = {}) {
+function vervalmoment({ soort, nu, sluitingstijd, einddatum, herhaalTot } = {}) {
   const moment = nu instanceof Date ? nu : new Date(Number(nu === undefined ? Date.now() : nu));
   if (Number.isNaN(moment.getTime())) return { ok: false, fout: DAGHAP_FOUTEN.einddatum };
   const vandaag = delenInTijdzone(moment);
 
-  if (soort === 'daghap') {
+  // Een herhaling loopt tot en met de einddatum, voor alle drie de soorten: op
+  // die laatste dag geldt de sluitingstijd van het restaurant als die bekend is,
+  // anders 23:59 Europe/Amsterdam. Daarna is het aanbod verlopen.
+  const herhaalEind = leesEinddatum(herhaalTot);
+  if (herhaalEind) {
+    const dagen = dagenTotEinddatum(moment, herhaalEind);
+    if (dagen < 0 || dagen > DAGHAP_MAX_DAGEN_VOORUIT) {
+      return { ok: false, fout: DAGHAP_FOUTEN.herhaaltot };
+    }
+    const sluiting = leesSluitingstijd(sluitingstijd);
+    const verlooptOp = tijdzoneNaarInstant({
+      ...herhaalEind,
+      uur: sluiting ? sluiting.uur : 23,
+      minuut: sluiting ? sluiting.minuut : 59,
+    });
+    return { ok: true, verlooptOp: verlooptOp.toISOString() };
+  }
+
+  if (soort === 'daghap' || soort === 'dagmenu') {
     const sluiting = leesSluitingstijd(sluitingstijd);
     const verlooptOp = tijdzoneNaarInstant({
       jaar: vandaag.jaar,
@@ -315,6 +304,152 @@ function isVerlopen(verlooptOp, nu) {
   const nuMs = nu instanceof Date ? nu.getTime() : Number(nu === undefined ? Date.now() : nu);
   return !(moment > nuMs);
 }
+
+// --- BE-67 (#164): het dagmenu, de herhaling en Op = op -----------------------
+//
+// Dezelfde opzet als de rest van dit bestand: een pure regel, geen database,
+// geen React en geen systeemklok. De klok komt altijd van de aanroeper, zodat de
+// grens rond middernacht in Europe/Amsterdam te testen is.
+
+/** Eén gang als `{ gang, naam }`; een onbekende gang of een lege naam valt weg. */
+function normaliseerGang(value) {
+  if (!value || typeof value !== 'object') return null;
+  const gang = tekst(value.gang).trim().toLowerCase();
+  if (!DAGHAP_GANGEN.includes(gang)) return null;
+  const naam = opschonen(value.naam);
+  if (!naam) return null;
+  return { gang, naam };
+}
+
+/**
+ * De gangen uit een verzoek: één per gang, in de vaste volgorde voor/hoofd/na en
+ * zonder lege gangen. Het voorgerecht of het nagerecht mag ontbreken; het
+ * hoofdgerecht niet — dat controleert `normaliseerAanbod`.
+ */
+function normaliseerGangen(value) {
+  const lijst = Array.isArray(value) ? value : [];
+  const perGang = new Map();
+  for (const item of lijst) {
+    const gang = normaliseerGang(item);
+    if (gang) perGang.set(gang.gang, gang.naam);
+  }
+  return DAGHAP_GANGEN.filter((gang) => perGang.has(gang))
+    .map((gang) => ({ gang, naam: perGang.get(gang) }));
+}
+
+/**
+ * De teksten van dit aanbod waar het filter én het zoeken naar kijken: de naam,
+ * de beschrijving en de namen van de gangen. Een gast zoekt op een gang, dus een
+ * gangnaam met reclametaal moet hetzelfde filter halen als de naam.
+ */
+function aanbodFilterTekst({ naam, beschrijving, gangen } = {}) {
+  const gangnamen = (Array.isArray(gangen) ? gangen : [])
+    .map((item) => tekst(item && item.naam));
+  return [tekst(naam), ...gangnamen, tekst(beschrijving)].filter(Boolean).join(' ');
+}
+
+/**
+ * De herhaaldagen als ISO-getallen, ontdubbeld en gesorteerd; alles buiten 1-7
+ * valt weg. Zo schrijft de API nooit een dubbele of ongesorteerde lijst weg.
+ */
+function normaliseerWeekdagen(value) {
+  const gekozen = Array.isArray(value) ? value : [];
+  const geldig = new Set();
+  for (const dag of gekozen) {
+    const nummer = Number(dag);
+    if (Number.isInteger(nummer) && DAGHAP_WEEKDAGEN.includes(nummer)) geldig.add(nummer);
+  }
+  return DAGHAP_WEEKDAGEN.filter((dag) => geldig.has(dag));
+}
+
+/**
+ * De herhaling uit een verzoek: `{ ok, fouten, herhaling }` met
+ * `herhaling = { weekdagen: [1, 3], tot: '2026-12-31' }` of `null` als het
+ * aanbod alleen vandaag geldt. De einddatum ligt binnen 90 dagen, dezelfde grens
+ * als bij een seizoensgerecht.
+ */
+function normaliseerHerhaling({ weekdagen, tot, nu } = {}) {
+  const gevraagd = Array.isArray(weekdagen) ? weekdagen : [];
+  const dagen = normaliseerWeekdagen(gevraagd);
+  const ruweTot = tekst(tot).trim();
+  if (dagen.length === 0 && !ruweTot) return { ok: true, fouten: [], herhaling: null };
+
+  const fouten = [];
+  if (dagen.length === 0) fouten.push(DAGHAP_FOUTEN.herhaaldag);
+  const eind = leesEinddatum(ruweTot);
+  const moment = nu instanceof Date ? nu : new Date(Number(nu === undefined ? Date.now() : nu));
+  if (!eind || Number.isNaN(moment.getTime())) {
+    fouten.push(DAGHAP_FOUTEN.herhaaltot);
+  } else {
+    const dagenTot = dagenTotEinddatum(moment, eind);
+    if (dagenTot < 0 || dagenTot > DAGHAP_MAX_DAGEN_VOORUIT) fouten.push(DAGHAP_FOUTEN.herhaaltot);
+  }
+  const uniek = [...new Set(fouten)];
+  if (uniek.length > 0) return { ok: false, fouten: uniek, herhaling: null };
+  const twee = (waarde) => String(waarde).padStart(2, '0');
+  return {
+    ok: true,
+    fouten: [],
+    herhaling: { weekdagen: dagen, tot: `${eind.jaar}-${twee(eind.maand)}-${twee(eind.dag)}` },
+  };
+}
+
+/** De Amsterdamse kalenderdatum van dit moment als `"2026-10-31"`. */
+function vandaagInAmsterdam(nu) {
+  const moment = nu instanceof Date ? nu : new Date(Number(nu === undefined ? Date.now() : nu));
+  if (Number.isNaN(moment.getTime())) return '';
+  const { jaar, maand, dag } = delenInTijdzone(moment);
+  const twee = (waarde) => String(waarde).padStart(2, '0');
+  return `${jaar}-${twee(maand)}-${twee(dag)}`;
+}
+
+/** De ISO-weekdag van dit moment in Europe/Amsterdam: 1 = maandag, 7 = zondag. */
+function weekdagInAmsterdam(nu) {
+  const datum = vandaagInAmsterdam(nu);
+  if (!datum) return 0;
+  const [jaar, maand, dag] = datum.split('-').map(Number);
+  const weekdag = new Date(Date.UTC(jaar, maand - 1, dag)).getUTCDay();
+  return ((weekdag + 6) % 7) + 1;
+}
+
+/**
+ * Is dit aanbod vandaag uitverkocht? Alleen de datum van vandaag telt: de stand
+ * van gisteren is vervallen, ook bij een herhaling. Er hoeft dus niets om
+ * middernacht te worden opgeruimd.
+ */
+function isUitverkochtVandaag(uitverkochtOp, nu) {
+  const datum = tekst(uitverkochtOp).trim().slice(0, 10);
+  if (!datum) return false;
+  return datum === vandaagInAmsterdam(nu);
+}
+
+/**
+ * Staat dit aanbod vandaag online? De ene regel die "alleen vandaag" en
+ * "elke week op" afhandelt, in Europe/Amsterdam:
+ *   - een verlopen moment betekent nooit online;
+ *   - een herhaling geldt alleen op de gekozen weekdagen en tot en met de
+ *     einddatum;
+ *   - zonder herhaling geldt het aanbod vandaag (het verloopmoment is het einde
+ *     van vandaag).
+ * `{ online, uitverkocht, reden }`, met `reden` een korte code voor de tests en
+ * voor de houder: 'verlopen', 'voorbij', 'andere_dag' of 'uitverkocht'.
+ */
+function staatOnlineVandaag({ verlooptOp, herhaalWeekdagen, herhaalTot, uitverkochtOp, nu } = {}) {
+  if (isVerlopen(verlooptOp, nu)) return { online: false, uitverkocht: false, reden: 'verlopen' };
+  const dagen = normaliseerWeekdagen(herhaalWeekdagen);
+  if (dagen.length > 0) {
+    const vandaag = vandaagInAmsterdam(nu);
+    const tot = tekst(herhaalTot).trim().slice(0, 10);
+    if (tot && vandaag && vandaag > tot) return { online: false, uitverkocht: false, reden: 'voorbij' };
+    if (vandaag && !dagen.includes(weekdagInAmsterdam(nu))) {
+      return { online: false, uitverkocht: false, reden: 'andere_dag' };
+    }
+  }
+  const uitverkocht = isUitverkochtVandaag(uitverkochtOp, nu);
+  return { online: true, uitverkocht, reden: uitverkocht ? 'uitverkocht' : '' };
+}
+
+
 
 // De woordenlijst van het filter, in drie groepen zoals het contract ze noemt.
 // Kleine letters, zonder accenten; `normaliseerVoorFilter` doet hetzelfde met
@@ -395,60 +530,6 @@ function beoordeelAanbod({ naam, beschrijving, prijsCent, duursteKaartPrijsCent 
   };
 }
 
-/** De Nederlandse zin bij een foutcode, voor het formulier en de API. */
-function berichtBij(code) {
-  switch (code) {
-    case DAGHAP_FOUTEN.naamKort:
-    case DAGHAP_FOUTEN.naamLang:
-      return DAGHAP_MESSAGES.naam;
-    case DAGHAP_FOUTEN.prijs:
-      return DAGHAP_MESSAGES.prijs;
-    case DAGHAP_FOUTEN.beschrijving:
-      return DAGHAP_MESSAGES.beschrijving;
-    case DAGHAP_FOUTEN.labels:
-      return DAGHAP_MESSAGES.labels;
-    case DAGHAP_FOUTEN.url:
-      return DAGHAP_MESSAGES.geenUrl;
-    case DAGHAP_FOUTEN.email:
-      return DAGHAP_MESSAGES.geenEmail;
-    case DAGHAP_FOUTEN.telefoon:
-      return DAGHAP_MESSAGES.geenTelefoon;
-    case DAGHAP_FOUTEN.hoofdletters:
-      return DAGHAP_MESSAGES.hoofdletters;
-    case DAGHAP_FOUTEN.leestekens:
-      return DAGHAP_MESSAGES.leestekens;
-    case DAGHAP_FOUTEN.emoji:
-      return DAGHAP_MESSAGES.emoji;
-    case DAGHAP_FOUTEN.soort:
-      return DAGHAP_MESSAGES.soort;
-    case DAGHAP_FOUTEN.einddatum:
-      return DAGHAP_MESSAGES.einddatum;
-    case DAGHAP_FOUTEN.daghapVol:
-      return DAGHAP_MESSAGES.daghapVol;
-    case DAGHAP_FOUTEN.seizoenVol:
-      return DAGHAP_MESSAGES.seizoenVol;
-    case DAGHAP_FOUTEN.daglimiet:
-      return DAGHAP_MESSAGES.daglimiet;
-    case DAGHAP_FOUTEN.verlopen:
-      return DAGHAP_MESSAGES.verlopen;
-    default:
-      return '';
-  }
-}
-
-/** De labels uit het contract, ontdubbeld en in de vaste volgorde. */
-function normaliseerLabels(value) {
-  const gekozen = Array.isArray(value) ? value : [];
-  const gevraagd = new Set(gekozen.map((label) => tekst(label).trim().toLowerCase()));
-  return DAGHAP_LABELS.filter((label) => gevraagd.has(label));
-}
-
-/** Staan er labels in de invoer die niet bestaan? */
-function heeftOnbekendLabel(value) {
-  const gekozen = Array.isArray(value) ? value : [];
-  return gekozen.some((label) => !DAGHAP_LABELS.includes(tekst(label).trim().toLowerCase()));
-}
-
 /**
  * Het volledige aanbod uit één verzoek, genormaliseerd en gecontroleerd:
  * `{ ok, fouten, aanbod }`. `aanbod` is alleen gevuld als `ok` waar is:
@@ -463,10 +544,18 @@ function normaliseerAanbod({
   naam,
   prijs,
   prijs_cent: prijsCentInvoer,
+  prijs3,
+  prijs_3: prijs3Alias,
+  prijs_3_cent: prijs3CentInvoer,
   beschrijving,
   labels,
+  gangen,
   einddatum,
   sluitingstijd,
+  weekdagen,
+  herhaal_weekdagen: herhaalWeekdagenInvoer,
+  herhaalTot,
+  herhaal_tot: herhaalTotInvoer,
   nu,
 } = {}) {
   const fouten = [];
@@ -494,12 +583,65 @@ function normaliseerAanbod({
 
   if (heeftOnbekendLabel(labels)) fouten.push(DAGHAP_FOUTEN.labels);
 
+  // BE-67: het dagmenu heeft 2 of 3 gangen met een verplicht hoofdgerecht, en een
+  // tweede prijs zodra er drie gangen zijn. De tekstregels gelden net zo goed
+  // voor de naam van een gang: daar komt de gast immers op uit bij het zoeken.
+  const gekozenGangen = normaliseerGangen(gangen);
+  let prijs3Cent = null;
+  if (gekozenSoort === 'dagmenu') {
+    if (gekozenGangen.length < DAGHAP_MIN_GANGEN
+        || gekozenGangen.length > DAGHAP_MAX_GANGEN
+        || !gekozenGangen.some((gang) => gang.gang === 'hoofd')) {
+      fouten.push(DAGHAP_FOUTEN.gangen);
+    }
+    for (const gang of gekozenGangen) {
+      if ([...gang.naam].length > DAGHAP_GANG_NAAM_MAX) fouten.push(DAGHAP_FOUTEN.gangNaam);
+      fouten.push(...controleerTekst(gang.naam).fouten);
+    }
+    const derdeInvoer = prijs3CentInvoer !== undefined && prijs3CentInvoer !== null
+      ? prijs3CentInvoer
+      : (prijs3 !== undefined && prijs3 !== null ? prijs3 : prijs3Alias);
+    if (gekozenGangen.length === DAGHAP_MAX_GANGEN) {
+      prijs3Cent = typeof derdeInvoer === 'number' && Number.isFinite(derdeInvoer)
+        ? derdeInvoer
+        : prijsNaarCenten(derdeInvoer);
+      if (!Number.isInteger(prijs3Cent)
+          || prijs3Cent < DAGHAP_PRIJS_MIN_CENT
+          || prijs3Cent > DAGHAP_PRIJS_MAX_CENT) {
+        fouten.push(DAGHAP_FOUTEN.prijs3);
+      }
+    } else if (tekst(derdeInvoer).trim() !== '') {
+      // Een derde prijs zonder drie gangen is geen stille korting: het formulier
+      // zegt dan wat er mis is.
+      fouten.push(DAGHAP_FOUTEN.geenDerdePrijs);
+    }
+  } else if (gekozenGangen.length > 0) {
+    // Alleen een dagmenu heeft gangen.
+    fouten.push(DAGHAP_FOUTEN.gangen);
+  }
+
+  // BE-67: herhalen mag bij alle drie de soorten; zonder weekdagen en zonder
+  // einddatum geldt het aanbod alleen vandaag.
+  const herhaal = normaliseerHerhaling({
+    weekdagen: weekdagen !== undefined ? weekdagen : herhaalWeekdagenInvoer,
+    tot: herhaalTot !== undefined ? herhaalTot : herhaalTotInvoer,
+    nu,
+  });
+  fouten.push(...herhaal.fouten);
+
+
   // De tekstregels gelden voor naam en beschrijving samen: wat in het ene veld
   // niet mag, mag in het andere ook niet.
   fouten.push(...controleerTekst(schoneNaam).fouten);
   fouten.push(...controleerTekst(schoneBeschrijving).fouten);
 
-  const verloop = vervalmoment({ soort: gekozenSoort, nu, sluitingstijd, einddatum });
+  const verloop = vervalmoment({
+    soort: gekozenSoort,
+    nu,
+    sluitingstijd,
+    einddatum,
+    herhaalTot: herhaal.herhaling ? herhaal.herhaling.tot : '',
+  });
   if (!verloop.ok) {
     fouten.push(verloop.fout === DAGHAP_FOUTEN.soort ? DAGHAP_FOUTEN.einddatum : verloop.fout);
   }
@@ -516,6 +658,10 @@ function normaliseerAanbod({
       beschrijving: schoneBeschrijving || null,
       labels: normaliseerLabels(labels),
       verlooptOp: verloop.verlooptOp,
+      // Alleen een dagmenu draagt gangen en een tweede prijs; de andere soorten
+      // houden precies de vorm van BE-55.
+      ...(gekozenSoort === 'dagmenu' ? { gangen: gekozenGangen, prijs3Cent } : {}),
+      ...(herhaal.herhaling ? { herhaling: herhaal.herhaling } : {}),
     },
   };
 }
@@ -533,6 +679,7 @@ function telActief(bestaand, nu) {
   const actief = rijen.filter((rij) => isActiefAanbod(rij, nu));
   return {
     daghap: actief.filter((rij) => rij.soort === 'daghap').length,
+    dagmenu: actief.filter((rij) => rij.soort === 'dagmenu').length,
     seizoensgerecht: actief.filter((rij) => rij.soort === 'seizoensgerecht').length,
     totaal: actief.length,
   };
@@ -549,6 +696,9 @@ function magSoortToevoegen({ bestaand, soort, behalveId, nu } = {}) {
   const telling = telActief(rijen, nu);
   if (soort === 'daghap' && telling.daghap >= DAGHAP_MAX_DAGHAP) {
     return { ok: false, fout: DAGHAP_FOUTEN.daghapVol, telling };
+  }
+  if (soort === 'dagmenu' && telling.dagmenu >= DAGHAP_MAX_DAGMENU) {
+    return { ok: false, fout: DAGHAP_FOUTEN.dagmenuVol, telling };
   }
   if (soort === 'seizoensgerecht' && telling.seizoensgerecht >= DAGHAP_MAX_SEIZOEN) {
     return { ok: false, fout: DAGHAP_FOUTEN.seizoenVol, telling };
@@ -631,15 +781,87 @@ function aanbodVoorScherm(rij) {
     verlooptOp: rij.verloopt_op || null,
     inControle: rij.status === DAGHAP_STATUS_CONTROLE,
     melding: rij.status === DAGHAP_STATUS_CONTROLE ? DAGHAP_IN_CONTROLE_MESSAGE : '',
+    // BE-67: deze velden bestaan pas na migratie 0026. Ontbreken ze (een oude rij
+    // of een database zonder 0026), dan staat er niets extra in het antwoord en
+    // blijft de vorm van BE-55 precies zoals hij was.
+    ...(rij.gangen === undefined || rij.gangen === null
+      ? {}
+      : { gangen: normaliseerGangen(rij.gangen) }),
+    ...(rij.prijs_3_cent === undefined || rij.prijs_3_cent === null
+      ? {}
+      : {
+        prijs3Cent: Number(rij.prijs_3_cent),
+        prijs3: centenNaarPrijs(rij.prijs_3_cent),
+      }),
+    ...(Array.isArray(rij.herhaal_weekdagen)
+      ? { herhaalWeekdagen: normaliseerWeekdagen(rij.herhaal_weekdagen) }
+      : {}),
+    ...(rij.herhaal_tot === undefined || rij.herhaal_tot === null
+      ? {}
+      : { herhaalTot: rij.herhaal_tot }),
+    ...(rij.uitverkocht_op === undefined || rij.uitverkocht_op === null
+      ? {}
+      : { uitverkochtOp: rij.uitverkocht_op }),
   };
+}
+
+/**
+ * BE-67, uitkomst 4: een getal onder de 5 leest als "< 5" (dezelfde regel als
+ * BE-57). Zo verraadt het overzicht niet of iets één, twee of vier keer bekeken
+ * is. Negatief of onleesbaar telt als nul.
+ */
+function cijferTekst(value) {
+  const aantal = Number(value);
+  if (!Number.isFinite(aantal) || aantal < DAGHAP_CIJFERS_MIN) return '< 5';
+  return String(Math.round(aantal));
+}
+
+/**
+ * BE-67, ronde 3: de bewaar- en deelknop bij een aanbod tellen via de
+ * bestaande tellerroute (`POST /api/v1/tellers`, BE-44). Die route kent
+ * gerechten; een aanbod krijgt daarom een eigen sleutel in dezelfde vorm als de
+ * gerecht-id (`<menukaart>-<categorie>-<gerecht>`), maar met een eigen,
+ * ondubbelzinnige kop: `daghap-<restaurant>-<aanbod>`. De tellerroute schrijft
+ * daarmee één regel in `daghap_gebeurtenissen`, net als bij `bekeken`.
+ */
+const AANBOD_SLEUTEL_PREFIX = 'daghap';
+const AANBOD_SLEUTEL_MAX = 96;
+const AANBOD_ID_PATROON = /^\d{1,18}$/;
+
+function aanbodSleutel({ restaurantId, aanbodId } = {}) {
+  const restaurant = tekst(restaurantId);
+  const id = tekst(aanbodId);
+  if (!restaurant || restaurant.length > 64 || !AANBOD_ID_PATROON.test(id)) return null;
+  const sleutel = `${AANBOD_SLEUTEL_PREFIX}-${restaurant}-${id}`;
+  return sleutel.length <= AANBOD_SLEUTEL_MAX ? sleutel : null;
+}
+
+/**
+ * De restaurant- en aanbodsleutel achter zo'n sleutel, of null. Een gerecht-id
+ * (`6-diner-0-0`) begint nooit met `daghap-`, dus de twee tellers kunnen elkaar
+ * niet in de weg zitten.
+ */
+function parseAanbodSleutel(value) {
+  const sleutel = tekst(value);
+  if (!sleutel || sleutel.length > AANBOD_SLEUTEL_MAX) return null;
+  const delen = sleutel.split('-');
+  if (delen.length < 3 || delen[0] !== AANBOD_SLEUTEL_PREFIX) return null;
+  const laatste = delen[delen.length - 1];
+  if (!AANBOD_ID_PATROON.test(laatste)) return null;
+  const restaurantId = delen.slice(1, -1).join('-');
+  if (!restaurantId || restaurantId.length > 64) return null;
+  return { sleutel, restaurantId, aanbodId: Number(laatste) };
 }
 
 /**
  * Het aanbod zoals een gast het ziet (stap B): alleen wat de weergave nodig
  * heeft, nooit het account, de status of de filterreden. Een gast krijgt dus
  * geen enkele interne kolom en ook geen volledige lijst van alle restaurants.
+ *
+ * `nu` is de klok van de aanroeper (standaard `Date.now()`), zodat de stand
+ * "uitverkocht" in Europe/Amsterdam te testen is zonder de systeemklok.
  */
-function publiekAanbodVoorScherm(rij) {
+function publiekAanbodVoorScherm(rij, nu) {
   if (!rij || typeof rij !== 'object') return null;
   const prijsCent = Number(rij.prijs_cent);
   return {
@@ -651,21 +873,40 @@ function publiekAanbodVoorScherm(rij) {
     beschrijving: rij.beschrijving || '',
     labels: normaliseerLabels(rij.labels),
     verlooptOp: rij.verloopt_op || null,
+    // BE-67: een gast ziet het dagmenu per gang, met beide prijzen, en ziet dat
+    // iets uitverkocht is. Alleen die drie velden komen erbij; niets intern.
+    ...(rij.gangen === undefined || rij.gangen === null
+      ? {}
+      : { gangen: normaliseerGangen(rij.gangen) }),
+    ...(rij.prijs_3_cent === undefined || rij.prijs_3_cent === null
+      ? {}
+      : { prijs3Cent: Number(rij.prijs_3_cent), prijs3: centenNaarPrijs(rij.prijs_3_cent) }),
+    // BE-67: een herhaling leest bij de bezoeker als "elke di en do".
+    ...(Array.isArray(rij.herhaal_weekdagen)
+      ? { herhaalWeekdagen: normaliseerWeekdagen(rij.herhaal_weekdagen) }
+      : {}),
+    ...(isUitverkochtVandaag(rij.uitverkocht_op, nu) ? { uitverkocht: true } : {}),
   };
 }
 
 module.exports = {
   DAGHAP_ACTIEVE_STATUSSEN,
+  DAGHAP_CIJFERS_MIN,
   DAGHAP_BESCHRIJVING_MAX,
   DAGHAP_FOUTEN,
+  DAGHAP_GANGEN,
+  DAGHAP_GANG_NAAM_MAX,
   DAGHAP_IN_CONTROLE_MESSAGE,
   DAGHAP_LABELS,
   DAGHAP_MAX_DAGEN_VOORUIT,
   DAGHAP_MAX_DAGHAP,
+  DAGHAP_MAX_DAGMENU,
   DAGHAP_MAX_EMOJI,
+  DAGHAP_MAX_GANGEN,
   DAGHAP_MAX_SEIZOEN,
   DAGHAP_MAX_WIJZIGINGEN_PER_DAG,
   DAGHAP_MESSAGES,
+  DAGHAP_MIN_GANGEN,
   DAGHAP_NAAM_MAX,
   DAGHAP_NAAM_MIN,
   DAGHAP_PRIJS_FACTOR,
@@ -677,12 +918,16 @@ module.exports = {
   DAGHAP_STATUS_ONLINE,
   DAGHAP_STATUS_VERLOPEN,
   DAGHAP_TIJDZONE,
+  DAGHAP_WEEKDAGEN,
+  aanbodFilterTekst,
+  aanbodSleutel,
   aanbodVoorScherm,
   aantalEmoji,
   begindagVan,
   beoordeelAanbod,
   berichtBij,
   centenNaarPrijs,
+  cijferTekst,
   controleerTekst,
   dagenTotEinddatum,
   delenInTijdzone,
@@ -693,21 +938,29 @@ module.exports = {
   heeftTelefoon,
   heeftUrl,
   isActiefAanbod,
+  isUitverkochtVandaag,
   isVerlopen,
   leesEinddatum,
   leesSluitingstijd,
   magSoortToevoegen,
   magVandaagWijzigen,
   normaliseerAanbod,
+  normaliseerGangen,
+  normaliseerHerhaling,
   normaliseerLabels,
   normaliseerVoorFilter,
+  normaliseerWeekdagen,
   opschonen,
+  parseAanbodSleutel,
   prijsNaarCenten,
   publiekAanbodVoorScherm,
   staatInHoofdletters,
+  staatOnlineVandaag,
   telActief,
   tijdzoneNaarInstant,
+  vandaagInAmsterdam,
   vervalmoment,
+  weekdagInAmsterdam,
 };
 
 

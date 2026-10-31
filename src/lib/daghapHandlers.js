@@ -32,20 +32,27 @@ const { MISSING_STORAGE_CODES, withTimeout } = require('./dishCounters');
 const {
   DAGHAP_FOUTEN,
   DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_MAX_GANGEN,
   DAGHAP_MESSAGES,
+  DAGHAP_SOORTEN,
   DAGHAP_STATUS_CONTROLE,
   DAGHAP_STATUS_OFFLINE,
   DAGHAP_STATUS_ONLINE,
   DAGHAP_STATUS_VERLOPEN,
+  aanbodFilterTekst,
   aanbodVoorScherm,
   begindagVan,
   beoordeelAanbod,
   berichtBij,
+  cijferTekst,
   isVerlopen,
   magSoortToevoegen,
   magVandaagWijzigen,
   normaliseerAanbod,
+  normaliseerGangen,
   publiekAanbodVoorScherm,
+  staatOnlineVandaag,
+  vandaagInAmsterdam,
 } = require('./daghapAanbod');
 
 // De tabellen en de functie uit supabase/migrations/0023.
@@ -56,6 +63,9 @@ const DAGHAP_TABLE_GEBEURTENISSEN = 'daghap_gebeurtenissen';
 // houder voor dit restaurant het plaatsrecht ontnam (stap B).
 const DAGHAP_TABLE_PLAATSRECHT = 'daghap_plaatsrecht';
 const DAGHAP_CLEANUP_FUNCTION = 'ruim_verlopen_daghap_op';
+// BE-67, uitkomst 4: de drie tellers van een aanbod, in de bestaande
+// gebeurtenissentabel (geen nieuwe tabel).
+const DAGHAP_CIJFERS = Object.freeze(['bekeken', 'bewaard', 'gedeeld']);
 // Na zoveel meldingen van verschillende apparaten gaat het aanbod op
 // `in_controle` (contract). Eén melding per apparaat telt.
 const DAGHAP_MELDINGEN_TOT_CONTROLE = 3;
@@ -75,8 +85,18 @@ const PUBLIEK_KOLOMMEN = 'id, soort, naam, prijs_cent, beschrijving, labels, ver
 // Voor de home is ook het restaurant nodig, anders is er geen link bij het
 // gerecht. Dat is het enige extra veld.
 const HOME_KOLOMMEN = `${PUBLIEK_KOLOMMEN}, restaurant_id`;
+// BE-67: de kolommen van migratie 0026. Ze bestaan pas na die migratie, dus elke
+// leesroute probeert het eerst mét en valt terug op de kolommen van 0023: zonder
+// 0026 werkt de app precies zoals nu en verschijnt het dagmenu eenvoudig niet.
+const UITBREIDING_KOLOMMEN = 'gangen, prijs_3_cent, herhaal_weekdagen, herhaal_tot, uitverkocht_op';
+const AANBOD_KOLOMMEN_UITGEBREID = `${AANBOD_KOLOMMEN}, ${UITBREIDING_KOLOMMEN}`;
+const PUBLIEK_KOLOMMEN_UITGEBREID = `${PUBLIEK_KOLOMMEN}, ${UITBREIDING_KOLOMMEN}`;
+const HOME_KOLOMMEN_UITGEBREID = `${PUBLIEK_KOLOMMEN_UITGEBREID}, restaurant_id`;
 
 const DAGHAP_NOT_AVAILABLE_MESSAGE = 'Daghappen zijn nog niet beschikbaar.';
+// BE-67: zonder migratie 0026 is er geen dagmenu; het formulier zegt dat met één
+// nette zin in plaats van een 500.
+const DAGMENU_NOT_AVAILABLE_MESSAGE = 'Het dagmenu is nog niet beschikbaar.';
 // De home toont er maximaal drie, in willekeurige volgorde (contract). De query
 // haalt een kleine kandidatenlijst op en nooit de hele tabel.
 const DAGHAP_HOME_LIMIT = 3;
@@ -94,6 +114,10 @@ function tekst(value) {
 const UNAVAILABLE = {
   status: 503,
   body: { error: 'daghap_unavailable', message: DAGHAP_NOT_AVAILABLE_MESSAGE },
+};
+const DAGMENU_UNAVAILABLE = {
+  status: 503,
+  body: { error: 'dagmenu_unavailable', message: DAGMENU_NOT_AVAILABLE_MESSAGE },
 };
 const NOT_FOUND = {
   status: 404,
@@ -326,11 +350,41 @@ function createDaghapHandlers({
       ? Number(duursteKaartPrijs(aanbod.restaurantId)) || 0
       : 0;
     return beoordeelAanbod({
-      naam: aanbod.naam,
-      beschrijving: aanbod.beschrijving,
+      // BE-67: ook de namen van de gangen van een dagmenu halen het filter; een
+      // gast zoekt op een gang en ziet die naam ook staan.
+      naam: aanbodFilterTekst(aanbod),
       prijsCent: aanbod.prijsCent,
       duursteKaartPrijsCent: duurste,
     });
+  }
+
+  /**
+   * De kolommen van 0026 in de rij, alleen als dit aanbod ze echt gebruikt. Een
+   * daghap zonder herhaling stuurt dus niets extra, zodat dezelfde route op een
+   * database zonder 0026 precies werkt als voorheen.
+   */
+  function uitbreidingVelden(aanbod) {
+    const isDagmenu = aanbod.soort === 'dagmenu';
+    const heeftHerhaling = Boolean(aanbod.herhaling);
+    if (!isDagmenu && !heeftHerhaling) return {};
+    const velden = {};
+    if (isDagmenu) {
+      velden.gangen = aanbod.gangen;
+      velden.prijs_3_cent = aanbod.prijs3Cent === undefined ? null : aanbod.prijs3Cent;
+    }
+    velden.herhaal_weekdagen = heeftHerhaling ? aanbod.herhaling.weekdagen : null;
+    velden.herhaal_tot = heeftHerhaling ? aanbod.herhaling.tot : null;
+    return velden;
+  }
+
+  /**
+   * Een leesquery met de kolommen van 0026, en zonder die kolommen als 0026 nog
+   * niet is toegepast. Zo blijft elke leesroute werken zoals nu.
+   */
+  async function leesMetUitbreiding(bouw, basis, uitgebreid) {
+    const eerste = await ask(bouw(uitgebreid));
+    if (!eerste.error || !missingStorage(eerste.error)) return eerste;
+    return ask(bouw(basis));
   }
 
   /** Het antwoord na een geslaagde schrijfactie. */
@@ -440,6 +494,10 @@ function createDaghapHandlers({
       filter_reden: filter.redenen.join(' ').slice(0, 80) || null,
       verloopt_op: aanbod.verlooptOp,
       updated_at: nuIso,
+      // BE-67: gangen, de derde prijs en de herhaling, alleen als dit aanbod ze
+      // gebruikt. Zonder migratie 0026 mislukt juist deze insert met een nette
+      // 503 in plaats van een 500.
+      ...uitbreidingVelden(aanbod),
     };
 
     let geschreven = await vraag(supabase, nieuweRij);
@@ -450,7 +508,10 @@ function createDaghapHandlers({
       await ruimVerlopenOp();
       geschreven = await vraag(supabase, nieuweRij);
     }
-    if (geschreven.error) return opslaanMislukt(geschreven.error);
+    if (geschreven.error) {
+      if (aanbod.soort === 'dagmenu' && missingStorage(geschreven.error)) return DAGMENU_UNAVAILABLE;
+      return opslaanMislukt(geschreven.error);
+    }
 
     const rij = rijUit(geschreven);
     if (!rij) return failed();
@@ -534,12 +595,18 @@ function createDaghapHandlers({
           filter_reden: filter.redenen.join(' ').slice(0, 80) || null,
           verloopt_op: aanbod.verlooptOp,
           updated_at: new Date(Number(now())).toISOString(),
+          // BE-67: de gangen, de derde prijs en de herhaling van een dagmenu. De
+          // stand van Op = op blijft staan: wijzigen verandert die niet.
+          ...uitbreidingVelden(aanbod),
         })
         .eq('id', id)
         .select(AANBOD_KOLOMMEN)
         .single(),
     );
-    if (geschreven.error) return opslaanMislukt(geschreven.error);
+    if (geschreven.error) {
+      if (aanbod.soort === 'dagmenu' && missingStorage(geschreven.error)) return DAGMENU_UNAVAILABLE;
+      return opslaanMislukt(geschreven.error);
+    }
 
     const rij = rijUit(geschreven);
     if (!rij) return failed();
@@ -555,6 +622,89 @@ function createDaghapHandlers({
    * DELETE /api/v1/daghap/<id> — offline halen. Nog een keer offline halen is
    * geen fout: er valt dan alleen niets te wijzigen.
    */
+  /**
+   * PATCH /api/v1/daghap/<id>/uitverkocht — Op = op (BE-67, uitkomst 3).
+   *
+   * Body: `{ uitverkocht: true | false }`. `true` zet `uitverkocht_op` op de
+   * Amsterdamse datum van vandaag, `false` maakt hem leeg ("Toch weer
+   * beschikbaar"). Dezelfde autorisatie als wijzigen: de sessie (401), het
+   * houderschap van het restaurant van dít aanbod (403) en het plaatsrecht
+   * (403). Een onbekend aanbod is een 404.
+   *
+   * De stand vervalt vanzelf: elke lezer vergelijkt die datum met vandaag in
+   * Europe/Amsterdam (isUitverkochtVandaag in daghapAanbod.js). Er hoeft dus om
+   * middernacht niets opgeruimd te worden en een herhaling is de volgende dag
+   * gewoon weer beschikbaar.
+   *
+   * Zonder 0026 bestaat de kolom niet: dan antwoordt de route 503 met één nette
+   * melding, net als de andere routes, en nooit een 500.
+   */
+  async function uitverkochtAanbod(request, context = {}) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+    const id = normaliseerId(context && context.id);
+    if (!id) return NOT_FOUND;
+    const body = await readBody(request);
+    if (!body) return invalid('invalid_body');
+
+    const stand = body.uitverkocht;
+    if (typeof stand !== 'boolean') {
+      return invalid('invalid_uitverkocht', {
+        message: 'Zeg met true of false of dit aanbod uitverkocht is.',
+      });
+    }
+
+    const auth = await aanvrager(request);
+    if (auth.response) return auth.response;
+
+    const gevonden = await ask(
+      supabase.from(DAGHAP_TABLE_AANBOD).select(AANBOD_KOLOMMEN).eq('id', id).maybeSingle(),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+    const huidig = gevonden.data;
+    if (!huidig) return NOT_FOUND;
+
+    const eigenaar = await controleerEigenaar(supabase, auth.userId, huidig.restaurant_id);
+    if (eigenaar.response) return eigenaar.response;
+
+    const recht = await controleerPlaatsrecht(supabase, auth.userId, huidig.restaurant_id);
+    if (recht.response) return recht.response;
+
+    if (huidig.status === DAGHAP_STATUS_VERLOPEN || isVerlopen(huidig.verloopt_op, now())) {
+      return geweigerd(DAGHAP_FOUTEN.verlopen);
+    }
+
+    const datum = stand ? vandaagInAmsterdam(now()) : null;
+    if (stand && !datum) return failed();
+
+    const bijgewerkt = await ask(
+      supabase
+        .from(DAGHAP_TABLE_AANBOD)
+        .update({ uitverkocht_op: datum })
+        .eq('id', id)
+        .select(AANBOD_KOLOMMEN_UITGEBREID)
+        .single(),
+    );
+    if (bijgewerkt.error) return opslaanMislukt(bijgewerkt.error);
+    const rij = rijUit(bijgewerkt);
+    if (!rij) return failed();
+
+    // Dezelfde geschiedenisschrijf als bij wijzigen; 0026 kent de twee acties
+    // 'uitverkocht' en 'beschikbaar' al.
+    const geschiedenis = await schrijfGeschiedenis(supabase, {
+      rij,
+      restaurantId: rij.restaurant_id || huidig.restaurant_id,
+      actie: stand ? 'uitverkocht' : 'beschikbaar',
+      door: auth.userId,
+      gegevens: { uitverkocht_op: datum },
+    });
+    if (geschiedenis.response) return geschiedenis.response;
+
+    return bewaard(rij, {
+      bericht: stand ? DAGHAP_MESSAGES.uitverkocht : DAGHAP_MESSAGES.weerBeschikbaar,
+    });
+  }
+
   async function offlineAanbod(request, context = {}) {
     const supabase = client();
     if (!supabase) return UNAVAILABLE;
@@ -604,6 +754,77 @@ function createDaghapHandlers({
   }
 
   /**
+   * BE-67, uitkomst 2: staat dit aanbod vandaag online in Europe/Amsterdam?
+   * Eén regel voor beide publieke routes en voor het zoeken, zodat "alleen
+   * vandaag" en "elke week op" overal hetzelfde werken. Een rij zonder de
+   * kolommen van 0026 telt als "alleen vandaag" (dat is wat 0023 al deed).
+   */
+  function onlineVandaag(rij) {
+    return staatOnlineVandaag({
+      verlooptOp: rij && rij.verloopt_op,
+      herhaalWeekdagen: rij && rij.herhaal_weekdagen,
+      herhaalTot: rij && rij.herhaal_tot,
+      uitverkochtOp: rij && rij.uitverkocht_op,
+      nu: now(),
+    }).online;
+  }
+
+  /**
+   * BE-67, uitkomst 4: het aantal keer bekeken, bewaard en gedeeld van elk
+   * aanbod vandaag (Europe/Amsterdam). De bestaande gebeurtenissentabel van 0023
+   * telt ze; er is geen nieuwe tabel en geen nieuwe teller. Ontbreekt de tabel of
+   * kent de database de acties van 0026 nog niet, dan is er geen cijfer en blijft
+   * het overzicht gewoon werken.
+   */
+  async function telCijfers(supabase, ids) {
+    if (ids.length === 0) return { perAanbod: new Map() };
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_GEBEURTENISSEN)
+        .select('aanbod_id, actie')
+        .in('aanbod_id', ids)
+        .in('actie', DAGHAP_CIJFERS)
+        .gte('moment', begindagVan(now())),
+    );
+    if (gevonden.error) return { perAanbod: new Map() };
+    const perAanbod = new Map();
+    for (const rij of Array.isArray(gevonden.data) ? gevonden.data : []) {
+      const sleutel = String(rij.aanbod_id);
+      const telling = perAanbod.get(sleutel) || { bekeken: 0, bewaard: 0, gedeeld: 0 };
+      if (DAGHAP_CIJFERS.includes(rij.actie)) telling[rij.actie] += 1;
+      perAanbod.set(sleutel, telling);
+    }
+    return { perAanbod };
+  }
+
+  /**
+   * BE-67, uitkomst 4: één `bekeken`-regel per getoond aanbod. Bewust
+   * fire-and-forget: een ontbrekende tabel of een fout mag de publieke pagina
+   * nooit breken, en er gaat niets over de bezoeker mee — alleen het aanbod en
+   * het moment.
+   */
+  async function telBekeken(supabase, rijen) {
+    const geldig = (Array.isArray(rijen) ? rijen : [])
+      .map((rij) => ({ id: rij && rij.id, restaurant_id: rij && rij.restaurant_id }))
+      .filter((rij) => rij.id !== undefined && rij.id !== null && rij.restaurant_id);
+    if (geldig.length === 0) return;
+    const moment = new Date(Number(now())).toISOString();
+    await ask(
+      supabase.from(DAGHAP_TABLE_GEBEURTENISSEN).insert(
+        geldig.map((rij) => ({
+          aanbod_id: rij.id,
+          restaurant_id: rij.restaurant_id,
+          actie: 'bekeken',
+          door: null,
+          apparaat: null,
+          gegevens: {},
+          moment,
+        })),
+      ),
+    );
+  }
+
+  /**
    * GET /api/v1/daghap?restaurant_id=<id> — wat er nu van dit restaurant
    * online staat. Verlopen aanbod komt hier nooit meer in voor, ook niet als de
    * opruimfunctie nog niet gelopen heeft.
@@ -621,24 +842,46 @@ function createDaghapHandlers({
     const eigenaar = await controleerEigenaar(supabase, auth.userId, restaurantId);
     if (eigenaar.response) return eigenaar.response;
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(AANBOD_KOLOMMEN)
+        .select(kolommen)
         .eq('restaurant_id', restaurantId)
         .in('status', [DAGHAP_STATUS_ONLINE, DAGHAP_STATUS_CONTROLE, DAGHAP_STATUS_OFFLINE])
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true }),
+      AANBOD_KOLOMMEN,
+      AANBOD_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
     const rijen = Array.isArray(gevonden.data) ? gevonden.data : [];
+    // BE-67, uitkomst 4: de drie cijfers van vandaag per aanbod, in dezelfde
+    // vorm als het overzicht ze toont ("< 5" onder de vijf).
+    const cijfers = await telCijfers(supabase, rijen.map((rij) => rij.id));
+    const perAanbodCijfers = (id) => {
+      const telling = cijfers.perAanbod.get(String(id)) || { bekeken: 0, bewaard: 0, gedeeld: 0 };
+      return {
+        bekeken: telling.bekeken,
+        bewaard: telling.bewaard,
+        gedeeld: telling.gedeeld,
+        bekekenTekst: cijferTekst(telling.bekeken),
+        bewaardTekst: cijferTekst(telling.bewaard),
+        gedeeldTekst: cijferTekst(telling.gedeeld),
+      };
+    };
     return {
       status: 200,
       body: {
         ok: true,
-        aanbod: rijen.map((rij) => aanbodVoorScherm(rij)).filter(Boolean),
+        aanbod: rijen
+          .map((rij) => {
+            const scherm = aanbodVoorScherm(rij);
+            return scherm ? { ...scherm, cijfers: perAanbodCijfers(rij.id) } : null;
+          })
+          .filter(Boolean),
         daghap: rijen.filter((rij) => rij.soort === 'daghap').length,
+        dagmenu: rijen.filter((rij) => rij.soort === 'dagmenu').length,
         seizoensgerechten: rijen.filter((rij) => rij.soort === 'seizoensgerecht').length,
       },
     };
@@ -676,14 +919,16 @@ function createDaghapHandlers({
     const restaurantId = restaurantIdUit(request, null);
     if (!restaurantId) return invalid('restaurant_required', { message: 'Kies eerst een restaurant.' });
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(PUBLIEK_KOLOMMEN)
+        .select(kolommen)
         .eq('restaurant_id', restaurantId)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true }),
+      PUBLIEK_KOLOMMEN,
+      PUBLIEK_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -692,8 +937,14 @@ function createDaghapHandlers({
     // databank en de klok van de server even uit elkaar lopen.
     const aanbod = rijen
       .filter((rij) => !isVerlopen(rij.verloopt_op, now()))
-      .map((rij) => publiekAanbodVoorScherm(rij))
+      // BE-67, uitkomst 2: een herhaling geldt alleen op de gekozen weekdagen,
+      // tot en met de einddatum, in Europe/Amsterdam.
+      .filter(onlineVandaag)
+      .map((rij) => publiekAanbodVoorScherm(rij, now()))
       .filter(Boolean);
+    // BE-67, uitkomst 4: telt wat de gast ziet. Best effort; een fout hier
+    // verandert het antwoord nooit.
+    await telBekeken(supabase, rijen.map((rij) => ({ id: rij.id, restaurant_id: restaurantId })));
 
     return { status: 200, body: { ok: true, aanbod } };
   }
@@ -717,14 +968,16 @@ function createDaghapHandlers({
       gevraagd = DAGHAP_HOME_LIMIT;
     }
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(HOME_KOLOMMEN)
+        .select(kolommen)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true })
         .limit(DAGHAP_HOME_KANDIDATEN),
+      HOME_KOLOMMEN,
+      HOME_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -738,13 +991,17 @@ function createDaghapHandlers({
       .map(({ rij }) => rij);
 
     const aanbod = geschud
+      .filter(onlineVandaag)
       .slice(0, gevraagd)
       .map((rij) => {
-        const scherm = publiekAanbodVoorScherm(rij);
+        const scherm = publiekAanbodVoorScherm(rij, now());
         if (!scherm) return null;
         return { ...scherm, restaurantId: rij.restaurant_id || null };
       })
       .filter(Boolean);
+
+    // BE-67, uitkomst 4: telt de aanbiedingen die deze gast echt ziet.
+    await telBekeken(supabase, aanbod.map((rij) => ({ id: rij.id, restaurant_id: rij.restaurantId })));
 
     return { status: 200, body: { ok: true, aanbod } };
   }
@@ -882,14 +1139,19 @@ function createDaghapHandlers({
     const supabase = client();
     if (!supabase) return UNAVAILABLE;
 
-    const gevonden = await ask(
-      supabase
+    // BE-67, uitkomst 5: een gast zoekt op de naam van een gang. Daarom leest
+    // deze lijst ook de gangen (0026) en de herhaling, met de kolommen van 0023
+    // als terugval zonder 0026.
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select('restaurant_id, soort, naam')
+        .select(kolommen)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true })
         .limit(DAGHAP_ZOEK_KANDIDATEN),
+      'restaurant_id, soort, naam',
+      'restaurant_id, soort, naam, gangen, herhaal_weekdagen, herhaal_tot, uitverkocht_op',
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -897,10 +1159,21 @@ function createDaghapHandlers({
     for (const rij of Array.isArray(gevonden.data) ? gevonden.data : []) {
       const restaurantId = rij && rij.restaurant_id;
       if (!restaurantId) continue;
+      // Een herhaling die vandaag niet geldt, hoort niet in het zoeken.
+      if (!onlineVandaag(rij)) continue;
       if (!perRestaurant[restaurantId]) perRestaurant[restaurantId] = [];
       perRestaurant[restaurantId].push({
-        soort: rij.soort === 'seizoensgerecht' ? 'seizoensgerecht' : 'daghap',
+        soort: DAGHAP_SOORTEN.includes(rij.soort) ? rij.soort : 'daghap',
         naam: tekst(rij.naam).slice(0, 80),
+        // De gangnamen, zodat een zoekopdracht op "pompoensoep" het restaurant
+        // vindt; nooit meer dan de namen zelf.
+        ...(Array.isArray(rij.gangen)
+          ? {
+            gangen: normaliseerGangen(rij.gangen)
+              .map((gang) => gang.naam)
+              .slice(0, DAGHAP_MAX_GANGEN),
+          }
+          : {}),
       });
     }
 
@@ -915,6 +1188,7 @@ function createDaghapHandlers({
     publiekAanbod,
     publiekVandaag,
     ruimVerlopenOp,
+    uitverkochtAanbod,
     wijzigAanbod,
     zoekAanbod,
   };

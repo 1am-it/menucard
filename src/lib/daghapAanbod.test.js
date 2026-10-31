@@ -176,8 +176,8 @@ test('BE-55: maximaal drie emoji', () => {
   assert.ok(vier.fouten.includes(DAGHAP_FOUTEN.emoji));
 });
 
-test('BE-55: alleen daghap of seizoensgerecht, en platte tekst blijft platte tekst', () => {
-  const onbekend = normaliseerAanbod({ ...basis, soort: 'dagmenu' });
+test('BE-55: alleen een bekende soort, en platte tekst blijft platte tekst', () => {
+  const onbekend = normaliseerAanbod({ ...basis, soort: 'dagschotel' });
   assert.equal(onbekend.ok, false);
   assert.ok(onbekend.fouten.includes(DAGHAP_FOUTEN.soort));
 
@@ -390,6 +390,47 @@ test('BE-55: de duurste kaartprijs komt uit de echte menukaarten', () => {
   }), 0);
   assert.equal(duursteKaartPrijsCent(), 0);
 });
+// BE-67 (ronde 3): de aanbodsleutel waarmee de bestaande bewaar- en deelknop
+// via /api/v1/tellers in daghap_gebeurtenissen telt.
+const { aanbodSleutel, parseAanbodSleutel } = require('./daghapAanbod');
+
+test('BE-67: de aanbodsleutel is eenduidig en leest terug als restaurant en aanbod', () => {
+  assert.equal(aanbodSleutel({ restaurantId: '6', aanbodId: 42 }), 'daghap-6-42');
+  assert.deepEqual(parseAanbodSleutel('daghap-6-42'), {
+    sleutel: 'daghap-6-42',
+    restaurantId: '6',
+    aanbodId: 42,
+  });
+  // Een restaurant-id met een streepje erin blijft heel.
+  const metStreepje = aanbodSleutel({ restaurantId: 'de-baron', aanbodId: '7' });
+  assert.equal(metStreepje, 'daghap-de-baron-7');
+  assert.deepEqual(parseAanbodSleutel(metStreepje), {
+    sleutel: 'daghap-de-baron-7',
+    restaurantId: 'de-baron',
+    aanbodId: 7,
+  });
+});
+
+test('BE-67: een gerecht-id en een kapotte sleutel zijn geen aanbod', () => {
+  for (const value of [
+    undefined,
+    null,
+    '',
+    '6-diner-0-0',
+    'daghap-6',
+    'daghap-6-',
+    'daghap-6-abc',
+    'daghap--12',
+    'daghap-6-42-',
+    'x'.repeat(120),
+  ]) {
+    assert.equal(parseAanbodSleutel(value), null, `${String(value)} is geen aanbodsleutel`);
+  }
+  assert.equal(aanbodSleutel({ restaurantId: '', aanbodId: 1 }), null);
+  assert.equal(aanbodSleutel({ restaurantId: '6', aanbodId: 'abc' }), null);
+  assert.equal(aanbodSleutel(), null);
+});
+
 
 
 

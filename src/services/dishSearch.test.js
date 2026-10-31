@@ -525,3 +525,31 @@ test('BE-60: het label staat ook op de voorbeeldgerechten van een restaurantgroe
   assert.equal(Object.hasOwn(eerder, 'tijdelijkNietBeschikbaar'), false);
 });
 
+
+// BE-67, uitkomst 5 — zoeken op de naam van een gang van een dagmenu.
+test("BE-67: een zoekopdracht op een gangnaam vindt het restaurant met dat dagmenu", () => {
+  // q=brood geeft vier restaurants; alleen het eerste heeft een dagmenu met een
+  // gang die "pompoensoep" heet. Zonder die gangnaam is er geen treffer.
+  const zonderFilter = searchDishes({ q: "brood", group: "restaurant" });
+  const doel = groepIds(zonderFilter)[0];
+  const dagmenu = [{
+    soort: "dagmenu",
+    naam: "Herfstmenu",
+    gangen: ["Pompoensoep met brood", "Hertenstoof", "Kastanjetaart"],
+  }];
+
+  const metGang = searchDishes({
+    q: "pompoensoep",
+    group: "restaurant",
+    vandaag: true,
+    aanbod: { [doel]: dagmenu },
+  });
+  assert.deepEqual(groepIds(metGang), [doel], "de gangnaam is een treffer voor dit restaurant");
+
+  const zonderGang = searchDishes({
+    q: "pompoensoep",
+    vandaag: true,
+    aanbod: { [doel]: [{ soort: "daghap", naam: "Herfstmenu" }] },
+  });
+  assert.equal(zonderGang.total, 0, "zonder de gangnaam is er geen treffer");
+});

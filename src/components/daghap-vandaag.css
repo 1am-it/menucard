@@ -146,3 +146,74 @@
     gap: 4px;
   }
 }
+
+/* BE-67, uitkomst 3 en 5 — Op = op en het dagmenu in het blok "Vandaag".
+   Een uitverkocht aanbod blijft in de lijst staan, grijs en doorgestreept, met
+   de badge "Op = op · uitverkocht". De gangen staan als regels Voor/Hoofd/Na,
+   met het hoofdgerecht vet; de prijzen zijn twee chips. Kleuren via tokens. */
+.daghap-vandaag-card--uitverkocht {
+  opacity: 0.65;
+}
+
+.daghap-vandaag-name--uitverkocht {
+  text-decoration: line-through;
+}
+
+.daghap-vandaag-badge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+  border: 1px solid var(--status-blocked-border);
+  white-space: nowrap;
+}
+
+.daghap-vandaag-gangen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.daghap-vandaag-gang {
+  display: flex;
+  gap: 8px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.daghap-vandaag-gang-label {
+  min-width: 3.5rem;
+  color: var(--text-secondary);
+}
+
+.daghap-vandaag-gang--hoofd .daghap-vandaag-gang-naam {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.daghap-vandaag-prijzen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.daghap-vandaag-chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--price-bg);
+  color: var(--price-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.daghap-vandaag-herhaal {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
