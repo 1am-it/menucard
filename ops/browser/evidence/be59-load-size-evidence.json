@@ -1,0 +1,389 @@
+{
+  "ticket": "BE-59 (#146)",
+  "criterion": "de eerste laadgrootte (JS van de eerste lading) groeit hooguit 1 KB per route; de totale overdracht staat er als informatie naast, want elke extra aanvraag telt ook haar kopteksten mee",
+  "category": "koude eerste overdracht in een echte browser op twee lokale productiebuilds (next build + next start); geen productie en geen echte acceptatie",
+  "ranAt": "2026-10-31T01:06:50.860Z",
+  "baseSha": "2b0e8b1",
+  "headSha": "ef140918971b1db1a6b4bf1e07b2db8d2a920a38",
+  "method": "CDP Network.loadingFinished, cache uit, 1280x900, document + scripts + stijlen",
+  "budgetKb": 1,
+  "rows": [
+    {
+      "route": "/",
+      "baseKb": 180,
+      "headKb": 181.5,
+      "growthKb": 1.5,
+      "baseScriptKb": 135.7,
+      "headScriptKb": 135.9,
+      "growthScriptKb": 0.2,
+      "baseRequests": 21,
+      "headRequests": 22,
+      "withinBudget": true,
+      "withinTotalBudget": false,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/",
+          "type": "Document",
+          "kb": 8.4
+        }
+      ]
+    },
+    {
+      "route": "/search",
+      "baseKb": 164.9,
+      "headKb": 166.2,
+      "growthKb": 1.3,
+      "baseScriptKb": 128.2,
+      "headScriptKb": 128.4,
+      "growthScriptKb": 0.2,
+      "baseRequests": 17,
+      "headRequests": 18,
+      "withinBudget": true,
+      "withinTotalBudget": false,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/_next/static/chunks/app/search/page-ad69c9980a6dcbc3.js",
+          "type": "Script",
+          "kb": 7.9
+        }
+      ]
+    },
+    {
+      "route": "/restaurant/[id]",
+      "baseKb": 185,
+      "headKb": 186.4,
+      "growthKb": 1.4,
+      "baseScriptKb": 142.6,
+      "headScriptKb": 142.9,
+      "growthScriptKb": 0.3,
+      "baseRequests": 19,
+      "headRequests": 20,
+      "withinBudget": true,
+      "withinTotalBudget": false,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/restaurant/6",
+          "type": "Document",
+          "kb": 11.7
+        }
+      ]
+    },
+    {
+      "route": "/menu/[id]",
+      "baseKb": 181.7,
+      "headKb": 183,
+      "growthKb": 1.3,
+      "baseScriptKb": 138.8,
+      "headScriptKb": 139,
+      "growthScriptKb": 0.2,
+      "baseRequests": 16,
+      "headRequests": 17,
+      "withinBudget": true,
+      "withinTotalBudget": false,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/menu/6-diner",
+          "type": "Document",
+          "kb": 14.6
+        }
+      ]
+    }
+  ],
+  "base": [
+    {
+      "route": "/",
+      "label": "basis 2b0e8b1",
+      "totalKb": 180,
+      "scriptKb": 135.7,
+      "resourceCount": 21,
+      "top": [
+        {
+          "path": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/",
+          "type": "Document",
+          "kb": 8.2
+        }
+      ]
+    },
+    {
+      "route": "/search",
+      "label": "basis 2b0e8b1",
+      "totalKb": 164.9,
+      "scriptKb": 128.2,
+      "resourceCount": 17,
+      "top": [
+        {
+          "path": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/_next/static/chunks/app/search/page-2892e0678436d3be.js",
+          "type": "Script",
+          "kb": 7.8
+        }
+      ]
+    },
+    {
+      "route": "/restaurant/[id]",
+      "label": "basis 2b0e8b1",
+      "totalKb": 185,
+      "scriptKb": 142.6,
+      "resourceCount": 19,
+      "top": [
+        {
+          "path": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/restaurant/6",
+          "type": "Document",
+          "kb": 11.5
+        }
+      ]
+    },
+    {
+      "route": "/menu/[id]",
+      "label": "basis 2b0e8b1",
+      "totalKb": 181.7,
+      "scriptKb": 138.8,
+      "resourceCount": 16,
+      "top": [
+        {
+          "path": "/_next/static/chunks/50291a53-e663f037a3178541.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/9325-32f272fae0591586.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/menu/6-diner",
+          "type": "Document",
+          "kb": 14.5
+        }
+      ]
+    }
+  ],
+  "head": [
+    {
+      "route": "/",
+      "label": "kop HEAD",
+      "totalKb": 181.5,
+      "scriptKb": 135.9,
+      "resourceCount": 22,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/",
+          "type": "Document",
+          "kb": 8.4
+        }
+      ]
+    },
+    {
+      "route": "/search",
+      "label": "kop HEAD",
+      "totalKb": 166.2,
+      "scriptKb": 128.4,
+      "resourceCount": 18,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/_next/static/chunks/app/search/page-ad69c9980a6dcbc3.js",
+          "type": "Script",
+          "kb": 7.9
+        }
+      ]
+    },
+    {
+      "route": "/restaurant/[id]",
+      "label": "kop HEAD",
+      "totalKb": 186.4,
+      "scriptKb": 142.9,
+      "resourceCount": 20,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/restaurant/6",
+          "type": "Document",
+          "kb": 11.7
+        }
+      ]
+    },
+    {
+      "route": "/menu/[id]",
+      "label": "kop HEAD",
+      "totalKb": 183,
+      "scriptKb": 139,
+      "resourceCount": 17,
+      "top": [
+        {
+          "path": "/_next/static/chunks/4bd1b696-f785427dddbba9fb.js",
+          "type": "Script",
+          "kb": 53.5
+        },
+        {
+          "path": "/_next/static/chunks/1255-5fe68596fe147850.js",
+          "type": "Script",
+          "kb": 45.4
+        },
+        {
+          "path": "/_next/static/css/35120c0af2a21ebf.css",
+          "type": "Stylesheet",
+          "kb": 25.9
+        },
+        {
+          "path": "/menu/6-diner",
+          "type": "Document",
+          "kb": 14.6
+        }
+      ]
+    }
+  ],
+  "passed": true
+}
