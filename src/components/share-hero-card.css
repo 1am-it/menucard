@@ -1,0 +1,185 @@
+/* BE-65 (#157) — opmaak van de deelkaart in de hero. Eigen bestand naast de
+   component (BE-52), alleen bestaande tokens, licht en donker. */
+
+.share-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 26px;
+  border-radius: 22px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--card-border-color);
+}
+
+.share-hero-title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.share-hero-sub {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.share-hero-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+}
+
+.share-hero-tab {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--chip-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.share-hero-tab:hover { background: var(--bg-hover); }
+
+.share-hero-tab:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.share-hero-tab.is-active {
+  background: var(--card-surface);
+  color: var(--text-primary);
+  font-weight: 800;
+  box-shadow: var(--card-shadow);
+}
+
+/* Het statische chatvoorbeeld: rechts uitgelijnd, net als in een chat. */
+.share-hero-example {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.share-hero-bubble {
+  margin: 0;
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.share-hero-linkcard {
+  width: min(100%, 260px);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--card-surface);
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+}
+
+.share-hero-strip {
+  display: block;
+  height: 8px;
+  background: var(--accent-fill);
+}
+
+.share-hero-linkcard-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+}
+
+.share-hero-cardtitle {
+  display: block;
+  padding: 12px 14px 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.share-hero-dish {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.share-hero-meta {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.share-hero-domain {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 0 14px 12px;
+}
+
+.share-hero-linkcard-body .share-hero-domain { padding: 0; }
+
+.share-hero-rows {
+  list-style: none;
+  margin: 0;
+  padding: 4px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.share-hero-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+.share-hero-row-name { min-width: 0; }
+.share-hero-row-price { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* De twee stemhoekjes: een zachte balk met het aantal stemmen. */
+.share-hero-bar {
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.share-hero-bar--more { width: 82%; }
+.share-hero-bar--less { width: 42%; }
+
+.share-hero-note {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 720px) {
+  .share-hero { padding: 18px; gap: 10px; }
+  .share-hero-title { font-size: 22px; }
+  .share-hero-linkcard { width: 100%; }
+}
