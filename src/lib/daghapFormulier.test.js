@@ -65,7 +65,7 @@ test('een losse weigering (limiet, 403, 503) wordt één algemene melding', () =
   assert.equal(foutmeldingen(null).algemeen, '');
   assert.deepEqual(foutmeldingen(undefined).velden, {
     soort: [], naam: [], prijs: [], beschrijving: [], labels: [], einddatum: [],
-    gangen: [], prijs3: [], weekdagen: [], herhaalTot: [], opIsOp: [],
+    gangen: [], prijs3: [], weekdagen: [], herhaalTot: [],
   });
 });
 
@@ -105,7 +105,6 @@ test('het formulier vult zich uit een bestaand aanbod en stuurt dezelfde velden 
     wanneer: 'vandaag',
     weekdagen: [],
     herhaalTot: '',
-    opIsOp: true,
   });
 
   const verzoek = aanbodVerzoek(waarden);
@@ -130,7 +129,7 @@ test('een daghap stuurt geen einddatum mee', () => {
   assert.deepEqual(leegFormulier(), {
     soort: 'daghap', naam: '', prijs: '', beschrijving: '', labels: [], einddatum: '',
     gangen: { voor: '', hoofd: '', na: '' }, prijs3: '', wanneer: 'vandaag',
-    weekdagen: [], herhaalTot: '', opIsOp: true,
+    weekdagen: [], herhaalTot: '',
   });
 });
 
@@ -212,7 +211,6 @@ test('BE-67: het formulier vult zich uit een bestaand dagmenu, heen en terug', (
   assert.equal(waarden.wanneer, 'elke_week');
   assert.deepEqual(waarden.weekdagen, [1, 5]);
   assert.equal(waarden.herhaalTot, '2026-12-31');
-  assert.equal(waarden.opIsOp, true);
 
   // Terug vertaald levert dat hetzelfde verzoek op.
   const verzoek = aanbodVerzoek(waarden);

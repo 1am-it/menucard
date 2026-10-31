@@ -644,16 +644,11 @@ export default function AanbodView({ restaurantIndex }) {
                   )}
                 </fieldset>
 
-                <div className="aanbod-chips">
-                  <label className="aanbod-chip">
-                    <input
-                      type="checkbox"
-                      checked={waarden.opIsOp}
-                      onChange={(event) => zetVeld('opIsOp', event.target.checked)}
-                    />
-                    <span>{FORM_MESSAGES.opIsOp}</span>
-                  </label>
-                </div>
+                {/* BE-67 (review ronde 2): het vinkje "Op = op" is hier weg.
+                    Elk aanbod heeft in het overzicht hieronder de knop Op = op,
+                    en de stand is een datum per aanbod — geen instelling die je
+                    bij het plaatsen kiest. Een vinkje dat niets opslaat, belooft
+                    iets wat het niet doet. */}
 
                 {waarden.soort === 'seizoensgerecht' && (
                   <div className="aanbod-field">

@@ -100,10 +100,10 @@ const FORM_MESSAGES = Object.freeze({
   weekdagLegend: 'Op welke dagen?',
   herhaalTotLabel: 'Tot en met',
   herhaalTotWijzig: 'wijzig',
-  opIsOp: 'Op = op: ik kan dit zelf op "uitverkocht" zetten',
   // BE-67, uitkomst 3: de knop in het overzicht van de houder en de meldingen
-  // die erbij horen. Het vinkje hierboven blijft staan als uitleg bij het
-  // formulier; de stand zelf is een datum per aanbod, geen instelling.
+  // die erbij horen. Er is geen vinkje "Op = op" in het formulier meer: elk
+  // aanbod krijgt die knop, en de stand is een datum per aanbod (uitverkocht_op
+  // in 0026), geen instelling bij het plaatsen.
   opIsOpKnop: 'Op = op',
   opIsOpWeer: 'Toch weer beschikbaar',
   opIsOpDone: 'Dit aanbod staat vandaag op uitverkocht.',
@@ -188,7 +188,7 @@ const VELDEN_VOOR_FOUT = Object.freeze({
 const FORMULIER_VELDEN = Object.freeze([
   'soort', 'naam', 'prijs', 'beschrijving', 'labels', 'einddatum',
   // BE-67: het dagmenu, de herhaling en Op = op.
-  'gangen', 'prijs3', 'weekdagen', 'herhaalTot', 'opIsOp',
+  'gangen', 'prijs3', 'weekdagen', 'herhaalTot',
 ]);
 
 function tekst(value) {
@@ -250,7 +250,6 @@ function formulierVanAanbod(aanbod) {
     wanneer: weekdagen.length > 0 ? 'elke_week' : 'vandaag',
     weekdagen,
     herhaalTot: tekst(rij.herhaalTot).slice(0, 10),
-    opIsOp: true,
   };
 }
 
@@ -263,13 +262,14 @@ function leegFormulier({ soort = 'daghap' } = {}) {
     beschrijving: '',
     labels: [],
     einddatum: '',
-    // BE-67: de gangen van een dagmenu, de herhaling en Op = op (standaard aan).
+    // BE-67: de gangen van een dagmenu en de herhaling. Op = op is geen veld
+    // van het formulier: elk aanbod heeft die knop in het overzicht, en de stand
+    // is een datum per aanbod (zie uitverkocht_op in 0026).
     gangen: { voor: '', hoofd: '', na: '' },
     prijs3: '',
     wanneer: 'vandaag',
     weekdagen: [],
     herhaalTot: '',
-    opIsOp: true,
   };
 }
 
