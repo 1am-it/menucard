@@ -11,7 +11,6 @@
   border-radius: 18px;
   background: var(--bg-elevated);
 }
-.zoek-gerecht--dish { margin-top: 12px; }
 .zoek-gerecht-title {
   margin: 0;
   font-size: 18px;
@@ -39,7 +38,6 @@
   font-size: 15px;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.15s;
 }
 .zoek-gerecht-btn:hover { background: var(--accent-fill-hover); }
 .zoek-gerecht-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }

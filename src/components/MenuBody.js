@@ -6,13 +6,10 @@
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
 import Emoji from '@/src/components/Emoji'
-// BE-62 (#153) — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?".
+// BE-62 — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?". De woorden
+// staan hier bewust als tekst en niet in een extra module: dit vlak hoort niet
+// in de eerste lading te groeien (contract, acceptatie 3).
 import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
-import {
-  SHARED_RETURN_BODY,
-  SHARED_RETURN_CTA,
-  SHARED_RETURN_TITLE,
-} from '@/src/lib/returnVisit'
 import DishShareButton from '@/src/components/DishShareButton'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
@@ -162,9 +159,9 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
           kaart (DishShareButton) en houdt de bestaande bewaarlogica. */}
       {shareNote && (
         <ZoekGerechtBlock
-          title={SHARED_RETURN_TITLE}
-          body={SHARED_RETURN_BODY}
-          cta={SHARED_RETURN_CTA}
+          title="Zelf ook zin in iets?"
+          body="Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig."
+          cta="Zoek een gerecht"
           variant="dish"
         />
       )}

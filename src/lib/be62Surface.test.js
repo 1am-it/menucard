@@ -24,10 +24,16 @@ const BLOCK_CSS = read('src/components/zoek-gerecht-block.css');
 const TIP_CSS = read('src/components/beginscherm-tip.css');
 const GLOBALS = read('app/globals.css');
 
+const {
+  SHARED_RETURN_BODY,
+  SHARED_RETURN_CTA,
+  SHARED_RETURN_TITLE,
+} = require('./returnVisit');
+
 const stripComments = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
 test('BE-62: /kies toont de vraag alleen na een eigen stem', () => {
-  assert.match(KIES, /import ZoekGerechtBlock from '@\/src\/components\/ZoekGerechtBlock'/);
+  assert.match(KIES, /const ZoekGerechtBlock = dynamic\(\(\) => import\('@\/src\/components\/ZoekGerechtBlock'\), \{ ssr: false \}\)/);
   assert.match(KIES, /const hasOwnVotes = !!\(progress && Array\.isArray\(progress\.gestemd\) && progress\.gestemd\.length > 0\)/);
   assert.match(KIES, /\{hasOwnVotes \? \(/);
   assert.match(KIES, /title=\{kiesReturnTitle\(ownLekkerName\)\}/);
@@ -61,17 +67,26 @@ test('BE-62: een gedeeld lijstje krijgt hetzelfde vlak, naast de bestaande bewaa
   const sharedBranch = LIJST.slice(LIJST.indexOf('{shared ? ('), LIJST.indexOf(') : own.length === 0 ? ('));
   assert.ok(sharedBranch.includes('<ZoekGerechtBlock'), 'het vlak staat in de tak van het gedeelde lijstje');
   assert.ok(sharedBranch.includes('ADD_TO_OWN_LIST_LABEL'), 'de bestaande bewaarknop staat ernaast');
+  // De woorden in het vlak zijn dezelfde als die van het gedeelde gerecht.
+  for (const source of [MENU_BODY, LIJST]) {
+    assert.ok(source.includes(`title="${SHARED_RETURN_TITLE}"`));
+    assert.ok(source.includes(`body="${SHARED_RETURN_BODY}"`));
+    assert.ok(source.includes(`cta="${SHARED_RETURN_CTA}"`));
+    assert.doesNotMatch(source, /from '@\/src\/lib\/returnVisit'/);
+  }
 });
 
 test('BE-62: de tip laadt pas na de check en staat op elke publieke pagina', () => {
   assert.match(LAYOUT, /import BeginschermTipGate from '@\/src\/components\/BeginschermTipGate'/);
   assert.match(LAYOUT, /<body>\{children\}<BeginschermTipGate \/><\/body>/);
-  // Pas na de voorwaarden: de kaart zelf komt via next/dynamic, zonder SSR.
+  // Pas na de voorwaarden: de regels en de kaart zelf komen via dynamic import.
   assert.match(GATE, /import dynamic from 'next\/dynamic'/);
   assert.match(GATE, /const BeginschermTip = dynamic\(\(\) => import\('\.\/BeginschermTip'\), \{ ssr: false \}\)/);
-  assert.match(GATE, /if \(!isPublicPath\(pathname\)\)/);
-  assert.match(GATE, /decideTip\(\{/);
-  assert.match(GATE, /dismissTip\(browserStorage\('localStorage'\)\)/);
+  assert.match(GATE, /import\('@\/src\/lib\/homeScreenTip'\)/);
+  assert.doesNotMatch(GATE, /^import .*homeScreenTip/m, 'de regels horen niet in de eerste lading');
+  assert.match(GATE, /if \(cancelled \|\| !tip\.isPublicPath\(pathname\)\) return/);
+  assert.match(GATE, /tip\.decideTip\(\{/);
+  assert.match(GATE, /tip\.dismissTip\(tip\.browserStorage\('localStorage'\)\)/);
   // Geen pop-up, geen modal en geen focus stelen.
   for (const source of [stripComments(GATE), stripComments(TIP)]) {
     assert.equal(source.includes('role="dialog"'), false);

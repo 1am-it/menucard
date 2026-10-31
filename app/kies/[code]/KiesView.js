@@ -26,6 +26,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import { safeBrowserStorage } from '@/src/lib/dishList'
@@ -58,8 +59,10 @@ import {
   undoVotedDishes,
   writeKiesProgress,
 } from '@/src/lib/kiesStemming'
-// BE-62 (#153) — na het stemmen een rustige regel naar de home, zonder account.
-import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
+// BE-62 — na het stemmen een rustige regel naar de home, zonder account. Het
+// vlak komt pas als deze bezoeker echt gestemd heeft, dus het hoeft niet in de
+// eerste lading van de pagina te zitten: vandaar `next/dynamic`.
+const ZoekGerechtBlock = dynamic(() => import('@/src/components/ZoekGerechtBlock'), { ssr: false })
 import {
   KIES_RETURN_BODY,
   KIES_RETURN_CTA,
