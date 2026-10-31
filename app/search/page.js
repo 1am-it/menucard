@@ -10,6 +10,9 @@ import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import StatusIcon from '@/src/components/StatusIcon'
+// BE-55 stap B, deel 5 (issue 135) — eigen opmaak voor het label en het filter
+// "Vandaag" in de zoekresultaten, naast deze pagina (BE-52).
+import './search.css'
 
 // BE-03 — dish-first search results.
 // BE-06 — filters + URL state added on top, see below.
@@ -107,11 +110,21 @@ function parseFilters(searchParams) {
     excl: (searchParams.get('excl') || '').split(',').filter(Boolean),
     day: searchParams.get('day') || '',
     nowOpen: searchParams.get('nowOpen') === '1',
+    // BE-55 stap B, deel 5 (issue 135); het filter "Vandaag": alleen restaurants met
+    // een actieve daghap of een actief seizoensgerecht.
+    vandaag: searchParams.get('vandaag') === '1',
   }
 }
 
 function hasActiveFilters(f) {
-  return !!(f.meal || f.maxPrice || f.cuisines.length || f.excl.length || f.day || f.nowOpen)
+  return !!(f.meal || f.maxPrice || f.cuisines.length || f.excl.length || f.day || f.nowOpen || f.vandaag)
+}
+
+// BE-55 — het label bij een treffer. Alleen een restaurant dat de zoekroute als
+// treffer teruggaf (group.vandaag) krijgt dit label; de soort komt uit het
+// aanbod zelf, nooit uit een aanname op de pagina.
+function vandaagLabel(soort) {
+  return soort === 'seizoensgerecht' ? 'Vandaag · seizoensgerecht' : 'Vandaag · daghap'
 }
 
 // Same minimum-length convention dishSearch.js and restaurantIndex.js both
@@ -131,6 +144,7 @@ function buildParams(f) {
   if (f.excl.length) p.set('excl', f.excl.join(','))
   if (f.day) p.set('day', f.day)
   if (f.nowOpen) p.set('nowOpen', '1')
+  if (f.vandaag) p.set('vandaag', '1')
   return p
 }
 
@@ -397,7 +411,7 @@ function SearchPageInner() {
     pushFilters({ ...filters, [key]: next })
   }
 
-  const resetFilters = () => pushFilters({ q: filters.q, meal: '', maxPrice: '', cuisines: [], excl: [], day: '', nowOpen: false })
+  const resetFilters = () => pushFilters({ q: filters.q, meal: '', maxPrice: '', cuisines: [], excl: [], day: '', nowOpen: false, vandaag: false })
 
   // BE-15 — "Meer resultaten laden" now loads more restaurant groups
   // (never more raw dishes — `results`, the leftover individual dishes, is
@@ -413,6 +427,7 @@ function SearchPageInner() {
     const tags = []
     if (filters.meal) tags.push({ key: 'meal', label: MEAL_OPTIONS.find((m) => m.value === filters.meal)?.label || filters.meal, onRemove: () => setFilter('meal', '') })
     if (filters.nowOpen) tags.push({ key: 'nowOpen', label: '🟢 Nu open', onRemove: () => setFilter('nowOpen', false) })
+    if (filters.vandaag) tags.push({ key: 'vandaag', label: 'Vandaag', onRemove: () => setFilter('vandaag', false) })
     if (filters.day) tags.push({ key: 'day', label: DAY_FULL[filters.day], onRemove: () => setFilter('day', '') })
     if (filters.maxPrice) tags.push({ key: 'price', label: `t/m €${filters.maxPrice}`, onRemove: () => setFilter('maxPrice', '') })
     filters.cuisines.forEach((c) => tags.push({ key: `cuisine-${c}`, label: c, onRemove: () => toggleInList('cuisines', c) }))
@@ -515,7 +530,16 @@ function SearchPageInner() {
       <div className="dish-group-list">
         {groups.map((group) => (
           <div key={group.restaurantId} className="menu-card dish-group-card">
-            <h3 className="dish-group-restaurant-name">{group.restaurantName}</h3>
+            {/* BE-55 stap B, deel 5 (issue 135); het label staat er alleen als de
+                zoekroute dit restaurant als treffer teruggaf (group.vandaag).
+                Geen aanbod betekent geen label, geen lege plek. Het label staat
+                naast de kop, niet erin: de kop blijft precies de naam. */}
+            <div className="dish-group-head">
+              <h3 className="dish-group-restaurant-name">{group.restaurantName}</h3>
+              {group.vandaag && (
+                <span className="vandaag-label">{vandaagLabel(group.vandaag.soort)}</span>
+              )}
+            </div>
             {group.menus.map((menu) => {
               const remaining = menu.count - menu.examples.length
               return (
@@ -689,6 +713,17 @@ function SearchPageInner() {
           >
             <StatusIcon name="clock" size={14} className="now-open-icon" />
             Nu open
+          </button>
+          {/* BE-55 stap B, deel 5 (issue 135); het filter "Vandaag". Zelfde vorm als
+              "Nu open": één knop, met dezelfde actieve stand en aria-pressed. */}
+          <button
+            type="button"
+            className={`now-open-btn vandaag-filter-btn ${filters.vandaag ? 'active' : ''}`}
+            onClick={() => setFilter('vandaag', !filters.vandaag)}
+            aria-pressed={filters.vandaag}
+          >
+            <StatusIcon name="clock" size={14} className="now-open-icon" />
+            Vandaag
           </button>
           <button
             type="button"

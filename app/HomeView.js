@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
+import DaghappenVandaag from '@/src/components/DaghappenVandaag'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import Wordmark from '@/src/components/Wordmark'
@@ -177,6 +178,12 @@ export default function HomeView({ candidates = [] }) {
           </div>
         </section>
 
+
+        {/* BE-55: "Daghappen vandaag" — maximaal drie, in willekeurige
+            volgorde, met een link "Alle" naar het filter "Vandaag". De sectie
+            haalt het aanbod zelf op na het laden (browserklok) en verschijnt
+            niet als er niets is. */}
+        <DaghappenVandaag />
 
         {/* BE-29 — seizoenstegels verschijnen pas als de browser de maand
             kent én de bestaande zoekopdracht echte resultaten heeft. */}

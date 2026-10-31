@@ -1,0 +1,271 @@
+'use strict';
+
+// BE-55 stap B (#135) — het houderformulier en het blok "Vandaag" als één
+// geteste beslissing.
+//
+// De API blijft de baas (src/lib/daghapHandlers.js): dit bestand rekent niets
+// goed of af, het vertaalt alleen. Wat hier staat:
+//   formulierVanAanbod   een bestaand aanbod → de waarden van het formulier;
+//   aanbodVerzoek        de waarden van het formulier → de body van POST/PATCH;
+//   veldenVoorFout       een foutcode van de API → het veld (of de velden) waar
+//                        de melding onder hoort, zodat er niets in één
+//                        verzamelblok verdwijnt;
+//   foutmeldingen        het antwoord van de API → per veld de Nederlandse zin;
+//   statusLabel          de stand van het aanbod in woorden, met `in_controle`
+//                        als "Wordt kort gecontroleerd";
+//   verloopTekst         "Online vandaag tot 21:00" of "Online tot en met
+//                        31 december", uit het echte verloopmoment;
+//   beschrijvingTeller   "42/140" onder het tekstveld.
+//
+// Geen React, geen netwerk, geen systeemklok: de tijdzone komt uit dezelfde
+// helper als de server. Bewust CommonJS, zodat `node --test` dit zonder
+// omzetting laadt en de client hetzelfde bestand gebruikt als de tests.
+
+const {
+  DAGHAP_BESCHRIJVING_MAX,
+  DAGHAP_FOUTEN,
+  DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_STATUS_CONTROLE,
+  DAGHAP_STATUS_OFFLINE,
+  DAGHAP_STATUS_ONLINE,
+  DAGHAP_STATUS_VERLOPEN,
+  DAGHAP_TIJDZONE,
+  berichtBij,
+  normaliseerLabels,
+} = require('./daghapAanbod');
+
+const SOORT_LABELS = Object.freeze({
+  daghap: 'Daghap',
+  seizoensgerecht: 'Seizoensgerecht',
+});
+
+const LABEL_LABELS = Object.freeze({
+  vegetarisch: 'Vegetarisch',
+  veganistisch: 'Veganistisch',
+  glutenvrij: 'Glutenvrij',
+});
+
+const STATUS_LABELS = Object.freeze({
+  [DAGHAP_STATUS_ONLINE]: 'Online',
+  [DAGHAP_STATUS_CONTROLE]: 'Wordt kort gecontroleerd',
+  [DAGHAP_STATUS_OFFLINE]: 'Offline',
+  [DAGHAP_STATUS_VERLOPEN]: 'Verlopen',
+});
+
+// De vaste teksten van het scherm. Eén plek, zodat het formulier en "wat staat
+// er online" nooit twee verschillende zinnen voor hetzelfde tonen.
+const FORM_MESSAGES = Object.freeze({
+  title: 'Daghap of seizoensgerecht',
+  intro:
+    'Zet vandaag één daghap online, of een seizoensgerecht tot een einddatum. Gasten zien het op je restaurantpagina, je menukaart en in de zoekresultaten.',
+  soortLegend: 'Wat wil je plaatsen?',
+  soortDaghapHint: 'Alleen vandaag, tot sluitingstijd.',
+  soortSeizoenHint: 'Tot een einddatum, maximaal 90 dagen vooruit.',
+  naamLabel: 'Naam',
+  naamHint: '3 tot 80 tekens.',
+  prijsLabel: 'Prijs',
+  prijsHint: 'Tussen € 0,50 en € 150.',
+  beschrijvingLabel: 'Beschrijving',
+  beschrijvingHint: `Maximaal ${DAGHAP_BESCHRIJVING_MAX} tekens. Geen links, e-mailadressen of telefoonnummers.`,
+  labelsLegend: 'Labels',
+  einddatumLabel: 'Tot en met',
+  einddatumHint: 'Maximaal 90 dagen vooruit.',
+  submit: 'Direct online zetten',
+  submitWijziging: 'Wijziging opslaan',
+  cancel: 'Annuleren',
+  wordtGecontroleerd: DAGHAP_IN_CONTROLE_MESSAGE,
+  onlineTitel: 'Wat staat er online',
+  onlineEmpty: 'Er staat nog geen daghap of seizoensgerecht online.',
+  onlineLimit:
+    'Maximaal 1 daghap en 3 seizoensgerechten per restaurant. Per dag kun je 10 keer plaatsen of wijzigen.',
+  adjust: 'Aanpassen',
+  takeOffline: 'Offline halen',
+  busy: 'Bezig…',
+  saved: 'Je aanbod staat online.',
+  savedControle: `Je aanbod staat nog niet online. ${DAGHAP_IN_CONTROLE_MESSAGE}`,
+  offlineDone: 'Je aanbod staat niet meer online.',
+  loading: 'Bezig met laden…',
+  genericError: 'Er ging iets mis. Probeer het opnieuw.',
+  loginNeeded: 'Log opnieuw in om je aanbod te beheren.',
+  noRestaurant: 'Je account is nog niet aan een goedgekeurd restaurant gekoppeld.',
+  noRestaurantHelp: 'Claim je restaurant; zodra de claim is goedgekeurd kun je aanbod plaatsen.',
+  restaurantLabel: 'Restaurant',
+  vandaagTitle: 'Vandaag',
+  vandaagSeason: 'Seizoensgerecht',
+  report: 'Klopt dit aanbod niet? Meld het',
+  reportConfirm: 'Bedankt, we kijken ernaar.',
+  reportAlready: 'Je had dit al gemeld. We kijken ernaar.',
+  reportFailed: 'Melden lukte niet. Probeer het later opnieuw.',
+});
+
+// Welke fout hoort bij welk veld? De tekstregels uit het contract gelden voor
+// naam én beschrijving; die staan dus bij beide velden, niet in een los blok.
+const VELDEN_VOOR_FOUT = Object.freeze({
+  [DAGHAP_FOUTEN.naamKort]: ['naam'],
+  [DAGHAP_FOUTEN.naamLang]: ['naam'],
+  [DAGHAP_FOUTEN.prijs]: ['prijs'],
+  [DAGHAP_FOUTEN.beschrijving]: ['beschrijving'],
+  [DAGHAP_FOUTEN.labels]: ['labels'],
+  [DAGHAP_FOUTEN.soort]: ['soort'],
+  [DAGHAP_FOUTEN.einddatum]: ['einddatum'],
+  [DAGHAP_FOUTEN.url]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.email]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.telefoon]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.hoofdletters]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.leestekens]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.emoji]: ['naam', 'beschrijving'],
+  [DAGHAP_FOUTEN.daghapVol]: ['soort'],
+  [DAGHAP_FOUTEN.seizoenVol]: ['soort'],
+  [DAGHAP_FOUTEN.daglimiet]: [],
+  [DAGHAP_FOUTEN.verlopen]: [],
+});
+
+const FORMULIER_VELDEN = Object.freeze(['soort', 'naam', 'prijs', 'beschrijving', 'labels', 'einddatum']);
+
+function tekst(value) {
+  return String(value === undefined || value === null ? '' : value);
+}
+
+/** De velden waar een foutcode bij hoort; onbekend is `[]` (algemene melding). */
+function veldenVoorFout(code) {
+  const velden = VELDEN_VOOR_FOUT[tekst(code)];
+  return Array.isArray(velden) ? velden.slice() : [];
+}
+
+/** Een prijs als invoer voor het formulier: `650` wordt `"6,50"`. */
+function prijsInvoer(prijsCent) {
+  const waarde = Number(prijsCent);
+  if (!Number.isFinite(waarde)) return '';
+  return (waarde / 100).toFixed(2).replace('.', ',');
+}
+
+const DATUM_DELEN = new Intl.DateTimeFormat('en-US', {
+  timeZone: DAGHAP_TIJDZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** De Amsterdamse kalenderdatum van een ISO-moment als `"2026-12-31"`. */
+function datumInAmsterdam(iso) {
+  const moment = Date.parse(tekst(iso));
+  if (!Number.isFinite(moment)) return '';
+  const delen = {};
+  for (const deel of DATUM_DELEN.formatToParts(new Date(moment))) {
+    if (deel.type !== 'literal') delen[deel.type] = deel.value;
+  }
+  return `${delen.year}-${delen.month}-${delen.day}`;
+}
+
+/** Een bestaand aanbod als waarden van het formulier. */
+function formulierVanAanbod(aanbod) {
+  const rij = aanbod && typeof aanbod === 'object' ? aanbod : {};
+  return {
+    soort: tekst(rij.soort) || 'daghap',
+    naam: tekst(rij.naam),
+    prijs: prijsInvoer(rij.prijsCent),
+    beschrijving: tekst(rij.beschrijving),
+    labels: normaliseerLabels(rij.labels),
+    einddatum: rij.soort === 'seizoensgerecht' ? datumInAmsterdam(rij.verlooptOp) : '',
+  };
+}
+
+/** Een leeg formulier; het soort staat standaard op daghap. */
+function leegFormulier({ soort = 'daghap' } = {}) {
+  return { soort, naam: '', prijs: '', beschrijving: '', labels: [], einddatum: '' };
+}
+
+/**
+ * De body van een POST of PATCH uit de waarden van het formulier. De server
+ * controleert alles opnieuw; dit is alleen de vorm die hij verwacht.
+ */
+function aanbodVerzoek(values) {
+  const waarden = values && typeof values === 'object' ? values : {};
+  const soort = tekst(waarden.soort).trim() || 'daghap';
+  const verzoek = {
+    soort,
+    naam: tekst(waarden.naam).trim(),
+    prijs: tekst(waarden.prijs).trim(),
+    beschrijving: tekst(waarden.beschrijving).trim(),
+    labels: normaliseerLabels(waarden.labels),
+  };
+  if (soort === 'seizoensgerecht') verzoek.einddatum = tekst(waarden.einddatum).trim();
+  return verzoek;
+}
+
+/**
+ * Het antwoord van de API als meldingen per veld: `{ velden, algemeen }`.
+ * `velden` heeft altijd de formuliervelden als sleutel (lege lijsten als er
+ * niets is), zodat het formulier zonder controle kan uitpakken.
+ */
+function foutmeldingen(body) {
+  const antwoord = body && typeof body === 'object' ? body : {};
+  const velden = {};
+  for (const veld of FORMULIER_VELDEN) velden[veld] = [];
+
+  const codes = Array.isArray(antwoord.errors) ? antwoord.errors : [];
+  for (const code of codes) {
+    const zin = berichtBij(code);
+    if (!zin) continue;
+    for (const veld of veldenVoorFout(code)) {
+      if (!velden[veld].includes(zin)) velden[veld].push(zin);
+    }
+  }
+
+  // Eén losse melding (403, 404, 409, 429, 503) hoort bij het geheel; bij
+  // validatiefouten staan de zinnen al onder de velden.
+  const los = tekst(antwoord.message).trim();
+  return { velden, algemeen: los && codes.length === 0 ? los : '' };
+}
+
+/** De stand van het aanbod in woorden; onbekend blijft eerlijk onbekend. */
+function statusLabel(status) {
+  return STATUS_LABELS[tekst(status)] || 'Onbekende status';
+}
+
+const TIJD_DELEN = new Intl.DateTimeFormat('nl-NL', {
+  timeZone: DAGHAP_TIJDZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
+
+const DAG_DELEN = new Intl.DateTimeFormat('nl-NL', {
+  timeZone: DAGHAP_TIJDZONE,
+  day: 'numeric',
+  month: 'long',
+});
+
+/**
+ * "Online vandaag tot 21:00" voor een daghap en "Online tot en met 31 december"
+ * voor een seizoensgerecht. Zonder bruikbaar moment is er geen belofte.
+ */
+function verloopTekst({ soort, verlooptOp } = {}) {
+  const moment = Date.parse(tekst(verlooptOp));
+  if (!Number.isFinite(moment)) return '';
+  if (soort === 'daghap') return `Online vandaag tot ${TIJD_DELEN.format(new Date(moment))}`;
+  return `Online tot en met ${DAG_DELEN.format(new Date(moment))}`;
+}
+
+/** De tekenteller onder het beschrijvingsveld: `"42/140"`. */
+function beschrijvingTeller(value) {
+  return `${[...tekst(value)].length}/${DAGHAP_BESCHRIJVING_MAX}`;
+}
+
+module.exports = {
+  FORMULIER_VELDEN,
+  FORM_MESSAGES,
+  LABEL_LABELS,
+  SOORT_LABELS,
+  STATUS_LABELS,
+  aanbodVerzoek,
+  beschrijvingTeller,
+  datumInAmsterdam,
+  foutmeldingen,
+  formulierVanAanbod,
+  leegFormulier,
+  prijsInvoer,
+  statusLabel,
+  veldenVoorFout,
+  verloopTekst,
+};

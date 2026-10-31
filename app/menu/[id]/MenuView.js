@@ -17,6 +17,8 @@ import EmojiText from '@/src/components/EmojiText'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
+// BE-55 stap B (#135) — "Vandaag" op de menupagina; geen aanbod, geen blok.
+import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
 import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation } from '@/src/components/MenuBody'
@@ -407,6 +409,13 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
             {r.notes && <div className="rp-note">{r.notes}</div>}
           </div>
         </div>
+      </div>
+
+      {/* BE-55 (issue 135, herstel na review deel 2) — "Vandaag" direct onder
+          de kop en boven de zoek- en filterbalk; het staat los van de filters
+          en verdwijnt als er niets online staat. */}
+      <div className="daghap-band">
+        <DaghapVandaag restaurantId={id.split('-')[0]} />
       </div>
 
       {/* ── Filter bar ── */}

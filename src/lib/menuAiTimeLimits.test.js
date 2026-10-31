@@ -59,7 +59,8 @@ test('Y1: no plan, Fluid or maxDuration override was added to the project config
   // must not carry a plan, Fluid or function-duration override.
   if (fs.existsSync(VERCEL_CONFIG_PATH)) {
     const vercelConfig = JSON.parse(fs.readFileSync(VERCEL_CONFIG_PATH, 'utf8'));
-    assert.deepEqual(Object.keys(vercelConfig), ['crons'], 'vercel.json only holds crons');
+    // Naast de crons alleen git.deploymentEnabled (werkbranches niet uitrollen).
+    assert.deepEqual(Object.keys(vercelConfig), ['crons', 'git'], 'vercel.json only holds crons and git');
     assert.doesNotMatch(JSON.stringify(vercelConfig), /maxDuration|fluid|functions/i);
   }
   const nextConfig = fs.readFileSync(NEXT_CONFIG_PATH, 'utf8');

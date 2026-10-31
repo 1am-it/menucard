@@ -1,0 +1,206 @@
+/* BE-55 stap B (#135) — het aanbodformulier in Mijn restaurant.
+ *
+ * Eigen bestand naast de pagina (BE-52); globals.css blijft ongemoeid. De
+ * gedeelde owner-klassen (owner-main, owner-section, owner-card, ...) komen uit
+ * ../mijn-restaurant.css, dat AanbodView ook importeert. Kleuren alleen via de
+ * bestaande tokens.
+ */
+
+.aanbod-back {
+  margin: 0 0 8px;
+}
+
+.aanbod-section {
+  margin-top: 8px;
+}
+
+.aanbod-form {
+  display: grid;
+  gap: 16px;
+  max-width: 640px;
+}
+
+.aanbod-field,
+.aanbod-fieldset {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.aanbod-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.aanbod-input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.aanbod-input--prijs,
+.aanbod-input--datum {
+  max-width: 200px;
+}
+
+.aanbod-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.aanbod-input:focus-visible,
+.aanbod-submit:focus-visible,
+.aanbod-knop:focus-visible,
+.aanbod-chip input:focus-visible,
+.aanbod-soort-keuze input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.aanbod-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.aanbod-counter {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.aanbod-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--status-blocked);
+}
+
+.aanbod-notice {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.aanbod-soort {
+  display: grid;
+  gap: 8px;
+}
+
+.aanbod-soort-keuze,
+.aanbod-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.aanbod-soort-keuze {
+  flex-wrap: wrap;
+}
+
+.aanbod-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aanbod-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.aanbod-submit {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aanbod-submit:hover:not(:disabled) {
+  background: var(--button-primary-hover);
+}
+
+.aanbod-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aanbod-card-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.aanbod-knop {
+  min-height: 44px;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.aanbod-knop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aanbod-status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral);
+  border: 1px solid var(--status-neutral-border);
+  white-space: nowrap;
+}
+
+.aanbod-status--online {
+  background: var(--accent-faint);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+.aanbod-status--in_controle {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+  border-color: var(--status-blocked-border);
+}
+
+.aanbod-controle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--status-blocked);
+}
+
+@media (max-width: 480px) {
+  .aanbod-form {
+    gap: 14px;
+  }
+
+  .aanbod-input--prijs,
+  .aanbod-input--datum {
+    max-width: none;
+  }
+}
