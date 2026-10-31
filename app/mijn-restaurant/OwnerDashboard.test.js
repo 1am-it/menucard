@@ -35,13 +35,21 @@ test('de kop gebruikt dezelfde opbouw als /mijn-restaurant/claimen: PrimaryNav e
   assert.match(source, /import ThemeToggle from ['"]@\/src\/components\/ThemeToggle['"]/);
   assert.match(
     source,
-    /<div className="header-inner">\s*<Wordmark \/>\s*<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>\s*<\/div>/,
-    'de kop moet woordmerk + .header-right(PrimaryNav, ThemeToggle) zijn, net als bij claimen',
+    /<div className="header-inner">\s*<Wordmark \/>\s*<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<AccountMenuButton \/>\s*<\/div>\s*<\/div>/,
+    'de kop moet woordmerk + .header-right(PrimaryNav, ThemeToggle, AccountMenuButton) zijn, net als bij claimen',
   );
   assert.equal(
     (source.match(/<PrimaryNav \/>/g) || []).length,
     1,
     'PrimaryNav hoort maar op één plek te staan: binnen .header-right',
+  );
+  // BE-59 (#146): de accountknop komt er als enige toevoeging bij, als laatste
+  // binnen dezelfde `.header-right`; een losse broer zou op mobiel (flex-wrap)
+  // een eigen regel krijgen en de kop weer laten groeien.
+  assert.equal(
+    (source.match(/<AccountMenuButton \/>/g) || []).length,
+    1,
+    'AccountMenuButton hoort maar op één plek te staan: binnen .header-right',
   );
 });
 
