@@ -1,9 +1,9 @@
 {
   "script": "run-be63-browser-check.js",
-  "ticket": "BE-63 (#155)",
+  "ticket": "BE-63 (#155) + BE-66 (#162)",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3189); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T10:51:44.792Z",
+  "startedAt": "2026-10-31T11:57:11.757Z",
   "port": 3189,
   "pages": [
     "/inloggen",
@@ -16,7 +16,7 @@
       "checks": 17,
       "passed": 17,
       "failed": 0,
-      "durationMs": 7504,
+      "durationMs": 6413,
       "error": null
     },
     {
@@ -24,7 +24,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 2324,
+      "durationMs": 2291,
       "error": null
     },
     {
@@ -32,7 +32,7 @@
       "checks": 22,
       "passed": 22,
       "failed": 0,
-      "durationMs": 3542,
+      "durationMs": 3305,
       "error": null
     },
     {
@@ -40,7 +40,15 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 9227,
+      "durationMs": 8848,
+      "error": null
+    },
+    {
+      "name": "inloggen-versturen",
+      "checks": 18,
+      "passed": 18,
+      "failed": 0,
+      "durationMs": 3179,
       "error": null
     },
     {
@@ -48,7 +56,7 @@
       "checks": 18,
       "passed": 18,
       "failed": 0,
-      "durationMs": 6512,
+      "durationMs": 6793,
       "error": null
     }
   ],
@@ -473,6 +481,96 @@
       "detail": "{\"inBeeld\":true,\"top\":604,\"bottom\":648,\"height\":44,\"viewportHeight\":720,\"onderkant\":720,\"scrollY\":389}"
     },
     {
+      "name": "inloggen versturen (light): e-mail invullen en versturen lukt",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "inloggen versturen (light): de codestap staat in beeld",
+      "passed": true,
+      "detail": "true / Vul de code in / fout \"\" / knop \"Inloggen\" / vorm \"Vul de code in Vul de zes cijfers in uit de e-mail. Als dit e-mailadres bij ons bekend is, ontvang je nu een code van zes cijfers. Code uit de e-mail Inloggen N\""
+    },
+    {
+      "name": "inloggen versturen (light): de neutrale melding over de code staat erbij",
+      "passed": true,
+      "detail": "Als dit e-mailadres bij ons bekend is, ontvang je nu een code van zes cijfers."
+    },
+    {
+      "name": "inloggen versturen (light): het codeveld vraagt zes cijfers",
+      "passed": true,
+      "detail": "numeric/6"
+    },
+    {
+      "name": "inloggen versturen (light): precies één gestubde oproep naar /auth/v1/otp",
+      "passed": true,
+      "detail": "[{\"kind\":\"otp\",\"method\":\"POST\",\"path\":\"/auth/v1/otp\",\"url\":\"http://127.0.0.1:9/auth/v1/otp\"}]"
+    },
+    {
+      "name": "inloggen versturen (light): geen ander netwerkverkeer",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "inloggen versturen (light): de stub zelf faalt niet",
+      "passed": true,
+      "detail": "stubfouten [] / native fetch true"
+    },
+    {
+      "name": "inloggen versturen (light): geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "inloggen versturen (light): het thema is aangetoond",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "inloggen versturen (dark): e-mail invullen en versturen lukt",
+      "passed": true,
+      "detail": "true/true"
+    },
+    {
+      "name": "inloggen versturen (dark): de codestap staat in beeld",
+      "passed": true,
+      "detail": "true / Vul de code in / fout \"\" / knop \"Inloggen\" / vorm \"Vul de code in Vul de zes cijfers in uit de e-mail. Als dit e-mailadres bij ons bekend is, ontvang je nu een code van zes cijfers. Code uit de e-mail Inloggen N\""
+    },
+    {
+      "name": "inloggen versturen (dark): de neutrale melding over de code staat erbij",
+      "passed": true,
+      "detail": "Als dit e-mailadres bij ons bekend is, ontvang je nu een code van zes cijfers."
+    },
+    {
+      "name": "inloggen versturen (dark): het codeveld vraagt zes cijfers",
+      "passed": true,
+      "detail": "numeric/6"
+    },
+    {
+      "name": "inloggen versturen (dark): precies één gestubde oproep naar /auth/v1/otp",
+      "passed": true,
+      "detail": "[{\"kind\":\"otp\",\"method\":\"POST\",\"path\":\"/auth/v1/otp\",\"url\":\"http://127.0.0.1:9/auth/v1/otp\"}]"
+    },
+    {
+      "name": "inloggen versturen (dark): geen ander netwerkverkeer",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "inloggen versturen (dark): de stub zelf faalt niet",
+      "passed": true,
+      "detail": "stubfouten [] / native fetch true"
+    },
+    {
+      "name": "inloggen versturen (dark): geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "inloggen versturen (dark): het thema is aangetoond",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
       "name": "kop als ingelogd 1280: het accountmenu staat in de kop",
       "passed": true,
       "detail": "true / {\"visible\":true,\"top\":10,\"bottom\":54,\"left\":1116,\"right\":1160,\"width\":44,\"height\":44}"
@@ -773,7 +871,7 @@
     },
     {
       "file": "be63-instellingen-1280-automatisch.png",
-      "sha256": "cf3d403595cd449e6e203915b2b841c986e52c1fcf8610d354591e73ad6897d7",
+      "sha256": "68957cf0c15175c8ce29bea4380ba45a2f46e499109f19b667eb6feda89941ac",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -783,7 +881,7 @@
     },
     {
       "file": "be63-instellingen-1280-delen.png",
-      "sha256": "b188f1d7168436aa6f20c16ad1f913c18c2b4747baeb830f0f6854695a6732f3",
+      "sha256": "aae7d4cd452cd388562f15360213265c6f90bd0f93d667e825a08a51ccd9c5ee",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1090,6 +1188,54 @@
       "theme": null,
       "state": "login-team",
       "themeProof": null
+    },
+    {
+      "file": "be66-inloggen-versturen-light.png",
+      "sha256": "2d4a43155eb5d6a746c388edd11524f7b397b5487ee1637f5ce574c91ac1b413",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "code-step",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be66-inloggen-versturen-dark.png",
+      "sha256": "706de4a07e75858823d522bdd36ac5b9789f758070e65f05fb532647a74ab385",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "code-step",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
     },
     {
       "file": "be63-kop-ingelogd-1280-licht.png",
