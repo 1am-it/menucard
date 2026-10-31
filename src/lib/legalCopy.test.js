@@ -57,7 +57,7 @@ test('de privacyverklaring heeft kop, datum en intro uit het contract', () => {
   assert.equal(PRIVACY.updated, 'Laatst bijgewerkt: [DATUM]');
   assert.equal(
     PRIVACY.intro,
-    'BredaEats laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang.',
+    'Onze Menukaarten laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang.',
   );
 });
 
@@ -76,7 +76,7 @@ test('de privacyverklaring heeft de acht secties, in de volgorde van het contrac
 
 test('de privacyverklaring bevat elke alinea en elk lijstitem letterlijk', () => {
   assert.deepEqual(textsOf(PRIVACY), [
-    'Wie zijn wij :: BredaEats is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES].',
+    'Wie zijn wij :: Onze Menukaarten is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES].',
     'Als bezoeker :: Je hebt geen account nodig. We vragen je niet om je naam of e-mailadres.',
     'Als bezoeker :: In je eigen browser bewaren we je lijstje, je themakeuze (licht of donker), je deelvoorkeur en of je een tip al gezien hebt. Dit staat alleen op je eigen toestel. Wij kunnen het niet inzien. Je wist het door de websitegegevens in je browser te wissen.',
     'Als bezoeker :: Tellers. We tellen hoe vaak een gerecht of restaurant bekeken, bewaard of gedeeld wordt, per dag. We bewaren daarbij geen IP-adres, geen account en niets dat naar jou leidt. Alleen het totaal per dag.',
@@ -104,7 +104,7 @@ test('de privacyverklaring bevat elke alinea en elk lijstitem letterlijk', () =>
 test('het colofon heeft de vijf secties, in de volgorde van het contract', () => {
   assert.equal(COLOFON.title, 'Colofon');
   assert.deepEqual(COLOFON.sections.map((section) => section.heading), [
-    'Over BredaEats',
+    'Over Onze Menukaarten',
     'Waar de gegevens vandaan komen',
     'Klopt er iets niet?',
     'Contact',
@@ -114,7 +114,7 @@ test('het colofon heeft de vijf secties, in de volgorde van het contract', () =>
 
 test('het colofon bevat elke alinea letterlijk, met de verwijzing naar /privacy', () => {
   assert.deepEqual(textsOf(COLOFON), [
-    'Over BredaEats :: BredaEats helpt je kiezen wat je vanavond eet in Breda: per gerecht, met de prijs erbij. Het is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER].',
+    'Over Onze Menukaarten :: Onze Menukaarten helpt je kiezen wat je vanavond eet in Breda: per gerecht, met de prijs erbij. Het is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER].',
     'Waar de gegevens vandaan komen :: Menukaarten en prijzen komen van de eigen websites en menukaarten van restaurants, en van restauranthouders zelf. Locatiegegevens komen deels van OpenStreetMap (© OpenStreetMap-bijdragers, beschikbaar onder de Open Database License). Bij elk restaurant staat waar de menukaart vandaan komt.',
     'Klopt er iets niet? :: Prijzen en gerechten kunnen veranderen. We doen ons best, maar kunnen niet garanderen dat alles altijd klopt. Ziet je iets dat niet klopt? Mail naar [E-MAILADRES]. Ben je de eigenaar van het restaurant? Via "Voor restaurants" beheer je je eigen gegevens.',
     'Contact :: [E-MAILADRES]',
@@ -156,7 +156,7 @@ test('de link naast de e-mailcode op /inloggen hoort bij de privacyverklaring', 
 
 test('beide documenten hebben metadata met een titel en een beschrijving', () => {
   for (const document of [PRIVACY, COLOFON]) {
-    assert.ok(document.metadata.title.includes('BredaEats'), `${document.title} heeft een titel`);
+    assert.ok(document.metadata.title.includes('Onze Menukaarten'), `${document.title} heeft een titel`);
     assert.ok(document.metadata.description.length > 40, `${document.title} heeft een echte beschrijving`);
   }
 });

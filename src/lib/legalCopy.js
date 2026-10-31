@@ -50,21 +50,21 @@ const list = (...items) => Object.freeze({ type: 'list', items: Object.freeze(it
 const PRIVACY_START = Object.freeze({
   href: PRIVACY_HREF,
   metadata: Object.freeze({
-    title: 'Privacy · BredaEats',
+    title: 'Privacy · Onze Menukaarten',
     description:
-      'Wat BredaEats van je bewaart, waarom en hoe lang: als bezoeker, bij een stemming, bij een daghap en als restauranthouder.',
+      'Wat Onze Menukaarten van je bewaart, waarom en hoe lang: als bezoeker, bij een stemming, bij een daghap en als restauranthouder.',
   }),
   title: 'Privacy',
   updated: 'Laatst bijgewerkt: [DATUM]',
   intro:
-    'BredaEats laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang.',
+    'Onze Menukaarten laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang.',
   sections: Object.freeze([
     Object.freeze({
       id: 'wie-zijn-wij',
       heading: 'Wie zijn wij',
       blocks: Object.freeze([
         paragraph(
-          'BredaEats is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES].',
+          'Onze Menukaarten is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES].',
         ),
       ]),
     }),
@@ -162,18 +162,18 @@ const PRIVACY = Object.freeze({
 const COLOFON = Object.freeze({
   href: COLOFON_HREF,
   metadata: Object.freeze({
-    title: 'Colofon · BredaEats',
+    title: 'Colofon · Onze Menukaarten',
     description:
-      'Wie BredaEats maakt, waar de menukaarten en prijzen vandaan komen en hoe je contact opneemt als er iets niet klopt.',
+      'Wie Onze Menukaarten maakt, waar de menukaarten en prijzen vandaan komen en hoe je contact opneemt als er iets niet klopt.',
   }),
   title: 'Colofon',
   sections: Object.freeze([
     Object.freeze({
       id: 'over-bredaeats',
-      heading: 'Over BredaEats',
+      heading: 'Over Onze Menukaarten',
       blocks: Object.freeze([
         paragraph(
-          'BredaEats helpt je kiezen wat je vanavond eet in Breda: per gerecht, met de prijs erbij. Het is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER].',
+          'Onze Menukaarten helpt je kiezen wat je vanavond eet in Breda: per gerecht, met de prijs erbij. Het is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER].',
         ),
       ]),
     }),

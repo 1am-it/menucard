@@ -51,7 +51,7 @@ test('de vorm staat in één component: h1, een h2 per sectie en geen eigen teks
   // de h2 per sectie; de bron staat dus in die volgorde.
   assert.ok(source.indexOf('<h1') < source.indexOf('<h2'), 'de h1 staat vóór de h2\'s');
   // Geen eigen zinnen in dit bestand: alleen tekst uit het document.
-  assert.doesNotMatch(source, /BredaEats|KvK|Autoriteit Persoonsgegevens/, 'de teksten komen uit src/lib/legalCopy.js');
+  assert.doesNotMatch(source, /Onze Menukaarten|KvK|Autoriteit Persoonsgegevens/, 'de teksten komen uit src/lib/legalCopy.js');
 });
 
 test('de opmaak is een eigen bestand met alleen tokens, systeemlettertype en een smalle kolom', () => {
