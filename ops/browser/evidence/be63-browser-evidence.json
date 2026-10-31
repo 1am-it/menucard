@@ -3,7 +3,7 @@
   "ticket": "BE-63 (#155)",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3189); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T10:17:30.168Z",
+  "startedAt": "2026-10-31T10:51:44.792Z",
   "port": 3189,
   "pages": [
     "/inloggen",
@@ -16,7 +16,7 @@
       "checks": 17,
       "passed": 17,
       "failed": 0,
-      "durationMs": 6410,
+      "durationMs": 7504,
       "error": null
     },
     {
@@ -24,7 +24,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 2251,
+      "durationMs": 2324,
       "error": null
     },
     {
@@ -32,7 +32,7 @@
       "checks": 22,
       "passed": 22,
       "failed": 0,
-      "durationMs": 3251,
+      "durationMs": 3542,
       "error": null
     },
     {
@@ -40,7 +40,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 8502,
+      "durationMs": 9227,
       "error": null
     },
     {
@@ -48,7 +48,7 @@
       "checks": 18,
       "passed": 18,
       "failed": 0,
-      "durationMs": 6970,
+      "durationMs": 6512,
       "error": null
     }
   ],
@@ -90,7 +90,7 @@
     {
       "name": "kop als gast 1280: de drie knoppen staan op één regel",
       "passed": true,
-      "detail": "23/10/10"
+      "detail": "10/10/10"
     },
     {
       "name": "kop als gast 390: geen horizontale overloop",
@@ -773,7 +773,7 @@
     },
     {
       "file": "be63-instellingen-1280-automatisch.png",
-      "sha256": "0a4df3d0689572ec65e2f3ca3246dbf6ac778764ed5ceb83593e7195741de93b",
+      "sha256": "cf3d403595cd449e6e203915b2b841c986e52c1fcf8610d354591e73ad6897d7",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -783,7 +783,7 @@
     },
     {
       "file": "be63-instellingen-1280-delen.png",
-      "sha256": "aae7d4cd452cd388562f15360213265c6f90bd0f93d667e825a08a51ccd9c5ee",
+      "sha256": "b188f1d7168436aa6f20c16ad1f913c18c2b4747baeb830f0f6854695a6732f3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",

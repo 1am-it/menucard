@@ -9,24 +9,34 @@
 import Link from 'next/link'
 import './public-footer.css'
 
-// Dezelfde bestemming als LOGIN_PAGE_HREF in src/lib/loginEntry.js (getest in
-// src/components/PublicFooter.test.js). Hier een letterlijke waarde, zodat een
-// gast die deze pagina's laadt geen enkel extra module meeneemt voor één link.
+// Dezelfde bestemmingen als de gedeelde bronnen: /inloggen is LOGIN_PAGE_HREF in
+// src/lib/loginEntry.js en /voor-restaurants is FOR_RESTAURANTS_HREF in
+// src/lib/forRestaurantsCopy.js (beide getest in
+// src/components/PublicFooter.test.js). Hier letterlijke waarden, zodat een gast
+// die deze pagina's laadt geen enkel extra module meeneemt voor twee links.
 const LOGIN_HREF = '/inloggen'
+const RESTAURANTS_HREF = '/voor-restaurants'
 
 export default function PublicFooter() {
   return (
     <footer className="public-footer">
       <div className="public-footer-inner">
-        {/* BE-59 deel 3 (#146): geen vooruit laden. Zonder prefetch={false}
-            haalt Next.js de route /inloggen al op zodra deze link in de buurt van
-            het venster komt: de meting van de eerste laadgrootte (ops/browser/
-            run-be59-load-size-check.js) liet daardoor +6,8 KB op / en +6,1 KB op
-            /search zien. De link, zijn doel en zijn naam blijven gelijk. */}
+        {/* BE-64 (#156, punt 5): "Voor restaurants" in de footer gaat nu naar de
+            eigen pagina; het tweede deel blijft de ene ingang /inloggen. Beide
+            links laden niet vooruit (BE-59 deel 3): zonder prefetch={false}
+            haalde Next.js /inloggen al op zodra de link in de buurt van het
+            venster kwam, gemeten in ops/browser/run-be59-load-size-check.js. */}
+        <Link className="public-footer-link" href={RESTAURANTS_HREF} prefetch={false}>
+          Voor restaurants
+        </Link>
+        <span className="public-footer-sep" aria-hidden="true">
+          ·
+        </span>
         <Link className="public-footer-link" href={LOGIN_HREF} prefetch={false}>
-          Voor restaurants · Inloggen
+          Inloggen
         </Link>
       </div>
     </footer>
   )
 }
+

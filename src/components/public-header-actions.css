@@ -15,6 +15,11 @@
 
 /* "Voor restaurants" is een gewone tekstlink, geen knop. */
 .pha-restaurants {
+  /* BE-64 (#156): de link is ook op /voor-restaurants een echt tikvlak van
+     44 px; de a11y-check van die pagina mat hier 19 px (BE-51-norm). */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
