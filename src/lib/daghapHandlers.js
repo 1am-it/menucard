@@ -47,6 +47,7 @@ const {
   magVandaagWijzigen,
   normaliseerAanbod,
   publiekAanbodVoorScherm,
+  vandaagInAmsterdam,
 } = require('./daghapAanbod');
 
 // De tabellen en de functie uit supabase/migrations/0023.
@@ -613,6 +614,89 @@ function createDaghapHandlers({
    * DELETE /api/v1/daghap/<id> — offline halen. Nog een keer offline halen is
    * geen fout: er valt dan alleen niets te wijzigen.
    */
+  /**
+   * PATCH /api/v1/daghap/<id>/uitverkocht — Op = op (BE-67, uitkomst 3).
+   *
+   * Body: `{ uitverkocht: true | false }`. `true` zet `uitverkocht_op` op de
+   * Amsterdamse datum van vandaag, `false` maakt hem leeg ("Toch weer
+   * beschikbaar"). Dezelfde autorisatie als wijzigen: de sessie (401), het
+   * houderschap van het restaurant van dít aanbod (403) en het plaatsrecht
+   * (403). Een onbekend aanbod is een 404.
+   *
+   * De stand vervalt vanzelf: elke lezer vergelijkt die datum met vandaag in
+   * Europe/Amsterdam (isUitverkochtVandaag in daghapAanbod.js). Er hoeft dus om
+   * middernacht niets opgeruimd te worden en een herhaling is de volgende dag
+   * gewoon weer beschikbaar.
+   *
+   * Zonder 0026 bestaat de kolom niet: dan antwoordt de route 503 met één nette
+   * melding, net als de andere routes, en nooit een 500.
+   */
+  async function uitverkochtAanbod(request, context = {}) {
+    const supabase = client();
+    if (!supabase) return UNAVAILABLE;
+    const id = normaliseerId(context && context.id);
+    if (!id) return NOT_FOUND;
+    const body = await readBody(request);
+    if (!body) return invalid('invalid_body');
+
+    const stand = body.uitverkocht;
+    if (typeof stand !== 'boolean') {
+      return invalid('invalid_uitverkocht', {
+        message: 'Zeg met true of false of dit aanbod uitverkocht is.',
+      });
+    }
+
+    const auth = await aanvrager(request);
+    if (auth.response) return auth.response;
+
+    const gevonden = await ask(
+      supabase.from(DAGHAP_TABLE_AANBOD).select(AANBOD_KOLOMMEN).eq('id', id).maybeSingle(),
+    );
+    if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
+    const huidig = gevonden.data;
+    if (!huidig) return NOT_FOUND;
+
+    const eigenaar = await controleerEigenaar(supabase, auth.userId, huidig.restaurant_id);
+    if (eigenaar.response) return eigenaar.response;
+
+    const recht = await controleerPlaatsrecht(supabase, auth.userId, huidig.restaurant_id);
+    if (recht.response) return recht.response;
+
+    if (huidig.status === DAGHAP_STATUS_VERLOPEN || isVerlopen(huidig.verloopt_op, now())) {
+      return geweigerd(DAGHAP_FOUTEN.verlopen);
+    }
+
+    const datum = stand ? vandaagInAmsterdam(now()) : null;
+    if (stand && !datum) return failed();
+
+    const bijgewerkt = await ask(
+      supabase
+        .from(DAGHAP_TABLE_AANBOD)
+        .update({ uitverkocht_op: datum })
+        .eq('id', id)
+        .select(AANBOD_KOLOMMEN_UITGEBREID)
+        .single(),
+    );
+    if (bijgewerkt.error) return opslaanMislukt(bijgewerkt.error);
+    const rij = rijUit(bijgewerkt);
+    if (!rij) return failed();
+
+    // Dezelfde geschiedenisschrijf als bij wijzigen; 0026 kent de twee acties
+    // 'uitverkocht' en 'beschikbaar' al.
+    const geschiedenis = await schrijfGeschiedenis(supabase, {
+      rij,
+      restaurantId: rij.restaurant_id || huidig.restaurant_id,
+      actie: stand ? 'uitverkocht' : 'beschikbaar',
+      door: auth.userId,
+      gegevens: { uitverkocht_op: datum },
+    });
+    if (geschiedenis.response) return geschiedenis.response;
+
+    return bewaard(rij, {
+      bericht: stand ? DAGHAP_MESSAGES.uitverkocht : DAGHAP_MESSAGES.weerBeschikbaar,
+    });
+  }
+
   async function offlineAanbod(request, context = {}) {
     const supabase = client();
     if (!supabase) return UNAVAILABLE;
@@ -755,7 +839,7 @@ function createDaghapHandlers({
     // databank en de klok van de server even uit elkaar lopen.
     const aanbod = rijen
       .filter((rij) => !isVerlopen(rij.verloopt_op, now()))
-      .map((rij) => publiekAanbodVoorScherm(rij))
+      .map((rij) => publiekAanbodVoorScherm(rij, now()))
       .filter(Boolean);
 
     return { status: 200, body: { ok: true, aanbod } };
@@ -805,7 +889,7 @@ function createDaghapHandlers({
     const aanbod = geschud
       .slice(0, gevraagd)
       .map((rij) => {
-        const scherm = publiekAanbodVoorScherm(rij);
+        const scherm = publiekAanbodVoorScherm(rij, now());
         if (!scherm) return null;
         return { ...scherm, restaurantId: rij.restaurant_id || null };
       })
@@ -980,6 +1064,7 @@ function createDaghapHandlers({
     publiekAanbod,
     publiekVandaag,
     ruimVerlopenOp,
+    uitverkochtAanbod,
     wijzigAanbod,
     zoekAanbod,
   };

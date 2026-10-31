@@ -25,6 +25,7 @@ const {
   DAGHAP_BESCHRIJVING_MAX,
   DAGHAP_FOUTEN,
   DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_PUBLIEK,
   DAGHAP_STATUS_CONTROLE,
   DAGHAP_STATUS_OFFLINE,
   DAGHAP_STATUS_ONLINE,
@@ -45,6 +46,14 @@ const GANG_LABELS = Object.freeze({
   voor: 'Voorgerecht',
   hoofd: 'Hoofdgerecht',
   na: 'Nagerecht',
+});
+
+// BE-67, uitkomst 5: de korte namen in het blok "Vandaag" — "Voor / Hoofd / Na",
+// zoals het contract ze noemt naast het formulier met de volledige namen.
+const GANG_KORT = Object.freeze({
+  voor: 'Voor',
+  hoofd: 'Hoofd',
+  na: 'Na',
 });
 
 // De weekdagknoppen van "Elke week op", in ISO-volgorde (1 = maandag).
@@ -92,6 +101,18 @@ const FORM_MESSAGES = Object.freeze({
   herhaalTotLabel: 'Tot en met',
   herhaalTotWijzig: 'wijzig',
   opIsOp: 'Op = op: ik kan dit zelf op "uitverkocht" zetten',
+  // BE-67, uitkomst 3: de knop in het overzicht van de houder en de meldingen
+  // die erbij horen. Het vinkje hierboven blijft staan als uitleg bij het
+  // formulier; de stand zelf is een datum per aanbod, geen instelling.
+  opIsOpKnop: 'Op = op',
+  opIsOpWeer: 'Toch weer beschikbaar',
+  opIsOpDone: 'Dit aanbod staat vandaag op uitverkocht.',
+  opIsOpWeerDone: 'Dit aanbod is weer beschikbaar.',
+  uitverkochtLabel: 'Uitverkocht',
+  uitverkochtBadge: DAGHAP_PUBLIEK.uitverkocht,
+  // BE-67, uitkomst 5: de twee prijschips bij een dagmenu.
+  prijs2Chip: DAGHAP_PUBLIEK.prijs2,
+  prijs3Chip: DAGHAP_PUBLIEK.prijs3,
   directlyVisible: "Direct zichtbaar bij 'Vandaag' en in de zoekresultaten.",
   naamLabel: 'Naam',
   naamHint: '3 tot 80 tekens.',
@@ -357,6 +378,22 @@ function verloopTekst({ soort, verlooptOp, herhaalWeekdagen, herhaalTot } = {}) 
   return `Online tot en met ${DAG_DELEN.format(new Date(moment))}`;
 }
 
+/**
+ * BE-67, uitkomst 5: het korte herhaallabel bij de bezoeker, bijvoorbeeld
+ * "elke di en do". Zonder weekdagen is er geen herhaling en dus geen label.
+ */
+function herhaalKort({ herhaalWeekdagen } = {}) {
+  const dagen = (Array.isArray(herhaalWeekdagen) ? herhaalWeekdagen : [])
+    .map(Number)
+    .filter((dag) => WEEKDAG_LABELS[dag]);
+  if (dagen.length === 0) return '';
+  const namen = [...new Set(dagen)].sort((a, b) => a - b).map((dag) => WEEKDAG_KORT[dag]);
+  const op = namen.length > 1
+    ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}`
+    : namen[0];
+  return `elke ${op}`;
+}
+
 /** De tekenteller onder het beschrijvingsveld: `"42/140"`. */
 function beschrijvingTeller(value) {
   return `${[...tekst(value)].length}/${DAGHAP_BESCHRIJVING_MAX}`;
@@ -365,6 +402,7 @@ function beschrijvingTeller(value) {
 module.exports = {
   FORMULIER_VELDEN,
   FORM_MESSAGES,
+  GANG_KORT,
   GANG_LABELS,
   LABEL_LABELS,
   SOORT_LABELS,
@@ -376,6 +414,7 @@ module.exports = {
   datumInAmsterdam,
   foutmeldingen,
   formulierVanAanbod,
+  herhaalKort,
   leegFormulier,
   prijsInvoer,
   statusLabel,

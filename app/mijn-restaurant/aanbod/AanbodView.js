@@ -19,7 +19,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
 import { eigenRestaurants } from '@/src/lib/ownerAanbod'
-import { DAGHAP_LABELS } from '@/src/lib/daghapAanbod'
+import { DAGHAP_LABELS, isUitverkochtVandaag } from '@/src/lib/daghapAanbod'
 import {
   FORM_MESSAGES,
   GANG_LABELS,
@@ -267,6 +267,42 @@ export default function AanbodView({ restaurantIndex }) {
         return
       }
       setMelding(FORM_MESSAGES.offlineDone)
+      await laadAanbod(session.access_token, restaurantId)
+    } catch (error) {
+      setFout(FORM_MESSAGES.genericError)
+    } finally {
+      setBezig(false)
+    }
+  }
+
+  // BE-67, uitkomst 3: Op = op. Eén knop zet het aanbod op "uitverkocht voor
+  // vandaag" en dezelfde knop maakt dat weer ongedaan ("Toch weer
+  // beschikbaar"). De stand is een datum; morgen is het aanbod dus vanzelf weer
+  // beschikbaar en hoeft de houder niets terug te zetten.
+  async function zetUitverkocht(item, stand) {
+    if (!session || bezig) return
+    setBezig(true)
+    setFout('')
+    setMelding('')
+    try {
+      const res = await fetch(`/api/v1/daghap/${encodeURIComponent(item.id)}/uitverkocht`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uitverkocht: stand }),
+      })
+      if (res.status === 401) {
+        router.replace(LOGIN_HREF)
+        return
+      }
+      const antwoord = await leesJson(res)
+      if (!res.ok) {
+        setFout(antwoord.message || FORM_MESSAGES.genericError)
+        return
+      }
+      setMelding(stand ? FORM_MESSAGES.opIsOpDone : FORM_MESSAGES.opIsOpWeerDone)
       await laadAanbod(session.access_token, restaurantId)
     } catch (error) {
       setFout(FORM_MESSAGES.genericError)
@@ -666,11 +702,16 @@ export default function AanbodView({ restaurantIndex }) {
                 <p className="owner-note">{FORM_MESSAGES.onlineEmpty}</p>
               ) : (
                 <ul className="owner-list">
-                  {aanbod.map((item) => (
+                  {aanbod.map((item) => {
+                    // BE-67, uitkomst 3: alleen een datum gelijk aan vandaag
+                    // telt, dus de stand van gisteren is vanzelf vervallen.
+                    const uitverkocht = isUitverkochtVandaag(item.uitverkochtOp, Date.now())
+                    return (
                     <li className="owner-card aanbod-card" key={item.id}>
                       <div className="owner-card-head">
-                        <h3 className="owner-restaurant-name">{item.naam}</h3>
+                        <h3 className={`owner-restaurant-name${uitverkocht ? ' aanbod-uitverkocht-naam' : ''}`}>{item.naam}</h3>
                         <span className={`aanbod-status aanbod-status--${item.status}`}>{statusLabel(item.status)}</span>
+                        {uitverkocht && <span className="aanbod-uitverkocht-label">{FORM_MESSAGES.uitverkochtLabel}</span>}
                       </div>
                       <p className="owner-note">
                         {SOORT_LABELS[item.soort] || item.soort} · {item.prijs}
@@ -699,6 +740,15 @@ export default function AanbodView({ restaurantIndex }) {
                         <button type="button" className="owner-link aanbod-knop" onClick={() => beginAanpassen(item)}>
                           {FORM_MESSAGES.adjust}
                         </button>
+                        {/* BE-67, uitkomst 3: Op = op heen en terug. */}
+                        <button
+                          type="button"
+                          className="owner-link aanbod-knop"
+                          onClick={() => zetUitverkocht(item, !uitverkocht)}
+                          disabled={bezig || item.status === 'offline'}
+                        >
+                          {uitverkocht ? FORM_MESSAGES.opIsOpWeer : FORM_MESSAGES.opIsOpKnop}
+                        </button>
                         <button
                           type="button"
                           className="owner-link aanbod-knop"
@@ -709,7 +759,8 @@ export default function AanbodView({ restaurantIndex }) {
                         </button>
                       </div>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
               )}
               <p className="owner-note">{FORM_MESSAGES.onlineLimit}</p>

@@ -40,6 +40,15 @@ const DAGHAP_TIJDZONE = 'Europe/Amsterdam';
 const DAGHAP_IN_CONTROLE_MESSAGE = 'Wordt kort gecontroleerd.';
 
 /** De meldingen van de API: één zin per weigering, nooit een technische fout. */
+// BE-67: de korte labels die een bezoeker ziet (het blok "Vandaag" en de home).
+// Ze staan hier en niet in daghapFormulier, zodat de eerste lading van de
+// publieke routes niet met het formulier groeit (zie commit 6818fba).
+const DAGHAP_PUBLIEK = Object.freeze({
+  uitverkocht: 'Op = op · uitverkocht',
+  prijs2: '2 gangen',
+  prijs3: '3 gangen',
+});
+
 const DAGHAP_MESSAGES = Object.freeze({
   naam: 'Gebruik een naam van 3 tot 80 tekens.',
   prijs: 'Vul een prijs tussen € 0,50 en € 150 in.',
@@ -67,6 +76,9 @@ const DAGHAP_MESSAGES = Object.freeze({
   geenEigenaar: 'Je bent geen houder van dit restaurant.',
   geenPlaatsrecht: 'Je mag voor dit restaurant geen aanbod meer plaatsen. Neem contact op met BredaEats.',
   inloggen: 'Log in om je aanbod te beheren.',
+  // BE-67: de twee standen van de Op = op-knop (uitkomst 3).
+  uitverkocht: 'Dit aanbod staat vandaag op uitverkocht.',
+  weerBeschikbaar: 'Dit aanbod is weer beschikbaar.',
 });
 
 
@@ -173,6 +185,7 @@ function heeftOnbekendLabel(value) {
 
 module.exports = {
   DAGHAP_ACTIEVE_STATUSSEN,
+  DAGHAP_PUBLIEK,
   DAGHAP_BESCHRIJVING_MAX,
   DAGHAP_FOUTEN,
   DAGHAP_GANGEN,

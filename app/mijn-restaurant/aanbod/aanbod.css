@@ -254,3 +254,21 @@
   margin-top: 8px;
 }
 
+
+/* BE-67, uitkomst 3 — Op = op in het overzicht van de houder. De naam van een
+   uitverkocht aanbod is doorgestreept, met het label ernaast; de knop zegt dan
+   "Toch weer beschikbaar". Kleuren alleen via de tokens. */
+.aanbod-uitverkocht-naam {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.aanbod-uitverkocht-label {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+  border: 1px solid var(--status-blocked-border);
+  white-space: nowrap;
+}

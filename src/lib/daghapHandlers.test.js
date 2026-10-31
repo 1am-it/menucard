@@ -957,3 +957,83 @@ test('BE-67: een dagmenu wijzigen houdt de gangen en de herhaling bij', async ()
   assert.equal(gewijzigd.body.aanbod.verlooptOp, '2026-12-24T22:59:00.000Z');
 });
 
+// --- BE-67, uitkomst 3: Op = op -----------------------------------------------
+
+function uitverkochtRequest(stand, { id = 1, headers = {} } = {}) {
+  return request(
+    { uitverkocht: stand },
+    { url: `http://localhost/api/v1/daghap/${id}/uitverkocht`, headers },
+  );
+}
+
+test('BE-67: Op = op zet de datum van vandaag en "Toch weer beschikbaar" maakt hem leeg', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const handlers = handlersFor(client);
+
+  const uit = await handlers.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' });
+  assert.equal(uit.status, 200, JSON.stringify(uit.body));
+  // NOW is 30 oktober 11:00 UTC = 12:00 in Europe/Amsterdam: dezelfde dag.
+  assert.equal(uit.body.aanbod.uitverkochtOp, '2026-10-30');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, '2026-10-30');
+  assert.equal(geschiedenis(client).at(-1).actie, 'uitverkocht');
+  assert.equal(geschiedenis(client).at(-1).aanbod_id, 1);
+
+  const terug = await handlers.uitverkochtAanbod(uitverkochtRequest(false), { id: '1' });
+  assert.equal(terug.status, 200, JSON.stringify(terug.body));
+  assert.equal(terug.body.aanbod.uitverkochtOp, undefined, 'geen stand meer in het antwoord');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, null);
+  assert.equal(geschiedenis(client).at(-1).actie, 'beschikbaar');
+});
+
+test('BE-67: Op = op vraagt dezelfde autorisatie als wijzigen', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const zonderSessie = handlersFor(client, { authenticate: async () => ({ ok: false, status: 401 }) });
+  assert.equal((await zonderSessie.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 401);
+
+  // Ingelogd, maar geen houder van dít restaurant.
+  const andereHouder = handlersFor(client, { authenticate: async () => ({ ok: true, userId: OTHER_ID }) });
+  assert.equal((await andereHouder.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 403);
+
+  // Wel houder, maar het plaatsrecht is afgenomen.
+  const zonderRecht = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    plaatsrecht: [{ restaurant_id: RESTAURANT_ID, user_id: OWNER_ID }],
+  });
+  const metRecht = handlersFor(zonderRecht);
+  assert.equal((await metRecht.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 403);
+
+  // Een onbekend aanbod en een ongeldige stand zijn geen uitzondering.
+  const handlers = handlersFor(client);
+  assert.equal((await handlers.uitverkochtAanbod(uitverkochtRequest(true), { id: '999' })).status, 404);
+  const ongeldig = await handlers.uitverkochtAanbod(
+    request({ uitverkocht: 'ja' }, { url: 'http://localhost/api/v1/daghap/1/uitverkocht' }),
+    { id: '1' },
+  );
+  assert.equal(ongeldig.status, 400);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, undefined, 'niets geschreven');
+});
+
+test('BE-67: de stand van gisteren is vervallen, die van vandaag telt', async () => {
+  const gisteren = fakeSupabase({ aanbod: [{ id: 1, uitverkocht_op: '2026-10-29' }] });
+  const vandaag = fakeSupabase({ aanbod: [{ id: 2, uitverkocht_op: '2026-10-30' }] });
+
+  const oud = await handlersFor(gisteren).publiekAanbod(
+    request(null, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+  assert.equal(oud.status, 200);
+  assert.equal(oud.body.aanbod[0].uitverkocht, undefined, 'de stand van gisteren telt niet meer');
+
+  const nu = await handlersFor(vandaag).publiekAanbod(
+    request(null, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+  assert.equal(nu.body.aanbod[0].uitverkocht, true);
+});
+
+test('BE-67: zonder 0026 is Op = op een nette 503 en geen 500', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }], ontbrekendeKolommen: ['uitverkocht_op'] });
+  const uitkomst = await handlersFor(client).uitverkochtAanbod(uitverkochtRequest(true), { id: '1' });
+  assert.equal(uitkomst.status, 503);
+  assert.equal(uitkomst.body.error, 'daghap_unavailable');
+});
+
+

@@ -806,8 +806,11 @@ function aanbodVoorScherm(rij) {
  * Het aanbod zoals een gast het ziet (stap B): alleen wat de weergave nodig
  * heeft, nooit het account, de status of de filterreden. Een gast krijgt dus
  * geen enkele interne kolom en ook geen volledige lijst van alle restaurants.
+ *
+ * `nu` is de klok van de aanroeper (standaard `Date.now()`), zodat de stand
+ * "uitverkocht" in Europe/Amsterdam te testen is zonder de systeemklok.
  */
-function publiekAanbodVoorScherm(rij) {
+function publiekAanbodVoorScherm(rij, nu) {
   if (!rij || typeof rij !== 'object') return null;
   const prijsCent = Number(rij.prijs_cent);
   return {
@@ -827,7 +830,7 @@ function publiekAanbodVoorScherm(rij) {
     ...(rij.prijs_3_cent === undefined || rij.prijs_3_cent === null
       ? {}
       : { prijs3Cent: Number(rij.prijs_3_cent), prijs3: centenNaarPrijs(rij.prijs_3_cent) }),
-    ...(isUitverkochtVandaag(rij.uitverkocht_op, Date.now()) ? { uitverkocht: true } : {}),
+    ...(isUitverkochtVandaag(rij.uitverkocht_op, nu) ? { uitverkocht: true } : {}),
   };
 }
 
