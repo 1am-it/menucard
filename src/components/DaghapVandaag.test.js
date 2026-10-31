@@ -81,3 +81,33 @@ test('BE-55: de band van de menupagina heeft eigen opmaak buiten globals.css', (
   assert.match(css, /\.daghap-band\s*\{[\s\S]*?max-width: var\(--max-w\)/, 'de band volgt de paginabreedte via een token');
   assert.doesNotMatch(css, /:\s*#[0-9a-fA-F]{3,8}\b|:\s*rgba?\(|:\s*hsla?\(/, 'kleuren komen uit tokens, geen losse kleurwaarden');
 });
+
+test("BE-67: het blok Vandaag toont een dagmenu per gang, met beide prijzen", () => {
+  const component = read(COMPONENT_PATH);
+  // De gangen als regels Voor / Hoofd / Na, met het hoofdgerecht vet (css).
+  assert.match(component, /GANG_KORT\[gang\.gang\]/, "de korte gangnaam komt uit de lib");
+  assert.match(component, /className={`daghap-vandaag-gang daghap-vandaag-gang--\$\{gang\.gang\}`}/,
+    "elke gang heeft een eigen regel");
+  assert.match(component, /FORM_MESSAGES\.prijs2Chip/, "de chip 2 gangen staat er");
+  assert.match(component, /FORM_MESSAGES\.prijs3Chip/, "de chip 3 gangen staat er");
+  assert.match(component, /herhaalKort\(/, "het label elke di en do komt uit de lib");
+  // Op = op: grijs, doorgestreept en met de badge; het blijft in de lijst staan.
+  assert.match(component, /daghap-vandaag-card--uitverkocht/);
+  assert.match(component, /daghap-vandaag-name--uitverkocht/);
+  assert.match(component, /FORM_MESSAGES\.uitverkochtBadge/);
+  const css = read("src/components/daghap-vandaag.css");
+  assert.match(css, /\.daghap-vandaag-name--uitverkocht \{[^}]*line-through/s, "de naam is doorgestreept");
+  assert.match(css, /\.daghap-vandaag-gang--hoofd \.daghap-vandaag-gang-naam \{[^}]*font-weight: 600/s,
+    "het hoofdgerecht is vet");
+});
+
+test("BE-67: het houderoverzicht heeft Op = op en de drie cijfers", () => {
+  const view = read("app/mijn-restaurant/aanbod/AanbodView.js");
+  assert.match(view, /onClick=\{\(\) => zetUitverkocht\(item, !uitverkocht\)\}/, "de knop wisselt tussen Op = op en Toch weer beschikbaar");
+  assert.match(view, /FORM_MESSAGES\.opIsOpWeer : FORM_MESSAGES\.opIsOpKnop/);
+  assert.match(view, /\/uitverkocht`, \{/, "de knop praat met de eigen route");
+  assert.match(view, /FORM_MESSAGES\.uitverkochtLabel/, "het label Uitverkocht staat er");
+  assert.match(view, /item\.cijfers\.bekekenTekst/);
+  assert.match(view, /item\.cijfers\.bewaardTekst/);
+  assert.match(view, /item\.cijfers\.gedeeldTekst/);
+});

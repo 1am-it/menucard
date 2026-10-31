@@ -844,6 +844,10 @@ function publiekAanbodVoorScherm(rij, nu) {
     ...(rij.prijs_3_cent === undefined || rij.prijs_3_cent === null
       ? {}
       : { prijs3Cent: Number(rij.prijs_3_cent), prijs3: centenNaarPrijs(rij.prijs_3_cent) }),
+    // BE-67: een herhaling leest bij de bezoeker als "elke di en do".
+    ...(Array.isArray(rij.herhaal_weekdagen)
+      ? { herhaalWeekdagen: normaliseerWeekdagen(rij.herhaal_weekdagen) }
+      : {}),
     ...(isUitverkochtVandaag(rij.uitverkocht_op, nu) ? { uitverkocht: true } : {}),
   };
 }

@@ -32,7 +32,9 @@ const { MISSING_STORAGE_CODES, withTimeout } = require('./dishCounters');
 const {
   DAGHAP_FOUTEN,
   DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_MAX_GANGEN,
   DAGHAP_MESSAGES,
+  DAGHAP_SOORTEN,
   DAGHAP_STATUS_CONTROLE,
   DAGHAP_STATUS_OFFLINE,
   DAGHAP_STATUS_ONLINE,
@@ -47,7 +49,9 @@ const {
   magSoortToevoegen,
   magVandaagWijzigen,
   normaliseerAanbod,
+  normaliseerGangen,
   publiekAanbodVoorScherm,
+  staatOnlineVandaag,
   vandaagInAmsterdam,
 } = require('./daghapAanbod');
 
@@ -750,6 +754,22 @@ function createDaghapHandlers({
   }
 
   /**
+   * BE-67, uitkomst 2: staat dit aanbod vandaag online in Europe/Amsterdam?
+   * Eén regel voor beide publieke routes en voor het zoeken, zodat "alleen
+   * vandaag" en "elke week op" overal hetzelfde werken. Een rij zonder de
+   * kolommen van 0026 telt als "alleen vandaag" (dat is wat 0023 al deed).
+   */
+  function onlineVandaag(rij) {
+    return staatOnlineVandaag({
+      verlooptOp: rij && rij.verloopt_op,
+      herhaalWeekdagen: rij && rij.herhaal_weekdagen,
+      herhaalTot: rij && rij.herhaal_tot,
+      uitverkochtOp: rij && rij.uitverkocht_op,
+      nu: now(),
+    }).online;
+  }
+
+  /**
    * BE-67, uitkomst 4: het aantal keer bekeken, bewaard en gedeeld van elk
    * aanbod vandaag (Europe/Amsterdam). De bestaande gebeurtenissentabel van 0023
    * telt ze; er is geen nieuwe tabel en geen nieuwe teller. Ontbreekt de tabel of
@@ -917,6 +937,9 @@ function createDaghapHandlers({
     // databank en de klok van de server even uit elkaar lopen.
     const aanbod = rijen
       .filter((rij) => !isVerlopen(rij.verloopt_op, now()))
+      // BE-67, uitkomst 2: een herhaling geldt alleen op de gekozen weekdagen,
+      // tot en met de einddatum, in Europe/Amsterdam.
+      .filter(onlineVandaag)
       .map((rij) => publiekAanbodVoorScherm(rij, now()))
       .filter(Boolean);
     // BE-67, uitkomst 4: telt wat de gast ziet. Best effort; een fout hier
@@ -968,6 +991,7 @@ function createDaghapHandlers({
       .map(({ rij }) => rij);
 
     const aanbod = geschud
+      .filter(onlineVandaag)
       .slice(0, gevraagd)
       .map((rij) => {
         const scherm = publiekAanbodVoorScherm(rij, now());
@@ -1115,14 +1139,19 @@ function createDaghapHandlers({
     const supabase = client();
     if (!supabase) return UNAVAILABLE;
 
-    const gevonden = await ask(
-      supabase
+    // BE-67, uitkomst 5: een gast zoekt op de naam van een gang. Daarom leest
+    // deze lijst ook de gangen (0026) en de herhaling, met de kolommen van 0023
+    // als terugval zonder 0026.
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select('restaurant_id, soort, naam')
+        .select(kolommen)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true })
         .limit(DAGHAP_ZOEK_KANDIDATEN),
+      'restaurant_id, soort, naam',
+      'restaurant_id, soort, naam, gangen, herhaal_weekdagen, herhaal_tot, uitverkocht_op',
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -1130,10 +1159,21 @@ function createDaghapHandlers({
     for (const rij of Array.isArray(gevonden.data) ? gevonden.data : []) {
       const restaurantId = rij && rij.restaurant_id;
       if (!restaurantId) continue;
+      // Een herhaling die vandaag niet geldt, hoort niet in het zoeken.
+      if (!onlineVandaag(rij)) continue;
       if (!perRestaurant[restaurantId]) perRestaurant[restaurantId] = [];
       perRestaurant[restaurantId].push({
-        soort: rij.soort === 'seizoensgerecht' ? 'seizoensgerecht' : 'daghap',
+        soort: DAGHAP_SOORTEN.includes(rij.soort) ? rij.soort : 'daghap',
         naam: tekst(rij.naam).slice(0, 80),
+        // De gangnamen, zodat een zoekopdracht op "pompoensoep" het restaurant
+        // vindt; nooit meer dan de namen zelf.
+        ...(Array.isArray(rij.gangen)
+          ? {
+            gangen: normaliseerGangen(rij.gangen)
+              .map((gang) => gang.naam)
+              .slice(0, DAGHAP_MAX_GANGEN),
+          }
+          : {}),
       });
     }
 

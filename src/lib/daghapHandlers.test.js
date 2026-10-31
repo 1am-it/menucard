@@ -1099,3 +1099,63 @@ test('BE-67: zonder de tellerkolommen blijft het overzicht werken, zonder cijfer
 });
 
 
+
+// --- BE-67, uitkomst 2 en 5: de herhaling bij de bezoeker en zoeken op een gang ---
+
+test("BE-67: de publieke routes tonen een herhaling alleen op de gekozen weekdag", async () => {
+  // NOW is vrijdag 30 oktober 2026 (weekdag 5).
+  const vrijdag = fakeSupabase({
+    aanbod: [{ id: 1, herhaal_weekdagen: [5], herhaal_tot: "2026-12-31" }],
+  });
+  const maandag = fakeSupabase({
+    aanbod: [{ id: 1, herhaal_weekdagen: [1, 3], herhaal_tot: "2026-12-31" }],
+  });
+
+  const opVrijdag = await handlersFor(vrijdag).publiekAanbod(request(null));
+  assert.equal(opVrijdag.body.aanbod.length, 1, "vrijdag staat het aanbod er wel");
+  assert.deepEqual(opVrijdag.body.aanbod[0].herhaalWeekdagen, [5], "het label elke vr kan lezen");
+
+  const opMaandag = await handlersFor(maandag).publiekAanbod(request(null));
+  assert.equal(opMaandag.body.aanbod.length, 0, "op een niet-gekozen dag staat het er niet");
+
+  const vandaagLijst = await handlersFor(maandag).publiekVandaag(request(null));
+  assert.equal(vandaagLijst.body.aanbod.length, 0, "ook de home volgt de herhaling");
+
+  const zoek = await handlersFor(maandag).zoekAanbod();
+  assert.deepEqual(zoek.body.aanbod, {}, "en het zoeken ook");
+});
+
+test("BE-67: zoeken op een gangnaam geeft het restaurant met de gangnamen terug", async () => {
+  const client = fakeSupabase({
+    aanbod: [
+      {
+        id: 1,
+        soort: "dagmenu",
+        naam: "Herfstmenu",
+        gangen: [
+          { gang: "voor", naam: "Pompoensoep" },
+          { gang: "hoofd", naam: "Hertenstoof" },
+        ],
+      },
+    ],
+  });
+  const zoek = await handlersFor(client).zoekAanbod();
+  assert.equal(zoek.status, 200);
+  assert.deepEqual(zoek.body.aanbod["1"], [{
+    soort: "dagmenu",
+    naam: "Herfstmenu",
+    gangen: ["Pompoensoep", "Hertenstoof"],
+  }]);
+});
+
+test("BE-67: zonder 0026 geeft zoeken en de publieke GET geen fout", async () => {
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    ontbrekendeKolommen: ["gangen", "prijs_3_cent", "herhaal_weekdagen", "herhaal_tot", "uitverkocht_op"],
+  });
+  const zoek = await handlersFor(client).zoekAanbod();
+  assert.equal(zoek.status, 200);
+  assert.equal(zoek.body.aanbod["1"][0].gangen, undefined, "geen gangen zonder 0026");
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
+});
