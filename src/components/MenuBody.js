@@ -7,11 +7,17 @@
 
 import Link from 'next/link'
 import Emoji from '@/src/components/Emoji'
-// BE-62 — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?". De opmaak
-// staat hier zelf en niet in een extra component: dit vlak hoort de eerste
-// lading van de menukaart niet te laten groeien (contract, acceptatie 3).
+// BE-62 — bij een gedeeld gerecht hetzelfde vlak als bij een gedeeld lijstje en
+// op /kies: één component, één stylesheet (src/components/ZoekGerechtBlock.js).
+// Ronde 1 zette de opmaak hier zelf neer om bytes te sparen, maar dan laadde de
+// menukaart de bijbehorende CSS nooit en stond het vlak zonder vorm in de
+// pagina. Eén component kost enkele honderden bytes en houdt het vlak overal
+// gelijk; de eerste lading blijft binnen de grens van 1 KB (zie
+// ops/browser/evidence/be62-build-size-evidence.json).
 import DishShareButton from '@/src/components/DishShareButton'
+import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
+import { SHARED_RETURN_BODY, SHARED_RETURN_CTA, SHARED_RETURN_TITLE } from '@/src/lib/returnVisit'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
 import { honestPriceLabel } from '@/src/lib/menuPrice'
@@ -145,6 +151,7 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
   const displayQuery = isResolvedTarget && highlightQuery ? highlightQuery : query
 
   return (
+    <>
     <div
       ref={innerRef}
       id={domId || undefined}
@@ -154,16 +161,6 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       {/* BE-44 (#105, criterium 2) — de ontvanger van een gedeelde link ziet
           deze regel boven de hele kaart van het opgelichte gerecht. */}
       {shareNote && <div className="dish-share-note">{SHARED_DISH_NOTE}</div>}
-      {/* BE-62 (#153, ontwerp punt 2) — alleen bij een gedeelde link, direct
-          onder de regel hierboven. De Bewaar-knop staat al in de voet van deze
-          kaart (DishShareButton) en houdt de bestaande bewaarlogica. */}
-      {shareNote && (
-        <section className="zoek-gerecht zoek-gerecht--dish">
-          <h2 className="zoek-gerecht-title">Zelf ook zin in iets?</h2>
-          <p className="zoek-gerecht-body">Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.</p>
-          <Link href="/" className="zoek-gerecht-btn" prefetch={false}>Zoek een gerecht</Link>
-        </section>
-      )}
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
@@ -270,6 +267,20 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         )}
       </div>
     </div>
+    {/* BE-62 (#153, ontwerp punt 2) — pas ná het gedeelde gerecht: eerst de
+        regel "Iemand deelde dit gerecht met je", dan de kaart met de bestaande
+        Bewaar-knop, en dan dit eigen vlak. Het staat als broer van de kaart in
+        dezelfde grid (en spant over de volle breedte, zie
+        zoek-gerecht-block.css), zodat het niet met de kaart samenvloeit. */}
+    {shareNote && (
+      <ZoekGerechtBlock
+        variant="dish"
+        title={SHARED_RETURN_TITLE}
+        body={SHARED_RETURN_BODY}
+        cta={SHARED_RETURN_CTA}
+      />
+    )}
+    </>
   )
 }
 

@@ -47,19 +47,29 @@ test('BE-62: /kies toont de vraag alleen na een eigen stem', () => {
   assert.ok(results.indexOf('<ZoekGerechtBlock') > 0, 'het vlak staat in de uitslag');
 });
 
-test('BE-62: een gedeeld gerecht krijgt het vlak onder de deelregel, met Bewaar', () => {
-  // De opmaak staat hier zelf (geen extra component), zodat de eerste lading
-  // van de menukaart niet groeit.
-  assert.doesNotMatch(MENU_BODY, /import ZoekGerechtBlock/);
-  // Deelregel en vlak delen dezelfde voorwaarde; het vlak staat er direct na.
-  assert.match(MENU_BODY, /\{shareNote && <div className="dish-share-note">\{SHARED_DISH_NOTE\}<\/div>\}/);
-  const after = MENU_BODY.slice(MENU_BODY.indexOf('{shareNote && <div className="dish-share-note">'));
-  assert.match(after, /\{shareNote && \(\s*<section className="zoek-gerecht zoek-gerecht--dish">/);
-  assert.equal(MENU_BODY.match(/className="zoek-gerecht zoek-gerecht--dish"/g).length, 1);
-  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_TITLE}<`));
-  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_BODY}<`));
-  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_CTA}<`));
-  assert.match(MENU_BODY, /<Link href="\/" className="zoek-gerecht-btn" prefetch=\{false\}>/);
+test('BE-62: een gedeeld gerecht krijgt hetzelfde vlak ná de kaart met Bewaar', () => {
+  // Eén component en één stylesheet voor alle drie de plekken: de menukaart, het
+  // gedeelde lijstje en /kies. Ronde 1 zette de opmaak hier zelf neer; dan laadde
+  // de menukaart de CSS nooit en stond het vlak zonder vorm in de pagina.
+  assert.match(MENU_BODY, /import ZoekGerechtBlock from '@\/src\/components\/ZoekGerechtBlock'/);
+  assert.match(MENU_BODY, /import \{ SHARED_RETURN_BODY, SHARED_RETURN_CTA, SHARED_RETURN_TITLE \} from '@\/src\/lib\/returnVisit'/);
+  assert.equal(MENU_BODY.match(/<ZoekGerechtBlock/g).length, 1);
+  assert.match(MENU_BODY, /<ZoekGerechtBlock\s+variant="dish"\s+title=\{SHARED_RETURN_TITLE\}\s+body=\{SHARED_RETURN_BODY\}\s+cta=\{SHARED_RETURN_CTA\}/);
+  // Geen tweede kopie van de opmaak in dit bestand.
+  assert.equal(MENU_BODY.includes('className="zoek-gerecht zoek-gerecht--dish"'), false);
+  // De volgorde in de markup (review ronde 2, punt 2): eerst de deelregel, dan
+  // het gedeelde gerecht met de bestaande Bewaar-knop, en pas daarna het vlak.
+  const note = MENU_BODY.indexOf('{shareNote && <div className="dish-share-note">');
+  const save = MENU_BODY.indexOf('entry={saveEntry}');
+  const block = MENU_BODY.indexOf('<ZoekGerechtBlock');
+  assert.ok(note > 0, 'de deelregel ontbreekt');
+  assert.ok(save > note, 'de Bewaar-knop hoort ná de deelregel');
+  assert.ok(block > save, 'het vlak hoort ná het gedeelde gerecht met Bewaar');
+  // En het vlak staat buiten de gerechtkaart: tussen Bewaar en het vlak sluiten
+  // de voet van de kaart en de kaart zelf.
+  assert.match(MENU_BODY.slice(save, block), /<\/div>\s*<\/div>/, 'het vlak staat nog in de gerechtkaart');
+  // Deelregel en vlak delen dezelfde voorwaarde (alleen bij een gedeelde link).
+  assert.match(MENU_BODY, /\{shareNote && \(/);
   // De bestaande bewaarknop blijft op de kaart staan (Bewaar + Delen).
   assert.match(MENU_BODY, /<DishShareButton[\s\S]*?entry=\{saveEntry\}/);
   // En de deelregel verschijnt alleen bij een gedeelde link, zoals voorheen.
@@ -118,6 +128,16 @@ test('BE-62: de opmaak staat in eigen bestanden met alleen tokens', () => {
   assert.match(BLOCK_CSS, /var\(--bg-elevated\)/);
   assert.match(BLOCK_CSS, /var\(--accent-fill\)/);
   assert.match(BLOCK_CSS, /var\(--on-accent-fill\)/);
+  // De vorm uit de review van ronde 2: eigen vlak, radius 16, padding 16-18,
+  // h2 op 18/800, tekst op 14 in --text-secondary en een knop van 46 px hoog.
+  assert.match(BLOCK_CSS, /border-radius: 16px/);
+  assert.match(BLOCK_CSS, /padding: 1[68]px/);
+  assert.match(BLOCK_CSS, /margin: 16px 0/);
+  assert.match(BLOCK_CSS, /\.zoek-gerecht-title \{[^}]*font-size: 18px[^}]*font-weight: 800/);
+  assert.match(BLOCK_CSS, /\.zoek-gerecht-body \{[^}]*font-size: 14px[^}]*color: var\(--text-secondary\)/);
+  assert.match(BLOCK_CSS, /\.zoek-gerecht-btn \{[^}]*min-height: 46px/);
+  // In de menukaart spant het vlak de volle breedte van de gerechtengrid.
+  assert.match(BLOCK_CSS, /\.zoek-gerecht--dish \{ grid-column: 1 \/ -1; \}/);
   assert.match(TIP_CSS, /var\(--bg-card\)/);
   assert.match(TIP_CSS, /var\(--border-focus\)/);
   // De tip hoort bij de telefoon; dezelfde grens als het ontwerp.
