@@ -21,6 +21,8 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import ListShareButton from '@/src/components/ListShareButton'
 import KiesStartButton from '@/src/components/KiesStartButton'
 import Wordmark from '@/src/components/Wordmark'
+// BE-62 — bij een gedeeld lijstje hetzelfde vlak als bij een gerecht.
+import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
 import {
   ADD_TO_OWN_LIST_LABEL,
   LIST_PAGE,
@@ -144,6 +146,15 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
                 <Link href={LIST_PAGE} className="lijst-link">{VIEW_LIST_LABEL}</Link>
               ) : null}
             </div>
+            {/* BE-62, ontwerp punt 3 — dezelfde uitnodiging als bij een
+                gedeeld gerecht. Het lijstje in je eigen lijstje zetten kan al
+                met de knop hierboven (bestaande logica). */}
+            <ZoekGerechtBlock
+              title="Zelf ook zin in iets?"
+              body="Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig."
+              cta="Zoek een gerecht"
+              variant="list"
+            />
           </>
         ) : own.length === 0 ? (
           <>

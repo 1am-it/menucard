@@ -402,8 +402,8 @@ test('de eigen stand gaat in localStorage en komt er heel uit', () => {
   const storage = memoryStorage();
   const written = writeKiesProgress(storage, CODE, { stemmer: STEMMER, roepnaam: ' Sam ', gestemd: ['a', 'a', 'b'] });
   assert.equal(written.ok, true);
-  assert.deepEqual(written.progress, { stemmer: STEMMER, roepnaam: 'Sam', gestemd: ['a', 'b'] });
-  assert.deepEqual(readKiesProgress(storage, CODE), { stemmer: STEMMER, roepnaam: 'Sam', gestemd: ['a', 'b'] });
+  assert.deepEqual(written.progress, { stemmer: STEMMER, roepnaam: 'Sam', gestemd: ['a', 'b'], lekker: [] });
+  assert.deepEqual(readKiesProgress(storage, CODE), { stemmer: STEMMER, roepnaam: 'Sam', gestemd: ['a', 'b'], lekker: [] });
   assert.ok(storage.dump()[KIES_PROGRESS_KEY], 'één sleutel voor alle stemmingen');
   assert.equal(readKiesProgress(storage, 'A'.repeat(21)), null, 'een andere code heeft een eigen stand');
 });

@@ -495,7 +495,53 @@ function normalizeKiesProgress(value) {
   const gestemd = Array.isArray(value.gestemd)
     ? [...new Set(value.gestemd.map(textOf).filter(Boolean))]
     : [];
-  return { stemmer, roepnaam, gestemd };
+  // BE-62 (#153) — de volgorde van de eigen "lekker"-stemmen, zodat /kies na
+  // het stemmen kan zeggen: "Jij koos <gerecht>". Alleen in deze browser; er
+  // gaat nog steeds niets extra naar de server. Een id dat niet meer bij
+  // `gestemd` hoort, valt weg.
+  const lekker = [];
+  if (Array.isArray(value.lekker)) {
+    for (const key of value.lekker.map(textOf)) {
+      if (key && gestemd.includes(key) && !lekker.includes(key)) lekker.push(key);
+    }
+  }
+  return { stemmer, roepnaam, gestemd, lekker };
+}
+
+/**
+ * De volgende stand van de eigen stemmen na één stem. `gestemd` houdt de
+ * volgorde van beoordelen aan; `lekker` onthoudt in welke volgorde deze
+ * bezoeker iets "lekker" vond en zakt terug als de stem "liever niet" wordt.
+ */
+function nextVotedDishes(progress, { dishKey, lekker } = {}) {
+  const key = textOf(dishKey);
+  const gestemd = ((progress && Array.isArray(progress.gestemd)) ? progress.gestemd : [])
+    .map(textOf).filter(Boolean);
+  const liked = ((progress && Array.isArray(progress.lekker)) ? progress.lekker : [])
+    .map(textOf).filter(Boolean);
+  if (!key) return { gestemd: [...new Set(gestemd)], lekker: [...new Set(liked)] };
+  const nextGestemd = [...new Set([...gestemd.filter((item) => item !== key), key])];
+  const nextLekker = lekker === true
+    ? (liked.includes(key) ? liked : [...liked, key])
+    : liked.filter((item) => item !== key);
+  return {
+    gestemd: nextGestemd,
+    lekker: [...new Set(nextLekker.filter((item) => nextGestemd.includes(item)))],
+  };
+}
+
+/** De laatste stem ongedaan maken: dezelfde stand als vóór die stem. */
+function undoVotedDishes(progress) {
+  const gestemd = ((progress && Array.isArray(progress.gestemd)) ? progress.gestemd : [])
+    .map(textOf).filter(Boolean);
+  const liked = ((progress && Array.isArray(progress.lekker)) ? progress.lekker : [])
+    .map(textOf).filter(Boolean);
+  if (gestemd.length === 0) return { gestemd: [], lekker: [...new Set(liked)] };
+  const removed = gestemd[gestemd.length - 1];
+  return {
+    gestemd: gestemd.slice(0, -1),
+    lekker: liked.filter((item) => item !== removed),
+  };
 }
 
 function readKiesProgressMap(storage) {
@@ -630,6 +676,7 @@ module.exports = {
   lastVoteOf,
   mapsRouteHref,
   nextDishIndex,
+  nextVotedDishes,
   normalizeDishKeys,
   normalizeKiesCode,
   normalizeLekker,
@@ -645,6 +692,7 @@ module.exports = {
   stemmingResult,
   swipeFeedback,
   swipeOutcome,
+  undoVotedDishes,
   voteOf,
   writeKiesProgress,
 };

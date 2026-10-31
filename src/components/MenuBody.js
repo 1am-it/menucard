@@ -5,7 +5,16 @@
 // chrome, no URL parameters, no filters, no reservation actions — those stay
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
+import Link from 'next/link'
 import Emoji from '@/src/components/Emoji'
+// BE-62 — bij een gedeeld gerecht hetzelfde vlak als bij een gedeeld lijstje en
+// op /kies: één component, één stylesheet (src/components/ZoekGerechtBlock.js).
+// Ronde 1 zette de opmaak hier zelf neer om bytes te sparen, maar dan laadde de
+// menukaart de bijbehorende CSS nooit en stond het vlak zonder vorm in de
+// pagina. Het vlak komt nu als kant-en-klaar knooppunt binnen (`shareBlock`),
+// zodat deze gedeelde body geen eigen import en geen eigen chunk meeneemt; de
+// menukaart laadt hetzelfde component pas bij de gedeelde link (zie
+// app/menu/[id]/MenuView.js), net als /kies.
 import DishShareButton from '@/src/components/DishShareButton'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
@@ -121,7 +130,7 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null, dishKey = null }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null, dishKey = null, shareBlock = null }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
   // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
@@ -141,6 +150,7 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
   const displayQuery = isResolvedTarget && highlightQuery ? highlightQuery : query
 
   return (
+    <>
     <div
       ref={innerRef}
       id={domId || undefined}
@@ -256,6 +266,13 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         )}
       </div>
     </div>
+    {/* BE-62 (#153, ontwerp punt 2) — pas ná het gedeelde gerecht: eerst de
+        regel "Iemand deelde dit gerecht met je", dan de kaart met de bestaande
+        Bewaar-knop, en dan dit eigen vlak. Het staat als broer van de kaart in
+        dezelfde grid (en spant over de volle breedte, zie
+        zoek-gerecht-block.css), zodat het niet met de kaart samenvloeit. */}
+    {shareNote && shareBlock}
+    </>
   )
 }
 

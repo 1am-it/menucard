@@ -171,6 +171,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/voor-restaurants/voor-restaurants.css',
     // BE-59: het accountmenu.
     'src/components/account-menu.css',
+    // BE-62 (#153): de sluitbare tip "Zet ons op je beginscherm".
+    'src/components/beginscherm-tip.css',
     'src/components/daghap-vandaag.css',
     // BE-55 deel 4: "Daghappen vandaag" op de home.
     'src/components/daghappen-vandaag.css',
@@ -193,6 +195,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/share-dialog.css',
     // BE-65: de deelkaart in de hero.
     'src/components/share-hero-card.css',
+    // BE-62 (#153): het vlak "Zelf ook zin in iets?" na een gedeelde link of stem.
+    'src/components/zoek-gerecht-block.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });
