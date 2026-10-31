@@ -19,18 +19,26 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import './share-dialog.css'
 import {
   MAX_SHARE_FAVORITES,
-  PHONE_MENU_LABEL,
   SHARE_CANCEL_LABEL,
   SHARE_CLEAR_LABEL,
+  SHARE_CLOSE_LABEL,
+  SHARE_FAVORITES_LABEL,
+  SHARE_HINT_FULL,
+  SHARE_MENU_TITLE,
   SHARE_METHODS,
   SHARE_MORE_LABEL,
   SHARE_SAVE_LABEL,
+  SHARE_SEGMENT_LEGEND,
+  SHARE_SEGMENT_METHODS_LABEL,
+  SHARE_SEGMENT_PHONE_LABEL,
   SHARE_SETTINGS_TITLE,
   SHARE_SHEET_HINT,
   SHARE_SHEET_TITLE,
   normalizeSharePreference,
+  shareFavoriteCountLabel,
   shareMethodLabel,
 } from '@/src/lib/sharePreference'
 
@@ -106,6 +114,61 @@ function ShareLayer({ onClose, children }) {
   )
 }
 
+// BE-61 (#152, ontwerp variant A) — de vijf manieren als inline-SVG in
+// lijnstijl. Geen merklogo's en geen vaste kleur: `currentColor` volgt de
+// tekstkleur van beide thema's, en de lijnen zijn `stroke`, niet `fill`.
+const METHOD_PATHS = {
+  // Een spraakwolkje.
+  whatsapp: <path d="M20.5 11.8a8.3 8.3 0 0 1-12.2 7.3L3.6 20.4l1.3-4.6a8.3 8.3 0 1 1 15.6-4Z" />,
+  // Twee schakels.
+  copy: (
+    <>
+      <path d="M10 14 14 10" />
+      <path d="M8.2 11.7 6.6 13.3a3.6 3.6 0 0 0 5.1 5.1l1.6-1.6" />
+      <path d="m15.8 12.3 1.6-1.6a3.6 3.6 0 0 0-5.1-5.1L10.7 7.2" />
+    </>
+  ),
+  // Een berichtvak.
+  sms: (
+    <>
+      <path d="M4.5 5.5h15a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H10l-4 4v-4H4.5A1.5 1.5 0 0 1 3 14V7a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <path d="M7.5 12h.01M12 12h.01M16.5 12h.01" />
+    </>
+  ),
+  // Een papieren vliegtuigje.
+  telegram: (
+    <>
+      <path d="M20.8 4.2 3.6 10.8l5.7 2.3 2.4 5.9 2.4-4.3 4-6.9" />
+      <path d="m9.3 13.1 8.2-8.4" />
+    </>
+  ),
+  // Een envelop.
+  email: (
+    <>
+      <path d="M4 6.5h16a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 16V8A1.5 1.5 0 0 1 4 6.5Z" />
+      <path d="m3.2 7.7 8.8 6.4 8.8-6.4" />
+    </>
+  ),
+}
+
+function ShareMethodIcon({ method }) {
+  return (
+    <svg
+      className="share-fav-icon"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {METHOD_PATHS[method] || METHOD_PATHS.copy}
+    </svg>
+  )
+}
+
 /**
  * Het blad "Hoe deel je meestal?" (criterium 2). `mode="settings"` toont
  * dezelfde keuzes vanuit "Delen via", met "Wissen" erbij (criterium 5).
@@ -147,9 +210,15 @@ export function ShareDialog({ open, mode = 'choose', value = null, onSave, onClo
     })
   }
 
+  // De schakelaar is een echte radiogroep (BE-61): één van de twee delen is
+  // altijd gekozen, dus wisselen zet alleen de andere stand aan. De gekozen
+  // favorieten blijven bewaard als je even naar het telefoonmenu kijkt.
+  function chooseFavorites() {
+    setPhone(false)
+  }
+
   function choosePhone() {
-    setPhone((current) => !current)
-    setMethods([])
+    setPhone(true)
   }
 
   function submit(event) {
@@ -170,49 +239,91 @@ export function ShareDialog({ open, mode = 'choose', value = null, onSave, onClo
         ref={panelRef}
         tabIndex={-1}
       >
-        <h2 className="share-panel-title" id={titleId}>{settings ? SHARE_SETTINGS_TITLE : SHARE_SHEET_TITLE}</h2>
-        <p className="share-panel-hint" id={hintId}>{SHARE_SHEET_HINT}</p>
+        <span className="share-grabber" aria-hidden="true" />
+        <div className="share-head">
+          <div className="share-head-text">
+            <h2 className="share-panel-title" id={titleId}>{settings ? SHARE_SETTINGS_TITLE : SHARE_SHEET_TITLE}</h2>
+            <p className="share-panel-hint" id={hintId}>{atLimit ? SHARE_HINT_FULL : SHARE_SHEET_HINT}</p>
+          </div>
+          <button type="button" className="share-close" aria-label={SHARE_CLOSE_LABEL} onClick={onClose}>
+            <svg
+              className="share-close-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              <path d="M7 7l10 10M17 7 7 17" />
+            </svg>
+          </button>
+        </div>
         <form className="share-form" onSubmit={submit}>
-          <fieldset className="share-options">
+          <fieldset className="share-segment">
+            <legend className="visually-hidden">{SHARE_SEGMENT_LEGEND}</legend>
+            <label className={`share-segment-option${phone ? '' : ' is-active'}`}>
+              <input
+                type="radio"
+                className="share-segment-input"
+                name={`${idPrefix}-modus`}
+                value="favorieten"
+                checked={!phone}
+                onChange={chooseFavorites}
+              />
+              <span className="share-segment-label">{SHARE_SEGMENT_METHODS_LABEL}</span>
+            </label>
+            <label className={`share-segment-option${phone ? ' is-active' : ''}`}>
+              <input
+                type="radio"
+                className="share-segment-input"
+                name={`${idPrefix}-modus`}
+                value="telefoonmenu"
+                checked={phone}
+                onChange={choosePhone}
+              />
+              <span className="share-segment-label">{SHARE_SEGMENT_PHONE_LABEL}</span>
+            </label>
+          </fieldset>
+          <div className="share-fav-head">
+            <span className="share-fav-title">{SHARE_FAVORITES_LABEL}</span>
+            <span className="share-fav-count">{shareFavoriteCountLabel(methods.length)}</span>
+          </div>
+          <fieldset className={`share-options${phone ? ' is-muted' : ''}`} disabled={phone}>
             <legend className="visually-hidden">Deelmanieren</legend>
             {SHARE_METHODS.map((method) => {
-              const checked = methods.includes(method.id)
+              const order = methods.indexOf(method.id)
+              const checked = order >= 0
               return (
-                <label key={method.id} className={`share-option${checked ? ' is-checked' : ''}`}>
+                <label key={method.id} className={`share-option share-fav-row${checked ? ' is-checked' : ''}`}>
                   <input
                     type="checkbox"
-                    className="share-option-input"
+                    className="share-fav-input"
                     name="deelmanier"
                     value={method.id}
                     checked={checked}
                     disabled={!checked && atLimit}
                     onChange={() => toggleMethod(method.id)}
                   />
+                  <span className="share-fav-icon-box">
+                    <ShareMethodIcon method={method.id} />
+                  </span>
                   <span className="share-option-label">{method.label}</span>
+                  <span className={`share-fav-mark${checked ? ' is-chosen' : ''}`} aria-hidden="true">
+                    {checked ? order + 1 : ''}
+                  </span>
                 </label>
               )
             })}
           </fieldset>
-          <label className={`share-option share-option-phone${phone ? ' is-checked' : ''}`}>
-            <input
-              type="checkbox"
-              className="share-option-input"
-              name="deelvoorkeur-telefoonmenu"
-              checked={phone}
-              onChange={choosePhone}
-            />
-            <span className="share-option-label">{PHONE_MENU_LABEL}</span>
-          </label>
           <div className="share-actions">
             {settings ? (
-              <button type="button" className="share-btn share-btn-quiet" onClick={() => onSave(null)}>
+              <button type="button" className="share-clear" onClick={() => onSave(null)}>
                 {SHARE_CLEAR_LABEL}
               </button>
             ) : null}
-            <button type="button" className="share-btn share-btn-quiet" onClick={onClose}>
-              {SHARE_CANCEL_LABEL}
-            </button>
-            <button type="submit" className="share-btn share-btn-primary" disabled={nothing}>
+            <button type="submit" className="share-btn share-btn-primary share-save" disabled={nothing}>
               {SHARE_SAVE_LABEL}
             </button>
           </div>

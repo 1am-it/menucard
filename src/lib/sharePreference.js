@@ -47,8 +47,20 @@ const SHARE_MORE_LABEL = 'Meer…';
 // De teksten van het blad en de instellingen (contract criterium 2 en 5). De
 // exacte teksten zijn gedelegeerd; deze staan hier zodat component en tests
 // nooit uit elkaar lopen.
+//
+// BE-61 (#152, variant A): het blad heeft nu één schakelaar met twee delen
+// ("Mijn favorieten" en "Telefoonmenu"), een kop met een sluitknop en de hint
+// uit het goedgekeurde ontwerp. "Annuleren" is uit het blad verdwenen: sluiten
+// gaat met het kruisje, met Esc of met een tik naast het paneel. De kleine
+// deelmenu (`ShareMenu`) houdt zijn eigen "Annuleren".
 const SHARE_SHEET_TITLE = 'Hoe deel je meestal?';
-const SHARE_SHEET_HINT = 'Kies maximaal 3 manieren. Daarna deel je met één of twee tikken.';
+const SHARE_SHEET_HINT = 'Kies tot 3 favorieten. Daarna deel je met één tik.';
+const SHARE_HINT_FULL = 'Je hebt 3 favorieten gekozen. Kies er eerst een af om een andere te nemen.';
+const SHARE_SEGMENT_LEGEND = 'Hoe wil je delen?';
+const SHARE_SEGMENT_METHODS_LABEL = 'Mijn favorieten';
+const SHARE_SEGMENT_PHONE_LABEL = 'Telefoonmenu';
+const SHARE_FAVORITES_LABEL = 'Favorieten';
+const SHARE_CLOSE_LABEL = 'Sluiten';
 const SHARE_SETTINGS_LABEL = 'Delen via';
 const SHARE_SETTINGS_TITLE = 'Delen via';
 const SHARE_SAVE_LABEL = 'Opslaan';
@@ -66,6 +78,16 @@ function textOf(value) {
 function shareMethodLabel(method) {
   const found = SHARE_METHODS.find((entry) => entry.id === method);
   return found ? found.label : null;
+}
+
+/**
+ * De teller rechts in het blad (BE-61, ontwerp): "0 van 3 gekozen" tot en met
+ * "3 van 3 gekozen". Een onbruikbaar aantal telt als nul.
+ */
+function shareFavoriteCountLabel(count) {
+  const number = Number(count);
+  const chosen = Number.isFinite(number) ? Math.min(MAX_SHARE_FAVORITES, Math.max(0, Math.trunc(number))) : 0;
+  return `${chosen} van ${MAX_SHARE_FAVORITES} gekozen`;
 }
 
 /**
@@ -282,12 +304,18 @@ module.exports = {
   PHONE_MENU_LABEL,
   SHARE_CANCEL_LABEL,
   SHARE_CLEAR_LABEL,
+  SHARE_CLOSE_LABEL,
+  SHARE_FAVORITES_LABEL,
+  SHARE_HINT_FULL,
   SHARE_MENU_TITLE,
   SHARE_METHODS,
   SHARE_METHOD_IDS,
   SHARE_MORE_LABEL,
   SHARE_PREFERENCE_KEY,
   SHARE_SAVE_LABEL,
+  SHARE_SEGMENT_LEGEND,
+  SHARE_SEGMENT_METHODS_LABEL,
+  SHARE_SEGMENT_PHONE_LABEL,
   SHARE_SETTINGS_LABEL,
   SHARE_SETTINGS_TITLE,
   SHARE_SHEET_HINT,
@@ -298,6 +326,7 @@ module.exports = {
   performShare,
   preferenceStorageValue,
   readSharePreference,
+  shareFavoriteCountLabel,
   shareMethodLabel,
   shareMethodLink,
   sharePlan,

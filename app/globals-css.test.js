@@ -174,6 +174,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/menu-body.css',
     // BE-59 deel 2: de footerlink op de publieke pagina's.
     'src/components/public-footer.css',
+    // BE-61: het deelblad "Delen via", naast de component.
+    'src/components/share-dialog.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });
