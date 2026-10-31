@@ -219,6 +219,8 @@ export default function QrKaartje({ restaurantIndex, siteUrl, siteIndexable }) {
       URL.revokeObjectURL(href)
       setMelding(QR_MESSAGES.shareFallback)
     } catch (error) {
+      // Wie het deelvenster sluit, heeft niets kapotgemaakt.
+      if (error && error.name === 'AbortError') return
       setFout(QR_MESSAGES.genericError)
     } finally {
       setBezig(false)
