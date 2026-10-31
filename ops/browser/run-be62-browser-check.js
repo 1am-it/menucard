@@ -272,10 +272,81 @@ async function voteAll(cdp) {
 
 /** Het instellingenpaneel weer dicht, zodat een opname de pagina toont. */
 async function closeSettings(cdp) {
-  const open = await evalJs(cdp, `Boolean(document.querySelector('${SETTINGS_PANEL}'))`);
-  if (!open) return;
-  await evalJs(cdp, `(() => { const knop = document.querySelector('${SETTINGS_BUTTON}'); if (knop) knop.click(); return true; })()`);
-  await sleep(250);
+  const dicht = `!document.querySelector('${SETTINGS_PANEL}')`;
+  if (await evalJs(cdp, `${dicht}`)) return true;
+  // Eerst de sluitknop in het paneel zelf.
+  await evalJs(cdp, `(() => { const knop = document.querySelector('.pha-close'); if (knop) { knop.click(); return 'clicked'; } return 'missing'; })()`);
+  if (await waitFor(cdp, dicht, 3000)) return true;
+  // Dan Escape, zoals het paneel zelf voorschrijft.
+  await evalJs(cdp, `(() => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    return true;
+  })()`);
+  if (await waitFor(cdp, dicht, 3000)) return true;
+  // Als laatste een klik naast het paneel (de achtergrondlaag).
+  await evalJs(cdp, `(() => { const laag = document.querySelector('.pha-layer'); if (laag) laag.click(); return true; })()`);
+  return waitFor(cdp, dicht, 3000);
+}
+
+/** Sluit het paneel en leg vast dat het echt dicht is vóór de opname. */
+async function sluitPaneel(cdp, label) {
+  const closed = await closeSettings(cdp);
+  await sleep(200);
+  const nogOpen = await evalJs(cdp, `Boolean(document.querySelector('${SETTINGS_PANEL}'))`);
+  check(`opname: het instellingenpaneel is dicht (${label})`, closed === true && nogOpen === false, `gesloten=${closed} · nogOpen=${nogOpen}`);
+  return nogOpen === false;
+}
+
+/** Het vlak als vlak: achtergrond, knophoogte, plek in beeld en ná het gerecht. */
+const BLOK_BEELD = `(() => {
+  const blok = document.querySelector('.zoek-gerecht');
+  if (!blok) return { present: false };
+  const rect = blok.getBoundingClientRect();
+  const stijl = getComputedStyle(blok);
+  const knop = blok.querySelector('.zoek-gerecht-btn');
+  const knopRect = knop ? knop.getBoundingClientRect() : null;
+  const noot = document.querySelector('.dish-share-note');
+  const kaart = noot ? noot.closest('.menu-card') : null;
+  const kaartRect = kaart ? kaart.getBoundingClientRect() : null;
+  return {
+    present: true,
+    rect: { top: Math.round(rect.top), bottom: Math.round(rect.bottom), height: Math.round(rect.height) },
+    inViewport: rect.top >= 0 && rect.bottom <= window.innerHeight + 0.5,
+    background: stijl.backgroundColor,
+    pageBackground: getComputedStyle(document.body).backgroundColor,
+    radius: stijl.borderTopLeftRadius,
+    paddingTop: stijl.paddingTop,
+    buttonHeight: knopRect ? Math.round(knopRect.height) : null,
+    afterDish: kaartRect
+      ? { cardBottom: Math.round(kaartRect.bottom), blockTop: Math.round(rect.top), ok: rect.top >= kaartRect.bottom - 1 }
+      : null,
+    panelOpen: Boolean(document.querySelector('.pha-panel')),
+  };
+})()`;
+
+/**
+ * Scroll het vlak in beeld en leg de vorm vast: het onderdeel zelf staat in de
+ * viewport, het paneel is dicht, de achtergrond wijkt af van de pagina en de
+ * knop is hoog genoeg. Zonder deze stap toonde ronde 1 het paneel in plaats van
+ * het vlak.
+ */
+async function blokInBeeld(cdp, label) {
+  const gevonden = await evalJs(cdp, `(() => {
+    const blok = document.querySelector('.zoek-gerecht');
+    if (!blok) return false;
+    blok.scrollIntoView({ block: 'center', inline: 'nearest' });
+    return true;
+  })()`);
+  await sleep(450);
+  const beeld = await evalJs(cdp, BLOK_BEELD);
+  check(`opname: het vlak zelf staat in beeld (${label})`, gevonden === true && beeld.inViewport === true, `${gevonden} · ${JSON.stringify(beeld.rect)}`);
+  check(`opname: geen paneel over de pagina (${label})`, beeld.panelOpen === false, String(beeld.panelOpen));
+  check(`vorm: het vlak heeft een andere achtergrond dan de pagina (${label})`,
+    Boolean(beeld.background) && beeld.background !== beeld.pageBackground, `${beeld.background} · ${beeld.pageBackground}`);
+  check(`vorm: de knop is minstens 44 px hoog (${label})`, beeld.buttonHeight >= 44, String(beeld.buttonHeight));
+  check(`vorm: radius 16 px en padding 18 px (${label})`,
+    beeld.radius === '16px' && beeld.paddingTop === '18px', `${beeld.radius} · ${beeld.paddingTop}`);
+  return beeld;
 }
 
 async function kiesScenario(cdp) {
@@ -303,9 +374,10 @@ async function kiesScenario(cdp) {
         hasResult = voted === true;
       }
       const proof = await applyTheme(cdp, theme);
-      await closeSettings(cdp);
-      const blok = await evalJs(cdp, BLOK_STAAT);
       const label = `${size.width} ${theme}`;
+      await sluitPaneel(cdp, `kies ${label}`);
+      await blokInBeeld(cdp, `kies ${label}`);
+      const blok = await evalJs(cdp, BLOK_STAAT);
       check(`kies: het vlak staat onder de uitslag (${label})`, blok.present === true, JSON.stringify(blok));
       check(`kies: de kop noemt het eerste "lekker"-gerecht (${label})`,
         blok.title === 'Jij koos Poussin. Zelf ook een lijstje maken?', blok.title);
@@ -326,8 +398,11 @@ async function gedeeldScenario(cdp) {
       await setViewport(cdp, size.width, size.height);
       await navigate(cdp, DISH_URL, `Boolean(document.querySelector('.dish-share-note'))`);
       const proof = await applyTheme(cdp, theme);
-      await closeSettings(cdp);
       const label = `${size.width} ${theme}`;
+      await sluitPaneel(cdp, `gedeeld gerecht ${label}`);
+      const beeld = await blokInBeeld(cdp, `gedeeld gerecht ${label}`);
+      check(`volgorde: het vlak staat ná het gedeelde gerecht (${label})`,
+        Boolean(beeld.afterDish) && beeld.afterDish.ok === true, JSON.stringify(beeld.afterDish));
       const blok = await evalJs(cdp, BLOK_STAAT);
       check(`gedeeld gerecht: het vlak staat onder de deelregel (${label})`, blok.present === true, JSON.stringify(blok));
       check(`gedeeld gerecht: kop, tekst en knop (${label})`,
@@ -353,7 +428,8 @@ async function gedeeldScenario(cdp) {
   for (const theme of THEMES) {
     await navigate(cdp, LIST_URL, `Boolean(document.querySelector('.lijst-title'))`);
     const proof = await applyTheme(cdp, theme);
-    await closeSettings(cdp);
+    await sluitPaneel(cdp, `gedeeld lijstje ${theme}`);
+    await blokInBeeld(cdp, `gedeeld lijstje ${theme}`);
     const blok = await evalJs(cdp, BLOK_STAAT);
     const addLabel = await evalJs(cdp, `(() => {
       const knop = document.querySelector('.lijst-add-btn');
@@ -411,10 +487,16 @@ async function tipScenario(cdp) {
     JSON.stringify({ label: second.closeLabel, size: second.closeSize }));
 
   const light = await applyTheme(cdp, 'light');
-  await closeSettings(cdp);
+  await sluitPaneel(cdp, 'tip licht');
+  const tipLight = await evalJs(cdp, TIP_STAAT);
+  check('tip: na het sluiten van het paneel staat de tip nog in beeld (licht)',
+    tipLight.present === true && tipLight.inViewport === true, JSON.stringify(tipLight.rect));
   await shot(cdp, 'be62-tip-390-licht.png', { theme: 'light', state: 'tweede-bezoek', themeProof: light });
   const dark = await applyTheme(cdp, 'dark');
-  await closeSettings(cdp);
+  await sluitPaneel(cdp, 'tip donker');
+  const tipDark = await evalJs(cdp, TIP_STAAT);
+  check('tip: na het sluiten van het paneel staat de tip nog in beeld (donker)',
+    tipDark.present === true && tipDark.inViewport === true, JSON.stringify(tipDark.rect));
   await shot(cdp, 'be62-tip-390-donker.png', { theme: 'dark', state: 'tweede-bezoek', themeProof: dark });
 
   const closed = await evalJs(cdp, `(() => {
