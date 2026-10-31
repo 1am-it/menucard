@@ -275,6 +275,21 @@ export default function AccountMenu() {
     </div>
   )
 
+  // BE-59 herstel (#146, Lead-review #6537034100): het paneel van onderen lag
+  // onder de vaste MobileTabBar (z-index 120), waardoor "Uitloggen" onzichtbaar
+  // en niet aan te tikken was. Paneel en overlay gaan samen door de portal, met
+  // een eigen stapelvolgorde (overlay 130, paneel 140): de overlay dekt het hele
+  // venster en vangt de klikken op die anders door de tabbalk heen gingen. Een
+  // klik op de overlay sluit het menu via de bestaande luisteraar voor klikken
+  // buiten het menu (mousedown, hierboven) — de overlay heeft daarom geen eigen
+  // handler en staat op aria-hidden.
+  const sheet = (
+    <>
+      <div className="account-menu-overlay" data-account-menu-overlay="" aria-hidden="true" />
+      {panel}
+    </>
+  )
+
   return (
     <div className="account-menu" ref={wrapperRef}>
       <button
@@ -297,7 +312,7 @@ export default function AccountMenu() {
           hing daardoor aan de kop in plaats van aan het venster en kwam boven
           in beeld. Een portal naar <body> zet het weer op zijn plek; op een
           breed scherm blijft het menu gewoon onder de knop staan. */}
-      {open && (narrow && typeof document !== 'undefined' ? createPortal(panel, document.body) : panel)}
+      {open && (narrow && typeof document !== 'undefined' ? createPortal(sheet, document.body) : panel)}
     </div>
   )
 }

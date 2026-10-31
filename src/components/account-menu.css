@@ -142,13 +142,29 @@
  * met grote tikvlakken. De component kiest deze vorm met matchMedia; de
  * media query hier houdt de tikmaten ook klopend als het venster krimpt. */
 @media (max-width: 719px) {
+  /* BE-59 herstel (#146, Lead-review #6537034100): de vaste MobileTabBar staat
+   * op z-index 120 (app/globals.css, `.mobile-tabbar`) en lag daardoor over het
+   * paneel: "Uitloggen" was niet te zien en niet aan te tikken. De overlay
+   * (130) dekt het hele venster, de tabbalk inbegrepen, en het paneel staat
+   * daar weer boven (140). De volgorde is een bronvergelijking in
+   * src/components/AccountMenu.test.js. */
+  .account-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--shadow-tint-md);
+  }
+
   .account-menu-panel--sheet {
     position: fixed;
     top: auto;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 80;
+    z-index: 140;
     min-width: 0;
     padding: 12px 12px 20px;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;

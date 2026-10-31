@@ -110,8 +110,42 @@ test('het paneel van onderen hangt aan het venster, niet aan de kop', () => {
   // in beeld in plaats van van onderen (gevonden door de browsercheck).
   const source = read(COMPONENT);
   assert.match(source, /import \{ createPortal \} from 'react-dom'/);
-  assert.match(source, /narrow && typeof document !== 'undefined' \? createPortal\(panel, document\.body\) : panel/);
+  assert.match(source, /narrow && typeof document !== 'undefined' \? createPortal\(sheet, document\.body\) : panel/);
   assert.match(source, /const inPanel = panelRef\.current && panelRef\.current\.contains\(event\.target\)/);
+});
+
+test('het paneel van onderen ligt boven de vaste tabbalk, met een dekkende overlay', () => {
+  // BE-59 herstel (#146, Lead-review #6537034100): in
+  // be59-beheerder-home-390-light-menu.png lag de vaste MobileTabBar over het
+  // paneel, waardoor "Uitloggen" niet te zien en niet aan te tikken was.
+  // Daarom vergelijkt deze test de echte z-index-waarden uit beide bronnen in
+  // plaats van een vaste waarde te herhalen.
+  const globals = read('app/globals.css');
+  const css = read(CSS);
+  const source = read(COMPONENT);
+
+  const tabbar = globals.match(/\.mobile-tabbar \{[^}]*z-index: (\d+);/);
+  assert.ok(tabbar, '.mobile-tabbar heeft een z-index in app/globals.css');
+  const tabbarZ = Number(tabbar[1]);
+
+  const overlay = css.match(/\.account-menu-overlay \{[^}]*z-index: (\d+);/);
+  const sheet = css.match(/\.account-menu-panel--sheet \{[^}]*z-index: (\d+);/);
+  assert.ok(overlay, '.account-menu-overlay heeft een eigen z-index');
+  assert.ok(sheet, '.account-menu-panel--sheet heeft een eigen z-index');
+  const overlayZ = Number(overlay[1]);
+  const sheetZ = Number(sheet[1]);
+
+  assert.ok(overlayZ > tabbarZ, `de overlay (${overlayZ}) dekt de tabbalk (${tabbarZ})`);
+  assert.ok(sheetZ > overlayZ, `het paneel (${sheetZ}) ligt boven zijn overlay (${overlayZ})`);
+
+  // De overlay dekt het hele venster, zodat er niet door de tabbalk heen te
+  // klikken valt, en is puur decoratief voor schermlezers.
+  assert.match(css, /\.account-menu-overlay \{[^}]*position: fixed;[^}]*inset: 0;/);
+  assert.match(css, /\.account-menu-overlay \{[^}]*background: var\(--shadow-tint-md\);/);
+  assert.match(source, /<div className="account-menu-overlay" data-account-menu-overlay="" aria-hidden="true" \/>/);
+  // De overlay gaat mee door de portal, anders blijft de kop met zijn
+  // backdrop-filter het referentiekader en dekt hij het venster niet.
+  assert.match(source, /const sheet = \(\s*<>\s*<div className="account-menu-overlay"[^>]*\/>\s*\{panel\}\s*<\/>\s*\)/);
 });
 
 test('mobiel: smaller dan 720 px hetzelfde menu als paneel van onderen, met sluitknop', () => {
@@ -120,7 +154,7 @@ test('mobiel: smaller dan 720 px hetzelfde menu als paneel van onderen, met slui
   assert.match(source, /const MOBILE_QUERY = '\(max-width: 719px\)'/);
   assert.match(source, /account-menu-panel--sheet/);
   assert.match(source, /className="account-menu-close"/);
-  assert.match(css, /@media \(max-width: 719px\) \{\s*\.account-menu-panel--sheet \{[^}]*position: fixed;[^}]*bottom: 0;/);
+  assert.match(css, /@media \(max-width: 719px\) \{[\s\S]*?\.account-menu-panel--sheet \{[^}]*position: fixed;[^}]*bottom: 0;/);
   assert.match(css, /\.account-menu-panel--sheet \.account-menu-item \{[^}]*min-height: 52px;/);
 });
 
