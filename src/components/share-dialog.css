@@ -103,6 +103,13 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* De twee labels blijven ook op 320 px binnen hun eigen deel. */
+.share-segment-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Het keuzepunt zelf is een echt radio-input en blijft dus met het toetsenbord
  * en de pijltjes te bedienen; alleen het ronde vakje is verborgen. */
 .share-segment-input {

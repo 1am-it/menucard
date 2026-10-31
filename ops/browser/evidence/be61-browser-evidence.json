@@ -1,0 +1,784 @@
+{
+  "script": "run-be61-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3188); geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T08:32:59.917Z",
+  "port": 3188,
+  "page": "/mijn-lijstje",
+  "filter": null,
+  "scenarioRuns": [
+    {
+      "name": "paneel",
+      "checks": 89,
+      "passed": 89,
+      "failed": 0,
+      "durationMs": 11362,
+      "error": null
+    },
+    {
+      "name": "kiezen",
+      "checks": 13,
+      "passed": 12,
+      "failed": 1,
+      "durationMs": 2182,
+      "error": null
+    },
+    {
+      "name": "sluiten",
+      "checks": 6,
+      "passed": 6,
+      "failed": 0,
+      "durationMs": 2172,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "paneel light/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel light/1280: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel light/1280: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":181,\"bottom\":719,\"left\":430,\"right\":850,\"width\":420,\"height\":538}"
+    },
+    {
+      "name": "paneel light/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel light/1280: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":190,\"bottom\":194,\"left\":622,\"right\":658,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel light/1280: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":204,\"bottom\":248,\"left\":789,\"right\":833,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel light/1280: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel light/1280: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(255, 255, 255)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel light/1280: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel light/1280: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":363,\"bottom\":399,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":419,\"bottom\":455,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":475,\"bottom\":511,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":531,\"bottom\":567,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":587,\"bottom\":623,\"left\":460,\"right\":496,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel light/1280: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel light/1280: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":650,\"bottom\":702,\"left\":720,\"right\":833,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel light/1280: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel light/1280: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel light/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel light/390: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel light/390: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":295,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":538}"
+    },
+    {
+      "name": "paneel light/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel light/390: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":304,\"bottom\":308,\"left\":177,\"right\":213,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel light/390: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":318,\"bottom\":362,\"left\":317,\"right\":361,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel light/390: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel light/390: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(255, 255, 255)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel light/390: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel light/390: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":476,\"bottom\":512,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":533,\"bottom\":569,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":589,\"bottom\":625,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":645,\"bottom\":681,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":701,\"bottom\":737,\"left\":42,\"right\":78,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel light/390: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel light/390: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":763,\"bottom\":815,\"left\":248,\"right\":361,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel light/390: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel light/390: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel light/390: het paneel ligt boven de tabbalk",
+      "passed": true,
+      "detail": "{\"paneel\":{\"top\":295,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":538},\"tabbalk\":{\"top\":772,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":60},\"punten\":[{\"x\":78,\"y\":802,\"inPaneel\":true},{\"x\":195,\"y\":802,\"inPaneel\":true},{\"x\":312,\"y\":802,\"inPaneel\":true}]}"
+    },
+    {
+      "name": "paneel light/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel light/320: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel light/320: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":151,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":557}"
+    },
+    {
+      "name": "paneel light/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel light/320: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":160,\"bottom\":164,\"left\":142,\"right\":178,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel light/320: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":174,\"bottom\":218,\"left\":247,\"right\":291,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel light/320: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel light/320: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(255, 255, 255)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel light/320: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel light/320: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":352,\"bottom\":388,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":409,\"bottom\":445,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":465,\"bottom\":501,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":521,\"bottom\":557,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":577,\"bottom\":613,\"left\":42,\"right\":78,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel light/320: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel light/320: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":639,\"bottom\":691,\"left\":178,\"right\":291,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel light/320: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel light/320: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel light/320: het paneel ligt boven de tabbalk",
+      "passed": true,
+      "detail": "{\"paneel\":{\"top\":151,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":557},\"tabbalk\":{\"top\":648,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":60},\"punten\":[{\"x\":64,\"y\":678,\"inPaneel\":true},{\"x\":160,\"y\":678,\"inPaneel\":true},{\"x\":256,\"y\":678,\"inPaneel\":true}]}"
+    },
+    {
+      "name": "paneel dark/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel dark/1280: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel dark/1280: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":181,\"bottom\":719,\"left\":430,\"right\":850,\"width\":420,\"height\":538}"
+    },
+    {
+      "name": "paneel dark/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel dark/1280: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":190,\"bottom\":194,\"left\":622,\"right\":658,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel dark/1280: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":204,\"bottom\":248,\"left\":789,\"right\":833,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel dark/1280: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel dark/1280: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(42, 47, 53)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel dark/1280: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel dark/1280: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":363,\"bottom\":399,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":419,\"bottom\":455,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":475,\"bottom\":511,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":531,\"bottom\":567,\"left\":460,\"right\":496,\"width\":36,\"height\":36},{\"top\":587,\"bottom\":623,\"left\":460,\"right\":496,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel dark/1280: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel dark/1280: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":650,\"bottom\":702,\"left\":720,\"right\":833,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel dark/1280: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel dark/1280: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel dark/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel dark/390: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel dark/390: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":295,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":538}"
+    },
+    {
+      "name": "paneel dark/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel dark/390: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":304,\"bottom\":308,\"left\":177,\"right\":213,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel dark/390: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":318,\"bottom\":362,\"left\":317,\"right\":361,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel dark/390: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel dark/390: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(42, 47, 53)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel dark/390: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel dark/390: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":476,\"bottom\":512,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":533,\"bottom\":569,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":589,\"bottom\":625,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":645,\"bottom\":681,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":701,\"bottom\":737,\"left\":42,\"right\":78,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel dark/390: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel dark/390: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":763,\"bottom\":815,\"left\":248,\"right\":361,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel dark/390: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel dark/390: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel dark/390: het paneel ligt boven de tabbalk",
+      "passed": true,
+      "detail": "{\"paneel\":{\"top\":295,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":538},\"tabbalk\":{\"top\":772,\"bottom\":832,\"left\":12,\"right\":378,\"width\":366,\"height\":60},\"punten\":[{\"x\":78,\"y\":802,\"inPaneel\":true},{\"x\":195,\"y\":802,\"inPaneel\":true},{\"x\":312,\"y\":802,\"inPaneel\":true}]}"
+    },
+    {
+      "name": "paneel dark/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "paneel dark/320: het is een echt dialoogvenster met een naam en een hint",
+      "passed": true,
+      "detail": "{\"role\":\"dialog\",\"modal\":\"true\",\"label\":\"Delen via\",\"hint\":\"Kies tot 3 favorieten. Daarna deel je met één tik.\"}"
+    },
+    {
+      "name": "paneel dark/320: het paneel staat in beeld",
+      "passed": true,
+      "detail": "{\"top\":151,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":557}"
+    },
+    {
+      "name": "paneel dark/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "paneel dark/320: een greepje van 36 × 4 px bovenaan",
+      "passed": true,
+      "detail": "{\"top\":160,\"bottom\":164,\"left\":142,\"right\":178,\"width\":36,\"height\":4}"
+    },
+    {
+      "name": "paneel dark/320: een ronde sluitknop van 44 × 44 px met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"box\":{\"top\":174,\"bottom\":218,\"left\":247,\"right\":291,\"width\":44,\"height\":44},\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "paneel dark/320: de schakelaar is één radiogroep met een verborgen legend",
+      "passed": true,
+      "detail": "{\"radios\":[{\"value\":\"favorieten\",\"checked\":true,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":false,\"type\":\"radio\"}],\"legende\":\"Hoe wil je delen?\"}"
+    },
+    {
+      "name": "paneel dark/320: de actieve stand heeft een eigen achtergrond",
+      "passed": true,
+      "detail": "{\"actief\":\"Mijn favorieten\",\"actiefAchtergrond\":\"rgb(42, 47, 53)\",\"inactief\":\"rgba(0, 0, 0, 0)\"}"
+    },
+    {
+      "name": "paneel dark/320: \"Favorieten\" links en \"0 van 3 gekozen\" rechts",
+      "passed": true,
+      "detail": "{\"titel\":\"Favorieten\",\"teller\":\"0 van 3 gekozen\"}"
+    },
+    {
+      "name": "paneel dark/320: vijf regels van minstens 56 px met een icoon van 36 px",
+      "passed": true,
+      "detail": "{\"hoogtes\":[56,56,56,56,56],\"iconen\":[{\"top\":352,\"bottom\":388,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":409,\"bottom\":445,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":465,\"bottom\":501,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":521,\"bottom\":557,\"left\":42,\"right\":78,\"width\":36,\"height\":36},{\"top\":577,\"bottom\":613,\"left\":42,\"right\":78,\"width\":36,\"height\":36}],\"labels\":[\"WhatsApp\",\"Link kopiëren\",\"Sms\",\"Telegram\",\"E-mail\"]}"
+    },
+    {
+      "name": "paneel dark/320: nog niets gekozen, dus \"Opslaan\" staat uit",
+      "passed": true,
+      "detail": "{\"disabled\":true,\"merkjes\":[\"\",\"\",\"\",\"\",\"\"]}"
+    },
+    {
+      "name": "paneel dark/320: de knop \"Opslaan\" is 52 px hoog en staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":639,\"bottom\":691,\"left\":178,\"right\":291,\"width\":113,\"height\":52}"
+    },
+    {
+      "name": "paneel dark/320: elementFromPoint in het midden van \"Opslaan\" geeft de knop zelf",
+      "passed": true,
+      "detail": "{\"tag\":\"BUTTON\",\"cls\":\"share-btn share-btn-primary share-save\",\"isSave\":true}"
+    },
+    {
+      "name": "paneel dark/320: \"Wissen\" staat er als tekstlink, \"Annuleren\" niet meer",
+      "passed": true,
+      "detail": "[\"\",\"Wissen\",\"Opslaan\"]"
+    },
+    {
+      "name": "paneel dark/320: het paneel ligt boven de tabbalk",
+      "passed": true,
+      "detail": "{\"paneel\":{\"top\":151,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":557},\"tabbalk\":{\"top\":648,\"bottom\":708,\"left\":12,\"right\":308,\"width\":296,\"height\":60},\"punten\":[{\"x\":64,\"y\":678,\"inPaneel\":true},{\"x\":160,\"y\":678,\"inPaneel\":true},{\"x\":256,\"y\":678,\"inPaneel\":true}]}"
+    },
+    {
+      "name": "thema: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "6/6 opnamen: "
+    },
+    {
+      "name": "kiezen: de regel sms is aan te klikken",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "kiezen: de regel whatsapp is aan te klikken",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "kiezen: de regel email is aan te klikken",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "kiezen: de merkjes volgen de volgorde van kiezen (WhatsApp 2, Sms 1, E-mail 3)",
+      "passed": true,
+      "detail": "2||1||3"
+    },
+    {
+      "name": "kiezen: de teller zegt \"3 van 3 gekozen\"",
+      "passed": true,
+      "detail": "3 van 3 gekozen"
+    },
+    {
+      "name": "kiezen: de hint zegt dat er 3 gekozen zijn",
+      "passed": true,
+      "detail": "Je hebt 3 favorieten gekozen. Kies er eerst een af om een andere te nemen."
+    },
+    {
+      "name": "kiezen: de twee andere regels staan uit, de gekozen niet",
+      "passed": true,
+      "detail": "false|true|false|true|false"
+    },
+    {
+      "name": "kiezen: met een keuze staat \"Opslaan\" aan",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "kiezen: de gekozen regels zijn herkenbaar opgemaakt",
+      "passed": true,
+      "detail": "[true,false,true,false,true]"
+    },
+    {
+      "name": "telefoonmenu: de schakelaar staat op \"Telefoonmenu\"",
+      "passed": true,
+      "detail": "[{\"value\":\"favorieten\",\"checked\":false,\"type\":\"radio\"},{\"value\":\"telefoonmenu\",\"checked\":true,\"type\":\"radio\"}]"
+    },
+    {
+      "name": "telefoonmenu: de hele lijst is uitgeschakeld en gedimd",
+      "passed": false,
+      "detail": "{\"uit\":[false,true,false,true,false],\"opacity\":0.55}"
+    },
+    {
+      "name": "telefoonmenu: \"Opslaan\" blijft bruikbaar",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "terug naar de favorieten: de volgorde van kiezen blijft bewaard",
+      "passed": true,
+      "detail": "2||1||3 / Mijn favorieten"
+    },
+    {
+      "name": "toetsenbord: de focus staat bij openen in het paneel",
+      "passed": true,
+      "detail": "share-close"
+    },
+    {
+      "name": "opslaan: het paneel sluit en de voorkeur staat in localStorage",
+      "passed": true,
+      "detail": "{\"methods\":[\"sms\",\"whatsapp\"]}"
+    },
+    {
+      "name": "sluiten: het kruisje sluit het paneel",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "sluiten: Esc sluit het paneel",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "sluiten: een tik naast het paneel sluit het",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "sluiten: het thema bleef aangetoond tijdens deze reeks",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be61-paneel-1280-light.png",
+      "sha256": "c5dbba1c694237cd0f4976dbc391bf3231db131b93a1e79cd29b492cb1e30c0d",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-paneel-390-light.png",
+      "sha256": "a76ffcf1610a03a8d1273c00a298155a7d99da6cf5ba6d8979144ee0d541c95a",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-paneel-320-light.png",
+      "sha256": "b48f6605dbb85fa00cff42f62814ff6672938a982d30ddab3dae996b7f468668",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-paneel-1280-dark.png",
+      "sha256": "1c638d8c1f315fa717dfa14e5ecf9709c4b43db5908dda728aecbec60a4a800c",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-paneel-390-dark.png",
+      "sha256": "3e4264116024e222f2341cb129cce3837d601840c3341b7f98c90536a712bc17",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-paneel-320-dark.png",
+      "sha256": "db6ae3007ba2a60d52c1e8e49356205622475659d16adf812120b29b2cf7add3",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "state": "paneel-open",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-kiezen-390-light.png",
+      "sha256": "d4107859d8c190b3c8ea93f024386a3ce8792d7160870bb4bc738bef11fb12b8",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "drie-gekozen",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be61-telefoonmenu-390-light.png",
+      "sha256": "b980298479b7924dca0c28daf99faae1df58ae331a605e0af4fbe6cf1a8e3de6",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "state": "telefoonmenu",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 1,
+  "passed": false
+}

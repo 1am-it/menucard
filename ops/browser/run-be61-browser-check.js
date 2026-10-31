@@ -122,20 +122,34 @@ async function applyTheme(cdp, theme) {
   const label = THEME_LABELS[theme];
   const klaar = await waitFor(cdp, `document.querySelectorAll('.theme-btn').length === 2`, 15000);
   if (!klaar) throw new Error(`theme_button_missing: ${label}`);
-  const clicked = await evalJs(cdp, clickThemeScript(label));
-  if (clicked !== 'clicked') throw new Error(`theme_button_missing: ${label}`);
-  await sleep(260);
-  return themeProof(cdp);
+  // De knop staat al in de server-HTML, dus een klik telt pas als het thema
+  // daarna echt aangetoond is. Enkele pogingen dekken de hydratatie.
+  for (let poging = 0; poging < 4; poging += 1) {
+    const clicked = await evalJs(cdp, clickThemeScript(label));
+    if (clicked !== 'clicked') throw new Error(`theme_button_missing: ${label}`);
+    await sleep(300);
+    const proof = await themeProof(cdp);
+    if (themeOk(proof, theme)) return proof;
+  }
+  throw new Error(`theme_not_applied: ${label}`);
 }
 
-// Het paneel openen zoals een bezoeker dat doet: een klik op "Delen via".
+// Het paneel openen zoals een bezoeker dat doet: een klik op "Delen via". De
+// knop bestaat al vóór de hydratatie, dus een klik die niets opent wordt
+// herhaald in plaats van meteen te falen.
 async function openPanel(cdp) {
   const geopend = await waitFor(cdp, `Boolean(document.querySelector('.share-settings-btn'))`, 15000);
   if (!geopend) throw new Error('settings_button_missing');
-  await evalJs(cdp, `(() => { const button = document.querySelector('.share-settings-btn'); button.click(); return true; })()`);
-  const open = await waitFor(cdp, `Boolean(document.querySelector('.share-sheet'))`, 10000);
-  if (!open) throw new Error('panel_not_open');
-  await sleep(180);
+  for (let poging = 0; poging < 4; poging += 1) {
+    await evalJs(cdp, `(() => { const button = document.querySelector('.share-settings-btn'); button.click(); return true; })()`);
+    const open = await waitFor(cdp, `Boolean(document.querySelector('.share-sheet'))`, 4000);
+    if (open) {
+      await sleep(180);
+      return;
+    }
+    await sleep(400);
+  }
+  throw new Error('panel_not_open');
 }
 
 
@@ -208,7 +222,13 @@ const PANEL_STATE = `(() => {
     labels: rows.map((row) => tekst(row.querySelector('.share-option-label'))),
     merkjes: rows.map((row) => tekst(row.querySelector('.share-fav-mark'))),
     gekozen: rows.map((row) => Boolean(row.querySelector('.share-fav-input') && row.querySelector('.share-fav-input').checked)),
-    uitgeschakeld: rows.map((row) => Boolean(row.querySelector('.share-fav-input') && row.querySelector('.share-fav-input').disabled)),
+    uitgeschakeld: rows.map((row) => {
+      const input = row.querySelector('.share-fav-input');
+      // Een uitgezette fieldset schakelt zijn invoervelden uit; de eigenschap
+      // disabled ziet alleen het eigen attribuut, het :disabled-pseudoklasse
+      // van de browser ziet ook de fieldset.
+      return Boolean(input && (input.disabled || input.matches(':disabled')));
+    }),
     lijstGedimd: (() => {
       const lijst = panel.querySelector('.share-options');
       return lijst ? Number(getComputedStyle(lijst).opacity) : null;
