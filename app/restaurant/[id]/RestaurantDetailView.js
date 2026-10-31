@@ -19,6 +19,9 @@ import { StaticMenu } from '@/src/components/MenuBody'
 // BE-55 stap B (#135) — het blok "Vandaag" haalt zelf alleen het actieve aanbod
 // van dit ene restaurant op; zonder aanbod verschijnt er niets.
 import DaghapVandaag from '@/src/components/DaghapVandaag'
+// BE-58 (#143): het bevestigingslabel, apart geïmporteerd zodat de bestaande
+// regressie op deze importregel blijft kloppen.
+import { MenuConfirmation } from '@/src/components/MenuBody'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -32,7 +35,7 @@ function getTodayKey() {
   return map[new Date().getDay()]
 }
 
-export default function RestaurantDetailView({ id, restaurant, menus }) {
+export default function RestaurantDetailView({ id, restaurant, menus, bevestiging = null }) {
   const todayKey = getTodayKey()
   const [activeDay, setActiveDay] = useState(todayKey)
   // Kleurtaal v2: "Nu open" only when open at this moment (browser clock,
@@ -83,6 +86,7 @@ export default function RestaurantDetailView({ id, restaurant, menus }) {
               <div className="detail-badge"><EmojiText value={restaurant.badge} /></div>
             )}
             <h1 className="detail-name">{restaurant.name}</h1>
+            <MenuConfirmation bevestiging={bevestiging} />
             <div className="detail-cuisine">{restaurant.cuisineLabel || restaurant.cuisine}</div>
 
             <p className="detail-desc">{restaurant.description}</p>

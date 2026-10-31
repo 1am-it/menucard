@@ -1,0 +1,158 @@
+/* BE-58 (#143) — de interne lijst "Wijzigingen van houders".
+   Eigen bestand naast de pagina (BE-52); kleuren alleen uit de tokens. */
+
+.mw-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.mw-title {
+  margin: 0 0 4px;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.mw-note {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mw-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.mw-filter {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mw-filter[aria-pressed='true'] {
+  background: var(--accent-faint);
+  color: var(--text-primary);
+}
+
+.mw-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.mw-card {
+  padding: 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.mw-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mw-dish {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mw-line {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.mw-chip {
+  padding: 2px 8px;
+  border: 1px solid var(--accent-border);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.mw-big {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-faint);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mw-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mw-approve,
+.mw-reject {
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mw-approve {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.mw-reject {
+  border: 1px solid var(--accent-border);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.mw-reject-form {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mw-label {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.mw-input {
+  padding: 8px 10px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.mw-status {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.mw-status--error {
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
