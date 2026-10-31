@@ -4,7 +4,7 @@
   "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3180, NEXT_DIST_DIR .next-browser-3180); geen productie, geen echte acceptatie",
   "siteUrl": "https://www.onze-menukaarten.nl",
   "siteIndexable": "",
-  "ranAt": "2026-10-31T14:27:32.409Z",
+  "ranAt": "2026-10-31T16:08:58.779Z",
   "passed": true,
   "checks": [
     {
@@ -445,7 +445,7 @@
     {
       "name": "mobiel 390: \"Tekst of formaat aanpassen\" klapt de keuzes uit",
       "passed": true,
-      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1463,\"left\":14,\"right\":376,\"width\":362,\"height\":503}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
+      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1420,\"left\":14,\"right\":376,\"width\":362,\"height\":460}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
     },
     {
       "name": "mobiel 320: het voorbeeld staat bovenaan, boven de keuzes",
@@ -480,7 +480,7 @@
     {
       "name": "mobiel 320: \"Tekst of formaat aanpassen\" klapt de keuzes uit",
       "passed": true,
-      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1463,\"left\":14,\"right\":306,\"width\":292,\"height\":503}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
+      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1420,\"left\":14,\"right\":306,\"width\":292,\"height\":460}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
     },
     {
       "name": "afdruk a6: kop, keuzes, voorbeeld en knoppen zijn verborgen",
@@ -652,7 +652,7 @@
         "viewportHeight": 900
       },
       "file": "be68-pagina-1280-licht.png",
-      "sha256": "0b05fd1e29ea53719f1bbb3ef1d2ae8b1a61c436a5860ef4f0e975f79ddc1093",
+      "sha256": "1ee2f8e4ad6859a9985ec80a333b945f834aeba31ca72a719e157054b250915c",
       "width": 1280,
       "height": 900
     },
@@ -683,7 +683,7 @@
         "viewportHeight": 900
       },
       "file": "be68-pagina-1280-donker.png",
-      "sha256": "c0c3255c92139ff0d523b906651e6fef62026945df341395c38205d28aac2920",
+      "sha256": "484cf88be7c804a2e8167c1306bbfa2044168c603a121fb0e923c1f7c058d765",
       "width": 1280,
       "height": 900
     },
@@ -1015,7 +1015,7 @@
       "checks": 72,
       "passed": 72,
       "failed": 0,
-      "durationMs": 37928,
+      "durationMs": 37909,
       "error": null
     },
     {
@@ -1023,7 +1023,7 @@
       "checks": 9,
       "passed": 9,
       "failed": 0,
-      "durationMs": 2368,
+      "durationMs": 2365,
       "error": null
     },
     {
@@ -1031,7 +1031,7 @@
       "checks": 14,
       "passed": 14,
       "failed": 0,
-      "durationMs": 19029,
+      "durationMs": 19245,
       "error": null
     },
     {
@@ -1039,7 +1039,7 @@
       "checks": 7,
       "passed": 7,
       "failed": 0,
-      "durationMs": 2397,
+      "durationMs": 2231,
       "error": null
     },
     {
@@ -1047,7 +1047,7 @@
       "checks": 20,
       "passed": 20,
       "failed": 0,
-      "durationMs": 877,
+      "durationMs": 860,
       "error": null
     }
   ],
