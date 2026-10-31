@@ -145,16 +145,16 @@ test('NvwaView: the print mechanism itself is untouched (window.print(), no new 
   // all five imports are still local/Next/React — no PDF/email library added.
   const importLines = source.split('\n').filter((line) => line.trim().startsWith('import '));
   // 3 pre-existing imports + the shared, in-repo Wordmark component (Onze
-  // Menukaarten header) + the shared MobileTabBar + BE-49's in-repo
-  // ShareSettingsButton ("Delen via" next to the theme choice) — still no
+  // Menukaarten header) + the shared MobileTabBar + BE-63's in-repo
+  // PublicHeaderActions (de ene kop met Inloggen en instellingen) — still no
   // external dependency.
-  assert.equal(importLines.length, 6);
+  assert.equal(importLines.length, 5);
   assert.ok(importLines.some((line) => line.includes('@/src/components/Wordmark')));
   assert.ok(importLines.some((line) => line.includes('@/src/components/MobileTabBar')));
-  assert.ok(importLines.some((line) => line.includes('@/src/components/ShareSettingsButton')));
+  assert.ok(importLines.some((line) => line.includes('@/src/components/PublicHeaderActions')));
   assert.ok(importLines.some((line) => line.includes("'react'")));
   assert.ok(importLines.some((line) => line.includes("next/link")));
-  assert.ok(importLines.some((line) => line.includes('ThemeToggle')));
+  assert.doesNotMatch(source, /<ThemeToggle \/>/);
 });
 
 test('NvwaView: the completeness calculation itself is unchanged (same fields, same formula)', () => {

@@ -1,19 +1,24 @@
-// BE-59 (#146, punt 4) — de enige ingang om in te loggen, /inloggen.
+// BE-59 (#146, punt 4) en BE-63 (#155, ronde 4) — de ene ingang om in te
+// loggen, /inloggen, volgens het op 31 oktober goedgekeurde ontwerp.
 //
-// Een korte uitleg en twee duidelijke keuzes (mockup schermen 4 en 5): een
-// restaurant, of het team van de menukaarten. Beide links gaan naar de
-// bestaande inlogpagina's; deze pagina voegt geen eigen inloglogica, geen
-// sessiecheck en geen rolherkenning toe (src/lib/loginEntry.js is de enige
-// bron voor de keuzes en is daar getest). Wie nog geen account heeft, claimt
-// eerst zijn restaurant.
+// Uitkomst 4 van het contract:
+//   - bovenaan het accentlabel "Voor restaurants", de h1 "Inloggen bij je
+//     restaurant" en de intro;
+//   - het e-mailformulier direct op de pagina. Dat formulier is de bestaande
+//     houder-inlog uit src/components/OwnerLoginCodeForm.js — dezelfde aanroep
+//     om de code te versturen, dezelfde codestap en dezelfde foutmeldingen als
+//     /mijn-restaurant/inloggen. De inloglogica zelf is niet veranderd;
+//   - rechts (op mobiel eronder) het claimblok in --bg-elevated met drie
+//     genummerde stappen en de omlijnde knop "Claim je restaurant";
+//   - onderaan de zin voor bezoekers en de kleine team-inloglink.
 //
-// Een Server Component: er is hier niets interactiefs, dus geen client-JS
-// nodig. De opmaak staat in het eigen bestand ernaast (BE-52).
+// De teksten en paden staan in src/lib/loginEntry.js (één bron, getest). Een
+// Server Component: alleen het formulier is client-JS.
 
 import Link from 'next/link'
-import { CLAIM_LINK, LOGIN_CHOICES, LOGIN_INTRO } from '@/src/lib/loginEntry'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
-import ThemeToggle from '@/src/components/ThemeToggle'
+import { LOGIN_PAGE } from '@/src/lib/loginEntry'
+import OwnerLoginCodeForm from '@/src/components/OwnerLoginCodeForm'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import './inloggen.css'
 
@@ -36,36 +41,60 @@ export default function InloggenPage() {
             <Wordmark />
           </nav>
           <div className="header-right">
-            <ThemeToggle />
-            <AccountMenuButton />
+            <PublicHeaderActions />
           </div>
         </div>
       </header>
 
       <main className="inloggen-main">
-        <h1 className="inloggen-title">Inloggen</h1>
-        <p className="inloggen-intro">{LOGIN_INTRO}</p>
+        <div className="inloggen-columns">
+          <section className="inloggen-login" aria-labelledby="inloggen-title">
+            <p className="inloggen-eyebrow">{LOGIN_PAGE.eyebrow}</p>
+            <h1 className="inloggen-title" id="inloggen-title">
+              {LOGIN_PAGE.title}
+            </h1>
+            <p className="inloggen-intro">{LOGIN_PAGE.intro}</p>
+            <div className="inloggen-form">
+              <OwnerLoginCodeForm
+                submitLabel={LOGIN_PAGE.submitLabel}
+                showSignInHeading={false}
+                headingLevel={2}
+                emailHelp={LOGIN_PAGE.emailHelp}
+              />
+            </div>
+          </section>
 
-        <ul className="inloggen-choices">
-          {LOGIN_CHOICES.map((choice) => (
-            <li key={choice.id}>
-              <Link className="inloggen-choice" href={choice.href}>
-                <span className="inloggen-choice-main">
-                  <span className="inloggen-choice-label">{choice.label}</span>
-                  <span className="inloggen-choice-detail">{choice.detail}</span>
-                </span>
-                <span className="inloggen-choice-hint">{choice.hint}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+          <aside className="inloggen-claim" aria-labelledby="inloggen-claim-title">
+            <h2 className="inloggen-claim-title" id="inloggen-claim-title">
+              {LOGIN_PAGE.claim.title}
+            </h2>
+            <p className="inloggen-claim-body">{LOGIN_PAGE.claim.body}</p>
+            <ol className="inloggen-steps">
+              {LOGIN_PAGE.claim.steps.map((step, index) => (
+                <li className="inloggen-step" key={step}>
+                  <span className="inloggen-step-number" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <span className="inloggen-step-text">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <Link className="inloggen-claim-action" href={LOGIN_PAGE.claim.actionHref}>
+              {LOGIN_PAGE.claim.actionLabel}
+            </Link>
+          </aside>
+        </div>
 
-        <p className="inloggen-claim">
-          <Link className="inloggen-claim-link" href={CLAIM_LINK.href}>
-            {CLAIM_LINK.label}
-          </Link>
-        </p>
+        <div className="inloggen-footer">
+          <p className="inloggen-visitor">{LOGIN_PAGE.visitor}</p>
+          <p className="inloggen-team">
+            <Link className="inloggen-team-link" href={LOGIN_PAGE.teamHref}>
+              {LOGIN_PAGE.teamLabel}
+            </Link>
+          </p>
+        </div>
       </main>
     </>
   )
 }
+

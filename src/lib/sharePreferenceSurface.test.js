@@ -23,8 +23,10 @@ const SHARE_BUTTON = read('src/components/DishShareButton.js');
 const SAVE_BUTTON = read('src/components/DishSaveButton.js');
 const DIALOG = read('src/components/ShareDialog.js');
 const SETTINGS = read('src/components/ShareSettingsButton.js');
+const HEADER_ACTIONS = read('src/components/PublicHeaderActions.js');
 const LIB = read('src/lib/sharePreference.js');
 const CSS = read('app/globals.css');
+const DIALOG_CSS = read('src/components/share-dialog.css');
 
 const PUBLIC_HEADERS = [
   'app/HomeView.js',
@@ -37,11 +39,15 @@ const PUBLIC_HEADERS = [
   'app/search/page.js',
 ];
 
+function cssBlockOf(source, selector) {
+  const start = source.indexOf(`${selector} {`);
+  assert.notEqual(start, -1, `${selector} staat niet in de css`);
+  const open = source.indexOf('{', start);
+  return source.slice(open + 1, source.indexOf('}', open));
+}
+
 function cssBlock(selector) {
-  const start = CSS.indexOf(`${selector} {`);
-  assert.notEqual(start, -1, `${selector} staat niet in app/globals.css`);
-  const open = CSS.indexOf('{', start);
-  return CSS.slice(open + 1, CSS.indexOf('}', open));
+  return cssBlockOf(CSS, selector);
 }
 
 test('de kaartregel: label links, de twee icoonknoppen rechts, onder de beschrijving', () => {
@@ -94,7 +100,9 @@ test('het blad heeft echte checkboxen, maximaal 3, en een telefoonmenu-optie', (
   assert.match(DIALOG, /type="checkbox"/);
   assert.match(DIALOG, /disabled=\{!checked && atLimit\}/);
   assert.match(DIALOG, /MAX_SHARE_FAVORITES/);
-  assert.match(DIALOG, /PHONE_MENU_LABEL/);
+  // BE-61: het telefoonmenu is geen losse checkbox meer maar het tweede deel
+  // van de schakelaar.
+  assert.match(DIALOG, /SHARE_SEGMENT_PHONE_LABEL/);
   assert.match(DIALOG, /SHARE_SHEET_TITLE/);
   assert.match(DIALOG, /SHARE_SETTINGS_TITLE/);
   // Esc sluit en de focus keert terug naar de knop die het paneel opende.
@@ -107,15 +115,95 @@ test('het blad heeft echte checkboxen, maximaal 3, en een telefoonmenu-optie', (
   assert.match(SHARE_BUTTON, /clearSharePreference\(storage\)/);
 });
 
-test('"Delen via" staat naast de themakeuze op elke publieke pagina', () => {
+test('BE-61: de schakelaar is één echte radiogroep in een fieldset', () => {
+  assert.match(DIALOG, /<fieldset className="share-segment">/);
+  assert.match(DIALOG, /<legend className="visually-hidden">\{SHARE_SEGMENT_LEGEND\}<\/legend>/);
+  // Twee echte radio-inputs met dezelfde naam: één groep, dus één stand.
+  assert.equal((DIALOG.match(/type="radio"/g) || []).length, 2);
+  assert.equal((DIALOG.match(/name=\{`\$\{idPrefix\}-modus`\}/g) || []).length, 2);
+  assert.match(DIALOG, /value="favorieten"[\s\S]*value="telefoonmenu"/);
+  assert.match(DIALOG, /checked=\{!phone\}/);
+  assert.match(DIALOG, /checked=\{phone\}/);
+  // De actieve stand: lichte achtergrond met een schaduw in een gevulde houder.
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-segment'), /background: var\(--bg-elevated\)/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-segment-option.is-active'),
+    /background: var\(--bg-card\)[\s\S]*box-shadow: var\(--shadow-sm\)/);
+  // Het keuzepunt blijft een echt input, dus toetsenbord en pijltjes werken.
+  assert.match(DIALOG_CSS, /\.share-segment-input:focus-visible/);
+});
+
+test('BE-61: de volgnummers volgen de volgorde van kiezen, met "n van 3"', () => {
+  assert.match(DIALOG, /const order = methods\.indexOf\(method\.id\)/);
+  assert.match(DIALOG, /const checked = order >= 0/);
+  assert.match(DIALOG, /\{checked \? order \+ 1 : ''\}/);
+  assert.match(DIALOG, /shareFavoriteCountLabel\(methods\.length\)/);
+  assert.match(DIALOG, /className=\{`share-fav-mark\$\{checked \? ' is-chosen' : ''\}`\}/);
+  // Per regel: een icoon van 36 px in een afgerond vlak, het label, het rondje.
+  assert.match(DIALOG, /<span className="share-fav-icon-box">[\s\S]*<span className="share-option-label">\{method\.label\}<\/span>[\s\S]*share-fav-mark/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-fav-icon-box'), /width: 36px/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-fav-row'), /min-height: 56px/);
+});
+
+test('BE-61: bij 3 gekozen gaan de andere regels uit en zegt de hint dat', () => {
+  assert.match(DIALOG, /disabled=\{!checked && atLimit\}/);
+  assert.match(DIALOG, /\{phone \? SHARE_PHONE_MENU_HINT : atLimit \? SHARE_HINT_FULL : SHARE_SHEET_HINT\}/);
+  assert.match(LIB, /SHARE_PHONE_MENU_HINT = 'Je deelt altijd via het deelmenu van je telefoon\.'/);
+  assert.match(LIB, /SHARE_HINT_FULL = 'Je hebt 3 favorieten gekozen/);
+  // Het telefoonmenu schakelt de hele lijst uit en dimt hem.
+  assert.match(DIALOG, /className=\{`share-options\$\{phone \? ' is-muted' : ''\}`\} disabled=\{phone\}/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-options.is-muted'), /opacity: 0\.55/);
+});
+
+test('BE-61: "Opslaan" staat uit zonder keuze en "Annuleren" is uit het blad', () => {
+  assert.match(DIALOG, /className="share-btn share-btn-primary share-save" disabled=\{nothing\}/);
+  assert.match(DIALOG, /const nothing = !phone && methods\.length === 0/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-save'), /min-height: 52px/);
+  // "Wissen" is er alleen in de instellingen, als tekstlink in --accent.
+  assert.match(DIALOG, /\{settings \? \([\s\S]*SHARE_CLEAR_LABEL[\s\S]*\) : null\}/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-clear'), /color: var\(--accent\)/);
+  // Het blad zelf heeft geen "Annuleren" meer; het kleine menu wel.
+  const sheet = DIALOG.slice(DIALOG.indexOf('export function ShareDialog'), DIALOG.indexOf('export function ShareMenu'));
+  assert.notEqual(sheet.indexOf('export function ShareDialog'), -1);
+  assert.doesNotMatch(sheet, /SHARE_CANCEL_LABEL/);
+  assert.match(DIALOG.slice(DIALOG.indexOf('export function ShareMenu')), /SHARE_CANCEL_LABEL/);
+  // Sluiten gaat met het kruisje (44 × 44 px, met een naam), Esc of een tik
+  // naast het paneel.
+  assert.match(DIALOG, /className="share-close" aria-label=\{SHARE_CLOSE_LABEL\} onClick=\{onClose\}/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-close'), /width: 44px[\s\S]*height: 44px/);
+  assert.match(DIALOG, /if \(event\.target === event\.currentTarget\) onClose\(\)/);
+});
+
+test('BE-61: de vijf manieren hebben een eigen lijnicoon, zonder merklogo', () => {
+  for (const method of ['whatsapp', 'copy', 'sms', 'telegram', 'email']) {
+    assert.match(DIALOG, new RegExp(`^  ${method}:`, 'm'), method);
+  }
+  assert.match(DIALOG, /stroke="currentColor"/);
+  assert.match(DIALOG, /aria-hidden="true"/);
+  // Geen gevulde merktekens en geen externe afbeelding of icoonpakket.
+  assert.doesNotMatch(code(DIALOG), /fill="(?!none)[^"]+"|<img|@fortawesome|lucide/);
+  assert.match(cssBlockOf(DIALOG_CSS, '.share-fav-icon'), /width: 20px/);
+});
+
+test('BE-63: de publieke kop gebruikt de ene component met "Delen via"', () => {
   for (const file of PUBLIC_HEADERS) {
     const source = read(file);
-    assert.match(source, /import ShareSettingsButton from '@\/src\/components\/ShareSettingsButton'/, file);
-    assert.match(source, /<ThemeToggle \/>\s*<ShareSettingsButton \/>/, `${file}: naast de themakeuze`);
+    assert.match(source, /import PublicHeaderActions from '@\/src\/components\/PublicHeaderActions'/, file);
+    assert.match(source, /<PublicHeaderActions \/>/, `${file}: de kop`);
+    // BE-63 (#155): geen losse themakeuze of deelknop meer in de publieke kop.
+    assert.doesNotMatch(source, /<ThemeToggle \/>|<ShareSettingsButton \/>/, `${file}: geen losse kopknoppen`);
   }
+  // De interne kop en /mijn-restaurant houden hun eigen losse knoppen.
+  assert.match(read('src/components/InternalNav.js'), /<ThemeToggle \/>/);
   assert.match(SETTINGS, /\{SHARE_SETTINGS_LABEL\}/);
   assert.match(SETTINGS, /mode="settings"/);
   assert.match(SETTINGS, /aria-expanded=\{open\}/);
+  assert.match(HEADER_ACTIONS, /PublicHeaderPanel/);
+  // BE-63 (#155, ronde 3): de inhoud van het paneel staat in
+  // PublicHeaderPanel.js en wordt pas bij het openen geladen.
+  const PANEL = read('src/components/PublicHeaderPanel.js');
+  assert.match(PANEL, /\{SHARE_SETTINGS_LABEL\}/);
+  assert.match(PANEL, /mode="settings"/);
+  assert.match(PANEL, /aria-expanded=\{shareOpen\}/);
 });
 
 test('de voorkeur gaat alleen naar localStorage, zonder cookie of netwerk', () => {

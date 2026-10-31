@@ -26,7 +26,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import ThemeToggle from '@/src/components/ThemeToggle'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import { safeBrowserStorage } from '@/src/lib/dishList'
 import {
@@ -343,7 +343,7 @@ export default function KiesView({ code }) {
         <div className="header-inner">
           <Wordmark />
           <div className="lijst-header-actions">
-            <ThemeToggle />
+            <PublicHeaderActions />
             <Link href="/mijn-lijstje" className="back-btn">← Mijn lijstje</Link>
           </div>
         </div>

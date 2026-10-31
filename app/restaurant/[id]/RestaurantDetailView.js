@@ -1,10 +1,8 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import PublicFooter from '@/src/components/PublicFooter'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import { getReservationActions, getReservationNote, isExternalReservation, isValidPhone, isValidUrl } from '@/src/utils/reservation'
 import Wordmark from '@/src/components/Wordmark'
@@ -73,9 +71,7 @@ export default function RestaurantDetailView({ id, restaurant, menus, bevestigin
         <div className="header-inner">
           <Wordmark />
           <div className="header-actions">
-            <ThemeToggle />
-            <ShareSettingsButton />
-            <AccountMenuButton />
+            <PublicHeaderActions />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>

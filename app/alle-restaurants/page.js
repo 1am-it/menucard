@@ -1,10 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import PublicFooter from '@/src/components/PublicFooter'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantListCard from '@/src/components/RestaurantListCard'
@@ -165,9 +163,7 @@ function AlleRestaurantsPageInner() {
           <Wordmark />
           <div className="header-right">
             <PrimaryNav />
-            <ThemeToggle />
-            <ShareSettingsButton />
-            <AccountMenuButton />
+            <PublicHeaderActions />
           </div>
         </div>
       </header>

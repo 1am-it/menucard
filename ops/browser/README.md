@@ -1083,7 +1083,92 @@ ontwikkelaarsbewijs met een gestubde API, geen onafhankelijke review en geen
 echte acceptatie; de visuele vergelijking met de goedgekeurde mockup blijft
 mensenwerk (daarom staan de schermafdrukken erin).
 
-## BE-60 (#150) — goedgekeurde houderwijzigingen in de zoekresultaten
+## BE-61 (#152, variant A) — het deelblad "Delen via" in een echte browser
+
+`npm run test:browser:be61` (of `node ops/browser/run-be61-browser-check.js`).
+Drie scenario's op poort 3188 (uit 3180-3189, via `BE61_PORT` te wijzigen), met
+een verse productieopbouw (`next build` + `next start`, de BE-57-opzet, zodat er
+geen HMR-herlaadbeurt in een meting valt) en een lokale Edge/Chrome via CDP. De
+pagina is `/mijn-lijstje`: die heeft de kop, de themaknop en de vaste tabbalk
+zonder restaurantgegevens. Draai deze check alleen.
+
+Wat hij meet:
+
+- **het paneel in licht en donker op 1280, 390 en 320 px** — een echt
+  dialoogvenster met naam en hint, een greepje van 36 × 4 px, een ronde
+  sluitknop van 44 × 44 px met `aria-label="Sluiten"`, twee echte radios in één
+  fieldset met een visueel verborgen legend, vijf regels van minstens 56 px met
+  een icoon van 36 px, "0 van 3 gekozen", "Opslaan" van 52 px en "Wissen" zonder
+  "Annuleren";
+- **"Opslaan" is te raken** — de knop staat volledig in beeld en
+  `elementFromPoint` in zijn midden geeft de knop zelf; geen horizontale
+  overloop;
+- **op 390 en 320 px ligt het paneel boven de tabbalk** — op drie punten over de
+  balk is het bovenste element het paneel;
+- **de volgorde van kiezen** — eerst Sms, dan WhatsApp, dan E-mail geeft de
+  merkjes 2-1-3, "3 van 3 gekozen", de hint over 3 favorieten en de twee andere
+  regels uit; het telefoonmenu schakelt de lijst uit en dimt hem;
+- **sluiten en opslaan** — het kruisje, Esc en een tik naast het paneel sluiten
+  het; "Opslaan" bewaart de keuze in `localStorage` onder `deelvoorkeur`;
+- **het thema is aangetoond, niet aangenomen**, net als bij BE-60: een klik op
+  de themaknop van de app zelf, en per opname `themeProof` met `data-theme`, de
+  actieve knop en de helderheid van `--bg`.
+
+Bewijs: `ops/browser/evidence/be-61/` (acht schermafdrukken als volledige
+viewport, in git) en `ops/browser/evidence/be61-browser-evidence.json` (111
+controles). De a11y-check is gefilterd gedraaid op de pagina met het paneel open:
+`node ops/browser/run-a11y-public-check.js --alleen=instellingen --poort=3189`
+(64 controles, 0 fouten). Grenzen: dit is ontwikkelaarsbewijs, geen
+onafhankelijke review en geen echte acceptatie; de opslag en de keuze van het
+gedrag staan in `src/lib/sharePreference.test.js` en de bedrading in
+`src/lib/sharePreferenceSurface.test.js`.
+
+
+## BE-63 (#155, ronde 4) — de kop en /inloggen in een echte browser
+
+`npm run test:browser:be63` (of `node ops/browser/run-be63-browser-check.js`).
+Vijf scenario's op poort 3189 (uit 3180-3189, via `BE63_PORT` te wijzigen), met
+een verse productieopbouw (`next build` + `next start` in een eigen bouwmap, de
+BE-57-opzet) en een lokale Edge/Chrome via CDP. De kop, het instellingenpaneel en
+het mobiele menu worden gemeten op `/inloggen` (statisch, met dezelfde gedeelde
+kop als de andere publieke pagina's en zonder API-aanroepen bij het laden); dat
+is ook de nieuwe pagina uit dit ticket. Draai deze check alleen. Met
+`--alleen=<scenario>` draai je één scenario; dat schrijft naar
+`be63-browser-evidence.filtered.json` en niet naar het bewijs van de levering.
+
+Wat hij meet:
+
+- **de kop als gast op 1280, 390 en 320 px** — op 1280 "Voor restaurants",
+  Inloggen en de instellingenknop; op 390 en 320 alleen Inloggen en de
+  menuknop; geen horizontale overloop; de knoppen staan op één regel en de
+  hoogte van de kop staat per breedte in het bewijs;
+- **de kop als ingelogd** — dezelfde sessie-stub als de BE-59-check zet een
+  fictieve sessie in `localStorage`; daarna staat het bestaande accountmenu in de
+  kop en is Inloggen weg;
+- **het instellingenpaneel op desktop** — het thema wisselt via de themakeuze in
+  het paneel zelf (Licht, Donker en Automatisch) en "Delen via" opent het
+  BE-61-venster;
+- **het mobiele menu op 390 en 320 px** — het blok "Heb je een restaurant?" met
+  Inloggen en Claim je zaak, de zin voor bezoekers, de weergave, Delen via en
+  Mijn lijstje staan in beeld; het menu ligt boven de tabbalk
+  (`elementFromPoint` in het midden van de laatste regel); Esc sluit het menu en
+  de focus keert terug naar de menuknop;
+- **`/inloggen`** — het accentlabel, de h1 "Inloggen bij je restaurant", de
+  intro, het e-mailveld en de knop "Stuur mij een inlogcode" van 52 px (de knop
+  in `--button-primary-bg`, vergeleken met de tokenswaarde), de uitleg over het
+  geclaimde adres, het claimblok met drie stappen en de knop naar
+  `/mijn-restaurant/claimen`, de bezoekerszin en de teamlink naar
+  `/internal/login`; daarna scrolt de check naar het claimblok en de teamlink om
+  te meten dat ze volledig in beeld passen;
+- **het thema is aangetoond, niet aangenomen**: per opname legt `themeProof`
+  `data-theme`, de actieve knop en de helderheid van `--bg` vast.
+
+Bewijs: `ops/browser/evidence/be-63/` (volledige viewport-opnames, in git) en
+`ops/browser/evidence/be63-browser-evidence.json`. Grenzen: dit is
+ontwikkelaarsbewijs, geen onafhankelijke review en geen echte acceptatie; de
+inlog zelf is niet uitgevoerd (geen Supabase-project) en de teksten en paden
+staan in `src/lib/loginEntry.test.js` en `src/lib/ownerLoginSurface.test.js`.
+
 
 `npm run test:browser:be60` (of `node ops/browser/run-be60-browser-check.js`).
 Eén scenario, poort 3186 (uit 3180-3189, via `BE60_PORT` te wijzigen), `next dev`,

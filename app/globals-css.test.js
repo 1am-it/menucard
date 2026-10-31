@@ -176,12 +176,19 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/dish-share-button.css',
     'src/components/kies-start.css',
     'src/components/menu-body.css',
+    // BE-63 (#155): de teller bij "Mijn lijstje" en de ene publieke kop.
+    'src/components/primary-nav.css',
     // BE-59 deel 2: de footerlink op de publieke pagina's.
     'src/components/public-footer.css',
+    // BE-63 (#155): de rechterkant van de publieke kop.
+    'src/components/public-header-actions.css',
+    'src/components/public-header-menu.css',
     // BE-65: de balk na het bewaren (laadt pas als er iets bewaard is).
     'src/components/saved-dishes-bar.css',
     // BE-65: het venster Stuur je lijstje (laadt pas bij het openen).
     'src/components/saved-list-send.css',
+    // BE-61: het deelblad "Delen via", naast de component.
+    'src/components/share-dialog.css',
     // BE-65: de deelkaart in de hero.
     'src/components/share-hero-card.css',
   ]);
