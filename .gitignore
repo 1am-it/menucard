@@ -34,3 +34,6 @@ ops/perf/output/
 .next-base/
 .next-be65/
 .next-be62/
+# BE-62 (#153) - lokale logbestanden van de browsercheck.
+/be62-browser.log
+/be62-browser.err

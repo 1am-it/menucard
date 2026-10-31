@@ -1,0 +1,341 @@
+{
+  "script": "run-be62-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde kies-API; geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T10:58:54.836Z",
+  "port": 3196,
+  "filter": null,
+  "scenarioRuns": null,
+  "network": null,
+  "checks": [
+    {
+      "name": "kies: geen terugkomvlak vóór de eigen stem",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "kies: stemmen tot de uitslag (1280)",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (1280 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (1280 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (1280 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (1280 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (390 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (390 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (390 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (390 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies na het stemmen (light) · a11y-fout · landmarks",
+      "passed": false,
+      "detail": "nav · document"
+    },
+    {
+      "name": "kies na het stemmen (light) · a11y-audit zonder fouten",
+      "passed": false,
+      "detail": "1 fouten"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (320 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (320 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (320 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (320 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (1280 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (1280 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (1280 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (1280 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (390 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (390 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (390 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (390 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies na het stemmen (dark) · a11y-fout · landmarks",
+      "passed": false,
+      "detail": "nav · document"
+    },
+    {
+      "name": "kies na het stemmen (dark) · a11y-audit zonder fouten",
+      "passed": false,
+      "detail": "1 fouten"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (320 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (320 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (320 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (320 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be62-kies-1280-light.png",
+      "sha256": "2098eea168c6885a9da0016e8dffc227be0286b66eaac310657009bef9e96d64",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-390-light.png",
+      "sha256": "0d4c268a7c1dd4dbd5fd5fbc04f49b67d67065950b3dc0b1b727f648d4f9c549",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-320-light.png",
+      "sha256": "789b27dd0bab76a039cba84713c38161cc78da60e2e1d9d3468ea0a090ca51b1",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-1280-dark.png",
+      "sha256": "d305b83d557993901af6c5e24fb0cba5e8415651fd52b18b6e04929f48f7b68c",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-390-dark.png",
+      "sha256": "7219332643c287944a0fc42e0c890c60201fc00856386efcd33d1dae3a75b6da",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-320-dark.png",
+      "sha256": "57afc79e87728b9336dc0df07a50cdeaac401fe5066a5fe69dfee448686dcc42",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 4,
+  "passed": false,
+  "error": "Error: page_not_ready: http://localhost:3196/menu/1-lunch?dish=1-lunch-0-0&name=Voorgerecht&stand=licht\nonze\nmenukaarten\nMenukaarten in Breda\nVoor restaurants\nInloggen\n← Restaurant Wolfslaar\nRestaurant Wolfslaar\nLunchkaart\n🥗 Lunch\n🍽 Diner\nLunchmenu's\nRESTAURANT\nRestaurant Wolfslaar\nModern Frans · Fine Dining\nOpent vandaag om 18:00\n📍\nWolfslaardreef 100, 4834 SP Breda\n📞 076 201 49 75\nWebsite\nReserveer via website\n(opent in een nieuw venster)\n\nReserveren gaat via de website van Restaurant Wolfslaar. Onze Menukaarten neemt zelf geen reserveringen of bestellingen aan.\n\nBron: www.restaurantwolfslaar.com/nl/menu-lunch · 2026-03-25\nChef Maarten Camps. Di–Vr open voor lunch vanaf 12:00. Keuze van de chef — geen vaste gerechten vermeld.\n🔍\n🛡 Allergie\n🌿 Vegetarisch\n🌱 Vegan\n☪️ Halal\n🌾 Glutenvrij\nMax prijs: alles\nLUNCHMENU'S\nBusiness Lunch\n€72,50\nTwee gangen, keuze van de chef, binnen een uur ges\n    at navigate (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\lib\\runtime.js:199:11)\n    at async gedeeldScenario (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\run-be62-browser-check.js:310:7)\n    at async runScenarioSelection (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\lib\\scenario-filter.js:142:7)\n    at async main (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\run-be62-browser-check.js:512:20)"
+}

@@ -54,10 +54,21 @@ const SHOT_DIR = path.join(EVIDENCE_DIR, 'be-62');
 
 const KIES_URL = `${APP}/kies/${BE62_KIES_CODE}`;
 // Een bestaand gerecht uit de echte menukaarten, met de stand van een gedeelde
-// link (dat is het teken dat iemand de link deelde).
-const DISH_URL = `${APP}/menu/1-lunch?dish=1-lunch-0-0&name=Voorgerecht&stand=licht`;
-const PLAIN_MENU_URL = `${APP}/menu/1-lunch`;
-const LIST_URL = `${APP}/mijn-lijstje?lijst=1-lunch-0-0`;
+// link (dat is het teken dat iemand de link deelde). `name` en `cat` moeten exact
+// kloppen, anders wijst de deeplink niets aan (resolveDishTarget).
+const DISH_TARGET = {
+  menuId: '1-diner',
+  catIdx: 1,
+  itemIdx: 0,
+  name: "Blonde d'Aquitaine Beef",
+  category: 'Voorgerechten',
+};
+const DISH_ID = `${DISH_TARGET.menuId}-${DISH_TARGET.catIdx}-${DISH_TARGET.itemIdx}`;
+const DISH_URL = `${APP}/menu/${DISH_TARGET.menuId}?dish=${DISH_ID}`
+  + `&name=${encodeURIComponent(DISH_TARGET.name)}`
+  + `&cat=${encodeURIComponent(DISH_TARGET.category)}&stand=licht`;
+const PLAIN_MENU_URL = `${APP}/menu/${DISH_TARGET.menuId}`;
+const LIST_URL = `${APP}/mijn-lijstje?lijst=${DISH_ID}`;
 const PLAIN_LIST_URL = `${APP}/mijn-lijstje`;
 const HOME_URL = `${APP}/`;
 
@@ -274,16 +285,22 @@ async function kiesScenario(cdp) {
     for (const size of SIZES) {
       await setViewport(cdp, size.width, size.height);
       await navigate(cdp, KIES_URL, `document.readyState === 'complete'`);
-      const hasResult = await evalJs(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`);
+      // De pagina haalt de stemming async op: wacht op één van de drie standen.
+      await waitFor(cdp, `Boolean(document.querySelector('#kies-roepnaam')) || Boolean(document.querySelector('.kies-dish-card')) || Boolean(document.querySelector('ul.kies-uitslag'))`, 25000);
+      let hasResult = await evalJs(cdp, `Boolean(document.querySelector('ul.kies-uitslag'))`);
       if (!hasResult) {
-        await joinKies(cdp);
-        if (!beforeChecked) {
-          const before = await evalJs(cdp, BLOK_STAAT);
-          check('kies: geen terugkomvlak vóór de eigen stem', before.present === false, JSON.stringify(before));
-          beforeChecked = true;
+        const naamveld = await evalJs(cdp, `Boolean(document.querySelector('#kies-roepnaam'))`);
+        if (naamveld) {
+          await joinKies(cdp);
+          if (!beforeChecked) {
+            const before = await evalJs(cdp, BLOK_STAAT);
+            check('kies: geen terugkomvlak vóór de eigen stem', before.present === false, JSON.stringify(before));
+            beforeChecked = true;
+          }
         }
         const voted = await voteAll(cdp);
-        check(`kies: stemmen tot de uitslag (${size.width})`, voted === true, String(voted));
+        check(`kies: stemmen tot de uitslag (${size.width} ${theme})`, voted === true, String(voted));
+        hasResult = voted === true;
       }
       const proof = await applyTheme(cdp, theme);
       await closeSettings(cdp);

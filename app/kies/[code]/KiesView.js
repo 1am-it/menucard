@@ -365,7 +365,11 @@ export default function KiesView({ code }) {
           <Wordmark />
           <div className="lijst-header-actions">
             <PublicHeaderActions />
-            <Link href="/mijn-lijstje" className="back-btn">← Mijn lijstje</Link>
+            {/* BE-62 (#153): de terug-link is meteen het nav-landmark van deze
+                pagina; zonder dat vond de a11y-audit hier geen navigatie. */}
+            <nav className="kies-back" aria-label="Terug">
+              <Link href="/mijn-lijstje" className="back-btn">← Mijn lijstje</Link>
+            </nav>
           </div>
         </div>
       </header>
