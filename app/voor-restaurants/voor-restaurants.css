@@ -17,7 +17,7 @@
 .vr-main {
   box-sizing: border-box;
   width: 100%;
-  max-width: 1120px;
+  max-width: 1150px;
   margin: 0 auto;
   padding: 32px 20px 48px;
   color: var(--text-primary);
@@ -212,6 +212,9 @@
 
 .vr-feature-body {
   margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
 
 .vr-allergens {
   display: grid;
@@ -250,34 +253,26 @@
   border-top: 1px solid var(--border);
 }
 
-@media (min-width: 720px) {
+/* Tussen 640 en 960 px: de hero blijft één kolom, de kaarten staan in twee
+   kolommen (Lead-review ronde 2). */
+@media (min-width: 640px) {
   .vr-feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 900px) {
-  .vr-allergens {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 24px;
-    padding: 24px;
-  }
-
-  .vr-allergens-action {
-    justify-self: end;
-  }
-}
-
-@media (min-width: 1000px) {
+/* Vanaf 960 px het desktopontwerp: de hero in twee kolommen (tekst links, het
+   weekoverzicht rechts), "Wat je krijgt" in drie kolommen en het
+   allergenenblok met de knop rechts uitgelijnd. */
+@media (min-width: 960px) {
   .vr-main {
     padding-top: 48px;
   }
 
   .vr-hero {
-    grid-template-columns: minmax(0, 1fr) 380px;
-    align-items: start;
-    gap: 40px;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 56px;
   }
 
   .vr-title {
@@ -290,6 +285,17 @@
 
   .vr-feature-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .vr-allergens {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .vr-allergens-action {
+    justify-self: end;
   }
 }
 
@@ -308,10 +314,6 @@
   .vr-allergens-action {
     width: 100%;
   }
-}
-
-  color: var(--text-secondary);
-  font-size: 14px;
 }
 
 .vr-soon {

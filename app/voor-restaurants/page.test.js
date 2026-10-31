@@ -231,7 +231,8 @@ test('de opmaak gebruikt alleen tokens en geen harde kleuren', () => {
   assert.match(rules, /\.vr-allergens \{[^}]*background: var\(--bg-elevated\)/, 'het allergenenblok op --bg-elevated');
   assert.match(rules, /\.vr-feature-icon \{[^}]*color: var\(--accent\)/, 'de iconen in --accent');
   assert.match(rules, /min-height: 44px/, 'grote tikvlakken');
-  assert.match(rules, /@media \(min-width: 1000px\)/, 'twee kolommen op desktop');
+  assert.match(rules, /@media \(min-width: 960px\)/, 'vanaf 960 px het desktopontwerp');
+  assert.match(rules, /@media \(min-width: 640px\)/, 'vanaf 640 px twee kaartkolommen');
   // BE-64 ronde 1, na de a11y-run: bij 200% tekst werd de pagina 497 px breed
   // door de lange kop "Allergenenoverzicht". Deze regel houdt hem binnen.
   assert.match(rules, /\.vr-section-title \{[^}]*overflow-wrap: anywhere/);
@@ -239,6 +240,98 @@ test('de opmaak gebruikt alleen tokens en geen harde kleuren', () => {
   // van 44 px (BE-51-norm), zonder de opmaak van de kop verder te veranderen.
   const headerCss = read('src/components/public-header-actions.css');
   assert.match(headerCss, /\.pha-restaurants \{[^}]*min-height: 44px/);
+});
+
+// De inhoud van het blok van één selector, binnen een stuk CSS. Zo meet een
+// assertie de regel zelf en niet de eerste de beste plek in het bestand.
+function regelIn(tekst, selector) {
+  const kop = `${selector} {`;
+  const index = tekst.indexOf(kop);
+  assert.ok(index >= 0, `${selector} ontbreekt`);
+  const eind = tekst.indexOf('}', index);
+  assert.ok(eind > index, `${selector} is niet afgesloten`);
+  return tekst.slice(index + kop.length, eind);
+}
+
+// Het volledige @media-blok, van `@media ... {` tot de bijbehorende `}`.
+function mediaBlok(rules, query) {
+  const index = rules.indexOf(`@media ${query} {`);
+  assert.ok(index >= 0, `@media ${query} ontbreekt`);
+  let diepte = 0;
+  for (let i = index; i < rules.length; i += 1) {
+    if (rules[i] === '{') diepte += 1;
+    else if (rules[i] === '}') {
+      diepte -= 1;
+      if (diepte === 0) return rules.slice(index, i + 1);
+    }
+  }
+  assert.fail(`@media ${query} is niet afgesloten`);
+}
+
+// Ronde 2 (Lead-review): in ronde 1 was `.vr-feature-body {` niet afgesloten.
+// Daardoor stond elk volgend blok — inclusief alle @media-regels — bínnen die
+// regel, en viel de hele desktopopmaak weg terwijl de bron er goed uitzag. Deze
+// controle bewaakt de vorm van het bestand: geen regel binnen een regel en geen
+// onafgesloten blok.
+function cssStructuurFouten(source) {
+  const bron = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  const fouten = [];
+  const stapel = [];
+  let begin = 0;
+  for (let i = 0; i < bron.length; i += 1) {
+    const teken = bron[i];
+    if (teken === '{') {
+      const prelude = bron.slice(begin, i).trim().replace(/\s+/g, ' ');
+      const ouder = stapel[stapel.length - 1];
+      if (ouder !== undefined && !ouder.startsWith('@')) {
+        fouten.push(`"${prelude}" staat binnen "${ouder}"`);
+      }
+      stapel.push(prelude);
+      begin = i + 1;
+    } else if (teken === '}') {
+      if (stapel.length === 0) fouten.push('een } zonder {');
+      stapel.pop();
+      begin = i + 1;
+    } else if (teken === ';' && stapel.length > 0) {
+      begin = i + 1;
+    }
+  }
+  if (stapel.length > 0) fouten.push(`niet afgesloten: ${stapel.join(' < ')}`);
+  return fouten;
+}
+
+test('het stylesheet is één vlakke lijst regels en @media-blokken', () => {
+  assert.deepEqual(cssStructuurFouten(read(CSS)), []);
+  // Dezelfde controle op een expres kapot bestand, zodat de test zelf ook
+  // aantoont dat hij een ontbrekende accolade opmerkt.
+  assert.match(cssStructuurFouten('.a { margin: 0;\n\n.b {\n  color: red;\n}\n').join(' '), /staat binnen "\.a"/);
+});
+
+test('de desktopopmaak volgt de Lead-review: hero twee kolommen, kaarten in drie, allergenenknop rechts', () => {
+  const rules = read(CSS).replace(/\/\*[\s\S]*?\*\//g, '');
+  // De inhoud krijgt een maximale breedte van ongeveer 1150 px en staat gecentreerd.
+  const main = regelIn(rules, '.vr-main');
+  assert.match(main, /max-width: 1150px/);
+  assert.match(main, /margin: 0 auto/);
+
+  const desktop = mediaBlok(rules, '(min-width: 960px)');
+  const hero = regelIn(desktop, '.vr-hero');
+  assert.match(hero, /grid-template-columns: minmax\(0, 1\.3fr\) minmax\(0, 1fr\)/);
+  assert.match(hero, /align-items: center/);
+  assert.match(hero, /gap: 56px/);
+  assert.match(regelIn(desktop, '.vr-feature-grid'), /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.match(regelIn(desktop, '.vr-allergens'), /grid-template-columns: minmax\(0, 1fr\) auto/);
+  assert.match(regelIn(desktop, '.vr-allergens-action'), /justify-self: end/);
+
+  // Tussen 640 en 960 px: de kaarten in twee kolommen, de hero in één kolom.
+  const midden = mediaBlok(rules, '(min-width: 640px)');
+  assert.match(regelIn(midden, '.vr-feature-grid'), /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.equal(midden.includes('.vr-hero'), false, 'de hero blijft onder 960 px één kolom');
+
+  // Onder 640 px blijft alles één kolom.
+  assert.match(regelIn(rules, '.vr-hero'), /gap:/);
+  assert.doesNotMatch(regelIn(rules, '.vr-hero'), /grid-template-columns/);
+  assert.match(regelIn(rules, '.vr-feature-grid'), /grid-template-columns: minmax\(0, 1fr\);/);
 });
 
 test('de sitemap en robots blijven dicht, ook voor deze pagina', () => {
