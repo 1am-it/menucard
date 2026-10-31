@@ -15,6 +15,10 @@
 //    label "Tijdelijk niet beschikbaar";
 //  - label en prijs staan bij de opname in beeld, zonder horizontale overflow,
 //    op 1280, 390 en 320 px en in licht en donker;
+//  - het thema van elke opname is aangetoond, niet aangenomen: vóór de opname
+//    gaat het thema via de themaknop van de app zelf (BE-46 deel 2, BE-57) en
+//    legt themeProof `data-theme`, de actieve knop en de helderheid van `--bg`
+//    vast (licht > 200, donker < 80). Zie lib/theme-proof.js;
 //  - screenshots bij het bewijs.
 //
 // Niet bewezen hier: de serverregels (overlay, filter, volgorde) — die staan in
@@ -33,6 +37,7 @@ const {
   startServer,
   startBrowser,
   evalJs,
+  waitFor,
   navigate,
   screenshot,
 } = require('./lib/runtime');
@@ -44,6 +49,13 @@ const {
   runScenarioSelection,
 } = require('./lib/scenario-filter');
 const { be60StubScript, NIEUWE_PRIJS, LABEL } = require('./lib/be60-zoek-stub');
+const {
+  THEME_LABELS,
+  themeProofScript,
+  clickThemeScript,
+  themeProofValue,
+  themeOk,
+} = require('./lib/theme-proof');
 
 const SCRIPT_NAME = 'run-be60-browser-check.js';
 const PORT = Number(process.env.BE60_PORT || 3186);
@@ -69,15 +81,45 @@ async function setViewport(cdp, width, height) {
   await cdp.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 600 });
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function shot(cdp, name, meta = {}) {
   fs.mkdirSync(SHOT_DIR, { recursive: true });
   const file = await screenshot(cdp, SHOT_DIR, name);
-  shots.push({ ...file, viewport: `${viewport.width}x${viewport.height}`, theme: meta.theme || null, state: meta.state || null });
+  shots.push({
+    ...file,
+    viewport: `${viewport.width}x${viewport.height}`,
+    theme: meta.theme || null,
+    state: meta.state || null,
+    themeProof: meta.themeProof || null,
+  });
   return file;
 }
 
-async function kiesThema(cdp, theme) {
-  await evalJs(cdp, `(() => { try { localStorage.setItem('bredaeats_theme', '${theme}'); } catch (error) { return false; } return true; })()`);
+/**
+ * Het bewijs van het thema zoals de pagina het echt toont: `data-theme`, de
+ * knop die de app zelf actief noemt en de helderheid van `--bg`. Dit is de
+ * meting die vlak vóór de opname valt; zonder dit bewijs telt een bestandsnaam
+ * met "-light" niets.
+ */
+async function themeProof(cdp) {
+  return themeProofValue(await evalJs(cdp, themeProofScript()));
+}
+
+/**
+ * Het thema zetten via de themaknop van de app zelf (BE-46 deel 2, BE-57): een
+ * klik op "Licht" of "Donker" in ThemeToggle, geen los attribuut en geen
+ * schrijfactie in de opslag. Geeft het bewijs terug waarmee de opname wordt
+ * gecontroleerd. De knop verschijnt pas na hydratatie, dus eerst kort wachten.
+ */
+async function applyTheme(cdp, theme) {
+  const label = THEME_LABELS[theme];
+  const klaar = await waitFor(cdp, `document.querySelectorAll('.theme-btn').length === 2`, 15000);
+  if (!klaar) throw new Error(`theme_button_missing: ${label}`);
+  const clicked = await evalJs(cdp, clickThemeScript(label));
+  if (clicked !== 'clicked') throw new Error(`theme_button_missing: ${label}`);
+  await sleep(260);
+  return themeProof(cdp);
 }
 
 // Leest de kaarten van de zoekresultaten en meet of prijs en label in beeld
@@ -110,12 +152,16 @@ const ZOEK_STAAT = `(() => {
 
 async function zoekenScenario(cdp) {
   for (const theme of ['light', 'dark']) {
-    await kiesThema(cdp, theme);
     for (const width of [1280, 390, 320]) {
       await setViewport(cdp, width, 900);
-      await navigate(cdp, `${APP}/search?q=steak`, `Boolean(document.querySelector('.dish-result-unavailable'))`, 120000);
+      await navigate(cdp, `${APP}/search?q=steak`, `Boolean(document.querySelector('.dish-result-unavailable'))`);
+      // Het thema en zijn bewijs vóór de meting en vóór de opname: een
+      // bestandsnaam met "-light" is geen bewijs, dit wel.
+      const proof = await applyTheme(cdp, theme);
       const staat = await evalJs(cdp, ZOEK_STAAT);
       const waar = `${theme}/${width}`;
+      check(`zoeken ${waar}: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)`,
+        themeOk(proof, theme), JSON.stringify(proof));
       check(`zoeken ${waar}: precies één label "Tijdelijk niet beschikbaar"`, staat.labelTekst === LABEL, staat.labelTekst);
       check(`zoeken ${waar}: de nieuwe prijs van de goedgekeurde wijziging staat er`, staat.prijzen.includes(NIEUWE_PRIJS), staat.prijzen.join('|'));
       check(`zoeken ${waar}: het gerecht met het label blijft staan, met zijn prijs`,
@@ -126,9 +172,14 @@ async function zoekenScenario(cdp) {
       check(`zoeken ${waar}: het label is zichtbaar opgemaakt (tekst en achtergrond)`,
         staat.labelKleur !== 'rgba(0, 0, 0, 0)' && staat.labelAchtergrond !== 'rgba(0, 0, 0, 0)',
         `${staat.labelKleur} / ${staat.labelAchtergrond}`);
-      await shot(cdp, `be60-zoeken-${width}-${theme}.png`, { theme, state: 'overlay' });
+      await shot(cdp, `be60-zoeken-${width}-${theme}.png`, { theme, state: 'overlay', themeProof: proof });
     }
   }
+
+  // Elke opname draagt zijn eigen themabewijs; een opname zonder bewijs telt niet.
+  const zonderBewijs = shots.filter((opname) => !themeOk(opname.themeProof, opname.theme));
+  check('thema: elke opname heeft een kloppend themabewijs', zonderBewijs.length === 0 && shots.length === 6,
+    `${shots.length - zonderBewijs.length}/${shots.length} opnamen: ${zonderBewijs.map((opname) => opname.file).join(',')}`);
 }
 
 const SCENARIOS = [
