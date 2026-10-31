@@ -325,7 +325,10 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
               {secondary.length > 0 && (
                 <>
                   <hr className="internal-nav-workqueue-separator" />
-                  <ul className="internal-nav-workqueue-list" aria-label="Stad en restaurantgegevens">
+                  <p className="internal-nav-workqueue-heading" id="internal-nav-overviews">
+                    Overzichten
+                  </p>
+                  <ul className="internal-nav-workqueue-list" aria-labelledby="internal-nav-overviews">
                     {secondary.map((m) => (
                       <li key={m.id}>
                         <a
