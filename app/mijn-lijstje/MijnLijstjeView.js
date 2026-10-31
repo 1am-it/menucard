@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -172,6 +173,7 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
         )}
       </main>
 
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
@@ -268,6 +269,7 @@ function AlleRestaurantsPageInner() {
         )}
       </main>
 
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

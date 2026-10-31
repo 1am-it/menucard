@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -647,6 +648,7 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
       {/* BE-44 (issue 105, criterium 4) — "<n> bewaard · Bekijken →" zodra er
           iets bewaard is; de balk staat boven de telefoonmenubalk. */}
       <SavedListBar />
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

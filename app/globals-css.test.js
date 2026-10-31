@@ -171,6 +171,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/daghappen-vandaag.css',
     'src/components/kies-start.css',
     'src/components/menu-body.css',
+    // BE-59 deel 2: de footerlink op de publieke pagina's.
+    'src/components/public-footer.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });

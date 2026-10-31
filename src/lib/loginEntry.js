@@ -33,11 +33,15 @@ const CLAIM_LINK = {
   href: CLAIM_SEARCH_HREF,
 };
 
+// De ene ingang zelf, voor de footerlink op de publieke pagina's (punt 3).
+const LOGIN_PAGE_HREF = '/inloggen';
+
 const LOGIN_INTRO =
   'Kies hieronder hoe je inlogt. We raden niet aan je e-mailadres welke rol je hebt; elke route heeft zijn eigen beveiliging.';
 
 module.exports = {
   LOGIN_CHOICES,
-  CLAIM_LINK,
   LOGIN_INTRO,
+  LOGIN_PAGE_HREF,
+  CLAIM_LINK,
 };
