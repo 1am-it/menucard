@@ -1,7 +1,10 @@
 'use client'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Emoji from '@/src/components/Emoji'
+import { SAVED_LIST_EVENT, readSavedList, safeBrowserStorage } from '@/src/lib/dishList'
+import './primary-nav.css'
 
 // BE-11 — permanent, text-only primary navigation: the two coequal public
 // entry points, `Zoeken` (dish/ingredient/restaurant/buurt/street/address
@@ -39,10 +42,26 @@ import Emoji from '@/src/components/Emoji'
 const DESTINATIONS = [
   { href: '/search', label: 'Zoeken', glyph: '🔍' },
   { href: '/alle-restaurants', label: 'Alle restaurants', glyph: '🍽️' },
+  // BE-63 (#155): het derde item uit het goedgekeurde ontwerp. De teller is het
+  // aantal bewaarde gerechten in dit browserlijstje (BE-44), geen servergetal.
+  { href: '/mijn-lijstje', label: 'Mijn lijstje', glyph: '⭐', count: true },
 ]
 
 export default function PrimaryNav() {
   const pathname = usePathname()
+  // Zonder opslag of vóór het mounten is de teller 0; de lijst zelf blijft
+  // werken. Het eigen `bredaeats:bewaard`-event houdt de teller gelijk met de
+  // bewaarknop op dezelfde pagina.
+  const [saved, setSaved] = useState(0)
+
+  useEffect(() => {
+    const storage = safeBrowserStorage()
+    const read = () => setSaved(readSavedList(storage).length)
+    read()
+    if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return undefined
+    window.addEventListener(SAVED_LIST_EVENT, read)
+    return () => window.removeEventListener(SAVED_LIST_EVENT, read)
+  }, [])
 
   return (
     <nav className="primary-nav" aria-label="Hoofdnavigatie">
@@ -55,6 +74,12 @@ export default function PrimaryNav() {
         >
           <Emoji glyph={destination.glyph} />
           {destination.label}
+          {destination.count ? (
+            <>
+              <span className="primary-nav-count" aria-hidden="true">{saved}</span>
+              <span className="visually-hidden">{saved === 1 ? '1 gerecht bewaard' : `${saved} gerechten bewaard`}</span>
+            </>
+          ) : null}
         </Link>
       ))}
     </nav>

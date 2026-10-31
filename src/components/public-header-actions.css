@@ -1,0 +1,168 @@
+.public-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* BE-63 (#155) — "Voor restaurants" is een gewone tekstlink, geen knop. */
+.pha-restaurants {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pha-restaurants:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pha-restaurants:focus-visible,
+.pha-login:focus-visible,
+.pha-settings:focus-visible,
+.pha-share:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* "Inloggen": omlijnd, rond en 44 px hoog, naast de instellingenknop. */
+.pha-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pha-login:hover {
+  border-color: var(--border-hover);
+}
+
+/* Eén ronde instellingenknop van 44 × 44 px. */
+.pha-settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pha-settings:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.pha-settings-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Het paneel zelf: het deelt de laag en het vlak van de deelpanelen
+ * (.share-layer/.share-panel), met dezelfde tokens. */
+.pha-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.pha-group {
+  display: grid;
+  gap: 8px;
+}
+
+.pha-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Drie standen naast elkaar; de bestaande .theme-switch/.theme-btn blijven de
+ * vorm en de kleuren uit de tokens houden. */
+.pha-panel .theme-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pha-panel .theme-btn {
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+/* "Delen via" opent het BE-61-venster; de huidige keuze staat eronder. */
+.pha-share {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pha-share:hover {
+  border-color: var(--border-hover);
+}
+
+.pha-share-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.pha-share-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pha-share-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pha-chevron {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+/* Op mobiel houden logo, "Inloggen" en de instellingenknop de kop samen; het
+ * mobiele menu met "Voor restaurants" volgt in een latere ronde. */
+@media (max-width: 720px) {
+  .public-header-actions {
+    gap: 8px;
+  }
+
+  .pha-restaurants {
+    display: none;
+  }
+
+  .pha-login {
+    padding: 0 14px;
+  }
+}

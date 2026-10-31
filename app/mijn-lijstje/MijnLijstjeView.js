@@ -15,10 +15,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import PublicFooter from '@/src/components/PublicFooter'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import ListShareButton from '@/src/components/ListShareButton'
 import KiesStartButton from '@/src/components/KiesStartButton'
@@ -101,9 +99,7 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
         <div className="header-inner">
           <Wordmark />
           <div className="lijst-header-actions">
-            <ThemeToggle />
-            <ShareSettingsButton />
-            <AccountMenuButton />
+            <PublicHeaderActions />
             {/* BE-50 (issue 120) — dezelfde regel als het woordmerk: deze tweede
                 weg naar de home laadt de home niet vooruit. De meting liet zien
                 dat juist deze prefetch (5,9 KB RSC + 8,8 KB routechunk) op

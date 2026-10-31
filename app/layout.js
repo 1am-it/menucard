@@ -33,7 +33,11 @@ export const metadata = {
 // OS's current preference via matchMedia, applied immediately (so there is
 // still no flash), and written back to storage as an explicit 'light' or
 // 'dark' — never re-read as 'system' again on a later visit.
-const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('bredaeats_theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else if(t==='system'){var r=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';document.documentElement.setAttribute('data-theme',r);localStorage.setItem('bredaeats_theme',r);}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('bredaeats_theme','dark');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
+// BE-63 (#155) — "Automatisch" uit het goedgekeurde ontwerp van de kop: de
+// stand 'auto' volgt het systeem en blijft als 'auto' bewaard (zie
+// src/lib/themePreference.js). De oude 'system'-waarde wordt nog steeds één keer
+// omgezet naar een concrete 'light' of 'dark'.
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('bredaeats_theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else if(t==='auto'){var a=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';document.documentElement.setAttribute('data-theme',a);}else if(t==='system'){var r=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';document.documentElement.setAttribute('data-theme',r);localStorage.setItem('bredaeats_theme',r);}else{document.documentElement.setAttribute('data-theme','dark');localStorage.setItem('bredaeats_theme','dark');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
 
 export default function RootLayout({ children }) {
   return (

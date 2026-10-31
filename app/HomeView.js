@@ -2,10 +2,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import PublicFooter from '@/src/components/PublicFooter'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import DaghappenVandaag from '@/src/components/DaghappenVandaag'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -123,9 +121,7 @@ export default function HomeView({ candidates = [] }) {
           <Wordmark />
           <div className="header-right">
             <PrimaryNav />
-            <ThemeToggle />
-            <ShareSettingsButton />
-            <AccountMenuButton />
+            <PublicHeaderActions />
           </div>
         </div>
       </header>

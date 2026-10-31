@@ -48,15 +48,15 @@ test('renders a semantic <nav> with the required Dutch aria-label', () => {
   assert.match(source, /<nav className="primary-nav" aria-label="Hoofdnavigatie">/);
 });
 
-test('defines exactly the two decided destinations, in order, with the exact required labels', () => {
+test('defines exactly the decided destinations, in order, with the exact required labels', () => {
   const source = readSource();
-  const destinationsBlock = source.match(/const DESTINATIONS = \[([\s\S]*?)\]/);
+  const destinationsBlock = source.match(/const DESTINATIONS = \[([\s\S]*?)\n\]/);
   assert.ok(destinationsBlock, 'expected a DESTINATIONS array');
   const entries = [...destinationsBlock[1].matchAll(/href:\s*'([^']+)',\s*label:\s*'([^']+)'/g)];
   assert.deepEqual(
     entries.map((m) => [m[1], m[2]]),
-    [['/search', 'Zoeken'], ['/alle-restaurants', 'Alle restaurants']],
-    'expected exactly /search "Zoeken" then /alle-restaurants "Alle restaurants", no other destination'
+    [['/search', 'Zoeken'], ['/alle-restaurants', 'Alle restaurants'], ['/mijn-lijstje', 'Mijn lijstje']],
+    'expected /search, /alle-restaurants and (BE-63) /mijn-lijstje, no other destination'
   );
 });
 
@@ -88,10 +88,13 @@ test('BE-28: emoji are decorative system characters via the shared <Emoji/>, nev
   assert.deepEqual(
     importLines.map((l) => l.trim()),
     [
+      "import { useEffect, useState } from 'react'",
       "import Link from 'next/link'",
       "import { usePathname } from 'next/navigation'",
       "import Emoji from '@/src/components/Emoji'",
+      "import { SAVED_LIST_EVENT, readSavedList, safeBrowserStorage } from '@/src/lib/dishList'",
+      "import './primary-nav.css'",
     ],
-    'no import beyond Link, usePathname and the shared Emoji — no new dependency'
+    'no import beyond React state, Link, usePathname, the shared Emoji, the existing dishList helpers and the component CSS'
   );
 });

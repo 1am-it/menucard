@@ -2,10 +2,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import PublicFooter from '@/src/components/PublicFooter'
-import ThemeToggle from '@/src/components/ThemeToggle'
-import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
 import MobileTabBar from '@/src/components/MobileTabBar'
 import RestaurantBrowseCard from '@/src/components/RestaurantBrowseCard'
@@ -676,9 +674,7 @@ function SearchPageInner() {
           <Wordmark />
           <div className="header-right">
             <PrimaryNav />
-            <ThemeToggle />
-            <ShareSettingsButton />
-            <AccountMenuButton />
+            <PublicHeaderActions />
           </div>
         </div>
       </header>

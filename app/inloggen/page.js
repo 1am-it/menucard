@@ -12,8 +12,7 @@
 
 import Link from 'next/link'
 import { CLAIM_LINK, LOGIN_CHOICES, LOGIN_INTRO } from '@/src/lib/loginEntry'
-import AccountMenuButton from '@/src/components/AccountMenuButton'
-import ThemeToggle from '@/src/components/ThemeToggle'
+import PublicHeaderActions from '@/src/components/PublicHeaderActions'
 import Wordmark from '@/src/components/Wordmark'
 import './inloggen.css'
 
@@ -36,8 +35,7 @@ export default function InloggenPage() {
             <Wordmark />
           </nav>
           <div className="header-right">
-            <ThemeToggle />
-            <AccountMenuButton />
+            <PublicHeaderActions />
           </div>
         </div>
       </header>

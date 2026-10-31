@@ -23,6 +23,7 @@ const SHARE_BUTTON = read('src/components/DishShareButton.js');
 const SAVE_BUTTON = read('src/components/DishSaveButton.js');
 const DIALOG = read('src/components/ShareDialog.js');
 const SETTINGS = read('src/components/ShareSettingsButton.js');
+const HEADER_ACTIONS = read('src/components/PublicHeaderActions.js');
 const LIB = read('src/lib/sharePreference.js');
 const CSS = read('app/globals.css');
 const DIALOG_CSS = read('src/components/share-dialog.css');
@@ -181,15 +182,22 @@ test('BE-61: de vijf manieren hebben een eigen lijnicoon, zonder merklogo', () =
   assert.match(cssBlockOf(DIALOG_CSS, '.share-fav-icon'), /width: 20px/);
 });
 
-test('"Delen via" staat naast de themakeuze op elke publieke pagina', () => {
+test('BE-63: de publieke kop gebruikt de ene component met "Delen via"', () => {
   for (const file of PUBLIC_HEADERS) {
     const source = read(file);
-    assert.match(source, /import ShareSettingsButton from '@\/src\/components\/ShareSettingsButton'/, file);
-    assert.match(source, /<ThemeToggle \/>\s*<ShareSettingsButton \/>/, `${file}: naast de themakeuze`);
+    assert.match(source, /import PublicHeaderActions from '@\/src\/components\/PublicHeaderActions'/, file);
+    assert.match(source, /<PublicHeaderActions \/>/, `${file}: de kop`);
+    // BE-63 (#155): geen losse themakeuze of deelknop meer in de publieke kop.
+    assert.doesNotMatch(source, /<ThemeToggle \/>|<ShareSettingsButton \/>/, `${file}: geen losse kopknoppen`);
   }
+  // De interne kop en /mijn-restaurant houden hun eigen losse knoppen.
+  assert.match(read('src/components/InternalNav.js'), /<ThemeToggle \/>/);
   assert.match(SETTINGS, /\{SHARE_SETTINGS_LABEL\}/);
   assert.match(SETTINGS, /mode="settings"/);
   assert.match(SETTINGS, /aria-expanded=\{open\}/);
+  assert.match(HEADER_ACTIONS, /\{SHARE_SETTINGS_LABEL\}/);
+  assert.match(HEADER_ACTIONS, /mode="settings"/);
+  assert.match(HEADER_ACTIONS, /aria-expanded=\{open\}/);
 });
 
 test('de voorkeur gaat alleen naar localStorage, zonder cookie of netwerk', () => {
