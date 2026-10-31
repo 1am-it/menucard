@@ -15,6 +15,8 @@ import { honestPriceLabel } from '@/src/lib/menuPrice'
 // de tabbladen op de restaurantpagina en de menukaart zelf nooit uit elkaar
 // lopen. Alleen de titel komt daar vandaan; het label met emoji blijft hier.
 import { MENU_TITLES } from '@/src/lib/menuTabs'
+// BE-52 (#128): de eigen opmaak van dit onderdeel staat naast de code.
+import './menu-body.css'
 
 export const TAG_LABELS = {
   aanbevolen:  'Aanbevolen',
@@ -92,6 +94,23 @@ export function highlight(text, query) {
   )
 }
 
+/**
+ * BE-58 (#143) — "Bevestigd door het restaurant · [datum]" bij de kop van de
+ * publieke menukaart en restaurantpagina. Alleen als de bevestiging nog geldig
+ * is (90 dagen, src/lib/snelAanpassen.js); anders rendert dit niets.
+ */
+export function MenuConfirmation({ bevestiging }) {
+  if (!bevestiging || bevestiging.actief !== true) return null
+  const label = bevestiging.label || 'Bevestigd door het restaurant'
+  return (
+    <p className="menu-confirmed">
+      <span className="menu-confirmed-mark" aria-hidden="true">✓</span>
+      {label}
+      {bevestiging.datum ? ` · ${bevestiging.datum}` : ''}
+    </p>
+  )
+}
+
 export function itemMatchesAllergens(item, excludeIds) {
   if (!excludeIds.length) return { safe: true, unknown: false }
   const allergens = item.allergens
@@ -137,6 +156,13 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
           {priceLabel}
         </div>
       </div>
+
+      {/* BE-58 (#143): een goedgekeurde wijziging van de houder zet dit gerecht
+          tijdelijk op niet beschikbaar. De prijs en de rest van de kaart blijven
+          zoals ze zijn; alleen dit label komt erbij. */}
+      {item.tijdelijkNietBeschikbaar && (
+        <div className="mc-unavailable">Tijdelijk niet beschikbaar</div>
+      )}
 
       {item.desc && (
         <div className="td-desc">{highlight(item.desc, displayQuery)}</div>

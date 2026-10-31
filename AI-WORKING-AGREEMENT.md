@@ -28,8 +28,9 @@ does not implement").
 
 - **Product Owner**: the human owner. Sets priorities and decides only on
   material risks, important architecture choices, costs and production actions
-  (production migrations, merges to `main`, production configuration, new paid
-  services or access).
+  (production migrations, production configuration, new paid services or
+  access). Merges to `main` are delegated to the Delivery Lead (owner decision
+  2026-10-30, see below).
 - **Delivery Lead**: Claude Code. Owns architecture, coordination, quality
   assurance and releases. May itself make simple code, configuration, test,
   tooling and procedure changes (for example release preparation, small fixes,
@@ -135,7 +136,15 @@ product decision, security/privacy/cost impact, external credential or access,
 production migration or deployment approval, or an unresolved conflict with a
 durable decision.
 
-Never merge, deploy, migrate production data, activate a source, save a real
+Merging to `main` is delegated to the Delivery Lead (owner decision
+2026-10-30: "je mag alles mergen; wij bespreken toch alles van tevoren"). The
+Lead merges only PRs it has reviewed against their contract, with green tests
+and build and no conflict with main. Other production actions stay with the
+owner unless explicitly delegated: dispatching or approving the production
+migration workflow, Vercel and Supabase settings, secrets, domains, and the
+launch.
+
+Apart from those merges, never deploy, migrate production data, activate a source, save a real
 concept, publish data, or create external side effects without explicit task
 authorization.
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { searchDishes } from '@/src/services/dishSearch'
+import { daghapHandlers } from '@/src/lib/daghapRouteDeps'
 
 function parseIntOr(value, fallback) {
   const n = parseInt(value, 10)
@@ -35,6 +36,21 @@ export async function GET(request) {
   // BE-15 — passed through as-is; searchDishes() itself falls back to the
   // default, ungrouped response for any value other than 'restaurant'.
   const group = searchParams.get('group') || ''
+  // BE-55 stap B, deel 5 (#135) — het filter "Vandaag". Alleen dan haalt deze
+  // route één kleine lijstvraag op (restaurant_id, soort, naam) en geeft die
+  // map aan searchDishes; de browser krijgt nooit een lijst, alleen het label
+  // bij de restaurants die hij al ziet. Zonder migratie of zonder Supabase
+  // blijft de zoekfunctie werken en is er simpelweg geen treffer.
+  const vandaag = searchParams.get('vandaag') === '1' || searchParams.get('vandaag') === 'true'
+  let aanbod = null
+  if (vandaag) {
+    try {
+      const { status, body } = await daghapHandlers.zoekAanbod()
+      if (status === 200 && body && body.aanbod && typeof body.aanbod === 'object') aanbod = body.aanbod
+    } catch (error) {
+      aanbod = null
+    }
+  }
 
   const result = searchDishes({
     q,
@@ -48,11 +64,18 @@ export async function GET(request) {
     cursor,
     limit,
     group,
+    vandaag,
+    aanbod,
   })
 
   return NextResponse.json(result, {
     headers: {
-      'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+      // Een Vandaag-treffer hangt van het actuele aanbod af; die mag niet uit
+      // een gedeelde cache komen. Alle andere zoekopdrachten houden hun
+      // bestaande cachekop.
+      'Cache-Control': vandaag
+        ? 'no-store'
+        : 'public, max-age=60, stale-while-revalidate=300',
     },
   })
 }

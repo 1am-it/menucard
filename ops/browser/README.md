@@ -1,5 +1,29 @@
 # Isolated browser fixture — #59 menu import/review
 
+## BE-55 part B: "Vandaag" and reporting (#135)
+
+`run-be55-browser-check.js` (also `npm run test:browser:be55`) drives
+`/restaurant/6` and `/menu/6-diner` with a fictional daghap API stubbed in the
+page (ops/browser/lib/be55-daghap-stub.js), on a local dev server and a real
+browser:
+
+- the "Vandaag" block shows one card per offer with its name, price pill,
+  description, labels, the season line, "Bewaar", "Deel" and "Klopt dit aanbod
+  niet? Meld het"; the card has a 2 px border; the block is labelled by its own
+  heading;
+- no offer (`?leeg=1`) means no block at all;
+- reporting shows a confirmation, a second tap from the same device says it was
+  already reported, and exactly one random device value (no account, no IP) is
+  sent;
+- light and dark at 1280, 390 and 320 px, no horizontal overflow, a visible
+  focus ring, a 44 px tap target and 4.5:1 contrast on the new text;
+- screenshots and `be55-browser-evidence.json` in `ops/browser/evidence/`.
+
+The server rules (three reports, limits, filter) are *not* proven here: they live
+in `src/lib/daghapHandlers.test.js`. The harness runs `next dev`, so run
+`next build` again before the performance budget test. Developer evidence on a
+local machine — not production, not independent acceptance.
+
 ## BE-42 part 1: menu names as buttons and softer prices (#98)
 
 `run-be42-browser-check.js` drives the real production build (`next start`, no

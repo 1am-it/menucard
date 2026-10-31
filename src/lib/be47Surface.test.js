@@ -166,7 +166,10 @@ test('BE-47: geen migratie, geen nieuwe tabel, geen RLS-wijziging', () => {
   assert.ok(!migrations.some((file) => /be47|mijn-restaurant|owner-account/i.test(file)), 'BE-47 adds no migration');
   for (const file of migrations) {
     const source = read(path.join('supabase', 'migrations', file));
-    assert.doesNotMatch(source, /mijn-restaurant|#111|BE-47/, `${file} must stay untouched by BE-47`);
+    // Alleen de BE-47-markers zelf. Een latere, goedgekeurde migratie mag de
+    // woorden "mijn-restaurant" of "/mijn-restaurant/menukaart" noemen (0025 van
+    // BE-58, #143) zonder daarmee een BE-47-wijziging te zijn.
+    assert.doesNotMatch(source, /BE-47|#111/, `${file} must stay untouched by BE-47`);
   }
   // No RLS policy is written by the new app code either.
   assert.doesNotMatch(

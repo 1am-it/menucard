@@ -1,0 +1,141 @@
+/* BE-55 stap B, deel 4 (#135) — de interne werkvoorraad /internal/aanbod.
+   Eigen bestand naast de pagina (BE-52); kleuren alleen via de bestaande
+   tokens, dus licht en donker werken zonder eigen themaregels. */
+
+.aanbod-beheer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-4, 16px);
+  color: var(--text-primary);
+}
+
+.aanbod-beheer-kop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aanbod-beheer-titel {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.aanbod-beheer-uitleg,
+.aanbod-beheer-meta,
+.aanbod-beheer-reden,
+.aanbod-beheer-teller {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.aanbod-beheer-status:empty {
+  display: none;
+}
+
+.aanbod-beheer-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.aanbod-beheer-fout {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-soft);
+  color: var(--text-primary);
+}
+
+.aanbod-beheer-lijst,
+.aanbod-beheer-rechten-lijst {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aanbod-beheer-rij,
+.aanbod-beheer-rechten-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border: 1px solid var(--border-subtle, var(--surface-soft));
+  border-radius: var(--radius-md, 10px);
+  background: var(--surface-soft);
+}
+
+.aanbod-beheer-gegevens {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.aanbod-beheer-naam {
+  margin: 0;
+  font-weight: 600;
+}
+
+.aanbod-beheer-acties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aanbod-beheer-knop {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-surface);
+  border-radius: var(--radius-md, 10px);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.aanbod-beheer-knop:hover {
+  background: var(--accent-surface);
+}
+
+.aanbod-beheer-knop:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.aanbod-beheer-knop-weg,
+.aanbod-beheer-knop-recht {
+  border-color: var(--border-subtle, var(--accent-surface));
+}
+
+.aanbod-beheer-subtitel {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.aanbod-beheer-leeg {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+  .aanbod-beheer-rij,
+  .aanbod-beheer-rechten-rij {
+    flex-direction: column;
+  }
+
+  .aanbod-beheer-acties,
+  .aanbod-beheer-knop {
+    width: 100%;
+  }
+}

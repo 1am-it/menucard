@@ -18,9 +18,11 @@ import EmojiText from '@/src/components/EmojiText'
 import ExternalLinkIcon from '@/src/components/ExternalLinkIcon'
 import StatusIcon from '@/src/components/StatusIcon'
 import useClientNow from '@/src/components/useClientNow'
+// BE-55 stap B (#135) — "Vandaag" op de menupagina; geen aanbod, geen blok.
+import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
-import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings } from '@/src/components/MenuBody'
+import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation } from '@/src/components/MenuBody'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -69,7 +71,7 @@ function itemMatchesPrice(item, maxPrice) {
 
 // ─── Main View ────────────────────────────────────────────────────────────────
 
-export default function MenuView({ id, r, restaurant, availableMeals }) {
+export default function MenuView({ id, r, restaurant, availableMeals, bevestiging = null }) {
   const searchParams = useSearchParams()
 
   // Read URL params (doorgegeven vanuit homepage)
@@ -311,6 +313,7 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
           <div>
             <div className="hero-eyebrow">{r.name || restaurant.name}</div>
             <h1 className="hero-title">{subtitle}</h1>
+            <MenuConfirmation bevestiging={bevestiging} />
             {menuSeason && (
               <div>
                 <span className="menu-season-label">
@@ -408,6 +411,13 @@ export default function MenuView({ id, r, restaurant, availableMeals }) {
             {r.notes && <div className="rp-note">{r.notes}</div>}
           </div>
         </div>
+      </div>
+
+      {/* BE-55 (issue 135, herstel na review deel 2) — "Vandaag" direct onder
+          de kop en boven de zoek- en filterbalk; het staat los van de filters
+          en verdwijnt als er niets online staat. */}
+      <div className="daghap-band">
+        <DaghapVandaag restaurantId={id.split('-')[0]} />
       </div>
 
       {/* ── Filter bar ── */}
