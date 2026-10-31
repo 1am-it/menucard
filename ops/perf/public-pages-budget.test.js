@@ -74,6 +74,25 @@ for (const [id, pagePath] of CONTRACT_PAGES) {
   });
 }
 
+test('de publieke kop importeert geen volledig dishList en laadt het paneel lui', () => {
+  // BE-63 (#155, ronde 3): de kop en de teller in PrimaryNav mogen niet het
+  // volledige src/lib/dishList.js (met de deellinks en de dieplinkopbouw) in de
+  // eerste lading halen. De teller leest de kleine helper, het paneel met de
+  // themakeuze en "Delen via" komt pas bij het openen.
+  const withoutComments = (source) =>
+    source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const files = ['src/components/PrimaryNav.js', 'src/components/PublicHeaderActions.js'];
+  for (const file of files) {
+    const source = withoutComments(fs.readFileSync(path.join(ROOT, file), 'utf8'));
+    assert.doesNotMatch(source, /from '@\/src\/lib\/dishList'/, `${file}: geen statische import van dishList`);
+    assert.doesNotMatch(source, /require\(['"][^'"]*dishList['"]\)/, `${file}: geen require van dishList`);
+    assert.match(source, /from '@\/src\/lib\/savedListStorage'/, `${file}: de kleine opslaghelper`);
+  }
+  const header = withoutComments(fs.readFileSync(path.join(ROOT, 'src/components/PublicHeaderActions.js'), 'utf8'));
+  assert.match(header, /dynamic\(\(\) => import\('@\/src\/components\/PublicHeaderPanel'\), \{ ssr: false \}\)/);
+  assert.doesNotMatch(header, /from '@\/src\/lib\/sharePreference'|from '@\/src\/lib\/themePreference'/);
+});
+
 test('het deelblad laadt pas na een tik en zit niet in het eerste JS-pakket', () => {
   for (const file of ['src/components/ShareSettingsButton.js', 'src/components/DishShareButton.js']) {
     const source = fs.readFileSync(path.join(ROOT, file), 'utf8');

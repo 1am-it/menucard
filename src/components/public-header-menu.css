@@ -1,0 +1,218 @@
+/* BE-63 (#155, ronde 3) — het instellingenpaneel en het mobiele menu.
+ *
+ * Deze opmaak hoort bij src/components/PublicHeaderPanel.js, dat pas bij het
+ * openen wordt geladen. Daarom staat het hier en niet bij de kop zelf: de
+ * eerste lading van een publieke pagina heeft dit niet nodig.
+ *
+ * Kleuren alleen via de bestaande tokens; het vlak en de laag komen van
+ * .share-layer/.share-panel in app/globals.css. */
+
+.pha-layer--sheet {
+  /* Ruimte voor de zwevende tabbalk (.mobile-tabbar, 12 px van onderen): het
+   * menu ligt erboven, niet erover. */
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+
+.pha-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.pha-panel--sheet {
+  max-width: 520px;
+}
+
+.pha-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pha-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Sluitknop: rond, 44 × 44 px, met dezelfde rand als de andere knoppen. */
+.pha-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.pha-close:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.pha-close:focus-visible,
+.pha-block-action:focus-visible,
+.pha-row:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.pha-close-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.pha-group {
+  display: grid;
+  gap: 8px;
+}
+
+.pha-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Drie standen naast elkaar; de bestaande .theme-switch/.theme-btn blijven de
+ * vorm en de kleuren uit de tokens houden. */
+.pha-panel .theme-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pha-panel .theme-btn {
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+/* Het blok "Heb je een restaurant?" met de twee knoppen. */
+.pha-restaurant {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.pha-restaurant-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pha-restaurant-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.pha-restaurant-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* De knoppen van het blok: de donkere Inloggen (.share-btn-primary) en de
+ * omlijnde Claim je zaak (.share-btn). */
+.pha-block-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.pha-visitor-note {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* "Delen via" opent het BE-61-venster; de huidige keuze staat eronder. */
+.pha-share {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pha-share:hover {
+  border-color: var(--border-hover);
+}
+
+.pha-share:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.pha-share-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.pha-share-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pha-share-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pha-chevron {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+/* "Mijn lijstje" met de teller, in dezelfde vorm als "Delen via". */
+.pha-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pha-row:hover {
+  border-color: var(--border-hover);
+}
+
+.pha-row-value {
+  display: inline-flex;
+  align-items: center;
+  min-width: 28px;
+  justify-content: flex-end;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}

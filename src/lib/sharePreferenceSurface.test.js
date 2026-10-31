@@ -195,9 +195,13 @@ test('BE-63: de publieke kop gebruikt de ene component met "Delen via"', () => {
   assert.match(SETTINGS, /\{SHARE_SETTINGS_LABEL\}/);
   assert.match(SETTINGS, /mode="settings"/);
   assert.match(SETTINGS, /aria-expanded=\{open\}/);
-  assert.match(HEADER_ACTIONS, /\{SHARE_SETTINGS_LABEL\}/);
-  assert.match(HEADER_ACTIONS, /mode="settings"/);
-  assert.match(HEADER_ACTIONS, /aria-expanded=\{open\}/);
+  assert.match(HEADER_ACTIONS, /PublicHeaderPanel/);
+  // BE-63 (#155, ronde 3): de inhoud van het paneel staat in
+  // PublicHeaderPanel.js en wordt pas bij het openen geladen.
+  const PANEL = read('src/components/PublicHeaderPanel.js');
+  assert.match(PANEL, /\{SHARE_SETTINGS_LABEL\}/);
+  assert.match(PANEL, /mode="settings"/);
+  assert.match(PANEL, /aria-expanded=\{shareOpen\}/);
 });
 
 test('de voorkeur gaat alleen naar localStorage, zonder cookie of netwerk', () => {

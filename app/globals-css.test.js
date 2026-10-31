@@ -179,6 +179,7 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     // BE-63 (#155): de rechterkant van de publieke kop.
     'src/components/public-header-actions.css',
     // BE-61: het deelblad "Delen via", naast de component.
+    'src/components/public-header-menu.css',
     'src/components/share-dialog.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');

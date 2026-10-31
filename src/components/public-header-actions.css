@@ -1,10 +1,19 @@
+/* BE-63 (#155, ronde 3) — alleen de knoppen van de publieke kop.
+ *
+ * Het paneel dat deze knoppen openen (weergave, "Delen via", het blok "Heb je
+ * een restaurant?" en "Mijn lijstje") heeft zijn eigen opmaak in
+ * src/components/public-header-menu.css, omdat het pas bij het openen wordt
+ * geladen. Zo blijft de eerste lading klein.
+ *
+ * Kleuren alleen via de bestaande tokens. */
+
 .public-header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-/* BE-63 (#155) — "Voor restaurants" is een gewone tekstlink, geen knop. */
+/* "Voor restaurants" is een gewone tekstlink, geen knop. */
 .pha-restaurants {
   color: var(--text-secondary);
   font-size: 14px;
@@ -22,7 +31,7 @@
 .pha-restaurants:focus-visible,
 .pha-login:focus-visible,
 .pha-settings:focus-visible,
-.pha-share:focus-visible {
+.pha-menu:focus-visible {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
@@ -47,7 +56,7 @@
   border-color: var(--border-hover);
 }
 
-/* Eén ronde instellingenknop van 44 × 44 px. */
+/* Eén ronde instellingenknop van 44 × 44 px (desktop). */
 .pha-settings {
   display: inline-flex;
   align-items: center;
@@ -73,96 +82,47 @@
   height: 20px;
 }
 
-/* Het paneel zelf: het deelt de laag en het vlak van de deelpanelen
- * (.share-layer/.share-panel), met dezelfde tokens. */
-.pha-panel {
-  display: grid;
-  gap: 16px;
-}
-
-.pha-group {
-  display: grid;
-  gap: 8px;
-}
-
-.pha-group-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* Drie standen naast elkaar; de bestaande .theme-switch/.theme-btn blijven de
- * vorm en de kleuren uit de tokens houden. */
-.pha-panel .theme-switch {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.pha-panel .theme-btn {
-  min-height: 44px;
-  padding: 0 8px;
-}
-
-/* "Delen via" opent het BE-61-venster; de huidige keuze staat eronder. */
-.pha-share {
-  display: flex;
+/* De menuknop hoort bij de telefoon; op desktop staat er de navigatie. */
+.pha-menu {
+  display: none;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 52px;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-primary);
-  font: inherit;
-  text-align: left;
   cursor: pointer;
 }
 
-.pha-share:hover {
+.pha-menu:hover {
   border-color: var(--border-hover);
 }
 
-.pha-share-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: grid;
-  gap: 2px;
+.pha-menu-icon {
+  width: 20px;
+  height: 20px;
 }
 
-.pha-share-label {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.pha-share-value {
-  font-size: 13px;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pha-chevron {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  color: var(--text-secondary);
-}
-
-/* Op mobiel houden logo, "Inloggen" en de instellingenknop de kop samen; het
- * mobiele menu met "Voor restaurants" volgt in een latere ronde. */
-@media (max-width: 720px) {
+/* Telefoon (tot en met 640 px): logo, "Inloggen" (of het accountmenu) en de
+ * menuknop. "Voor restaurants" en de instellingenknop zitten dan in het menu. */
+@media (max-width: 640px) {
   .public-header-actions {
     gap: 8px;
   }
 
-  .pha-restaurants {
+  .pha-restaurants,
+  .pha-settings {
     display: none;
   }
 
   .pha-login {
     padding: 0 14px;
+  }
+
+  .pha-menu {
+    display: inline-flex;
   }
 }
