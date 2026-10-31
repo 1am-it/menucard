@@ -1,17 +1,17 @@
 {
   "script": "run-be65-browser-check.js",
   "kind": "fixture_browser_evidence",
-  "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde zoek-API; geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T09:56:13.597Z",
-  "port": 3196,
+  "category": "lokale browsercheck van de productieopbouw (next start op poort 3194) met een gestubde zoek-API; geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T10:35:06.083Z",
+  "port": 3194,
   "filter": null,
   "scenarioRuns": [
     {
       "name": "home",
-      "checks": 185,
-      "passed": 185,
+      "checks": 267,
+      "passed": 267,
       "failed": 0,
-      "durationMs": 13765,
+      "durationMs": 20870,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 62,
       "passed": 62,
       "failed": 0,
-      "durationMs": 10592,
+      "durationMs": 10746,
       "error": null
     }
   ],
@@ -139,14 +139,14 @@
       "detail": "[]"
     },
     {
-      "name": "home light/1280: Bewaren zet de knop aan",
+      "name": "home light/1280: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home light/1280: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home light/1280: de balk staat helemaal in beeld",
@@ -154,9 +154,9 @@
       "detail": "{\"breedte\":420,\"rechts\":26,\"onder\":20}"
     },
     {
-      "name": "home light/1280: Versturen wijst naar /mijn-lijstje",
+      "name": "home light/1280: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home light/1280: de sluitknop heeft een aria-label",
@@ -172,6 +172,76 @@
       "name": "home light/1280: rechtsonder en hooguit 420 px breed",
       "passed": true,
       "detail": "420px breed, 26px van rechts, 20px van onderen"
+    },
+    {
+      "name": "home light/1280: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home light/1280: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home light/1280: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home light/1280: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home light/1280: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home light/1280: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":440,\"hoogte\":499,\"overflow\":-6}"
+    },
+    {
+      "name": "home light/1280: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":null}"
+    },
+    {
+      "name": "home light/1280: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home light/1280: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home light/1280: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home light/1280: op desktop hooguit 440 px breed",
+      "passed": true,
+      "detail": "440"
+    },
+    {
+      "name": "home light/1280: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home light/1280: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home light/1280: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home light/1280: de balk is weg na sluiten",
@@ -294,14 +364,14 @@
       "detail": "[]"
     },
     {
-      "name": "home light/390: Bewaren zet de knop aan",
+      "name": "home light/390: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home light/390: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home light/390: de balk staat helemaal in beeld",
@@ -309,9 +379,9 @@
       "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
     },
     {
-      "name": "home light/390: Versturen wijst naar /mijn-lijstje",
+      "name": "home light/390: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home light/390: de sluitknop heeft een aria-label",
@@ -322,6 +392,71 @@
       "name": "home light/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
       "passed": true,
       "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home light/390: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home light/390: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home light/390: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home light/390: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home light/390: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home light/390: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"hoogte\":518,\"overflow\":0}"
+    },
+    {
+      "name": "home light/390: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":true}"
+    },
+    {
+      "name": "home light/390: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home light/390: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home light/390: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/390: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home light/390: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home light/390: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home light/390: de balk is weg na sluiten",
@@ -444,14 +579,14 @@
       "detail": "[]"
     },
     {
-      "name": "home light/320: Bewaren zet de knop aan",
+      "name": "home light/320: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home light/320: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home light/320: de balk staat helemaal in beeld",
@@ -459,9 +594,9 @@
       "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
     },
     {
-      "name": "home light/320: Versturen wijst naar /mijn-lijstje",
+      "name": "home light/320: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home light/320: de sluitknop heeft een aria-label",
@@ -472,6 +607,71 @@
       "name": "home light/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
       "passed": true,
       "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home light/320: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home light/320: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home light/320: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home light/320: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home light/320: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home light/320: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"hoogte\":536,\"overflow\":0}"
+    },
+    {
+      "name": "home light/320: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":true}"
+    },
+    {
+      "name": "home light/320: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home light/320: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home light/320: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/320: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home light/320: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home light/320: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home light/320: de balk is weg na sluiten",
@@ -485,6 +685,11 @@
     },
     {
       "name": "gast home (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gast home met venster (light) · a11y-audit zonder fouten",
       "passed": true,
       "detail": "0 fouten"
     },
@@ -599,14 +804,14 @@
       "detail": "[]"
     },
     {
-      "name": "home dark/1280: Bewaren zet de knop aan",
+      "name": "home dark/1280: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home dark/1280: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home dark/1280: de balk staat helemaal in beeld",
@@ -614,9 +819,9 @@
       "detail": "{\"breedte\":420,\"rechts\":26,\"onder\":20}"
     },
     {
-      "name": "home dark/1280: Versturen wijst naar /mijn-lijstje",
+      "name": "home dark/1280: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home dark/1280: de sluitknop heeft een aria-label",
@@ -632,6 +837,76 @@
       "name": "home dark/1280: rechtsonder en hooguit 420 px breed",
       "passed": true,
       "detail": "420px breed, 26px van rechts, 20px van onderen"
+    },
+    {
+      "name": "home dark/1280: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home dark/1280: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home dark/1280: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home dark/1280: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home dark/1280: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home dark/1280: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":440,\"hoogte\":499,\"overflow\":-6}"
+    },
+    {
+      "name": "home dark/1280: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":null}"
+    },
+    {
+      "name": "home dark/1280: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home dark/1280: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home dark/1280: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home dark/1280: op desktop hooguit 440 px breed",
+      "passed": true,
+      "detail": "440"
+    },
+    {
+      "name": "home dark/1280: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home dark/1280: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home dark/1280: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home dark/1280: de balk is weg na sluiten",
@@ -754,14 +1029,14 @@
       "detail": "[]"
     },
     {
-      "name": "home dark/390: Bewaren zet de knop aan",
+      "name": "home dark/390: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home dark/390: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home dark/390: de balk staat helemaal in beeld",
@@ -769,9 +1044,9 @@
       "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
     },
     {
-      "name": "home dark/390: Versturen wijst naar /mijn-lijstje",
+      "name": "home dark/390: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home dark/390: de sluitknop heeft een aria-label",
@@ -782,6 +1057,71 @@
       "name": "home dark/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
       "passed": true,
       "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home dark/390: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home dark/390: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home dark/390: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home dark/390: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home dark/390: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home dark/390: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"hoogte\":518,\"overflow\":0}"
+    },
+    {
+      "name": "home dark/390: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":true}"
+    },
+    {
+      "name": "home dark/390: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home dark/390: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home dark/390: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/390: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home dark/390: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home dark/390: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home dark/390: de balk is weg na sluiten",
@@ -904,14 +1244,14 @@
       "detail": "[]"
     },
     {
-      "name": "home dark/320: Bewaren zet de knop aan",
+      "name": "home dark/320: Bewaren zet de knoppen aan",
       "passed": true,
-      "detail": "true"
+      "detail": "[\"true\",\"true\"]"
     },
     {
       "name": "home dark/320: de balk verschijnt met het aantal en de tekst",
       "passed": true,
-      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+      "detail": "2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen"
     },
     {
       "name": "home dark/320: de balk staat helemaal in beeld",
@@ -919,9 +1259,9 @@
       "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
     },
     {
-      "name": "home dark/320: Versturen wijst naar /mijn-lijstje",
+      "name": "home dark/320: Versturen is een knop die het venster opent",
       "passed": true,
-      "detail": "/mijn-lijstje"
+      "detail": "{\"knop\":true,\"popup\":\"dialog\",\"label\":\"Versturen\"}"
     },
     {
       "name": "home dark/320: de sluitknop heeft een aria-label",
@@ -932,6 +1272,71 @@
       "name": "home dark/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
       "passed": true,
       "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home dark/320: het venster opent vanuit de balk, als dialoog \"Stuur je lijstje\"",
+      "passed": true,
+      "detail": "{\"rol\":\"dialog\",\"modal\":\"true\",\"titel\":\"Stuur je lijstje\"}"
+    },
+    {
+      "name": "home dark/320: de twee bewaarde gerechten staan er met naam en prijs",
+      "passed": true,
+      "detail": "[[\"White Bean & Veggie Sandwich\",\"€14,75\"],[\"Club Coppa di Parma\",\"€16,95\"]]"
+    },
+    {
+      "name": "home dark/320: twee radio's in een fieldset, standaard Gewoon delen",
+      "passed": true,
+      "detail": "{\"radios\":[{\"type\":\"radio\",\"value\":\"plain\",\"checked\":true},{\"type\":\"radio\",\"value\":\"vote\",\"checked\":false}],\"legende\":\"Hoe wil je het sturen?\"}"
+    },
+    {
+      "name": "home dark/320: de gekozen kaart heeft een rand van 2 px, de andere 1 px",
+      "passed": true,
+      "detail": "2px / 1px"
+    },
+    {
+      "name": "home dark/320: drie deelmanieren in een rij",
+      "passed": true,
+      "detail": "[\"WhatsApp\",\"Link kopiëren\",\"Meer…\"]"
+    },
+    {
+      "name": "home dark/320: het venster staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"hoogte\":536,\"overflow\":0}"
+    },
+    {
+      "name": "home dark/320: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar",
+      "passed": true,
+      "detail": "{\"raakbaar\":[true,true,true],\"bovenTabbalk\":true}"
+    },
+    {
+      "name": "home dark/320: de sluitknop is 44 bij 44 met aria-label \"Sluiten\"",
+      "passed": true,
+      "detail": "{\"breed\":44,\"hoog\":44,\"label\":\"Sluiten\"}"
+    },
+    {
+      "name": "home dark/320: de focus staat in het venster",
+      "passed": true,
+      "detail": "saved-send-close"
+    },
+    {
+      "name": "home dark/320: geen horizontale overloop met het venster open",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/320: de radio's wisselen",
+      "passed": true,
+      "detail": "{\"radios\":[false,true],\"randen\":[\"1px\",\"2px\"]}"
+    },
+    {
+      "name": "home dark/320: Esc sluit het venster",
+      "passed": true,
+      "detail": "{\"open\":false,\"focus\":\"saved-bar-send\"}"
+    },
+    {
+      "name": "home dark/320: de focus keert terug naar Versturen",
+      "passed": true,
+      "detail": "saved-bar-send"
     },
     {
       "name": "home dark/320: de balk is weg na sluiten",
@@ -949,9 +1354,14 @@
       "detail": "0 fouten"
     },
     {
+      "name": "gast home met venster (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
       "name": "thema: elke opname heeft een kloppend themabewijs",
       "passed": true,
-      "detail": "18/18 opnamen: "
+      "detail": "30/30 opnamen: "
     },
     {
       "name": "zoeken light/1280: het thema is aangetoond",
@@ -1264,6 +1674,11 @@
       "detail": "0 fouten"
     },
     {
+      "name": "kies: de API is gestubd en er is geen echte stemming gemaakt",
+      "passed": true,
+      "detail": "{\"stub\":true,\"calls\":0}"
+    },
+    {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
       "passed": true,
       "detail": "[]"
@@ -1328,7 +1743,7 @@
     },
     {
       "file": "be65-home-1280-light-balk.png",
-      "sha256": "fe5f918a80e55442d4ceea747dabfac8e1c226bdbf9533e96dbc477b446fc671",
+      "sha256": "a278ca68c00b21ae340ee6340ba5795b71aa232b05e53c1345f2da6677b9019e",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1350,8 +1765,54 @@
       }
     },
     {
+      "file": "be65-home-1280-light-venster.png",
+      "sha256": "bc650595b01fe0bd5127f10ecdad721a5ad2641238f450e6915210b1f6c3807a",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "venster",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-light-venster-stemmen.png",
+      "sha256": "169ae439d422dbbbb74f64523cc93d0f0cd045ab9a7137748367220a1fd6456d",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "venster-stemmen",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
       "file": "be65-home-390-light-tabjes.png",
-      "sha256": "dab187244b1a55ecad250777dd107319c98d2cf8c50ac0fc884d7bc62a9e26cb",
+      "sha256": "88e8097bf116dc579eb3131abd1924526410a03b66ac0fdf3b4a42c877234744",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1374,7 +1835,7 @@
     },
     {
       "file": "be65-home-390-light-kaart.png",
-      "sha256": "7e8f56a942a23acb7a0f8bce362e24e38d45f7d70f9d4add65de430c8e5711ca",
+      "sha256": "aee0e8ea98fc8b510bc10c7fddd9be06c1f8f902d7df77e8f2f4a622edcc2a3a",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1397,7 +1858,7 @@
     },
     {
       "file": "be65-home-390-light-balk.png",
-      "sha256": "443a8081ce4dec75d1ebf18e48799b179b87661d50e7426f99d07cb4a68739ea",
+      "sha256": "69da459c8857d5c3bffb78bfef06e1f872a67a5bf3974e70b8a44e4a8f1942b5",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1419,8 +1880,54 @@
       }
     },
     {
+      "file": "be65-home-390-light-venster.png",
+      "sha256": "2b8c6859b72447ffe5738a5121a7d9f4623aa47bfecc06aa2a8d06b1093c0c83",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "venster",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-light-venster-stemmen.png",
+      "sha256": "24fe5a0d2072a1df19dbc502db8080b9a9540525d1d768b614989bbb25b2fca5",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "venster-stemmen",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
       "file": "be65-home-320-light-tabjes.png",
-      "sha256": "f4e1c7b56fea10522a549ca8ba45afbd7770b428e552d046bd5c751274435a9c",
+      "sha256": "6e087b6da581c02df57eb7c65f65c8bb1f5490a8f4ec3f0748ecdaef6b6d9110",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1443,7 +1950,7 @@
     },
     {
       "file": "be65-home-320-light-kaart.png",
-      "sha256": "0f6b4956be3e9e54ff13aecb8e176d7d42efad8e19cca70c5d747fdd26cc7e20",
+      "sha256": "57f72808b4ad5ec10d341527972e5c43cc215cda027fde57e8771d9cf68cffbe",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1466,12 +1973,58 @@
     },
     {
       "file": "be65-home-320-light-balk.png",
-      "sha256": "a04a0c514170839e57f60477c44fa6ba8809f78a2feb2d9d853c1455bb0b13e1",
+      "sha256": "829e93bf6f83a5f11bec1f68c6c2a8a0c3338b26fa5a7a2317bdc6b682df903e",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
       "theme": "light",
       "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-light-venster.png",
+      "sha256": "7db6b353727c42026eaa4d3a3bb77648c7591cde704b61b0f60d1af0523288d0",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "venster",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-light-venster-stemmen.png",
+      "sha256": "5fe03811960e0f0c4f2a3b24dc87198ee48f87a7b818f39895fe514dedca9b10",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "venster-stemmen",
       "themeProof": {
         "attr": "light",
         "active": [
@@ -1512,7 +2065,7 @@
     },
     {
       "file": "be65-home-1280-dark-kaart.png",
-      "sha256": "3a5c87998c9b3e291b9ffa4b644e739a45511e9be016062bd3ba35b77e83b9dc",
+      "sha256": "3d78f479716d04d59f18851e5af92e596c7ae37ec8e45929156de9bb45e95013",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -1535,12 +2088,58 @@
     },
     {
       "file": "be65-home-1280-dark-balk.png",
-      "sha256": "1bfb6ebacf157f0dc82b6fcaea8068b1195ce8f7f19852ea647ff8c5f9239014",
+      "sha256": "dcb580b39f1b4ef6d983f6d922b4815bb50598baca371247765f26e764cb7fa3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
       "theme": "dark",
       "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-dark-venster.png",
+      "sha256": "0049a5f8620a5b152255f563e9df42a225af0b395b5a6e7b5b0ea9774a37714f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "venster",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-dark-venster-stemmen.png",
+      "sha256": "e60e4cd3653977475af270648baa7457de7da568cef55976dbe9ba66c8c13d88",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "venster-stemmen",
       "themeProof": {
         "attr": "dark",
         "active": [
@@ -1581,7 +2180,7 @@
     },
     {
       "file": "be65-home-390-dark-kaart.png",
-      "sha256": "26b94e311a1d78910bf8001f03f41ddd2ef63f67a223756252fc1ef6c9770f49",
+      "sha256": "b1e1a8e1573e034c74cbb4140422877356c2e991ca478e215bb247b4ec8a7707",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1604,7 +2203,7 @@
     },
     {
       "file": "be65-home-390-dark-balk.png",
-      "sha256": "8d5cfd7e3095d636a94d91795210fba8cef8d0c21b269abd025bca0e30509029",
+      "sha256": "e432bd4387847bd9cdb6ca2ae1d518ed2b867b4050b85ca30d826a4e7850123f",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
@@ -1626,8 +2225,54 @@
       }
     },
     {
+      "file": "be65-home-390-dark-venster.png",
+      "sha256": "a8e17f8c24ef529058fd8d60d88ec1e1e36bd1238cc047823c70c61c13a92f7b",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "venster",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-dark-venster-stemmen.png",
+      "sha256": "72ed973eebe4c9e705143b053f4d5ea2e58f1e44aa22dcb0c0f8a809ecfb8e0b",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "venster-stemmen",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
       "file": "be65-home-320-dark-tabjes.png",
-      "sha256": "e4fabdc4c374716e11a05a3386c6db64a135109033dd4e157a52e4af246e927d",
+      "sha256": "d2b16efdac2bec9d89b22b36873f47338ca1aa8225b6e883b3fa7658d02c6cd1",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1650,7 +2295,7 @@
     },
     {
       "file": "be65-home-320-dark-kaart.png",
-      "sha256": "5d2824b2f510e1250777a95ae0f51e02857097ed61442c9c8224c99449ed8739",
+      "sha256": "126a6d3fe471a6ba1e80c696285eb385bf8badc585a9737c76144b1b255df4e0",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
@@ -1673,12 +2318,58 @@
     },
     {
       "file": "be65-home-320-dark-balk.png",
-      "sha256": "f504652453ca5f77a65fa3ee49a594907ed511075c2e7beef4abc145290d170f",
+      "sha256": "8826b26f6908d46b9acdf7ae74c527db59d834a1b33a3fbccdb622c88ff27b1a",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
       "theme": "dark",
       "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-dark-venster.png",
+      "sha256": "38ae21e2e6b2d8689ab8f8ea345ec757bce3818e1fc062e1d837b71e0260846a",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "venster",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-dark-venster-stemmen.png",
+      "sha256": "06d8595f545975933d46a0b0fd799784b80158299449175effff9f1d34693108",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "venster-stemmen",
       "themeProof": {
         "attr": "dark",
         "active": [

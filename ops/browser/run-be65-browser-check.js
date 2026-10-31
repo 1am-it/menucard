@@ -18,7 +18,13 @@
 //    px, staan niet in een <a> en bewaren werkt;
 //  - de balk na het bewaren staat in beeld, boven de tabbalk (elementFromPoint
 //    op de tabbalk komt bij de tabbalk uit) en is weg na sluiten;
-//  - daarna de bestaande a11y-audit op / en /search, met 0 fouten.
+//  - het venster "Stuur je lijstje" opent vanuit de balk: het staat helemaal in
+//    beeld en boven de tabbalk (elementFromPoint op de deelknoppen), de twee
+//    bewaarde gerechten staan er met naam en prijs, de radio's wisselen en Esc
+//    sluit het venster met de focus terug op "Versturen". De kies-API is gestubd
+//    (lib/be65-kies-stub.js): er wordt geen echte stemming aangemaakt;
+//  - daarna de bestaande a11y-audit op / en /search, en op / met het venster
+//    open, met 0 fouten.
 //
 // Dit is ontwikkelaarsbewijs, geen onafhankelijke review en geen echte
 // acceptatie. Gebruik: node ops/browser/run-be65-browser-check.js
