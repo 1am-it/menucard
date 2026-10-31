@@ -176,8 +176,8 @@ test('BE-55: maximaal drie emoji', () => {
   assert.ok(vier.fouten.includes(DAGHAP_FOUTEN.emoji));
 });
 
-test('BE-55: alleen daghap of seizoensgerecht, en platte tekst blijft platte tekst', () => {
-  const onbekend = normaliseerAanbod({ ...basis, soort: 'dagmenu' });
+test('BE-55: alleen een bekende soort, en platte tekst blijft platte tekst', () => {
+  const onbekend = normaliseerAanbod({ ...basis, soort: 'dagschotel' });
   assert.equal(onbekend.ok, false);
   assert.ok(onbekend.fouten.includes(DAGHAP_FOUTEN.soort));
 
