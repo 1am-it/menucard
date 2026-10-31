@@ -518,6 +518,8 @@ async function main() {
       appOrigins: APP_ORIGINS,
       baseUrl: `${APP}/`,
       fixtureRoutes: [
+        { id: 'zoeken', match: 'prefix', path: '/api/search', methods: ['GET'] },
+        { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET'] },
         { id: 'tellers', match: 'exact', path: '/api/v1/tellers', methods: ['POST'] },
         { id: 'bekeken', match: 'exact', path: '/api/v1/bekeken', methods: ['POST'] },
       ],

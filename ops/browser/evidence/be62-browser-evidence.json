@@ -2,11 +2,39 @@
   "script": "run-be62-browser-check.js",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde kies-API; geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T10:58:54.836Z",
+  "startedAt": "2026-10-31T11:07:38.475Z",
   "port": 3196,
   "filter": null,
-  "scenarioRuns": null,
-  "network": null,
+  "scenarioRuns": [
+    {
+      "name": "kies",
+      "checks": 34,
+      "passed": 34,
+      "failed": 0,
+      "durationMs": 14261,
+      "error": null
+    },
+    {
+      "name": "gedeeld",
+      "checks": 30,
+      "passed": 30,
+      "failed": 0,
+      "durationMs": 22974,
+      "error": null
+    },
+    {
+      "name": "tip",
+      "checks": 11,
+      "passed": 11,
+      "failed": 0,
+      "durationMs": 10562,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
   "checks": [
     {
       "name": "kies: geen terugkomvlak vóór de eigen stem",
@@ -14,7 +42,7 @@
       "detail": "{\"present\":false}"
     },
     {
-      "name": "kies: stemmen tot de uitslag (1280)",
+      "name": "kies: stemmen tot de uitslag (1280 light)",
       "passed": true,
       "detail": "true"
     },
@@ -69,14 +97,9 @@
       "detail": "Zoek een gerecht → · /"
     },
     {
-      "name": "kies na het stemmen (light) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document"
-    },
-    {
       "name": "kies na het stemmen (light) · a11y-audit zonder fouten",
-      "passed": false,
-      "detail": "1 fouten"
+      "passed": true,
+      "detail": "0 fouten"
     },
     {
       "name": "kies: het vlak staat onder de uitslag (320 light)",
@@ -154,14 +177,9 @@
       "detail": "Zoek een gerecht → · /"
     },
     {
-      "name": "kies na het stemmen (dark) · a11y-fout · landmarks",
-      "passed": false,
-      "detail": "nav · document"
-    },
-    {
       "name": "kies na het stemmen (dark) · a11y-audit zonder fouten",
-      "passed": false,
-      "detail": "1 fouten"
+      "passed": true,
+      "detail": "0 fouten"
     },
     {
       "name": "kies: het vlak staat onder de uitslag (320 dark)",
@@ -187,6 +205,231 @@
       "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (320 dark)",
       "passed": true,
       "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (1280 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (390 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (320 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (1280 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (390 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (320 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gewoon bezoek aan een menukaart: geen terugkomvlak",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "gedeeld lijstje: het vlak staat er (light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: kop en knop naar de home (light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: de bestaande bewaarknop blijft (light)",
+      "passed": true,
+      "detail": "Zet ze op mijn eigen lijstje"
+    },
+    {
+      "name": "gedeeld lijstje (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gedeeld lijstje: het vlak staat er (dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: kop en knop naar de home (dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: de bestaande bewaarknop blijft (dark)",
+      "passed": true,
+      "detail": "Zet ze op mijn eigen lijstje"
+    },
+    {
+      "name": "gedeeld lijstje (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gewoon bezoek aan mijn lijstje: geen terugkomvlak",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: niet bij het eerste bezoek",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: wel bij het tweede bezoek",
+      "passed": true,
+      "detail": "{\"present\":true,\"title\":\"Zet ons op je beginscherm\",\"heading\":\"h2\",\"body\":\"Dan vind je ons net zo snel als een app. Tik op Delen en daarna op Zet op beginscherm.\",\"logo\":\"om\",\"closeLabel\":\"Tip sluiten\",\"closeSize\":{\"w\":44,\"h\":44},\"rect\":{\"top\":586,\"bottom\":696},\"tabbar\":{\"top\":708,\"bottom\":768},\"inViewport\":true,\"hitIsTip\":true,\"visits\":{\"visits\":2,\"dismissed\":false}}"
+    },
+    {
+      "name": "tip: het bezoek is in localStorage geteld",
+      "passed": true,
+      "detail": "{\"visits\":2,\"dismissed\":false}"
+    },
+    {
+      "name": "tip: boven de tabbalk, helemaal in beeld",
+      "passed": true,
+      "detail": "{\"rect\":{\"top\":586,\"bottom\":696},\"tabbar\":{\"top\":708,\"bottom\":768},\"inViewport\":true}"
+    },
+    {
+      "name": "tip: elementFromPoint raakt de kaart zelf (geen pop-up ervoor)",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "tip: kop, logo-tegeltje en tekst uit het ontwerp",
+      "passed": true,
+      "detail": "{\"title\":\"Zet ons op je beginscherm\",\"logo\":\"om\",\"body\":\"Dan vind je ons net zo snel als een app. Tik op Delen en daarna op Zet op beginscherm.\"}"
+    },
+    {
+      "name": "tip: sluitknop van 44 × 44 px met aria-label \"Tip sluiten\"",
+      "passed": true,
+      "detail": "{\"label\":\"Tip sluiten\",\"size\":{\"w\":44,\"h\":44}}"
+    },
+    {
+      "name": "tip: weg direct na sluiten",
+      "passed": true,
+      "detail": "clicked · {\"present\":false}"
+    },
+    {
+      "name": "tip: na sluiten nooit meer, ook niet in een nieuw bezoek",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: niet op desktop (1280 px)",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: zonder opslag geen tip en geen fout",
+      "passed": true,
+      "detail": "{\"tip\":{\"present\":false},\"page\":true}"
+    },
+    {
+      "name": "kies: de API is gestubd en elk stemverzoek bleef lokaal",
+      "passed": true,
+      "detail": "{\"stub\":true,\"calls\":0}"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
     }
   ],
   "shots": [
@@ -333,9 +576,266 @@
         "luminance": 35,
         "source": "--bg"
       }
+    },
+    {
+      "file": "be62-gerecht-1280-light.png",
+      "sha256": "c54efb4d23fe989de10f0df237bd1ff217e0dee62247663a1d5843fdab36947f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-390-light.png",
+      "sha256": "f33b7f95fffce7b9c303ab8a54187b12bbb1dc795caad08a6dc1568b793f3203",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-320-light.png",
+      "sha256": "178ec1e73e2cc2b2f098bb857b5ab840d953c5fb93d38a281320613fffa78f6f",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-1280-dark.png",
+      "sha256": "2f480a04bd0a08f6c550ee07bd5d74efb14b1891e3be8d8d17000e3e9b7b700c",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-390-dark.png",
+      "sha256": "4c017ead971801b3f699efe8b3e51d96f725dbfa947dfa48a854f754f9b57d04",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-320-dark.png",
+      "sha256": "fad93565eb872e200a7d21ed0aceed70681f40af5f1f98a7dc1484a6635b50c3",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-lijstje-390-light.png",
+      "sha256": "50ed716b694c807eb38573ac1b8b3199025173b0af6b38a4184b4faef6bb3151",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-lijstje-390-dark.png",
+      "sha256": "93adcb94eb5fb66b5fb8303b6eec4214aef6db571d5ef9b17db5c55f9389dc96",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-licht.png",
+      "sha256": "d44e4ac9f4d0e1d80ea50d801b2e42fea0eb7cd3db626d98cb72e62663b628c9",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "tweede-bezoek",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-donker.png",
+      "sha256": "ed0e1b8a47b615bb5cd8017c4988afa3c5825baf6c5ed7722e89c7e4bfa48248",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "tweede-bezoek",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-geen-opslag.png",
+      "sha256": "498bb7e616fcf32eb72d69c72d390505575e37ffa3597b888067ea4020d90248",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "zonder-opslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
     }
   ],
-  "failed": 4,
-  "passed": false,
-  "error": "Error: page_not_ready: http://localhost:3196/menu/1-lunch?dish=1-lunch-0-0&name=Voorgerecht&stand=licht\nonze\nmenukaarten\nMenukaarten in Breda\nVoor restaurants\nInloggen\n← Restaurant Wolfslaar\nRestaurant Wolfslaar\nLunchkaart\n🥗 Lunch\n🍽 Diner\nLunchmenu's\nRESTAURANT\nRestaurant Wolfslaar\nModern Frans · Fine Dining\nOpent vandaag om 18:00\n📍\nWolfslaardreef 100, 4834 SP Breda\n📞 076 201 49 75\nWebsite\nReserveer via website\n(opent in een nieuw venster)\n\nReserveren gaat via de website van Restaurant Wolfslaar. Onze Menukaarten neemt zelf geen reserveringen of bestellingen aan.\n\nBron: www.restaurantwolfslaar.com/nl/menu-lunch · 2026-03-25\nChef Maarten Camps. Di–Vr open voor lunch vanaf 12:00. Keuze van de chef — geen vaste gerechten vermeld.\n🔍\n🛡 Allergie\n🌿 Vegetarisch\n🌱 Vegan\n☪️ Halal\n🌾 Glutenvrij\nMax prijs: alles\nLUNCHMENU'S\nBusiness Lunch\n€72,50\nTwee gangen, keuze van de chef, binnen een uur ges\n    at navigate (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\lib\\runtime.js:199:11)\n    at async gedeeldScenario (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\run-be62-browser-check.js:310:7)\n    at async runScenarioSelection (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\lib\\scenario-filter.js:142:7)\n    at async main (C:\\Users\\madej\\Documents\\Codex\\menucard-local-runner-2\\workspace\\ops\\browser\\run-be62-browser-check.js:512:20)"
+  "failed": 0,
+  "passed": true
 }
