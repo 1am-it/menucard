@@ -7,53 +7,70 @@
 // achtergrond. De toegankelijke naam is "Bewaar <gerecht>"; staat hij aan, dan
 // is de bladwijzer gevuld en zegt `aria-pressed="true"` het (contract).
 //
-// - De stand komt altijd uit de opslag zelf (`localStorage`, in try/catch in
-//   src/lib/dishList.js). Kan de browser niet opslaan, dan blijft de knop
-//   werken en de pagina staan; alleen het onthouden lukt dan niet.
-// - Een eigen event (`SAVED_LIST_EVENT`) houdt de knop, de onderbalk en de
+// BE-65 (#157, ronde 2) — de knop is klein en statisch; de bewaarlogica komt
+// pas bij de klik binnen (`import('@/src/lib/dishList')`). Wat meteen moet
+// kloppen is de stand: die leest de kleine lezer in src/lib/savedListRead.js
+// rechtstreeks uit `localStorage`, zonder de zware module te laden.
+//
+// - Zonder opslag (privémodus, beleid) werkt de knop gewoon en blijft de pagina
+//   staan; alleen het onthouden lukt dan niet. Nooit een harde fout.
+// - Een eigen event (`SAVED_LIST_EVENT_NAME`) houdt de knop, de balk en de
 //   lijstpagina in dezelfde stand, zonder twee bronnen van waarheid.
 
 import { useCallback, useEffect, useState } from 'react'
 import {
-  SAVED_LIST_EVENT,
-  isDishSaved,
-  safeBrowserStorage,
-  toggleSavedDish,
-} from '@/src/lib/dishList'
-import { SAVED_EVENT, sendDishCounter } from '@/src/lib/dishCounters'
+  SAVED_LIST_EVENT_NAME,
+  browserStorage,
+  hasSavedId,
+} from '@/src/lib/savedListRead'
 
-export default function DishSaveButton({ entry = null, name = null }) {
+/** De id van dit gerecht, uit de bestaande `entry` of uit de compacte regel. */
+function dishIdOf({ entry, dish }) {
+  if (entry && entry.id) return entry.id
+  if (dish && dish.dishId) return dish.dishId
+  return null
+}
+
+export default function DishSaveButton({ entry = null, dish = null, name = null }) {
   const [saved, setSaved] = useState(false)
+  const id = dishIdOf({ entry, dish })
 
   useEffect(() => {
-    if (!entry) return undefined
-    const sync = () => setSaved(isDishSaved(safeBrowserStorage(), entry.id))
+    if (!id) return undefined
+    const sync = () => setSaved(hasSavedId(browserStorage(), id))
     sync()
-    window.addEventListener(SAVED_LIST_EVENT, sync)
+    window.addEventListener(SAVED_LIST_EVENT_NAME, sync)
     window.addEventListener('storage', sync)
     return () => {
-      window.removeEventListener(SAVED_LIST_EVENT, sync)
+      window.removeEventListener(SAVED_LIST_EVENT_NAME, sync)
       window.removeEventListener('storage', sync)
     }
-  }, [entry])
+  }, [id])
 
-  const handleClick = useCallback(() => {
-    const result = toggleSavedDish(safeBrowserStorage(), entry)
+  const handleClick = useCallback(async () => {
+    // Pas bij de klik: de echte bewaarlogica en de anonieme teller.
+    const [list, counters] = await Promise.all([
+      import('@/src/lib/dishList'),
+      import('@/src/lib/dishCounters'),
+    ])
+    const wanted = entry || (dish ? list.entryFromDish(dish) : null)
+    if (!wanted) return
+    const result = list.toggleSavedDish(browserStorage(), wanted)
     setSaved(result.saved)
     try {
-      window.dispatchEvent(new Event(SAVED_LIST_EVENT))
+      window.dispatchEvent(new Event(SAVED_LIST_EVENT_NAME))
     } catch (error) {
       // Geen venster (zou niet kunnen na een klik): de knop zelf is al bij.
     }
     // BE-44 (#105, criterium 5) — alleen tellen als het gerecht erbij komt,
     // nooit bij weghalen (contract), en fire-and-forget: de knop wacht niet op
     // de teller en een mislukte telling verandert niets aan de stand.
-    if (result.saved) void sendDishCounter({ dish: entry && entry.id, event: SAVED_EVENT })
-  }, [entry])
+    if (result.saved) void counters.sendDishCounter({ dish: wanted.id, event: counters.SAVED_EVENT })
+  }, [dish, entry])
 
-  if (!entry) return null
+  if (!id) return null
 
-  const saveName = String(name || entry.name || '').trim() || 'dit gerecht'
+  const saveName = String(name || (entry && entry.name) || (dish && dish.name) || '').trim() || 'dit gerecht'
 
   return (
     <button
