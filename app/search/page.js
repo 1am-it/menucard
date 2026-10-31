@@ -597,7 +597,7 @@ function SearchPageInner() {
                             {example.priceOnRequest
                               ? <span className="price-label price-label--soft">op aanvraag</span>
                               : example.priceDisplay && <span className="price-label">{example.priceDisplay}</span>}
-                            {/* BE-65 (#157) — Bewaren en Delen met de bestaande
+                            {/* BE-65 (issue 157) — Bewaren en Delen met de bestaande
                                 componenten, naast de link van het gerecht en
                                 nooit erin. De deellink is dezelfde als de link
                                 van dit resultaat. */}

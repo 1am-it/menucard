@@ -148,7 +148,7 @@ export default function HomeView({ candidates = [] }) {
             Waar heb je vanavond zin in? <Emoji glyph="😋" />
           </h1>
 
-          {/* BE-65 (#157) — twee kolommen op een breed scherm: links zoeken en
+          {/* BE-65 (issue 157) — twee kolommen op een breed scherm: links zoeken en
               de maaltijdchips, rechts de deelkaart. Op mobiel staat de kaart
               onder de zoekbalk en de chips. */}
           <div className="home-hero-grid">
@@ -300,7 +300,7 @@ export default function HomeView({ candidates = [] }) {
                       </span>
                       <span className="tonight-price">{dish.priceDisplay}</span>
                     </Link>
-                    {/* BE-65 (#157) — de knoppen staan naast de link, nooit
+                    {/* BE-65 (issue 157) — de knoppen staan naast de link, nooit
                         erin: een knop in een link is geen bediening. Ze
                         gebruiken de bestaande componenten, dus dezelfde opslag
                         en dezelfde deelfunctie met de voorkeur uit "Delen via". */}

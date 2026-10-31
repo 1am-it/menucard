@@ -105,7 +105,10 @@ test('de ontvanger ziet de regel "Iemand deelde dit gerecht met je" bij de kaart
 test('de deelknop is een icoonknop met aria-label, aria-expanded en een statusmelding', () => {
   // BE-49 (#115, criterium 1 en 6): geen zichtbaar woord meer, maar een
   // icoonknop met de gerechtnaam in de aria-label en de stand in aria-expanded.
-  assert.match(SHARE_BUTTON, /aria-label=\{`Deel \$\{shareName\}`\}/);
+  // BE-65 (#157): dezelfde knop heeft nu een variant met het zichtbare woord
+  // "Delen" (home en /search). Zonder die variant blijft de naam letterlijk
+  // "Deel <gerecht>", zoals BE-49 het eist.
+  assert.match(SHARE_BUTTON, /aria-label=\{withLabel \? `Delen: \$\{shareName\}` : `Deel \$\{shareName\}`\}/);
   assert.match(SHARE_BUTTON, /aria-expanded=\{open\}/);
   assert.match(SHARE_BUTTON, /role="status"/);
   assert.doesNotMatch(SHARE_BUTTON, /\btext:\s/, 'er gaat geen berichttekst mee');

@@ -149,6 +149,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
   const stylesheets = cssFiles().sort();
   assert.deepEqual(stylesheets, [
     'app/globals.css',
+    // BE-65: de twee kolommen van de hero en de knoppen bij elk gerecht.
+    'app/home.css',
     // BE-59 deel 2: de ene ingang /inloggen.
     'app/inloggen/inloggen.css',
     // BE-55 deel 4: de interne werkvoorraad, naast zijn pagina.
@@ -170,10 +172,14 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/daghap-vandaag.css',
     // BE-55 deel 4: "Daghappen vandaag" op de home.
     'src/components/daghappen-vandaag.css',
+    // BE-65: de deelknop met het woord "Delen" (home en /search).
+    'src/components/dish-share-button.css',
     'src/components/kies-start.css',
     'src/components/menu-body.css',
     // BE-59 deel 2: de footerlink op de publieke pagina's.
     'src/components/public-footer.css',
+    // BE-65: de deelkaart in de hero.
+    'src/components/share-hero-card.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });
