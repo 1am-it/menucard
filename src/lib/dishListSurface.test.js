@@ -62,9 +62,11 @@ test('elke gerechtkaart op de menupagina krijgt "Delen" én "Bewaren"', () => {
 });
 
 test('de bewaarknop leest en schrijft via de lib en toont "Bewaard" met aria-pressed', () => {
-  assert.match(SAVE_BUTTON, /isDishSaved\(safeBrowserStorage\(\), entry\.id\)/);
-  assert.match(SAVE_BUTTON, /safeBrowserStorage\(\)/);
-  assert.match(SAVE_BUTTON, /toggleSavedDish\(safeBrowserStorage\(\), entry\)/);
+  // BE-65 ronde 2: de stand komt uit de kleine lezer, de schrijfactie uit de
+  // zware lib en pas bij de klik.
+  assert.match(SAVE_BUTTON, /const sync = \(\) => setSaved\(hasSavedId\(browserStorage\(\), id\)\)/);
+  assert.match(SAVE_BUTTON, /import\('@\/src\/lib\/dishList'\)/);
+  assert.match(SAVE_BUTTON, /toggleSavedDish\(browserStorage\(\), wanted\)/);
   assert.match(SAVE_BUTTON, /aria-pressed=\{saved\}/);
   // BE-49 (#115, criterium 1): geen zichtbaar label meer, maar een icoonknop
   // met de gerechtnaam in de aria-label ("Bewaar <gerecht>").

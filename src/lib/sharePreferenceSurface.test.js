@@ -126,7 +126,7 @@ test('de voorkeur gaat alleen naar localStorage, zonder cookie of netwerk', () =
   }
   // De teller is de enige keer dat er iets de deur uit gaat, en die kent alleen
   // dish en event — de gekozen manier nooit.
-  assert.match(SHARE_BUTTON, /void sendDishCounter\(\{ dish, event: SHARED_EVENT \}\)/);
+  assert.match(SHARE_BUTTON, /void mods\.counters\.sendDishCounter\(\{ dish: dishId, event: mods\.counters\.SHARED_EVENT \}\)/);
   assert.doesNotMatch(SHARE_BUTTON, /sendDishCounter\(\{[^}]*method/);
   assert.match(LIB, /SHARE_PREFERENCE_KEY = 'deelvoorkeur'/);
   // De link per manier: alleen de url (en bij e-mail het onderwerp).
