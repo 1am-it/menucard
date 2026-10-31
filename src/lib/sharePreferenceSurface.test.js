@@ -84,7 +84,9 @@ test('de icoonknoppen: 44 × 44 px, icoon ±20 px, geen gevuld vlak, wel een naa
   assert.match(CSS, /\.dish-share-btn \.dish-share-icon \{ width: 20px; height: 20px; \}/);
   assert.match(CSS, /\.dish-save-btn \.dish-share-icon \{ width: 20px; height: 20px; \}/);
 
-  assert.match(SHARE_BUTTON, /aria-label=\{`Deel \$\{shareName\}`\}/);
+  // BE-65 (#157): dezelfde knop heeft nu een variant met het zichtbare woord
+  // "Delen"; zonder die variant blijft de naam "Deel <gerecht>" (BE-49).
+  assert.match(SHARE_BUTTON, /aria-label=\{withLabel \? `Delen: \$\{shareName\}` : `Deel \$\{shareName\}`\}/);
   assert.match(SHARE_BUTTON, /aria-expanded=\{open\}/);
   assert.match(SAVE_BUTTON, /aria-label=\{`Bewaar \$\{saveName\}`\}/);
   assert.match(SAVE_BUTTON, /aria-pressed=\{saved\}/);
@@ -212,7 +214,7 @@ test('de voorkeur gaat alleen naar localStorage, zonder cookie of netwerk', () =
   }
   // De teller is de enige keer dat er iets de deur uit gaat, en die kent alleen
   // dish en event — de gekozen manier nooit.
-  assert.match(SHARE_BUTTON, /void sendDishCounter\(\{ dish, event: SHARED_EVENT \}\)/);
+  assert.match(SHARE_BUTTON, /void mods\.counters\.sendDishCounter\(\{ dish: dishId, event: mods\.counters\.SHARED_EVENT \}\)/);
   assert.doesNotMatch(SHARE_BUTTON, /sendDishCounter\(\{[^}]*method/);
   assert.match(LIB, /SHARE_PREFERENCE_KEY = 'deelvoorkeur'/);
   // De link per manier: alleen de url (en bij e-mail het onderwerp).

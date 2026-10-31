@@ -94,6 +94,26 @@ function buildEntry({ menuId, catIdx, itemIdx, item, category, restaurantName } 
 }
 
 /**
+ * BE-65 (#157) — hetzelfde bewaarde gerecht, opgebouwd uit de compacte
+ * gerechtregel die de home en /search al hebben (dishId, naam, categorie,
+ * prijs). De id draagt de menukaart en de plek
+ * (`<menukaart>-<categorie>-<gerecht>`), dus er is geen tweede databron of
+ * extra veld nodig. Ongeldig blijft ongeldig: dan is er geen bewaarknop.
+ */
+function entryFromDish({ dishId, name, category, price, restaurantName } = {}) {
+  const parsed = parseDishId(dishId);
+  const dishName = textOf(name);
+  if (!parsed || !dishName) return null;
+  return normalizeEntry({
+    id: dishIdOf(parsed),
+    name: dishName,
+    category: textOf(category),
+    price: textOf(price),
+    restaurant: textOf(restaurantName),
+  });
+}
+
+/**
  * Een opgeslagen of uit de URL gelezen waarde weer bruikbaar maken. Een entry
  * zonder geldige id of zonder naam is geen gerecht: die telt als overgeslagen.
  */
@@ -435,6 +455,7 @@ module.exports = {
   dishIdOf,
   dishIds,
   encodeListParam,
+  entryFromDish,
   isDishSaved,
   listDishHref,
   listImageRows,

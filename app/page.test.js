@@ -37,7 +37,7 @@ test('BE-29: app/page.js is a server page that only passes the compact candidate
   assert.doesNotMatch(page, /^'use client'/m, 'the page itself must stay server-side');
   assert.match(page, /import HomeView from '\.\/HomeView'/);
   assert.match(page, /import \{ buildTonightCandidates \} from '@\/src\/lib\/publicTonightData'/);
-  assert.match(page, /<HomeView candidates=\{buildTonightCandidates\(\)\} \/>/);
+  assert.match(page, /<HomeView candidates=\{buildTonightCandidates\(\)\} shareCard=\{<ShareHeroCard \/>\} \/>/);
   assert.match(page, /export const revalidate = 300\b/, 'a bounded ISR window keeps the home fast');
   assert.doesNotMatch(page, /^import .*menus\.json/m, 'the menu archive is never imported into the page module');
   assert.doesNotMatch(page, /selectTonightDishes|tonight=/, 'no server-side moment selection remains');

@@ -1,0 +1,46 @@
+/* BE-65 (#157) — opmaak die alleen bij de home hoort (BE-52): de twee
+   kolommen van de hero en de bewaar- en deelknoppen naast elk gerecht van
+   "Vanavond op de kaart". Alleen bestaande tokens, licht en donker. */
+
+.home-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.home-hero-main { min-width: 0; }
+
+/* De zoekbalk houdt zijn eigen marge; binnen de kolom telt alleen de afstand
+   tussen zoeken en de chips. */
+.home-hero-main .home-search { margin-top: 0; }
+
+/* De kaarten van "Vanavond op de kaart": de link naar het gerecht en
+   daarnaast de bewaar- en deelknoppen. De knoppen staan nooit in de link. */
+.tonight-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.tonight-item .tonight-card { min-width: 0; }
+
+.tonight-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+/* Op een smal scherm staan de knoppen onder de kaart, rechts uitgelijnd: zo
+   past de kaart zelf en ontstaat er geen horizontale overloop. */
+@media (max-width: 560px) {
+  .tonight-item { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .tonight-actions { justify-content: flex-end; }
+}
+
+@media (max-width: 900px) {
+  .home-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+}
