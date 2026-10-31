@@ -73,6 +73,10 @@ test('Versturen opent het venster "Stuur je lijstje" (ronde 4)', () => {
   assert.match(BAR, /const SavedListSendDialog = dynamic\(\(\) => import\('\.\/SavedListSendDialog'\), \{ loading: \(\) => null \}\)/);
   assert.doesNotMatch(BAR, /^import SavedListSendDialog from/m);
   assert.match(BAR, /\{sending \? <SavedListSendDialog open onClose=\{\(\) => setSending\(false\)\} \/> : null\}/);
+  // Precies één exportregel: een tweede regel met dezelfde namen laat `next
+  // build` vallen op "Duplicate export" (ronde 4).
+  const exports = BAR.match(/^export \{[^}]*\}/gm) || [];
+  assert.equal(exports.length, 1, `één exportregel, gevonden: ${exports.join(' | ')}`);
 });
 
 test('de opmaak: rechtsonder, boven de tabbalk, alleen tokens', () => {

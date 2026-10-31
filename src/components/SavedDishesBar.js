@@ -133,4 +133,3 @@ export default function SavedDishesBar() {
 
 export { BAR_CLOSE_LABEL, BAR_HIDDEN_KEY, BAR_SEND_LABEL, readHidden, writeHidden }
 
-export { BAR_CLOSE_LABEL, BAR_HIDDEN_KEY, BAR_HREF, BAR_SEND_LABEL, readHidden, writeHidden }
