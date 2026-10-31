@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { searchDishes } from '@/src/services/dishSearch'
 import { daghapHandlers } from '@/src/lib/daghapRouteDeps'
+import { zoekMetOverlay } from '@/src/lib/zoekOverlay'
+import { laadZoekOverlay } from '@/src/lib/zoekOverlayServer'
 
 function parseIntOr(value, fallback) {
   const n = parseInt(value, 10)
@@ -52,20 +54,30 @@ export async function GET(request) {
     }
   }
 
-  const result = searchDishes({
-    q,
-    meal,
-    maxPrice,
-    cuisines,
-    buurt,
-    excludeAllergens,
-    day,
-    nowOpen,
-    cursor,
-    limit,
-    group,
-    vandaag,
-    aanbod,
+  // BE-60 (#150) — de zoekresultaten tonen een goedgekeurde houderwijziging:
+  // de nieuwe prijs, het label "Tijdelijk niet beschikbaar" en een prijsfilter
+  // dat met de nieuwe prijs rekent. De overlay komt van precies de restaurants
+  // die in het resultaat staan, gecacht per restaurant met de tag van BE-58
+  // (src/lib/zoekOverlayServer.js). Zonder migratie of configuratie komt er
+  // niets terug en blijven de statische prijzen staan, zonder fout.
+  const result = await zoekMetOverlay({
+    zoek: (overlay) => searchDishes({
+      q,
+      meal,
+      maxPrice,
+      cuisines,
+      buurt,
+      excludeAllergens,
+      day,
+      nowOpen,
+      cursor,
+      limit,
+      group,
+      vandaag,
+      aanbod,
+      overlay,
+    }),
+    laadOverlay: laadZoekOverlay,
   })
 
   return NextResponse.json(result, {

@@ -66,6 +66,12 @@ const MEAL_OPTIONS = [
 // (<Emoji/> zet aria-hidden); het label ernaast draagt de betekenis.
 const MEAL_GLYPHS = { lunch: '🥪', diner: '🍝', borrel: '🍻', specialiteiten: '⭐' }
 
+// BE-60 (#150) — hetzelfde label als op de menukaart (BE-58,
+// src/components/MenuBody.js). Bewust hier als tekst en niet geïmporteerd:
+// de zoekpagina is een clientcomponent en hoeft daarvoor geen servermodule
+// mee te laden.
+const TIJDELIJK_NIET_BESCHIKBAAR = 'Tijdelijk niet beschikbaar'
+
 const DAYS = ['ma', 'di', 'wo', 'do', 'vr', 'za', 'zo']
 const DAY_LABELS = { ma: 'Ma', di: 'Di', wo: 'Wo', do: 'Do', vr: 'Vr', za: 'Za', zo: 'Zo' }
 const DAY_FULL = { ma: 'Maandag', di: 'Dinsdag', wo: 'Woensdag', do: 'Donderdag', vr: 'Vrijdag', za: 'Zaterdag', zo: 'Zondag' }
@@ -571,6 +577,13 @@ function SearchPageInner() {
                                   isWeakMatch()). A normal, visibly-matching
                                   example gets no hint at all. */}
                               {example.weakMatch && <span className="dish-result-match-hint">Gevonden in aanvullende menudetails</span>}
+                              {/* BE-60 (#150) — hetzelfde label als op de
+                                  menukaart (BE-58). Het gerecht blijft staan
+                                  en houdt zijn plaats; alleen dit label komt
+                                  erbij. */}
+                              {example.tijdelijkNietBeschikbaar && (
+                                <span className="dish-result-unavailable">{TIJDELIJK_NIET_BESCHIKBAAR}</span>
+                              )}
                             </span>
                             {/* BE-28 — de echte prijs van dít gerecht,
                                 rechts in de kaart (ook op 320 px). */}
