@@ -1,0 +1,21 @@
+{
+  "ticket": "BE-65 (#157), ronde 4",
+  "criterion": "de eerste laadgrootte van / en /search groeit hooguit 2 KB per route, en in ronde 4 niet boven de stand van ronde 3",
+  "category": "developer-meting uit de routetabel van Ã©Ã©n lokale productiebuild in deze werkkopie; geen browseroverdracht, geen compressiemeting en geen echte acceptatie",
+  "ranAt": "2026-10-31",
+  "baseSha": "053240d82c9a98fc0ba217f834dea90ae7db5408",
+  "headSha": "afb6f34 plus de opbouw van deze ronde",
+  "method": "next build in deze werkkopie (Next 15.5.15) zonder NEXT_DIST_DIR, cijfers uit de routetabel van die build. De vergelijking met ronde 3 gebruikt dezelfde routetabel en dezelfde gzip-som per route uit ronde 3 (ops/browser/evidence/be65-build-size-evidence.json, ronde 3).",
+  "budgetKb": 2,
+  "rows": [
+    { "route": "/", "baseRoute": "7.29 kB", "baseFirstLoad": "123 kB", "round3FirstLoad": "126 kB", "headRoute": "8.65 kB", "headFirstLoad": "126 kB", "deltaFirstLoad": "+3 kB", "deltaVersusRound3": "0 kB", "verdict": "gelijk aan ronde 3; de Lead accepteerde +3 kB" },
+    { "route": "/search", "baseRoute": "7.68 kB", "baseFirstLoad": "121 kB", "round3FirstLoad": "125 kB", "headRoute": "7.03 kB", "headFirstLoad": "125 kB", "deltaFirstLoad": "+4 kB", "deltaVersusRound3": "0 kB", "verdict": "gelijk aan ronde 3; de Lead accepteerde +4 kB" }
+  ],
+  "shared": { "base": "103 kB", "head": "103 kB" },
+  "whatChangedThisRound": "Het venster Stuur je lijstje hangt achter Versturen en wordt met next/dynamic pas geladen als het opengaat (eigen chunk). In de eerste lading van / en /search verandert daardoor niets: de routetabel is gelijk aan ronde 3, en de gedeelde chunk blijft 103 kB.",
+  "nextCandidates": [
+    "ShareSettingsButton in de kop laadt nog mee in de eerste lading (chunk 6009 uit ronde 3). Dat bestand hoort bij PR #158.",
+    "De kleine lezer (chunk 8875, 2,6 kB) als ESM zou ongebruikte exports laten wegvallen, maar de node-tests lezen hem met require(); eerst afstemmen."
+  ],
+  "passed": true
+}

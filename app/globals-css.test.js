@@ -149,6 +149,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
   const stylesheets = cssFiles().sort();
   assert.deepEqual(stylesheets, [
     'app/globals.css',
+    // BE-65: de twee kolommen van de hero en de knoppen bij elk gerecht.
+    'app/home.css',
     // BE-59 deel 2: de ene ingang /inloggen.
     'app/inloggen/inloggen.css',
     // BE-55 deel 4: de interne werkvoorraad, naast zijn pagina.
@@ -172,6 +174,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/daghap-vandaag.css',
     // BE-55 deel 4: "Daghappen vandaag" op de home.
     'src/components/daghappen-vandaag.css',
+    // BE-65: de deelknop met het woord "Delen" (home en /search).
+    'src/components/dish-share-button.css',
     'src/components/kies-start.css',
     'src/components/menu-body.css',
     // BE-63 (#155): de teller bij "Mijn lijstje" en de ene publieke kop.
@@ -180,9 +184,15 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/public-footer.css',
     // BE-63 (#155): de rechterkant van de publieke kop.
     'src/components/public-header-actions.css',
-    // BE-61: het deelblad "Delen via", naast de component.
     'src/components/public-header-menu.css',
+    // BE-65: de balk na het bewaren (laadt pas als er iets bewaard is).
+    'src/components/saved-dishes-bar.css',
+    // BE-65: het venster Stuur je lijstje (laadt pas bij het openen).
+    'src/components/saved-list-send.css',
+    // BE-61: het deelblad "Delen via", naast de component.
     'src/components/share-dialog.css',
+    // BE-65: de deelkaart in de hero.
+    'src/components/share-hero-card.css',
   ]);
   assert.deepEqual(stylesheets.filter((file) => file.endsWith('.module.css')), [], 'geen CSS-modules');
 });

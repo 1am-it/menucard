@@ -63,21 +63,24 @@ test('tellers: de echte client en de echte menukaarten komen alleen via de route
 });
 
 test('tellers: "Delen" telt na een geslaagde deelactie, nooit na een afbreking', () => {
-  assert.match(SHARE_BUTTON, /import \{ SHARED_EVENT, sendDishCounter \} from '@\/src\/lib\/dishCounters'/);
-  assert.match(SHARE_BUTTON, /void sendDishCounter\(\{ dish, event: SHARED_EVENT \}\)/);
+  // BE-65 ronde 2: de deellogica komt pas bij de klik binnen, dus de teller
+  // wordt via een dynamische import gelezen in plaats van statisch.
+  assert.match(SHARE_BUTTON, /import\('@\/src\/lib\/dishCounters'\)/);
+  assert.match(SHARE_BUTTON, /void mods\.counters\.sendDishCounter\(\{ dish: dishId, event: mods\.counters\.SHARED_EVENT \}\)/);
   // BE-49 (#115) — elke manier gaat door de ene deeluitvoering, met dezelfde
   // teller. Die telt in src/lib/sharePreference.js alleen bij een geslaagde
   // actie (unit-tests daar) en nooit bij een afbreking of weigering.
-  assert.match(SHARE_BUTTON, /await performShare\(\{/);
-  assert.match(SHARE_BUTTON, /count: countShared/);
+  assert.match(SHARE_BUTTON, /await mods\.preference\.performShare\(\{/);
+  assert.match(SHARE_BUTTON, /count: \(\) => \{/);
   // De knop wacht nooit op de teller.
-  assert.doesNotMatch(SHARE_BUTTON, /await sendDishCounter/);
+  assert.doesNotMatch(SHARE_BUTTON, /await [a-zA-Z.]*sendDishCounter/);
 });
 
 test('tellers: "Bewaren" telt alleen bij aanzetten, "Reserveer" bij een klik, allebei fire-and-forget', () => {
-  assert.match(SAVE_BUTTON, /import \{ SAVED_EVENT, sendDishCounter \} from '@\/src\/lib\/dishCounters'/);
-  assert.match(SAVE_BUTTON, /if \(result\.saved\) void sendDishCounter\(\{ dish: entry && entry\.id, event: SAVED_EVENT \}\)/);
-  assert.doesNotMatch(SAVE_BUTTON, /await sendDishCounter/, 'de knop wacht nooit op de teller');
+  // BE-65 ronde 2: ook de bewaarlogica en de teller komen pas bij de klik.
+  assert.match(SAVE_BUTTON, /import\('@\/src\/lib\/dishCounters'\)/);
+  assert.match(SAVE_BUTTON, /if \(result\.saved\) void counters\.sendDishCounter\(\{ dish: wanted\.id, event: counters\.SAVED_EVENT \}\)/);
+  assert.doesNotMatch(SAVE_BUTTON, /await [a-zA-Z.]*sendDishCounter/, 'de knop wacht nooit op de teller');
 
   assert.match(MENU_VIEW, /import \{ RESERVATION_EVENT, sendDishCounter \} from '@\/src\/lib\/dishCounters'/);
   assert.match(MENU_VIEW, /const reservationDishKey = dishTarget \? `\$\{id\}-\$\{dishTarget\.catIdx\}-\$\{dishTarget\.itemIdx\}` : null/);

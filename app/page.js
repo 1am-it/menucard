@@ -10,10 +10,13 @@
 // na het laden bepaald (zie HomeView).
 
 import HomeView from './HomeView'
+// BE-65 (issue 157) — de deelkaart is een Server Component zonder client-JS;
+// de serverpagina maakt hem en geeft hem als kinderen mee aan de clientweergave.
+import ShareHeroCard from '@/src/components/ShareHeroCard'
 import { buildTonightCandidates } from '@/src/lib/publicTonightData'
 
 export const revalidate = 300
 
 export default function HomePage() {
-  return <HomeView candidates={buildTonightCandidates()} />
+  return <HomeView candidates={buildTonightCandidates()} shareCard={<ShareHeroCard />} />
 }

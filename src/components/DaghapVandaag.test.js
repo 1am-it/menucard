@@ -35,7 +35,10 @@ test('BE-55: een daghapkaart heeft precies één "Bewaar" en één "Deel"', () =
 test('BE-55: "Bewaar" bestaat op de kaart doordat de deelknop hem zelf rendert', () => {
   const shareButton = read(SHARE_BUTTON_PATH);
   assert.equal((shareButton.match(/<DishSaveButton/g) || []).length, 1, 'de deelknop rendert de bewaarknop één keer');
-  assert.match(shareButton, /aria-label=\{`Deel \$\{shareName\}`\}/, '"Deel" heeft een duidelijke toegankelijke naam');
+  // BE-65 (#157) voegde een variant met het zichtbare woord "Delen" toe voor de
+  // home en /search. De menukaart houdt de bestaande naam "Deel <gerecht>":
+  // die tak staat letterlijk in dezelfde regel.
+  assert.match(shareButton, /aria-label=\{withLabel \? `Delen: \$\{shareName\}` : `Deel \$\{shareName\}`\}/, '"Deel" heeft een duidelijke toegankelijke naam');
 });
 
 test('BE-55: de bewaarknop heeft een duidelijke toegankelijke naam', () => {
