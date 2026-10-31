@@ -53,7 +53,10 @@ async function leesJson(res) {
 /** EÃ©n kaartje, zoals het op tafel komt te staan: altijd licht papier. */
 function Kaartje({ naam, tekst, url, afdruk = false }) {
   return (
-    <div className={`qr-kaartje-kaart${afdruk ? ' qr-kaartje-kaart--afdruk' : ''}`}>
+    <div
+      className={`qr-kaartje-kaart${afdruk ? ' qr-kaartje-kaart--afdruk' : ''}`}
+      data-url={url || ''}
+    >
       <span className="qr-kaartje-strook" aria-hidden="true" />
       <p className="qr-kaartje-naam">{naam}</p>
       <p className="qr-kaartje-tekst">{tekst}</p>
@@ -241,7 +244,7 @@ export default function QrKaartje({ restaurantIndex, siteUrl, siteIndexable }) {
       <main className="owner-main">
         <p className="qr-kaartje-back">
           <Link className="owner-link" href={DASHBOARD_HREF}>
-            â† Terug naar Mijn restaurant
+            ← Terug naar Mijn restaurant
           </Link>
         </p>
 
