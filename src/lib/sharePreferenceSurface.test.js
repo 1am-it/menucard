@@ -143,7 +143,8 @@ test('BE-61: de volgnummers volgen de volgorde van kiezen, met "n van 3"', () =>
 
 test('BE-61: bij 3 gekozen gaan de andere regels uit en zegt de hint dat', () => {
   assert.match(DIALOG, /disabled=\{!checked && atLimit\}/);
-  assert.match(DIALOG, /\{atLimit \? SHARE_HINT_FULL : SHARE_SHEET_HINT\}/);
+  assert.match(DIALOG, /\{phone \? SHARE_PHONE_MENU_HINT : atLimit \? SHARE_HINT_FULL : SHARE_SHEET_HINT\}/);
+  assert.match(LIB, /SHARE_PHONE_MENU_HINT = 'Je deelt altijd via het deelmenu van je telefoon\.'/);
   assert.match(LIB, /SHARE_HINT_FULL = 'Je hebt 3 favorieten gekozen/);
   // Het telefoonmenu schakelt de hele lijst uit en dimt hem.
   assert.match(DIALOG, /className=\{`share-options\$\{phone \? ' is-muted' : ''\}`\} disabled=\{phone\}/);
