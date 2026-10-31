@@ -37,6 +37,7 @@ const {
   DAGHAP_STATUS_OFFLINE,
   DAGHAP_STATUS_ONLINE,
   DAGHAP_STATUS_VERLOPEN,
+  aanbodFilterTekst,
   aanbodVoorScherm,
   begindagVan,
   beoordeelAanbod,
@@ -75,8 +76,18 @@ const PUBLIEK_KOLOMMEN = 'id, soort, naam, prijs_cent, beschrijving, labels, ver
 // Voor de home is ook het restaurant nodig, anders is er geen link bij het
 // gerecht. Dat is het enige extra veld.
 const HOME_KOLOMMEN = `${PUBLIEK_KOLOMMEN}, restaurant_id`;
+// BE-67: de kolommen van migratie 0026. Ze bestaan pas na die migratie, dus elke
+// leesroute probeert het eerst mét en valt terug op de kolommen van 0023: zonder
+// 0026 werkt de app precies zoals nu en verschijnt het dagmenu eenvoudig niet.
+const UITBREIDING_KOLOMMEN = 'gangen, prijs_3_cent, herhaal_weekdagen, herhaal_tot, uitverkocht_op';
+const AANBOD_KOLOMMEN_UITGEBREID = `${AANBOD_KOLOMMEN}, ${UITBREIDING_KOLOMMEN}`;
+const PUBLIEK_KOLOMMEN_UITGEBREID = `${PUBLIEK_KOLOMMEN}, ${UITBREIDING_KOLOMMEN}`;
+const HOME_KOLOMMEN_UITGEBREID = `${PUBLIEK_KOLOMMEN_UITGEBREID}, restaurant_id`;
 
 const DAGHAP_NOT_AVAILABLE_MESSAGE = 'Daghappen zijn nog niet beschikbaar.';
+// BE-67: zonder migratie 0026 is er geen dagmenu; het formulier zegt dat met één
+// nette zin in plaats van een 500.
+const DAGMENU_NOT_AVAILABLE_MESSAGE = 'Het dagmenu is nog niet beschikbaar.';
 // De home toont er maximaal drie, in willekeurige volgorde (contract). De query
 // haalt een kleine kandidatenlijst op en nooit de hele tabel.
 const DAGHAP_HOME_LIMIT = 3;
@@ -94,6 +105,10 @@ function tekst(value) {
 const UNAVAILABLE = {
   status: 503,
   body: { error: 'daghap_unavailable', message: DAGHAP_NOT_AVAILABLE_MESSAGE },
+};
+const DAGMENU_UNAVAILABLE = {
+  status: 503,
+  body: { error: 'dagmenu_unavailable', message: DAGMENU_NOT_AVAILABLE_MESSAGE },
 };
 const NOT_FOUND = {
   status: 404,
@@ -326,11 +341,41 @@ function createDaghapHandlers({
       ? Number(duursteKaartPrijs(aanbod.restaurantId)) || 0
       : 0;
     return beoordeelAanbod({
-      naam: aanbod.naam,
-      beschrijving: aanbod.beschrijving,
+      // BE-67: ook de namen van de gangen van een dagmenu halen het filter; een
+      // gast zoekt op een gang en ziet die naam ook staan.
+      naam: aanbodFilterTekst(aanbod),
       prijsCent: aanbod.prijsCent,
       duursteKaartPrijsCent: duurste,
     });
+  }
+
+  /**
+   * De kolommen van 0026 in de rij, alleen als dit aanbod ze echt gebruikt. Een
+   * daghap zonder herhaling stuurt dus niets extra, zodat dezelfde route op een
+   * database zonder 0026 precies werkt als voorheen.
+   */
+  function uitbreidingVelden(aanbod) {
+    const isDagmenu = aanbod.soort === 'dagmenu';
+    const heeftHerhaling = Boolean(aanbod.herhaling);
+    if (!isDagmenu && !heeftHerhaling) return {};
+    const velden = {};
+    if (isDagmenu) {
+      velden.gangen = aanbod.gangen;
+      velden.prijs_3_cent = aanbod.prijs3Cent === undefined ? null : aanbod.prijs3Cent;
+    }
+    velden.herhaal_weekdagen = heeftHerhaling ? aanbod.herhaling.weekdagen : null;
+    velden.herhaal_tot = heeftHerhaling ? aanbod.herhaling.tot : null;
+    return velden;
+  }
+
+  /**
+   * Een leesquery met de kolommen van 0026, en zonder die kolommen als 0026 nog
+   * niet is toegepast. Zo blijft elke leesroute werken zoals nu.
+   */
+  async function leesMetUitbreiding(bouw, basis, uitgebreid) {
+    const eerste = await ask(bouw(uitgebreid));
+    if (!eerste.error || !missingStorage(eerste.error)) return eerste;
+    return ask(bouw(basis));
   }
 
   /** Het antwoord na een geslaagde schrijfactie. */
@@ -440,6 +485,10 @@ function createDaghapHandlers({
       filter_reden: filter.redenen.join(' ').slice(0, 80) || null,
       verloopt_op: aanbod.verlooptOp,
       updated_at: nuIso,
+      // BE-67: gangen, de derde prijs en de herhaling, alleen als dit aanbod ze
+      // gebruikt. Zonder migratie 0026 mislukt juist deze insert met een nette
+      // 503 in plaats van een 500.
+      ...uitbreidingVelden(aanbod),
     };
 
     let geschreven = await vraag(supabase, nieuweRij);
@@ -450,7 +499,10 @@ function createDaghapHandlers({
       await ruimVerlopenOp();
       geschreven = await vraag(supabase, nieuweRij);
     }
-    if (geschreven.error) return opslaanMislukt(geschreven.error);
+    if (geschreven.error) {
+      if (aanbod.soort === 'dagmenu' && missingStorage(geschreven.error)) return DAGMENU_UNAVAILABLE;
+      return opslaanMislukt(geschreven.error);
+    }
 
     const rij = rijUit(geschreven);
     if (!rij) return failed();
@@ -534,12 +586,18 @@ function createDaghapHandlers({
           filter_reden: filter.redenen.join(' ').slice(0, 80) || null,
           verloopt_op: aanbod.verlooptOp,
           updated_at: new Date(Number(now())).toISOString(),
+          // BE-67: de gangen, de derde prijs en de herhaling van een dagmenu. De
+          // stand van Op = op blijft staan: wijzigen verandert die niet.
+          ...uitbreidingVelden(aanbod),
         })
         .eq('id', id)
         .select(AANBOD_KOLOMMEN)
         .single(),
     );
-    if (geschreven.error) return opslaanMislukt(geschreven.error);
+    if (geschreven.error) {
+      if (aanbod.soort === 'dagmenu' && missingStorage(geschreven.error)) return DAGMENU_UNAVAILABLE;
+      return opslaanMislukt(geschreven.error);
+    }
 
     const rij = rijUit(geschreven);
     if (!rij) return failed();
@@ -621,14 +679,16 @@ function createDaghapHandlers({
     const eigenaar = await controleerEigenaar(supabase, auth.userId, restaurantId);
     if (eigenaar.response) return eigenaar.response;
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(AANBOD_KOLOMMEN)
+        .select(kolommen)
         .eq('restaurant_id', restaurantId)
         .in('status', [DAGHAP_STATUS_ONLINE, DAGHAP_STATUS_CONTROLE, DAGHAP_STATUS_OFFLINE])
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true }),
+      AANBOD_KOLOMMEN,
+      AANBOD_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -639,6 +699,7 @@ function createDaghapHandlers({
         ok: true,
         aanbod: rijen.map((rij) => aanbodVoorScherm(rij)).filter(Boolean),
         daghap: rijen.filter((rij) => rij.soort === 'daghap').length,
+        dagmenu: rijen.filter((rij) => rij.soort === 'dagmenu').length,
         seizoensgerechten: rijen.filter((rij) => rij.soort === 'seizoensgerecht').length,
       },
     };
@@ -676,14 +737,16 @@ function createDaghapHandlers({
     const restaurantId = restaurantIdUit(request, null);
     if (!restaurantId) return invalid('restaurant_required', { message: 'Kies eerst een restaurant.' });
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(PUBLIEK_KOLOMMEN)
+        .select(kolommen)
         .eq('restaurant_id', restaurantId)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true }),
+      PUBLIEK_KOLOMMEN,
+      PUBLIEK_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
@@ -717,14 +780,16 @@ function createDaghapHandlers({
       gevraagd = DAGHAP_HOME_LIMIT;
     }
 
-    const gevonden = await ask(
-      supabase
+    const gevonden = await leesMetUitbreiding(
+      (kolommen) => supabase
         .from(DAGHAP_TABLE_AANBOD)
-        .select(HOME_KOLOMMEN)
+        .select(kolommen)
         .eq('status', DAGHAP_STATUS_ONLINE)
         .gt('verloopt_op', new Date(Number(now())).toISOString())
         .order('verloopt_op', { ascending: true })
         .limit(DAGHAP_HOME_KANDIDATEN),
+      HOME_KOLOMMEN,
+      HOME_KOLOMMEN_UITGEBREID,
     );
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
