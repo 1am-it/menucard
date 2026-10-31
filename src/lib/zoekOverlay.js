@@ -109,21 +109,6 @@ function verzamelRestaurantIds(result) {
   return ids;
 }
 
-/** De al opgehaalde overlay aangevuld met nieuwe restaurants. */
-function voegOverlaySamen(bestaand, nieuw) {
-  const samen = bestaand && typeof bestaand === 'object' ? bestaand : {};
-  if (!nieuw || typeof nieuw !== 'object') return samen;
-  const entries = nieuw instanceof Map ? nieuw.entries() : Object.entries(nieuw);
-  for (const [restaurantId, wijzigingen] of entries) {
-    const id = tekst(restaurantId);
-    const lijst = (Array.isArray(wijzigingen) ? wijzigingen : [])
-      .filter((wijziging) => wijziging && typeof wijziging === 'object');
-    if (!id || lijst.length === 0) continue;
-    samen[id] = [...(Array.isArray(samen[id]) ? samen[id] : []), ...lijst];
-  }
-  return samen;
-}
-
 /**
  * Zoeken met de overlay van de restaurants in beeld.
  *
