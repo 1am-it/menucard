@@ -32,7 +32,7 @@ const {
   DAGHAP_TIJDZONE,
   berichtBij,
   normaliseerLabels,
-} = require('./daghapAanbod');
+} = require('./daghapBerichten');
 
 const SOORT_LABELS = Object.freeze({
   daghap: 'Daghap',
