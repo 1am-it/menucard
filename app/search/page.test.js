@@ -173,7 +173,7 @@ test('the only <h3> this file renders itself is BE-15\'s own grouped-restaurant 
 test('imports and renders the shared PrimaryNav component, before ThemeToggle, inside the existing header-right group', () => {
   const source = readPageSource();
   assert.match(source, /import PrimaryNav from ['"]@\/src\/components\/PrimaryNav['"]/);
-  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<ShareSettingsButton \/>\s*<\/div>/);
+  assert.match(source, /<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<ShareSettingsButton \/>\s*<AccountMenuButton \/>\s*<\/div>/);
 });
 
 test('the duplicate "← Home" link is removed; the shared wordmark remains the only link to "/"', () => {

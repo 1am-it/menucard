@@ -32,6 +32,7 @@ const MULTI_SCENARIO_CHECKS = [
   { file: 'ops/browser/run-be44-browser-check.js', list: 'SCENARIOS' },
   { file: 'ops/browser/run-be48-browser-check.js', list: 'SCENARIOS' },
   { file: 'ops/browser/run-be58-browser-check.js', list: 'SCENARIOS' },
+  { file: 'ops/browser/run-be59-browser-check.js', list: 'SCENARIOS' },
 ];
 
 test('BE-43: elke check met meerdere scenario\'s gebruikt de gedeelde helper', () => {

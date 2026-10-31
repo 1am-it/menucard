@@ -1,8 +1,8 @@
 {
   "ticket": "BE-57 (#139, deel 2)",
   "route": "/mijn-restaurant",
-  "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3187); geen productie, geen echte acceptatie",
-  "ranAt": "2026-10-31T00:09:28.191Z",
+  "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3197); geen productie, geen echte acceptatie",
+  "ranAt": "2026-10-31T01:54:21.796Z",
   "passed": true,
   "checks": [
     {
@@ -63,12 +63,12 @@
     {
       "name": "toetsenbord: minstens vijf stappen, elk met een zichtbare focusring",
       "passed": true,
-      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Zoeken\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Alle restaurants\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je restaurantpagina\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Daghap of seizoensgerecht plaatsen\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart op de publieke pagina\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Uitloggen\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Account verwijderen\",\"visible\":true}]"
+      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Zoeken\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Alle restaurants\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"button.account-menu-trigger\",\"name\":\"Account van houder@example.invalid\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je restaurantpagina\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Menukaart bijwerken\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Daghap of seizoensgerecht plaatsen\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart op de publieke pagina\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Uitloggen\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Account verwijderen\",\"visible\":true}]"
     },
     {
       "name": "toetsenbord: de link naar de menukaart komt langs",
       "passed": true,
-      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Zoeken\",\"Alle restaurants\",\"Licht\",\"Donker\",\"Bekijk je restaurantpagina\",\"Bekijk je menukaart\",\"Daghap of seizoensgerecht plaatsen\",\"Bekijk je menukaart op de publieke pagina\",\"Uitloggen\",\"Account verwijderen\"]"
+      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Zoeken\",\"Alle restaurants\",\"Licht\",\"Donker\",\"Account van houder@example.invalid\",\"Bekijk je restaurantpagina\",\"Bekijk je menukaart\",\"Menukaart bijwerken\",\"Daghap of seizoensgerecht plaatsen\",\"Bekijk je menukaart op de publieke pagina\",\"Uitloggen\",\"Account verwijderen\"]"
     },
     {
       "name": "a11y overzicht: het thema light staat echt voor de audit",
@@ -76,24 +76,24 @@
       "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · contrast: 48 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · contrast: 49 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (licht) · koppen: één h1 bij 8 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (licht) · koppen: geen niveau overgeslagen",
@@ -121,24 +121,24 @@
       "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 48 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 49 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/overzicht (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (donker) · koppen: één h1 bij 8 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/overzicht (donker) · koppen: geen niveau overgeslagen",
@@ -248,7 +248,7 @@
     {
       "name": "overzicht: de opname 390/light toont \"Deze week\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":116,\"headerHeight\":85,\"safeBottom\":772}"
     },
     {
       "name": "overzicht: de vier cijfers staan volledig in beeld bij 390/light",
@@ -313,7 +313,7 @@
     {
       "name": "overzicht: de opname 320/light toont \"Deze week\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":107,\"headerHeight\":85,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":97,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "overzicht: de vier cijfers staan volledig in beeld bij 320/light",
@@ -391,24 +391,24 @@
       "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · contrast: 41 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · koppen: één h1 bij 9 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · koppen: geen niveau overgeslagen",
@@ -436,24 +436,24 @@
       "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · contrast: 41 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · koppen: één h1 bij 9 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · koppen: geen niveau overgeslagen",
@@ -553,7 +553,7 @@
     {
       "name": "net-geclaimd: de opname 390/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":116,\"headerHeight\":85,\"safeBottom\":772}"
     },
     {
       "name": "net-geclaimd: geen horizontale scroll bij 390/light",
@@ -608,7 +608,7 @@
     {
       "name": "net-geclaimd: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":96,\"headerHeight\":85,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":125,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "net-geclaimd: geen horizontale scroll bij 320/light",
@@ -676,24 +676,24 @@
       "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · contrast: 41 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · koppen: één h1 bij 9 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · koppen: geen niveau overgeslagen",
@@ -721,24 +721,24 @@
       "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · contrast: 41 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · naam: 11 bedieningselementen",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · naam: 13 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · tikdoel: 13 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · koppen: één h1 bij 9 koppen",
       "passed": true,
-      "detail": "h1: \"Mijn restaurant\""
+      "detail": "h1: \"Mijn restaurant · Restaurant Wolfslaar\""
     },
     {
       "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · koppen: geen niveau overgeslagen",
@@ -838,7 +838,7 @@
     {
       "name": "geen-cijfers: de opname 390/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":116,\"headerHeight\":85,\"safeBottom\":772}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 390/light",
@@ -893,7 +893,7 @@
     {
       "name": "geen-cijfers: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
       "passed": true,
-      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":113,\"headerHeight\":85,\"safeBottom\":628}"
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":125,\"headerHeight\":85,\"safeBottom\":628}"
     },
     {
       "name": "geen-cijfers: geen horizontale scroll bij 320/light",
@@ -978,7 +978,7 @@
         "panelTop": 81
       },
       "file": "be57-overzicht-1280-licht.png",
-      "sha256": "4a7bad087361b0a1f9c081231058ff98cecb66ee2f95c6935df0cea7460247be",
+      "sha256": "41d63ccb01482f2ad1cadfcd9be6b514cc5bf8652f7e7a79cbb03292b1f16c63",
       "width": 1280,
       "height": 900
     },
@@ -1027,7 +1027,7 @@
         "panelTop": 81
       },
       "file": "be57-overzicht-1280-donker.png",
-      "sha256": "9a92fdda233ad3e825396120d88706b41a23cacc7081fce2d7c0e2f1424d8702",
+      "sha256": "d61fff8f5b9262f56c03bd1dd0701f602c908769ae93dee7d9b0c665b52569f2",
       "width": 1280,
       "height": 900
     },
@@ -1073,10 +1073,10 @@
         "figureCount": 4,
         "figuresInView": 4,
         "allFiguresInView": true,
-        "panelTop": 105
+        "panelTop": 116
       },
       "file": "be57-overzicht-390-licht.png",
-      "sha256": "311ac1a75e69862b12a0a642f91f1219fa21510e490faad5bc1d290d2ab8e338",
+      "sha256": "da9d82e95d34d70fb319f2817d87c42e856343008bfd77df99f8c5a32bd0bba5",
       "width": 390,
       "height": 844
     },
@@ -1125,7 +1125,7 @@
         "panelTop": 93
       },
       "file": "be57-overzicht-390-donker.png",
-      "sha256": "ff74266b9fc13d82950e30a7dc2e29b4e02bd25d3be9085abed6ff6588075914",
+      "sha256": "62c037f0d146660b79ccbb41129938e6d87ec29fb1c68d993cd56ff5df84073d",
       "width": 390,
       "height": 844
     },
@@ -1171,10 +1171,10 @@
         "figureCount": 4,
         "figuresInView": 4,
         "allFiguresInView": true,
-        "panelTop": 107
+        "panelTop": 97
       },
       "file": "be57-overzicht-320-licht.png",
-      "sha256": "9900cbda607a0287d08d8c126757251dfcef4156cb33e0e8a6b27555876c6b84",
+      "sha256": "d724bd9d64b48027dd91b8ed7af5a072c0e564a18ea08aec79d8f9bd32441d77",
       "width": 320,
       "height": 700
     },
@@ -1223,7 +1223,7 @@
         "panelTop": 93
       },
       "file": "be57-overzicht-320-donker.png",
-      "sha256": "5e8684d709fd64ada33cdb8e731f61380631ff816f39ff50f3c31c850c4ab2cd",
+      "sha256": "beb92b07a561eca4d8511ffe6c3a8b37bf7e765a4dc322b020ae4c52ab91268e",
       "width": 320,
       "height": 700
     },
@@ -1268,7 +1268,7 @@
         "panelTop": 81
       },
       "file": "be57-net-geclaimd-1280-licht.png",
-      "sha256": "b6583bb9287de8c3ba426c77d0cafd483096ce72f4b10a2984bd3e9929983492",
+      "sha256": "4897f6a557c09d9904eeb2861c8df7bd8b1e5b2663c3b9d1c5e64e98a40dd396",
       "width": 1280,
       "height": 900
     },
@@ -1313,7 +1313,7 @@
         "panelTop": 81
       },
       "file": "be57-net-geclaimd-1280-donker.png",
-      "sha256": "ee959f20a1735a963d6676fba37aa706ed450012d719085c8584b04a5dacfa1c",
+      "sha256": "515c37cbcf80b792ba8b82b0462240c3d518a23391e7887194077b756e2c0c56",
       "width": 1280,
       "height": 900
     },
@@ -1355,10 +1355,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 105
+        "panelTop": 116
       },
       "file": "be57-net-geclaimd-390-licht.png",
-      "sha256": "e9ad34292ff94567a0830ee0a631ddb1de33281443e9305a373ff534b013b03a",
+      "sha256": "608afd07bf2f6b1eb6d00dc64cd45dff9ae1d72d70ecf6c85b500efd67824830",
       "width": 390,
       "height": 844
     },
@@ -1403,7 +1403,7 @@
         "panelTop": 93
       },
       "file": "be57-net-geclaimd-390-donker.png",
-      "sha256": "13f37d6d105cc4fb14e6feb58a3d81f8d8e8298f58c766b6c9e32d9ba7e9584d",
+      "sha256": "6134bb1b98c46b51c76413e986f5ae778d3235986eeb06762631fafb6dd81f2c",
       "width": 390,
       "height": 844
     },
@@ -1445,10 +1445,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 96
+        "panelTop": 125
       },
       "file": "be57-net-geclaimd-320-licht.png",
-      "sha256": "3a3de3ccabf791dcd07110b9ae4dcdb9478a00ada73cb1ccb4fa9bfc5104a5be",
+      "sha256": "ecf98d808956ebd2845bbfbe175223d157152d73525b470a349590eb77195246",
       "width": 320,
       "height": 700
     },
@@ -1493,7 +1493,7 @@
         "panelTop": 93
       },
       "file": "be57-net-geclaimd-320-donker.png",
-      "sha256": "b0b90b43bf34263c826153e626887dcacdce9e965d35d637d4d644e035ba8284",
+      "sha256": "c5e4b3e4501f68f03a2d6506b623ddce5d7ed5d448c3b4ef534c2aa98198baef",
       "width": 320,
       "height": 700
     },
@@ -1538,7 +1538,7 @@
         "panelTop": 81
       },
       "file": "be57-geen-cijfers-1280-licht.png",
-      "sha256": "a352c4a6861fb302ffbacc907dbcf2c661bc343bc77642508d1ba87b42ccda32",
+      "sha256": "bbe890570f300db958e6cf9c9e137eb8492af74f0747c6922f4e39459f8ac7d6",
       "width": 1280,
       "height": 900
     },
@@ -1583,7 +1583,7 @@
         "panelTop": 81
       },
       "file": "be57-geen-cijfers-1280-donker.png",
-      "sha256": "fa5db021a25eb43f49c985f97745f61e80e20646aef72b883eae9fc8ec7b3883",
+      "sha256": "c75e87a984befa8492dae9b01ea8bf7bcf64fd2b59bc741c67aaf4e233f6a8b4",
       "width": 1280,
       "height": 900
     },
@@ -1625,10 +1625,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 105
+        "panelTop": 116
       },
       "file": "be57-geen-cijfers-390-licht.png",
-      "sha256": "6a00b2f177f2fd63852e113a2e40234f17e254ce24d470ead2fba5ea98f4d356",
+      "sha256": "f5c08ea4ae0b49a41fc1bd5e1894237e91a892f739187b822ec7f6573f6da251",
       "width": 390,
       "height": 844
     },
@@ -1673,7 +1673,7 @@
         "panelTop": 93
       },
       "file": "be57-geen-cijfers-390-donker.png",
-      "sha256": "ea7f88d324c026f7285ae0d02250973f97692d6b6c5b87669476584d6339634f",
+      "sha256": "1713e60fcc3208a0233c9570756d7219664483a217f41783433e933e652621cb",
       "width": 390,
       "height": 844
     },
@@ -1715,10 +1715,10 @@
         "figureCount": 0,
         "figuresInView": 0,
         "allFiguresInView": false,
-        "panelTop": 113
+        "panelTop": 125
       },
       "file": "be57-geen-cijfers-320-licht.png",
-      "sha256": "8078be1c8b4aeb6ceefc7a3d7730fdacad5355d1ed41841e151ec7fdde3c16a9",
+      "sha256": "cc237ed1e6680acfab5af5b7e1da032beced17ffd3c06b0ac338e028cb832d13",
       "width": 320,
       "height": 700
     },
@@ -1763,7 +1763,7 @@
         "panelTop": 93
       },
       "file": "be57-geen-cijfers-320-donker.png",
-      "sha256": "336fd53a87c86fed53b12900cfd89360832ca3dabf790e1351e8073ef6ea7522",
+      "sha256": "b93370e0b99665a85d005d277f93b5d5aae5e2543167a0118cf8cfce6128da02",
       "width": 320,
       "height": 700
     }
@@ -1869,6 +1869,11 @@
           "visible": true
         },
         {
+          "selector": "button.account-menu-trigger",
+          "name": "Account van houder@example.invalid",
+          "visible": true
+        },
+        {
           "selector": "a.owner-link",
           "name": "Bekijk je restaurantpagina",
           "visible": true
@@ -1876,6 +1881,11 @@
         {
           "selector": "a.owner-link",
           "name": "Bekijk je menukaart",
+          "visible": true
+        },
+        {
+          "selector": "a.owner-link",
+          "name": "Menukaart bijwerken",
           "visible": true
         },
         {
@@ -2026,7 +2036,7 @@
             "figureCount": 4,
             "figuresInView": 4,
             "allFiguresInView": true,
-            "panelTop": 105
+            "panelTop": 116
           }
         },
         {
@@ -2112,7 +2122,7 @@
             "figureCount": 4,
             "figuresInView": 4,
             "allFiguresInView": true,
-            "panelTop": 107
+            "panelTop": 97
           }
         },
         {
@@ -2323,7 +2333,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 105
+            "panelTop": 116
           }
         },
         {
@@ -2401,7 +2411,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 96
+            "panelTop": 125
           }
         },
         {
@@ -2608,7 +2618,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 105
+            "panelTop": 116
           }
         },
         {
@@ -2686,7 +2696,7 @@
             "figureCount": 0,
             "figuresInView": 0,
             "allFiguresInView": false,
-            "panelTop": 113
+            "panelTop": 125
           }
         },
         {

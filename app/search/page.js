@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import PrimaryNav from '@/src/components/PrimaryNav'
@@ -676,6 +678,7 @@ function SearchPageInner() {
             <PrimaryNav />
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenuButton />
           </div>
         </div>
       </header>
@@ -871,6 +874,7 @@ function SearchPageInner() {
         )}
       </main>
 
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

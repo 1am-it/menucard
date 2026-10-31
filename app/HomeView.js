@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import DaghappenVandaag from '@/src/components/DaghappenVandaag'
@@ -123,6 +125,7 @@ export default function HomeView({ candidates = [] }) {
             <PrimaryNav />
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenuButton />
           </div>
         </div>
       </header>
@@ -302,6 +305,7 @@ export default function HomeView({ candidates = [] }) {
         </div>
       </main>
 
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

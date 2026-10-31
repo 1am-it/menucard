@@ -1,0 +1,50 @@
+/* BE-59 (#146, punt 3) — de footerlink onderaan de publieke pagina's.
+   Eigen bestand naast de component (BE-52). Alleen tokens: licht en donker
+   volgen automatisch. De link is een tikvlak van minimaal 44 px. */
+
+.public-footer {
+  box-sizing: border-box;
+  width: 100%;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.public-footer-inner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.public-footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.public-footer-link:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.public-footer-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Op de telefoon staat de vaste menubalk onderaan (MobileTabBar): de footer
+   krijgt daar ruimte voor, zodat de link nooit achter die balk verdwijnt. */
+@media (max-width: 719px) {
+  .public-footer {
+    margin-bottom: 64px;
+  }
+}

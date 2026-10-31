@@ -155,3 +155,30 @@ test('overview: the static index carries the real names and published menu ids',
   // Junk in, nothing out.
   assert.deepEqual(buildOwnerRestaurantIndex(null, null), {});
 });
+
+// BE-59 (#146, punt 7): de kop van Mijn restaurant noemt de naam, maar alleen
+// bij precies één restaurant.
+test('de kop is "Mijn restaurant · [naam]" bij één restaurant en zonder naam bij meerdere', () => {
+  const one = buildOwnerOverview({
+    roles: [{ role: 'owner', restaurant_id: '1' }],
+    claims: [],
+    restaurants: RESTAURANTS,
+  });
+  assert.equal(one.heading, 'Mijn restaurant · Restaurant Wolfslaar');
+
+  const two = buildOwnerOverview({
+    roles: [{ role: 'owner', restaurant_id: '1' }, { role: 'owner', restaurant_id: '2' }],
+    claims: [],
+    restaurants: RESTAURANTS,
+  });
+  assert.equal(two.restaurants.length, 2);
+  assert.equal(two.heading, 'Mijn restaurant', 'bij meerdere restaurants voorlopig geen wisselaar');
+
+  const unknownName = buildOwnerOverview({
+    roles: [{ role: 'owner', restaurant_id: '9' }],
+    claims: [],
+    restaurants: RESTAURANTS,
+  });
+  assert.equal(unknownName.heading, 'Mijn restaurant', 'geen verzonnen naam');
+});
+

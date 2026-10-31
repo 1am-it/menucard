@@ -29,6 +29,7 @@ import {
 } from '@/src/lib/ownerAccess'
 import { OWNER_OVERVIEW_MESSAGES, buildOwnerOverview, ownedRestaurantIds } from '@/src/lib/ownerRestaurantOverview'
 import { buildStatsView } from '@/src/lib/ownerStatsView'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 // BE-52 (#128): de eigen opmaak van deze pagina staat naast de pagina.
 import './mijn-restaurant.css'
@@ -205,12 +206,13 @@ export default function OwnerDashboard({ restaurantIndex }) {
           "Deze week" niet onder de vaste kop. Het nav-landmark blijft altijd
           aanwezig: PrimaryNav op desktop, MobileTabBar (aria-label "Hoofdmenu")
           op mobiel. */}
-      <header className="site-header">
+      <header className="site-header owner-header">
         <div className="header-inner">
           <Wordmark />
           <div className="header-right">
             <PrimaryNav />
             <ThemeToggle />
+            <AccountMenuButton />
           </div>
         </div>
       </header>

@@ -159,3 +159,25 @@
 @media (max-width: 720px) {
   .owner-main { padding-bottom: 112px; }
 }
+
+/* BE-59 integratie (issue 146): op 320 px paste de kop niet meer op één regel sinds
+   de accountknop (44 px) in `.header-right` staat. Gemeten hoogte werd 141 px,
+   terwijl BE-57 eist dat de kop niet hoger wordt dan 96 px en dat "Deze week"
+   met de vier cijfers volledig in beeld blijft.
+
+   Het woordmerk, het themablok en de avatar samen zijn ±339 px breed; op 320 px
+   is er 288 px beschikbaar (twee regels zouden minstens 120 px hoog zijn). Deze
+   pagina laat daarom onder 360 px de tekst van het woordmerk weg en houdt de
+   tegel: precies de bestaande smalle-smartphoneconventie van de interne
+   navigatie (app/globals.css, `.internal-nav-home .wordmark-text`). De
+   toegankelijke naam van de link blijft "Onze Menukaarten, naar de startpagina"
+   (aria-label op het woordmerk), en geen enkel tikvlak wordt kleiner: tegel,
+   themablok en avatar houden hun 44 px. Alleen de tussenruimte krimpt mee.
+
+   390 px houdt exact de nagemeten opmaak; daar past alles nog op één regel. */
+@media (max-width: 360px) {
+  .owner-header .header-inner { padding: 10px 12px; gap: 6px 10px; }
+  .owner-header .header-right { gap: 8px; }
+  .owner-header .wordmark { gap: 8px; }
+  .owner-header .wordmark-text { display: none; }
+}

@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import AccountMenuButton from '@/src/components/AccountMenuButton'
+import PublicFooter from '@/src/components/PublicFooter'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import ShareSettingsButton from '@/src/components/ShareSettingsButton'
 import MobileTabBar from '@/src/components/MobileTabBar'
@@ -73,6 +75,7 @@ export default function RestaurantDetailView({ id, restaurant, menus, bevestigin
           <div className="header-actions">
             <ThemeToggle />
             <ShareSettingsButton />
+            <AccountMenuButton />
             <Link href="/alle-restaurants" className="back-btn">← Alle restaurants</Link>
           </div>
         </div>
@@ -332,6 +335,7 @@ export default function RestaurantDetailView({ id, restaurant, menus, bevestigin
         </div>
       </main>
 
+      <PublicFooter />
       <MobileTabBar />
     </>
   )

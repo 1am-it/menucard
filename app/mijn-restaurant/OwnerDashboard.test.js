@@ -35,13 +35,42 @@ test('de kop gebruikt dezelfde opbouw als /mijn-restaurant/claimen: PrimaryNav e
   assert.match(source, /import ThemeToggle from ['"]@\/src\/components\/ThemeToggle['"]/);
   assert.match(
     source,
-    /<div className="header-inner">\s*<Wordmark \/>\s*<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<\/div>\s*<\/div>/,
-    'de kop moet woordmerk + .header-right(PrimaryNav, ThemeToggle) zijn, net als bij claimen',
+    /<div className="header-inner">\s*<Wordmark \/>\s*<div className="header-right">\s*<PrimaryNav \/>\s*<ThemeToggle \/>\s*<AccountMenuButton \/>\s*<\/div>\s*<\/div>/,
+    'de kop moet woordmerk + .header-right(PrimaryNav, ThemeToggle, AccountMenuButton) zijn, net als bij claimen',
   );
   assert.equal(
     (source.match(/<PrimaryNav \/>/g) || []).length,
     1,
     'PrimaryNav hoort maar op één plek te staan: binnen .header-right',
+  );
+  // BE-59 (#146): de accountknop komt er als enige toevoeging bij, als laatste
+  // binnen dezelfde `.header-right`; een losse broer zou op mobiel (flex-wrap)
+  // een eigen regel krijgen en de kop weer laten groeien.
+  assert.equal(
+    (source.match(/<AccountMenuButton \/>/g) || []).length,
+    1,
+    'AccountMenuButton hoort maar op één plek te staan: binnen .header-right',
+  );
+});
+
+test('onder 360 px blijft de kop één regel: eigen smalle regel, geen verborgen accountknop', () => {
+  const css = read(CSS);
+  assert.match(
+    read(DASHBOARD),
+    /<header className="site-header owner-header">/,
+    'de smalle kopregels moeten aan deze pagina hangen, niet aan de gedeelde kop',
+  );
+  const narrow = css.match(/@media \(max-width: 360px\) \{[\s\S]*?\n\}/);
+  assert.ok(narrow, 'de pagina hoort een eigen regel onder 360 px te hebben');
+  assert.match(
+    narrow[0],
+    /\.owner-header \.wordmark-text \{ display: none; \}/,
+    'op 320 px past woordmerk + themablok + avatar niet naast elkaar; de tekst vervalt, de tegel blijft',
+  );
+  assert.doesNotMatch(
+    narrow[0],
+    /account-menu|theme-switch|theme-btn/,
+    'de accountknop en het themablok mogen op smalle schermen niet verdwijnen of kleiner worden',
   );
 });
 

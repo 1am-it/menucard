@@ -118,6 +118,19 @@ function formatDate(value) {
 
 
 
+/** De kop van "Mijn restaurant": bij precies één restaurant met een bekende
+ * naam staat de naam erbij ("Mijn restaurant · [naam]", issue #146 punt 7). Bij
+ * meerdere restaurants blijft het voorlopig alleen de titel; een wisselaar per
+ * restaurant komt later. */
+function overviewHeading(restaurants) {
+  const list = Array.isArray(restaurants) ? restaurants : [];
+  if (list.length === 1) {
+    const name = text(list[0] && list[0].name);
+    if (name) return `${OWNER_OVERVIEW_MESSAGES.title} · ${name}`;
+  }
+  return OWNER_OVERVIEW_MESSAGES.title;
+}
+
 /**
  * Bouwt het schermmodel voor `/mijn-restaurant`.
  *
@@ -195,7 +208,7 @@ function buildOwnerOverview(input) {
       : OWNER_OVERVIEW_MESSAGES.noClaims,
     empty: approved.length === 0 && openClaims.length === 0,
     hasOwnerAccess: ownedIds.length > 0,
-    heading: OWNER_OVERVIEW_MESSAGES.title,
+    heading: overviewHeading(approved),
     intro: OWNER_OVERVIEW_MESSAGES.intro,
   };
 }

@@ -47,6 +47,7 @@ import {
 // stored as `bredaeats_theme`, dark when nothing is stored, no OS-preference
 // following). Mounted here so every internal page gets it — no internal-only
 // theme logic.
+import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 import { WordmarkInline } from '@/src/components/Wordmark'
 
@@ -324,7 +325,10 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
               {secondary.length > 0 && (
                 <>
                   <hr className="internal-nav-workqueue-separator" />
-                  <ul className="internal-nav-workqueue-list" aria-label="Stad en restaurantgegevens">
+                  <p className="internal-nav-workqueue-heading" id="internal-nav-overviews">
+                    Overzichten
+                  </p>
+                  <ul className="internal-nav-workqueue-list" aria-labelledby="internal-nav-overviews">
                     {secondary.map((m) => (
                       <li key={m.id}>
                         <a
@@ -377,6 +381,11 @@ export default function InternalNav({ accessToken, roles: rolesProp }) {
         </a>
       )}
       {noAccess && <span className="internal-nav-note">Dit account heeft geen interne toegang</span>}
+
+      {/* BE-59 (#146) — hetzelfde accountmenu als op de publieke pagina's. Op
+          interne pagina's staat daar ook "Bekijk de site" in (de keuze daarvoor
+          komt uit het pad, zie src/lib/accountMenu.js). */}
+      <AccountMenuButton />
 
       {!narrow && (
         <div className="internal-nav-actions">

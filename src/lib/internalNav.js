@@ -90,6 +90,22 @@ const INTERNAL_MODULES = [
 ];
 
 
+// Pagina's onder app/internal die bewust géén eigen plek in de balk hebben
+// (#146, criterium 5): de inlog- en activatiepagina's, en /internal zelf (dat met
+// zijn eigen landingsregel doorverwijst). Detailpagina's met een [id] vallen er
+// ook buiten: die horen bij hun overzichtspagina. Elke andere pagina onder
+// app/internal moet bereikbaar zijn — als balk-item, als subpagina daarvan, of
+// via een echte link vanuit een interne pagina. De volledigheidstest
+// (src/lib/internalNavCompleteness.test.js) faalt anders.
+const INTERNAL_PAGE_EXCEPTIONS = Object.freeze([
+  '/internal',
+  '/internal/login',
+  '/internal/activate',
+  '/internal/set-password',
+  '/internal/wachtwoord-vergeten',
+]);
+
+
 /** The union of every section each of the roles individually unlocks — an
  * `internal`+`editor` account gets both sets, never just one (mirrors
  * src/lib/internalAuth.js's getAccessForRestaurant's own "strongest
@@ -185,6 +201,7 @@ module.exports = {
   COVERAGE_HREF,
   ADD_ENTRY_HREF,
   INTERNAL_MODULES,
+  INTERNAL_PAGE_EXCEPTIONS,
   resolveVisibleModules,
   groupModulesByPlacement,
   resolveCount,
