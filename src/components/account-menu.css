@@ -99,7 +99,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 40px;
+  /* BE-59 deel 3 (#146): 44 px, niet 40. De a11y-audit van de publieke pagina's
+   * (ops/browser/lib/a11y-audit.js, BE-51) eist een tikdoel van 44 px, of 24 px
+   * met genoeg ruimte ertussen; de rijen staan hier 2 px van elkaar en zijn dus
+   * te dicht op elkaar. De maat is nu overal dezelfde als die van de avatar. */
+  min-height: 44px;
   padding: 8px 10px;
   border: 0;
   border-radius: var(--radius-md);

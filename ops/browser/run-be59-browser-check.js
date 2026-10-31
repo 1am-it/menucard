@@ -166,12 +166,30 @@ async function gotoPage(url, readyExpression) {
 // Het hele onderdeel op de opname: de uitsnede loopt van de bovenkant van het
 // element tot de onderkant, ook als het hoger is dan het venster.
 async function capture(selector, name) {
+  // Een vast paneel (het menu van onderen) niet in beeld scrollen: het hangt aan
+  // het venster en scrollen zou het juist uit het venster schuiven.
+  const vast = await evalJs(
+    cdp,
+    `(() => {
+      const el = document.querySelector(${JSON.stringify(selector)});
+      return el ? getComputedStyle(el).position === 'fixed' : false;
+    })()`,
+  );
+  if (!vast) {
+    await evalJs(
+      cdp,
+      `(() => {
+        const el = document.querySelector(${JSON.stringify(selector)});
+        if (el) el.scrollIntoView({ block: 'center', inline: 'nearest' });
+        return true;
+      })()`,
+    );
+  }
   const info = await evalJs(
     cdp,
     `(() => {
       const el = document.querySelector(${JSON.stringify(selector)});
       if (!el) return null;
-      el.scrollIntoView({ block: 'center', inline: 'nearest' });
       const rect = el.getBoundingClientRect();
       const fixed = getComputedStyle(el).position === 'fixed';
       return {
@@ -203,11 +221,11 @@ async function capture(selector, name) {
     height: Math.max(1, Math.round(info.height)),
   };
   const shot = await screenshot(cdp, SHOT_DIR, `${name}.png`, { clip });
-  shots.push({ ...shot, selector, clip, fitsHorizontally });
+  shots.push({ ...shot, selector, clip, fitsHorizontally, info });
   add(
     `opname ${name}: hele onderdeel in beeld`,
     fitsHorizontally && fitsVertically,
-    JSON.stringify({ clip, fitsHorizontally, fitsVertically }),
+    JSON.stringify({ clip, fitsHorizontally, fitsVertically, fixed: info.fixed, pageY: info.pageY, innerHeight: info.innerHeight }),
   );
   return shot;
 }
@@ -505,7 +523,7 @@ async function runBeheerder() {
   await openMenu('beheerder home');
   const menu = await menuSnapshot();
 
-  add('beheerder: de initialen komen uit de naam (SV)', Boolean(menu) && menu.initials === 'SV', menu && menu.initials);
+  add('beheerder: de initialen komen uit de naam (SD)', Boolean(menu) && menu.initials === 'SD', menu && menu.initials);
   add(
     'beheerder: het schermlezerlabel noemt de naam en het aantal taken',
     Boolean(menu) && menu.ariaLabel === `Account van ${BEHEERDER_NAME}, ${OPEN_WORK_TOTAL} openstaande taken`,

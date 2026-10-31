@@ -97,6 +97,13 @@ test('desktop: Escape sluit en zet de focus terug; de pijltoetsen verplaatsen de
   assert.match(source, /next = index <= 0 \? focusable\.length - 1 : index - 1/, 'ArrowUp gaat rond');
 });
 
+test('elk menu-item is een tikdoel van 44 px', () => {
+  // BE-59 deel 3 (#146): de a11y-audit van de publieke pagina's eist 44 px (of
+  // 24 px met genoeg ruimte); de rijen staan 2 px van elkaar, dus 44 px.
+  const css = read(CSS);
+  assert.match(css, /\.account-menu-item \{[^}]*min-height: 44px;/);
+});
+
 test('mobiel: smaller dan 720 px hetzelfde menu als paneel van onderen, met sluitknop', () => {
   const source = read(COMPONENT);
   const css = read(CSS);
