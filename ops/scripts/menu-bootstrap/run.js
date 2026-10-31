@@ -31,6 +31,7 @@ function parseArgs(argv) {
     if (arg === '--dry-run') args.dryRun = true;
     else if (arg === '--write') args.write = true;
     else if (arg.startsWith('--only=')) args.only = arg.slice('--only='.length).split(',').map((id) => id.trim()).filter(Boolean);
+    else if (arg === '--no-report') args.noReport = true;
   }
   if (!args.dryRun && !args.write) args.dryRun = true;
   return args;
@@ -73,6 +74,10 @@ async function main() {
     scraped,
     generatedAt: new Date().toISOString(),
   });
+  if (args.noReport) {
+    console.log('Rapport overgeslagen (--no-report): het volledige rapport blijft staan.');
+    return;
+  }
   fs.writeFileSync(REPORT_JSON, serialize(report));
   fs.writeFileSync(REPORT_MD, renderMarkdown(report));
   console.log(`Rapport: ${REPORT_MD} en ${REPORT_JSON}.`);
