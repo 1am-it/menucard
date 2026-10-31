@@ -285,7 +285,9 @@ async function homeScenario(cdp) {
       check(`${waar}: geen knop staat in een link`, knoppen.every((k) => !k.inLink), JSON.stringify(knoppen.filter((k) => k.inLink).map((k) => k.label)));
 
       await evalJs(cdp, `document.querySelector('.tonight-actions .dish-save-btn').click()`);
-      await sleep(240);
+      // De balk komt achter next/dynamic binnen: wacht tot hij er echt is in
+      // plaats van op een vaste korte pauze.
+      await waitFor(cdp, `Boolean(document.querySelector('.saved-bar'))`, 4000);
       const na = await evalJs(cdp, knoppenStaat('.tonight-actions .dish-save-btn'));
       check(`${waar}: Bewaren zet de knop aan`, na[0] ? na[0].pressed === 'true' : false, na[0] ? na[0].pressed : 'geen knop');
       const balk = await evalJs(cdp, BALK_STAAT);
@@ -342,7 +344,8 @@ async function zoekScenario(cdp) {
       check(`${waar}: geen horizontale overloop`, Number(overflow) <= 0, overflow);
 
       await evalJs(cdp, `document.querySelector('.dish-result-actions .dish-save-btn').click()`);
-      await sleep(240);
+      // De balk komt achter next/dynamic binnen: wacht tot hij er echt is.
+      await waitFor(cdp, `Boolean(document.querySelector('.saved-bar'))`, 4000);
       const na = await evalJs(cdp, knoppenStaat('.dish-result-actions .dish-save-btn'));
       check(`${waar}: Bewaren zet de knop aan`, na[0] ? na[0].pressed === 'true' : false, na[0] ? na[0].pressed : 'geen knop');
       const balk = await evalJs(cdp, BALK_STAAT);

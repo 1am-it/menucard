@@ -90,7 +90,7 @@ test('de balk komt pas binnen als er iets bewaard is (geen statische import)', (
   const LAZY = read('src/components/SavedDishesBarLazy.js');
   assert.match(LAZY, /^'use client'/m);
   assert.match(LAZY, /import dynamic from 'next\/dynamic'/);
-  assert.match(LAZY, /dynamic\(\(\) => import\('\.\/SavedDishesBar'\), \{ ssr: false, loading: \(\) => null \}\)/);
+  assert.match(LAZY, /dynamic\(\(\) => import\('\.\/SavedDishesBar'\), \{ loading: \(\) => null \}\)/);
   assert.match(LAZY, /const sync = \(\) => setShow\(savedCount\(browserStorage\(\)\) > 0\)/);
   assert.match(LAZY, /window\.addEventListener\(SAVED_LIST_EVENT_NAME, sync\)/);
   assert.match(LAZY, /return show \? <SavedDishesBar \/> : null/);

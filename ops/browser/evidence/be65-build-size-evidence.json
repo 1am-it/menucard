@@ -1,44 +1,44 @@
 {
-  "ticket": "BE-65 (#157), ronde 2",
+  "ticket": "BE-65 (#157), ronde 3",
   "criterion": "de eerste laadgrootte van / en /search groeit hooguit 2 KB per route",
-  "category": "developer-meting uit de routetabel van twee lokale productiebuilds in deze werkkopie; geen browseroverdracht, geen compressiemeting en geen echte acceptatie",
+  "category": "developer-meting uit de routetabel en app-build-manifest.json van één lokale productiebuild in deze werkkopie; geen browseroverdracht, geen compressiemeting en geen echte acceptatie",
   "ranAt": "2026-10-31",
   "baseSha": "053240d82c9a98fc0ba217f834dea90ae7db5408",
-  "headSha": "1a094b2",
-  "method": "next build in deze ene werkkopie, eerst op de head (NEXT_DIST_DIR=.next-head), daarna met git checkout 053240d op de basis (NEXT_DIST_DIR=.next-base) en terug naar feat/delen-home-157. Geen worktree en geen junction naar node_modules. Cijfers uit de routetabel van next 15.5.15; per bestand uit app-build-manifest.json van beide bouwmappen. Beide mappen zijn na de meting verwijderd.",
+  "headSha": "3f8bfcc plus de kaart als Server Component en de balk achter next/dynamic",
+  "method": "next build in deze werkkopie met NEXT_DIST_DIR=.next-be65 (Next 15.5.15); cijfers uit de routetabel, per bestand de som van de gzip-grootte (niveau 9) van de JS-bestanden die app-build-manifest.json per route noemt. De basiscijfers komen uit dezelfde meting in ronde 2 op 053240d, met dezelfde methode. Geen worktree en geen junction.",
   "budgetKb": 2,
   "rows": [
-    { "route": "/", "baseRoute": "7.29 kB", "baseFirstLoad": "123 kB", "headRoute": "9.82 kB", "headFirstLoad": "128 kB", "deltaFirstLoad": "+5 kB", "verdict": "over budget" },
-    { "route": "/search", "baseRoute": "7.68 kB", "baseFirstLoad": "121 kB", "headRoute": "7.28 kB", "headFirstLoad": "125 kB", "deltaFirstLoad": "+4 kB", "verdict": "over budget" }
+    { "route": "/", "baseRoute": "7.29 kB", "baseFirstLoad": "123 kB", "headRoute": "8.65 kB", "headFirstLoad": "126 kB", "deltaFirstLoad": "+3 kB", "verdict": "over budget; was +5 kB in ronde 2" },
+    { "route": "/search", "baseRoute": "7.68 kB", "baseFirstLoad": "121 kB", "headRoute": "7.03 kB", "headFirstLoad": "125 kB", "deltaFirstLoad": "+4 kB", "verdict": "over budget; de routechunk zelf is 0,65 kB kleiner dan de basis" }
   ],
   "shared": { "base": "103 kB", "head": "103 kB" },
-  "rawBytesFirstLoad": {
-    "/": { "base": 407276, "head": 419468, "delta": 12192 },
-    "/search": { "base": 405175, "head": 413926, "delta": 8751 }
+  "firstLoadJsGzipBytes": {
+    "/": { "head": 126415, "deltaKb": 3 },
+    "/search": { "head": 124793, "deltaKb": 4 }
   },
   "perFile": {
     "/": [
-      { "file": "app/page chunk", "base": 20407, "head": 28964, "delta": 8557, "what": "ShareHeroCard met de drie statische chatvoorbeelden, SavedDishesBar en de compacte DishShareButton/DishSaveButton" },
-      { "file": "gedeelde chunk 6009", "base": 13204, "head": 16791, "delta": 3587, "what": "de bestaande ShareSettingsButton-code met sharePreference en dishList; zat op de basis in chunk 214 en is door de nieuwe chunkgrens groter" },
-      { "file": "gedeelde chunk 8875", "base": 0, "head": 6603, "delta": 6603, "what": "SavedDishesBar met de kleine lezer savedListRead" },
-      { "file": "gedeelde chunk 9857", "base": 6918, "head": 7226, "delta": 308, "what": "overige gedeelde componenten, iets anders verdeeld" },
-      { "file": "gedeelde chunks 8498 en 9506", "base": 13909, "head": 0, "delta": -13909, "what": "vervangen door de drie chunks hierboven" },
-      { "file": "framework, react en webpack", "base": 359756, "head": 359884, "delta": 128, "what": "ongewijzigd op de webpack-runtime na" }
+      { "file": "app/page chunk", "head": 8649, "what": "de home zelf; de deelkaart zit er niet meer in, die staat nu als HTML in de pagina" },
+      { "file": "gedeelde chunk 8875", "head": 2612, "what": "SavedDishesBarLazy met de kleine lezer savedListRead; de balk zelf zit in chunk 3187 en laadt pas bij de klik" },
+      { "file": "gedeelde chunk 6009", "head": 6038, "what": "de bestaande ShareSettingsButton-code met sharePreference en dishList; hoort bij de kop (PR #158) en is niet aangeraakt" },
+      { "file": "gedeelde chunk 2619", "head": 3385, "what": "bestaande gedeelde componenten" },
+      { "file": "gedeelde chunk 9857", "head": 2665, "what": "bestaande gedeelde componenten" },
+      { "file": "framework, react en webpack", "head": "103 kB samen", "what": "ongewijzigd" }
     ],
     "/search": [
-      { "file": "app/search/page chunk", "base": 25297, "head": 23422, "delta": -1875, "what": "de dynamische import haalt dishList, dishShare en entryFromDish uit de eerste lading; de balk en de compacte gerechtregel komen ervoor terug" },
-      { "file": "gedeelde chunk 6009", "base": 13204, "head": 16791, "delta": 3587, "what": "als bij /" },
-      { "file": "gedeelde chunk 8875", "base": 0, "head": 6603, "delta": 6603, "what": "als bij /" },
-      { "file": "gedeelde chunk 9857", "base": 0, "head": 7226, "delta": 7226, "what": "als bij /" },
-      { "file": "gedeelde chunks 214 en 8498", "base": 20122, "head": 0, "delta": -20122, "what": "vervangen door de drie chunks hierboven" },
-      { "file": "framework, react en webpack", "base": 359756, "head": 359884, "delta": 128, "what": "ongewijzigd op de webpack-runtime na" }
+      { "file": "app/search/page chunk", "head": 7027, "what": "de zoekpagina; 0,65 kB kleiner dan de basis" },
+      { "file": "gedeelde chunk 8875", "head": 2612, "what": "als bij /" },
+      { "file": "gedeelde chunk 6009", "head": 6038, "what": "als bij / (de kop)" },
+      { "file": "gedeelde chunk 2619", "head": 3385, "what": "als bij /" },
+      { "file": "gedeelde chunk 9857", "head": 2665, "what": "als bij /" },
+      { "file": "framework, react en webpack", "head": "103 kB samen", "what": "ongewijzigd" }
     ]
   },
-  "verdict": "over budget: +5 kB op / en +4 kB op /search, tegen 2 kB toegestaan",
-  "whatChangedThisRound": "De deellogica (dishShare, sharePreference, dishCounters) en de bewaarlogica (dishList) komen op / en /search pas binnen bij een klik; de stand van Bewaren leest de kleine lezer src/lib/savedListRead.js. Dat haalt de zware modules uit de eerste lading van /search (routechunk -1,9 kB) maar niet uit die van /: de bestaande ShareSettingsButton in de kop houdt sharePreference en dishList statisch in een gedeelde chunk, en de verplichte deelkaart in de hero (uitkomst 1) staat met zijn drie voorbeelden in de page-chunk.",
+  "verdict": "nog boven budget: +3 kB op / (was +5) en +4 kB op /search (was +4), tegen 2 kB toegestaan. Dit is de laagste stand die deze ronde haalt.",
+  "whatChangedThisRound": "De deelkaart is een Server Component zonder client-JS: de drie voorbeelden staan als HTML in de pagina en de tabjes zijn radio's met CSS `:checked ~`. De balk na het bewaren laadt pas via next/dynamic als er iets bewaard is (chunk 3187); in de eerste lading blijft alleen de kleine lezer over. De resterende groei zit in de gedeelde chunk van de kop (6009) en in die kleine lezer.",
   "nextCandidates": [
-    "De drie statische chatvoorbeelden van ShareHeroCard naar de serverpagina (app/page.js) verplaatsen en alleen de tabjes client-side houden; dat haalt de voorbeeldteksten uit de page-chunk.",
-    "ShareSettingsButton ook pas bij de klik laden. Dat bestand zit in de kop, en PR #158 vervangt in dezelfde tijd de knoppen in de kop van alle publieke pagina's: niet zonder afstemming aanraken."
+    "De kleine lezer (chunk 8875, 2,6 kB) is nu de grootste eigen post. SavedListRead als ESM zou ongebruikte exports laten wegvallen, maar de node-tests lezen hem met require(); eerst afstemmen.",
+    "ShareSettingsButton in de kop ook pas bij de klik laden (chunk 6009). Dat bestand hoort bij PR #158 en is deze ronde niet aangeraakt."
   ],
   "passed": false
 }

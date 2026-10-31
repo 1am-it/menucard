@@ -15,7 +15,7 @@ import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import { SAVED_LIST_EVENT_NAME, browserStorage, savedCount } from '@/src/lib/savedListRead'
 
-const SavedDishesBar = dynamic(() => import('./SavedDishesBar'), { ssr: false, loading: () => null })
+const SavedDishesBar = dynamic(() => import('./SavedDishesBar'), { loading: () => null })
 
 export default function SavedDishesBarLazy() {
   const [show, setShow] = useState(false)
