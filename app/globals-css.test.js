@@ -178,6 +178,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/menu-body.css',
     // BE-59 deel 2: de footerlink op de publieke pagina's.
     'src/components/public-footer.css',
+    // BE-65: de balk na het bewaren (laadt pas als er iets bewaard is).
+    'src/components/saved-dishes-bar.css',
     // BE-65: de deelkaart in de hero.
     'src/components/share-hero-card.css',
   ]);

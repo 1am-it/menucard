@@ -15,7 +15,7 @@ import StatusIcon from '@/src/components/StatusIcon'
 // BE-65 (#157) — dezelfde bewaar- en deelknoppen als op de home, bij elk
 // zoekresultaat.
 import DishShareButton from '@/src/components/DishShareButton'
-import SavedDishesBar from '@/src/components/SavedDishesBar'
+import SavedDishesBar from '@/src/components/SavedDishesBarLazy'
 // BE-55 stap B, deel 5 (issue 135) — eigen opmaak voor het label en het filter
 // "Vandaag" in de zoekresultaten, naast deze pagina (BE-52).
 import './search.css'

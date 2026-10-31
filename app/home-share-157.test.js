@@ -20,16 +20,20 @@ const ROOT = path.join(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8').replace(/\r\n/g, '\n');
 
 const HOME = read('app/HomeView.js');
+const PAGE = read('app/page.js');
 const HOME_CSS = read('app/home.css');
 const SHARE_BUTTON = read('src/components/DishShareButton.js');
 
 test('home: de deelkaart staat in de hero, naast zoeken en chips', () => {
-  assert.match(HOME, /import ShareHeroCard from '@\/src\/components\/ShareHeroCard'/);
-  assert.match(HOME, /<ShareHeroCard \/>/);
+  // BE-65 ronde 3 — de kaart is een Server Component: app/page.js maakt hem en
+  // geeft hem als prop aan de clientweergave, zodat er geen client-JS bij komt.
+  assert.match(PAGE, /import ShareHeroCard from '@\/src\/components\/ShareHeroCard'/);
+  assert.match(PAGE, /shareCard=\{<ShareHeroCard \/>\}/);
+  assert.doesNotMatch(HOME, /import ShareHeroCard from/);
   const hero = HOME.slice(HOME.indexOf('className="home-hero"'), HOME.indexOf('</section>'));
   const form = hero.indexOf('className="home-search"');
   const chips = hero.indexOf('className="home-chips"');
-  const card = hero.indexOf('<ShareHeroCard />');
+  const card = hero.indexOf('{shareCard}');
   assert.ok(form > -1 && chips > form && card > chips, 'de kaart volgt op de zoekbalk en de chips');
   assert.match(HOME_CSS, /\.home-hero-grid \{[\s\S]*?grid-template-columns: minmax\(0, 1\.2fr\) minmax\(0, 1fr\);/);
   assert.match(HOME_CSS, /@media \(max-width: 900px\) \{[\s\S]*?\.home-hero-grid \{ grid-template-columns: minmax\(0, 1fr\);/);

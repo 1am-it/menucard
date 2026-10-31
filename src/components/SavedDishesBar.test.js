@@ -76,9 +76,30 @@ test('de opmaak: rechtsonder, boven de tabbalk, alleen tokens', () => {
 
 test('home en /search zetten de balk vóór de tabbalk', () => {
   for (const [name, source] of [['home', HOME], ['search', SEARCH]]) {
-    assert.match(source, /import SavedDishesBar from '@\/src\/components\/SavedDishesBar'/, name);
+    assert.match(source, /import SavedDishesBar from '@\/src\/components\/SavedDishesBarLazy'/, name);
     const bar = source.indexOf('<SavedDishesBar />');
     const tabs = source.indexOf('<MobileTabBar />');
     assert.ok(bar > -1 && tabs > bar, `${name}: de balk staat vóór de tabbalk`);
   }
+});
+
+test('de balk komt pas binnen als er iets bewaard is (geen statische import)', () => {
+  // Lead-review ronde 3, punt 3: de balk hoorde bij het eerste JS-pakket van /
+  // en /search, ook zonder bewaard gerecht. De lezer laadt hem pas bij een
+  // aantal van één of meer, via next/dynamic.
+  const LAZY = read('src/components/SavedDishesBarLazy.js');
+  assert.match(LAZY, /^'use client'/m);
+  assert.match(LAZY, /import dynamic from 'next\/dynamic'/);
+  assert.match(LAZY, /dynamic\(\(\) => import\('\.\/SavedDishesBar'\), \{ ssr: false, loading: \(\) => null \}\)/);
+  assert.match(LAZY, /const sync = \(\) => setShow\(savedCount\(browserStorage\(\)\) > 0\)/);
+  assert.match(LAZY, /window\.addEventListener\(SAVED_LIST_EVENT_NAME, sync\)/);
+  assert.match(LAZY, /return show \? <SavedDishesBar \/> : null/);
+  assert.doesNotMatch(
+    LAZY,
+    /^import \{[^}]*SavedDishesBar[^}]*\} from '\.\/SavedDishesBar'/m,
+    'de balk staat weer in een statische import'
+  );
+  assert.doesNotMatch(LAZY, /^import SavedDishesBar from '\.\/SavedDishesBar'/m);
+  // De balk zelf blijft ongewijzigd werken als hij eenmaal geladen is.
+  assert.match(BAR, /^'use client'/m);
 });

@@ -12,11 +12,11 @@ import MobileTabBar from '@/src/components/MobileTabBar'
 import Wordmark from '@/src/components/Wordmark'
 import Emoji from '@/src/components/Emoji'
 import useClientNow from '@/src/components/useClientNow'
-// BE-65 (#157) — de deelkaart in de hero en de bestaande bewaar- en
-// deelknoppen bij elk gerecht van "Vanavond op de kaart".
-import ShareHeroCard from '@/src/components/ShareHeroCard'
+// BE-65 (#157) — de bestaande bewaar- en deelknoppen bij elk gerecht van
+// "Vanavond op de kaart". De deelkaart in de hero komt als prop binnen
+// (Server Component, zie app/page.js).
 import DishShareButton from '@/src/components/DishShareButton'
-import SavedDishesBar from '@/src/components/SavedDishesBar'
+import SavedDishesBar from '@/src/components/SavedDishesBarLazy'
 // BE-52 — opmaak die alleen bij deze pagina hoort, in een eigen bestand naast
 // de pagina in plaats van onderaan app/globals.css.
 import './home.css'
@@ -72,7 +72,7 @@ const PROMISES = [
   { glyph: '📵', text: "Geen foto’s, wel info" },
 ]
 
-export default function HomeView({ candidates = [] }) {
+export default function HomeView({ candidates = [], shareCard = null }) {
   const router = useRouter()
   const [query, setQuery] = useState('')
   // Browserklok, net als op de restaurant- en menukaartpagina. Vóór de
@@ -175,7 +175,9 @@ export default function HomeView({ candidates = [] }) {
                 ))}
               </div>
             </div>
-            <ShareHeroCard />
+            {/* BE-65 ronde 3 — de kaart komt als Server Component van app/page.js
+                binnen en kost daardoor geen client-JS. */}
+            {shareCard}
           </div>
         </section>
 

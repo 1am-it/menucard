@@ -28,54 +28,99 @@
   color: var(--text-secondary);
 }
 
-.share-hero-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+/* De drie tabjes: radio's in een fieldset. De radio's liggen onzichtbaar
+   precies over hun tabje, zodat het hele tabje het tikdoel is (44 px) en de
+   pijltjestoetsen de groep bedienen. `:checked +` kleurt het actieve tabje,
+   `:checked ~` toont het bijbehorende voorbeeld. */
+.share-hero-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  /* Een fieldset heeft standaard een min-content breedte en een rand; beide
+     zouden op 320 px horizontale overloop geven. */
+  min-inline-size: 0;
   padding: 4px;
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--chip-bg);
 }
 
-.share-hero-tab {
-  flex: 1 1 auto;
-  /* BE-65 ronde 2: 44 px hoog, zodat elk tabje een echt tikdoel is en niet
-     binnen 12 px van zijn buurman ligt (a11y-audit, tikdoel). */
-  min-height: 44px;
-  padding: 0 14px;
+.share-hero-radio {
+  grid-row: 1;
+  justify-self: stretch;
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
+  opacity: 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.share-hero-tab {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* BE-65 ronde 2: 44 px hoog, zodat elk tabje een echt tikdoel is. */
+  min-height: 44px;
+  padding: 0 10px;
   border-radius: var(--radius-pill);
-  background: transparent;
   color: var(--chip-text);
-  font: inherit;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
-.share-hero-tab:hover { background: var(--bg-hover); }
+/* Elk tabje in zijn eigen kolom, met zijn radio in dezelfde cel. */
+.share-hero-radio:nth-of-type(1),
+.share-hero-tab:nth-of-type(1) { grid-column: 1; }
+.share-hero-radio:nth-of-type(2),
+.share-hero-tab:nth-of-type(2) { grid-column: 2; }
+.share-hero-radio:nth-of-type(3),
+.share-hero-tab:nth-of-type(3) { grid-column: 3; }
 
-.share-hero-tab:focus-visible {
+.share-hero-radio:hover + .share-hero-tab { background: var(--bg-hover); }
+
+.share-hero-radio:focus-visible + .share-hero-tab {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
 
-.share-hero-tab.is-active {
+.share-hero-radio:checked + .share-hero-tab {
   background: var(--card-surface);
   color: var(--text-primary);
   font-weight: 800;
   box-shadow: var(--card-shadow);
 }
 
-/* Het statische chatvoorbeeld: rechts uitgelijnd, net als in een chat. */
+/* De labels: het korte label is er voor smalle schermen. */
+.share-hero-tab-short { display: none; }
+
+/* De drie voorbeelden staan alle drie in de HTML; alleen het gekozen
+   voorbeeld is zichtbaar. `display: none` verbergt het ook echt voor een
+   voorlezer. */
 .share-hero-example {
-  display: flex;
+  display: none;
+  grid-row: 2;
+  grid-column: 1 / -1;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
   margin: 0;
   min-width: 0;
+}
+
+#share-hero-kaart-een:checked ~ .share-hero-example--een,
+#share-hero-kaart-lijstje:checked ~ .share-hero-example--lijstje,
+#share-hero-kaart-stemmen:checked ~ .share-hero-example--stemmen {
+  display: flex;
 }
 
 .share-hero-bubble {
@@ -160,20 +205,59 @@
 .share-hero-row-name { min-width: 0; }
 .share-hero-row-price { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* De twee stemhoekjes: een zachte balk met het aantal stemmen. */
-.share-hero-bar {
-  padding: 6px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--chip-bg);
-  color: var(--chip-text);
-  font-size: 13px;
-  font-weight: 700;
+/* De stemregels: gerechtnaam links (vet bij de koploper), "n× lekker" rechts
+   en daaronder een balkje met het aandeel. Gevuld deel in --text-primary,
+   de rest in --border. */
+.share-hero-vote-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.share-hero-bar--more { width: 82%; }
-.share-hero-bar--less { width: 42%; }
+.share-hero-vote-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+.share-hero-vote-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-hero-vote-name.is-leader { font-weight: 800; }
+
+.share-hero-vote-count {
+  flex: none;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.share-hero-vote-track {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+}
+
+.share-hero-vote-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--text-primary);
+}
+
+.share-hero-vote-fill--75 { width: 75%; }
+.share-hero-vote-fill--25 { width: 25%; }
 
 .share-hero-note {
+  align-self: stretch;
   margin: 0;
   font-size: 13.5px;
   line-height: 1.45;
@@ -184,4 +268,17 @@
   .share-hero { padding: 18px; gap: 10px; }
   .share-hero-title { font-size: 22px; }
   .share-hero-linkcard { width: 100%; }
+}
+
+/* Tot en met 640 px: korte labels, zodat de drie tabjes ook op 320 px op één
+   regel blijven. */
+@media (max-width: 640px) {
+  .share-hero-switch { gap: 4px; }
+  .share-hero-tab { padding: 0 8px; font-size: 13px; }
+  .share-hero-tab-full { display: none; }
+  .share-hero-tab-short { display: inline; }
+}
+
+@media (max-width: 380px) {
+  .share-hero-tab { padding: 0 6px; font-size: 12.5px; }
 }
