@@ -72,9 +72,9 @@ const STATUS_LABELS = Object.freeze({
 // De vaste teksten van het scherm. Eén plek, zodat het formulier en "wat staat
 // er online" nooit twee verschillende zinnen voor hetzelfde tonen.
 const FORM_MESSAGES = Object.freeze({
-  title: 'Daghap of seizoensgerecht',
+  title: 'Wat staat er vandaag op?',
   intro:
-    'Zet vandaag één daghap online, of een seizoensgerecht tot een einddatum. Gasten zien het op je restaurantpagina, je menukaart en in de zoekresultaten.',
+    'Zet vandaag een daghap, een dagmenu of een seizoensgerecht online. Gasten zien het op je restaurantpagina, je menukaart en in de zoekresultaten.',
   soortLegend: 'Wat wil je plaatsen?',
   soortDaghapHint: 'Alleen vandaag, tot sluitingstijd.',
   soortDagmenuHint: 'Twee of drie gangen, met een eigen prijs.',
@@ -102,7 +102,7 @@ const FORM_MESSAGES = Object.freeze({
   labelsLegend: 'Labels',
   einddatumLabel: 'Tot en met',
   einddatumHint: 'Maximaal 90 dagen vooruit.',
-  submit: 'Direct online zetten',
+  submit: 'Zet online',
   submitWijziging: 'Wijziging opslaan',
   cancel: 'Annuleren',
   wordtGecontroleerd: DAGHAP_IN_CONTROLE_MESSAGE,

@@ -204,3 +204,53 @@
     max-width: none;
   }
 }
+
+/* BE-67: het dagmenu, de herhaling en Op = op. Kleuren alleen via de bestaande
+   tokens, zodat licht en donker hetzelfde blok delen. */
+.aanbod-prijzen {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.aanbod-weekdag-knoppen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* De weekdagknoppen zijn echte checkboxes met een doel van minstens 40 px. */
+.aanbod-weekdag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.aanbod-weekdag:has(input:checked) {
+  border-color: var(--border-focus);
+  background: var(--bg-hover);
+  font-weight: 600;
+}
+
+.aanbod-weekdag input {
+  accent-color: var(--button-primary-bg);
+}
+
+.aanbod-gangen-lijst {
+  color: var(--text-secondary);
+}
+
+.aanbod-submit-hint {
+  margin-top: 8px;
+}
+

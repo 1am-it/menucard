@@ -22,8 +22,10 @@ import { eigenRestaurants } from '@/src/lib/ownerAanbod'
 import { DAGHAP_LABELS } from '@/src/lib/daghapAanbod'
 import {
   FORM_MESSAGES,
+  GANG_LABELS,
   LABEL_LABELS,
   SOORT_LABELS,
+  WEEKDAG_KORT,
   aanbodVerzoek,
   beschrijvingTeller,
   foutmeldingen,
@@ -163,6 +165,22 @@ export default function AanbodView({ restaurantIndex }) {
       labels: huidig.labels.includes(label)
         ? huidig.labels.filter((huidige) => huidige !== label)
         : [...huidig.labels, label],
+    }))
+  }
+
+  // BE-67: de gangen van een dagmenu staan als drie tekstvelden op het scherm en
+  // gaan als lijst naar de server (aanbodVerzoek doet die vertaling).
+  function zetGang(gang, waarde) {
+    setWaarden((huidig) => ({ ...huidig, gangen: { ...huidig.gangen, [gang]: waarde } }))
+  }
+
+  // De weekdagknoppen van "Elke week op": echte checkboxes, altijd gesorteerd.
+  function wisselWeekdag(dag) {
+    setWaarden((huidig) => ({
+      ...huidig,
+      weekdagen: huidig.weekdagen.includes(dag)
+        ? huidig.weekdagen.filter((huidige) => huidige !== dag)
+        : [...huidig.weekdagen, dag].sort((a, b) => a - b),
     }))
   }
 
@@ -351,7 +369,9 @@ export default function AanbodView({ restaurantIndex }) {
                         />
                         <span>{label}</span>
                         <span className="aanbod-hint">
-                          {soort === 'daghap' ? FORM_MESSAGES.soortDaghapHint : FORM_MESSAGES.soortSeizoenHint}
+                          {soort === 'daghap'
+                            ? FORM_MESSAGES.soortDaghapHint
+                            : (soort === 'dagmenu' ? FORM_MESSAGES.soortDagmenuHint : FORM_MESSAGES.soortSeizoenHint)}
                         </span>
                       </label>
                     ))}
@@ -362,6 +382,39 @@ export default function AanbodView({ restaurantIndex }) {
                     </p>
                   )}
                 </fieldset>
+
+                {waarden.soort === 'dagmenu' && (
+                  <fieldset
+                    className="aanbod-fieldset aanbod-gangen"
+                    aria-describedby={heeftFout('gangen') ? 'aanbod-gangen-error' : 'aanbod-gangen-hint'}
+                  >
+                    <legend className="aanbod-label">{FORM_MESSAGES.gangenLegend}</legend>
+                    {Object.entries(GANG_LABELS).map(([gang, label]) => (
+                      <div className="aanbod-field" key={gang}>
+                        <label className="aanbod-label" htmlFor={`aanbod-gang-${gang}`}>
+                          {label}
+                          {gang !== 'hoofd' && <span className="aanbod-hint"> ({FORM_MESSAGES.gangNaHint})</span>}
+                        </label>
+                        <input
+                          id={`aanbod-gang-${gang}`}
+                          className="aanbod-input"
+                          type="text"
+                          value={waarden.gangen[gang] || ''}
+                          onChange={(event) => zetGang(gang, event.target.value)}
+                          maxLength={120}
+                        />
+                      </div>
+                    ))}
+                    <p className="aanbod-hint" id="aanbod-gangen-hint">
+                      {FORM_MESSAGES.gangenHint}
+                    </p>
+                    {heeftFout('gangen') && (
+                      <p className="aanbod-error" id="aanbod-gangen-error">
+                        {veldFout('gangen').join(' ')}
+                      </p>
+                    )}
+                  </fieldset>
+                )}
 
                 <div className="aanbod-field">
                   <label className="aanbod-label" htmlFor="aanbod-naam">
@@ -389,18 +442,45 @@ export default function AanbodView({ restaurantIndex }) {
 
                 <div className="aanbod-field">
                   <label className="aanbod-label" htmlFor="aanbod-prijs">
-                    {FORM_MESSAGES.prijsLabel}
+                    {waarden.soort === 'dagmenu' ? FORM_MESSAGES.prijs2Label : FORM_MESSAGES.prijsLabel}
                   </label>
-                  <input
-                    id="aanbod-prijs"
-                    className="aanbod-input aanbod-input--prijs"
-                    type="text"
-                    inputMode="decimal"
-                    value={waarden.prijs}
-                    onChange={(event) => zetVeld('prijs', event.target.value)}
-                    aria-describedby={heeftFout('prijs') ? 'aanbod-prijs-error' : 'aanbod-prijs-hint'}
-                    aria-invalid={heeftFout('prijs') || undefined}
-                  />
+                  <div className={waarden.soort === 'dagmenu' ? 'aanbod-prijzen' : undefined}>
+                    <input
+                      id="aanbod-prijs"
+                      className="aanbod-input aanbod-input--prijs"
+                      type="text"
+                      inputMode="decimal"
+                      value={waarden.prijs}
+                      onChange={(event) => zetVeld('prijs', event.target.value)}
+                      aria-describedby={heeftFout('prijs') ? 'aanbod-prijs-error' : 'aanbod-prijs-hint'}
+                      aria-invalid={heeftFout('prijs') || undefined}
+                    />
+                    {waarden.soort === 'dagmenu' && (
+                      <div className="aanbod-field">
+                        <label className="aanbod-label" htmlFor="aanbod-prijs3">
+                          {FORM_MESSAGES.prijs3Label}
+                        </label>
+                        <input
+                          id="aanbod-prijs3"
+                          className="aanbod-input aanbod-input--prijs"
+                          type="text"
+                          inputMode="decimal"
+                          value={waarden.prijs3}
+                          onChange={(event) => zetVeld('prijs3', event.target.value)}
+                          aria-describedby={heeftFout('prijs3') ? 'aanbod-prijs3-error' : 'aanbod-prijs3-hint'}
+                          aria-invalid={heeftFout('prijs3') || undefined}
+                        />
+                        <p className="aanbod-hint" id="aanbod-prijs3-hint">
+                          {FORM_MESSAGES.prijs3Hint}
+                        </p>
+                        {heeftFout('prijs3') && (
+                          <p className="aanbod-error" id="aanbod-prijs3-error">
+                            {veldFout('prijs3').join(' ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <p className="aanbod-hint" id="aanbod-prijs-hint">
                     {FORM_MESSAGES.prijsHint}
                   </p>
@@ -456,6 +536,89 @@ export default function AanbodView({ restaurantIndex }) {
                   )}
                 </fieldset>
 
+                <fieldset
+                  className="aanbod-fieldset aanbod-wanneer"
+                  aria-describedby={heeftFout('weekdagen') || heeftFout('herhaalTot') ? 'aanbod-herhaal-error' : undefined}
+                >
+                  <legend className="aanbod-label">{FORM_MESSAGES.wanneerLegend}</legend>
+                  <div className="aanbod-soort">
+                    {[['vandaag', FORM_MESSAGES.alleenVandaag], ['elke_week', FORM_MESSAGES.elkeWeek]].map(([waarde, label]) => (
+                      <label className="aanbod-soort-keuze" key={waarde}>
+                        <input
+                          type="radio"
+                          name="wanneer"
+                          value={waarde}
+                          checked={waarden.wanneer === waarde}
+                          onChange={() => zetVeld('wanneer', waarde)}
+                        />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {waarden.wanneer === 'elke_week' && (
+                    <>
+                      <fieldset
+                        className="aanbod-fieldset aanbod-weekdagen"
+                        aria-describedby={heeftFout('weekdagen') ? 'aanbod-weekdagen-error' : undefined}
+                      >
+                        <legend className="aanbod-label">{FORM_MESSAGES.weekdagLegend}</legend>
+                        <div className="aanbod-weekdag-knoppen">
+                          {Object.entries(WEEKDAG_KORT).map(([dag, kort]) => (
+                            <label className="aanbod-weekdag" key={dag}>
+                              <input
+                                type="checkbox"
+                                checked={waarden.weekdagen.includes(Number(dag))}
+                                onChange={() => wisselWeekdag(Number(dag))}
+                              />
+                              <span>{kort}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {heeftFout('weekdagen') && (
+                          <p className="aanbod-error" id="aanbod-weekdagen-error">
+                            {veldFout('weekdagen').join(' ')}
+                          </p>
+                        )}
+                      </fieldset>
+
+                      <div className="aanbod-field">
+                        <label className="aanbod-label" htmlFor="aanbod-herhaaltot">
+                          {FORM_MESSAGES.herhaalTotLabel}
+                        </label>
+                        <input
+                          id="aanbod-herhaaltot"
+                          className="aanbod-input aanbod-input--datum"
+                          type="date"
+                          value={waarden.herhaalTot}
+                          onChange={(event) => zetVeld('herhaalTot', event.target.value)}
+                          aria-describedby={heeftFout('herhaalTot') ? 'aanbod-herhaaltot-error' : 'aanbod-herhaaltot-hint'}
+                          aria-invalid={heeftFout('herhaalTot') || undefined}
+                        />
+                        <p className="aanbod-hint" id="aanbod-herhaaltot-hint">
+                          {FORM_MESSAGES.einddatumHint}
+                        </p>
+                        {heeftFout('herhaalTot') && (
+                          <p className="aanbod-error" id="aanbod-herhaaltot-error">
+                            {veldFout('herhaalTot').join(' ')}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </fieldset>
+
+                <div className="aanbod-chips">
+                  <label className="aanbod-chip">
+                    <input
+                      type="checkbox"
+                      checked={waarden.opIsOp}
+                      onChange={(event) => zetVeld('opIsOp', event.target.checked)}
+                    />
+                    <span>{FORM_MESSAGES.opIsOp}</span>
+                  </label>
+                </div>
+
                 {waarden.soort === 'seizoensgerecht' && (
                   <div className="aanbod-field">
                     <label className="aanbod-label" htmlFor="aanbod-einddatum">
@@ -491,6 +654,7 @@ export default function AanbodView({ restaurantIndex }) {
                     </button>
                   )}
                 </div>
+                <p className="aanbod-hint aanbod-submit-hint">{FORM_MESSAGES.directlyVisible}</p>
               </form>
             </section>
 
@@ -510,10 +674,26 @@ export default function AanbodView({ restaurantIndex }) {
                       </div>
                       <p className="owner-note">
                         {SOORT_LABELS[item.soort] || item.soort} · {item.prijs}
-                        {verloopTekst({ soort: item.soort, verlooptOp: item.verlooptOp })
-                          ? ` · ${verloopTekst({ soort: item.soort, verlooptOp: item.verlooptOp })}`
+                        {item.prijs3 ? ` · ${item.prijs3}` : ''}
+                        {verloopTekst({
+                          soort: item.soort,
+                          verlooptOp: item.verlooptOp,
+                          herhaalWeekdagen: item.herhaalWeekdagen,
+                          herhaalTot: item.herhaalTot,
+                        })
+                          ? ` · ${verloopTekst({
+                            soort: item.soort,
+                            verlooptOp: item.verlooptOp,
+                            herhaalWeekdagen: item.herhaalWeekdagen,
+                            herhaalTot: item.herhaalTot,
+                          })}`
                           : ''}
                       </p>
+                      {Array.isArray(item.gangen) && item.gangen.length > 0 && (
+                        <p className="owner-note aanbod-gangen-lijst">
+                          {item.gangen.map((gang) => `${GANG_LABELS[gang.gang] || gang.gang}: ${gang.naam}`).join(' · ')}
+                        </p>
+                      )}
                       {item.inControle && <p className="aanbod-controle">{FORM_MESSAGES.wordtGecontroleerd}</p>}
                       <div className="aanbod-card-actions">
                         <button type="button" className="owner-link aanbod-knop" onClick={() => beginAanpassen(item)}>
