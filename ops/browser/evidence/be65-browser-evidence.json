@@ -1,0 +1,1400 @@
+{
+  "script": "run-be65-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck van de productieopbouw (next start op poort 3194) met een gestubde zoek-API; geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T09:27:24.080Z",
+  "port": 3194,
+  "filter": null,
+  "scenarioRuns": [
+    {
+      "name": "home",
+      "checks": 125,
+      "passed": 125,
+      "failed": 0,
+      "durationMs": 12657,
+      "error": null
+    },
+    {
+      "name": "zoeken",
+      "checks": 62,
+      "passed": 62,
+      "failed": 0,
+      "durationMs": 10214,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "home light/1280: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home light/1280: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home light/1280: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/1280: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":-6}"
+    },
+    {
+      "name": "home light/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home light/1280: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/1280: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home light/1280: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home light/1280: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home light/1280: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home light/1280: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"99x44\",\"44x44\",\"99x44\",\"44x44\",\"99x44\",\"44x44\"]"
+    },
+    {
+      "name": "home light/1280: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home light/1280: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home light/1280: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home light/1280: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":420,\"rechts\":26,\"onder\":20}"
+    },
+    {
+      "name": "home light/1280: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home light/1280: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home light/1280: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":false,\"boven\":null,\"opTabbalk\":null,\"opBalk\":true}"
+    },
+    {
+      "name": "home light/1280: rechtsonder en hooguit 420 px breed",
+      "passed": true,
+      "detail": "420px breed, 26px van rechts, 20px van onderen"
+    },
+    {
+      "name": "home light/1280: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home light/1280: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "home light/390: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home light/390: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home light/390: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/390: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":0}"
+    },
+    {
+      "name": "home light/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/390: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/390: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home light/390: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home light/390: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home light/390: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home light/390: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "home light/390: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home light/390: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home light/390: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home light/390: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "home light/390: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home light/390: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home light/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home light/390: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home light/390: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "home light/320: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home light/320: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home light/320: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/320: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":0}"
+    },
+    {
+      "name": "home light/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home light/320: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home light/320: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home light/320: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home light/320: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home light/320: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home light/320: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "home light/320: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home light/320: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home light/320: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home light/320: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "home light/320: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home light/320: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home light/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home light/320: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home light/320: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "gast home (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "home dark/1280: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home dark/1280: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home dark/1280: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/1280: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":-6}"
+    },
+    {
+      "name": "home dark/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "home dark/1280: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/1280: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home dark/1280: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home dark/1280: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home dark/1280: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home dark/1280: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"99x44\",\"44x44\",\"99x44\",\"44x44\",\"99x44\",\"44x44\"]"
+    },
+    {
+      "name": "home dark/1280: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home dark/1280: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/1280: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home dark/1280: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":420,\"rechts\":26,\"onder\":20}"
+    },
+    {
+      "name": "home dark/1280: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home dark/1280: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home dark/1280: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":false,\"boven\":null,\"opTabbalk\":null,\"opBalk\":true}"
+    },
+    {
+      "name": "home dark/1280: rechtsonder en hooguit 420 px breed",
+      "passed": true,
+      "detail": "420px breed, 26px van rechts, 20px van onderen"
+    },
+    {
+      "name": "home dark/1280: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home dark/1280: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "home dark/390: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home dark/390: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home dark/390: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/390: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":0}"
+    },
+    {
+      "name": "home dark/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/390: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/390: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home dark/390: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home dark/390: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home dark/390: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home dark/390: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "home dark/390: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home dark/390: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/390: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home dark/390: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "home dark/390: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home dark/390: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home dark/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home dark/390: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home dark/390: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "home dark/320: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "home dark/320: de deelkaart staat er met drie tabjes",
+      "passed": true,
+      "detail": "{\"kaart\":true,\"tabjes\":3}"
+    },
+    {
+      "name": "home dark/320: precies één tabje is actief",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/320: de kaart staat in beeld",
+      "passed": true,
+      "detail": "{\"inBeeld\":true,\"overflow\":0}"
+    },
+    {
+      "name": "home dark/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "home dark/320: tabje 1 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "true,false,false"
+    },
+    {
+      "name": "home dark/320: tabje 2 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,true,false"
+    },
+    {
+      "name": "home dark/320: tabje 3 is na de klik actief en het enige actieve tabje",
+      "passed": true,
+      "detail": "false,false,true"
+    },
+    {
+      "name": "home dark/320: de drie tabjes geven elk een eigen voorbeeld",
+      "passed": true,
+      "detail": "Zaterdag hier lunchen?|Tik bij een gerecht op Delen. / Welke zullen we doen?|Bewaar een paar gerechten en stuur je lijstje in één keer. / Stem even, ik reserveer!|Stuur je lijstje met stemmen aan. Iedereen kiest, jij ziet de winnaar. Zonder account."
+    },
+    {
+      "name": "home dark/320: elk gerecht heeft Bewaren en Delen",
+      "passed": true,
+      "detail": "6"
+    },
+    {
+      "name": "home dark/320: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "home dark/320: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home dark/320: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "home dark/320: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "home dark/320: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "home dark/320: Versturen wijst naar /mijn-lijstje",
+      "passed": true,
+      "detail": "/mijn-lijstje"
+    },
+    {
+      "name": "home dark/320: de sluitknop heeft een aria-label",
+      "passed": true,
+      "detail": "Sluit de balk met bewaarde gerechten"
+    },
+    {
+      "name": "home dark/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true,\"opBalk\":true}"
+    },
+    {
+      "name": "home dark/320: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "home dark/320: de balk blijft dicht in deze sessie",
+      "passed": true,
+      "detail": "1"
+    },
+    {
+      "name": "gast home (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "thema: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "12/12 opnamen: "
+    },
+    {
+      "name": "zoeken light/1280: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/1280: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken light/1280: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"99x44\",\"44x44\",\"99x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken light/1280: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken light/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/1280: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/1280: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken light/1280: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":420,\"rechts\":20,\"onder\":20}"
+    },
+    {
+      "name": "zoeken light/1280: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":false,\"boven\":null,\"opTabbalk\":null}"
+    },
+    {
+      "name": "zoeken light/1280: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "zoeken light/390: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/390: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken light/390: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken light/390: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken light/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/390: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/390: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken light/390: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "zoeken light/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true}"
+    },
+    {
+      "name": "zoeken light/390: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "zoeken light/320: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/320: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken light/320: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken light/320: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken light/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/320: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken light/320: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken light/320: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "zoeken light/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true}"
+    },
+    {
+      "name": "zoeken light/320: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "gast zoeken (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "zoeken dark/1280: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/1280: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken dark/1280: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"99x44\",\"44x44\",\"99x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken dark/1280: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken dark/1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/1280: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/1280: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken dark/1280: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":420,\"rechts\":20,\"onder\":20}"
+    },
+    {
+      "name": "zoeken dark/1280: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":false,\"boven\":null,\"opTabbalk\":null}"
+    },
+    {
+      "name": "zoeken dark/1280: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "zoeken dark/390: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/390: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken dark/390: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken dark/390: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken dark/390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/390: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/390: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken dark/390: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":366,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "zoeken dark/390: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true}"
+    },
+    {
+      "name": "zoeken dark/390: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "zoeken dark/320: het thema is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/320: elk resultaat heeft de bewaar- en deelknoppen",
+      "passed": true,
+      "detail": "4"
+    },
+    {
+      "name": "zoeken dark/320: de knoppen zijn minstens 44 bij 44 px",
+      "passed": true,
+      "detail": "[\"44x44\",\"44x44\",\"44x44\",\"44x44\"]"
+    },
+    {
+      "name": "zoeken dark/320: geen knop staat in een link",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken dark/320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/320: Bewaren zet de knop aan",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "zoeken dark/320: de balk verschijnt met het aantal en de tekst",
+      "passed": true,
+      "detail": "1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen"
+    },
+    {
+      "name": "zoeken dark/320: de balk staat helemaal in beeld",
+      "passed": true,
+      "detail": "{\"breedte\":296,\"rechts\":12,\"onder\":80}"
+    },
+    {
+      "name": "zoeken dark/320: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar",
+      "passed": true,
+      "detail": "{\"zichtbaar\":true,\"boven\":true,\"opTabbalk\":true}"
+    },
+    {
+      "name": "zoeken dark/320: de balk is weg na sluiten",
+      "passed": true,
+      "detail": "{\"balk\":false,\"vlag\":\"1\"}"
+    },
+    {
+      "name": "gast zoeken (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be65-home-1280-light-kaart.png",
+      "sha256": "a68f78bbcbdcd193b52b8b80e5849e3a206f40c21e08116df506306518d6d3be",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-light-balk.png",
+      "sha256": "06535df6f2e74be3f9f12237b58e62ad2803287df919fbf166e77025e0a4adc5",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-light-kaart.png",
+      "sha256": "1dbcbbeced44cc3e3f6048f7d876fd433bba946d76de99ab34cd7c4089014bca",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-light-balk.png",
+      "sha256": "cb547901e49d6a39a15cbd2d34e8ac19f46f91436bd07f8465e9f5c339423409",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-light-kaart.png",
+      "sha256": "8c19e72a5fa4dcb9d12ff6d7521bf298904a8085962cc982183363189f62a83f",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-light-balk.png",
+      "sha256": "fc5cb6e584b04ed185e57a5d1ddf2b7ff06ba9b17b0e2243510081450afe06a0",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-dark-kaart.png",
+      "sha256": "f27b86dbe49b6b52daeaba2ec038a5f1db473ce3530c378fe82f3a073b5eb358",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-1280-dark-balk.png",
+      "sha256": "58ef9cf06028ba2b96e6a98c91ef130feea1502d45a26076229609ae81e20b2b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-dark-kaart.png",
+      "sha256": "a7a3aad0ff008c07c2939217ee043fcc8c5f09a65ba05b064688a95dce7aec4c",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-390-dark-balk.png",
+      "sha256": "79a2adbe4a2e97247111f3546e7e45336528aba63aad5e37dfab7002d9f58efa",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-dark-kaart.png",
+      "sha256": "e78ee25b46175b787707b72c235382112fe264c08c5caf03cc6c7f14e6dfc1b2",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "kaart",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-home-320-dark-balk.png",
+      "sha256": "86caabec64fb8304029cf2860623e00f3921b4a6df5673bbabaec5e807fca3c1",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-1280-light-balk.png",
+      "sha256": "843d473955df4410e1e4ae4b393ba11c8ee55129e3cd588829f684597a729e4a",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-390-light-balk.png",
+      "sha256": "735798ad2211c95f31f11fed976942558f4439b4c07eb93c7690e348aef67728",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-320-light-balk.png",
+      "sha256": "e389f40b293d957b4e9c7a04cbf2fb92f3c69d4aa1803ac844b4ddb26360b201",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "balk",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-1280-dark-balk.png",
+      "sha256": "b16a656609df3b240d7afdf40094f7cfaab28cc3afb8b5d1ffddae21fa5e35ce",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-390-dark-balk.png",
+      "sha256": "6f57d5db2c3682e8798884b81031049cf0834c0ee3c6e7fe88aa429693c44448",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be65-zoeken-320-dark-balk.png",
+      "sha256": "5a9a610bbcef4fdc9cc590f9ad4f6762d8b6d1b5506da3e65f4f405b3e2b8ad2",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "balk",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}

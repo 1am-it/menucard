@@ -249,7 +249,7 @@ async function homeScenario(cdp) {
     await setViewport(cdp, 1280, 900);
     await navigate(cdp, `${APP}/`, `Boolean(document.querySelector('.share-hero-tab'))`);
     await applyTheme(cdp, theme);
-    await a11y('gast home', theme);
+    await a11y(cdp, 'gast home', theme);
   }
 
   const zonderBewijs = shots.filter((opname) => !themeOk(opname.themeProof, opname.theme));
@@ -298,7 +298,7 @@ async function zoekScenario(cdp) {
     await setViewport(cdp, 1280, 900);
     await navigate(cdp, `${APP}/search?q=steak`, `Boolean(document.querySelector('.dish-result-actions .dish-share-buttons'))`);
     await applyTheme(cdp, theme);
-    await a11y('gast zoeken', theme);
+    await a11y(cdp, 'gast zoeken', theme);
   }
 }
 
@@ -354,6 +354,8 @@ async function main() {
       fixtureRoutes: [
         { id: 'zoeken', match: 'prefix', path: '/api/search', methods: ['GET'] },
         { id: 'restaurants', match: 'prefix', path: '/api/restaurants', methods: ['GET'] },
+        { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET'] },
+        { id: 'tellers', match: 'exact', path: '/api/v1/tellers', methods: ['POST'] },
         { id: 'bekeken', match: 'exact', path: '/api/v1/bekeken', methods: ['POST'] },
       ],
     });
@@ -428,11 +430,11 @@ async function leegOpslag(cdp) {
 }
 
 /** De a11y-audit van de bestaande lib, met 0 fouten als eis. */
-async function a11y(label, theme) {
+async function a11y(cdp, label, theme) {
   const measured = await evalJs(cdp, audit.inPageSource('auditPage', [{ minTarget: 44 }]));
   const review = audit.checksFromAudit(label, theme === 'light' ? 'licht' : 'donker', measured, { minTarget: 44 });
-  for (const failure of review.failures) {
+  for (const failure of review.errors) {
     check(`${label} (${theme}) · a11y-fout · ${failure.criterion}`, false, `${failure.reason} · ${failure.name}`);
   }
-  check(`${label} (${theme}) · a11y-audit zonder fouten`, review.failures.length === 0, `${review.failures.length} fouten`);
+  check(`${label} (${theme}) · a11y-audit zonder fouten`, review.errors.length === 0, `${review.errors.length} fouten`);
 }

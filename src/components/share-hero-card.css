@@ -39,7 +39,9 @@
 
 .share-hero-tab {
   flex: 1 1 auto;
-  min-height: 40px;
+  /* BE-65 ronde 2: 44 px hoog, zodat elk tabje een echt tikdoel is en niet
+     binnen 12 px van zijn buurman ligt (a11y-audit, tikdoel). */
+  min-height: 44px;
   padding: 0 14px;
   border: 0;
   border-radius: var(--radius-pill);
