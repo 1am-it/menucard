@@ -25,7 +25,8 @@ test('de footer toont de contracttekst en gaat naar /inloggen', () => {
   const source = read('src/components/PublicFooter.js');
   const { LOGIN_PAGE_HREF } = require('../lib/loginEntry');
   assert.equal(LOGIN_PAGE_HREF, '/inloggen');
-  assert.match(source, /href=\{LOGIN_PAGE_HREF\}/);
+  assert.match(source, /const LOGIN_HREF = '\/inloggen'/, 'dezelfde bestemming als de ene ingang');
+  assert.match(source, /href=\{LOGIN_HREF\}/);
   assert.match(source, /Voor restaurants · Inloggen/);
   assert.match(source, /^import '\.\/public-footer\.css'$/m);
   assert.ok(fs.existsSync(path.join(ROOT, 'src/components/public-footer.css')));
@@ -36,11 +37,8 @@ test('de footer heeft geen sessiecheck nodig: geen Supabase, geen opslag, geen v
   const imports = source.match(/^import .+$/gm) || [];
   assert.deepEqual(
     imports.map((line) => line.trim()),
-    [
-      "import Link from 'next/link'",
-      "import { LOGIN_PAGE_HREF } from '@/src/lib/loginEntry'",
-      "import './public-footer.css'",
-    ],
+    ["import Link from 'next/link'", "import './public-footer.css'"],
+    'alleen next/link en de eigen CSS: niets extra in de eerste lading',
   );
   assert.doesNotMatch(source, /supabase|fetch\(|localStorage|useEffect/i);
 });
