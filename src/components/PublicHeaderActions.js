@@ -75,6 +75,10 @@ export default function PublicHeaderActions() {
 
   useEffect(() => {
     const storage = safeBrowserStorage()
+    setSignedIn(hasSupabaseSessionKey(storage))
+    setTheme(readThemePreference(storage) || DEFAULT_THEME)
+    setShareValue(readSharePreference(storage))
+  }, [])
 
   // Esc sluit, Tab blijft in het paneel en de focus keert terug naar de knop
   // die het paneel opende.
@@ -257,8 +261,3 @@ export default function PublicHeaderActions() {
     </div>
   )
 }
-
-    setSignedIn(hasSupabaseSessionKey(storage))
-    setTheme(readThemePreference(storage) || DEFAULT_THEME)
-    setShareValue(readSharePreference(storage))
-  }, [])
