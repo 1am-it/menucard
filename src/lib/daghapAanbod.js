@@ -817,6 +817,43 @@ function cijferTekst(value) {
 }
 
 /**
+ * BE-67, ronde 3: de bewaar- en deelknop bij een aanbod tellen via de
+ * bestaande tellerroute (`POST /api/v1/tellers`, BE-44). Die route kent
+ * gerechten; een aanbod krijgt daarom een eigen sleutel in dezelfde vorm als de
+ * gerecht-id (`<menukaart>-<categorie>-<gerecht>`), maar met een eigen,
+ * ondubbelzinnige kop: `daghap-<restaurant>-<aanbod>`. De tellerroute schrijft
+ * daarmee één regel in `daghap_gebeurtenissen`, net als bij `bekeken`.
+ */
+const AANBOD_SLEUTEL_PREFIX = 'daghap';
+const AANBOD_SLEUTEL_MAX = 96;
+const AANBOD_ID_PATROON = /^\d{1,18}$/;
+
+function aanbodSleutel({ restaurantId, aanbodId } = {}) {
+  const restaurant = tekst(restaurantId);
+  const id = tekst(aanbodId);
+  if (!restaurant || restaurant.length > 64 || !AANBOD_ID_PATROON.test(id)) return null;
+  const sleutel = `${AANBOD_SLEUTEL_PREFIX}-${restaurant}-${id}`;
+  return sleutel.length <= AANBOD_SLEUTEL_MAX ? sleutel : null;
+}
+
+/**
+ * De restaurant- en aanbodsleutel achter zo'n sleutel, of null. Een gerecht-id
+ * (`6-diner-0-0`) begint nooit met `daghap-`, dus de twee tellers kunnen elkaar
+ * niet in de weg zitten.
+ */
+function parseAanbodSleutel(value) {
+  const sleutel = tekst(value);
+  if (!sleutel || sleutel.length > AANBOD_SLEUTEL_MAX) return null;
+  const delen = sleutel.split('-');
+  if (delen.length < 3 || delen[0] !== AANBOD_SLEUTEL_PREFIX) return null;
+  const laatste = delen[delen.length - 1];
+  if (!AANBOD_ID_PATROON.test(laatste)) return null;
+  const restaurantId = delen.slice(1, -1).join('-');
+  if (!restaurantId || restaurantId.length > 64) return null;
+  return { sleutel, restaurantId, aanbodId: Number(laatste) };
+}
+
+/**
  * Het aanbod zoals een gast het ziet (stap B): alleen wat de weergave nodig
  * heeft, nooit het account, de status of de filterreden. Een gast krijgt dus
  * geen enkele interne kolom en ook geen volledige lijst van alle restaurants.
@@ -883,6 +920,7 @@ module.exports = {
   DAGHAP_TIJDZONE,
   DAGHAP_WEEKDAGEN,
   aanbodFilterTekst,
+  aanbodSleutel,
   aanbodVoorScherm,
   aantalEmoji,
   begindagVan,
@@ -913,6 +951,7 @@ module.exports = {
   normaliseerVoorFilter,
   normaliseerWeekdagen,
   opschonen,
+  parseAanbodSleutel,
   prijsNaarCenten,
   publiekAanbodVoorScherm,
   staatInHoofdletters,

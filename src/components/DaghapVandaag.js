@@ -119,6 +119,11 @@ export default function DaghapVandaag({ restaurantId }) {
           const melding = meldingen[item.id]
           // De bestaande bewaar- en deelknop werken met een gerecht-entry; een
           // daghap krijgt er een met precies de velden die die knoppen gebruiken.
+          // BE-67 (ronde 3): de id is tegelijk de aanbodsleutel van de
+          // tellerroute (`daghap-<restaurant>-<aanbod>`, zie
+          // src/lib/daghapAanbod.js), zodat Bewaren en Delen ook in
+          // daghap_gebeurtenissen tellen. Beide knoppen gebruiken precies deze
+          // id; geen tweede vorm ernaast.
           const entry = {
             id: `daghap-${restaurantId}-${item.id}`,
             name: item.naam,
@@ -185,7 +190,7 @@ export default function DaghapVandaag({ restaurantId }) {
                   name={item.naam}
                   title={item.naam}
                   href={entry.href}
-                  dishKey={`daghap-${item.id}`}
+                  dishKey={entry.id}
                 />
               </div>
               <div className="daghap-vandaag-report">

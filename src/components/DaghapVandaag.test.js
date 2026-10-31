@@ -111,3 +111,19 @@ test("BE-67: het houderoverzicht heeft Op = op en de drie cijfers", () => {
   assert.match(view, /item\.cijfers\.bewaardTekst/);
   assert.match(view, /item\.cijfers\.gedeeldTekst/);
 });
+test('BE-67: Bewaar en Delen bij een aanbod sturen dezelfde aanbodsleutel mee', () => {
+  const component = read(COMPONENT_PATH);
+  // Eén id, gebruikt door beide knoppen: de bewaarknop leest hem uit de entry,
+  // de deelknop krijgt precies diezelfde id als `dishKey`.
+  assert.match(component, /id: `daghap-\$\{restaurantId\}-\$\{item\.id\}`/,
+    'de entry-id is de aanbodsleutel van de tellerroute');
+  assert.match(component, /dishKey=\{entry\.id\}/);
+  assert.doesNotMatch(component, /dishKey=\{`daghap-/, 'geen tweede sleutelvorm ernaast');
+
+  // De sleutel die de browser stuurt, is de sleutel die de route herkent.
+  const { aanbodSleutel, parseAanbodSleutel } = require('../lib/daghapAanbod');
+  const sleutel = aanbodSleutel({ restaurantId: '6', aanbodId: 42 });
+  assert.equal(sleutel, `daghap-${'6'}-${42}`);
+  assert.deepEqual(parseAanbodSleutel(sleutel), { sleutel, restaurantId: '6', aanbodId: 42 });
+});
+

@@ -170,3 +170,112 @@ test('tellerroute: hooguit één verzoek per seconde per gerecht en gebeurtenis'
   await handlers.countDishEvent(request({ dish: DISH, event: 'gedeeld' }));
   assert.equal(fake.calls.length, 4);
 });
+
+// BE-67 (ronde 3) — de bewaar- en deelknop bij een daghap of dagmenu gebruiken
+// dezelfde tellerroute. Een nep-client met `from().insert()` legt vast wat er
+// geschreven wordt; er komt geen Supabase en geen netwerk aan te pas.
+
+const AANBOD = 'daghap-6-42';
+
+/** Een nep-client met zowel de tellerfunctie als de geschiedenistabel. */
+function fakeBeheerSupabase(insertResult = { error: null }) {
+  const rows = [];
+  return {
+    rows,
+    client: {
+      rpc() {
+        return Promise.resolve({ error: null });
+      },
+      from(table) {
+        return {
+          insert(row) {
+            rows.push({ table, row });
+            return Promise.resolve(typeof insertResult === 'function' ? insertResult(row) : insertResult);
+          },
+        };
+      },
+    },
+  };
+}
+
+test('tellerroute: bewaard en gedeeld bij een aanbod schrijven één rij in daghap_gebeurtenissen', async () => {
+  const fake = fakeBeheerSupabase();
+  const handlers = handlerWith(fake.client, { now: () => Date.UTC(2026, 9, 31, 10, 0, 0) });
+
+  const bewaard = await handlers.countDishEvent(request({ dish: AANBOD, event: 'bewaard' }));
+  const gedeeld = await handlers.countDishEvent(request({ dish: AANBOD, event: 'gedeeld' }));
+
+  assert.deepEqual(bewaard, { status: 204, body: null });
+  assert.deepEqual(gedeeld, { status: 204, body: null });
+  assert.equal(fake.rows.length, 2);
+  assert.equal(fake.rows[0].table, 'daghap_gebeurtenissen');
+  assert.deepEqual(fake.rows[0].row, {
+    aanbod_id: 42,
+    restaurant_id: '6',
+    actie: 'bewaard',
+    door: null,
+    apparaat: null,
+    gegevens: {},
+    moment: '2026-10-31T10:00:00.000Z',
+  });
+  assert.equal(fake.rows[1].row.actie, 'gedeeld');
+  // Niets over de bezoeker: geen apparaat, geen account, geen cookie.
+  for (const { row } of fake.rows) {
+    assert.equal(row.door, null);
+    assert.equal(row.apparaat, null);
+    assert.deepEqual(row.gegevens, {});
+    assert.deepEqual(Object.keys(row).sort(), [
+      'aanbod_id', 'actie', 'apparaat', 'door', 'gegevens', 'moment', 'restaurant_id',
+    ]);
+  }
+});
+
+test('tellerroute: een aanbod telt niet bij reserveren, een onbekend event of een onbruikbare sleutel', async () => {
+  const fake = fakeBeheerSupabase();
+  const handlers = handlerWith(fake.client);
+
+  for (const body of [
+    { dish: AANBOD, event: 'reserveren' },
+    { dish: AANBOD, event: 'bekeken' },
+    { dish: AANBOD, event: 'onbekend' },
+    { dish: 'daghap-6-', event: 'bewaard' },
+    { dish: 'daghap-6-abc', event: 'bewaard' },
+    { dish: DISH, event: 'bewaard' },
+  ]) {
+    const result = await handlers.countDishEvent(request(body));
+    assert.deepEqual(result, { status: 204, body: null });
+  }
+
+  assert.equal(fake.rows.filter((entry) => entry.table === 'daghap_gebeurtenissen').length, 0);
+});
+
+test('tellerroute: zonder 0026 (de insert faalt) blijft het 204 en telt een gerecht gewoon door', async () => {
+  // De check op `actie` kent de waarde nog niet: Postgres weigert de rij.
+  const fake = fakeBeheerSupabase({ error: { code: '23514', message: 'new row violates check constraint' } });
+  const handlers = handlerWith(fake.client);
+
+  const result = await handlers.countDishEvent(request({ dish: AANBOD, event: 'gedeeld' }));
+
+  assert.deepEqual(result, { status: 204, body: null });
+  assert.equal(fake.rows.length, 1);
+  // Een geweigerde rij is geen ontbrekende opslag: het gerecht telt door.
+  assert.equal(handlers.storageMissing(), false);
+});
+
+test('tellerroute: een aanbod telt hooguit één keer per seconde per sleutel en gebeurtenis', async () => {
+  let clock = 9000;
+  const fake = fakeBeheerSupabase();
+  const handlers = handlerWith(fake.client, { now: () => clock });
+
+  await handlers.countDishEvent(request({ dish: AANBOD, event: 'gedeeld' }));
+  await handlers.countDishEvent(request({ dish: AANBOD, event: 'gedeeld' }));
+  assert.equal(fake.rows.length, 1);
+
+  await handlers.countDishEvent(request({ dish: AANBOD, event: 'bewaard' }));
+  assert.equal(fake.rows.length, 2);
+
+  clock += 1000;
+  await handlers.countDishEvent(request({ dish: AANBOD, event: 'gedeeld' }));
+  assert.equal(fake.rows.length, 3);
+});
+
