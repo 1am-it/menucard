@@ -109,27 +109,59 @@ async function applyTheme(cdp, theme) {
 }
 
 
-/** De kaart: tabjes, aria-pressed, de tekst van het voorbeeld en de overloop. */
+/** De kaart: de radiogroep, de zichtbare labels, het getoonde voorbeeld en de overloop. */
 const KAART_STAAT = `(() => {
   const card = document.querySelector('.share-hero');
+  const radios = Array.from(document.querySelectorAll('.share-hero-radio'));
   const tabs = Array.from(document.querySelectorAll('.share-hero-tab'));
-  const bubble = document.querySelector('.share-hero-bubble');
-  const note = document.querySelector('.share-hero-note');
-  const figure = document.querySelector('.share-hero-example');
+  const panels = Array.from(document.querySelectorAll('.share-hero-example'));
+  const zichtbaar = panels.filter((p) => getComputedStyle(p).display !== 'none');
   const inBeeld = (el) => {
     if (!el) return false;
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && r.left >= 0 && r.right <= window.innerWidth + 0.5;
   };
+  // Het label zoals een gebruiker het ziet: alleen de zichtbare span telt.
+  const zichtbaarLabel = (el) => Array.from(el.children)
+    .filter((kind) => getComputedStyle(kind).display !== 'none')
+    .map((kind) => kind.textContent.trim())
+    .join('');
+  const toppen = tabs.map((t) => Math.round(t.getBoundingClientRect().top));
+  const paneel = zichtbaar[0] || null;
+  const bubble = paneel ? paneel.querySelector('.share-hero-bubble') : null;
+  const note = paneel ? paneel.querySelector('.share-hero-note') : null;
   return {
     thema: document.documentElement.getAttribute('data-theme'),
     kaart: Boolean(card),
     tabjes: tabs.length,
-    labels: tabs.map((t) => t.textContent.trim()),
-    pressed: tabs.map((t) => t.getAttribute('aria-pressed')),
+    radios: radios.length,
+    labels: tabs.map(zichtbaarLabel),
+    aangevinkt: radios.map((r) => r.checked),
+    toppen,
+    eenRegel: toppen.length === 3 && new Set(toppen).size === 1,
+    breedtes: tabs.map((t) => Math.round(t.getBoundingClientRect().width)),
+    panelen: panels.length,
+    zichtbarePanelen: zichtbaar.length,
+    zichtbaar: paneel ? paneel.className : '',
     bubble: bubble ? bubble.textContent.trim() : '',
     note: note ? note.textContent.trim() : '',
-    figuurLabel: figure ? figure.getAttribute('aria-label') : '',
+    figuurLabel: paneel ? paneel.getAttribute('aria-label') : '',
+    stemregels: paneel ? Array.from(paneel.querySelectorAll('.share-hero-vote-row')).map((row) => {
+      const naam = row.querySelector('.share-hero-vote-name');
+      const telling = row.querySelector('.share-hero-vote-count');
+      const track = row.querySelector('.share-hero-vote-track');
+      const fill = row.querySelector('.share-hero-vote-fill');
+      const tr = track ? track.getBoundingClientRect() : null;
+      const fr = fill ? fill.getBoundingClientRect() : null;
+      return {
+        naam: naam ? naam.textContent.trim() : '',
+        vet: naam ? Number(window.getComputedStyle(naam).fontWeight) >= 700 : null,
+        telling: telling ? telling.textContent.trim() : '',
+        aandeel: tr && fr && tr.width > 0 ? Math.round((fr.width / tr.width) * 100) : null,
+        balkKleur: track ? window.getComputedStyle(track).backgroundColor : '',
+        vulKleur: fill ? window.getComputedStyle(fill).backgroundColor : '',
+      };
+    }) : [],
     kaartInBeeld: inBeeld(card),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   };
@@ -195,22 +227,56 @@ async function homeScenario(cdp) {
       check(`${waar}: het thema is aangetoond`, themeOk(proof, theme), JSON.stringify(proof));
 
       const kaart = await evalJs(cdp, KAART_STAAT);
-      check(`${waar}: de deelkaart staat er met drie tabjes`, kaart.kaart && kaart.tabjes === 3, JSON.stringify({ kaart: kaart.kaart, tabjes: kaart.tabjes }));
-      check(`${waar}: precies één tabje is actief`, kaart.pressed.filter((p) => p === 'true').length === 1, kaart.pressed.join(','));
+      check(`${waar}: de deelkaart staat er met drie radio's en drie tabjes`,
+        kaart.kaart && kaart.radios === 3 && kaart.tabjes === 3,
+        JSON.stringify({ kaart: kaart.kaart, radios: kaart.radios, tabjes: kaart.tabjes }));
+      check(`${waar}: precies één radio staat aan`, kaart.aangevinkt.filter(Boolean).length === 1, kaart.aangevinkt.join(','));
+      check(`${waar}: alle drie de tabjes staan op één regel (gelijke offsetTop)`, kaart.eenRegel === true,
+        `offsetTop ${kaart.toppen.join(',')}`);
+      const verwacht = width <= 640
+        ? ['Eén gerecht', 'Lijstje', 'Stemmen']
+        : ['Eén gerecht', 'Een lijstje', 'Laat stemmen'];
+      check(`${waar}: de labels zijn ${verwacht.join(' / ')}`,
+        kaart.labels.join('|') === verwacht.join('|'), kaart.labels.join('|'));
+      check(`${waar}: de drie voorbeelden staan in de HTML, één is zichtbaar`,
+        kaart.panelen === 3 && kaart.zichtbarePanelen === 1,
+        JSON.stringify({ panelen: kaart.panelen, zichtbaar: kaart.zichtbarePanelen }));
       check(`${waar}: de kaart staat in beeld`, kaart.kaartInBeeld, JSON.stringify({ inBeeld: kaart.kaartInBeeld, overflow: kaart.overflow }));
       check(`${waar}: geen horizontale overloop`, kaart.overflow <= 0, kaart.overflow);
+      await shot(cdp, `be65-home-${width}-${theme}-tabjes.png`, { theme, state: 'tabjes', themeProof: proof });
 
       const teksten = [];
       for (let index = 0; index < kaart.tabjes; index += 1) {
         await evalJs(cdp, KLIK_TAB(index));
-        await sleep(140);
+        await sleep(120);
         const nu = await evalJs(cdp, KAART_STAAT);
         teksten.push(`${nu.bubble}|${nu.note}`);
-        check(`${waar}: tabje ${index + 1} is na de klik actief en het enige actieve tabje`,
-          nu.pressed[index] === 'true' && nu.pressed.filter((p) => p === 'true').length === 1, nu.pressed.join(','));
+        check(`${waar}: tabje ${index + 1} is na de klik het enige aangevinkte tabje`,
+          nu.aangevinkt[index] === true && nu.aangevinkt.filter(Boolean).length === 1, nu.aangevinkt.join(','));
+        check(`${waar}: tabje ${index + 1} toont alleen zijn eigen voorbeeld`,
+          nu.zichtbarePanelen === 1 && nu.zichtbaar.includes(['een', 'lijstje', 'stemmen'][index]),
+          JSON.stringify({ zichtbaar: nu.zichtbaar, aantal: nu.zichtbarePanelen }));
       }
       check(`${waar}: de drie tabjes geven elk een eigen voorbeeld`, new Set(teksten).size === kaart.tabjes, teksten.join(' / '));
-      await shot(cdp, `be65-home-${width}-${theme}-kaart.png`, { theme, state: 'kaart', themeProof: proof });
+
+      // Het voorbeeld "Laat stemmen" (Lead-review ronde 3, punt 1) staat nu open.
+      const stemmen = await evalJs(cdp, KAART_STAAT);
+      const regels = stemmen.stemregels;
+      check(`${waar}: het stemvoorbeeld noemt de gerechten met hun telling`,
+        regels.length === 2 &&
+          regels[0].naam === 'Pasta pesto' && regels[0].telling === '3× lekker' &&
+          regels[1].naam === 'Huisgemaakte burger' && regels[1].telling === '1× lekker',
+        JSON.stringify(regels.map((r) => `${r.naam} ${r.telling}`)));
+      check(`${waar}: de koploper is vet, de tweede regel niet`,
+        regels.length === 2 && regels[0].vet === true && regels[1].vet === false,
+        JSON.stringify(regels.map((r) => r.vet)));
+      check(`${waar}: de balkjes zijn 75% en 25%`,
+        regels.length === 2 && Math.abs(regels[0].aandeel - 75) <= 2 && Math.abs(regels[1].aandeel - 25) <= 2,
+        JSON.stringify(regels.map((r) => r.aandeel)));
+      check(`${waar}: het gevulde deel en de rest hebben een eigen kleur`,
+        regels.length === 2 && regels.every((r) => r.vulKleur && r.balkKleur && r.vulKleur !== r.balkKleur),
+        JSON.stringify(regels.map((r) => `${r.balkKleur}/${r.vulKleur}`)));
+      await shot(cdp, `be65-home-${width}-${theme}-kaart.png`, { theme, state: 'stemmen', themeProof: proof });
 
       const knoppen = await evalJs(cdp, knoppenStaat('.tonight-actions button'));
       check(`${waar}: elk gerecht heeft Bewaren en Delen`, knoppen.length >= 2, knoppen.length);
