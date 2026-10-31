@@ -1,0 +1,18 @@
+{
+  "ticket": "BE-65 (#157)",
+  "criterion": "de eerste laadgrootte van / en /search groeit hooguit 2 KB per route",
+  "category": "developer-meting uit de routetabel van twee lokale productiebuilds (next build op deze machine, dezelfde node_modules en Next 15.5.15); geen browseroverdracht en geen echte acceptatie",
+  "ranAt": "2026-10-31",
+  "baseSha": "053240d82c9a98fc0ba217f834dea90ae7db5408",
+  "headSha": "1195cef",
+  "method": "next build in deze werkkopie (head) en in een losse worktree op 053240d met een junction naar dezelfde node_modules; cijfers uit de routetabel (route-JS en First Load JS, inclusief de gedeelde chunks). De worktree is daarna verwijderd.",
+  "budgetKb": 2,
+  "rows": [
+    { "route": "/", "baseRoute": "7.31 kB", "baseFirstLoad": "123 kB", "headRoute": "8.34 kB", "headFirstLoad": "128 kB", "deltaFirstLoad": "+5 kB" },
+    { "route": "/search", "baseRoute": "7.69 kB", "baseFirstLoad": "121 kB", "headRoute": "7.82 kB", "headFirstLoad": "124 kB", "deltaFirstLoad": "+3 kB" }
+  ],
+  "shared": { "base": "103 kB", "head": "103 kB" },
+  "verdict": "over budget",
+  "note": "De deel- en bewaarknoppen op / en /search trekken de bestaande clientcode van de menukaart mee (DishShareButton, DishSaveButton, dishList, dishShare, sharePreference). Dat is functioneel wat het contract vraagt, maar het kost meer dan de 2 KB die het contract toestaat. Een volgende ronde kan de deelfunctie pas bij de klik laden; dat is een keuze over opbouw en prestatie en hoort bij de Lead, niet stilzwijgend bij de developer.",
+  "passed": false
+}
