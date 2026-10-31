@@ -1,0 +1,341 @@
+/* BE-64 (#156) — opmaak voor /voor-restaurants volgens het op 31 oktober
+   goedgekeurde ontwerp. Eigen bestand naast de pagina (BE-52), zodat
+   app/globals.css ongemoeid blijft. Alles is een token uit dat bestand: licht en
+   donker volgen automatisch en er staat nergens een hardgecodeerde kleur.
+
+   Desktop: een hero in twee kolommen, het weekoverzicht rechts in
+   --bg-elevated, daaronder "Wat je krijgt" in drie kolommen en het
+   allergenenblok in een eigen vlak. Mobiel: één kolom, alles onder elkaar. */
+
+.vr-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.vr-main {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.vr-hero {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+}
+
+.vr-hero-text {
+  min-width: 0;
+}
+
+.vr-title {
+  margin: 0 0 14px;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.vr-intro {
+  margin: 0 0 24px;
+  max-width: 46ch;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.vr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+
+.vr-cta-primary,
+.vr-cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.vr-cta-primary {
+  border-color: var(--button-primary-bg);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.vr-cta-primary:hover {
+  border-color: var(--button-primary-hover);
+  background: var(--button-primary-hover);
+}
+
+.vr-cta-secondary {
+  border-color: var(--border-hover);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.vr-cta-secondary:hover {
+  background: var(--surface-soft);
+}
+
+/* Het voorbeeld van het weekoverzicht: duidelijk voorbeeldwerk. De cijfers zijn
+   "—" (geen echte en geen verzonnen data) en de regel eronder zegt dat. */
+.vr-preview {
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.vr-preview-eyebrow {
+  margin: 0 0 14px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.vr-preview-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.vr-preview-stat {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.vr-preview-label {
+  margin: 0 0 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.vr-preview-value {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.vr-preview-caption {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.vr-features {
+  margin-top: 48px;
+}
+
+.vr-section-title {
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.vr-feature-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vr-feature {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card-surface);
+}
+
+/* Lijn-icoon in --accent: de SVG zelf staat op currentColor. */
+.vr-feature-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin: 0 0 10px;
+  color: var(--accent);
+}
+
+.vr-feature-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.vr-feature-body {
+  margin: 0;
+
+.vr-allergens {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 22px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+}
+
+.vr-allergens-text {
+  min-width: 0;
+}
+
+.vr-allergens .vr-section-title {
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.vr-allergens-body {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.vr-allergens-action {
+  justify-self: start;
+  min-height: 48px;
+}
+
+.vr-bottom-actions {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 720px) {
+  .vr-feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .vr-allergens {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .vr-allergens-action {
+    justify-self: end;
+  }
+}
+
+@media (min-width: 1000px) {
+  .vr-main {
+    padding-top: 48px;
+  }
+
+  .vr-hero {
+    grid-template-columns: minmax(0, 1fr) 380px;
+    align-items: start;
+    gap: 40px;
+  }
+
+  .vr-title {
+    font-size: 60px;
+  }
+
+  .vr-intro {
+    font-size: 17px;
+  }
+
+  .vr-feature-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 359px) {
+  .vr-main {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .vr-title {
+    font-size: 28px;
+  }
+
+  .vr-actions .vr-cta-primary,
+  .vr-actions .vr-cta-secondary,
+  .vr-allergens-action {
+    width: 100%;
+  }
+}
+
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.vr-soon {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.vr-cta-primary:focus-visible,
+.vr-cta-secondary:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.vr-actions .vr-cta-primary,
+.vr-actions .vr-cta-secondary {
+  min-height: 52px;
+}
+
+.vr-micro {
+  margin: 12px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}

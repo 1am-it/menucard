@@ -1,7 +1,9 @@
 'use strict';
 
-// BE-59 (#146, punt 3) — de footerlink "Voor restaurants · Inloggen" onderaan
-// de publieke pagina's, en de ene ingang waar hij heen gaat.
+// BE-59 (#146, punt 3) — de footerlinks onderaan de publieke pagina's, en de
+// pagina's waar ze heen gaan. BE-64 (#156, punt 5) splitst de oude link
+// "Voor restaurants · Inloggen": "Voor restaurants" gaat naar
+// /voor-restaurants, "Inloggen" blijft de ene ingang.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -19,25 +21,36 @@ const PUBLIC_PAGES = [
   'app/restaurant/[id]/RestaurantDetailView.js',
   'app/menu/[id]/MenuView.js',
   'app/mijn-lijstje/MijnLijstjeView.js',
+  // BE-64 (#156): de pagina voor restaurants heeft dezelfde kop en footer.
+  'app/voor-restaurants/page.js',
 ];
 
-test('de footer toont de contracttekst en gaat naar /inloggen', () => {
+test('de footer toont "Voor restaurants" en "Inloggen", elk naar de eigen pagina', () => {
   const source = read('src/components/PublicFooter.js');
   const { LOGIN_PAGE_HREF } = require('../lib/loginEntry');
+  const { FOR_RESTAURANTS_HREF } = require('../lib/forRestaurantsCopy');
   assert.equal(LOGIN_PAGE_HREF, '/inloggen');
+  assert.equal(FOR_RESTAURANTS_HREF, '/voor-restaurants');
   assert.match(source, /const LOGIN_HREF = '\/inloggen'/, 'dezelfde bestemming als de ene ingang');
-  assert.match(source, /href=\{LOGIN_HREF\}/);
-  assert.match(source, /Voor restaurants · Inloggen/);
+  assert.match(source, /const RESTAURANTS_HREF = '\/voor-restaurants'/, 'de eigen pagina voor restaurants');
+  assert.match(source, /href=\{RESTAURANTS_HREF\} prefetch=\{false\}>\s*Voor restaurants\s*<\/Link>/);
+  assert.match(source, /href=\{LOGIN_HREF\} prefetch=\{false\}>\s*Inloggen\s*<\/Link>/);
+  assert.match(source, /className="public-footer-sep" aria-hidden="true"/, 'het scheidingsteken leest niet voor');
   assert.match(source, /^import '\.\/public-footer\.css'$/m);
   assert.ok(fs.existsSync(path.join(ROOT, 'src/components/public-footer.css')));
 });
 
-test('de footerlink laadt /inloggen niet vooruit (gemeten eerste laadgrootte)', () => {
+test('de footerlinks laden de twee routes niet vooruit (gemeten eerste laadgrootte)', () => {
   // BE-59 deel 3 (#146): zonder prefetch={false} haalde Next.js de route
   // /inloggen al op zodra de link bij het venster kwam: +6,8 KB op / en +6,1 KB
-  // op /search in ops/browser/run-be59-load-size-check.js.
+  // op /search in ops/browser/run-be59-load-size-check.js. Voor
+  // /voor-restaurants geldt hetzelfde (BE-64).
   const source = read('src/components/PublicFooter.js');
-  assert.match(source, /<Link className="public-footer-link" href=\{LOGIN_HREF\} prefetch=\{false\}>/);
+  const links = source.match(/<Link\b[^>]*>/g) || [];
+  assert.equal(links.length, 2, 'twee footerlinks');
+  for (const link of links) {
+    assert.match(link, /prefetch=\{false\}/, `${link} laadt niet vooruit`);
+  }
 });
 
 test('de footer heeft geen sessiecheck nodig: geen Supabase, geen opslag, geen verzoek', () => {

@@ -157,6 +157,14 @@ const SCENARIOS = [
     dialog: true,
     label: 'de instellingen (Delen via)',
   },
+  // BE-64 (#156): de publieke pagina voor restaurants, met de gedeelde kop, de
+  // hero, "Wat je krijgt" en het allergenenblok.
+  {
+    name: 'voor-restaurants',
+    url: '/voor-restaurants',
+    ready: `${MAIN_READY} && !!document.querySelector('.vr-title')`,
+    label: 'voor restaurants',
+  },
 ];
 
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);
