@@ -104,6 +104,16 @@ test('elk menu-item is een tikdoel van 44 px', () => {
   assert.match(css, /\.account-menu-item \{[^}]*min-height: 44px;/);
 });
 
+test('het paneel van onderen hangt aan het venster, niet aan de kop', () => {
+  // BE-59 deel 3 (#146): de kop heeft `backdrop-filter`, en dat maakt de kop het
+  // referentiekader voor `position: fixed`. Zonder portal kwam het paneel boven
+  // in beeld in plaats van van onderen (gevonden door de browsercheck).
+  const source = read(COMPONENT);
+  assert.match(source, /import \{ createPortal \} from 'react-dom'/);
+  assert.match(source, /narrow && typeof document !== 'undefined' \? createPortal\(panel, document\.body\) : panel/);
+  assert.match(source, /const inPanel = panelRef\.current && panelRef\.current\.contains\(event\.target\)/);
+});
+
 test('mobiel: smaller dan 720 px hetzelfde menu als paneel van onderen, met sluitknop', () => {
   const source = read(COMPONENT);
   const css = read(CSS);
@@ -131,11 +141,12 @@ test('geen nieuwe dependency, geen eigen inloglogica of TOTP', () => {
     importLines.map((line) => line.trim()),
     [
       "import { useEffect, useRef, useState } from 'react'",
+      "import { createPortal } from 'react-dom'",
       "import { usePathname, useRouter } from 'next/navigation'",
       'import {',
       "import './account-menu.css'",
     ],
-    'alleen React, next/navigation, de pure helpers en de eigen CSS',
+    'alleen React, react-dom (bestaande dependency, voor het paneel), next/navigation, de pure helpers en de eigen CSS',
   );
   assert.match(source, /\} from '@\/src\/lib\/accountMenu'/);
   assert.doesNotMatch(source, /signInWith|verifyOtp|totp|mfa|enroll/i);

@@ -23,6 +23,7 @@
 // rolgefilterd. Een ontbrekend aantal geeft geen stip, nooit een nep-getal.
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   accountAriaLabel,
@@ -149,7 +150,11 @@ export default function AccountMenu() {
     }
 
     function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setOpen(false)
+      // Het paneel kan door een portal buiten de wikkel staan (smal scherm);
+      // een klik in het menu zelf mag het niet sluiten.
+      const inWrapper = wrapperRef.current && wrapperRef.current.contains(event.target)
+      const inPanel = panelRef.current && panelRef.current.contains(event.target)
+      if (!inWrapper && !inPanel) setOpen(false)
     }
 
     document.addEventListener('keydown', handleKeyDown)
@@ -240,6 +245,36 @@ export default function AccountMenu() {
     )
   }
 
+  // Het paneel zelf, één keer beschreven: op een smal scherm gaat het door een
+  // portal naar <body>, op een breed scherm staat het onder de knop.
+  const panel = (
+    <div
+      ref={panelRef}
+      id={PANEL_ID}
+      role="dialog"
+      aria-label="Accountmenu"
+      className={`account-menu-panel ${narrow ? 'account-menu-panel--sheet' : ''}`}
+      onKeyDown={handlePanelKeyDown}
+    >
+      {narrow && (
+        <div className="account-menu-sheet-header">
+          <span className="account-menu-sheet-title">Account</span>
+          <button
+            type="button"
+            className="account-menu-close"
+            onClick={() => {
+              setOpen(false)
+              if (triggerRef.current) triggerRef.current.focus()
+            }}
+          >
+            Sluiten
+          </button>
+        </div>
+      )}
+      {menuBody()}
+    </div>
+  )
+
   return (
     <div className="account-menu" ref={wrapperRef}>
       <button
@@ -257,33 +292,12 @@ export default function AccountMenu() {
         {dot && <span className="account-menu-dot" aria-hidden="true" />}
       </button>
 
-      {open && (
-        <div
-          ref={panelRef}
-          id={PANEL_ID}
-          role="dialog"
-          aria-label="Accountmenu"
-          className={`account-menu-panel ${narrow ? 'account-menu-panel--sheet' : ''}`}
-          onKeyDown={handlePanelKeyDown}
-        >
-          {narrow && (
-            <div className="account-menu-sheet-header">
-              <span className="account-menu-sheet-title">Account</span>
-              <button
-                type="button"
-                className="account-menu-close"
-                onClick={() => {
-                  setOpen(false)
-                  if (triggerRef.current) triggerRef.current.focus()
-                }}
-              >
-                Sluiten
-              </button>
-            </div>
-          )}
-          {menuBody()}
-        </div>
-      )}
+      {/* BE-59 deel 3 (#146): de kop heeft `backdrop-filter`, en dat maakt van de
+          kop het referentiekader voor `position: fixed`. Het paneel van onderen
+          hing daardoor aan de kop in plaats van aan het venster en kwam boven
+          in beeld. Een portal naar <body> zet het weer op zijn plek; op een
+          breed scherm blijft het menu gewoon onder de knop staan. */}
+      {open && (narrow && typeof document !== 'undefined' ? createPortal(panel, document.body) : panel)}
     </div>
   )
 }
