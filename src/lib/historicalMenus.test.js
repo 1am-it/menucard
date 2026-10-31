@@ -9,6 +9,11 @@
 // The snapshot is pinned by its canonical LF hash and latest scraped date.
 // Changing either requires an explicit acceptance-evidence update, not a
 // silent refresh.
+//
+// BE-71 (#176, besluit 021) added two live cards (5-menukaart, 22-menukaart) to
+// the same file. That is the explicit acceptance-evidence update named above:
+// the whole file stays pinned by this hash and the latest scraped date, and the
+// four March cards of TARGETS below are still asserted one-for-one.
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -21,8 +26,8 @@ const { categoryPath } = require('./menuHierarchy');
 const { liveMenuLines, normalizePrice, buildMenuConcept } = require('./menuConcept');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const SNAPSHOT_SHA256 = '46c84c0fad3c0bef02173cedfa4e5e3d699d2acacd0a8b9ff9ec4afe90e49766';
-const LATEST_SCRAPED = '2026-03-28';
+const SNAPSHOT_SHA256 = '61a3fdaa21df0c7705c8c5d96d01e560d298002515d92e04f2863a1f45ec3e92';
+const LATEST_SCRAPED = '2026-11-01';
 const TARGETS = [
   { id: '1', name: 'Restaurant Wolfslaar' },
   { id: '6', name: 'Brasserie Bardot' },

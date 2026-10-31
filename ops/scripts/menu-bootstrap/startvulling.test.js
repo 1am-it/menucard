@@ -246,6 +246,7 @@ test('de motor levert voor een complete kaart een entry; het rapport noemt bron,
 test('het rapport telt nieuw, weg en een andere prijs tegen de kaart van maart', () => {
   const previous = {
     '99-menukaart': {
+      scraped: '2026-03-25',
       categories: [{ name: 'Hoofdgerechten', items: [{ name: 'Biefstuk', price: '€24,00', priceValue: 24 }, { name: 'Oude vis', price: '€20,00', priceValue: 20 }] }],
     },
   };

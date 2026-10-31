@@ -38,7 +38,11 @@ function parseArgs(argv) {
 }
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  // The Dutch calendar date of the fetch, not the UTC date: a card fetched at
+  // 00:32 in Breda is today's card, not yesterday's.
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
 function readJson(file) {

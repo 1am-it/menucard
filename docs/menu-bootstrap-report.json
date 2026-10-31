@@ -1,8 +1,8 @@
 {
   "issue": "#176 (BE-71)",
   "decision": "planning/decisions/021-breda-menu-bootstrap.md",
-  "scraped": "2026-10-31",
-  "generatedAt": "2026-10-31T23:31:20.968Z",
+  "scraped": "2026-11-01",
+  "generatedAt": "2026-10-31T23:38:31.399Z",
   "totals": {
     "restaurants": 25,
     "done": 2,
@@ -131,8 +131,10 @@
       "pricedCount": 12,
       "pageCount": null,
       "reasons": [],
-      "hadCard": false,
-      "previousKeys": []
+      "hadCard": true,
+      "previousKeys": [
+        "5-menukaart"
+      ]
     },
     {
       "id": "6",
@@ -488,8 +490,10 @@
       "pricedCount": 22,
       "pageCount": null,
       "reasons": [],
-      "hadCard": false,
-      "previousKeys": []
+      "hadCard": true,
+      "previousKeys": [
+        "22-menukaart"
+      ]
     },
     {
       "id": "23",

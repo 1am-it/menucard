@@ -69,7 +69,10 @@ function buildReport({ results, previousMenus, scraped, generatedAt }) {
       hadCard,
       previousKeys: Object.keys(previous),
     };
-    if (hadCard && result.entry && result.status === 'done') {
+    // A difference is only meaningful against a card that was fetched on an
+    // earlier day: a re-run on the same day would compare the card with itself.
+    const olderCard = Object.values(previous).some((entry) => entry && typeof entry.scraped === 'string' && entry.scraped < (scraped || ''));
+    if (hadCard && olderCard && result.entry && result.status === 'done') {
       const diffs = {};
       for (const [key, entry] of Object.entries(previous)) diffs[key] = compareCards(entry, result.entry);
       row.diff = diffs;
@@ -140,6 +143,14 @@ function renderMarkdown(report) {
   }
   lines.push('');
   const compared = report.restaurants.filter((row) => row.diff);
+  if (compared.length === 0) {
+    lines.push('## Verschillen met de kaarten van 25 maart 2026');
+    lines.push('');
+    lines.push('Geen van de bestaande kaarten is vervangen, dus er zijn geen nieuwe, verdwenen of');
+    lines.push('anders geprijsde gerechten te melden. De vier kaarten van maart (1, 6, 19, 23) staan');
+    lines.push('ongewijzigd in `data/menus.json`; hun verse lezing staat met reden in de tabel hierboven.');
+    lines.push('');
+  }
   if (compared.length > 0) {
     lines.push('## Verschillen met de kaarten van 25 maart 2026');
     lines.push('');

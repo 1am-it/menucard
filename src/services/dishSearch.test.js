@@ -75,8 +75,8 @@ test('allergen-exclusion baseline: "steak" excluding allergen 7 still excludes e
   const withoutExclusion = searchDishes({ q: 'steak' });
   const withExclusion = searchDishes({ q: 'steak', excludeAllergens: [7] });
 
-  assert.equal(withoutExclusion.total, 11, 'baseline expected 11 matches for "steak" without exclusion');
-  assert.equal(withExclusion.total, 9, 'baseline expected 9 matches for "steak" excluding allergen 7');
+  assert.equal(withoutExclusion.total, 15, 'baseline expected 15 matches for "steak" without exclusion (BE-71 added the two live cards of restaurant 5)');
+  assert.equal(withExclusion.total, 13, 'baseline expected 13 matches for "steak" excluding allergen 7');
 
   const idsWithout = withoutExclusion.results.map((d) => d.dishId);
   const idsWith = withExclusion.results.map((d) => d.dishId);
@@ -96,8 +96,10 @@ test('ordinary query unaffected by sup/wine: "steak" keeps its exact pre-existin
   const res = searchDishes({ q: 'steak' });
   const expectedOrder = [
     '6-diner-1-1', '6-diner-1-0', '6-lunch-2-4', '6-lunch-2-3',
+    '5-menukaart-0-10', '5-menukaart-0-0',
     '19-lunch-3-0', '19-diner-2-0', '23-lunch-0-10', '23-diner-1-0',
-    '23-diner-0-0', '23-lunch-3-2', '23-diner-4-2',
+    '23-diner-0-0', '5-menukaart-0-8', '5-menukaart-0-5',
+    '23-lunch-3-2', '23-diner-4-2',
   ];
   assert.equal(res.total, expectedOrder.length);
   assert.deepEqual(res.results.map((d) => d.dishId), expectedOrder);
@@ -141,6 +143,8 @@ test('BE-13: "friet" keeps its exact, unchanged pre-existing result set — unaf
     '23-lunch-3-2', '23-diner-4-2', '23-lunch-3-4', '23-diner-4-4',
     '23-lunch-3-1', '23-diner-4-1', '23-diner-4-3', '23-diner-1-2',
     '23-diner-1-0', '23-lunch-0-12', '23-diner-1-6', '23-diner-1-1',
+    // BE-71: the live card of Restaurant Chocolat (5) prints friet twice.
+    '5-menukaart-0-4', '5-menukaart-0-10',
   ];
   assert.equal(res.total, expectedIds.length);
   assert.deepEqual(res.results.map((d) => d.dishId).sort(), expectedIds.sort());
@@ -170,25 +174,31 @@ test('BE-15: an unknown group value falls back to the exact ungrouped response, 
   assert.deepEqual(unknownGroup, ungrouped, 'an unrecognized group value must fall back completely and silently, never zero out results like an invalid `meal` would');
 });
 
-test('BE-16: q=kip — 11 dishes match across 3 restaurants; every restaurant becomes its own group, none stays an individual result, and lowCoverage is correctly absent', () => {
+test('BE-16: q=kip — 11 dishes match across 4 restaurants; every restaurant becomes its own group, none stays an individual result, and lowCoverage is correctly absent', () => {
   const res = searchDishes({ q: 'kip', group: 'restaurant' });
-  assert.equal(res.restaurantGroups.length, 3, 'BE-15\'s old "4 or more" threshold is retired — Brasserie Bardot, Restaurant Zuyd, and T-Huis all qualify now, none of them reaching 4 on any single menu');
-  assert.equal(res.total, 3, 'group-mode total counts restaurant groups');
+  assert.equal(res.restaurantGroups.length, 4, 'BE-15\'s old "4 or more" threshold is retired — Brasserie Bardot, Restaurant Zuyd, T-Huis and (since BE-71) Makanan all qualify now, none of them reaching 4 on any single original menu');
+  assert.equal(res.total, 4, 'group-mode total counts restaurant groups');
   assert.equal(res.results.length, 0, 'no leftover individual results — every one of the 11 dishes lives inside a group');
   const byRestaurant = Object.fromEntries(res.restaurantGroups.map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]));
+  assert.deepEqual(byRestaurant['Makanan'], [['menukaart', 4]], 'BE-71: the startvulling card of Makanan (22)');
   assert.deepEqual(byRestaurant['Brasserie Bardot'], [['lunch', 2], ['diner', 1], ['specialiteiten', 1]]);
   assert.deepEqual(byRestaurant['Restaurant Zuyd'], [['lunch', 1], ['diner', 1]]);
   assert.deepEqual(byRestaurant['T-Huis'], [['lunch', 3], ['diner', 2]]);
   assert.equal(res.lowCoverage, undefined, 'lowCoverage must not appear — the underlying, ungrouped dish count (11) is not zero');
 });
 
-test('BE-16: q=friet — one restaurant group with two subgroups (unchanged in outcome from before, since T-Huis already had 4+ matches on both menus)', () => {
+test('BE-16: q=friet — two restaurant groups; T-Huis keeps its two subgroups', () => {
   const res = searchDishes({ q: 'friet', group: 'restaurant' });
-  assert.equal(res.restaurantGroups.length, 1);
-  const [group] = res.restaurantGroups;
+  assert.equal(res.restaurantGroups.length, 2);
+  const [group] = res.restaurantGroups.filter((g) => g.restaurantId === '23');
   assert.equal(group.restaurantId, '23');
   assert.equal(group.restaurantName, 'T-Huis');
   assert.deepEqual(group.menus.map((m) => [m.mealType, m.count]), [['diner', 8], ['lunch', 4]], 'subgroups ordered by descending match count, diner (8) before lunch (4)');
+  // BE-71: the live card of Restaurant Chocolat (5) is a second group.
+  assert.deepEqual(
+    res.restaurantGroups.filter((g) => g.restaurantId === '5').map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]),
+    [['Restaurant Chocolat', [['menukaart', 2]]]],
+  );
   assert.equal(res.results.length, 0, 'no leftover individual results');
 });
 
@@ -526,7 +536,7 @@ test('BE-60: het label staat ook op de voorbeeldgerechten van een restaurantgroe
 });
 
 
-// BE-67, uitkomst 5 � zoeken op de naam van een gang van een dagmenu.
+// BE-67, uitkomst 5 � zoeken op de naam van een gang van een dagmenu.
 test("BE-67: een zoekopdracht op een gangnaam vindt het restaurant met dat dagmenu", () => {
   // q=brood geeft vier restaurants; alleen het eerste heeft een dagmenu met een
   // gang die "pompoensoep" heet. Zonder die gangnaam is er geen treffer.

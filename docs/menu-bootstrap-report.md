@@ -4,8 +4,8 @@ Eenmalige vulling volgens besluit 021 (BE-71, #176). Alleen de eigen websites va
 25 restaurants in `data/restaurants.json`, alleen de bestaande deterministische lezers,
 geen AI en geen betaalde dienst.
 
-- Ophaaldatum: 2026-10-31
-- Gegenereerd: 2026-10-31T23:31:20.968Z
+- Ophaaldatum: 2026-11-01
+- Gegenereerd: 2026-10-31T23:38:31.399Z
 - Geslaagd: 2 · overgeslagen: 21 · geblokkeerd: 2 (van 25)
 
 ## Redenen, gegroepeerd
@@ -47,4 +47,10 @@ geen AI en geen betaalde dienst.
 | 23 | T-Huis | https://t-huis.online/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
 | 24 | Trattoria Perron | https://www.trattoriaperron.nl/menu/ | html | 142 | 131 | overgeslagen: gerechten zonder prijs (11 gerecht(en)); prijs buiten € 1–€ 150 (1 gerecht(en)); gerecht met meerdere prijzen (1 aandachtspunt(en)) |
 | 25 | Dolce e Salato | https://dolceesalato.nl/menu/ | html | 87 | 87 | overgeslagen: prijs buiten € 1–€ 150 (1 gerecht(en)); herkende sectie niet als gerechten opgeslagen (1 aandachtspunt(en)) |
+
+## Verschillen met de kaarten van 25 maart 2026
+
+Geen van de bestaande kaarten is vervangen, dus er zijn geen nieuwe, verdwenen of
+anders geprijsde gerechten te melden. De vier kaarten van maart (1, 6, 19, 23) staan
+ongewijzigd in `data/menus.json`; hun verse lezing staat met reden in de tabel hierboven.
 
