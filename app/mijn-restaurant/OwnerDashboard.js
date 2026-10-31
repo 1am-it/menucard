@@ -45,6 +45,11 @@ import OwnerStatsPanel from './OwnerStatsPanel'
 const AANBOD_HREF = '/mijn-restaurant/aanbod'
 const AANBOD_LINK_LABEL = 'Daghap of seizoensgerecht plaatsen'
 
+// BE-68 (#168) — het QR-kaartje voor op tafel, naast de andere links van een
+// eigen restaurant.
+const QR_KAARTJE_HREF = '/mijn-restaurant/qr'
+const QR_KAARTJE_LINK_LABEL = 'QR-kaartje'
+
 export default function OwnerDashboard({ restaurantIndex }) {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
@@ -270,6 +275,12 @@ export default function OwnerDashboard({ restaurantIndex }) {
                         {restaurant.known && (
                           <Link className="owner-link" href="/mijn-restaurant/menukaart">
                             Menukaart bijwerken
+                          </Link>
+                        )}
+                        {/* BE-68: het QR-kaartje voor op tafel. */}
+                        {restaurant.known && ownedIds.includes(restaurant.id) && (
+                          <Link className="owner-link" href={QR_KAARTJE_HREF}>
+                            {QR_KAARTJE_LINK_LABEL}
                           </Link>
                         )}
                         {restaurant.known && !restaurant.menuHref && (

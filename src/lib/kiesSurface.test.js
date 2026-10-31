@@ -303,6 +303,7 @@ test('kies: privacy — geen ip, user agent, cookie of account, en geen nieuwe d
     '@supabase/supabase-js',
     'next',
     'pdfjs-dist',
+    'qrcode-generator',
     'react',
     'react-dom',
   ]);

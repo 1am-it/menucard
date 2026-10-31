@@ -153,7 +153,12 @@ test('BE-28: the public surfaces are token-only — no hard-coded colour in the 
   const files = execSync('git ls-files app src', { cwd: ROOT }).toString().trim().split('\n')
     .filter((f) => f.endsWith('.js') && !f.endsWith('.test.js') && fs.existsSync(path.join(ROOT, f)))
     .filter((f) => f.startsWith('app/') && !f.startsWith('app/api/') && !f.startsWith('app/internal/'))
-    .filter((f) => !f.includes('/nvwa/'));
+    .filter((f) => !f.includes('/nvwa/'))
+    // BE-68 (#168): het QR-kaartje is per ontwerp altijd wit papier, ook in het
+    // donkere thema; de twee vaste waarden staan in QrCode.js en zijn met naam
+    // vastgelegd in src/lib/qrKaartjeSurface.test.js. Zonder die uitzondering
+    // zou een QR-code op een donkere ondergrond komen te staan.
+    .filter((f) => !f.startsWith('app/mijn-restaurant/qr/'));
   const offenders = [];
   for (const file of files) {
     const src = read(file);
@@ -185,8 +190,9 @@ test('BE-28: no gradient, no new dependency, font or image was added', () => {
   assert.doesNotMatch(section, /gradient/i);
   assert.doesNotMatch(section, /@font-face|url\(|\.png|\.jpg/);
   const pkg = JSON.parse(read('package.json'));
+  // BE-68 (#168): de eigenaar keurde precies één nieuwe dependency goed.
   assert.deepEqual(Object.keys(pkg.dependencies).sort(), [
-    '@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'react', 'react-dom',
+    '@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'qrcode-generator', 'react', 'react-dom',
   ]);
 });
 

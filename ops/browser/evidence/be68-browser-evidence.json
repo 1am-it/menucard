@@ -1,0 +1,1066 @@
+{
+  "ticket": "BE-68 (#168)",
+  "route": "/mijn-restaurant/qr",
+  "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3180, NEXT_DIST_DIR .next-browser-3180); geen productie, geen echte acceptatie",
+  "siteUrl": "https://www.onze-menukaarten.nl",
+  "siteIndexable": "",
+  "ranAt": "2026-10-31T16:08:58.779Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "pagina 1280/light: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 1280/light: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 1280/light: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 1280/light: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 1280/light: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 1280/light: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 1280/light: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 1280/light: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 1280/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "pagina 1280/light: het thema is echt light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 1280/light: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 1280/light: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":303,\"bottom\":863,\"left\":648,\"right\":1045,\"viewportWidth\":1280,\"viewportHeight\":900}"
+    },
+    {
+      "name": "pagina 1280/dark: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 1280/dark: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 1280/dark: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 1280/dark: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 1280/dark: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 1280/dark: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 1280/dark: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 1280/dark: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 1280/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "pagina 1280/dark: het thema is echt dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 1280/dark: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 1280/dark: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":247,\"bottom\":807,\"left\":648,\"right\":1045,\"viewportWidth\":1280,\"viewportHeight\":900}"
+    },
+    {
+      "name": "pagina 390/light: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 390/light: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 390/light: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 390/light: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 390/light: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 390/light: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 390/light: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 390/light: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 390/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "pagina 390/light: het thema is echt light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 390/light: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 390/light: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":280,\"bottom\":840,\"left\":29,\"right\":426,\"viewportWidth\":426,\"viewportHeight\":922}"
+    },
+    {
+      "name": "pagina 390/dark: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 390/dark: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 390/dark: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 390/dark: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 390/dark: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 390/dark: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 390/dark: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 390/dark: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 390/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "pagina 390/dark: het thema is echt dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 390/dark: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 390/dark: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":181,\"bottom\":741,\"left\":29,\"right\":426,\"viewportWidth\":426,\"viewportHeight\":922}"
+    },
+    {
+      "name": "pagina 320/light: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 320/light: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 320/light: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 320/light: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 320/light: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 320/light: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 320/light: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 320/light: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 320/light: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "pagina 320/light: het thema is echt light",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 320/light: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 320/light: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":181,\"bottom\":741,\"left\":29,\"right\":426,\"viewportWidth\":426,\"viewportHeight\":932}"
+    },
+    {
+      "name": "pagina 320/dark: de route is /mijn-restaurant/qr",
+      "passed": true,
+      "detail": "/mijn-restaurant/qr"
+    },
+    {
+      "name": "pagina 320/dark: de h1 is \"QR-kaartje voor op tafel\"",
+      "passed": true,
+      "detail": "QR-kaartje voor op tafel"
+    },
+    {
+      "name": "pagina 320/dark: de intro noemt de actuele prijs en het niet-opnieuw-afdrukken",
+      "passed": true,
+      "detail": "Gasten scannen het kaartje en zien direct je actuele menukaart, met de goede prijzen. Prijs aangepast? Het kaartje toont direct de nieuwe prijs, opnieuw afdrukken is niet nodig."
+    },
+    {
+      "name": "pagina 320/dark: de melding \"nog niet live\" staat er",
+      "passed": true,
+      "detail": "Je kunt het kaartje al bekijken. Druk het af zodra Onze Menukaarten live is."
+    },
+    {
+      "name": "pagina 320/dark: de keuzes staan er: doel, tekst en formaat",
+      "passed": true,
+      "detail": "{\"doelen\":[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}],\"tekstLabel\":\"Tekst op het kaartje\",\"formaten\":[{\"label\":\"Tafelkaartje A6\",\"actief\":\"ja\"},{\"label\":\"4 op een A4\",\"actief\":\"nee\"},{\"label\":\"Alleen de QR (PNG)\",\"actief\":\"nee\"}]}"
+    },
+    {
+      "name": "pagina 320/dark: het voorbeeld toont naam, tekst, voet en logo",
+      "passed": true,
+      "detail": "{\"naam\":\"Restaurant Wolfslaar\",\"tekst\":\"Bekijk onze menukaart\",\"voet\":\"Scan met je camera · altijd met prijzen\",\"logo\":\"om\\nonze menukaarten\"}"
+    },
+    {
+      "name": "pagina 320/dark: de QR-code is een echte SVG met modules",
+      "passed": true,
+      "detail": "{\"viewBox\":\"0 0 41 41\",\"label\":\"QR-code naar de menukaart van Restaurant Wolfslaar\",\"modules\":530,\"signature\":-529500979,\"empty\":false}"
+    },
+    {
+      "name": "pagina 320/dark: de URL achter de QR is de menukaart met ?bron=qr",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/menu/1?bron=qr"
+    },
+    {
+      "name": "pagina 320/dark: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "pagina 320/dark: het thema is echt dark",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "pagina 320/dark: geen paneel open bij de opname",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "pagina 320/dark: het kaartje staat volledig in beeld",
+      "passed": true,
+      "detail": "{\"top\":186,\"bottom\":746,\"left\":29,\"right\":426,\"viewportWidth\":426,\"viewportHeight\":932}"
+    },
+    {
+      "name": "keuzes: de menukaart is het standaarddoel",
+      "passed": true,
+      "detail": "[{\"label\":\"De menukaart\",\"actief\":\"ja\"},{\"label\":\"De restaurantpagina\",\"actief\":\"nee\"}]"
+    },
+    {
+      "name": "keuzes: de teller begint op 21/40",
+      "passed": true,
+      "detail": "21/40"
+    },
+    {
+      "name": "keuzes: het doel \"De restaurantpagina\" is actief",
+      "passed": true,
+      "detail": "[{\"label\":\"De menukaart\",\"actief\":\"nee\"},{\"label\":\"De restaurantpagina\",\"actief\":\"ja\"}]"
+    },
+    {
+      "name": "keuzes: de URL in de QR wisselt mee naar de restaurantpagina",
+      "passed": true,
+      "detail": "https://www.onze-menukaarten.nl/restaurant/1?bron=qr"
+    },
+    {
+      "name": "keuzes: de QR-matrix zelf verandert mee",
+      "passed": true,
+      "detail": "{\"voor\":-529500979,\"na\":-1415765575}"
+    },
+    {
+      "name": "keuzes: de tekst verandert in het voorbeeld",
+      "passed": true,
+      "detail": "Vandaag verse vis"
+    },
+    {
+      "name": "keuzes: de teller telt mee",
+      "passed": true,
+      "detail": "17/40"
+    },
+    {
+      "name": "keuzes: 41 tekens geeft de melding over 40 tekens",
+      "passed": true,
+      "detail": "Gebruik maximaal 40 tekens op het kaartje."
+    },
+    {
+      "name": "keuzes: het formaat \"4 op een A4\" zet vier kaartjes klaar",
+      "passed": true,
+      "detail": "{\"formaatVoor\":\"a6\",\"formaatNa\":{\"formaat\":\"a4\",\"kaartjes\":4}}"
+    },
+    {
+      "name": "mobiel 390: het voorbeeld staat bovenaan, boven de keuzes",
+      "passed": true,
+      "detail": "{\"previewTop\":295,\"paneelTop\":939}"
+    },
+    {
+      "name": "mobiel 390: de keuzes zijn dichtgeklapt",
+      "passed": true,
+      "detail": "{\"hidden\":true,\"visible\":false,\"rect\":{\"top\":0,\"bottom\":0,\"left\":0,\"right\":0,\"width\":0,\"height\":0}}"
+    },
+    {
+      "name": "mobiel 390: \"Tekst of formaat aanpassen\" staat er en is minstens 44 px",
+      "passed": true,
+      "detail": "{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"false\",\"height\":44}"
+    },
+    {
+      "name": "mobiel 390: de knoppen zijn minstens 44 px hoog",
+      "passed": true,
+      "detail": "[{\"label\":\"Download pdf\",\"height\":45},{\"label\":\"Afdrukken\",\"height\":45},{\"label\":\"Deel de QR-afbeelding\",\"height\":45}]"
+    },
+    {
+      "name": "mobiel 390: \"Deel de QR-afbeelding\" staat er op mobiel",
+      "passed": true,
+      "detail": "[\"Download pdf\",\"Afdrukken\",\"Deel de QR-afbeelding\"]"
+    },
+    {
+      "name": "mobiel 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "mobiel 390: \"Tekst of formaat aanpassen\" klapt de keuzes uit",
+      "passed": true,
+      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1420,\"left\":14,\"right\":376,\"width\":362,\"height\":460}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
+    },
+    {
+      "name": "mobiel 320: het voorbeeld staat bovenaan, boven de keuzes",
+      "passed": true,
+      "detail": "{\"previewTop\":295,\"paneelTop\":939}"
+    },
+    {
+      "name": "mobiel 320: de keuzes zijn dichtgeklapt",
+      "passed": true,
+      "detail": "{\"hidden\":true,\"visible\":false,\"rect\":{\"top\":0,\"bottom\":0,\"left\":0,\"right\":0,\"width\":0,\"height\":0}}"
+    },
+    {
+      "name": "mobiel 320: \"Tekst of formaat aanpassen\" staat er en is minstens 44 px",
+      "passed": true,
+      "detail": "{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"false\",\"height\":44}"
+    },
+    {
+      "name": "mobiel 320: de knoppen zijn minstens 44 px hoog",
+      "passed": true,
+      "detail": "[{\"label\":\"Download pdf\",\"height\":45},{\"label\":\"Afdrukken\",\"height\":45},{\"label\":\"Deel de QR-afbeelding\",\"height\":45}]"
+    },
+    {
+      "name": "mobiel 320: \"Deel de QR-afbeelding\" staat er op mobiel",
+      "passed": true,
+      "detail": "[\"Download pdf\",\"Afdrukken\",\"Deel de QR-afbeelding\"]"
+    },
+    {
+      "name": "mobiel 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "mobiel 320: \"Tekst of formaat aanpassen\" klapt de keuzes uit",
+      "passed": true,
+      "detail": "{\"keuzes\":{\"hidden\":false,\"visible\":true,\"rect\":{\"top\":960,\"bottom\":1420,\"left\":14,\"right\":306,\"width\":292,\"height\":460}},\"adjust\":{\"label\":\"Tekst of formaat aanpassen\",\"expanded\":\"true\",\"height\":44}}"
+    },
+    {
+      "name": "afdruk a6: kop, keuzes, voorbeeld en knoppen zijn verborgen",
+      "passed": true,
+      "detail": "{\"header\":{\"display\":\"none\",\"width\":0,\"height\":0,\"visible\":false},\"main\":{\"display\":\"none\",\"width\":0,\"height\":0,\"visible\":false},\"preview\":{\"display\":\"grid\",\"width\":0,\"height\":0,\"visible\":false},\"actions\":{\"display\":\"flex\",\"width\":0,\"height\":0,\"visible\":false}}"
+    },
+    {
+      "name": "afdruk a6: alleen het afdrukvel met precies één kaartje blijft over",
+      "passed": true,
+      "detail": "{\"sheet\":{\"display\":\"grid\",\"width\":1280,\"height\":559,\"visible\":true},\"formaat\":\"a6\",\"count\":1}"
+    },
+    {
+      "name": "afdruk a6: het kaartje is 397 × 559 px (105 × 148 mm)",
+      "passed": true,
+      "detail": "{\"width\":397,\"height\":559,\"top\":0,\"left\":0}"
+    },
+    {
+      "name": "afdruk a6: de QR-code staat ook op het afdrukvel met modules",
+      "passed": true,
+      "detail": "[{\"hasSvg\":true,\"modules\":530}]"
+    },
+    {
+      "name": "afdruk a4: vier kaartjes in twee kolommen op één vel",
+      "passed": true,
+      "detail": "{\"formaat\":\"a4\",\"count\":4,\"columns\":\"637px 637px\"}"
+    },
+    {
+      "name": "afdruk a4: elk kaartje is 397 × 559 px",
+      "passed": true,
+      "detail": "[{\"width\":397,\"height\":559,\"top\":0,\"left\":0},{\"width\":397,\"height\":559,\"top\":0,\"left\":637},{\"width\":397,\"height\":559,\"top\":559,\"left\":0},{\"width\":397,\"height\":559,\"top\":559,\"left\":637}]"
+    },
+    {
+      "name": "afdruk a4: de kop blijft ook hier verborgen",
+      "passed": true,
+      "detail": "{\"header\":{\"display\":\"none\",\"width\":0,\"height\":0,\"visible\":false},\"main\":{\"display\":\"none\",\"width\":0,\"height\":0,\"visible\":false}}"
+    },
+    {
+      "name": "a11y: het thema light staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · contrast: 29 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.28:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · naam: 7 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · tikdoel: 7 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · koppen: één h1 bij 2 koppen",
+      "passed": true,
+      "detail": "h1: \"QR-kaartje voor op tafel\""
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "/mijn-restaurant/qr (licht) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "/mijn-restaurant/qr (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "a11y: het thema dark staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · contrast: 29 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · naam: 7 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · tikdoel: 7 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · koppen: één h1 bij 2 koppen",
+      "passed": true,
+      "detail": "h1: \"QR-kaartje voor op tafel\""
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "/mijn-restaurant/qr (donker) · formulier: 1 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "/mijn-restaurant/qr (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "errors": [],
+  "shots": [
+    {
+      "name": "be68-pagina-1280-licht.png",
+      "viewport": "1280x900",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 303,
+        "bottom": 863,
+        "left": 648,
+        "right": 1045,
+        "viewportWidth": 1280,
+        "viewportHeight": 900
+      },
+      "file": "be68-pagina-1280-licht.png",
+      "sha256": "1ee2f8e4ad6859a9985ec80a333b945f834aeba31ca72a719e157054b250915c",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be68-pagina-1280-donker.png",
+      "viewport": "1280x900",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 247,
+        "bottom": 807,
+        "left": 648,
+        "right": 1045,
+        "viewportWidth": 1280,
+        "viewportHeight": 900
+      },
+      "file": "be68-pagina-1280-donker.png",
+      "sha256": "484cf88be7c804a2e8167c1306bbfa2044168c603a121fb0e923c1f7c058d765",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be68-pagina-390-licht.png",
+      "viewport": "390x844",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 280,
+        "bottom": 840,
+        "left": 29,
+        "right": 426,
+        "viewportWidth": 426,
+        "viewportHeight": 922
+      },
+      "file": "be68-pagina-390-licht.png",
+      "sha256": "5be51a9d905ca04dac09c1f7189fa63811adc9246a7a8fb80ae320c18236bb60",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be68-pagina-390-donker.png",
+      "viewport": "390x844",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 181,
+        "bottom": 741,
+        "left": 29,
+        "right": 426,
+        "viewportWidth": 426,
+        "viewportHeight": 922
+      },
+      "file": "be68-pagina-390-donker.png",
+      "sha256": "c7dda114aed0f8ee2f843725f66b5b299a220cf395b294fce65403fadb4f510e",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be68-pagina-320-licht.png",
+      "viewport": "320x700",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 181,
+        "bottom": 741,
+        "left": 29,
+        "right": 426,
+        "viewportWidth": 426,
+        "viewportHeight": 932
+      },
+      "file": "be68-pagina-320-licht.png",
+      "sha256": "bed385b573c0e7499556cb0b7044e244364211744508a84034cb0f474801896c",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be68-pagina-320-donker.png",
+      "viewport": "320x700",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      },
+      "framing": {
+        "top": 186,
+        "bottom": 746,
+        "left": 29,
+        "right": 426,
+        "viewportWidth": 426,
+        "viewportHeight": 932
+      },
+      "file": "be68-pagina-320-donker.png",
+      "sha256": "df87f5b152a8f37a82378445153dc9024788c8db3abb82059670ab95d9079c25",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be68-mobiel-390-dicht.png",
+      "viewport": "390x844",
+      "stand": "keuzes dicht",
+      "file": "be68-mobiel-390-dicht.png",
+      "sha256": "21a791df73e18b088d3d4bc69e2dd56fdb8efe8941d35d8c4d7211d206303fe0",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be68-mobiel-390-open.png",
+      "viewport": "390x844",
+      "stand": "keuzes open",
+      "file": "be68-mobiel-390-open.png",
+      "sha256": "21a791df73e18b088d3d4bc69e2dd56fdb8efe8941d35d8c4d7211d206303fe0",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be68-mobiel-320-dicht.png",
+      "viewport": "320x700",
+      "stand": "keuzes dicht",
+      "file": "be68-mobiel-320-dicht.png",
+      "sha256": "ccfa9e5bfd40c1529484cb8697190cf12ca324e86de6ebbcd5e1ae60a56db159",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be68-mobiel-320-open.png",
+      "viewport": "320x700",
+      "stand": "keuzes open",
+      "file": "be68-mobiel-320-open.png",
+      "sha256": "ccfa9e5bfd40c1529484cb8697190cf12ca324e86de6ebbcd5e1ae60a56db159",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be68-afdruk-a6-1280-licht.png",
+      "media": "print",
+      "formaat": "a6",
+      "measured": {
+        "header": {
+          "display": "none",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "main": {
+          "display": "none",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "preview": {
+          "display": "grid",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "keuzes": {
+          "display": "grid",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "actions": {
+          "display": "flex",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "adjust": null,
+        "sheet": {
+          "display": "grid",
+          "width": 1280,
+          "height": 559,
+          "visible": true
+        },
+        "formaat": "a6",
+        "columns": "1280px",
+        "count": 1,
+        "cards": [
+          {
+            "width": 397,
+            "height": 559,
+            "top": 0,
+            "left": 0
+          }
+        ],
+        "svgs": [
+          {
+            "hasSvg": true,
+            "modules": 530
+          }
+        ]
+      },
+      "file": "be68-afdruk-a6-1280-licht.png",
+      "sha256": "7e0de88dc3fe80771ca1adaf7853668495a7505aa44d3640ba97a8e0b86f844a",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be68-afdruk-a4-1280-licht.png",
+      "media": "print",
+      "formaat": "a4",
+      "measured": {
+        "header": {
+          "display": "none",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "main": {
+          "display": "none",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "preview": {
+          "display": "grid",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "keuzes": {
+          "display": "grid",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "actions": {
+          "display": "flex",
+          "width": 0,
+          "height": 0,
+          "visible": false
+        },
+        "adjust": null,
+        "sheet": {
+          "display": "grid",
+          "width": 1274,
+          "height": 1119,
+          "visible": true
+        },
+        "formaat": "a4",
+        "columns": "637px 637px",
+        "count": 4,
+        "cards": [
+          {
+            "width": 397,
+            "height": 559,
+            "top": 0,
+            "left": 0
+          },
+          {
+            "width": 397,
+            "height": 559,
+            "top": 0,
+            "left": 637
+          },
+          {
+            "width": 397,
+            "height": 559,
+            "top": 559,
+            "left": 0
+          },
+          {
+            "width": 397,
+            "height": 559,
+            "top": 559,
+            "left": 637
+          }
+        ],
+        "svgs": [
+          {
+            "hasSvg": true,
+            "modules": 530
+          },
+          {
+            "hasSvg": true,
+            "modules": 530
+          },
+          {
+            "hasSvg": true,
+            "modules": 530
+          },
+          {
+            "hasSvg": true,
+            "modules": 530
+          }
+        ]
+      },
+      "file": "be68-afdruk-a4-1280-licht.png",
+      "sha256": "de55eb0b9a33df3751d6fa3d5afc43cd6e4a60648c4c49473c94183155c05533",
+      "width": 1280,
+      "height": 900
+    }
+  ],
+  "filter": null,
+  "scenarios": [
+    {
+      "name": "pagina",
+      "checks": 72,
+      "passed": 72,
+      "failed": 0,
+      "durationMs": 37909,
+      "error": null
+    },
+    {
+      "name": "keuzes",
+      "checks": 9,
+      "passed": 9,
+      "failed": 0,
+      "durationMs": 2365,
+      "error": null
+    },
+    {
+      "name": "mobiel",
+      "checks": 14,
+      "passed": 14,
+      "failed": 0,
+      "durationMs": 19245,
+      "error": null
+    },
+    {
+      "name": "afdruk",
+      "checks": 7,
+      "passed": 7,
+      "failed": 0,
+      "durationMs": 2231,
+      "error": null
+    },
+    {
+      "name": "a11y",
+      "checks": 20,
+      "passed": 20,
+      "failed": 0,
+      "durationMs": 860,
+      "error": null
+    }
+  ],
+  "a11y": [
+    {
+      "route": "/mijn-restaurant/qr",
+      "theme": "light",
+      "errors": 0
+    },
+    {
+      "route": "/mijn-restaurant/qr",
+      "theme": "dark",
+      "errors": 0
+    }
+  ]
+}

@@ -129,5 +129,5 @@ test('no colour, font size or dependency is invented for BE-41', () => {
   // The badge roles stay the reviewed ones: no new class, no new token.
   assert.doesNotMatch(VIEW, /status-badge--(blocked|file|action)/);
   const pkg = JSON.parse(read('package.json'));
-  assert.deepEqual(Object.keys(pkg.dependencies).sort(), ['@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'react', 'react-dom']);
+  assert.deepEqual(Object.keys(pkg.dependencies).sort(), ['@anthropic-ai/sdk', '@supabase/supabase-js', 'next', 'pdfjs-dist', 'qrcode-generator', 'react', 'react-dom']);
 });
