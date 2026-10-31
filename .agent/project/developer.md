@@ -59,6 +59,18 @@ stappen en stopte met `aborted`. Daarom, in elke ronde:
    duurste soort, en geeft kans op onbedoelde wijzigingen.
 9. **Geen lange uitleg tussendoor.** Werk en commit; de uitleg hoort kort in de
    commitboodschap en de checkpoint aan het eind.
+10. **Nooit `git worktree add` voor metingen of builds.** Een worktree die naar
+    `node_modules` wijst, wist bij het opruimen de hele `node_modules` van de
+    runner. Dat is twee keer gebeurd, op 30 en 31 okt. Meet een basis in je
+    eigen werkkopie:
+    - `git stash -u`;
+    - `git checkout <base>`;
+    - bouwen met `NEXT_DIST_DIR=.next-base`;
+    - terug naar je branch en `git stash pop`;
+    - bouwen met `NEXT_DIST_DIR=.next-head`;
+    - beide mappen verwijderen.
+
+    Controleer aan het eind dat `node_modules/next/package.json` bestaat.
 
 ## Paginagebonden CSS (BE-52, Lead-besluit 30 okt)
 
