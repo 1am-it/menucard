@@ -59,8 +59,20 @@ test('de balk verschijnt vanaf één bewaard gerecht en is te sluiten', () => {
   assert.match(BAR, /function sessionStore\(\) \{\n\s+try \{\n\s+return typeof window === 'undefined' \? null : window\.sessionStorage\n\s+\} catch \(error\) \{\n\s+return null/);
   assert.match(BAR, /try \{\n\s+if \(hidden\) storage\.setItem[^]*?\} catch \(error\) \{\n\s+return false/);
   assert.match(BAR, /const BAR_SEND_LABEL = 'Versturen'/);
-  assert.match(BAR, /const BAR_HREF = '\/mijn-lijstje'/);
-  assert.match(BAR, /<Link className="saved-bar-send" href=\{BAR_HREF\}>\{BAR_SEND_LABEL\}<\/Link>/);
+});
+
+test('Versturen opent het venster "Stuur je lijstje" (ronde 4)', () => {
+  // Geen link meer naar /mijn-lijstje: het venster komt achter deze knop.
+  assert.doesNotMatch(BAR, /href=\{BAR_HREF\}/);
+  assert.doesNotMatch(BAR, /const BAR_HREF = /);
+  assert.match(BAR, /className="saved-bar-send"[\s\S]*?aria-haspopup="dialog"[\s\S]*?aria-expanded=\{sending\}[\s\S]*?onClick=\{\(\) => setSending\(true\)\}/);
+  assert.match(BAR, /\{BAR_SEND_LABEL\}\n\s+<\/button>/);
+  // Het venster laadt pas bij het openen: next/dynamic, geen statische import,
+  // en het staat alleen in de voorwaarde `sending`.
+  assert.match(BAR, /import dynamic from 'next\/dynamic'/);
+  assert.match(BAR, /const SavedListSendDialog = dynamic\(\(\) => import\('\.\/SavedListSendDialog'\), \{ loading: \(\) => null \}\)/);
+  assert.doesNotMatch(BAR, /^import SavedListSendDialog from/m);
+  assert.match(BAR, /\{sending \? <SavedListSendDialog open onClose=\{\(\) => setSending\(false\)\} \/> : null\}/);
 });
 
 test('de opmaak: rechtsonder, boven de tabbalk, alleen tokens', () => {
