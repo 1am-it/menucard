@@ -165,6 +165,20 @@ const SCENARIOS = [
     ready: `${MAIN_READY} && !!document.querySelector('.vr-title')`,
     label: 'voor restaurants',
   },
+  // BE-69 (#172): de twee publieke tekstpagina's, in dezelfde opbouw als
+  // /voor-restaurants (gedeelde kop, één kolom tekst, de footer).
+  {
+    name: 'privacy',
+    url: '/privacy',
+    ready: `${MAIN_READY} && !!document.querySelector('.legal-title')`,
+    label: 'de privacyverklaring',
+  },
+  {
+    name: 'colofon',
+    url: '/colofon',
+    ready: `${MAIN_READY} && !!document.querySelector('.legal-title')`,
+    label: 'het colofon',
+  },
 ];
 
 const SELECTION = parseScenarioArgs(process.argv.slice(2), SCENARIOS);

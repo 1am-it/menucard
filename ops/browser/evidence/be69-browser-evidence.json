@@ -1,0 +1,751 @@
+{
+  "script": "run-be69-browser-check.js",
+  "ticket": "BE-69 (#172)",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3189); geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T19:28:58.147Z",
+  "port": 3189,
+  "pages": [
+    "/privacy",
+    "/colofon"
+  ],
+  "filter": null,
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "privacy 1280: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 1280: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 1280: de h1 is \"Privacy\"",
+      "passed": true,
+      "detail": "Privacy"
+    },
+    {
+      "name": "privacy 1280: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Wie zijn wij | Als bezoeker | Samen kiezen (stemmen) | Daghap: \"laat het me weten\" | Als restauranthouder | Wie helpt ons | Je rechten | Wijzigingen / 2,2,2,2,2,2,2,2"
+    },
+    {
+      "name": "privacy 1280: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Privacy\",\"id\":null},{\"level\":2,\"text\":\"Wie zijn wij\",\"id\":\"legal-wie-zijn-wij\"}]"
+    },
+    {
+      "name": "privacy 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "privacy 1280: ook in donker geen overloop",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "privacy 1280: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "680"
+    },
+    {
+      "name": "privacy 1280: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "privacy 1280: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 1280: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "privacy 1280: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "privacy 1280: de datumregel staat bovenaan",
+      "passed": true,
+      "detail": "Laatst bijgewerkt: [DATUM]"
+    },
+    {
+      "name": "privacy 1280: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang."
+    },
+    {
+      "name": "privacy 1280: de eerste alinea uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES]."
+    },
+    {
+      "name": "privacy 390: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 390: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 390: de h1 is \"Privacy\"",
+      "passed": true,
+      "detail": "Privacy"
+    },
+    {
+      "name": "privacy 390: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Wie zijn wij | Als bezoeker | Samen kiezen (stemmen) | Daghap: \"laat het me weten\" | Als restauranthouder | Wie helpt ons | Je rechten | Wijzigingen / 2,2,2,2,2,2,2,2"
+    },
+    {
+      "name": "privacy 390: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Privacy\",\"id\":null},{\"level\":2,\"text\":\"Wie zijn wij\",\"id\":\"legal-wie-zijn-wij\"}]"
+    },
+    {
+      "name": "privacy 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 390: ook in donker geen overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 390: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "390"
+    },
+    {
+      "name": "privacy 390: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "privacy 390: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 390: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "privacy 390: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "privacy 390: de datumregel staat bovenaan",
+      "passed": true,
+      "detail": "Laatst bijgewerkt: [DATUM]"
+    },
+    {
+      "name": "privacy 390: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang."
+    },
+    {
+      "name": "privacy 390: de eerste alinea uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES]."
+    },
+    {
+      "name": "privacy 320: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 320: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "privacy 320: de h1 is \"Privacy\"",
+      "passed": true,
+      "detail": "Privacy"
+    },
+    {
+      "name": "privacy 320: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Wie zijn wij | Als bezoeker | Samen kiezen (stemmen) | Daghap: \"laat het me weten\" | Als restauranthouder | Wie helpt ons | Je rechten | Wijzigingen / 2,2,2,2,2,2,2,2"
+    },
+    {
+      "name": "privacy 320: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Privacy\",\"id\":null},{\"level\":2,\"text\":\"Wie zijn wij\",\"id\":\"legal-wie-zijn-wij\"}]"
+    },
+    {
+      "name": "privacy 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 320: ook in donker geen overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 320: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "320"
+    },
+    {
+      "name": "privacy 320: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "privacy 320: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "privacy 320: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "privacy 320: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "privacy 320: de datumregel staat bovenaan",
+      "passed": true,
+      "detail": "Laatst bijgewerkt: [DATUM]"
+    },
+    {
+      "name": "privacy 320: de intro uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats laat zien wat je vanavond kunt eten, waar en voor welke prijs. We willen zo weinig mogelijk over je weten. Hieronder staat precies wat we bewaren, waarom, en hoe lang."
+    },
+    {
+      "name": "privacy 320: de eerste alinea uit het contract staat er",
+      "passed": true,
+      "detail": "BredaEats is een dienst van [NAAM ORGANISATIE], [ADRES], KvK [KVK-NUMMER]. Vragen over privacy stel je via [E-MAILADRES]."
+    },
+    {
+      "name": "privacy: de footerlink \"Colofon\" navigeert echt naar /colofon",
+      "passed": true,
+      "detail": "{\"ok\":true,\"url\":\"/colofon\",\"title\":\"Colofon\"}"
+    },
+    {
+      "name": "privacy: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "6/6 opnamen: "
+    },
+    {
+      "name": "colofon 1280: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 1280: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 1280: de h1 is \"Colofon\"",
+      "passed": true,
+      "detail": "Colofon"
+    },
+    {
+      "name": "colofon 1280: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Over BredaEats | Waar de gegevens vandaan komen | Klopt er iets niet? | Contact | Privacy / 2,2,2,2,2"
+    },
+    {
+      "name": "colofon 1280: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Colofon\",\"id\":null},{\"level\":2,\"text\":\"Over BredaEats\",\"id\":\"legal-over-bredaeats\"}]"
+    },
+    {
+      "name": "colofon 1280: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 1280: ook in donker geen overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 1280: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "680"
+    },
+    {
+      "name": "colofon 1280: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "colofon 1280: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 1280: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "colofon 1280: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "colofon 390: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 390: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 390: de h1 is \"Colofon\"",
+      "passed": true,
+      "detail": "Colofon"
+    },
+    {
+      "name": "colofon 390: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Over BredaEats | Waar de gegevens vandaan komen | Klopt er iets niet? | Contact | Privacy / 2,2,2,2,2"
+    },
+    {
+      "name": "colofon 390: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Colofon\",\"id\":null},{\"level\":2,\"text\":\"Over BredaEats\",\"id\":\"legal-over-bredaeats\"}]"
+    },
+    {
+      "name": "colofon 390: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 390: ook in donker geen overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 390: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "390"
+    },
+    {
+      "name": "colofon 390: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "colofon 390: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 390: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "colofon 390: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "colofon 320: het thema licht is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 320: het thema donker is aangetoond",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\",\"Automatisch\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "colofon 320: de h1 is \"Colofon\"",
+      "passed": true,
+      "detail": "Colofon"
+    },
+    {
+      "name": "colofon 320: de secties staan er als h2 in de volgorde van het contract",
+      "passed": true,
+      "detail": "Over BredaEats | Waar de gegevens vandaan komen | Klopt er iets niet? | Contact | Privacy / 2,2,2,2,2"
+    },
+    {
+      "name": "colofon 320: de h1 staat vóór de eerste h2",
+      "passed": true,
+      "detail": "[{\"level\":1,\"text\":\"Colofon\",\"id\":null},{\"level\":2,\"text\":\"Over BredaEats\",\"id\":\"legal-over-bredaeats\"}]"
+    },
+    {
+      "name": "colofon 320: geen horizontale overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 320: ook in donker geen overloop",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 320: de kolom is maximaal 680 px breed",
+      "passed": true,
+      "detail": "320"
+    },
+    {
+      "name": "colofon 320: het systeemlettertype staat op de kolom",
+      "passed": true,
+      "detail": "system-ui, -apple-system, \"Segoe UI\", sans-serif"
+    },
+    {
+      "name": "colofon 320: geen afbeeldingen op de pagina",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "colofon 320: de open gegevens staan er letterlijk",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "colofon 320: de footer toont \"Voor restaurants\", \"Inloggen\", \"Privacy\" en \"Colofon\"",
+      "passed": true,
+      "detail": "[{\"text\":\"Voor restaurants\",\"href\":\"/voor-restaurants\"},{\"text\":\"Inloggen\",\"href\":\"/inloggen\"},{\"text\":\"Privacy\",\"href\":\"/privacy\"},{\"text\":\"Colofon\",\"href\":\"/colofon\"}]"
+    },
+    {
+      "name": "colofon: de footerlink \"Privacy\" navigeert echt naar /privacy",
+      "passed": true,
+      "detail": "{\"ok\":true,\"url\":\"/privacy\",\"title\":\"Privacy\"}"
+    },
+    {
+      "name": "colofon: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "6/6 opnamen: "
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be69-privacy-1280-licht.png",
+      "sha256": "daea5de502f8b4b3ecfad9286df32d8e4e49b865d91bfecc34fd3474936b4d1e",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-privacy-1280-donker.png",
+      "sha256": "b82fefabc15d2e97eedac6753334d0033b104eb32f57eddae4e0dba93abb8d62",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-privacy-390-licht.png",
+      "sha256": "52bf143273561cd0da3f46aec7e30c23b7f433ba42bbe476ba99a832c152e4f7",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-privacy-390-donker.png",
+      "sha256": "6b3ec946d52381a8216d7b4ba28ddcbe6a804b1af70817e080048868c7be4f1c",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-privacy-320-licht.png",
+      "sha256": "d0707a679c74b7a0097968a0974d6e7dbb7c4b827a4254e64d707f914946f1af",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-privacy-320-donker.png",
+      "sha256": "a11a4e6ae1eca6c73422f54b1b00f8baa340c1f3002a678c1ef1ecbcbfe38d1b",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "page": "privacy",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-1280-licht.png",
+      "sha256": "8c75c85261ac5a72547fe52d64d49902d894c4484683f4df902c2787c214e75b",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-1280-donker.png",
+      "sha256": "1e0ff90533076bc9c6d5d449ad47e58c41f633c2cbcbea695c8fa49dd53b2d77",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-390-licht.png",
+      "sha256": "21163e09c0dfccb67134531b97c37f99ae11062ca6521df0556d41dfffd26a40",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "light",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-390-donker.png",
+      "sha256": "f237490594f901abc19dd9e998b2732fa65a9d5dbf820594c14fc4f3ef375f6a",
+      "width": 390,
+      "height": 844,
+      "viewport": "390x844",
+      "theme": "dark",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-320-licht.png",
+      "sha256": "5736182df52d7c3295292de8e1e09fa70e2d703e92fba401005aca09fe009f6d",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "light",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be69-colofon-320-donker.png",
+      "sha256": "475a5e19e36088fbf2336faea0168ad6c2478b311d13c453f7377e2cb9bca727",
+      "width": 320,
+      "height": 720,
+      "viewport": "320x720",
+      "theme": "dark",
+      "page": "colofon",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}
