@@ -365,8 +365,8 @@ export default function KiesView({ code }) {
           <Wordmark />
           <div className="lijst-header-actions">
             <PublicHeaderActions />
-            {/* BE-62 (#153): de terug-link is meteen het nav-landmark van deze
-                pagina; zonder dat vond de a11y-audit hier geen navigatie. */}
+            {/* BE-62: de terug-link is meteen het nav-landmark van deze pagina;
+                zonder dat vond de a11y-audit hier geen navigatie. */}
             <nav className="kies-back" aria-label="Terug">
               <Link href="/mijn-lijstje" className="back-btn">← Mijn lijstje</Link>
             </nav>
@@ -546,7 +546,7 @@ export default function KiesView({ code }) {
             ) : (
               <p className="kies-hint">{KIES_EMPTY_RESULT_MESSAGE}</p>
             )}
-            {/* BE-62 (#153, ontwerp punt 1) — rustig vlak onder de uitslag:
+            {/* BE-62, ontwerp punt 1 — rustig vlak onder de uitslag:
                 "Jij koos <gerecht>. Zelf ook een lijstje maken?" */}
             {hasOwnVotes ? (
               <ZoekGerechtBlock

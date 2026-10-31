@@ -151,7 +151,7 @@ export default function MijnLijstjeView({ shared = false, sharedDishes = [], ski
                 <Link href={LIST_PAGE} className="lijst-link">{VIEW_LIST_LABEL}</Link>
               ) : null}
             </div>
-            {/* BE-62 (#153, ontwerp punt 3) — dezelfde uitnodiging als bij een
+            {/* BE-62, ontwerp punt 3 — dezelfde uitnodiging als bij een
                 gedeeld gerecht. Het lijstje in je eigen lijstje zetten kan al
                 met de knop hierboven (bestaande logica). */}
             <ZoekGerechtBlock
