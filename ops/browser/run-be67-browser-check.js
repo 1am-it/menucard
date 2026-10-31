@@ -641,6 +641,7 @@ async function overzichtScenario() {
   const oproepen = await evalJs(cdp, 'window.__BE67__ ? window.__BE67__.uitverkocht.length : 0');
   check('overzicht: elke klik ging naar de Op = op-route', oproepen >= THEMES.length * WIDTHS.length * 2, oproepen);
   return { scenario: 'overzicht', begin, resultaten, uitverkochtOproepen: oproepen };
+}
 
 // --- Het blok "Vandaag" bij de bezoeker -------------------------------------
 
@@ -734,10 +735,6 @@ async function vandaagScenario() {
   check('vandaag: de pagina haalde het aanbod bij de publieke route', publiek >= 1, publiek);
   return { scenario: 'vandaag', resultaten, publiekOproepen: publiek };
 }
-
-}
-
-
 
 // --- De a11y-audit, gefilterd op beide pagina's ------------------------------
 
