@@ -45,6 +45,7 @@ const {
   runScenarioSelection,
 } = require('./lib/scenario-filter');
 const { be60StubScript } = require('./lib/be60-zoek-stub');
+const { be65KiesStubScript } = require('./lib/be65-kies-stub');
 const {
   THEME_LABELS,
   themeProofScript,
@@ -210,10 +211,63 @@ const BALK_STAAT = `(() => {
     opTabbalk: middenTabbalk ? Boolean(middenTabbalk.closest('.mobile-tabbar')) : null,
     opBalk: middenBalk ? Boolean(middenBalk.closest('.saved-bar')) : false,
     sluitLabel: sluit ? sluit.getAttribute('aria-label') : '',
-    verstuurHref: send ? send.getAttribute('href') : '',
+    verstuurKnop: send ? send.tagName === 'BUTTON' : false,
+    verstuurHaspopup: send ? send.getAttribute('aria-haspopup') : '',
+    verstuurLabel: send ? send.textContent.trim() : '',
     vlag: lezen('bredaeats_balk_gesloten'),
   };
 })()`;
+
+/** Het venster "Stuur je lijstje": inhoud, plaats, focus en aanklikbaarheid. */
+const VENSTER_STAAT = `(() => {
+  const panel = document.querySelector('.saved-send-panel');
+  const tabbar = document.querySelector('.mobile-tabbar');
+  if (!panel) return { venster: false };
+  const tekst = (el) => (el ? String(el.textContent || '').trim() : '');
+  const r = panel.getBoundingClientRect();
+  const zichtbaar = tabbar ? getComputedStyle(tabbar).display !== 'none' : false;
+  const t = tabbar ? tabbar.getBoundingClientRect() : null;
+  const radios = Array.from(panel.querySelectorAll('.saved-send-radio'));
+  const kaarten = Array.from(panel.querySelectorAll('.saved-send-mode'));
+  const methoden = Array.from(panel.querySelectorAll('.saved-send-method'));
+  const raakbaar = methoden.map((button) => {
+    const br = button.getBoundingClientRect();
+    const hit = document.elementFromPoint((br.left + br.right) / 2, (br.top + br.bottom) / 2);
+    return Boolean(hit && (hit === button || button.contains(hit)));
+  });
+  const sluit = panel.querySelector('.saved-send-close');
+  const sr = sluit ? sluit.getBoundingClientRect() : null;
+  return {
+    venster: true,
+    rol: panel.getAttribute('role'),
+    modal: panel.getAttribute('aria-modal'),
+    titel: tekst(panel.querySelector('.saved-send-title')),
+    legende: tekst(panel.querySelector('.saved-send-legend')),
+    gerechten: Array.from(panel.querySelectorAll('.saved-send-dish')).map((li) => [
+      tekst(li.querySelector('.saved-send-dish-name')),
+      tekst(li.querySelector('.saved-send-dish-price')),
+    ]),
+    radios: radios.map((radio) => ({ type: radio.type, value: radio.value, checked: radio.checked })),
+    randen: kaarten.map((kaart) => getComputedStyle(kaart).borderTopWidth),
+    methoden: methoden.map((button) => tekst(button)),
+    raakbaar: raakbaar,
+    breedte: Math.round(r.width),
+    hoogte: Math.round(r.height),
+    inBeeld: r.left >= -0.5 && r.right <= window.innerWidth + 0.5 && r.top >= 0 && r.bottom <= window.innerHeight + 0.5,
+    bovenTabbalk: t && zichtbaar ? r.bottom <= t.top + 0.5 : null,
+    sluitBreed: sr ? Math.round(sr.width) : 0,
+    sluitHoog: sr ? Math.round(sr.height) : 0,
+    sluitLabel: sluit ? sluit.getAttribute('aria-label') : '',
+    focusInPaneel: panel.contains(document.activeElement),
+    focusElement: document.activeElement ? String(document.activeElement.className || document.activeElement.tagName) : '',
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+  };
+})()`;
+
+const VENSTER_DICHT = `(() => ({
+  open: Boolean(document.querySelector('.saved-send-panel')),
+  focus: document.activeElement ? String(document.activeElement.className || document.activeElement.tagName) : '',
+}))()`;
 
 async function homeScenario(cdp) {
   for (const theme of ['light', 'dark']) {
@@ -284,18 +338,24 @@ async function homeScenario(cdp) {
         JSON.stringify(knoppen.map((k) => `${k.breed}x${k.hoog}`)));
       check(`${waar}: geen knop staat in een link`, knoppen.every((k) => !k.inLink), JSON.stringify(knoppen.filter((k) => k.inLink).map((k) => k.label)));
 
-      await evalJs(cdp, `document.querySelector('.tonight-actions .dish-save-btn').click()`);
+      // Twee gerechten bewaren (Lead-review ronde 4).
+      await evalJs(cdp, `document.querySelectorAll('.tonight-actions .dish-save-btn')[0].click()`);
+      await evalJs(cdp, `document.querySelectorAll('.tonight-actions .dish-save-btn')[1].click()`);
       // De balk komt achter next/dynamic binnen: wacht tot hij er echt is in
       // plaats van op een vaste korte pauze.
       await waitFor(cdp, `Boolean(document.querySelector('.saved-bar'))`, 4000);
       const na = await evalJs(cdp, knoppenStaat('.tonight-actions .dish-save-btn'));
-      check(`${waar}: Bewaren zet de knop aan`, na[0] ? na[0].pressed === 'true' : false, na[0] ? na[0].pressed : 'geen knop');
+      check(`${waar}: Bewaren zet de knoppen aan`,
+        na.length >= 2 && na[0].pressed === 'true' && na[1].pressed === 'true',
+        JSON.stringify(na.slice(0, 2).map((k) => k.pressed)));
       const balk = await evalJs(cdp, BALK_STAAT);
       check(`${waar}: de balk verschijnt met het aantal en de tekst`,
-        balk.balk === true && String(balk.tekst || '').trim() === '1 gerecht bewaard · Stuur je lijstje, met of zonder stemmen', balk.tekst);
+        balk.balk === true && String(balk.tekst || '').trim() === '2 gerechten bewaard · Stuur je lijstje, met of zonder stemmen', balk.tekst);
       check(`${waar}: de balk staat helemaal in beeld`, balk.inBeeld === true,
         JSON.stringify({ breedte: balk.breedte, rechts: balk.rechtsRuimte, onder: balk.onderRuimte }));
-      check(`${waar}: Versturen wijst naar /mijn-lijstje`, balk.verstuurHref === '/mijn-lijstje', balk.verstuurHref);
+      check(`${waar}: Versturen is een knop die het venster opent`,
+        balk.verstuurKnop === true && balk.verstuurHaspopup === 'dialog' && balk.verstuurLabel === 'Versturen',
+        JSON.stringify({ knop: balk.verstuurKnop, popup: balk.verstuurHaspopup, label: balk.verstuurLabel }));
       check(`${waar}: de sluitknop heeft een aria-label`, Boolean(balk.sluitLabel), balk.sluitLabel);
       check(`${waar}: de balk ligt boven de tabbalk en de tabbalk blijft aanklikbaar`,
         balk.tabbarZichtbaar ? balk.bovenTabbalk === true && balk.opTabbalk === true : balk.opTabbalk === null,
@@ -306,6 +366,61 @@ async function homeScenario(cdp) {
       }
       await shot(cdp, `be65-home-${width}-${theme}-balk.png`, { theme, state: 'balk', themeProof: proof });
 
+      // Ronde 4 — het venster "Stuur je lijstje" achter "Versturen".
+      await evalJs(cdp, `document.querySelector('.saved-bar-send').click()`);
+      await waitFor(cdp, `Boolean(document.querySelector('.saved-send-panel'))`, 4000);
+      const venster = await evalJs(cdp, VENSTER_STAAT);
+      check(`${waar}: het venster opent vanuit de balk, als dialoog "Stuur je lijstje"`,
+        venster.venster === true && venster.rol === 'dialog' && venster.modal === 'true' && venster.titel === 'Stuur je lijstje',
+        JSON.stringify({ rol: venster.rol, modal: venster.modal, titel: venster.titel }));
+      check(`${waar}: de twee bewaarde gerechten staan er met naam en prijs`,
+        venster.gerechten.length === 2 && venster.gerechten.every(([naam, prijs]) => Boolean(naam) && Boolean(prijs)),
+        JSON.stringify(venster.gerechten));
+      check(`${waar}: twee radio's in een fieldset, standaard Gewoon delen`,
+        venster.radios.length === 2 &&
+          venster.radios[0].type === 'radio' && venster.radios[0].value === 'plain' && venster.radios[0].checked === true &&
+          venster.radios[1].value === 'vote' && venster.radios[1].checked === false &&
+          venster.legende === 'Hoe wil je het sturen?',
+        JSON.stringify({ radios: venster.radios, legende: venster.legende }));
+      check(`${waar}: de gekozen kaart heeft een rand van 2 px, de andere 1 px`,
+        venster.randen.length === 2 && venster.randen[0] === '2px' && venster.randen[1] === '1px',
+        venster.randen.join(' / '));
+      check(`${waar}: drie deelmanieren in een rij`,
+        venster.methoden.length === 3 && venster.methoden[2] === 'Meer…', JSON.stringify(venster.methoden));
+      check(`${waar}: het venster staat helemaal in beeld`, venster.inBeeld === true,
+        JSON.stringify({ breedte: venster.breedte, hoogte: venster.hoogte, overflow: venster.overflow }));
+      check(`${waar}: het venster ligt boven de tabbalk en de deelknoppen zijn aanklikbaar`,
+        venster.raakbaar.length === 3 && venster.raakbaar.every(Boolean) &&
+          (venster.bovenTabbalk === null || venster.bovenTabbalk === true),
+        JSON.stringify({ raakbaar: venster.raakbaar, bovenTabbalk: venster.bovenTabbalk }));
+      check(`${waar}: de sluitknop is 44 bij 44 met aria-label "Sluiten"`,
+        venster.sluitBreed >= 44 && venster.sluitHoog >= 44 && venster.sluitLabel === 'Sluiten',
+        JSON.stringify({ breed: venster.sluitBreed, hoog: venster.sluitHoog, label: venster.sluitLabel }));
+      check(`${waar}: de focus staat in het venster`, venster.focusInPaneel === true, venster.focusElement);
+      check(`${waar}: geen horizontale overloop met het venster open`, venster.overflow <= 0, venster.overflow);
+      if (width === 1280) {
+        check(`${waar}: op desktop hooguit 440 px breed`, venster.breedte <= 440, venster.breedte);
+      }
+      await shot(cdp, `be65-home-${width}-${theme}-venster.png`, { theme, state: 'venster', themeProof: proof });
+
+      // De radio's wisselen.
+      await evalJs(cdp, `document.querySelectorAll('.saved-send-radio')[1].click()`);
+      await sleep(120);
+      const gekozen = await evalJs(cdp, VENSTER_STAAT);
+      check(`${waar}: de radio's wisselen`,
+        gekozen.radios[0].checked === false && gekozen.radios[1].checked === true &&
+          gekozen.randen[1] === '2px' && gekozen.randen[0] === '1px',
+        JSON.stringify({ radios: gekozen.radios.map((radio) => radio.checked), randen: gekozen.randen }));
+      await shot(cdp, `be65-home-${width}-${theme}-venster-stemmen.png`, { theme, state: 'venster-stemmen', themeProof: proof });
+
+      // Esc sluit het venster en de focus keert terug naar "Versturen".
+      await evalJs(cdp, `document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`);
+      await sleep(200);
+      const gesloten = await evalJs(cdp, VENSTER_DICHT);
+      check(`${waar}: Esc sluit het venster`, gesloten.open === false, JSON.stringify(gesloten));
+      check(`${waar}: de focus keert terug naar Versturen`,
+        gesloten.focus.includes('saved-bar-send'), gesloten.focus);
+
       await evalJs(cdp, `document.querySelector('.saved-bar-close').click()`);
       await sleep(180);
       const dicht = await evalJs(cdp, BALK_STAAT);
@@ -315,9 +430,17 @@ async function homeScenario(cdp) {
 
     // De a11y-audit van de bestaande lib op de home, in dit thema.
     await setViewport(cdp, 1280, 900);
+    await leegOpslag(cdp);
     await navigate(cdp, `${APP}/`, `Boolean(document.querySelector('.share-hero-tab'))`);
     await applyTheme(cdp, theme);
     await a11y(cdp, 'gast home', theme);
+
+    // Ronde 4 — dezelfde audit met het venster "Stuur je lijstje" open.
+    await evalJs(cdp, `document.querySelector('.tonight-actions .dish-save-btn').click()`);
+    await waitFor(cdp, `Boolean(document.querySelector('.saved-bar'))`, 4000);
+    await evalJs(cdp, `document.querySelector('.saved-bar-send').click()`);
+    await waitFor(cdp, `Boolean(document.querySelector('.saved-send-panel'))`, 4000);
+    await a11y(cdp, 'gast home met venster', theme);
   }
 
   const zonderBewijs = shots.filter((opname) => !themeOk(opname.themeProof, opname.theme));
@@ -430,8 +553,15 @@ async function main() {
     });
     await enableFetchGuard(cdp, guard);
     await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: be60StubScript() });
+    // Ronde 4: de kies-API is gestubd, zodat een tik op een deelmanier nooit
+    // een echte stemming aanmaakt.
+    await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: be65KiesStubScript() });
 
     scenarioRuns = await runScenarioSelection({ entries: SCENARIOS, checks, cdp, filter: SELECTION.filter });
+
+    const kies = await evalJs(cdp, '({ stub: Boolean(window.__BE65_KIES_STUB__), calls: (window.__BE65_KIES_CALLS__ || []).length })');
+    check('kies: de API is gestubd en er is geen echte stemming gemaakt',
+      kies.stub === true && kies.calls === 0, JSON.stringify(kies));
 
     const pageViolations = await evalJs(cdp, 'window.__FIXTURE_NETWORK_VIOLATIONS__ || []');
     const guardViolations = guard.appViolations();
