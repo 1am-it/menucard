@@ -30,6 +30,7 @@ const {
   checksFromDialog,
   inPageSource,
 } = require('./a11y-audit');
+const audit = require('./a11y-audit');
 
 test('parseColor leest elke vorm die getComputedStyle teruggeeft', () => {
   assert.deepEqual(parseColor('#fff'), { r: 255, g: 255, b: 255, a: 1 });
@@ -193,6 +194,31 @@ test('checksFromAudit laat een inline link in een zin met rust', () => {
   };
   const { errors } = checksFromAudit('home', 'licht', meting);
   assert.deepEqual(errors.filter((error) => error.criterion === 'tikdoel'), []);
+});
+
+test('BE-70: een link in een vaste laag is geen tikdoel dat te dicht op een ander staat', () => {
+  // /alle-restaurants op 390 px: de naamlink van een kaart (130×24, middenformaat)
+  // lag binnen 12 px van `a.mobile-tab-link` in de zwevende menubalk. Die balk is
+  // zelf `position: fixed`; de links erin niet. Ze horen allebei bij de vaste laag
+  // en tellen daarom niet als buur (ops/browser/lib/a11y-audit.js, insideFixedLayer).
+  const kaart = { selector: 'a.ar-name.ar-name-link', tag: 'a', name: 'Restaurant Zuyd', width: 130, height: 24, inlineInText: false, midSized: true, spacingOk: true, fixed: false };
+  const balk = { selector: 'a.mobile-tab-link', tag: 'a', name: 'Restaurants', width: 96, height: 48, inlineInText: false, midSized: true, spacingOk: true, fixed: true };
+  const goed = checksFromAudit('alle-restaurants', 'licht', { ...schoneMeting, targets: [kaart, balk] });
+  assert.deepEqual(goed.errors.filter((error) => error.criterion === 'tikdoel'), [], 'de vaste balk geeft geen fout meer');
+
+  // Een buur die niet in een vaste laag ligt blijft wel een echt rood punt.
+  const dichtbij = { ...kaart, spacingOk: false };
+  const rood = checksFromAudit('alle-restaurants', 'licht', { ...schoneMeting, targets: [dichtbij] });
+  const fout = rood.errors.find((error) => error.criterion === 'tikdoel');
+  assert.ok(fout, 'een te dicht doel zonder vaste laag blijft een fout');
+  assert.equal(fout.reason, 'te-dicht-op-elkaar');
+
+  // De wandeling zit in het in-de-pagina-script: ook de ouders tellen mee.
+  const bron = audit.inPageSource('auditPage', [{ minTarget: 44, midTarget: 24 }]);
+  assert.match(bron, /function insideFixedLayer\(element\)/);
+  assert.match(bron, /style\.position === 'fixed' \|\| style\.position === 'sticky'/);
+  assert.match(bron, /node = node\.parentElement/);
+  assert.match(bron, /fixed: insideFixedLayer\(element\)/);
 });
 
 test('checksFromFocusWalk eist zichtbare focus en DOM-volgorde', () => {

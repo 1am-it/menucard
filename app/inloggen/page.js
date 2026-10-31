@@ -88,7 +88,7 @@ export default function InloggenPage() {
                 </li>
               ))}
             </ol>
-            <Link className="inloggen-claim-action" href={LOGIN_PAGE.claim.actionHref}>
+            <Link className="inloggen-claim-action" href={LOGIN_PAGE.claim.actionHref} prefetch={false}>
               {LOGIN_PAGE.claim.actionLabel}
             </Link>
           </aside>
@@ -97,7 +97,12 @@ export default function InloggenPage() {
         <div className="inloggen-footer">
           <p className="inloggen-visitor">{LOGIN_PAGE.visitor}</p>
           <p className="inloggen-team">
-            <Link className="inloggen-team-link" href={LOGIN_PAGE.teamHref}>
+            {/* BE-70 (#173): de team-inlog is een interne pagina met de
+                inlogclient van de houder in de eerste lading. Een standaard
+                `Link` prefetcht die route meteen, en dan weegt /inloggen 258 kB
+                in plaats van ongeveer 190 kB. De link werkt precies hetzelfde;
+                hij haalt de doelpagina pas bij de klik. */}
+            <Link className="inloggen-team-link" href={LOGIN_PAGE.teamHref} prefetch={false}>
               {LOGIN_PAGE.teamLabel}
             </Link>
           </p>
