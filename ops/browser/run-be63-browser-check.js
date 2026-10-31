@@ -639,12 +639,17 @@ const CODE_STEP_STATE = `(() => {
   return {
     titel: tekst(document.querySelector('.inloggen-form .auth-title')),
     notice: tekst(document.querySelector('.inloggen-form .auth-notice')),
+    error: tekst(document.querySelector('.inloggen-form .auth-error')),
+    knop: tekst(submit),
+    formulier: tekst(document.querySelector('.inloggen-form')),
     codeVeld: Boolean(code),
     codeInputMode: code ? code.getAttribute('inputmode') : null,
     codeMaxLength: code ? code.getAttribute('maxlength') : null,
     submit: tekst(submit),
     otp: otpStub ? otpStub.calls : [],
     violations: otpStub ? otpStub.violations : [],
+    stubErrors: otpStub ? otpStub.stubErrors : [],
+    nativeFetch: otpStub ? otpStub.nativeFetchAvailable : null,
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   };
 })()`;
@@ -702,7 +707,7 @@ async function inloggenVersturenScenario(cdp) {
       check(`${prefix}: e-mail invullen en versturen lukt`, ingevuld === true && verstuurd === true, `${ingevuld}/${verstuurd}`);
       check(`${prefix}: de codestap staat in beeld`,
         klaar === true && state.codeVeld === true && state.titel === 'Vul de code in',
-        `${JSON.stringify(klaar)} / ${state.titel}`);
+        `${JSON.stringify(klaar)} / ${state.titel} / fout ${JSON.stringify(state.error)} / knop ${JSON.stringify(state.knop)} / vorm ${JSON.stringify(String(state.formulier).slice(0, 160))}`);
       check(`${prefix}: de neutrale melding over de code staat erbij`,
         /^Als dit e-mailadres bij ons bekend is/.test(state.notice), state.notice);
       check(`${prefix}: het codeveld vraagt zes cijfers`,
@@ -713,6 +718,8 @@ async function inloggenVersturenScenario(cdp) {
         JSON.stringify(state.otp));
       check(`${prefix}: geen ander netwerkverkeer`, state.violations.length === 0,
         JSON.stringify(state.violations.slice(0, 2)));
+      check(`${prefix}: de stub zelf faalt niet`, state.stubErrors.length === 0 && state.nativeFetch === true,
+        `stubfouten ${JSON.stringify(state.stubErrors)} / native fetch ${JSON.stringify(state.nativeFetch)}`);
       check(`${prefix}: geen horizontale overloop`, state.overflow <= 0, state.overflow);
       check(`${prefix}: het thema is aangetoond`, themeOk(proof, theme), proof.attr);
     }

@@ -66,6 +66,21 @@ test('verkeer naar de app gaat door, een externe bestemming niet', async () => {
   assert.equal(stub.violations[0].kind, 'external_origin');
 });
 
+test('de geïnjecteerde bron werkt met alleen de paginaglobals', async () => {
+  // De stub gaat als *broncode* de pagina in. Deze test voert precies die bron
+  // uit met alleen de globals die de pagina heeft, zodat een helper die per
+  // ongeluk buiten de stub staat (en dus in de pagina niet bestaat) hier faalt
+  // in plaats van pas in de browser.
+  const fakeWindow = { location: { href: `${APP}/inloggen`, origin: APP, pathname: '/inloggen' }, fetch: null };
+  const run = new Function('window', 'Response', 'URL', `${be66OtpStubScript({})}; return window.__BE66__;`);
+  const api = run(fakeWindow, Response, URL);
+  const response = await fakeWindow.fetch(`${AUTH_ORIGIN}/auth/v1/otp`, { method: 'POST' });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {});
+  assert.equal(api.otpCount(), 1);
+  assert.deepEqual(api.violations, []);
+});
+
 test('de scriptbron draagt de fictieve auth-origin en verwijst naar /auth/v1/otp', () => {
   const source = be66OtpStubScript({});
   assert.match(source, /127\.0\.0\.1:9/);

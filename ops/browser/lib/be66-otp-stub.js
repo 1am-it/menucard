@@ -16,16 +16,21 @@
 
 const AUTH_ORIGIN = 'http://127.0.0.1:9';
 
-function jsonResponse(body, status) {
-  return new Response(JSON.stringify(body), {
-    status: status || 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
 function installBe66OtpStub(settings) {
+  // Deze hulpfunctie staat bewust *binnen* de stub: de stub gaat als broncode
+  // de pagina in (`installBe66OtpStub.toString()`), dus alles wat hij gebruikt
+  // moet in zijn eigen scope staan. Een helper buiten de functie is in de pagina
+  // niet gedefinieerd en zou de verzendstap als netwerkfout laten eindigen.
+  function jsonResponse(body, status) {
+    return new Response(JSON.stringify(body), {
+      status: status || 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const calls = [];
   const violations = [];
+  const stubErrors = [];
   const nativeFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
 
   window.fetch = async function (input, init) {
@@ -36,7 +41,12 @@ function installBe66OtpStub(settings) {
     if (url.origin === settings.authOrigin) {
       if (url.pathname === '/auth/v1/otp' && method === 'POST') {
         calls.push({ kind: 'otp', method: method, path: url.pathname, url: url.href });
-        return jsonResponse({}, 200);
+        try {
+          return jsonResponse({}, 200);
+        } catch (error) {
+          stubErrors.push(String((error && error.message) || error));
+          throw error;
+        }
       }
       violations.push({ kind: 'unexpected_auth_route', method: method, url: url.href });
       return jsonResponse({ error: 'fixture_unexpected_auth_route' }, 404);
@@ -55,6 +65,8 @@ function installBe66OtpStub(settings) {
     settings: settings,
     calls: calls,
     violations: violations,
+    stubErrors: stubErrors,
+    nativeFetchAvailable: Boolean(nativeFetch),
     otpCount: function () {
       return calls.length;
     },
