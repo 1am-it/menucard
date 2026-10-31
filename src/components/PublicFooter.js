@@ -18,7 +18,12 @@ export default function PublicFooter() {
   return (
     <footer className="public-footer">
       <div className="public-footer-inner">
-        <Link className="public-footer-link" href={LOGIN_HREF}>
+        {/* BE-59 deel 3 (#146): geen vooruit laden. Zonder prefetch={false}
+            haalt Next.js de route /inloggen al op zodra deze link in de buurt van
+            het venster komt: de meting van de eerste laadgrootte (ops/browser/
+            run-be59-load-size-check.js) liet daardoor +6,8 KB op / en +6,1 KB op
+            /search zien. De link, zijn doel en zijn naam blijven gelijk. */}
+        <Link className="public-footer-link" href={LOGIN_HREF} prefetch={false}>
           Voor restaurants · Inloggen
         </Link>
       </div>

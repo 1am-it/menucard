@@ -49,6 +49,7 @@ function argValue(flag, fallback) {
 }
 
 const BASE_SHA = argValue('--basis', '2b0e8b1');
+const HERGEBRUIK_BASIS = args.includes('--basis-hergebruiken');
 const BASE_DIR = path.resolve(REPO_ROOT, '..', `be59-base-${BASE_SHA}`);
 const EVIDENCE_PATH = path.join(__dirname, 'evidence', 'be59-load-size-evidence.json');
 
@@ -118,10 +119,26 @@ function attachMeter(cdp) {
       const scriptBytes = finished
         .filter((entry) => entry.type === 'Script')
         .reduce((sum, entry) => sum + entry.bytes, 0);
+      // De grootste posten met naam, zodat het verschil per route te verklaren is
+      // en niet alleen een getal blijft.
+      const top = finished
+        .slice()
+        .sort((links, rechts) => rechts.bytes - links.bytes)
+        .slice(0, 4)
+        .map((entry) => {
+          let pad = entry.url;
+          try {
+            pad = new URL(entry.url).pathname;
+          } catch {
+            // een onbekende URL blijft zoals hij is
+          }
+          return { path: pad, type: entry.type, kb: Math.round((entry.bytes / 1024) * 10) / 10 };
+        });
       return {
         totalKb: Math.round((totalBytes / 1024) * 10) / 10,
         scriptKb: Math.round((scriptBytes / 1024) * 10) / 10,
         resourceCount: finished.length,
+        top,
       };
     },
   };
@@ -180,7 +197,8 @@ async function main() {
   if (!browserPath) throw new Error('no_local_browser');
 
   prepareBase();
-  build(BASE_DIR, `basis ${BASE_SHA}`);
+  const basisGebouwd = fs.existsSync(path.join(BASE_DIR, '.next', 'BUILD_ID'));
+  if (!(HERGEBRUIK_BASIS && basisGebouwd)) build(BASE_DIR, `basis ${BASE_SHA}`);
   build(REPO_ROOT, 'kop (HEAD)');
 
   const outputDir = path.join(__dirname, 'output', 'be-59');

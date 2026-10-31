@@ -32,6 +32,14 @@ test('de footer toont de contracttekst en gaat naar /inloggen', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'src/components/public-footer.css')));
 });
 
+test('de footerlink laadt /inloggen niet vooruit (gemeten eerste laadgrootte)', () => {
+  // BE-59 deel 3 (#146): zonder prefetch={false} haalde Next.js de route
+  // /inloggen al op zodra de link bij het venster kwam: +6,8 KB op / en +6,1 KB
+  // op /search in ops/browser/run-be59-load-size-check.js.
+  const source = read('src/components/PublicFooter.js');
+  assert.match(source, /<Link className="public-footer-link" href=\{LOGIN_HREF\} prefetch=\{false\}>/);
+});
+
 test('de footer heeft geen sessiecheck nodig: geen Supabase, geen opslag, geen verzoek', () => {
   const source = read('src/components/PublicFooter.js');
   const imports = source.match(/^import .+$/gm) || [];
