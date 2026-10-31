@@ -13,7 +13,8 @@ const {
   initialsFrom,
   resolveAccountName,
   accountAriaLabel,
-  resolveRoleLabels,
+  resolveRoleDescription,
+  resolveRoleDescriptions,
   shouldShowDot,
   openWorkTotal,
   isInternalPath,
@@ -60,15 +61,63 @@ test('de naam komt uit de sessiemetadata, met het e-mailadres als terugval', () 
   assert.equal(resolveAccountName(null), 'Account');
 });
 
-test('rolLabels: vaste volgorde, alleen bekende rollen', () => {
-  assert.deepEqual(resolveRoleLabels([{ role: 'internal', restaurant_id: null }]), ['Intern']);
-  assert.deepEqual(
-    resolveRoleLabels([{ role: 'owner' }, { role: 'internal' }, { role: 'editor' }]),
-    ['Intern', 'Editor', 'Houder'],
+test('de rol in gewone woorden: Beheerder, Redacteur en Restauranthouder van [naam]', () => {
+  assert.equal(resolveRoleDescription([{ role: 'internal', restaurant_id: null }]), 'Beheerder');
+  assert.equal(resolveRoleDescription([{ role: 'editor' }]), 'Redacteur');
+  assert.equal(
+    resolveRoleDescription([{ role: 'owner', restaurant_id: 'r1', restaurant_name: 'Smelt' }]),
+    'Restauranthouder van Smelt',
   );
-  assert.deepEqual(resolveRoleLabels([]), []);
-  assert.deepEqual(resolveRoleLabels([{ role: 'onbekend' }]), []);
-  assert.deepEqual(resolveRoleLabels(null), []);
+  assert.deepEqual(resolveRoleDescription([]), '');
+  assert.deepEqual(resolveRoleDescription([{ role: 'onbekend' }]), '');
+  assert.deepEqual(resolveRoleDescription(null), '');
+});
+
+test('de rol in gewone woorden: meerdere rollen met " · " ertussen, in vaste volgorde', () => {
+  const description = resolveRoleDescription([
+    { role: 'owner', restaurant_id: 'r1', restaurant_name: 'Smelt' },
+    { role: 'internal' },
+    { role: 'editor' },
+  ]);
+  assert.equal(description, 'Beheerder · Redacteur · Restauranthouder van Smelt');
+  assert.deepEqual(resolveRoleDescriptions([{ role: 'internal' }, { role: 'editor' }]), ['Beheerder', 'Redacteur']);
+});
+
+test('de rol in gewone woorden: één, twee of meer restaurants', () => {
+  const owner = (names) =>
+    names.map((name, index) => ({ role: 'owner', restaurant_id: `r${index}`, restaurant_name: name }));
+
+  assert.equal(resolveRoleDescription(owner(['Smelt'])), 'Restauranthouder van Smelt');
+  assert.equal(
+    resolveRoleDescription(owner(['Smelt', 'De Bruine Boon'])),
+    'Restauranthouder van Smelt en De Bruine Boon',
+  );
+  assert.equal(
+    resolveRoleDescription(owner(['Smelt', 'De Bruine Boon', 'Het Zusje'])),
+    'Restauranthouder van 3 restaurants',
+  );
+  assert.equal(
+    resolveRoleDescription(owner(['Smelt', 'Smelt'])),
+    'Restauranthouder van Smelt',
+    'hetzelfde restaurant twee keer is nog steeds één',
+  );
+  assert.equal(
+    resolveRoleDescription([{ role: 'owner', restaurant_id: 'onbekend' }]),
+    'Restauranthouder',
+    'zonder bekende naam geen verzonnen plaats',
+  );
+});
+
+test('de rolbeschrijving bevat nooit een technische rolnaam', () => {
+  const outputs = [
+    resolveRoleDescription([{ role: 'internal' }]),
+    resolveRoleDescription([{ role: 'editor' }]),
+    resolveRoleDescription([{ role: 'owner', restaurant_id: 'r1', restaurant_name: 'Smelt' }]),
+    resolveRoleDescription([{ role: 'internal' }, { role: 'editor' }, { role: 'owner' }]),
+  ];
+  for (const output of outputs) {
+    assert.doesNotMatch(output, /\b(internal|editor|owner|staff_role|restaurant_id)\b/, output);
+  }
 });
 
 test('de stip: alleen internal of editor, en alleen bij een echt aantal groter dan 0', () => {

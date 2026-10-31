@@ -32,7 +32,7 @@ import {
   openWorkTotal,
   resolveAccountMenuItems,
   resolveAccountName,
-  resolveRoleLabels,
+  resolveRoleDescription,
   shouldShowDot,
 } from '@/src/lib/accountMenu'
 import './account-menu.css'
@@ -207,7 +207,7 @@ export default function AccountMenu() {
 
   const workCount = hasWorkRoles(account.roles) ? count : null
   const dot = shouldShowDot(account.roles, workCount)
-  const roleLabels = resolveRoleLabels(account.roles)
+  const roleDescription = resolveRoleDescription(account.roles)
   const items = resolveAccountMenuItems({ roles: account.roles, pathname })
 
   function menuBody() {
@@ -215,7 +215,7 @@ export default function AccountMenu() {
       <>
         <div className="account-menu-header">
           <p className="account-menu-name">{account.name}</p>
-          {roleLabels.length > 0 && <p className="account-menu-roles">{roleLabels.join(' · ')}</p>}
+          {roleDescription.length > 0 && <p className="account-menu-roles">{roleDescription}</p>}
         </div>
 
         <ul className="account-menu-items">

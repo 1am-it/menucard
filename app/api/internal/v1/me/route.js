@@ -19,12 +19,18 @@
 
 import { NextResponse } from 'next/server'
 import { authenticateInternalRequest } from '@/src/lib/internalAuth'
+import { withOwnerRestaurantNames } from '@/src/lib/ownerRoleNames'
+import restaurantsData from '@/data/restaurants.json'
 
 export async function GET(request) {
   const auth = await authenticateInternalRequest(request)
 
   if (auth.ok) {
-    return NextResponse.json({ roles: auth.roles })
+    // BE-59 (#146, punt 6): een houder ziet zijn rol in gewone woorden
+    // ("Restauranthouder van [naam]"). De naam is publiek en komt uit dezelfde
+    // statische index als de rest van de site; de rollen zelf en hun rechten
+    // blijven exact zoals authenticateInternalRequest ze teruggaf.
+    return NextResponse.json({ roles: withOwnerRestaurantNames(auth.roles, restaurantsData) })
   }
 
   // BE-48 (#112): "second step still missing" is *not* the same as "no internal

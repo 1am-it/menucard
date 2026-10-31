@@ -70,6 +70,15 @@ test('de avatar is 44 px, heeft een stip en een schermlezerlabel met de naam', (
   assert.match(source, /aria-expanded=\{open\}/);
 });
 
+test('bovenin het menu staan de rollen in gewone woorden, nooit de technische namen', () => {
+  const source = read(COMPONENT);
+  assert.match(source, /const roleDescription = resolveRoleDescription\(account\.roles\)/);
+  assert.match(source, /roleDescription\.length > 0 && <p className="account-menu-roles">\{roleDescription\}<\/p>/);
+  const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  assert.doesNotMatch(code, /'Intern'|'Editor'|'Houder'/, 'geen korte, technische rolaanduidingen in het menu');
+});
+
+
 test('de stip komt uit de helpers: alleen internal/editor met n > 0, en geen nep-getal', () => {
   const source = read(COMPONENT);
   assert.match(source, /const workCount = hasWorkRoles\(account\.roles\) \? count : null/);

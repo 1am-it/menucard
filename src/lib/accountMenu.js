@@ -38,12 +38,14 @@ const ITEM_LABELS = {
   uitloggen: 'Uitloggen',
 };
 
-// Nederlandse rolLabels, één vaste volgorde. Onbekende rolwaarden leveren geen
-// label op (fail closed: liever niets dan een verzonnen rol).
-const ROLE_LABELS = [
-  ['internal', 'Intern'],
-  ['editor', 'Editor'],
-  ['owner', 'Houder'],
+// De rol in gewone woorden (issue #146, aanvulling 30 okt, punten 6-8). Nooit
+// de technische rolnaam in de uitvoer: `internal` heet "Beheerder", `editor`
+// "Redacteur", en een houder "Restauranthouder van [naam]". Onbekende
+// rolwaarden leveren geen regel op (fail closed: liever niets dan een verzonnen
+// rol).
+const ROLE_WORDS = [
+  ['internal', 'Beheerder'],
+  ['editor', 'Redacteur'],
 ];
 
 function roleValues(roles) {
@@ -60,11 +62,44 @@ function hasWorkRoles(roles) {
   return hasRole(roles, 'internal') || hasRole(roles, 'editor');
 }
 
-/** De zichtbare rolLabels bij deze rollen, in vaste volgorde, zonder dubbelen.
- * Een account zonder bekende rol krijgt een lege lijst — nooit "Gast" of een
- * andere verzonnen aanduiding. */
-function resolveRoleLabels(roles) {
-  return ROLE_LABELS.filter(([role]) => hasRole(roles, role)).map(([, label]) => label);
+/** De restaurants waar deze houder van is, als namen, in de volgorde van de
+ * rollen en zonder dubbelen. De naam komt uit de server
+ * (src/lib/ownerRoleNames.js); zonder naam blijft de lijst leeg. */
+function ownerRestaurantNames(roles) {
+  const names = [];
+  for (const entry of Array.isArray(roles) ? roles : []) {
+    if (!entry || typeof entry !== 'object' || entry.role !== 'owner') continue;
+    const name = typeof entry.restaurant_name === 'string' ? entry.restaurant_name.trim() : '';
+    if (!name || names.includes(name)) continue;
+    names.push(name);
+  }
+  return names;
+}
+
+/** "Restauranthouder van [A]", "… van [A] en [B]" of "… van 3 restaurants"
+ * (issue #146, punt 6). Zonder bekende naam alleen "Restauranthouder" — nooit
+ * een verzonnen of technische naam. */
+function ownerDescription(roles) {
+  const names = ownerRestaurantNames(roles);
+  if (names.length === 0) return 'Restauranthouder';
+  if (names.length === 1) return `Restauranthouder van ${names[0]}`;
+  if (names.length === 2) return `Restauranthouder van ${names[0]} en ${names[1]}`;
+  return `Restauranthouder van ${names.length} restaurants`;
+}
+
+/** De rollen in gewone woorden, in vaste volgorde, zonder dubbelen. Een account
+ * zonder bekende rol krijgt een lege lijst — nooit "Gast" of een andere
+ * verzonnen aanduiding. */
+function resolveRoleDescriptions(roles) {
+  const descriptions = ROLE_WORDS.filter(([role]) => hasRole(roles, role)).map(([, word]) => word);
+  if (hasRole(roles, 'owner')) descriptions.push(ownerDescription(roles));
+  return descriptions;
+}
+
+/** Één regel voor bovenin het accountmenu: de rollen in gewone woorden,
+ * gescheiden door " · " (issue #146, punt 6). Leeg als er geen bekende rol is. */
+function resolveRoleDescription(roles) {
+  return resolveRoleDescriptions(roles).join(' · ');
 }
 
 function withoutDiacritics(value) {
@@ -165,7 +200,10 @@ module.exports = {
   SITE_HREF,
   hasRole,
   hasWorkRoles,
-  resolveRoleLabels,
+  ownerRestaurantNames,
+  ownerDescription,
+  resolveRoleDescriptions,
+  resolveRoleDescription,
   hasSupabaseSessionKey,
   initialsFrom,
   resolveAccountName,
