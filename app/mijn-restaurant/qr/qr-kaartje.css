@@ -154,24 +154,29 @@
 
 /* ── De schakelaar voor het formaat ──────────────────────────────────────── */
 
+/* Drie gelijke vakken naast elkaar. Als pil liep de derde keuze in de smalle
+   kolom naar een tweede regel en werd de schakelaar een scheve vorm; nu breekt
+   hooguit de tekst binnen een vak. */
 .qr-kaartje-formaten {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
   padding: 4px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: var(--bg-elevated);
 }
 
 .qr-kaartje-formaat {
   position: relative;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding: 0 14px;
+  padding: 6px 8px;
   border: 1px solid transparent;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
+  text-align: center;
+  line-height: 1.25;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
