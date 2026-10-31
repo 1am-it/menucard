@@ -115,7 +115,7 @@ test('de deelknop is een icoonknop met aria-label, aria-expanded en een statusme
   // De payload zelf (alleen url en title) staat in de ene deeluitvoering.
   const LIB = read('src/lib/sharePreference.js');
   assert.match(LIB, /buildSharePayload\(\{ title, url: href \}\)/);
-  assert.match(SHARE_BUTTON, /await performShare\(\{/);
+  assert.match(SHARE_BUTTON, /await mods\.preference\.performShare\(\{/);
   const button = cssBlock('.dish-share-btn');
   assert.match(button, /min-height:\s*44px/);
   assert.match(button, /min-width:\s*44px/);
