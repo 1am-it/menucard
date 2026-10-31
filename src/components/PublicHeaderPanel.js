@@ -271,7 +271,7 @@ export default function PublicHeaderPanel({ variant = 'settings', onClose, retur
           </Link>
         ) : (
           <div className="share-actions">
-            <button type="button" className="share-btn share-btn-quiet" onClick={close}>
+            <button type="button" className="share-btn" onClick={close}>
               {MENU_CLOSE_LABEL}
             </button>
           </div>

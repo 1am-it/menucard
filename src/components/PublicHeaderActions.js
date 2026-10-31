@@ -26,7 +26,6 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import AccountMenuButton from '@/src/components/AccountMenuButton'
 import { hasSupabaseSessionKey } from '@/src/lib/accountSession'
-import { safeBrowserStorage } from '@/src/lib/savedListStorage'
 import './public-header-actions.css'
 
 // Het hele paneel komt pas in beeld na een tik; tot die tijd is het niet
@@ -46,7 +45,14 @@ export default function PublicHeaderActions() {
   const menuRef = useRef(null)
 
   useEffect(() => {
-    setSignedIn(hasSupabaseSessionKey(safeBrowserStorage()))
+    // Dezelfde goedkope blik als AccountMenuButton: alleen kijken of er een
+    // sessiesleutel staat, zonder extra module in de eerste lading. Zonder
+    // opslag (privémodus, beleid) blijft "Inloggen" gewoon staan.
+    try {
+      setSignedIn(hasSupabaseSessionKey(window.localStorage))
+    } catch (error) {
+      setSignedIn(false)
+    }
   }, [])
 
   function close() {

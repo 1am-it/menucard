@@ -47,7 +47,7 @@ test('als gast: "Voor restaurants", "Inloggen" naar /inloggen en de instellingen
   assert.match(HERO, /<Link href="\/inloggen" className="pha-login">Inloggen<\/Link>/);
   // De knop verschijnt alleen zonder sessiesleutel; de server raadt niets.
   assert.match(HERO, /\{signedIn \? null : \(/);
-  assert.match(HERO, /hasSupabaseSessionKey\(safeBrowserStorage\(\)\)/);
+  assert.match(HERO, /hasSupabaseSessionKey\(window\.localStorage\)/);
   assert.match(HERO, /aria-label=\{SETTINGS_BUTTON_LABEL\}/);
   assert.match(HERO, /const SETTINGS_BUTTON_LABEL = 'Instellingen: thema en delen'/);
   assert.match(HERO, /aria-haspopup="dialog"/);
@@ -73,8 +73,9 @@ test('de eerste lading bevat alleen de knoppen: het paneel wordt pas bij openen 
   for (const forbidden of [/themePreference/, /sharePreference/, /ShareDialog/, /readSavedList/, /createPortal/, /SAVED_LIST_EVENT/]) {
     assert.doesNotMatch(HERO, forbidden, `${forbidden}: hoort niet in de eerste lading van de kop`);
   }
-  // De sessiesleutel komt uit het kleine helperbestand, niet uit dishList.
-  assert.match(HERO, /import \{ safeBrowserStorage \} from '@\/src\/lib\/savedListStorage'/);
+  // De sessiesleutel wordt net als in AccountMenuButton direct gelezen: geen
+  // extra module in de eerste lading.
+  assert.doesNotMatch(HERO, /savedListStorage/);
   assert.doesNotMatch(HERO, /@\/src\/lib\/dishList/, 'geen volledig dishList in de eerste lading');
   assert.match(HERO, /variant=\{open\}/);
   assert.match(HERO, /onClose=\{close\}/);

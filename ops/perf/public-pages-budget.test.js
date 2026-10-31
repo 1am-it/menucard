@@ -86,8 +86,12 @@ test('de publieke kop importeert geen volledig dishList en laadt het paneel lui'
     const source = withoutComments(fs.readFileSync(path.join(ROOT, file), 'utf8'));
     assert.doesNotMatch(source, /from '@\/src\/lib\/dishList'/, `${file}: geen statische import van dishList`);
     assert.doesNotMatch(source, /require\(['"][^'"]*dishList['"]\)/, `${file}: geen require van dishList`);
-    assert.match(source, /from '@\/src\/lib\/savedListStorage'/, `${file}: de kleine opslaghelper`);
   }
+  // De teller in PrimaryNav leest de kleine helper; de kop leest alleen de
+  // sessiesleutel en hoeft daarvoor geen module te laden.
+  const nav = withoutComments(fs.readFileSync(path.join(ROOT, 'src/components/PrimaryNav.js'), 'utf8'));
+  assert.match(nav, /from '@\/src\/lib\/savedListStorage'/, 'de teller leest de kleine opslaghelper');
+  assert.match(nav, /savedListCount\(storage\)/);
   const header = withoutComments(fs.readFileSync(path.join(ROOT, 'src/components/PublicHeaderActions.js'), 'utf8'));
   assert.match(header, /dynamic\(\(\) => import\('@\/src\/components\/PublicHeaderPanel'\), \{ ssr: false \}\)/);
   assert.doesNotMatch(header, /from '@\/src\/lib\/sharePreference'|from '@\/src\/lib\/themePreference'/);
