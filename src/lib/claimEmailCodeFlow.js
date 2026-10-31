@@ -15,6 +15,9 @@
 // text from src/lib/authErrors.js, never Supabase's own `error.message`.
 
 const { MESSAGES, authErrorMessage } = require('./authErrors');
+// BE-66 (#162): de vlag staat in een eigen, piepklein bestand, zodat het
+// formulier hem kan lezen zonder deze hele logica in de eerste lading te halen.
+const { SMS_LOGIN_FLAG, isSmsLoginEnabled } = require('./ownerSmsLogin');
 
 const CODE_LENGTH = 6;
 // GoTrue verifies both a signup and a magic-link token with type 'email'.
@@ -139,7 +142,6 @@ async function verifyEmailCode(supabaseAuth, options) {
 // the pages only render a phone field when `isSmsLoginEnabled` is true, so
 // there is no phone field anywhere in the default build.
 
-const SMS_LOGIN_FLAG = 'NEXT_PUBLIC_OWNER_SMS_LOGIN';
 const OTP_TYPE_SMS = 'sms';
 // At least 8 digits, an optional leading +, and spaces/dashes as people type
 // them. Supabase's own check remains the real one; this only stops an
@@ -154,15 +156,6 @@ const OWNER_SIGN_IN_MESSAGES = Object.freeze({
   invalidPhone: 'Vul een geldig telefoonnummer in, bijvoorbeeld +31 6 12345678.',
   smsDisabled: 'Inloggen met een telefoonnummer staat nog uit. Log in met je e-mailadres.',
 });
-
-/**
- * Whether the (default off) sms login is switched on. Only the exact value `1`
- * or a boolean `true` enables it: `'0'`, `'true'`, `''` and an unset variable
- * all leave it off, so a typo can never open a channel the owner did not approve.
- */
-function isSmsLoginEnabled(value) {
-  return value === true || value === 1 || value === '1';
-}
 
 function normalizePhone(value) {
   return typeof value === 'string' ? value.trim() : '';

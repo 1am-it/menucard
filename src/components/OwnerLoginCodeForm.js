@@ -23,11 +23,24 @@
 //     pagina);
 //   - emailHelp: één regel onder het formulier, bijvoorbeeld de uitleg welk
 //     adres je gebruikt.
+//
+// BE-66 (#162) — wat er in de eerste lading zit en wat pas bij het versturen:
+// dit component is de kleine, statische helft (velden, teksten, knoppen,
+// validatie op leeg). De Supabase-client en de inloglogica komen pas binnen bij
+// een tik op "Stuur mij een inlogcode" of "Inloggen", via
+// src/lib/ownerLoginClient.js. Daardoor zit @supabase/supabase-js niet meer in de
+// eerste lading van /inloggen (177 kB → zie de meting in de checkpoint) en
+// verandert er aan de flow zelf niets. Zolang de logica laadt, staat de knop op
+// "Bezig…" (uitgeschakeld, met aria-busy).
+//
+// Een al ingelogde houder hoeft hier niets extra's te doen: deze pagina stuurt
+// niemand bij het laden door (dat deed BE-63 al niet) en de goedkope
+// sessiesleutel-helper in de gedeelde kop (src/lib/accountSession.js) regelt het
+// accountmenu. Er komt dus geen volledige client in de eerste lading.
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getSupabaseBrowser } from '@/src/lib/supabaseBrowser'
-import { isSmsLoginEnabled, requestOwnerSignInCode, verifyOwnerSignInCode } from '@/src/lib/claimEmailCodeFlow'
+import { isSmsLoginEnabled } from '@/src/lib/ownerSmsLogin'
 import { MESSAGES } from '@/src/lib/authErrors'
 import { INTERNAL_LOGIN_HREF, OWNER_ACCESS_MESSAGES, resolveOwnerEntry } from '@/src/lib/ownerAccess'
 
@@ -54,7 +67,10 @@ export default function OwnerLoginCodeForm({
   const [codeSent, setCodeSent] = useState(false)
   const [notice, setNotice] = useState(null)
   const [error, setError] = useState(null)
-  const [busy, setBusy] = useState(false)
+  // BE-66: null = niets bezig; 'laden' = de logica en de client komen binnen;
+  // 'versturen' / 'controleren' = de bestaande Supabase-aanroep loopt.
+  const [phase, setPhase] = useState(null)
+  const busy = phase !== null
 
   const effectiveChannel = smsEnabled && channel === 'sms' ? 'sms' : 'email'
   // Eén h1 per pagina: /inloggen heeft zijn eigen titel al in de server-HTML.
@@ -78,10 +94,12 @@ export default function OwnerLoginCodeForm({
     if (event) event.preventDefault()
     setError(null)
     setNotice(null)
-    setBusy(true)
+    setPhase('laden')
     try {
-      const supabase = getSupabaseBrowser()
-      const result = await requestOwnerSignInCode(supabase.auth, {
+      // BE-66: pas nu, bij het versturen, komen de client en de logica binnen.
+      const login = await import('@/src/lib/ownerLoginClient')
+      setPhase('versturen')
+      const result = await login.sendOwnerSignInCode({
         channel: effectiveChannel,
         email,
         phone,
@@ -97,17 +115,18 @@ export default function OwnerLoginCodeForm({
     } catch (err) {
       setError(CONFIG_ERROR_TEXT)
     } finally {
-      setBusy(false)
+      setPhase(null)
     }
   }
 
   async function handleVerifyCode(event) {
     if (event) event.preventDefault()
     setError(null)
-    setBusy(true)
+    setPhase('laden')
     try {
-      const supabase = getSupabaseBrowser()
-      const result = await verifyOwnerSignInCode(supabase.auth, {
+      const login = await import('@/src/lib/ownerLoginClient')
+      setPhase('controleren')
+      const result = await login.confirmOwnerSignInCode({
         channel: effectiveChannel,
         email,
         phone,
@@ -127,7 +146,7 @@ export default function OwnerLoginCodeForm({
     } catch (err) {
       setError(CONFIG_ERROR_TEXT)
     } finally {
-      setBusy(false)
+      setPhase(null)
     }
   }
 
@@ -222,8 +241,13 @@ export default function OwnerLoginCodeForm({
               </div>
             )}
             {errorAlert}
-            <button type="submit" className="auth-submit" disabled={busy}>
-              {busy ? 'Bezig met versturen…' : submitLabel}
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={busy}
+              aria-busy={busy ? 'true' : undefined}
+            >
+              {phase === 'laden' ? 'Bezig…' : phase === 'versturen' ? 'Bezig met versturen…' : submitLabel}
             </button>
           </form>
           {emailHelp ? <p className="auth-help">{emailHelp}</p> : null}
@@ -259,8 +283,13 @@ export default function OwnerLoginCodeForm({
               />
             </div>
             {errorAlert}
-            <button type="submit" className="auth-submit" disabled={busy}>
-              {busy ? 'Bezig met controleren…' : 'Inloggen'}
+            <button
+              type="submit"
+              className="auth-submit"
+              disabled={busy}
+              aria-busy={busy ? 'true' : undefined}
+            >
+              {phase === 'laden' ? 'Bezig…' : phase === 'controleren' ? 'Bezig met controleren…' : 'Inloggen'}
             </button>
           </form>
           <div className="auth-actions">
