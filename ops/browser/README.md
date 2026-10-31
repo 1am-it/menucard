@@ -1124,7 +1124,51 @@ gedrag staan in `src/lib/sharePreference.test.js` en de bedrading in
 `src/lib/sharePreferenceSurface.test.js`.
 
 
-## BE-60 (#150) — goedgekeurde houderwijzigingen in de zoekresultaten
+## BE-63 (#155, ronde 4) — de kop en /inloggen in een echte browser
+
+`npm run test:browser:be63` (of `node ops/browser/run-be63-browser-check.js`).
+Vijf scenario's op poort 3189 (uit 3180-3189, via `BE63_PORT` te wijzigen), met
+een verse productieopbouw (`next build` + `next start` in een eigen bouwmap, de
+BE-57-opzet) en een lokale Edge/Chrome via CDP. De kop, het instellingenpaneel en
+het mobiele menu worden gemeten op `/inloggen` (statisch, met dezelfde gedeelde
+kop als de andere publieke pagina's en zonder API-aanroepen bij het laden); dat
+is ook de nieuwe pagina uit dit ticket. Draai deze check alleen. Met
+`--alleen=<scenario>` draai je één scenario; dat schrijft naar
+`be63-browser-evidence.filtered.json` en niet naar het bewijs van de levering.
+
+Wat hij meet:
+
+- **de kop als gast op 1280, 390 en 320 px** — op 1280 "Voor restaurants",
+  Inloggen en de instellingenknop; op 390 en 320 alleen Inloggen en de
+  menuknop; geen horizontale overloop; de knoppen staan op één regel en de
+  hoogte van de kop staat per breedte in het bewijs;
+- **de kop als ingelogd** — dezelfde sessie-stub als de BE-59-check zet een
+  fictieve sessie in `localStorage`; daarna staat het bestaande accountmenu in de
+  kop en is Inloggen weg;
+- **het instellingenpaneel op desktop** — het thema wisselt via de themakeuze in
+  het paneel zelf (Licht, Donker en Automatisch) en "Delen via" opent het
+  BE-61-venster;
+- **het mobiele menu op 390 en 320 px** — het blok "Heb je een restaurant?" met
+  Inloggen en Claim je zaak, de zin voor bezoekers, de weergave, Delen via en
+  Mijn lijstje staan in beeld; het menu ligt boven de tabbalk
+  (`elementFromPoint` in het midden van de laatste regel); Esc sluit het menu en
+  de focus keert terug naar de menuknop;
+- **`/inloggen`** — het accentlabel, de h1 "Inloggen bij je restaurant", de
+  intro, het e-mailveld en de knop "Stuur mij een inlogcode" van 52 px (de knop
+  in `--button-primary-bg`, vergeleken met de tokenswaarde), de uitleg over het
+  geclaimde adres, het claimblok met drie stappen en de knop naar
+  `/mijn-restaurant/claimen`, de bezoekerszin en de teamlink naar
+  `/internal/login`; daarna scrolt de check naar het claimblok en de teamlink om
+  te meten dat ze volledig in beeld passen;
+- **het thema is aangetoond, niet aangenomen**: per opname legt `themeProof`
+  `data-theme`, de actieve knop en de helderheid van `--bg` vast.
+
+Bewijs: `ops/browser/evidence/be-63/` (volledige viewport-opnames, in git) en
+`ops/browser/evidence/be63-browser-evidence.json`. Grenzen: dit is
+ontwikkelaarsbewijs, geen onafhankelijke review en geen echte acceptatie; de
+inlog zelf is niet uitgevoerd (geen Supabase-project) en de teksten en paden
+staan in `src/lib/loginEntry.test.js` en `src/lib/ownerLoginSurface.test.js`.
+
 
 `npm run test:browser:be60` (of `node ops/browser/run-be60-browser-check.js`).
 Eén scenario, poort 3186 (uit 3180-3189, via `BE60_PORT` te wijzigen), `next dev`,
