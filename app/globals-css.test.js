@@ -167,6 +167,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/mijn-restaurant/mijn-restaurant.css',
     // BE-55 deel 5: het label en het filter "Vandaag" in de zoekresultaten.
     'app/search/search.css',
+    // BE-64 (#156): de pagina voor restaurants, naast de pagina.
+    'app/voor-restaurants/voor-restaurants.css',
     // BE-59: het accountmenu.
     'src/components/account-menu.css',
     // BE-62 (#153): de sluitbare tip "Zet ons op je beginscherm".

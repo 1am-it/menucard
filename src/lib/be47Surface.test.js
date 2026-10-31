@@ -34,9 +34,14 @@ const CSS = read('app/globals.css');
 test('BE-47: /mijn-restaurant/inloggen gebruikt de gedeelde BE-48-flow', () => {
   assert.match(LOGIN_PAGE, /import OwnerLoginView from '\.\/OwnerLoginView'/);
   assert.match(LOGIN_VIEW, /from '@\/src\/components\/OwnerLoginCodeForm'/);
-  assert.match(LOGIN_FORM, /from '@\/src\/lib\/claimEmailCodeFlow'/);
-  assert.match(LOGIN_FORM, /requestOwnerSignInCode\(/);
-  assert.match(LOGIN_FORM, /verifyOwnerSignInCode\(/);
+  // BE-66 (#162): de flow en de client komen pas bij het versturen binnen, via
+  // src/lib/ownerLoginClient.js (zie ownerLoginSurface.test.js). De pagina's en
+  // het formulier gebruiken nog steeds dezelfde, onveranderde BE-48-flow.
+  const client = read('src/lib/ownerLoginClient.js');
+  assert.match(client, /import\('\.\/claimEmailCodeFlow\.js'\)/);
+  assert.match(client, /requestOwnerSignInCode\(/);
+  assert.match(client, /verifyOwnerSignInCode\(/);
+  assert.match(LOGIN_FORM, /await import\('@\/src\/lib\/ownerLoginClient'\)/);
   // Criterion 1: the owner branch never creates an account.
   const flow = read('src/lib/claimEmailCodeFlow.js');
   assert.match(flow, /async function requestOwnerSignInCode/);
