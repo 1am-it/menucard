@@ -162,6 +162,8 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/mijn-restaurant/mijn-restaurant.css',
     // BE-55 deel 5: het label en het filter "Vandaag" in de zoekresultaten.
     'app/search/search.css',
+    // BE-59: het accountmenu.
+    'src/components/account-menu.css',
     'src/components/daghap-vandaag.css',
     // BE-55 deel 4: "Daghappen vandaag" op de home.
     'src/components/daghappen-vandaag.css',
