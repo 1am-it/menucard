@@ -3,7 +3,7 @@
   "ticket": "BE-64 (#156)",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3188); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T10:41:32.067Z",
+  "startedAt": "2026-10-31T11:06:38.517Z",
   "port": 3188,
   "pages": [
     "/voor-restaurants"
@@ -31,12 +31,12 @@
     {
       "name": "voor-restaurants 1280: \"Claim je restaurant\" is minstens 44 px hoog en gaat naar claimen",
       "passed": true,
-      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":242,\"bottom\":294}}"
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":426,\"bottom\":478}}"
     },
     {
       "name": "voor-restaurants 1280: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
       "passed": true,
-      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":1665,\"bottom\":1717}}"
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":1158,\"bottom\":1210}}"
     },
     {
       "name": "voor-restaurants 1280: de twee knoppen staan in de hero en nog eens onderaan",
@@ -76,7 +76,7 @@
     {
       "name": "voor-restaurants 1280: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
       "passed": true,
-      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":1621,\"bottom\":1665}}"
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":48,\"top\":998,\"bottom\":1046}}"
     },
     {
       "name": "voor-restaurants 1280: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
@@ -101,22 +101,37 @@
     {
       "name": "voor-restaurants 1280: de h1 is minimaal 32 px",
       "passed": true,
-      "detail": "32px"
+      "detail": "60px"
+    },
+    {
+      "name": "voor-restaurants 1280: het weekoverzicht staat rechts naast de h1-kolom, op dezelfde hoogte",
+      "passed": true,
+      "detail": "weekoverzicht {\"left\":734,\"right\":1192,\"top\":176,\"bottom\":446} naast de h1-kolom {\"left\":82,\"right\":678,\"top\":113,\"bottom\":509}"
+    },
+    {
+      "name": "voor-restaurants 1280: de eerste drie kaarten staan in één rij",
+      "passed": true,
+      "detail": "offsetTop: 602, 602, 602, 761, 761, 761"
+    },
+    {
+      "name": "voor-restaurants 1280: de allergenenknop staat rechts van de tekst",
+      "passed": true,
+      "detail": "knop {\"left\":977,\"right\":1167,\"top\":998,\"bottom\":1046} naast de tekst {\"left\":107,\"right\":953,\"top\":964,\"bottom\":1080}"
     },
     {
       "name": "voor-restaurants 1280: het weekoverzicht past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":315,\"bottom\":585,\"height\":271,\"viewportHeight\":900,\"onderkant\":900}"
+      "detail": "{\"inBeeld\":true,\"top\":176,\"bottom\":446,\"height\":271,\"viewportHeight\":900,\"onderkant\":900}"
     },
     {
       "name": "voor-restaurants 1280: het allergenenblok past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":605,\"bottom\":739,\"height\":134,\"viewportHeight\":900,\"onderkant\":900}"
+      "detail": "{\"inBeeld\":true,\"top\":520,\"bottom\":686,\"height\":166,\"viewportHeight\":900,\"onderkant\":900}"
     },
     {
       "name": "voor-restaurants 1280: de knoppen onderaan past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":739,\"bottom\":791,\"height\":52,\"viewportHeight\":900,\"onderkant\":900}"
+      "detail": "{\"inBeeld\":true,\"top\":718,\"bottom\":791,\"height\":73,\"viewportHeight\":900,\"onderkant\":900}"
     },
     {
       "name": "voor-restaurants 390: de h1 uit het contract staat er",
@@ -141,7 +156,7 @@
     {
       "name": "voor-restaurants 390: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
       "passed": true,
-      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":2168,\"bottom\":2220}}"
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":2309,\"bottom\":2361}}"
     },
     {
       "name": "voor-restaurants 390: de twee knoppen staan in de hero en nog eens onderaan",
@@ -181,7 +196,7 @@
     {
       "name": "voor-restaurants 390: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
       "passed": true,
-      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":2060,\"bottom\":2104}}"
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":48,\"top\":2121,\"bottom\":2169}}"
     },
     {
       "name": "voor-restaurants 390: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
@@ -209,6 +224,21 @@
       "detail": "32px"
     },
     {
+      "name": "voor-restaurants 390: het weekoverzicht staat onder de h1 in plaats van ernaast",
+      "passed": true,
+      "detail": "weekoverzicht {\"left\":20,\"right\":370,\"top\":548,\"bottom\":818} onder de h1-kolom {\"left\":20,\"right\":370,\"top\":113,\"bottom\":520}"
+    },
+    {
+      "name": "voor-restaurants 390: de kaarten staan onder elkaar",
+      "passed": true,
+      "detail": "offsetTop: 911, 1070, 1229, 1387, 1546, 1705"
+    },
+    {
+      "name": "voor-restaurants 390: de allergenenknop staat onder de tekst",
+      "passed": true,
+      "detail": "knop {\"left\":41,\"right\":231,\"top\":2121,\"bottom\":2169} onder de tekst {\"left\":41,\"right\":349,\"top\":1906,\"bottom\":2109}"
+    },
+    {
       "name": "voor-restaurants 390: het weekoverzicht past volledig in beeld",
       "passed": true,
       "detail": "{\"inBeeld\":true,\"top\":287,\"bottom\":557,\"height\":271,\"viewportHeight\":844,\"onderkant\":844}"
@@ -216,12 +246,12 @@
     {
       "name": "voor-restaurants 390: het allergenenblok past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":302,\"bottom\":555,\"height\":253,\"viewportHeight\":844,\"onderkant\":844}"
+      "detail": "{\"inBeeld\":true,\"top\":267,\"bottom\":576,\"height\":309,\"viewportHeight\":844,\"onderkant\":844}"
     },
     {
       "name": "voor-restaurants 390: de knoppen onderaan past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":555,\"bottom\":671,\"height\":116,\"viewportHeight\":844,\"onderkant\":844}"
+      "detail": "{\"inBeeld\":true,\"top\":534,\"bottom\":671,\"height\":137,\"viewportHeight\":844,\"onderkant\":844}"
     },
     {
       "name": "voor-restaurants 320: de h1 uit het contract staat er",
@@ -241,12 +271,12 @@
     {
       "name": "voor-restaurants 320: \"Claim je restaurant\" is minstens 44 px hoog en gaat naar claimen",
       "passed": true,
-      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":175,\"height\":52,\"top\":468,\"bottom\":520}}"
+      "detail": "{\"tekst\":\"Claim je restaurant\",\"href\":\"/mijn-restaurant/claimen\",\"box\":{\"visible\":true,\"width\":292,\"height\":52,\"top\":444,\"bottom\":496}}"
     },
     {
       "name": "voor-restaurants 320: \"Ik heb al een account\" is minstens 44 px hoog en gaat naar /inloggen",
       "passed": true,
-      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":191,\"height\":52,\"top\":2480,\"bottom\":2532}}"
+      "detail": "{\"tekst\":\"Ik heb al een account\",\"href\":\"/inloggen\",\"box\":{\"visible\":true,\"width\":292,\"height\":52,\"top\":2544,\"bottom\":2596}}"
     },
     {
       "name": "voor-restaurants 320: de twee knoppen staan in de hero en nog eens onderaan",
@@ -286,7 +316,7 @@
     {
       "name": "voor-restaurants 320: \"Bekijk een voorbeeld\" is minstens 44 px hoog en gaat naar het nvwa-voorbeeld",
       "passed": true,
-      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":190,\"height\":44,\"top\":2372,\"bottom\":2416}}"
+      "detail": "{\"tekst\":\"Bekijk een voorbeeld\",\"href\":\"/nvwa/1\",\"box\":{\"visible\":true,\"width\":250,\"height\":48,\"top\":2356,\"bottom\":2404}}"
     },
     {
       "name": "voor-restaurants 320: de link \"Voor restaurants\" in de kop leidt naar deze pagina",
@@ -314,6 +344,21 @@
       "detail": "32px"
     },
     {
+      "name": "voor-restaurants 320: het weekoverzicht staat onder de h1 in plaats van ernaast",
+      "passed": true,
+      "detail": "weekoverzicht {\"left\":14,\"right\":306,\"top\":639,\"bottom\":927} onder de h1-kolom {\"left\":14,\"right\":306,\"top\":169,\"bottom\":611}"
+    },
+    {
+      "name": "voor-restaurants 320: de kaarten staan onder elkaar",
+      "passed": true,
+      "detail": "offsetTop: 1020, 1200, 1380, 1560, 1739, 1898"
+    },
+    {
+      "name": "voor-restaurants 320: de allergenenknop staat onder de tekst",
+      "passed": true,
+      "detail": "knop {\"left\":35,\"right\":285,\"top\":2356,\"bottom\":2404} onder de tekst {\"left\":35,\"right\":285,\"top\":2120,\"bottom\":2344}"
+    },
+    {
       "name": "voor-restaurants 320: het weekoverzicht past volledig in beeld",
       "passed": true,
       "detail": "{\"inBeeld\":true,\"top\":216,\"bottom\":504,\"height\":289,\"viewportHeight\":720,\"onderkant\":720}"
@@ -321,12 +366,12 @@
     {
       "name": "voor-restaurants 320: het allergenenblok past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":211,\"bottom\":509,\"height\":298,\"viewportHeight\":720,\"onderkant\":720}"
+      "detail": "{\"inBeeld\":true,\"top\":195,\"bottom\":525,\"height\":330,\"viewportHeight\":720,\"onderkant\":720}"
     },
     {
       "name": "voor-restaurants 320: de knoppen onderaan past volledig in beeld",
       "passed": true,
-      "detail": "{\"inBeeld\":true,\"top\":431,\"bottom\":547,\"height\":116,\"viewportHeight\":720,\"onderkant\":720}"
+      "detail": "{\"inBeeld\":true,\"top\":410,\"bottom\":547,\"height\":137,\"viewportHeight\":720,\"onderkant\":720}"
     },
     {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
@@ -347,7 +392,7 @@
   "shots": [
     {
       "file": "be64-voor-restaurants-1280-licht.png",
-      "sha256": "05507ca0b7c6d05c4dc350c0ad8002fa4696a23c326465f35165c87cf506daa2",
+      "sha256": "b4e4d9c45a6b2367fdd8c7f21d1d03ce7ba5f0996fd8908249f27930b490d392",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -371,7 +416,7 @@
     },
     {
       "file": "be64-voor-restaurants-1280-donker.png",
-      "sha256": "06e9951bf4f96d40ce980221244805ff6c93576688387d0d69e55e9d3636f4be",
+      "sha256": "e44fe11380bf0db1cece260b0bc9fc435a8032340c2e3f67dfbc76d765f870c4",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -395,7 +440,7 @@
     },
     {
       "file": "be64-voor-restaurants-1280-vrpreview.png",
-      "sha256": "7f922bcefb2c35120c7d1a689b3036839a6913e18a5c562da71959a0cb50da59",
+      "sha256": "e44fe11380bf0db1cece260b0bc9fc435a8032340c2e3f67dfbc76d765f870c4",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -405,7 +450,7 @@
     },
     {
       "file": "be64-voor-restaurants-1280-vrallergens.png",
-      "sha256": "84e29a2f2792231978af5fbfe9010915fb5397df1ee70a6dd551eb72ecb49f43",
+      "sha256": "2082673648caefe81479e4c797a7668a80fa08f16cec76ae89b79114546825e3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -415,7 +460,7 @@
     },
     {
       "file": "be64-voor-restaurants-1280-vrbottomactions.png",
-      "sha256": "84e29a2f2792231978af5fbfe9010915fb5397df1ee70a6dd551eb72ecb49f43",
+      "sha256": "2082673648caefe81479e4c797a7668a80fa08f16cec76ae89b79114546825e3",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -483,7 +528,7 @@
     },
     {
       "file": "be64-voor-restaurants-390-vrallergens.png",
-      "sha256": "dc6bdb6f908b2060aef7866b119e69dd088ad8102df5e01ca11aad74d0cd67e1",
+      "sha256": "08ad8287ea3db72c59aec09c7932f409fd94983eb1083afd88acfc2114cf2ef5",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -493,7 +538,7 @@
     },
     {
       "file": "be64-voor-restaurants-390-vrbottomactions.png",
-      "sha256": "dc6bdb6f908b2060aef7866b119e69dd088ad8102df5e01ca11aad74d0cd67e1",
+      "sha256": "4a3ac254bd54ee1acca0ddf8e36fa656b14f965d5276635c9506c04cf8564cbb",
       "width": 390,
       "height": 844,
       "viewport": "390x844",
@@ -503,7 +548,7 @@
     },
     {
       "file": "be64-voor-restaurants-320-licht.png",
-      "sha256": "03ded653aab243b695d5c5f840f268af18cf72cf9bd018b7dc40d007b1dcc08c",
+      "sha256": "e5b85d3bf9a0a583951021a9c2a7929677b773c2c144f1f710f7d9508d4a1fcf",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -527,7 +572,7 @@
     },
     {
       "file": "be64-voor-restaurants-320-donker.png",
-      "sha256": "0308b1cb15974bcc58bad63af0a714b34a131a4a69d86ec449fe4b08876a203d",
+      "sha256": "6537b64c3e47f46195c54de325c6f23e869d2e60299433e1d2b3d01196646154",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -551,7 +596,7 @@
     },
     {
       "file": "be64-voor-restaurants-320-vrpreview.png",
-      "sha256": "63ce6c9a850b4ff74dfff843a902116eb585280e31593e9e11867543ada98719",
+      "sha256": "e52df2eb49fd445a66f70451e6ece944de886485dd99faacbe6a3607d9f3bd16",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -561,7 +606,7 @@
     },
     {
       "file": "be64-voor-restaurants-320-vrallergens.png",
-      "sha256": "8ad3132243228d98b933dd2849e76b4220309036f5727f83299acf25c7f2d538",
+      "sha256": "ed89af199e0ba24531487a61bdca7c3da9500c0785d5a44734f5a48f96397724",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
@@ -571,7 +616,7 @@
     },
     {
       "file": "be64-voor-restaurants-320-vrbottomactions.png",
-      "sha256": "dfd7016128017f874616891decb9a1da133895a4ba19e5e4d53bd5f7cb3b47f4",
+      "sha256": "c0400cbd4fe9ba076ef0fec21078fdd6ea979a729c62794acb01afdc3b6e60e9",
       "width": 320,
       "height": 720,
       "viewport": "320x720",
