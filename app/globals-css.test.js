@@ -181,6 +181,9 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     // BE-65: de deelknop met het woord "Delen" (home en /search).
     'src/components/dish-share-button.css',
     'src/components/kies-start.css',
+    // BE-69 (#172): de twee tekstpagina's /privacy en /colofon, naast de
+    // gedeelde vorm in src/components/LegalDocument.js.
+    'src/components/legal-document.css',
     'src/components/menu-body.css',
     // BE-63 (#155): de teller bij "Mijn lijstje" en de ene publieke kop.
     'src/components/primary-nav.css',

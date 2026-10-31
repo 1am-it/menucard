@@ -197,6 +197,32 @@
   text-underline-offset: 3px;
 }
 
+/* BE-69 (#172, uitkomst 3): de verwijzing naar de privacyverklaring, direct
+   onder de e-mailcode. Een tikvlak van 44 px, zoals de andere kleine links. */
+.inloggen-privacy {
+  margin: 10px 0 0;
+}
+
+.inloggen-privacy-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.inloggen-privacy-link:hover {
+  color: var(--text-primary);
+}
+
+.inloggen-privacy-link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
 @media (min-width: 900px) {
   .inloggen-columns {
     grid-template-columns: minmax(0, 1fr) 360px;

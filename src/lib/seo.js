@@ -19,8 +19,10 @@ const SITEMAP_PATH = '/sitemap.xml';
 // claimflow en de twee persoonlijke pagina's (het lijstje en de stemming).
 const PRIVATE_PATHS = ['/internal', '/api', '/mijn-restaurant', '/claim', '/kies', '/mijn-lijstje'];
 
-// De publieke pagina's zonder eigen id in de URL.
-const PUBLIC_PATHS = ['/', '/alle-restaurants'];
+// De publieke pagina's zonder eigen id in de URL. BE-69 (#172, uitkomst 1 en 2)
+// voegt de twee tekstpagina's /privacy en /colofon toe: ze staan in de sitemap
+// zoals de andere publieke pagina's.
+const PUBLIC_PATHS = ['/', '/alle-restaurants', '/privacy', '/colofon'];
 
 /** Draagt dit pad een van de privépaden (ook als het eronder hangt)? */
 function isPrivatePath(value) {

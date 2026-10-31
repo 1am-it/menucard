@@ -4,6 +4,8 @@
 # bouwmap (NEXT_DIST_DIR), zodat een net gedraaide `next build` in .next geen
 # volledige herlaadbeurt in de testserver veroorzaakt.
 .next-browser-*/
+# BE-69 (#172): de eigen bouwmap van de browsercheck van /privacy en /colofon.
+.next-be69/
 .env.local
 .DS_Store
 
