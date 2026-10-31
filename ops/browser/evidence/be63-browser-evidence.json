@@ -3,7 +3,7 @@
   "ticket": "BE-63 (#155)",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck op een verse productieopbouw (next build + next start op poort 3189); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T10:13:11.532Z",
+  "startedAt": "2026-10-31T10:17:30.168Z",
   "port": 3189,
   "pages": [
     "/inloggen",
@@ -16,7 +16,7 @@
       "checks": 17,
       "passed": 17,
       "failed": 0,
-      "durationMs": 6149,
+      "durationMs": 6410,
       "error": null
     },
     {
@@ -24,7 +24,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 2284,
+      "durationMs": 2251,
       "error": null
     },
     {
@@ -32,7 +32,7 @@
       "checks": 22,
       "passed": 22,
       "failed": 0,
-      "durationMs": 3369,
+      "durationMs": 3251,
       "error": null
     },
     {
@@ -40,7 +40,7 @@
       "checks": 36,
       "passed": 36,
       "failed": 0,
-      "durationMs": 8740,
+      "durationMs": 8502,
       "error": null
     },
     {
@@ -48,7 +48,7 @@
       "checks": 18,
       "passed": 18,
       "failed": 0,
-      "durationMs": 6261,
+      "durationMs": 6970,
       "error": null
     }
   ],
@@ -580,7 +580,7 @@
   ],
   "shots": [
     {
-      "file": "be63-kop-gast-1280-licht",
+      "file": "be63-kop-gast-1280-licht.png",
       "sha256": "1db09a10457e865e32003c08ca6d1e8c0dbf013a28de825ea9efe4c19fad8b43",
       "width": 1280,
       "height": 900,
@@ -604,7 +604,7 @@
       }
     },
     {
-      "file": "be63-kop-gast-1280-donker",
+      "file": "be63-kop-gast-1280-donker.png",
       "sha256": "8bf07f6ecf1cefaac0d013ab2fa92bf4f8d173196a2b8f6fd5275a782ecd29fc",
       "width": 1280,
       "height": 900,
@@ -628,7 +628,7 @@
       }
     },
     {
-      "file": "be63-kop-gast-390-licht",
+      "file": "be63-kop-gast-390-licht.png",
       "sha256": "14cdb3dc7653bcf145aa0e7631d432fa1b561f6e855a9430d229ac4844542fbe",
       "width": 390,
       "height": 844,
@@ -652,7 +652,7 @@
       }
     },
     {
-      "file": "be63-kop-gast-390-donker",
+      "file": "be63-kop-gast-390-donker.png",
       "sha256": "615f608068f16a257fd217e2e229a03e9d3f1fbee12d75104f56b4f0da067646",
       "width": 390,
       "height": 844,
@@ -676,7 +676,7 @@
       }
     },
     {
-      "file": "be63-kop-gast-320-licht",
+      "file": "be63-kop-gast-320-licht.png",
       "sha256": "2172bae01ee412325e5e0ff90fe835bd0f351fe8348f431905aa07138a1b10c1",
       "width": 320,
       "height": 720,
@@ -700,7 +700,7 @@
       }
     },
     {
-      "file": "be63-kop-gast-320-donker",
+      "file": "be63-kop-gast-320-donker.png",
       "sha256": "09a3b2cc03ecd3df48238f52cbe999744ebbae5075c96d37d41975b826faa0ea",
       "width": 320,
       "height": 720,
@@ -724,7 +724,7 @@
       }
     },
     {
-      "file": "be63-instellingen-1280-licht",
+      "file": "be63-instellingen-1280-licht.png",
       "sha256": "b2a610adb71d152103fe677bcf3a63241db9ec280b8e489bd7a6dfd12259bf33",
       "width": 1280,
       "height": 900,
@@ -748,7 +748,7 @@
       }
     },
     {
-      "file": "be63-instellingen-1280-donker",
+      "file": "be63-instellingen-1280-donker.png",
       "sha256": "16af7d7aefb8bd680250ec44aad40b078aab91d4346bc30beadecc6543317f6f",
       "width": 1280,
       "height": 900,
@@ -772,8 +772,8 @@
       }
     },
     {
-      "file": "be63-instellingen-1280-automatisch",
-      "sha256": "65ce8f95d43d08bd0264ad600b3434db29646951aee3086e5f52bc8dc9f5d64d",
+      "file": "be63-instellingen-1280-automatisch.png",
+      "sha256": "0a4df3d0689572ec65e2f3ca3246dbf6ac778764ed5ceb83593e7195741de93b",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -782,8 +782,8 @@
       "themeProof": null
     },
     {
-      "file": "be63-instellingen-1280-delen",
-      "sha256": "8870041077e709327ac3983b4195e38803b2d3a262cf1a50c9e32e210308393f",
+      "file": "be63-instellingen-1280-delen.png",
+      "sha256": "aae7d4cd452cd388562f15360213265c6f90bd0f93d667e825a08a51ccd9c5ee",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -792,7 +792,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-menu-390-licht",
+      "file": "be63-menu-390-licht.png",
       "sha256": "c39e26d48cfb326ee4fc839d6386cfcaa85c4ec382c6cac14cb9837d318090cb",
       "width": 390,
       "height": 844,
@@ -816,7 +816,7 @@
       }
     },
     {
-      "file": "be63-menu-390-donker",
+      "file": "be63-menu-390-donker.png",
       "sha256": "a2afb13a38125a8cfe8d2b489eb6ae69a693a674dca99e0ce22d5b16fe5faef1",
       "width": 390,
       "height": 844,
@@ -840,7 +840,7 @@
       }
     },
     {
-      "file": "be63-menu-320-licht",
+      "file": "be63-menu-320-licht.png",
       "sha256": "ef87596d6ca819895e3aa9ed9cbc791ed8828a6c606c222e2226e8b3044c6be2",
       "width": 320,
       "height": 720,
@@ -864,7 +864,7 @@
       }
     },
     {
-      "file": "be63-menu-320-donker",
+      "file": "be63-menu-320-donker.png",
       "sha256": "e0f704dd1c036910f578463734255c8ecc0640025b8960002eef3b564e65a4d9",
       "width": 320,
       "height": 720,
@@ -888,7 +888,7 @@
       }
     },
     {
-      "file": "be63-inloggen-1280-licht",
+      "file": "be63-inloggen-1280-licht.png",
       "sha256": "2f3d97d9535af6290109614123bffc438e3f03f857312565418e89659c04931d",
       "width": 1280,
       "height": 900,
@@ -912,7 +912,7 @@
       }
     },
     {
-      "file": "be63-inloggen-1280-donker",
+      "file": "be63-inloggen-1280-donker.png",
       "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
       "width": 1280,
       "height": 900,
@@ -936,7 +936,7 @@
       }
     },
     {
-      "file": "be63-inloggen-1280-claim",
+      "file": "be63-inloggen-1280-claim.png",
       "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
       "width": 1280,
       "height": 900,
@@ -946,7 +946,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-inloggen-1280-team",
+      "file": "be63-inloggen-1280-team.png",
       "sha256": "59f86d7b0a1fc15267b9c0429c8b5e4588b18a921de368de8645d2cf728266f4",
       "width": 1280,
       "height": 900,
@@ -956,7 +956,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-inloggen-390-licht",
+      "file": "be63-inloggen-390-licht.png",
       "sha256": "14cdb3dc7653bcf145aa0e7631d432fa1b561f6e855a9430d229ac4844542fbe",
       "width": 390,
       "height": 844,
@@ -980,7 +980,7 @@
       }
     },
     {
-      "file": "be63-inloggen-390-donker",
+      "file": "be63-inloggen-390-donker.png",
       "sha256": "615f608068f16a257fd217e2e229a03e9d3f1fbee12d75104f56b4f0da067646",
       "width": 390,
       "height": 844,
@@ -1004,7 +1004,7 @@
       }
     },
     {
-      "file": "be63-inloggen-390-claim",
+      "file": "be63-inloggen-390-claim.png",
       "sha256": "83a225895fd946f9eb461f112ec3c39a42f245b4831ca3e8ea268a7ca56140c0",
       "width": 390,
       "height": 844,
@@ -1014,7 +1014,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-inloggen-390-team",
+      "file": "be63-inloggen-390-team.png",
       "sha256": "83a225895fd946f9eb461f112ec3c39a42f245b4831ca3e8ea268a7ca56140c0",
       "width": 390,
       "height": 844,
@@ -1024,7 +1024,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-inloggen-320-licht",
+      "file": "be63-inloggen-320-licht.png",
       "sha256": "2172bae01ee412325e5e0ff90fe835bd0f351fe8348f431905aa07138a1b10c1",
       "width": 320,
       "height": 720,
@@ -1048,7 +1048,7 @@
       }
     },
     {
-      "file": "be63-inloggen-320-donker",
+      "file": "be63-inloggen-320-donker.png",
       "sha256": "09a3b2cc03ecd3df48238f52cbe999744ebbae5075c96d37d41975b826faa0ea",
       "width": 320,
       "height": 720,
@@ -1072,7 +1072,7 @@
       }
     },
     {
-      "file": "be63-inloggen-320-claim",
+      "file": "be63-inloggen-320-claim.png",
       "sha256": "5dd1f477f2561f2e4f6b1676cff7bcdbea1e346fb5f79546bcf23ed1e9898d93",
       "width": 320,
       "height": 720,
@@ -1082,7 +1082,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-inloggen-320-team",
+      "file": "be63-inloggen-320-team.png",
       "sha256": "96c14fd3cc28804593dcb013aef7a1a63e11ab87cb0fb73c0eb11ce4d146dc25",
       "width": 320,
       "height": 720,
@@ -1092,7 +1092,7 @@
       "themeProof": null
     },
     {
-      "file": "be63-kop-ingelogd-1280-licht",
+      "file": "be63-kop-ingelogd-1280-licht.png",
       "sha256": "bdfa7a7626497482d0472a4c8370f4bfe8d0e3ba6ff7b2af704d80f7001f950e",
       "width": 1280,
       "height": 900,
@@ -1116,7 +1116,7 @@
       }
     },
     {
-      "file": "be63-kop-ingelogd-1280-donker",
+      "file": "be63-kop-ingelogd-1280-donker.png",
       "sha256": "0dabd4b1745331e559fefabf1c5e7809080c85fcc26338b23c14e594fb6ac861",
       "width": 1280,
       "height": 900,
@@ -1140,7 +1140,7 @@
       }
     },
     {
-      "file": "be63-kop-ingelogd-390-licht",
+      "file": "be63-kop-ingelogd-390-licht.png",
       "sha256": "a9ef85990317d940411b8c5c73e5b06399e700fc242be3d5dd25b7863e6b7732",
       "width": 390,
       "height": 844,
@@ -1164,7 +1164,7 @@
       }
     },
     {
-      "file": "be63-kop-ingelogd-390-donker",
+      "file": "be63-kop-ingelogd-390-donker.png",
       "sha256": "79be983040a8e4dc0c9533402784f0dc6a02c69fddc559e6d0539e12f207f29b",
       "width": 390,
       "height": 844,
@@ -1188,7 +1188,7 @@
       }
     },
     {
-      "file": "be63-kop-ingelogd-320-licht",
+      "file": "be63-kop-ingelogd-320-licht.png",
       "sha256": "9ba5457a99e3e701a97f470bf5e78f335aa1d83a6b764f80a00c769dc0df852a",
       "width": 320,
       "height": 720,
@@ -1212,7 +1212,7 @@
       }
     },
     {
-      "file": "be63-kop-ingelogd-320-donker",
+      "file": "be63-kop-ingelogd-320-donker.png",
       "sha256": "4ac3426eee0bbae9f219e86ce77c2dd659f34a580c887f73e757e18228911705",
       "width": 320,
       "height": 720,

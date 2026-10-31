@@ -105,8 +105,8 @@ async function setViewport(cdp, width, height) {
 async function shot(cdp, name, meta = {}) {
   fs.mkdirSync(SHOT_DIR, { recursive: true });
   // Een volledige viewport, geen uitsnede: de kop, het paneel en de vaste
-  // tabbalk moeten samen op de opname staan.
-  const file = await screenshot(cdp, SHOT_DIR, name);
+  // tabbalk moeten samen op de opname staan. De opname is altijd een PNG.
+  const file = await screenshot(cdp, SHOT_DIR, `${name}.png`);
   shots.push({
     ...file,
     viewport: `${viewport.width}x${viewport.height}`,
