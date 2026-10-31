@@ -237,7 +237,8 @@ test('BE-70: het thema gaat via het instellingenpaneel en het paneel is dicht bi
   const source = read(CHECK);
   assert.match(source, /const SETTINGS_PANEL = '\.pha-panel'/);
   assert.match(source, /clickThemeScript/);
-  assert.match(source, /themeOk\(proof, theme\)/);
+  assert.match(source, /themeOk\(open, theme\)/);
+  assert.match(source, /themeStillApplied\(proof, theme\)/);
   assert.match(source, /theme_lost_after_close/);
   // Het paneel gaat dicht vóór de opname: closeSettings eerst, daarna pas shot().
   const meet = source.slice(source.indexOf('async function meetPagina'));

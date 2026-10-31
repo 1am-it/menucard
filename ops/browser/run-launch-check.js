@@ -56,7 +56,7 @@ const {
   filteredEvidencePath,
   runScenarioSelection,
 } = require('./lib/scenario-filter');
-const { THEME_LABELS, themeProofScript, clickThemeScript, themeProofValue, themeOk } = require('./lib/theme-proof');
+const { THEME_LABELS, THEME_LUMINANCE, themeProofScript, clickThemeScript, themeProofValue, themeOk } = require('./lib/theme-proof');
 const { be67StubScript } = require('./lib/be67-daghap-stub');
 const { be62KiesStubScript, BE62_KIES_CODE } = require('./lib/be62-kies-stub');
 const audit = require('./lib/a11y-audit');
@@ -191,6 +191,19 @@ async function closeSettings(cdp) {
 }
 
 /**
+ * Het bewijs ná het sluiten van het instellingenpaneel. De themaknoppen staan op
+ * de publieke pagina's in dat paneel, dus na het sluiten is er geen actieve knop
+ * meer om te lezen; het thema blijft dan bewezen door `data-theme` plus de
+ * helderheid van `--bg`, met dezelfde grenzen als themeOk (BE-67).
+ */
+function themeStillApplied(proof, theme) {
+  if (!proof || proof.attr !== theme || !Number.isFinite(proof.luminance)) return false;
+  return theme === 'light'
+    ? proof.luminance > THEME_LUMINANCE.light.above
+    : proof.luminance < THEME_LUMINANCE.dark.below;
+}
+
+/**
  * Het thema via de themakeuze in het instellingenpaneel, daarna het paneel
  * dicht en pas dan het bewijs. Geen los attribuut en geen schrijfactie in de
  * opslag: alleen de app bepaalt het thema.
@@ -201,22 +214,22 @@ async function applyTheme(cdp, theme, label) {
   if (!(await waitFor(cdp, `document.querySelectorAll('.theme-btn').length >= 2`, 15000))) {
     throw new Error(`theme_button_missing: ${want}`);
   }
-  let proof = null;
+  let open = null;
   for (let poging = 0; poging < 4; poging += 1) {
     const clicked = await evalJs(cdp, clickThemeScript(want));
     if (clicked !== 'clicked') throw new Error(`theme_button_missing: ${want}`);
     await sleep(300);
-    proof = await themeProof(cdp);
-    if (themeOk(proof, theme)) break;
-    proof = null;
+    open = await themeProof(cdp);
+    if (themeOk(open, theme)) break;
+    open = null;
   }
-  if (!proof) throw new Error(`theme_not_applied: ${want}`);
+  if (!open) throw new Error(`theme_not_applied: ${want}`);
   const closed = await closeSettings(cdp);
   if (!closed) throw new Error(`settings_panel_still_open: ${want}`);
   await sleep(150);
-  proof = await themeProof(cdp);
-  if (!themeOk(proof, theme)) throw new Error(`theme_lost_after_close: ${want}`);
-  themeLog.push({ page: label, theme, panelClosed: closed, proof });
+  const proof = await themeProof(cdp);
+  if (!themeStillApplied(proof, theme)) throw new Error(`theme_lost_after_close: ${want}`);
+  themeLog.push({ page: label, theme, panelClosed: closed, proofOpen: open, proof });
   return { proof, panelClosed: closed };
 }
 
@@ -507,7 +520,11 @@ async function main() {
       appOrigins: APP_ORIGINS,
       baseUrl: `${APP}/`,
       // De in-page stubs antwoorden zelf; de guard staat de routes alleen toe.
+      // `/api/search` en `/api/restaurants` zijn echte, alleen-lezen app-routes
+      // die de home en het zoeken zelf aanroepen.
       fixtureRoutes: [
+        { id: 'search', match: 'exact', path: '/api/search', methods: ['GET'] },
+        { id: 'restaurants', match: 'exact', path: '/api/restaurants', methods: ['GET'] },
         { id: 'kies', match: 'prefix', path: '/api/v1/kies', methods: ['GET', 'POST'] },
         { id: 'daghap', match: 'prefix', path: '/api/v1/daghap', methods: ['GET', 'POST', 'PATCH', 'DELETE'] },
         { id: 'tellers', match: 'exact', path: '/api/v1/tellers', methods: ['POST'] },
