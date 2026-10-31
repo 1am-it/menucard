@@ -49,29 +49,33 @@ test('BE-62: /kies toont de vraag alleen na een eigen stem', () => {
 
 test('BE-62: een gedeeld gerecht krijgt hetzelfde vlak ná de kaart met Bewaar', () => {
   // Eén component en één stylesheet voor alle drie de plekken: de menukaart, het
-  // gedeelde lijstje en /kies. Ronde 1 zette de opmaak hier zelf neer; dan laadde
-  // de menukaart de CSS nooit en stond het vlak zonder vorm in de pagina.
-  assert.match(MENU_BODY, /import ZoekGerechtBlock from '@\/src\/components\/ZoekGerechtBlock'/);
-  assert.match(MENU_BODY, /import \{ SHARED_RETURN_BODY, SHARED_RETURN_CTA, SHARED_RETURN_TITLE \} from '@\/src\/lib\/returnVisit'/);
-  assert.equal(MENU_BODY.match(/<ZoekGerechtBlock/g).length, 1);
-  assert.match(MENU_BODY, /<ZoekGerechtBlock\s+variant="dish"\s+title=\{SHARED_RETURN_TITLE\}\s+body=\{SHARED_RETURN_BODY\}\s+cta=\{SHARED_RETURN_CTA\}/);
-  // Geen tweede kopie van de opmaak in dit bestand.
-  assert.equal(MENU_BODY.includes('className="zoek-gerecht zoek-gerecht--dish"'), false);
+  // gedeelde lijstje en /kies. De gedeelde body blijft vrij van de import (ronde
+  // 1 zette de opmaak hier zelf neer en laadde de CSS nooit); de menukaart laadt
+  // het component pas bij een gedeelde link. Zo blijft de eerste lading van de
+  // menukaart binnen de grens van 1 KB en onder de oude BE-50-budgetgrens.
+  assert.doesNotMatch(MENU_BODY, /import .*ZoekGerechtBlock|<ZoekGerechtBlock/, 'de gedeelde body haalt het component niet binnen');
   // De volgorde in de markup (review ronde 2, punt 2): eerst de deelregel, dan
   // het gedeelde gerecht met de bestaande Bewaar-knop, en pas daarna het vlak.
   const note = MENU_BODY.indexOf('{shareNote && <div className="dish-share-note">');
   const save = MENU_BODY.indexOf('entry={saveEntry}');
-  const block = MENU_BODY.indexOf('<ZoekGerechtBlock');
+  const block = MENU_BODY.indexOf('{shareNote && shareBlock}');
   assert.ok(note > 0, 'de deelregel ontbreekt');
   assert.ok(save > note, 'de Bewaar-knop hoort ná de deelregel');
   assert.ok(block > save, 'het vlak hoort ná het gedeelde gerecht met Bewaar');
   // En het vlak staat buiten de gerechtkaart: tussen Bewaar en het vlak sluiten
   // de voet van de kaart en de kaart zelf.
   assert.match(MENU_BODY.slice(save, block), /<\/div>\s*<\/div>/, 'het vlak staat nog in de gerechtkaart');
-  // Deelregel en vlak delen dezelfde voorwaarde (alleen bij een gedeelde link).
-  assert.match(MENU_BODY, /\{shareNote && \(/);
+  // Precies één plek voor het vlak, en alleen bij een gedeelde link.
+  assert.equal(MENU_BODY.match(/\{shareNote && shareBlock\}/g).length, 1);
   // De bestaande bewaarknop blijft op de kaart staan (Bewaar + Delen).
   assert.match(MENU_BODY, /<DishShareButton[\s\S]*?entry=\{saveEntry\}/);
+  // MenuView laadt hetzelfde component lui en geeft het als shareBlock mee.
+  assert.match(MENU_VIEW, /const ZoekGerechtBlock = dynamic\(\(\) => import\('@\/src\/components\/ZoekGerechtBlock'\), \{ ssr: false \}\)/);
+  assert.equal(MENU_VIEW.match(/<ZoekGerechtBlock/g).length, 1);
+  assert.match(MENU_VIEW, /shareBlock=\{isResolvedTarget && hasShareTheme\(standParam\) \? \(/);
+  for (const woord of [SHARED_RETURN_TITLE, SHARED_RETURN_BODY, SHARED_RETURN_CTA]) {
+    assert.ok(MENU_VIEW.includes(`"${woord}"`), `het vlak mist de tekst "${woord}"`);
+  }
   // En de deelregel verschijnt alleen bij een gedeelde link, zoals voorheen.
   assert.match(MENU_VIEW, /shareNote=\{isResolvedTarget && hasShareTheme\(standParam\)\}/);
 });

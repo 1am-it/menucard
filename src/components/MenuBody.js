@@ -11,13 +11,12 @@ import Emoji from '@/src/components/Emoji'
 // op /kies: één component, één stylesheet (src/components/ZoekGerechtBlock.js).
 // Ronde 1 zette de opmaak hier zelf neer om bytes te sparen, maar dan laadde de
 // menukaart de bijbehorende CSS nooit en stond het vlak zonder vorm in de
-// pagina. Eén component kost enkele honderden bytes en houdt het vlak overal
-// gelijk; de eerste lading blijft binnen de grens van 1 KB (zie
-// ops/browser/evidence/be62-build-size-evidence.json).
+// pagina. Het vlak komt nu als kant-en-klaar knooppunt binnen (`shareBlock`),
+// zodat deze gedeelde body geen eigen import en geen eigen chunk meeneemt; de
+// menukaart laadt hetzelfde component pas bij de gedeelde link (zie
+// app/menu/[id]/MenuView.js), net als /kies.
 import DishShareButton from '@/src/components/DishShareButton'
-import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
-import { SHARED_RETURN_BODY, SHARED_RETURN_CTA, SHARED_RETURN_TITLE } from '@/src/lib/returnVisit'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
 import { honestPriceLabel } from '@/src/lib/menuPrice'
@@ -131,7 +130,7 @@ export function itemMatchesAllergens(item, excludeIds) {
 
 // ─── MenuItem Component ────────────────────────────────────────────────────────
 
-export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null, dishKey = null }) {
+export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTarget = false, showPulse = false, highlightQuery = null, innerRef, domId = null, category = null, menuTitle = null, sourceDate = null, shareHref = null, shareTitle = null, shareNote = false, saveEntry = null, dishKey = null, shareBlock = null }) {
   const { safe, unknown } = itemMatchesAllergens(item, excludeAllergens)
   const hasAllergenFilter = excludeAllergens.length > 0
   // BE-29 (#70) — een daghap alleen als de bron het zelf zegt en de kaart
@@ -272,14 +271,7 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
         Bewaar-knop, en dan dit eigen vlak. Het staat als broer van de kaart in
         dezelfde grid (en spant over de volle breedte, zie
         zoek-gerecht-block.css), zodat het niet met de kaart samenvloeit. */}
-    {shareNote && (
-      <ZoekGerechtBlock
-        variant="dish"
-        title={SHARED_RETURN_TITLE}
-        body={SHARED_RETURN_BODY}
-        cta={SHARED_RETURN_CTA}
-      />
-    )}
+    {shareNote && shareBlock}
     </>
   )
 }

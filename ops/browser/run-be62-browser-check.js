@@ -331,6 +331,9 @@ const BLOK_BEELD = `(() => {
  * het vlak.
  */
 async function blokInBeeld(cdp, label) {
+  // Het vlak komt op de menukaart en op /kies uit een eigen chunk: eerst wachten
+  // tot het er echt staat, anders meet je een lege pagina.
+  await waitFor(cdp, `Boolean(document.querySelector('.zoek-gerecht'))`, 10000);
   const gevonden = await evalJs(cdp, `(() => {
     const blok = document.querySelector('.zoek-gerecht');
     if (!blok) return false;
