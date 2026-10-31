@@ -7,7 +7,7 @@
     "/internal/tellers"
   ],
   "category": "lokale browsercheck met gestubde sessie en API (next dev op poort 3192); geen productie en geen echte acceptatie",
-  "ranAt": "2026-10-31T01:26:08.963Z",
+  "ranAt": "2026-10-31T01:56:22.813Z",
   "passed": true,
   "filter": null,
   "checks": [
@@ -1134,7 +1134,7 @@
     {
       "name": "opname be59-houder-owner-1280-light-kop: hele onderdeel in beeld",
       "passed": true,
-      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+      "detail": "{\"clip\":{\"x\":227,\"y\":97,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":97,\"innerHeight\":900}"
     },
     {
       "name": "houder /: de accountknop verschijnt",
@@ -1249,7 +1249,7 @@
     {
       "name": "opname be59-houder-owner-1280-light-kop: hele onderdeel in beeld",
       "passed": true,
-      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+      "detail": "{\"clip\":{\"x\":227,\"y\":97,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":97,\"innerHeight\":900}"
     },
     {
       "name": "houder /: de accountknop verschijnt",
@@ -1364,14 +1364,14 @@
     {
       "name": "opname be59-houder-owner-1280-dark-kop: hele onderdeel in beeld",
       "passed": true,
-      "detail": "{\"clip\":{\"x\":230,\"y\":93,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":93,\"innerHeight\":900}"
+      "detail": "{\"clip\":{\"x\":227,\"y\":97,\"width\":820,\"height\":31},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":97,\"innerHeight\":900}"
     }
   ],
   "errors": [],
   "shots": [
     {
       "file": "be59-gast-home-1280-light-footer.png",
-      "sha256": "ece5125c26362ba03ed2e16f29c2e1326e2c2a9099538e1b0ba90a81ba2b2a82",
+      "sha256": "ce21473a5b4e0257f9b2fe7b965c130fb3dfc24e9efd2a9722886b841a535725",
       "width": 1274,
       "height": 61,
       "selector": ".public-footer",
@@ -1421,7 +1421,7 @@
     },
     {
       "file": "be59-gast-home-390-light-footer.png",
-      "sha256": "c174d56e1525575e55cc8824935130378db1875803e18fd3c3697afd3d52347d",
+      "sha256": "e14533503c0437464f3c3994a156d1f8c267fcc7a76dc1be4f5b0f859f1e66c1",
       "width": 390,
       "height": 61,
       "selector": ".public-footer",
@@ -1471,7 +1471,7 @@
     },
     {
       "file": "be59-gast-home-1280-dark-footer.png",
-      "sha256": "afd8c839cdbc1f9c8ab18e23755637236676ffecd60492b572be99a79e50bd9c",
+      "sha256": "2dbe5ce6c332e6489256ef71f65c0c7398bfeeda7fcf9eb5fb47b6b66950f228",
       "width": 1274,
       "height": 61,
       "selector": ".public-footer",
@@ -1496,7 +1496,7 @@
     },
     {
       "file": "be59-gast-home-390-dark-footer.png",
-      "sha256": "da41aff091e535498a98dacc796146b874330713f746ddaccc8aad01c3b5f377",
+      "sha256": "c9f16ffeceaf6c854ee840ab4239a625afb7a63f4e5135ac03543f92aa5a38ed",
       "width": 390,
       "height": 61,
       "selector": ".public-footer",
@@ -1521,7 +1521,7 @@
     },
     {
       "file": "be59-gast-home-320-dark-footer.png",
-      "sha256": "8e4ef4f3e00a60a6adb1c2269d33255bdc69542a7c6fbc6083a60bbf00a67ae5",
+      "sha256": "c072aadbf6de8e5921d53a50bfcc00637b86c174b37fd8de0de3c34b71fd226e",
       "width": 320,
       "height": 61,
       "selector": ".public-footer",
@@ -2242,19 +2242,19 @@
       "height": 31,
       "selector": ".owner-title",
       "clip": {
-        "x": 230,
-        "y": 93,
+        "x": 227,
+        "y": 97,
         "width": 820,
         "height": 31
       },
       "fitsHorizontally": true,
       "info": {
-        "left": 230,
-        "right": 1050,
+        "left": 227,
+        "right": 1047,
         "width": 820,
         "height": 31.1875,
-        "pageX": 230,
-        "pageY": 93,
+        "pageX": 227,
+        "pageY": 97,
         "innerWidth": 1280,
         "innerHeight": 900,
         "fixed": false
@@ -2425,19 +2425,19 @@
       "height": 31,
       "selector": ".owner-title",
       "clip": {
-        "x": 230,
-        "y": 93,
+        "x": 227,
+        "y": 97,
         "width": 820,
         "height": 31
       },
       "fitsHorizontally": true,
       "info": {
-        "left": 230,
-        "right": 1050,
+        "left": 227,
+        "right": 1047,
         "width": 820,
         "height": 31.1875,
-        "pageX": 230,
-        "pageY": 93,
+        "pageX": 227,
+        "pageY": 97,
         "innerWidth": 1280,
         "innerHeight": 900,
         "fixed": false
@@ -2608,19 +2608,19 @@
       "height": 31,
       "selector": ".owner-title",
       "clip": {
-        "x": 230,
-        "y": 93,
+        "x": 227,
+        "y": 97,
         "width": 820,
         "height": 31
       },
       "fitsHorizontally": true,
       "info": {
-        "left": 230,
-        "right": 1050,
+        "left": 227,
+        "right": 1047,
         "width": 820,
         "height": 31.1875,
-        "pageX": 230,
-        "pageY": 93,
+        "pageX": 227,
+        "pageY": 97,
         "innerWidth": 1280,
         "innerHeight": 900,
         "fixed": false
@@ -2633,7 +2633,7 @@
       "checks": 40,
       "passed": 40,
       "failed": 0,
-      "durationMs": 9698,
+      "durationMs": 9868,
       "error": null
     },
     {
@@ -2641,7 +2641,7 @@
       "checks": 45,
       "passed": 45,
       "failed": 0,
-      "durationMs": 12419,
+      "durationMs": 10327,
       "error": null
     },
     {
@@ -2649,7 +2649,7 @@
       "checks": 126,
       "passed": 126,
       "failed": 0,
-      "durationMs": 34326,
+      "durationMs": 33845,
       "error": null
     },
     {
@@ -2657,7 +2657,7 @@
       "checks": 60,
       "passed": 60,
       "failed": 0,
-      "durationMs": 24454,
+      "durationMs": 25708,
       "error": null
     }
   ],
