@@ -21,6 +21,7 @@
 
 const { berichtBij, controleerTekst } = require('./daghapAanbod');
 const { isIndexable } = require('./seo');
+const { normalizeSiteUrl } = require('./siteUrl');
 const { eigenRestaurants } = require('./ownerAanbod');
 
 // De tekst op het kaartje: kort genoeg om op A6 in twee regels te passen.
@@ -141,11 +142,13 @@ function absoluteBasis(value) {
 }
 
 /**
- * De basis voor de QR-code: NEXT_PUBLIC_SITE_URL, en pas als die leeg is de
- * oorsprong waarop de pagina draait. Leeg blijft leeg — dan is er geen kaartje.
+ * De basis voor de QR-code: NEXT_PUBLIC_SITE_URL, en pas als die leeg of
+ * ongeldig is de oorsprong waarop de pagina draait. De configuratie gaat door
+ * dezelfde strenge controle als de sitemap (src/lib/siteUrl.js): alleen https,
+ * zonder pad. Leeg blijft leeg — dan is er geen kaartje.
  */
 function basisUrl({ siteUrl, origin } = {}) {
-  return absoluteBasis(siteUrl) || absoluteBasis(origin);
+  return normalizeSiteUrl(siteUrl) || absoluteBasis(origin);
 }
 
 /** Het pad achter de QR-code: de menukaart (standaard) of de restaurantpagina. */

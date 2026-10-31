@@ -1,0 +1,464 @@
+/* BE-68 (#168) — het QR-kaartje in Mijn restaurant.
+ *
+ * Eigen bestand naast de pagina (BE-52); globals.css blijft ongemoeid. De
+ * gedeelde owner-klassen (owner-main, owner-title, owner-intro, owner-link,
+ * owner-note) komen uit ../mijn-restaurant.css. Kleuren komen uit de tokens,
+ * met één uitzondering: het kaartje zelf is altijd papier — ook in het donkere
+ * thema, want een QR-code op een donkere ondergrond scant niet betrouwbaar.
+ * Die vaste waarden staan als --papier-* bij elkaar, net als het printblok in
+ * app/globals.css.
+ */
+
+.qr-kaartje-back {
+  margin: 0 0 8px;
+}
+
+.qr-kaartje-pagina {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 32px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.qr-kaartje-paneel {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.qr-kaartje-keuzes {
+  display: grid;
+  gap: 18px;
+}
+
+/* Op desktop staan de keuzes er altijd; `hidden` geldt alleen op mobiel. */
+@media (min-width: 641px) {
+  .qr-kaartje-keuzes[hidden] {
+    display: grid;
+  }
+}
+
+.qr-kaartje-veld {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.qr-kaartje-label {
+  padding: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.qr-kaartje-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.qr-kaartje-teller {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.qr-kaartje-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--status-blocked);
+}
+
+.qr-kaartje-melding,
+.qr-kaartje-nietlive {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.qr-kaartje-input {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.qr-kaartje-input:focus-visible,
+.qr-kaartje-knop:focus-visible,
+.qr-kaartje-aanpassen:focus-visible,
+.qr-kaartje-doel input:focus-visible,
+.qr-kaartje-formaat input:focus-visible {
+
+/* ── De twee keuzekaarten (doel) ─────────────────────────────────────────── */
+
+.qr-kaartje-doelen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.qr-kaartje-doel {
+  display: grid;
+  gap: 4px;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* De gekozen kaart krijgt een rand van 2 px in --text-primary; de kleur alleen
+ * haalt geen 3:1, de rand wel. */
+.qr-kaartje-doel[data-actief='ja'] {
+  border-color: var(--text-primary);
+  box-shadow: inset 0 0 0 1px var(--text-primary);
+}
+
+/* Het radio-rondje zelf blijft zichtbaar voor toetsenbord en screenreader, maar
+ * ligt over de hele kaart heen onopvallend op zijn plaats. */
+.qr-kaartje-doel input,
+.qr-kaartje-formaat input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.qr-kaartje-doel:focus-within,
+.qr-kaartje-formaat:focus-within {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.qr-kaartje-doel-label {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.qr-kaartje-doel-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ── De schakelaar voor het formaat ──────────────────────────────────────── */
+
+.qr-kaartje-formaten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+}
+
+.qr-kaartje-formaat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qr-kaartje-formaat[data-actief='ja'] {
+  border-color: var(--input-border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+:root[data-theme='dark'] .qr-kaartje-formaat[data-actief='ja'] {
+  border-color: transparent;
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+}
+
+/* ── De knoppen ──────────────────────────────────────────────────────────── */
+
+.qr-kaartje-acties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.qr-kaartje-knop {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qr-kaartje-knop--primair {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
+}
+
+.qr-kaartje-knop--primair:hover {
+  background: var(--accent-fill-hover);
+  border-color: var(--accent-fill-hover);
+}
+
+.qr-kaartje-knop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qr-kaartje-aanpassen {
+  justify-self: start;
+
+/* ── Het kaartje: altijd papier ──────────────────────────────────────────── */
+
+.qr-kaartje-kaart {
+  /* Vaste waarden, geen themawaarden: dit vlak is wit papier, ook in donker.
+     De waarden zijn de lichte tokens uit app/globals.css. */
+  --papier: #FFFFFF;
+  --papier-ink: #1F2328;
+  --papier-ink-zacht: #5A6168;
+  --papier-strook: #F2C35B;
+  --papier-tegel: #F2C35B;
+  --papier-tegel-ink: #1F1600;
+  --papier-rand: #EEEAE2;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 105mm;
+  max-width: 100%;
+  aspect-ratio: 105 / 148;
+  overflow: hidden;
+  padding: 0 12mm 8mm;
+  border: 1px solid var(--papier-rand);
+  border-radius: 12px;
+  background: var(--papier);
+  color: var(--papier-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.qr-kaartje-strook {
+  display: block;
+  width: calc(100% + 24mm);
+  height: 14px;
+  margin: 0 -12mm 10mm;
+  background: var(--papier-strook);
+}
+
+.qr-kaartje-naam {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--papier-ink);
+  overflow-wrap: anywhere;
+}
+
+.qr-kaartje-tekst {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+  color: var(--papier-ink-zacht);
+  overflow-wrap: anywhere;
+}
+
+.qr-kaartje-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 8mm 0 auto;
+}
+
+.qr-kaartje-code-svg {
+  display: block;
+  width: 62mm;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ruimte reserveren terwijl de QR-bibliotheek nog laadt. */
+.qr-kaartje-code-leeg {
+  display: block;
+  width: 62mm;
+  max-width: 100%;
+  aspect-ratio: 1;
+  background: var(--papier);
+}
+
+.qr-kaartje-voet {
+  margin: 6mm 0 3mm;
+  font-size: 0.8rem;
+  color: var(--papier-ink-zacht);
+}
+
+.qr-kaartje-merk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--papier-ink);
+}
+
+.qr-kaartje-tegel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--papier-tegel);
+  color: var(--papier-tegel-ink);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.qr-kaartje-voorbeeld {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+.qr-kaartje-voorbeeld-titel {
+  justify-self: start;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+
+/* Op het scherm bestaat het afdrukvel niet; bij printen is het het enige dat
+ * overblijft. */
+.qr-kaartje-afdruk {
+  display: none;
+}
+
+/* ── Mobiel: het voorbeeld bovenaan, de keuzes achter één knop ───────────── */
+
+@media (max-width: 640px) {
+  .qr-kaartje-pagina {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .qr-kaartje-voorbeeld {
+    order: -1;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+  }
+
+  .qr-kaartje-doelen {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-kaartje-knop {
+    flex: 1 1 100%;
+  }
+}
+
+/* ── Afdrukken ───────────────────────────────────────────────────────────────
+ * Alleen het kaartje komt op papier: de kop, het voorbeeld en de keuzes zijn
+ * verborgen. A6 is 105 × 148 mm (marge 0, het kaartje vult het vel); het A4-vel
+ * krijgt vier van die kaartjes in 2 × 2. De PDF ontstaat via de printdialoog
+ * ("Opslaan als pdf"), zonder pdf-bibliotheek.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+@media print {
+  @page {
+    size: 105mm 148mm;
+    margin: 0;
+  }
+
+  /* Een eigen paginanaam, zodat de vier-kaartjesversie op A4 past. */
+  @page qr-a4 {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #FFFFFF;
+  }
+
+  /* Alleen het afdrukvel blijft over: de kop, de titel, het voorbeeld en de
+   * keuzes gaan niet mee op papier. */
+  body > * {
+    display: none !important;
+  }
+
+  .qr-kaartje-afdruk {
+    display: grid !important;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .qr-kaartje-afdruk[data-formaat='a4'] {
+    page: qr-a4;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 148mm;
+  }
+
+  .qr-kaartje-kaart--afdruk {
+    width: 105mm;
+    height: 148mm;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  /* De PNG-versie print alleen de QR, zonder de rest van het kaartje. */
+  .qr-kaartje-afdruk[data-formaat='png'] .qr-kaartje-kaart--afdruk {
+    height: 105mm;
+  }
+}

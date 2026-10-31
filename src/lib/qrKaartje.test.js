@@ -68,9 +68,9 @@ test('BE-68: NEXT_PUBLIC_SITE_URL gaat voor de huidige oorsprong', () => {
     'zonder site-URL telt de oorsprong',
   );
   assert.equal(
-    qrUrl({ restaurantId: 'abc', siteUrl: 'onzemenukaarten.nl' }),
-    'https://onzemenukaarten.nl/menu/abc?bron=qr',
-    'een basis zonder schema wordt https',
+    qrUrl({ restaurantId: 'abc', siteUrl: 'onzemenukaarten.nl', origin: 'http://localhost:3180' }),
+    'http://localhost:3180/menu/abc?bron=qr',
+    'een onbruikbare configuratie valt terug op de oorsprong',
   );
   // Zonder restaurant of zonder basis is er geen kaartje.
   assert.equal(qrUrl({ restaurantId: '', siteUrl: 'https://onzemenukaarten.nl' }), '');
