@@ -1035,3 +1035,35 @@ De pagina zoekt in dezelfde gegevens als `/alle-restaurants`
 (`GET /api/restaurants`, dezelfde paginering) met de geteste regel uit
 `src/lib/claimSearch.js`; er is geen nieuwe API, database of dependency.
 
+
+## BE-59 deel 3 (#146) - het accountmenu in een echte browser
+
+`run-be59-browser-check.js` (ook `npm run test:browser:be59`) start zijn eigen
+`next dev` op poort 3192 en een echte browser via CDP, met een gestubde sessie
+en API (`lib/be59-stub-page.js`): de sessiesleutel `sb-127-auth-token` staat
+vóór het laden in `localStorage`, `GET /api/internal/v1/me` geeft de rollen,
+`/workqueue-counts` de open-werk-tellingen en `/api/claims/mine` geen claims.
+Vier scenarios (`--lijst`, `--alleen=<naam>`):
+
+- **gast** - geen sessiesleutel: geen accountknop, geen sessie- of rolopvraag,
+  wel de footerlink "Voor restaurants - Inloggen" naar `/inloggen`;
+- **inloggen** - beide keuzes met hun bestemming
+  (`/mijn-restaurant/inloggen`, `/internal/login`) en de claimlink naar
+  `/mijn-restaurant/claimen`;
+- **beheerder** - `internal` + `editor` met zeven openstaande taken: knop met
+  stip, "Beheer - 7 open", de rol in gewone woorden, toetsenbord (openen,
+  pijltoetsen, Escape, focus terug), op 390 en 320 px het paneel van onderen met
+  de sluitknop, en op `/internal/tellers` "Bekijk de site";
+- **houder** - `owner` zonder openstaand werk: geen stip, wel Mijn restaurant, en
+  op `/mijn-restaurant` de kop "Mijn restaurant - [naam]".
+
+Alles in licht en donker op 1280, 390 en 320 px, elk onderdeel volledig op de
+opname, geen horizontale overloop, plus de a11y-audit van de publieke pagina's
+op de home, `/inloggen` en het geopende menu. Bewijs:
+`ops/browser/evidence/be59-browser-evidence.json` en `evidence/be-59/*.png`
+(49 opnamen). De laatste volledige run gaf 263 checks en 0 fouten.
+`run-be59-load-size-check.js` meet de eerste laadgrootte van `/`, `/search`,
+`/restaurant/[id]` en `/menu/[id]` op twee lokale productiebuilds (basis
+`2b0e8b1` uit een losse worktree) en schrijft
+`ops/browser/evidence/be59-load-size-evidence.json`. Lokale
+twikkelaarsbewijs, geen productie en geen onafhankelijke review.
