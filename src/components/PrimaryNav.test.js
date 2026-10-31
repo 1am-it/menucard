@@ -85,6 +85,7 @@ test('BE-28: emoji are decorative system characters via the shared <Emoji/>, nev
   assert.doesNotMatch(withoutGlyphSlots, emojiPattern, 'no bare emoji outside <Emoji glyph="…"/>');
   assert.doesNotMatch(source, /react-icons|lucide|heroicons|<svg/i, 'no icon library or inline SVG — emoji are plain characters');
   const importLines = source.match(/^import .+$/gm) || [];
+  const limitedCount = importLines.filter((line) => /['"]@\/src\/lib\/dishList|require\(/.test(line));
   assert.deepEqual(
     importLines.map((l) => l.trim()),
     [
@@ -92,9 +93,12 @@ test('BE-28: emoji are decorative system characters via the shared <Emoji/>, nev
       "import Link from 'next/link'",
       "import { usePathname } from 'next/navigation'",
       "import Emoji from '@/src/components/Emoji'",
-      "import { SAVED_LIST_EVENT, readSavedList, safeBrowserStorage } from '@/src/lib/dishList'",
+      "import { SAVED_LIST_EVENT, safeBrowserStorage, savedListCount } from '@/src/lib/savedListStorage'",
       "import './primary-nav.css'",
     ],
-    'no import beyond React state, Link, usePathname, the shared Emoji, the existing dishList helpers and the component CSS'
+    'no import beyond React state, Link, usePathname, the shared Emoji, the tiny saved-list helper and the component CSS'
   );
+  // BE-63 (#155, ronde 3): de teller leest alleen de kleine helper, niet het
+  // volledige dishList met de deellinks.
+  assert.equal(limitedCount.length, 0, `de teller leest alleen src/lib/savedListStorage.js, niet ${limitedCount.join(', ')}`);
 });

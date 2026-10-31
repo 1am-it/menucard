@@ -20,16 +20,19 @@
 
 const { buildDishDeepLink } = require('./dishDeepLink');
 const { dishSharePrice, normalizeShareTheme, withShareTheme } = require('./dishShare');
+// BE-63 (#155, ronde 3): de opslagsleutel, het event, het limiet en de veilige
+// opslagtoegang staan in één klein bestand, zodat de publieke kop ze kan
+// gebruiken zonder dit hele bestand (en de deellinks) mee te laden.
+const {
+  SAVED_LIST_EVENT,
+  SAVED_LIST_KEY,
+  SAVED_LIST_LIMIT,
+  safeBrowserStorage,
+} = require('./savedListStorage');
 
-// Opslagsleutel in dezelfde stijl als `bredaeats_theme` (app/layout.js).
-const SAVED_LIST_KEY = 'bredaeats_bewaard';
-const SAVED_LIST_LIMIT = 20;
 // De gedeelde lijst staat op de eigen pagina, met de id's in de URL.
 const LIST_PARAM = 'lijst';
 const LIST_PAGE = '/mijn-lijstje';
-// Een eigen event, zodat de knop, de onderbalk en de lijstpagina dezelfde stand
-// zien zonder dat er een tweede bron van waarheid ontstaat.
-const SAVED_LIST_EVENT = 'bredaeats:bewaard';
 
 // Letterlijk de teksten uit het contract (criterium 4).
 const SAVE_LABEL = 'Bewaren';
@@ -200,17 +203,8 @@ function addEntries(entries, additions) {
 
 // ─── Opslag: alleen de browser, en nooit een harde fout ──────────────────────
 
-/**
- * `localStorage`, of null als er geen venster is of de browser hem weigert
- * (privémodus, beleid). Alle lezers en schrijvers hieronder accepteren null.
- */
-function safeBrowserStorage() {
-  try {
-    return typeof window === 'undefined' ? null : window.localStorage;
-  } catch (error) {
-    return null;
-  }
-}
+// `safeBrowserStorage()` komt uit src/lib/savedListStorage.js (BE-63, ronde 3) en
+// staat daar samen met de sleutel en het event: één plek, geen tweede variant.
 
 /** Lezen. Zonder opslag, met een fout of met kapotte JSON: een leeg lijstje. */
 function readSavedList(storage) {

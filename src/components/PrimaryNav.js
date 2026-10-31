@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Emoji from '@/src/components/Emoji'
-import { SAVED_LIST_EVENT, readSavedList, safeBrowserStorage } from '@/src/lib/dishList'
+import { SAVED_LIST_EVENT, safeBrowserStorage, savedListCount } from '@/src/lib/savedListStorage'
 import './primary-nav.css'
 
 // BE-11 — permanent, text-only primary navigation: the two coequal public
@@ -51,12 +51,14 @@ export default function PrimaryNav() {
   const pathname = usePathname()
   // Zonder opslag of vóór het mounten is de teller 0; de lijst zelf blijft
   // werken. Het eigen `bredaeats:bewaard`-event houdt de teller gelijk met de
-  // bewaarknop op dezelfde pagina.
+  // bewaarknop op dezelfde pagina. Bewust alleen de kleine teller uit
+  // src/lib/savedListStorage.js: het volledige dishList (met de deellinks) hoort
+  // niet in de eerste lading van deze pagina (BE-63, ronde 3).
   const [saved, setSaved] = useState(0)
 
   useEffect(() => {
     const storage = safeBrowserStorage()
-    const read = () => setSaved(readSavedList(storage).length)
+    const read = () => setSaved(savedListCount(storage))
     read()
     if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return undefined
     window.addEventListener(SAVED_LIST_EVENT, read)
