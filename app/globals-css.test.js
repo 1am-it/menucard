@@ -172,8 +172,12 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'src/components/daghappen-vandaag.css',
     'src/components/kies-start.css',
     'src/components/menu-body.css',
+    // BE-63 (#155): de teller bij "Mijn lijstje" en de ene publieke kop.
+    'src/components/primary-nav.css',
     // BE-59 deel 2: de footerlink op de publieke pagina's.
     'src/components/public-footer.css',
+    // BE-63 (#155): de rechterkant van de publieke kop.
+    'src/components/public-header-actions.css',
     // BE-61: het deelblad "Delen via", naast de component.
     'src/components/share-dialog.css',
   ]);

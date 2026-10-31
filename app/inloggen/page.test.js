@@ -39,8 +39,9 @@ test('/inloggen bevat geen inloglogica, geen sessiecheck en geen Supabase', () =
 
 test('de pagina heeft dezelfde kop als de publieke pagina\'s, met het accountmenu', () => {
   const source = read(PAGE);
-  assert.match(source, /import AccountMenuButton from '@\/src\/components\/AccountMenuButton'/);
-  assert.match(source, /<AccountMenuButton \/>/);
+  // BE-63 (#155): het accountmenu zit nu in de ene gedeelde kopcomponent.
+  assert.match(source, /import PublicHeaderActions from '@\/src\/components\/PublicHeaderActions'/);
+  assert.match(source, /<PublicHeaderActions \/>/);
   assert.match(source, /<h1 className="inloggen-title">Inloggen<\/h1>/);
 });
 
