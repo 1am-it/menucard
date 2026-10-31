@@ -230,6 +230,151 @@ async function capture(selector, name) {
   return shot;
 }
 
+// BE-59 herstel (#146, Lead-review #6537034100): het mobiele paneel als
+// volledige viewport in plaats van als uitsnede, zodat de vaste tabbalk en het
+// paneel samen op de opname staan. Zonder clip is de opname precies het venster;
+// de gemeten CSS-pixels en de beeldpunten vallen daardoor samen.
+async function captureViewport(name, selectors) {
+  const info = await evalJs(
+    cdp,
+    `(() => {
+      const found = {};
+      const wanted = ${JSON.stringify(selectors)};
+      for (const key of Object.keys(wanted)) {
+        const el = document.querySelector(wanted[key]);
+        if (!el) { found[key] = null; continue; }
+        const rect = el.getBoundingClientRect();
+        found[key] = {
+          top: Math.round(rect.top), bottom: Math.round(rect.bottom),
+          left: Math.round(rect.left), right: Math.round(rect.right),
+          width: Math.round(rect.width), height: Math.round(rect.height),
+        };
+      }
+      return { innerWidth: window.innerWidth, innerHeight: window.innerHeight, found };
+    })()`,
+  );
+  const shot = await screenshot(cdp, SHOT_DIR, `${name}.png`);
+  const inBeeld = (rect) =>
+    Boolean(rect) && rect.top >= -1 && rect.left >= -1 && rect.bottom <= info.innerHeight + 1 && rect.right <= info.innerWidth + 1;
+  const zelfdeMaat = shot.width === info.innerWidth && shot.height === info.innerHeight;
+  const beiden = inBeeld(info.found.paneel) && inBeeld(info.found.tabbalk);
+  shots.push({ ...shot, selector: null, viewport: { width: info.innerWidth, height: info.innerHeight }, found: info.found });
+  add(
+    `opname ${name}: volledige viewport met paneel en tabbalk in beeld`,
+    zelfdeMaat && beiden,
+    JSON.stringify({ opname: { width: shot.width, height: shot.height }, viewport: { width: info.innerWidth, height: info.innerHeight }, found: info.found }),
+  );
+  return shot;
+}
+
+// Een echte muisklik, zoals een vinger op het scherm: dezelfde invoerlaag als
+// de bezoeker gebruikt, geen synthetische element.click().
+async function pressAt(x, y) {
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
+}
+
+async function releaseAt(x, y) {
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+}
+
+// BE-59 herstel (#146, Lead-review #6537034100): de vaste MobileTabBar lag over
+// het paneel. Deze meting kijkt naar de echte stapelvolgorde in de browser, met
+// het paneel open:
+//   * het laatste item ("Uitloggen") staat volledig in beeld;
+//   * elementFromPoint in het midden van dat item geeft het item zelf;
+//   * op drie punten over de tabbalk is de balk zelf nooit het bovenste element
+//     (het paneel dekt hem, anders de overlay), dus niet aan te klikken;
+//   * een echte klik op de overlay sluit het paneel zonder te navigeren.
+async function sheetAboveTabBar(label) {
+  const meting = await evalJs(
+    cdp,
+    `(() => {
+      const panel = document.querySelector('#account-menu-panel');
+      const tabbar = document.querySelector('.mobile-tabbar');
+      if (!panel || !tabbar) return { panel: Boolean(panel), tabbar: Boolean(tabbar) };
+      const rijen = Array.from(panel.querySelectorAll('.account-menu-items li'));
+      const laatste = rijen[rijen.length - 1] || null;
+      const knop = laatste ? laatste.querySelector('button, a') : null;
+      const knopRect = knop ? knop.getBoundingClientRect() : null;
+      const paneelRect = panel.getBoundingClientRect();
+      const midden = knopRect
+        ? document.elementFromPoint(knopRect.left + knopRect.width / 2, knopRect.top + knopRect.height / 2)
+        : null;
+      const beschrijf = (el) => (el ? String(el.tagName).toLowerCase() + '.' + String(el.className || '') : null);
+      const tabLink = tabbar.querySelector('.mobile-tab-link');
+      const tabRect = tabLink ? tabLink.getBoundingClientRect() : null;
+      // Drie steekproeven over de tabbalk (links, midden, rechts): geen enkele
+      // mag de balk zelf raken zolang het paneel open is.
+      const steekproeven = tabRect
+        ? [0.15, 0.5, 0.85].map((deel) => {
+            const x = Math.round(tabRect.left + tabRect.width * deel);
+            const y = Math.round(tabRect.top + tabRect.height / 2);
+            const el = document.elementFromPoint(x, y);
+            return { x, y, inTabbalk: Boolean(el) && (el === tabbar || tabbar.contains(el)), hit: beschrijf(el) };
+          })
+        : [];
+      return {
+        innerHeight: window.innerHeight,
+        label: knop ? (knop.innerText || '').trim() : '',
+        knop: knopRect
+          ? { top: Math.round(knopRect.top), bottom: Math.round(knopRect.bottom), height: Math.round(knopRect.height) }
+          : null,
+        knopInBeeld: Boolean(knopRect) && knopRect.top >= -1 && knopRect.bottom <= window.innerHeight + 1,
+        hitZelf: Boolean(midden) && (midden === knop || knop.contains(midden)),
+        hit: beschrijf(midden),
+        paneel: {
+          top: Math.round(paneelRect.top),
+          bottom: Math.round(paneelRect.bottom),
+          left: Math.round(paneelRect.left),
+          right: Math.round(paneelRect.right),
+        },
+        steekproeven,
+        // Waar de overlay zelf boven de tabbalk te raken is: net boven het paneel.
+        overlayPunt: paneelRect.top > 12 ? { x: Math.round(window.innerWidth / 2), y: Math.round(paneelRect.top) - 6 } : null,
+      };
+    })()`,
+  );
+
+  add(
+    `${label}: het laatste item (Uitloggen) staat volledig in beeld`,
+    Boolean(meting) && meting.label === 'Uitloggen' && meting.knopInBeeld,
+    JSON.stringify(meting && { label: meting.label, knop: meting.knop, innerHeight: meting.innerHeight }),
+  );
+  add(
+    `${label}: elementFromPoint in het midden van Uitloggen geeft het item zelf, niet de tabbalk`,
+    Boolean(meting) && meting.hitZelf,
+    JSON.stringify(meting && { hit: meting.hit }),
+  );
+  // De tabbalk ligt onder het paneel (dat hem helemaal dekt) en anders onder de
+  // overlay: op drie punten over de balk is de balk zelf nooit het bovenste
+  // element, dus valt er niet door het paneel heen te klikken.
+  const steekproeven = (meting && meting.steekproeven) || [];
+  add(
+    `${label}: de tabbalk is nergens klikbaar zolang het paneel open is`,
+    steekproeven.length === 3 && steekproeven.every((punt) => !punt.inTabbalk),
+    JSON.stringify({ steekproeven }),
+  );
+
+  if (!meting || !meting.overlayPunt) return meting;
+
+  // Een echte klik op de overlay, net boven het paneel: de overlay is dekkend en
+  // vangt de klik op (het paneel sluit, de pagina navigeert niet). Zo wordt de
+  // laag getest die de tabbalk eerder doorliet.
+  const padVoor = await evalJs(cdp, 'location.pathname');
+  await pressAt(meting.overlayPunt.x, meting.overlayPunt.y);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const paneelDicht = await evalJs(cdp, `document.querySelector('#account-menu-panel') === null`);
+  await releaseAt(meting.overlayPunt.x, meting.overlayPunt.y);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const padNa = await evalJs(cdp, 'location.pathname');
+  add(
+    `${label}: een klik op de overlay sluit het paneel en navigeert niet`,
+    paneelDicht && padVoor === padNa,
+    JSON.stringify({ padVoor, padNa, paneelDicht, punt: meting.overlayPunt }),
+  );
+  return meting;
+}
+
 async function noHorizontalOverflow(label) {
   const gemeten = await evalJs(
     cdp,
@@ -623,8 +768,23 @@ async function runBeheerder() {
       await openAsBeheerder(theme);
       await capture('.account-menu', `be59-beheerder-home-${size.name}-${theme}-knop`);
       if (await openMenu(`beheerder opname (${theme}/${size.name})`)) {
-        await capture('#account-menu-panel', `be59-beheerder-home-${size.name}-${theme}-menu`);
-        await closeMenuWithEscape(`beheerder opname (${theme}/${size.name})`);
+        if (size.name === '1280') {
+          await capture('#account-menu-panel', `be59-beheerder-home-${size.name}-${theme}-menu`);
+          await closeMenuWithEscape(`beheerder opname (${theme}/${size.name})`);
+        } else {
+          // BE-59 herstel (#146, Lead-review #6537034100): het paneel van
+          // onderen als volledige viewport (geen uitsnede), zodat de vaste
+          // tabbalk en het paneel samen te zien zijn, plus de echte
+          // stapelvolgorde: Uitloggen in beeld, de hit-test op het item zelf en
+          // een tabbalk die niet aan te klikken is. sheetAboveTabBar sluit het
+          // paneel met die klik op de tabbalk.
+          await captureViewport(`be59-beheerder-home-${size.name}-${theme}-menu`, {
+            paneel: '#account-menu-panel',
+            tabbalk: '.mobile-tabbar',
+          });
+          const meting = await sheetAboveTabBar(`beheerder paneel (${theme}/${size.name})`);
+          if (!meting || !meting.overlayPunt) await closeMenuWithEscape(`beheerder opname (${theme}/${size.name})`);
+        }
       }
       await noHorizontalOverflow(`beheerder home (${theme}/${size.name})`);
     }
