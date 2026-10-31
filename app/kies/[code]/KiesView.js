@@ -50,12 +50,22 @@ import {
   kiesLekkerShare,
   kiesProgressLabel,
   nextDishIndex,
+  nextVotedDishes,
   normalizeRoepnaam,
   readKiesProgress,
   swipeFeedback,
   swipeOutcome,
+  undoVotedDishes,
   writeKiesProgress,
 } from '@/src/lib/kiesStemming'
+// BE-62 (#153) — na het stemmen een rustige regel naar de home, zonder account.
+import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
+import {
+  KIES_RETURN_BODY,
+  KIES_RETURN_CTA,
+  firstLekkerDishName,
+  kiesReturnTitle,
+} from '@/src/lib/returnVisit'
 // BE-52 (#128): de eigen opmaak van deze pagina staat naast de view.
 import '../kies.css'
 
@@ -128,6 +138,12 @@ export default function KiesView({ code }) {
   const stackShare = index >= 0 && dishes.length > 0
     ? Math.round(((index + 1) / dishes.length) * 100)
     : 0
+  // BE-62 (#153) — de vraag na het stemmen hoort alleen bij een bezoeker die
+  // zelf gestemd heeft; wie alleen meekijkt, ziet hem niet. De kop gebruikt het
+  // eerste gerecht dat deze bezoeker "lekker" gaf, anders de terugvalregel.
+  const hasOwnVotes = !!(progress && Array.isArray(progress.gestemd) && progress.gestemd.length > 0)
+  const ownLekker = progress && Array.isArray(progress.lekker) ? progress.lekker : []
+  const ownLekkerName = firstLekkerDishName({ dishes, lekker: ownLekker })
 
   /** De stemming ophalen en de eigen stand terugzetten (localStorage). */
   const load = useCallback(async () => {
@@ -199,7 +215,7 @@ export default function KiesView({ code }) {
       if (response.ok) {
         const nextProgress = {
           ...progress,
-          gestemd: [...progress.gestemd.filter((key) => key !== dish.id), dish.id],
+          ...nextVotedDishes(progress, { dishKey: dish.id, lekker }),
         }
         setProgress(nextProgress)
         writeKiesProgress(safeBrowserStorage(), code, nextProgress)
@@ -256,7 +272,7 @@ export default function KiesView({ code }) {
         return
       }
       if (body.undone) {
-        const nextProgress = { ...progress, gestemd: progress.gestemd.slice(0, -1) }
+        const nextProgress = { ...progress, ...undoVotedDishes(progress) }
         setProgress(nextProgress)
         writeKiesProgress(safeBrowserStorage(), code, nextProgress)
         if (body.uitslag) {
@@ -286,7 +302,12 @@ export default function KiesView({ code }) {
       setNameError(KIES_VOTE_FAILED_MESSAGE)
       return
     }
-    const next = { stemmer, roepnaam, gestemd: progress ? progress.gestemd : [] }
+    const next = {
+      stemmer,
+      roepnaam,
+      gestemd: progress ? progress.gestemd : [],
+      lekker: progress && Array.isArray(progress.lekker) ? progress.lekker : [],
+    }
     setProgress(next)
     writeKiesProgress(safeBrowserStorage(), code, next)
     setNameError('')
@@ -521,6 +542,16 @@ export default function KiesView({ code }) {
             ) : (
               <p className="kies-hint">{KIES_EMPTY_RESULT_MESSAGE}</p>
             )}
+            {/* BE-62 (#153, ontwerp punt 1) — rustig vlak onder de uitslag:
+                "Jij koos <gerecht>. Zelf ook een lijstje maken?" */}
+            {hasOwnVotes ? (
+              <ZoekGerechtBlock
+                title={kiesReturnTitle(ownLekkerName)}
+                body={KIES_RETURN_BODY}
+                cta={KIES_RETURN_CTA}
+                variant="kies"
+              />
+            ) : null}
           </section>
         ) : null}
       </main>

@@ -6,6 +6,13 @@
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
 import Emoji from '@/src/components/Emoji'
+// BE-62 (#153) — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?".
+import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
+import {
+  SHARED_RETURN_BODY,
+  SHARED_RETURN_CTA,
+  SHARED_RETURN_TITLE,
+} from '@/src/lib/returnVisit'
 import DishShareButton from '@/src/components/DishShareButton'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
@@ -150,6 +157,17 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
       {/* BE-44 (#105, criterium 2) — de ontvanger van een gedeelde link ziet
           deze regel boven de hele kaart van het opgelichte gerecht. */}
       {shareNote && <div className="dish-share-note">{SHARED_DISH_NOTE}</div>}
+      {/* BE-62 (#153, ontwerp punt 2) — alleen bij een gedeelde link, direct
+          onder de regel hierboven. De Bewaar-knop staat al in de voet van deze
+          kaart (DishShareButton) en houdt de bestaande bewaarlogica. */}
+      {shareNote && (
+        <ZoekGerechtBlock
+          title={SHARED_RETURN_TITLE}
+          body={SHARED_RETURN_BODY}
+          cta={SHARED_RETURN_CTA}
+          variant="dish"
+        />
+      )}
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>
         <div className={`td-price ${!item.price ? 'no-price' : ''}`}>
