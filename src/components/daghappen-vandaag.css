@@ -95,3 +95,13 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* BE-67, uitkomst 3 — Op = op op de home: het aanbod blijft staan, grijs en
+   doorgestreept, met de badge in het labelvlak. Kleuren via tokens. */
+.daghappen-vandaag-kaart--uitverkocht {
+  opacity: 0.65;
+}
+
+.daghappen-vandaag-naam--uitverkocht {
+  text-decoration: line-through;
+}

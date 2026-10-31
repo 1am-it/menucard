@@ -112,6 +112,19 @@
   flex-wrap: wrap;
 }
 
+/* BE-67, a11y (ronde 3): het keuzerondje en het vinkje zijn zelf het tikdoel.
+   Op de standaardmaat (13 px) haalt geen enkel doel de 24 px van WCAG 2.2 AA
+   (de browsercheck meldde "te-klein" op de houderpagina). Het rondje of vinkje
+   is nu 24 px; de omliggende kaart van 44 px blijft het zichtbare doel. */
+.aanbod-soort-keuze input,
+.aanbod-chip input,
+.aanbod-weekdag input {
+  inline-size: 24px;
+  block-size: 24px;
+  margin: 0;
+  flex: none;
+}
+
 .aanbod-chips {
   display: flex;
   flex-wrap: wrap;
@@ -203,4 +216,127 @@
   .aanbod-input--datum {
     max-width: none;
   }
+}
+
+/* BE-67: het dagmenu, de herhaling en Op = op. Kleuren alleen via de bestaande
+   tokens, zodat licht en donker hetzelfde blok delen. */
+.aanbod-prijzen {
+  display: grid;
+  gap: 12px;
+  /* min(140px, 100%) houdt de kolom binnen de kaart; met een vaste 140 px
+     werden twee kolommen samen breder dan het formulier en liep het op 390 en
+     320 px horizontaal over (BE-67, browsercheck). */
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+}
+
+/* Het prijsveld heeft een intrinsieke breedte van bijna 200 px. Binnen een
+   smalle kolom mag het krimpen in plaats van het formulier te verbreden. */
+.aanbod-prijzen > *,
+.aanbod-prijzen .aanbod-field {
+  min-width: 0;
+}
+
+.aanbod-prijzen .aanbod-input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Het eerste prijsveld staat los in het raster en werd anders uitgerekt tot de
+   hoogte van de buurkolom (label + veld + hint). Het schuift zo ver omlaag als
+   het label boven het tweede veld, zodat beide velden op één lijn staan. */
+.aanbod-prijzen > .aanbod-input {
+  align-self: start;
+  margin-top: calc(1.5em + 6px);
+}
+
+.aanbod-weekdag-knoppen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* De weekdagknoppen zijn echte checkboxes met een doel van minstens 40 px. */
+.aanbod-weekdag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.aanbod-weekdag:has(input:checked) {
+  border-color: var(--border-focus);
+  background: var(--bg-hover);
+  font-weight: 600;
+}
+
+.aanbod-weekdag input {
+  accent-color: var(--button-primary-bg);
+}
+
+.aanbod-gangen-lijst {
+  color: var(--text-secondary);
+}
+
+.aanbod-submit-hint {
+  margin-top: 8px;
+}
+
+
+/* BE-67, uitkomst 3 � Op = op in het overzicht van de houder. De naam van een
+   uitverkocht aanbod is doorgestreept, met het label ernaast; de knop zegt dan
+   "Toch weer beschikbaar". Kleuren alleen via de tokens. */
+.aanbod-uitverkocht-naam {
+  text-decoration: line-through;
+  color: var(--text-secondary);
+}
+
+.aanbod-uitverkocht-label {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked);
+  border: 1px solid var(--status-blocked-border);
+  white-space: nowrap;
+}
+
+/* BE-67, uitkomst 4 � de drie cijfers van vandaag per aanbod: bekeken,
+   bewaard en gedeeld. Onder de vijf staat er "< 5" (dezelfde regel als BE-57). */
+.aanbod-cijfers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aanbod-cijfer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  border: 1px solid var(--status-neutral-border);
+}
+
+.aanbod-cijfer-getal {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.aanbod-cijfer-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }

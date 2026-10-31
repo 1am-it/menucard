@@ -16,7 +16,7 @@
 
 import { useEffect, useState } from 'react'
 import DishShareButton from '@/src/components/DishShareButton'
-import { FORM_MESSAGES, LABEL_LABELS, verloopTekst } from '@/src/lib/daghapFormulier'
+import { FORM_MESSAGES, GANG_KORT, LABEL_LABELS, herhaalKort, verloopTekst } from '@/src/lib/daghapFormulier'
 import './daghap-vandaag.css'
 
 const APPARAAT_KEY = 'daghap-apparaat'
@@ -110,9 +110,20 @@ export default function DaghapVandaag({ restaurantId }) {
       <ul className="daghap-vandaag-list">
         {aanbod.map((item) => {
           const seizoen = item.soort === 'seizoensgerecht'
+          // BE-67: het dagmenu per gang, met beide prijzen; een uitverkocht
+          // aanbod blijft in de lijst staan, grijs en doorgestreept.
+          const dagmenu = item.soort === 'dagmenu'
+          const gangen = Array.isArray(item.gangen) ? item.gangen : []
+          const uitverkocht = item.uitverkocht === true
+          const herhaal = herhaalKort({ herhaalWeekdagen: item.herhaalWeekdagen })
           const melding = meldingen[item.id]
           // De bestaande bewaar- en deelknop werken met een gerecht-entry; een
           // daghap krijgt er een met precies de velden die die knoppen gebruiken.
+          // BE-67 (ronde 3): de id is tegelijk de aanbodsleutel van de
+          // tellerroute (`daghap-<restaurant>-<aanbod>`, zie
+          // src/lib/daghapAanbod.js), zodat Bewaren en Delen ook in
+          // daghap_gebeurtenissen tellen. Beide knoppen gebruiken precies deze
+          // id; geen tweede vorm ernaast.
           const entry = {
             id: `daghap-${restaurantId}-${item.id}`,
             name: item.naam,
@@ -120,11 +131,39 @@ export default function DaghapVandaag({ restaurantId }) {
             href: `/restaurant/${encodeURIComponent(restaurantId)}`,
           }
           return (
-            <li className="daghap-vandaag-card" key={item.id}>
+            <li
+              className={`daghap-vandaag-card${uitverkocht ? ' daghap-vandaag-card--uitverkocht' : ''}`}
+              key={item.id}
+            >
               <div className="daghap-vandaag-head">
-                <h3 className="daghap-vandaag-name">{item.naam}</h3>
-                <span className="daghap-vandaag-price">{item.prijs}</span>
+                <h3 className={`daghap-vandaag-name${uitverkocht ? ' daghap-vandaag-name--uitverkocht' : ''}`}>
+                  {item.naam}
+                </h3>
+                {uitverkocht ? (
+                  <span className="daghap-vandaag-badge">{FORM_MESSAGES.uitverkochtBadge}</span>
+                ) : (
+                  !dagmenu && <span className="daghap-vandaag-price">{item.prijs}</span>
+                )}
               </div>
+              {dagmenu && gangen.length > 0 && (
+                <ul className="daghap-vandaag-gangen">
+                  {gangen.map((gang) => (
+                    <li className={`daghap-vandaag-gang daghap-vandaag-gang--${gang.gang}`} key={gang.gang}>
+                      <span className="daghap-vandaag-gang-label">{GANG_KORT[gang.gang] || gang.gang}</span>
+                      <span className="daghap-vandaag-gang-naam">{gang.naam}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {dagmenu && (
+                <ul className="daghap-vandaag-prijzen">
+                  <li className="daghap-vandaag-chip">{FORM_MESSAGES.prijs2Chip} {item.prijs}</li>
+                  {item.prijs3 ? (
+                    <li className="daghap-vandaag-chip">{FORM_MESSAGES.prijs3Chip} {item.prijs3}</li>
+                  ) : null}
+                </ul>
+              )}
+              {herhaal && <p className="daghap-vandaag-herhaal">{herhaal}</p>}
               {item.beschrijving && <p className="daghap-vandaag-desc">{item.beschrijving}</p>}
               {Array.isArray(item.labels) && item.labels.length > 0 && (
                 <ul className="daghap-vandaag-labels">
@@ -151,7 +190,7 @@ export default function DaghapVandaag({ restaurantId }) {
                   name={item.naam}
                   title={item.naam}
                   href={entry.href}
-                  dishKey={`daghap-${item.id}`}
+                  dishKey={entry.id}
                 />
               </div>
               <div className="daghap-vandaag-report">

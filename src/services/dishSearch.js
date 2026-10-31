@@ -349,6 +349,17 @@ function searchDishes({
     ? getDishIndex()
     : getDishIndex().map((dish) => pasZoekOverlayToeOpGerecht(dish, overlayPerGerechtMap))
 
+  // BE-67, uitkomst 5: een gast zoekt op de naam van een gang ("pompoensoep").
+  // Dat is een treffer voor de restaurants met dat dagmenu, ook als geen enkel
+  // gerecht zo heet. Het telt als zichtbare tekst, dus in dezelfde tier als een
+  // beschrijving: het gaat nooit vóór een treffer op een gerechtnaam.
+  const gangTreffer = (restaurantId) => {
+    if (!hasQuery || !vandaag) return false
+    const items = aanbodPerRestaurant.get(String(restaurantId)) || []
+    return items.some((item) => (Array.isArray(item.gangen) ? item.gangen : [])
+      .some((naam) => String(naam).toLowerCase().includes(needle)))
+  }
+
   const candidates = index
     .filter((dish) => {
       if (meal && !MEAL_TYPES.includes(meal)) return false
@@ -365,7 +376,10 @@ function searchDishes({
       if (day && !nowOpen && !dish._restaurant.openingHours?.[day]) return false
       return true
     })
-    .map((dish) => ({ dish, tier: hasQuery ? getMatchTier(dish, needle) : 0 }))
+    .map((dish) => ({
+      dish,
+      tier: hasQuery ? (getMatchTier(dish, needle) ?? (gangTreffer(dish.restaurantId) ? 2 : null)) : 0,
+    }))
     .filter(({ tier }) => !hasQuery || tier !== null)
 
   // Ranking (BE-02c): lower tier first; ties broken by distance (currently

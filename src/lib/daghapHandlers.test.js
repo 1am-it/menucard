@@ -87,7 +87,7 @@ function daghapBody(overrides = {}) {
  * meer tabellen ontbreken (42P01), precies de fout van een nog niet toegepaste
  * 0023.
  */
-function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaatsrecht = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null } = {}) {
+function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaatsrecht = [], eigenaren = [{ user_id: OWNER_ID, role: 'owner', restaurant_id: RESTAURANT_ID }], failing = null, failingInsert = [], rpcResult = 2, rpcError = null, ontbrekendeKolommen = [] } = {}) {
   const tables = {
     [DAGHAP_TABLE_AANBOD]: aanbod.map((rij) => aanbodRij(rij)),
     [DAGHAP_TABLE_GEBEURTENISSEN]: gebeurtenissen.map((rij, index) => ({ gebeurtenis_id: index + 1, ...rij })),
@@ -123,6 +123,18 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaats
     });
     const error = errorFor(query.table);
     if (error) return Promise.resolve({ data: null, error });
+    // BE-67: een kolom die pas na migratie 0026 bestaat. Lezen én schrijven
+    // falen dan met 42703, precies zoals PostgREST het teruggeeft.
+    const ontbrekend = ontbrekendeKolommen.find((kolom) => (
+      (query.kolommen && String(query.kolommen).includes(kolom))
+      || (query.payload && Object.prototype.hasOwnProperty.call(query.payload, kolom))
+    ));
+    if (ontbrekend) {
+      return Promise.resolve({
+        data: null,
+        error: { code: '42703', message: `column ${ontbrekend} does not exist` },
+      });
+    }
     const rijen = tables[query.table] || [];
 
     if (query.action === 'select') {
@@ -187,7 +199,7 @@ function fakeSupabase({ aanbod = [], gebeurtenissen = [], meldingen = [], plaats
       filters: [],
       payload: null,
       order: null,
-      select() { return query; },
+      select(kolommen) { query.kolommen = kolommen; return query; },
       eq(kolom, waarde) { query.filters.push([kolom, 'eq', waarde]); return query; },
       in(kolom, waarden) { query.filters.push([kolom, 'in', waarden]); return query; },
       gt(kolom, waarde) { query.filters.push([kolom, 'gt', waarde]); return query; },
@@ -824,4 +836,326 @@ test('BE-55 deel 5: zoekAanbod zonder migratie of zonder client is 503 en gooit 
     timeoutMs: 200,
   });
   assert.equal((await zonderClient.zoekAanbod()).status, 503);
+});
+
+// --- BE-67: het dagmenu door de route -----------------------------------------
+
+/** De body van een dagmenu, zoals het formulier hem stuurt. */
+function dagmenuBody(overrides = {}) {
+  return {
+    restaurant_id: RESTAURANT_ID,
+    soort: 'dagmenu',
+    naam: 'Herfstmenu',
+    prijs: '22,50',
+    prijs3: '27,50',
+    beschrijving: 'Met pompoen en wild',
+    labels: ['vegetarisch'],
+    gangen: [
+      { gang: 'voor', naam: 'Pompoensoep' },
+      { gang: 'hoofd', naam: 'Hertenstoof' },
+      { gang: 'na', naam: 'Kastanjetaart' },
+    ],
+    ...overrides,
+  };
+}
+
+test('BE-67: een houder plaatst een dagmenu met gangen, prijzen en herhaling', async () => {
+  const client = fakeSupabase();
+  const handlers = handlersFor(client);
+
+  const resultaat = await handlers.plaatsAanbod(request(dagmenuBody({
+    weekdagen: [5],
+    herhaalTot: '2026-12-31',
+  })));
+
+  assert.equal(resultaat.status, 201, JSON.stringify(resultaat.body));
+  assert.equal(resultaat.body.aanbod.soort, 'dagmenu');
+  assert.equal(resultaat.body.aanbod.prijsCent, 2250, 'de eerste prijs is die voor twee gangen');
+  assert.equal(resultaat.body.aanbod.prijs3Cent, 2750);
+  assert.deepEqual(resultaat.body.aanbod.gangen, dagmenuBody().gangen.map((gang) => ({ gang: gang.gang, naam: gang.naam })));
+  assert.deepEqual(resultaat.body.aanbod.herhaalWeekdagen, [5]);
+  assert.equal(resultaat.body.aanbod.herhaalTot, '2026-12-31');
+  // De herhaling bepaalt het verloopmoment: het einde van 31 december.
+  assert.equal(resultaat.body.aanbod.verlooptOp, '2026-12-31T22:59:00.000Z');
+
+  const rij = client.tables[DAGHAP_TABLE_AANBOD][0];
+  assert.equal(rij.prijs_3_cent, 2750);
+  assert.deepEqual(rij.herhaal_weekdagen, [5]);
+  assert.equal(rij.herhaal_tot, '2026-12-31');
+  assert.equal(geschiedenis(client)[0].actie, 'geplaatst');
+});
+
+test('BE-67: een dagmenu met een gangnaam als reclametaal gaat in controle', async () => {
+  const client = fakeSupabase();
+  const handlers = handlersFor(client);
+  const resultaat = await handlers.plaatsAanbod(request(dagmenuBody({
+    gangen: [
+      { gang: 'voor', naam: 'Soep' },
+      { gang: 'hoofd', naam: 'Stoof met korting' },
+    ],
+    prijs3: '',
+  })));
+  assert.equal(resultaat.status, 201, JSON.stringify(resultaat.body));
+  assert.equal(resultaat.body.aanbod.status, 'in_controle');
+  assert.equal(resultaat.body.inControle, true);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].prijs_3_cent, null, 'twee gangen: geen derde prijs');
+});
+
+test('BE-67: zonder migratie 0026 meldt de route netjes dat het dagmenu nog niet kan', async () => {
+  const kolommen = ['gangen', 'prijs_3_cent', 'herhaal_weekdagen', 'herhaal_tot', 'uitverkocht_op'];
+  const client = fakeSupabase({ aanbod: [aanbodRij()], ontbrekendeKolommen: kolommen });
+  const handlers = handlersFor(client);
+
+  // Lezen blijft werken: de bestaande daghap komt gewoon terug.
+  const lijst = await handlers.lijstAanbod(request(null));
+  assert.equal(lijst.status, 200);
+  assert.deepEqual(lijst.body.aanbod.map((rij) => rij.naam), ['Pompoensoep met brood']);
+  const publiek = await handlers.publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
+
+  // Schrijven van een dagmenu geeft 503 met één zin, geen 500.
+  const geplaatst = await handlers.plaatsAanbod(request(dagmenuBody()));
+  assert.equal(geplaatst.status, 503);
+  assert.equal(geplaatst.body.error, 'dagmenu_unavailable');
+  assert.equal(geplaatst.body.message, 'Het dagmenu is nog niet beschikbaar.');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD].length, 1, 'er komt niets bij');
+  // Sinds uitkomst 4 schrijft de publieke GET één 'bekeken'-teller per getoond
+  // aanbod; een geweigerde plaatsing schrijft nog steeds niets.
+  assert.equal(geschiedenis(client).filter((rij) => rij.actie !== 'bekeken').length, 0);
+
+  // Een gewone daghap blijft ook werken zonder 0026 (op een lege werkvoorraad,
+  // want dit restaurant heeft in deze test al een actieve daghap).
+  const leeg = fakeSupabase({ ontbrekendeKolommen: kolommen });
+  const daghap = await handlersFor(leeg).plaatsAanbod(request(daghapBody()));
+  assert.equal(daghap.status, 201, JSON.stringify(daghap.body));
+});
+
+test('BE-67: een dagmenu wijzigen houdt de gangen en de herhaling bij', async () => {
+  const client = fakeSupabase();
+  const handlers = handlersFor(client);
+  const geplaatst = await handlers.plaatsAanbod(request(dagmenuBody({ weekdagen: [1, 5], herhaalTot: '2026-12-31' })));
+  assert.equal(geplaatst.status, 201);
+
+  const gewijzigd = await handlers.wijzigAanbod(
+    request({
+      naam: 'Herfstmenu met wild',
+      prijs: '23,50',
+      prijs3: '28,50',
+      gangen: [
+        { gang: 'voor', naam: 'Pompoensoep' },
+        { gang: 'hoofd', naam: 'Wildstoof' },
+        { gang: 'na', naam: 'Kastanjetaart' },
+      ],
+      weekdagen: [5],
+      herhaalTot: '2026-12-24',
+    }, { url: `http://localhost/api/v1/daghap/${geplaatst.body.aanbod.id}` }),
+    { id: String(geplaatst.body.aanbod.id) },
+  );
+  assert.equal(gewijzigd.status, 200, JSON.stringify(gewijzigd.body));
+  assert.equal(gewijzigd.body.aanbod.naam, 'Herfstmenu met wild');
+  assert.equal(gewijzigd.body.aanbod.gangen[1].naam, 'Wildstoof');
+  assert.deepEqual(gewijzigd.body.aanbod.herhaalWeekdagen, [5]);
+  assert.equal(gewijzigd.body.aanbod.herhaalTot, '2026-12-24');
+  assert.equal(gewijzigd.body.aanbod.verlooptOp, '2026-12-24T22:59:00.000Z');
+});
+
+// --- BE-67, uitkomst 3: Op = op -----------------------------------------------
+
+function uitverkochtRequest(stand, { id = 1, headers = {} } = {}) {
+  return request(
+    { uitverkocht: stand },
+    { url: `http://localhost/api/v1/daghap/${id}/uitverkocht`, headers },
+  );
+}
+
+test('BE-67: Op = op zet de datum van vandaag en "Toch weer beschikbaar" maakt hem leeg', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const handlers = handlersFor(client);
+
+  const uit = await handlers.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' });
+  assert.equal(uit.status, 200, JSON.stringify(uit.body));
+  // NOW is 30 oktober 11:00 UTC = 12:00 in Europe/Amsterdam: dezelfde dag.
+  assert.equal(uit.body.aanbod.uitverkochtOp, '2026-10-30');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, '2026-10-30');
+  assert.equal(geschiedenis(client).at(-1).actie, 'uitverkocht');
+  assert.equal(geschiedenis(client).at(-1).aanbod_id, 1);
+
+  const terug = await handlers.uitverkochtAanbod(uitverkochtRequest(false), { id: '1' });
+  assert.equal(terug.status, 200, JSON.stringify(terug.body));
+  assert.equal(terug.body.aanbod.uitverkochtOp, undefined, 'geen stand meer in het antwoord');
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, null);
+  assert.equal(geschiedenis(client).at(-1).actie, 'beschikbaar');
+});
+
+test('BE-67: Op = op vraagt dezelfde autorisatie als wijzigen', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const zonderSessie = handlersFor(client, { authenticate: async () => ({ ok: false, status: 401 }) });
+  assert.equal((await zonderSessie.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 401);
+
+  // Ingelogd, maar geen houder van dít restaurant.
+  const andereHouder = handlersFor(client, { authenticate: async () => ({ ok: true, userId: OTHER_ID }) });
+  assert.equal((await andereHouder.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 403);
+
+  // Wel houder, maar het plaatsrecht is afgenomen.
+  const zonderRecht = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    plaatsrecht: [{ restaurant_id: RESTAURANT_ID, user_id: OWNER_ID }],
+  });
+  const metRecht = handlersFor(zonderRecht);
+  assert.equal((await metRecht.uitverkochtAanbod(uitverkochtRequest(true), { id: '1' })).status, 403);
+
+  // Een onbekend aanbod en een ongeldige stand zijn geen uitzondering.
+  const handlers = handlersFor(client);
+  assert.equal((await handlers.uitverkochtAanbod(uitverkochtRequest(true), { id: '999' })).status, 404);
+  const ongeldig = await handlers.uitverkochtAanbod(
+    request({ uitverkocht: 'ja' }, { url: 'http://localhost/api/v1/daghap/1/uitverkocht' }),
+    { id: '1' },
+  );
+  assert.equal(ongeldig.status, 400);
+  assert.equal(client.tables[DAGHAP_TABLE_AANBOD][0].uitverkocht_op, undefined, 'niets geschreven');
+});
+
+test('BE-67: de stand van gisteren is vervallen, die van vandaag telt', async () => {
+  const gisteren = fakeSupabase({ aanbod: [{ id: 1, uitverkocht_op: '2026-10-29' }] });
+  const vandaag = fakeSupabase({ aanbod: [{ id: 2, uitverkocht_op: '2026-10-30' }] });
+
+  const oud = await handlersFor(gisteren).publiekAanbod(
+    request(null, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+  assert.equal(oud.status, 200);
+  assert.equal(oud.body.aanbod[0].uitverkocht, undefined, 'de stand van gisteren telt niet meer');
+
+  const nu = await handlersFor(vandaag).publiekAanbod(
+    request(null, { url: `http://localhost/api/v1/daghap/publiek?restaurant_id=${RESTAURANT_ID}` }),
+  );
+  assert.equal(nu.body.aanbod[0].uitverkocht, true);
+});
+
+test('BE-67: zonder 0026 is Op = op een nette 503 en geen 500', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }], ontbrekendeKolommen: ['uitverkocht_op'] });
+  const uitkomst = await handlersFor(client).uitverkochtAanbod(uitverkochtRequest(true), { id: '1' });
+  assert.equal(uitkomst.status, 503);
+  assert.equal(uitkomst.body.error, 'daghap_unavailable');
+});
+
+// --- BE-67, uitkomst 4: bekeken, bewaard en gedeeld ---------------------------
+
+test('BE-67: het overzicht telt vandaag bekeken, bewaard en gedeeld per aanbod', async () => {
+  const vandaag = new Date(NOW).toISOString();
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }, { id: 2, soort: 'seizoensgerecht' }],
+    gebeurtenissen: [
+      // Vijf keer bekeken, vier keer bewaard en zeven keer gedeeld bij aanbod 1.
+      ...[1, 2, 3, 4, 5].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: vandaag })),
+      ...[1, 2, 3, 4].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bewaard', moment: vandaag })),
+      ...[1, 2, 3, 4, 5, 6, 7].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'gedeeld', moment: vandaag })),
+      // Eén keer bekeken bij aanbod 2: dat blijft "< 5".
+      { aanbod_id: 2, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: vandaag },
+      // Een wijziging telt niet mee, en de teller van gisteren ook niet.
+      { aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'gewijzigd', moment: vandaag },
+      { aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: '2026-10-29T09:00:00.000Z' },
+    ],
+  });
+
+  const lijst = await handlersFor(client).lijstAanbod(request(null));
+  assert.equal(lijst.status, 200);
+  const eerste = lijst.body.aanbod.find((rij) => rij.id === 1);
+  assert.deepEqual(
+    { bekeken: eerste.cijfers.bekeken, bewaard: eerste.cijfers.bewaard, gedeeld: eerste.cijfers.gedeeld },
+    { bekeken: 5, bewaard: 4, gedeeld: 7 },
+  );
+  assert.equal(eerste.cijfers.bekekenTekst, '5');
+  // Onder de vijf toont het overzicht "< 5" (dezelfde regel als BE-57).
+  assert.equal(eerste.cijfers.bewaardTekst, '< 5');
+  assert.equal(eerste.cijfers.gedeeldTekst, '7');
+  const tweede = lijst.body.aanbod.find((rij) => rij.id === 2);
+  assert.equal(tweede.cijfers.bekekenTekst, '< 5');
+  assert.equal(tweede.cijfers.bewaard, 0, 'geen bewaarregels voor dit aanbod');
+});
+
+test('BE-67: de publieke GET schrijft één bekeken-teller per getoond aanbod', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
+  const tellers = geschiedenis(client).filter((rij) => rij.actie === 'bekeken');
+  assert.equal(tellers.length, 1);
+  assert.equal(String(tellers[0].aanbod_id), '1');
+  assert.equal(tellers[0].restaurant_id, RESTAURANT_ID);
+  assert.equal(tellers[0].moment, new Date(NOW).toISOString());
+});
+
+test('BE-67: zonder de tellerkolommen blijft het overzicht werken, zonder cijfers', async () => {
+  // Een database zonder de acties van 0026 weigert de teller; de leesroute mag
+  // daar nooit op stuklopen (uitkomst: zonder migratie geen fout).
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    failing: { [DAGHAP_TABLE_GEBEURTENISSEN]: true },
+  });
+  const lijst = await handlersFor(client).lijstAanbod(request(null));
+  assert.equal(lijst.status, 200);
+  assert.equal(lijst.body.aanbod[0].cijfers.bekekenTekst, '< 5');
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
+});
+
+
+
+// --- BE-67, uitkomst 2 en 5: de herhaling bij de bezoeker en zoeken op een gang ---
+
+test("BE-67: de publieke routes tonen een herhaling alleen op de gekozen weekdag", async () => {
+  // NOW is vrijdag 30 oktober 2026 (weekdag 5).
+  const vrijdag = fakeSupabase({
+    aanbod: [{ id: 1, herhaal_weekdagen: [5], herhaal_tot: "2026-12-31" }],
+  });
+  const maandag = fakeSupabase({
+    aanbod: [{ id: 1, herhaal_weekdagen: [1, 3], herhaal_tot: "2026-12-31" }],
+  });
+
+  const opVrijdag = await handlersFor(vrijdag).publiekAanbod(request(null));
+  assert.equal(opVrijdag.body.aanbod.length, 1, "vrijdag staat het aanbod er wel");
+  assert.deepEqual(opVrijdag.body.aanbod[0].herhaalWeekdagen, [5], "het label elke vr kan lezen");
+
+  const opMaandag = await handlersFor(maandag).publiekAanbod(request(null));
+  assert.equal(opMaandag.body.aanbod.length, 0, "op een niet-gekozen dag staat het er niet");
+
+  const vandaagLijst = await handlersFor(maandag).publiekVandaag(request(null));
+  assert.equal(vandaagLijst.body.aanbod.length, 0, "ook de home volgt de herhaling");
+
+  const zoek = await handlersFor(maandag).zoekAanbod();
+  assert.deepEqual(zoek.body.aanbod, {}, "en het zoeken ook");
+});
+
+test("BE-67: zoeken op een gangnaam geeft het restaurant met de gangnamen terug", async () => {
+  const client = fakeSupabase({
+    aanbod: [
+      {
+        id: 1,
+        soort: "dagmenu",
+        naam: "Herfstmenu",
+        gangen: [
+          { gang: "voor", naam: "Pompoensoep" },
+          { gang: "hoofd", naam: "Hertenstoof" },
+        ],
+      },
+    ],
+  });
+  const zoek = await handlersFor(client).zoekAanbod();
+  assert.equal(zoek.status, 200);
+  assert.deepEqual(zoek.body.aanbod["1"], [{
+    soort: "dagmenu",
+    naam: "Herfstmenu",
+    gangen: ["Pompoensoep", "Hertenstoof"],
+  }]);
+});
+
+test("BE-67: zonder 0026 geeft zoeken en de publieke GET geen fout", async () => {
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    ontbrekendeKolommen: ["gangen", "prijs_3_cent", "herhaal_weekdagen", "herhaal_tot", "uitverkocht_op"],
+  });
+  const zoek = await handlersFor(client).zoekAanbod();
+  assert.equal(zoek.status, 200);
+  assert.equal(zoek.body.aanbod["1"][0].gangen, undefined, "geen gangen zonder 0026");
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
 });

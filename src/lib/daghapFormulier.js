@@ -25,6 +25,7 @@ const {
   DAGHAP_BESCHRIJVING_MAX,
   DAGHAP_FOUTEN,
   DAGHAP_IN_CONTROLE_MESSAGE,
+  DAGHAP_PUBLIEK,
   DAGHAP_STATUS_CONTROLE,
   DAGHAP_STATUS_OFFLINE,
   DAGHAP_STATUS_ONLINE,
@@ -32,11 +33,36 @@ const {
   DAGHAP_TIJDZONE,
   berichtBij,
   normaliseerLabels,
-} = require('./daghapAanbod');
+} = require('./daghapBerichten');
 
 const SOORT_LABELS = Object.freeze({
   daghap: 'Daghap',
+  dagmenu: 'Dagmenu',
   seizoensgerecht: 'Seizoensgerecht',
+});
+
+// BE-67: de drie gangen van een dagmenu, in leesvolgorde.
+const GANG_LABELS = Object.freeze({
+  voor: 'Voorgerecht',
+  hoofd: 'Hoofdgerecht',
+  na: 'Nagerecht',
+});
+
+// BE-67, uitkomst 5: de korte namen in het blok "Vandaag" — "Voor / Hoofd / Na",
+// zoals het contract ze noemt naast het formulier met de volledige namen.
+const GANG_KORT = Object.freeze({
+  voor: 'Voor',
+  hoofd: 'Hoofd',
+  na: 'Na',
+});
+
+// De weekdagknoppen van "Elke week op", in ISO-volgorde (1 = maandag).
+const WEEKDAG_KORT = Object.freeze({
+  1: 'ma', 2: 'di', 3: 'wo', 4: 'do', 5: 'vr', 6: 'za', 7: 'zo',
+});
+const WEEKDAG_LABELS = Object.freeze({
+  1: 'maandag', 2: 'dinsdag', 3: 'woensdag', 4: 'donderdag',
+  5: 'vrijdag', 6: 'zaterdag', 7: 'zondag',
 });
 
 const LABEL_LABELS = Object.freeze({
@@ -55,12 +81,44 @@ const STATUS_LABELS = Object.freeze({
 // De vaste teksten van het scherm. Eén plek, zodat het formulier en "wat staat
 // er online" nooit twee verschillende zinnen voor hetzelfde tonen.
 const FORM_MESSAGES = Object.freeze({
-  title: 'Daghap of seizoensgerecht',
+  title: 'Wat staat er vandaag op?',
   intro:
-    'Zet vandaag één daghap online, of een seizoensgerecht tot een einddatum. Gasten zien het op je restaurantpagina, je menukaart en in de zoekresultaten.',
+    'Zet vandaag een daghap, een dagmenu of een seizoensgerecht online. Gasten zien het op je restaurantpagina, je menukaart en in de zoekresultaten.',
   soortLegend: 'Wat wil je plaatsen?',
   soortDaghapHint: 'Alleen vandaag, tot sluitingstijd.',
+  soortDagmenuHint: 'Twee of drie gangen, met een eigen prijs.',
   soortSeizoenHint: 'Tot een einddatum, maximaal 90 dagen vooruit.',
+  gangenLegend: 'Gangen (2 of 3)',
+  gangenHint: 'Minstens twee gangen; het hoofdgerecht is verplicht.',
+  gangNaHint: 'mag leeg',
+  prijs2Label: 'Prijs 2 gangen',
+  prijs3Label: 'Prijs 3 gangen',
+  prijs3Hint: 'Alleen nodig als je drie gangen invult.',
+  wanneerLegend: 'Wanneer?',
+  alleenVandaag: 'Alleen vandaag',
+  elkeWeek: 'Elke week op',
+  weekdagLegend: 'Op welke dagen?',
+  herhaalTotLabel: 'Tot en met',
+  herhaalTotWijzig: 'wijzig',
+  // BE-67, uitkomst 3: de knop in het overzicht van de houder en de meldingen
+  // die erbij horen. Er is geen vinkje "Op = op" in het formulier meer: elk
+  // aanbod krijgt die knop, en de stand is een datum per aanbod (uitverkocht_op
+  // in 0026), geen instelling bij het plaatsen.
+  opIsOpKnop: 'Op = op',
+  opIsOpWeer: 'Toch weer beschikbaar',
+  opIsOpDone: 'Dit aanbod staat vandaag op uitverkocht.',
+  opIsOpWeerDone: 'Dit aanbod is weer beschikbaar.',
+  uitverkochtLabel: 'Uitverkocht',
+  uitverkochtBadge: DAGHAP_PUBLIEK.uitverkocht,
+  // BE-67, uitkomst 4: de drie tegels in het overzicht van de houder.
+  cijfersTitel: 'Vandaag',
+  cijferBekeken: 'bekeken',
+  cijferBewaard: 'bewaard',
+  cijferGedeeld: 'gedeeld',
+  // BE-67, uitkomst 5: de twee prijschips bij een dagmenu.
+  prijs2Chip: DAGHAP_PUBLIEK.prijs2,
+  prijs3Chip: DAGHAP_PUBLIEK.prijs3,
+  directlyVisible: "Direct zichtbaar bij 'Vandaag' en in de zoekresultaten.",
   naamLabel: 'Naam',
   naamHint: '3 tot 80 tekens.',
   prijsLabel: 'Prijs',
@@ -70,7 +128,7 @@ const FORM_MESSAGES = Object.freeze({
   labelsLegend: 'Labels',
   einddatumLabel: 'Tot en met',
   einddatumHint: 'Maximaal 90 dagen vooruit.',
-  submit: 'Direct online zetten',
+  submit: 'Zet online',
   submitWijziging: 'Wijziging opslaan',
   cancel: 'Annuleren',
   wordtGecontroleerd: DAGHAP_IN_CONTROLE_MESSAGE,
@@ -116,11 +174,22 @@ const VELDEN_VOOR_FOUT = Object.freeze({
   [DAGHAP_FOUTEN.emoji]: ['naam', 'beschrijving'],
   [DAGHAP_FOUTEN.daghapVol]: ['soort'],
   [DAGHAP_FOUTEN.seizoenVol]: ['soort'],
+  [DAGHAP_FOUTEN.dagmenuVol]: ['soort'],
+  [DAGHAP_FOUTEN.gangen]: ['gangen'],
+  [DAGHAP_FOUTEN.gangNaam]: ['gangen'],
+  [DAGHAP_FOUTEN.prijs3]: ['prijs3'],
+  [DAGHAP_FOUTEN.geenDerdePrijs]: ['prijs3'],
+  [DAGHAP_FOUTEN.herhaaldag]: ['weekdagen'],
+  [DAGHAP_FOUTEN.herhaaltot]: ['herhaalTot'],
   [DAGHAP_FOUTEN.daglimiet]: [],
   [DAGHAP_FOUTEN.verlopen]: [],
 });
 
-const FORMULIER_VELDEN = Object.freeze(['soort', 'naam', 'prijs', 'beschrijving', 'labels', 'einddatum']);
+const FORMULIER_VELDEN = Object.freeze([
+  'soort', 'naam', 'prijs', 'beschrijving', 'labels', 'einddatum',
+  // BE-67: het dagmenu, de herhaling en Op = op.
+  'gangen', 'prijs3', 'weekdagen', 'herhaalTot',
+]);
 
 function tekst(value) {
   return String(value === undefined || value === null ? '' : value);
@@ -160,6 +229,15 @@ function datumInAmsterdam(iso) {
 /** Een bestaand aanbod als waarden van het formulier. */
 function formulierVanAanbod(aanbod) {
   const rij = aanbod && typeof aanbod === 'object' ? aanbod : {};
+  const gangen = { voor: '', hoofd: '', na: '' };
+  for (const gang of Array.isArray(rij.gangen) ? rij.gangen : []) {
+    if (gang && gang.gang && Object.prototype.hasOwnProperty.call(gangen, gang.gang)) {
+      gangen[gang.gang] = tekst(gang.naam);
+    }
+  }
+  const weekdagen = Array.isArray(rij.herhaalWeekdagen)
+    ? rij.herhaalWeekdagen.map(Number).filter((dag) => WEEKDAG_LABELS[dag])
+    : [];
   return {
     soort: tekst(rij.soort) || 'daghap',
     naam: tekst(rij.naam),
@@ -167,17 +245,42 @@ function formulierVanAanbod(aanbod) {
     beschrijving: tekst(rij.beschrijving),
     labels: normaliseerLabels(rij.labels),
     einddatum: rij.soort === 'seizoensgerecht' ? datumInAmsterdam(rij.verlooptOp) : '',
+    gangen,
+    prijs3: rij.prijs3Cent === undefined || rij.prijs3Cent === null ? '' : prijsInvoer(rij.prijs3Cent),
+    wanneer: weekdagen.length > 0 ? 'elke_week' : 'vandaag',
+    weekdagen,
+    herhaalTot: tekst(rij.herhaalTot).slice(0, 10),
   };
 }
 
 /** Een leeg formulier; het soort staat standaard op daghap. */
 function leegFormulier({ soort = 'daghap' } = {}) {
-  return { soort, naam: '', prijs: '', beschrijving: '', labels: [], einddatum: '' };
+  return {
+    soort,
+    naam: '',
+    prijs: '',
+    beschrijving: '',
+    labels: [],
+    einddatum: '',
+    // BE-67: de gangen van een dagmenu en de herhaling. Op = op is geen veld
+    // van het formulier: elk aanbod heeft die knop in het overzicht, en de stand
+    // is een datum per aanbod (zie uitverkocht_op in 0026).
+    gangen: { voor: '', hoofd: '', na: '' },
+    prijs3: '',
+    wanneer: 'vandaag',
+    weekdagen: [],
+    herhaalTot: '',
+  };
 }
 
 /**
  * De body van een POST of PATCH uit de waarden van het formulier. De server
  * controleert alles opnieuw; dit is alleen de vorm die hij verwacht.
+ *
+ * Een dagmenu gaat als `gangen: [{ gang, naam }]` met alleen de ingevulde gangen;
+ * de derde prijs gaat mee zodra er drie gangen zijn. Herhalen gaat als
+ * `weekdagen` en `herhaalTot` bij "Elke week op", en blijft weg bij "Alleen
+ * vandaag" — dan geldt het aanbod vandaag.
  */
 function aanbodVerzoek(values) {
   const waarden = values && typeof values === 'object' ? values : {};
@@ -190,6 +293,22 @@ function aanbodVerzoek(values) {
     labels: normaliseerLabels(waarden.labels),
   };
   if (soort === 'seizoensgerecht') verzoek.einddatum = tekst(waarden.einddatum).trim();
+
+  if (soort === 'dagmenu') {
+    const velden = waarden.gangen && typeof waarden.gangen === 'object' ? waarden.gangen : {};
+    const gangen = Object.keys(GANG_LABELS)
+      .map((gang) => ({ gang, naam: tekst(velden[gang]).trim() }))
+      .filter((gang) => gang.naam !== '');
+    verzoek.gangen = gangen;
+    if (gangen.length >= 3) verzoek.prijs3 = tekst(waarden.prijs3).trim();
+  }
+
+  if (tekst(waarden.wanneer).trim() === 'elke_week') {
+    verzoek.weekdagen = (Array.isArray(waarden.weekdagen) ? waarden.weekdagen : [])
+      .map(Number)
+      .filter((dag) => WEEKDAG_LABELS[dag]);
+    verzoek.herhaalTot = tekst(waarden.herhaalTot).trim();
+  }
   return verzoek;
 }
 
@@ -240,11 +359,44 @@ const DAG_DELEN = new Intl.DateTimeFormat('nl-NL', {
  * "Online vandaag tot 21:00" voor een daghap en "Online tot en met 31 december"
  * voor een seizoensgerecht. Zonder bruikbaar moment is er geen belofte.
  */
-function verloopTekst({ soort, verlooptOp } = {}) {
+function verloopTekst({ soort, verlooptOp, herhaalWeekdagen, herhaalTot } = {}) {
   const moment = Date.parse(tekst(verlooptOp));
   if (!Number.isFinite(moment)) return '';
-  if (soort === 'daghap') return `Online vandaag tot ${TIJD_DELEN.format(new Date(moment))}`;
+  // BE-67: een herhaling leest als "Online elke week op ma en vr tot en met
+  // 31 december", uit het echte verloopmoment (het einde van de einddatum).
+  const dagen = (Array.isArray(herhaalWeekdagen) ? herhaalWeekdagen : [])
+    .map(Number)
+    .filter((dag) => WEEKDAG_LABELS[dag]);
+  if (dagen.length > 0) {
+    const namen = [...new Set(dagen)].sort((a, b) => a - b).map((dag) => WEEKDAG_KORT[dag]);
+    const op = namen.length > 1
+      ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}`
+      : namen[0];
+    const laatsteDag = tekst(herhaalTot).slice(0, 10) ? tekst(herhaalTot).slice(0, 10) : verlooptOp;
+    const eind = Date.parse(`${laatsteDag.slice(0, 10)}T12:00:00.000Z`);
+    const tot = Number.isFinite(eind) ? ` tot en met ${DAG_DELEN.format(new Date(eind))}` : '';
+    return `Online elke week op ${op}${tot}`;
+  }
+  if (soort === 'daghap' || soort === 'dagmenu') {
+    return `Online vandaag tot ${TIJD_DELEN.format(new Date(moment))}`;
+  }
   return `Online tot en met ${DAG_DELEN.format(new Date(moment))}`;
+}
+
+/**
+ * BE-67, uitkomst 5: het korte herhaallabel bij de bezoeker, bijvoorbeeld
+ * "elke di en do". Zonder weekdagen is er geen herhaling en dus geen label.
+ */
+function herhaalKort({ herhaalWeekdagen } = {}) {
+  const dagen = (Array.isArray(herhaalWeekdagen) ? herhaalWeekdagen : [])
+    .map(Number)
+    .filter((dag) => WEEKDAG_LABELS[dag]);
+  if (dagen.length === 0) return '';
+  const namen = [...new Set(dagen)].sort((a, b) => a - b).map((dag) => WEEKDAG_KORT[dag]);
+  const op = namen.length > 1
+    ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}`
+    : namen[0];
+  return `elke ${op}`;
 }
 
 /** De tekenteller onder het beschrijvingsveld: `"42/140"`. */
@@ -255,14 +407,19 @@ function beschrijvingTeller(value) {
 module.exports = {
   FORMULIER_VELDEN,
   FORM_MESSAGES,
+  GANG_KORT,
+  GANG_LABELS,
   LABEL_LABELS,
   SOORT_LABELS,
   STATUS_LABELS,
+  WEEKDAG_KORT,
+  WEEKDAG_LABELS,
   aanbodVerzoek,
   beschrijvingTeller,
   datumInAmsterdam,
   foutmeldingen,
   formulierVanAanbod,
+  herhaalKort,
   leegFormulier,
   prijsInvoer,
   statusLabel,

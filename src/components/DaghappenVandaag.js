@@ -16,6 +16,9 @@
 // Opmaak staat in ./daghappen-vandaag.css (BE-52), kleuren via de tokens.
 
 import { useEffect, useState } from 'react'
+// BE-67: alleen de drie korte bezoekerslabels, niet het formulier of de
+// meldingenlijst: de eerste lading van de home mag hooguit 1 KB groeien.
+import { DAGHAP_PUBLIEK } from '@/src/lib/daghapPubliek'
 import './daghappen-vandaag.css'
 
 const API = '/api/v1/daghap/vandaag'
@@ -53,15 +56,30 @@ export default function DaghappenVandaag() {
         </a>
       </div>
       <ul className="daghappen-vandaag-lijst">
-        {aanbod.map((rij) => (
-          <li key={rij.id} className="daghappen-vandaag-kaart">
-            <a className="daghappen-vandaag-link" href={`/restaurant/${rij.restaurantId}`}>
-              <span className="daghappen-vandaag-naam">{rij.naam}</span>
-              <span className="daghappen-vandaag-prijs">{rij.prijs}</span>
-              <span className="daghappen-vandaag-label">Vandaag</span>
-            </a>
-          </li>
-        ))}
+        {aanbod.map((rij) => {
+          // BE-67, uitkomst 3 en 5: een uitverkocht aanbod blijft staan, grijs
+          // en doorgestreept met de badge; een dagmenu toont beide prijzen.
+          const uitverkocht = rij.uitverkocht === true
+          const dagmenu = rij.soort === 'dagmenu'
+          return (
+            <li
+              key={rij.id}
+              className={`daghappen-vandaag-kaart${uitverkocht ? ' daghappen-vandaag-kaart--uitverkocht' : ''}`}
+            >
+              <a className="daghappen-vandaag-link" href={`/restaurant/${rij.restaurantId}`}>
+                <span className={`daghappen-vandaag-naam${uitverkocht ? ' daghappen-vandaag-naam--uitverkocht' : ''}`}>
+                  {rij.naam}
+                </span>
+                <span className="daghappen-vandaag-prijs">
+                  {dagmenu && rij.prijs3
+                    ? `${DAGHAP_PUBLIEK.prijs2} ${rij.prijs} · ${DAGHAP_PUBLIEK.prijs3} ${rij.prijs3}`
+                    : rij.prijs}
+                </span>
+                <span className="daghappen-vandaag-label">{uitverkocht ? DAGHAP_PUBLIEK.uitverkocht : 'Vandaag'}</span>
+              </a>
+            </li>
+          )
+        })}
       </ul>
     </section>
   )

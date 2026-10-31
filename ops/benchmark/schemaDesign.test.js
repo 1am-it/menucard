@@ -101,6 +101,9 @@ test('the v2 design adds no database migration in this branch', () => {
   // BE-58's holder changes plus confirmation (0025, #143, owner-approved
   // 30 Oct). None adds v2/product storage.
   // BE-57's anonymous "bekeken" counter (#139). None adds v2/product storage.
+  // BE-67's dagmenu, repetition and sold-out columns on daghap_aanbod (0026,
+  // #164, owner-approved 31 Oct). Additive offer columns only; none adds
+  // v2/product storage.
   assert.deepEqual(later, [
     '0020_be25_menu_structure_reviews.sql',
     '0021_be44_dish_counters.sql',
@@ -109,6 +112,8 @@ test('the v2 design adds no database migration in this branch', () => {
     '0023_be55_daghap.sql',
     '0024_be57_bekeken.sql',
     '0025_be58_snel_aanpassen.sql',
+    // BE-67 (#164) dagmenu: geen v2/productopslag.
+    '0026_be67_daghap_b.sql',
   ]);
   for (const name of later) {
     const source = fs.readFileSync(path.join(MIGRATIONS, name), 'utf8');
