@@ -7,7 +7,7 @@
     "/internal/tellers"
   ],
   "category": "lokale browsercheck met gestubde sessie en API (next dev op poort 3192); geen productie en geen echte acceptatie",
-  "ranAt": "2026-10-31T00:55:45.128Z",
+  "ranAt": "2026-10-31T01:09:09.944Z",
   "passed": true,
   "filter": null,
   "checks": [
@@ -39,7 +39,7 @@
     {
       "name": "gast home: geen sessie- of rolopvraag en geen auth-verkeer",
       "passed": true,
-      "detail": "{\"accountCalls\":[],\"alleAanroepen\":0}"
+      "detail": "{\"accountCalls\":[],\"alleAanroepen\":4}"
     },
     {
       "name": "gast home: geen accountmenu-bestand geladen",
@@ -54,25 +54,25 @@
     {
       "name": "gast home (light/1280): geen horizontale overloop",
       "passed": true,
-      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1280}"
+      "detail": "{\"innerWidth\":1280,\"scrollWidth\":1274}"
     },
     {
-      "name": "gast home (licht) · contrast: 24 teksten gemeten tegen de echte achtergrond",
+      "name": "gast home (licht) · contrast: 38 teksten gemeten tegen de echte achtergrond",
       "passed": true,
       "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
     },
     {
-      "name": "gast home (licht) · naam: 17 bedieningselementen",
+      "name": "gast home (licht) · naam: 23 bedieningselementen",
       "passed": true,
       "detail": "0 zonder naam, 0 met alleen een symbool"
     },
     {
-      "name": "gast home (licht) · tikdoel: 17 doelen, 0 onder 44 px",
+      "name": "gast home (licht) · tikdoel: 23 doelen, 0 onder 44 px",
       "passed": true,
       "detail": "0 te klein of te dicht op een ander doel"
     },
     {
-      "name": "gast home (licht) · koppen: één h1 bij 2 koppen",
+      "name": "gast home (licht) · koppen: één h1 bij 3 koppen",
       "passed": true,
       "detail": "h1: \"Waar heb je vanavond zin in?\""
     },
@@ -99,7 +99,7 @@
     {
       "name": "opname be59-gast-home-1280-light-footer: hele onderdeel in beeld",
       "passed": true,
-      "detail": "{\"clip\":{\"x\":0,\"y\":762,\"width\":1280,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":762.34375,\"innerHeight\":900}"
+      "detail": "{\"clip\":{\"x\":0,\"y\":1123,\"width\":1274,\"height\":61},\"fitsHorizontally\":true,\"fitsVertically\":true,\"fixed\":false,\"pageY\":1123.4375,\"innerHeight\":900}"
     },
     {
       "name": "gast home (light): het thema staat aan",
@@ -1331,24 +1331,24 @@
   "shots": [
     {
       "file": "be59-gast-home-1280-light-footer.png",
-      "sha256": "1d98e6403d97e1b24616f9e06e210149adf8a2305c97391652603b0966fde5b2",
-      "width": 1280,
+      "sha256": "ce21473a5b4e0257f9b2fe7b965c130fb3dfc24e9efd2a9722886b841a535725",
+      "width": 1274,
       "height": 61,
       "selector": ".public-footer",
       "clip": {
         "x": 0,
-        "y": 762,
-        "width": 1280,
+        "y": 1123,
+        "width": 1274,
         "height": 61
       },
       "fitsHorizontally": true,
       "info": {
         "left": 0,
-        "right": 1280,
-        "width": 1280,
+        "right": 1274,
+        "width": 1274,
         "height": 61,
         "pageX": 0,
-        "pageY": 762.34375,
+        "pageY": 1123.4375,
         "innerWidth": 1280,
         "innerHeight": 900,
         "fixed": false
@@ -1356,7 +1356,7 @@
     },
     {
       "file": "be59-gast-home-1280-light-footer.png",
-      "sha256": "312f20a69c2ef016e17c2081cb9c8c032996205227734bbc0f3e7c0b6f1d0b19",
+      "sha256": "051fca90881b38d55a00b3f0d4c992a8780a269d2c07b3fe525df5f210d0c52e",
       "width": 1274,
       "height": 61,
       "selector": ".public-footer",
@@ -1381,7 +1381,7 @@
     },
     {
       "file": "be59-gast-home-390-light-footer.png",
-      "sha256": "a03948a850ff6b0253912c3d7359b57e4e0c47a3e3b1f61560ce93b77d1c9f41",
+      "sha256": "5fcfa7d55181761b3fbcf9a135511a04758a7f13a917a6160692ef069353c1da",
       "width": 390,
       "height": 61,
       "selector": ".public-footer",
@@ -1406,7 +1406,7 @@
     },
     {
       "file": "be59-gast-home-320-light-footer.png",
-      "sha256": "d40a3c814e1763f23a1b4d9c63be033684100efb262dbc16c7b6ff0b992723fc",
+      "sha256": "e9663f02bde96acf1918b7e1b38a48fe3a561954fd491a677e7dbfa7ada8b2a3",
       "width": 320,
       "height": 61,
       "selector": ".public-footer",
@@ -1431,7 +1431,7 @@
     },
     {
       "file": "be59-gast-home-1280-dark-footer.png",
-      "sha256": "92a8b51f477fbe157e22b8b5745abc9466d35a2a657d0229befe4a964ba454c2",
+      "sha256": "afaba066a4bc4b61a6d230e19244a78ac62bad9fadbd8f8a469a372eac099492",
       "width": 1274,
       "height": 61,
       "selector": ".public-footer",
@@ -1456,7 +1456,7 @@
     },
     {
       "file": "be59-gast-home-390-dark-footer.png",
-      "sha256": "ac57278e2d4e732b39aad425cd148ae7d28f66e8a90e387abcc0513d0a5c418f",
+      "sha256": "9dcdd42ca2edfc23b2bdf898ac3f6b971b4b14b53db57f5b9e8bb10de385ca24",
       "width": 390,
       "height": 61,
       "selector": ".public-footer",
@@ -1481,7 +1481,7 @@
     },
     {
       "file": "be59-gast-home-320-dark-footer.png",
-      "sha256": "89d1f62c899278267911f2170f754a443e4a6b7deab4153055df04b93ac7fdae",
+      "sha256": "006a63cf48ec6c728b8b1be83a9a65ffcad782a3c2778fc618c0f1f8fe1e7f52",
       "width": 320,
       "height": 61,
       "selector": ".public-footer",
@@ -2561,7 +2561,7 @@
       "checks": 40,
       "passed": 40,
       "failed": 0,
-      "durationMs": 20280,
+      "durationMs": 9343,
       "error": null
     },
     {
@@ -2569,7 +2569,7 @@
       "checks": 45,
       "passed": 45,
       "failed": 0,
-      "durationMs": 11014,
+      "durationMs": 11973,
       "error": null
     },
     {
@@ -2577,7 +2577,7 @@
       "checks": 118,
       "passed": 118,
       "failed": 0,
-      "durationMs": 30105,
+      "durationMs": 42681,
       "error": null
     },
     {
@@ -2585,7 +2585,7 @@
       "checks": 60,
       "passed": 60,
       "failed": 0,
-      "durationMs": 38256,
+      "durationMs": 30690,
       "error": null
     }
   ],
