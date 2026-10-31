@@ -420,3 +420,108 @@ test('BE-55: het label Vandaag staat alleen bij een restaurant met aanbod', () =
   assert.ok(leegAanbod.restaurantGroups.every((groep) => groep.vandaag === undefined), 'een lege lijst is geen treffer');
 });
 
+
+// BE-60 (#150) — een goedgekeurde houderwijziging in de zoekresultaten: de
+// nieuwe prijs, het label "Tijdelijk niet beschikbaar", het prijsfilter dat met
+// de nieuwe prijs rekent, en een volgorde die identiek blijft. Alles tegen de
+// echte data, zoals de rest van dit bestand: 23-lunch-0-10 is "Steak à la
+// T-Huis" (€ 23,75) en 23-lunch-0-0 is "Middle Eastern Pancakes" (€ 14,75).
+const STEAK = '23-lunch-0-10';
+const PANCAKES = '23-lunch-0-0';
+
+function prijsWijziging(prijsCent, { menuId = '23-lunch', categorieIndex = 0, gerechtIndex = 10 } = {}) {
+  return { menuId, categorieIndex, gerechtIndex, soort: 'prijs', prijsCent };
+}
+
+function labelWijziging({ menuId = '23-lunch', categorieIndex = 0, gerechtIndex = 10 } = {}) {
+  return { menuId, categorieIndex, gerechtIndex, soort: 'beschikbaarheid', tijdelijkNietBeschikbaar: true };
+}
+
+test('BE-60: een goedgekeurde prijswijziging staat als nieuwe prijs in de zoekresultaten', () => {
+  const zonder = searchDishes({ q: 'pancetta' });
+  const met = searchDishes({ q: 'pancetta', overlay: { '23': [prijsWijziging(1850)] } });
+  const voor = zonder.results.find((d) => d.dishId === STEAK);
+  const na = met.results.find((d) => d.dishId === STEAK);
+  assert.equal(voor.priceDisplay, '€23,75', 'de statische prijs is de basis');
+  assert.equal(na.priceDisplay, '€18,50', 'de nieuwe prijs staat in het resultaat');
+  assert.equal(na.priceValue, 18.5);
+  assert.equal(na.priceOnRequest, false);
+  assert.deepEqual(Object.keys(na).sort(), Object.keys(voor).sort(), 'geen enkel ander veld verandert');
+  assert.equal(met.total, zonder.total, 'het aantal treffers blijft gelijk');
+});
+
+test('BE-60: het prijsfilter "Tot € x" rekent met de nieuwe prijs', () => {
+  // Zonder overlay valt de steak (€ 23,75) buiten "tot € 20".
+  const zonder = searchDishes({ q: 'pancetta', maxPrice: 20 });
+  assert.ok(!zonder.results.some((d) => d.dishId === STEAK), 'zonder overlay: te duur');
+
+  // Een goedgekeurde prijs van € 18,50 brengt hem binnen het filter.
+  const goedkoper = searchDishes({ q: 'pancetta', maxPrice: 20, overlay: { '23': [prijsWijziging(1850)] } });
+  const steak = goedkoper.results.find((d) => d.dishId === STEAK);
+  assert.ok(steak, 'met de nieuwe prijs valt het gerecht binnen "tot € 20"');
+  assert.equal(steak.priceDisplay, '€18,50');
+
+  // Andersom: de pancakes (€ 14,75) vallen door een duurdere nieuwe prijs af.
+  const pancakes = { menuId: '23-lunch', categorieIndex: 0, gerechtIndex: 0 };
+  const voor = searchDishes({ q: 'pancakes', maxPrice: 20 }).results.some((d) => d.dishId === PANCAKES);
+  assert.ok(voor, 'zonder overlay: binnen het filter');
+  const duurder = searchDishes({ q: 'pancakes', maxPrice: 20, overlay: { '23': [prijsWijziging(2500, pancakes)] } });
+  assert.ok(!duurder.results.some((d) => d.dishId === PANCAKES), 'met de nieuwe prijs: te duur');
+});
+
+test('BE-60: een gerecht tijdelijk niet beschikbaar blijft staan met het label', () => {
+  const zonder = searchDishes({ q: 'pancetta' });
+  const met = searchDishes({ q: 'pancetta', overlay: { '23': [labelWijziging()] } });
+  const na = met.results.find((d) => d.dishId === STEAK);
+  assert.ok(na, 'het gerecht blijft in de resultaten staan');
+  assert.equal(na.tijdelijkNietBeschikbaar, true, 'met het label van de menukaart');
+  assert.equal(na.priceDisplay, '€23,75', 'de prijs blijft staan');
+  assert.equal(met.total, zonder.total, 'niets wordt verborgen');
+  assert.deepEqual(
+    met.results.map((d) => d.dishId),
+    zonder.results.map((d) => d.dishId),
+    'de volgorde verandert niet',
+  );
+});
+
+test('BE-60: de volgorde is identiek met en zonder overlay', () => {
+  const zonder = searchDishes({ q: 'soep', group: 'restaurant' });
+  const met = searchDishes({
+    q: 'soep',
+    group: 'restaurant',
+    overlay: { '23': [prijsWijziging(1850), labelWijziging()] },
+  });
+  assert.deepEqual(
+    met.restaurantGroups.map((groep) => groep.restaurantId),
+    zonder.restaurantGroups.map((groep) => groep.restaurantId),
+    'dezelfde restaurants in dezelfde volgorde',
+  );
+  assert.deepEqual(
+    met.restaurantGroups.map((groep) => groep.menus.map((menu) => `${menu.mealType}:${menu.count}`)),
+    zonder.restaurantGroups.map((groep) => groep.menus.map((menu) => `${menu.mealType}:${menu.count}`)),
+    'dezelfde menu\'s met dezelfde aantallen',
+  );
+});
+
+test('BE-60: zonder overlay verandert er niets (geen label, dezelfde prijs)', () => {
+  const zonder = searchDishes({ q: 'pancetta' });
+  for (const dish of zonder.results) {
+    assert.equal(Object.hasOwn(dish, 'tijdelijkNietBeschikbaar'), false, 'geen label zonder wijziging');
+  }
+  const steak = zonder.results.find((d) => d.dishId === STEAK);
+  assert.equal(steak.priceDisplay, '€23,75');
+});
+
+test('BE-60: het label staat ook op de voorbeeldgerechten van een restaurantgroep', () => {
+  const met = searchDishes({ q: 'pancetta', group: 'restaurant', overlay: { '23': [labelWijziging()] } });
+  const voorbeelden = met.restaurantGroups.flatMap((groep) => groep.menus.flatMap((menu) => menu.examples));
+  const steak = voorbeelden.find((voorbeeld) => voorbeeld.dishId === STEAK);
+  assert.ok(steak, 'het voorbeeld staat in de groep');
+  assert.equal(steak.tijdelijkNietBeschikbaar, true);
+  const zonder = searchDishes({ q: 'pancetta', group: 'restaurant' });
+  const eerder = zonder.restaurantGroups
+    .flatMap((groep) => groep.menus.flatMap((menu) => menu.examples))
+    .find((voorbeeld) => voorbeeld.dishId === STEAK);
+  assert.equal(Object.hasOwn(eerder, 'tijdelijkNietBeschikbaar'), false);
+});
+

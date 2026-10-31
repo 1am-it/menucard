@@ -25,6 +25,12 @@
 const restaurantsData = require('../../data/restaurants.json')
 const menusData = require('../../data/menus.json')
 
+// BE-60 (#150) — de goedgekeurde houderwijzigingen als overlay. De zoeklaag
+// past die vóór het filteren toe (zie hieronder), zodat het prijsfilter met de
+// nieuwe prijs rekent; de volgorde verandert nooit, want er wordt niet op prijs
+// gesorteerd.
+const { overlayPerGerecht, pasZoekOverlayToeOpGerecht } = require('../lib/zoekOverlay')
+
 const MEAL_TYPES = ['lunch', 'diner', 'borrel', 'specialiteiten']
 
 const CUISINE_KEYWORDS = {
@@ -260,6 +266,9 @@ const PUBLIC_DISH_FIELDS = [
 function toPublicDishShape(dish) {
   const shape = {}
   for (const field of PUBLIC_DISH_FIELDS) shape[field] = dish[field]
+  // BE-60 (#150) — het label staat er alleen als het gerecht het echt heeft.
+  // Zonder overlay is het antwoord dus byte voor byte hetzelfde als voorheen.
+  if (dish.tijdelijkNietBeschikbaar === true) shape.tijdelijkNietBeschikbaar = true
   return shape
 }
 
@@ -295,6 +304,9 @@ function normaliseerAanbodMap(aanbod) {
  * @param {object|Map} [params.aanbod] - het aanbod per restaurantId, zoals de
  *   caller het net ophaalde (bv. { '23': [{ soort: 'daghap', naam: '...' }] });
  *   leeg of afwezig betekent: nergens aanbod
+ * @param {object|Map} [params.overlay] - BE-60: de goedgekeurde wijzigingen per
+ *   restaurantId, zoals de zoekroute ze net ophaalde; leeg of afwezig betekent:
+ *   de statische prijzen en geen label
  * @param {number} [params.cursor] - offset into the filtered result set
  * @param {number} [params.limit]
  * @param {string} [params.group] - BE-15: 'restaurant' for the additive
@@ -315,6 +327,7 @@ function searchDishes({
   group = '',
   vandaag = false,
   aanbod = null,
+  overlay = null,
 } = {}) {
   const boundedLimit = Math.min(Math.max(1, limit || DEFAULT_LIMIT), MAX_LIMIT)
   const boundedCursor = Math.max(0, cursor || 0)
@@ -326,7 +339,17 @@ function searchDishes({
   // geen Supabase en geen databank, net als bij de rest van de zoeklaag.
   const aanbodPerRestaurant = normaliseerAanbodMap(aanbod)
 
-  const candidates = getDishIndex()
+  // BE-60 (#150) — de overlay komt van de caller (de zoekroute haalt hem
+  // gecacht per restaurant op, met dezelfde tag als BE-58) en is hier alleen
+  // een map van gerecht-id naar wijziging. Toepassen gebeurt vóór het filter:
+  // zo rekent "Tot € x" met de nieuwe prijs. Een gerecht zonder wijziging
+  // houdt exact hetzelfde object, dus zonder overlay is niets anders.
+  const overlayPerGerechtMap = overlayPerGerecht(overlay)
+  const index = overlayPerGerechtMap.size === 0
+    ? getDishIndex()
+    : getDishIndex().map((dish) => pasZoekOverlayToeOpGerecht(dish, overlayPerGerechtMap))
+
+  const candidates = index
     .filter((dish) => {
       if (meal && !MEAL_TYPES.includes(meal)) return false
       if (meal && dish.mealType !== meal) return false
@@ -449,6 +472,9 @@ function searchDishes({
         priceDisplay: dish.priceDisplay,
         priceOnRequest: dish.priceOnRequest,
         priceIsFrom: dish.priceIsFrom,
+        // BE-60 (#150) — een gerecht dat tijdelijk niet beschikbaar is, houdt
+        // zijn plaats in de groep en krijgt alleen dit label erbij.
+        ...(dish.tijdelijkNietBeschikbaar === true ? { tijdelijkNietBeschikbaar: true } : {}),
       })
     }
   }

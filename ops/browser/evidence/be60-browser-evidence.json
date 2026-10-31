@@ -1,0 +1,431 @@
+{
+  "script": "run-be60-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck met gestubde zoek-API (next dev op poort 3186); geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T01:04:22.934Z",
+  "port": 3186,
+  "filter": null,
+  "scenarioRuns": [
+    {
+      "name": "zoeken",
+      "checks": 49,
+      "passed": 49,
+      "failed": 0,
+      "durationMs": 21615,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "zoeken light/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/1280: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken light/1280: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken light/1280: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken light/1280: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken light/1280: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken light/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/1280: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken light/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/390: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken light/390: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken light/390: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken light/390: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken light/390: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken light/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/390: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken light/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken light/320: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken light/320: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken light/320: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken light/320: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken light/320: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken light/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken light/320: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken dark/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/1280: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken dark/1280: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken dark/1280: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken dark/1280: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken dark/1280: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken dark/1280: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/1280: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+    },
+    {
+      "name": "zoeken dark/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/390: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken dark/390: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken dark/390: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken dark/390: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken dark/390: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken dark/390: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/390: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+    },
+    {
+      "name": "zoeken dark/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
+      "name": "zoeken dark/320: precies één label \"Tijdelijk niet beschikbaar\"",
+      "passed": true,
+      "detail": "Tijdelijk niet beschikbaar"
+    },
+    {
+      "name": "zoeken dark/320: de nieuwe prijs van de goedgekeurde wijziging staat er",
+      "passed": true,
+      "detail": "€18,50|€21,00"
+    },
+    {
+      "name": "zoeken dark/320: het gerecht met het label blijft staan, met zijn prijs",
+      "passed": true,
+      "detail": "€21,00"
+    },
+    {
+      "name": "zoeken dark/320: de volgorde blijft gelijk (twee gerechten)",
+      "passed": true,
+      "detail": "2"
+    },
+    {
+      "name": "zoeken dark/320: label en prijs staan in beeld bij de opname",
+      "passed": true,
+      "detail": "{\"label\":true,\"overflow\":0}"
+    },
+    {
+      "name": "zoeken dark/320: geen horizontale overflow",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "zoeken dark/320: het label is zichtbaar opgemaakt (tekst en achtergrond)",
+      "passed": true,
+      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+    },
+    {
+      "name": "thema: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "6/6 opnamen: "
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "zoeken: de pagina vroeg de gestubde zoek-API om de resultaten",
+      "passed": true,
+      "detail": "[\"/api/search?q=steak&group=restaurant\"]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be60-zoeken-1280-light.png",
+      "sha256": "2ce113e867dc1b1e1794c9820fa7a4147d0805f1150ab74cd514669e30412be4",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "light",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be60-zoeken-390-light.png",
+      "sha256": "c4ae9dcb64b60ecac9388524857d7ca817a8411c6fe7f3f141b3265cf12e2cd2",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "light",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be60-zoeken-320-light.png",
+      "sha256": "b9fa3312f7a06b7614911268acedb699c11768e9e2254abee683c7c48ae476ac",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "light",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be60-zoeken-1280-dark.png",
+      "sha256": "749c4f6e2992aa3bdd0121506d74eeaa378770924c5883ad69c010cd09542b26",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "theme": "dark",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be60-zoeken-390-dark.png",
+      "sha256": "0afe4d17f81c24c2c8558c4a02a437e421d54559fcec849b5c228a7198d2fc53",
+      "width": 390,
+      "height": 900,
+      "viewport": "390x900",
+      "theme": "dark",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be60-zoeken-320-dark.png",
+      "sha256": "c2d5fc981fdd642bc48f88df984987e372797c6eedf107b76804b57811d2919e",
+      "width": 320,
+      "height": 900,
+      "viewport": "320x900",
+      "theme": "dark",
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}
