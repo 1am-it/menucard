@@ -63,8 +63,8 @@ export default function InloggenPage() {
                 emailHelp={LOGIN_PAGE.emailHelp}
               />
             </div>
-            {/* BE-69 (#172, uitkomst 3): naast de e-mailcode de verwijzing naar
-                de privacyverklaring. De tekst en het pad staan in
+            {/* BE-69 (uitkomst 3): naast de e-mailcode de verwijzing naar de
+                privacyverklaring. De tekst en het pad staan in
                 src/lib/legalCopy.js, zodat er geen tweede versie ontstaat. */}
             <p className="inloggen-privacy">
               <Link className="inloggen-privacy-link" href={LOGIN_PRIVACY_LINK.href}>
