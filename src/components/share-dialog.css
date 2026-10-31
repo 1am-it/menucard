@@ -90,6 +90,7 @@
   min-height: 44px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
+  border: 1px solid transparent;
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
@@ -100,7 +101,27 @@
 .share-segment-option.is-active {
   background: var(--bg-card);
   color: var(--text-primary);
+  /* BE-61 review (#152, punt 2): de vulling alleen haalt in licht geen 3:1
+   * tegen de houder (#FFFFFF op #F6F4EF). De rand met --input-border doet dat
+   * wel (3,2:1), zonder de vulling of de tekst van licht te veranderen. */
+  border-color: var(--input-border);
   box-shadow: var(--shadow-sm);
+}
+
+/* BE-61 review (#152, punt 2): in donker is --bg-card bijna gelijk aan de
+ * houder (--bg-elevated), waardoor "Mijn favorieten" nauwelijks te zien was.
+ * In donker gebruikt het actieve deel daarom het chip-paar uit de tokens;
+ * licht blijft precies zoals het was. */
+:root[data-theme="dark"] .share-segment-option.is-active {
+  background: var(--chip-active-bg);
+  color: var(--chip-active-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .share-segment-option.is-active {
+    background: var(--chip-active-bg);
+    color: var(--chip-active-text);
+  }
 }
 
 /* De twee labels blijven ook op 320 px binnen hun eigen deel. */

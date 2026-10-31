@@ -57,6 +57,7 @@ const {
   themeProofValue,
   themeOk,
 } = require('./lib/theme-proof');
+const { contrastRatio } = require('./lib/a11y-audit');
 
 const SCRIPT_NAME = 'run-be61-browser-check.js';
 const PORT = Number(process.env.BE61_PORT || 3188);
@@ -213,6 +214,9 @@ const PANEL_STATE = `(() => {
     radios: radios.map((input) => ({ value: input.value, checked: input.checked, type: input.type })),
     actief: tekst(active),
     actiefAchtergrond: active ? getComputedStyle(active).backgroundColor : '',
+    actiefTekstKleur: active ? getComputedStyle(active).color : '',
+    actiefRandKleur: active ? getComputedStyle(active).borderTopColor : '',
+    houderAchtergrond: segment ? getComputedStyle(segment).backgroundColor : '',
     inactiefAchtergrond: inactief ? getComputedStyle(inactief).backgroundColor : '',
     lijstTitel: tekst(panel.querySelector('.share-fav-title')),
     teller: tekst(panel.querySelector('.share-fav-count')),
@@ -305,6 +309,17 @@ async function panelScenario(cdp) {
       check(`paneel ${waar}: de actieve stand heeft een eigen achtergrond`,
         staat.actief === 'Mijn favorieten' && staat.actiefAchtergrond !== staat.inactiefAchtergrond,
         JSON.stringify({ actief: staat.actief, actiefAchtergrond: staat.actiefAchtergrond, inactief: staat.inactiefAchtergrond }));
+      // BE-61 review (#152, punt 2): het actieve deel moet in beide thema's
+      // duidelijk van de houder te onderscheiden zijn: minstens 3:1. Dat mag via
+      // de vulling (donker) of via de rand (licht); beide worden gemeten.
+      {
+        const vulling = contrastRatio(staat.actiefAchtergrond, staat.houderAchtergrond);
+        const rand = contrastRatio(staat.actiefRandKleur, staat.houderAchtergrond);
+        const beste = Math.max(Number(vulling) || 0, Number(rand) || 0);
+        check(`paneel ${waar}: het actieve deel wijkt minstens 3:1 af van de houder`,
+          beste >= 3,
+          JSON.stringify({ beste, vulling, rand, actief: staat.actiefAchtergrond, randKleur: staat.actiefRandKleur, houder: staat.houderAchtergrond, tekst: staat.actiefTekstKleur }));
+      }
       check(`paneel ${waar}: "Favorieten" links en "0 van 3 gekozen" rechts`,
         staat.lijstTitel === 'Favorieten' && staat.teller === '0 van 3 gekozen',
         JSON.stringify({ titel: staat.lijstTitel, teller: staat.teller }));
@@ -379,6 +394,8 @@ async function kiezenScenario(cdp) {
   check('telefoonmenu: de hele lijst is uitgeschakeld en gedimd',
     telefoon.uitgeschakeld.every(Boolean) && telefoon.lijstGedimd !== null && telefoon.lijstGedimd < 1,
     JSON.stringify({ uit: telefoon.uitgeschakeld, opacity: telefoon.lijstGedimd }));
+  check('telefoonmenu: de hint gaat over het deelmenu van de telefoon',
+    telefoon.hint === 'Je deelt altijd via het deelmenu van je telefoon.', telefoon.hint);
   check('telefoonmenu: "Opslaan" blijft bruikbaar', telefoon.saveDisabled === false, telefoon.saveDisabled);
   await shot(cdp, 'be61-telefoonmenu-390-light.png', { theme: 'light', state: 'telefoonmenu', themeProof: proof });
 

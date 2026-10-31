@@ -56,6 +56,10 @@ const SHARE_MORE_LABEL = 'Meer…';
 const SHARE_SHEET_TITLE = 'Hoe deel je meestal?';
 const SHARE_SHEET_HINT = 'Kies tot 3 favorieten. Daarna deel je met één tik.';
 const SHARE_HINT_FULL = 'Je hebt 3 favorieten gekozen. Kies er eerst een af om een andere te nemen.';
+// BE-61 review (#152, punt 1): staat de schakelaar op "Telefoonmenu", dan gaat
+// de hint daarover en niet meer over de drie favorieten — die lijst staat dan
+// immers uit.
+const SHARE_PHONE_MENU_HINT = 'Je deelt altijd via het deelmenu van je telefoon.';
 const SHARE_SEGMENT_LEGEND = 'Hoe wil je delen?';
 const SHARE_SEGMENT_METHODS_LABEL = 'Mijn favorieten';
 const SHARE_SEGMENT_PHONE_LABEL = 'Telefoonmenu';
@@ -63,6 +67,8 @@ const SHARE_FAVORITES_LABEL = 'Favorieten';
 const SHARE_CLOSE_LABEL = 'Sluiten';
 const SHARE_SETTINGS_LABEL = 'Delen via';
 const SHARE_SETTINGS_TITLE = 'Delen via';
+// BE-63 (#155): de subtekst bij "Delen via" als er nog niets gekozen is.
+const SHARE_SETTINGS_EMPTY_LABEL = 'Nog niet gekozen';
 const SHARE_SAVE_LABEL = 'Opslaan';
 const SHARE_CLEAR_LABEL = 'Wissen';
 const SHARE_CANCEL_LABEL = 'Annuleren';
@@ -128,6 +134,23 @@ function normalizeSharePreference(value) {
   if (value.phone === true) return { phone: true, methods: [] };
   const methods = normalizeShareMethods(value.methods || value.favorieten);
   return methods.length > 0 ? { phone: false, methods } : null;
+}
+
+/**
+ * BE-63 (#155) — de subtekst onder "Delen via" in het instellingenpaneel: de
+ * huidige keuze in gewone taal, bijvoorbeeld "WhatsApp, Link kopiëren" of
+ * "Telefoonmenu". Zonder keuze staat er "Nog niet gekozen".
+ */
+function sharePreferenceSummary(value) {
+  const preference = normalizeSharePreference(value);
+  if (!preference) return SHARE_SETTINGS_EMPTY_LABEL;
+  if (preference.phone) return SHARE_SEGMENT_PHONE_LABEL;
+  const labels = preference.methods
+    .slice()
+    .sort((a, b) => SHARE_METHOD_IDS.indexOf(a) - SHARE_METHOD_IDS.indexOf(b))
+    .map((method) => shareMethodLabel(method))
+    .filter(Boolean);
+  return labels.length > 0 ? labels.join(', ') : SHARE_SETTINGS_EMPTY_LABEL;
 }
 
 /** De vorm die in `localStorage` gaat; null als er niets te bewaren is. */
@@ -311,11 +334,13 @@ module.exports = {
   SHARE_METHODS,
   SHARE_METHOD_IDS,
   SHARE_MORE_LABEL,
+  SHARE_PHONE_MENU_HINT,
   SHARE_PREFERENCE_KEY,
   SHARE_SAVE_LABEL,
   SHARE_SEGMENT_LEGEND,
   SHARE_SEGMENT_METHODS_LABEL,
   SHARE_SEGMENT_PHONE_LABEL,
+  SHARE_SETTINGS_EMPTY_LABEL,
   SHARE_SETTINGS_LABEL,
   SHARE_SETTINGS_TITLE,
   SHARE_SHEET_HINT,
@@ -330,6 +355,7 @@ module.exports = {
   shareMethodLabel,
   shareMethodLink,
   sharePlan,
+  sharePreferenceSummary,
   storageAvailable,
   writeSharePreference,
 };

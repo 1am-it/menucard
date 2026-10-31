@@ -30,6 +30,7 @@ import {
   SHARE_MENU_TITLE,
   SHARE_METHODS,
   SHARE_MORE_LABEL,
+  SHARE_PHONE_MENU_HINT,
   SHARE_SAVE_LABEL,
   SHARE_SEGMENT_LEGEND,
   SHARE_SEGMENT_METHODS_LABEL,
@@ -243,7 +244,9 @@ export function ShareDialog({ open, mode = 'choose', value = null, onSave, onClo
         <div className="share-head">
           <div className="share-head-text">
             <h2 className="share-panel-title" id={titleId}>{settings ? SHARE_SETTINGS_TITLE : SHARE_SHEET_TITLE}</h2>
-            <p className="share-panel-hint" id={hintId}>{atLimit ? SHARE_HINT_FULL : SHARE_SHEET_HINT}</p>
+            <p className="share-panel-hint" id={hintId}>
+              {phone ? SHARE_PHONE_MENU_HINT : atLimit ? SHARE_HINT_FULL : SHARE_SHEET_HINT}
+            </p>
           </div>
           <button type="button" className="share-close" aria-label={SHARE_CLOSE_LABEL} onClick={onClose}>
             <svg
