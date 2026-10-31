@@ -366,8 +366,9 @@ async function homeScenario(cdp) {
       }
       await shot(cdp, `be65-home-${width}-${theme}-balk.png`, { theme, state: 'balk', themeProof: proof });
 
-      // Ronde 4 — het venster "Stuur je lijstje" achter "Versturen".
-      await evalJs(cdp, `document.querySelector('.saved-bar-send').click()`);
+      // Ronde 4 — het venster "Stuur je lijstje" achter "Versturen". Eerst
+      // focussen, zoals een echte klik doet: daarna kan de focus terugkeren.
+      await evalJs(cdp, `(() => { const knop = document.querySelector('.saved-bar-send'); knop.focus(); knop.click(); return true; })()`);
       await waitFor(cdp, `Boolean(document.querySelector('.saved-send-panel'))`, 4000);
       const venster = await evalJs(cdp, VENSTER_STAAT);
       check(`${waar}: het venster opent vanuit de balk, als dialoog "Stuur je lijstje"`,

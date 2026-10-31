@@ -97,6 +97,8 @@ test('twee keuzekaarten als radio\'s in een fieldset, standaard "Gewoon delen"',
   assert.match(DIALOG, /\{SEND_VOTE_LABEL\}<\/span>\n\s+<span className="saved-send-mode-hint">\{SEND_VOTE_HINT\}/);
   // De gekozen kaart krijgt een rand van 2 px in --accent.
   assert.match(CSS, /\.saved-send-mode\.is-checked \{\n\s+border: 2px solid var\(--accent\);/);
+  // Het keuzerondje zelf is het tikdoel van 44 × 44 px (a11y-audit eist 44).
+  assert.match(CSS, /\.saved-send-radio \{[\s\S]*?width: 44px;[\s\S]*?height: 44px;/);
 });
 
 test('"Gewoon delen" deelt de lijstlink zoals ListShareButton', () => {
