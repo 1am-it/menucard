@@ -2,16 +2,16 @@
   "script": "run-be60-browser-check.js",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck met gestubde zoek-API (next dev op poort 3186); geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T00:50:48.935Z",
+  "startedAt": "2026-10-31T01:04:22.934Z",
   "port": 3186,
   "filter": null,
   "scenarioRuns": [
     {
       "name": "zoeken",
-      "checks": 42,
-      "passed": 42,
+      "checks": 49,
+      "passed": 49,
       "failed": 0,
-      "durationMs": 21921,
+      "durationMs": 21615,
       "error": null
     }
   ],
@@ -20,6 +20,11 @@
     "pageViolations": []
   },
   "checks": [
+    {
+      "name": "zoeken light/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
+    },
     {
       "name": "zoeken light/1280: precies één label \"Tijdelijk niet beschikbaar\"",
       "passed": true,
@@ -53,7 +58,12 @@
     {
       "name": "zoeken light/1280: het label is zichtbaar opgemaakt (tekst en achtergrond)",
       "passed": true,
-      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken light/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
     },
     {
       "name": "zoeken light/390: precies één label \"Tijdelijk niet beschikbaar\"",
@@ -88,7 +98,12 @@
     {
       "name": "zoeken light/390: het label is zichtbaar opgemaakt (tekst en achtergrond)",
       "passed": true,
-      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken light/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#FFFFFF\",\"bodyBg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"source\":\"--bg\"}"
     },
     {
       "name": "zoeken light/320: precies één label \"Tijdelijk niet beschikbaar\"",
@@ -123,7 +138,12 @@
     {
       "name": "zoeken light/320: het label is zichtbaar opgemaakt (tekst en achtergrond)",
       "passed": true,
-      "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+      "detail": "rgb(92, 86, 80) / rgb(243, 241, 236)"
+    },
+    {
+      "name": "zoeken dark/1280: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
     },
     {
       "name": "zoeken dark/1280: precies één label \"Tijdelijk niet beschikbaar\"",
@@ -161,6 +181,11 @@
       "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
     },
     {
+      "name": "zoeken dark/390: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
+    },
+    {
       "name": "zoeken dark/390: precies één label \"Tijdelijk niet beschikbaar\"",
       "passed": true,
       "detail": "Tijdelijk niet beschikbaar"
@@ -194,6 +219,11 @@
       "name": "zoeken dark/390: het label is zichtbaar opgemaakt (tekst en achtergrond)",
       "passed": true,
       "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
+    },
+    {
+      "name": "zoeken dark/320: het thema is aangetoond (data-theme, actieve knop, --bg-helderheid)",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"bg\":\"#1F2328\",\"bodyBg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"source\":\"--bg\"}"
     },
     {
       "name": "zoeken dark/320: precies één label \"Tijdelijk niet beschikbaar\"",
@@ -231,6 +261,11 @@
       "detail": "rgb(182, 188, 195) / rgb(53, 58, 65)"
     },
     {
+      "name": "thema: elke opname heeft een kloppend themabewijs",
+      "passed": true,
+      "detail": "6/6 opnamen: "
+    },
+    {
       "name": "netwerk: geen geblokkeerde oproep in de pagina",
       "passed": true,
       "detail": "[]"
@@ -254,39 +289,95 @@
   "shots": [
     {
       "file": "be60-zoeken-1280-light.png",
-      "sha256": "10fd346704f9c3f2f3b23bdcf7225b064d5a6f1ebd5c97dfed9175f5a3cc6e5f",
+      "sha256": "2ce113e867dc1b1e1794c9820fa7a4147d0805f1150ab74cd514669e30412be4",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
       "theme": "light",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
     },
     {
       "file": "be60-zoeken-390-light.png",
-      "sha256": "0afe4d17f81c24c2c8558c4a02a437e421d54559fcec849b5c228a7198d2fc53",
+      "sha256": "c4ae9dcb64b60ecac9388524857d7ca817a8411c6fe7f3f141b3265cf12e2cd2",
       "width": 390,
       "height": 900,
       "viewport": "390x900",
       "theme": "light",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
     },
     {
       "file": "be60-zoeken-320-light.png",
-      "sha256": "c2d5fc981fdd642bc48f88df984987e372797c6eedf107b76804b57811d2919e",
+      "sha256": "b9fa3312f7a06b7614911268acedb699c11768e9e2254abee683c7c48ae476ac",
       "width": 320,
       "height": 900,
       "viewport": "320x900",
       "theme": "light",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
     },
     {
       "file": "be60-zoeken-1280-dark.png",
-      "sha256": "10fd346704f9c3f2f3b23bdcf7225b064d5a6f1ebd5c97dfed9175f5a3cc6e5f",
+      "sha256": "749c4f6e2992aa3bdd0121506d74eeaa378770924c5883ad69c010cd09542b26",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
       "theme": "dark",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
     },
     {
       "file": "be60-zoeken-390-dark.png",
@@ -295,7 +386,21 @@
       "height": 900,
       "viewport": "390x900",
       "theme": "dark",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
     },
     {
       "file": "be60-zoeken-320-dark.png",
@@ -304,7 +409,21 @@
       "height": 900,
       "viewport": "320x900",
       "theme": "dark",
-      "state": "overlay"
+      "state": "overlay",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
     }
   ],
   "failed": 0,
