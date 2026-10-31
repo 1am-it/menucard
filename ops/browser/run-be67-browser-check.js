@@ -336,8 +336,11 @@ function scrollToScript(selector) {
   return `(() => {
     const blok = document.querySelector(${JSON.stringify(selector)});
     if (!blok) return { inBeeld: false, reden: 'geen onderdeel' };
-    blok.scrollIntoView({ block: 'start', inline: 'nearest' });
-    window.scrollBy(0, -80);
+    // Bewust scrollTo en niet scrollIntoView: dat laatste koos in een lange
+    // houderpagina de onderkant van het document, waardoor de kop van het
+    // formulier buiten beeld bleef (ronde 3, eerste meting).
+    const y = blok.getBoundingClientRect().top + window.scrollY - 8;
+    window.scrollTo({ top: Math.max(0, y), left: 0, behavior: 'instant' });
     const r = blok.getBoundingClientRect();
     return {
       inBeeld: r.top >= 0 && r.top < window.innerHeight && r.bottom > 0,
@@ -383,6 +386,21 @@ const FORMULIER_STAAT = `(() => {
     return r.width > 0 && r.height > 0;
   });
   const prijs3 = document.querySelector('#aanbod-prijs3');
+  // BE-67: bij overloop meteen laten zien wélk onderdeel te breed is.
+  const rand = form.getBoundingClientRect().right;
+  const buitenBeeld = [...form.querySelectorAll('*')]
+    .map((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        tag: el.tagName.toLowerCase(),
+        cls: String(el.className || '').slice(0, 60),
+        id: el.id || '',
+        breedte: Math.round(r.width),
+        rechts: Math.round(r.right),
+      };
+    })
+    .filter((rij) => rij.rechts > rand + 1)
+    .slice(0, 5);
   return {
     present: true,
     soort: (() => { const el = document.querySelector('input[name="soort"]:checked'); return el ? el.value : null; })(),
@@ -400,6 +418,7 @@ const FORMULIER_STAAT = `(() => {
     invoer: invoer.length,
     zichtbareInvoer: zichtbaar.length,
     formulierOverloop: form.scrollWidth - form.clientWidth,
+    buitenBeeld,
     overflow: document.documentElement.scrollWidth - window.innerWidth,
     thema: document.documentElement.getAttribute('data-theme'),
   };
@@ -436,7 +455,7 @@ function beoordeelFormulier(label, gemeten) {
   check(`${label}: zeven weekdagknoppen`, gemeten.weekdagKnoppen === 7, gemeten.weekdagKnoppen);
   check(`${label}: weekdagknoppen minstens 40 px`, gemeten.minHoogte >= 40, `${gemeten.minHoogte} px`);
   check(`${label}: elk veld is zichtbaar`, gemeten.invoer > 0 && gemeten.zichtbareInvoer === gemeten.invoer, `${gemeten.zichtbareInvoer}/${gemeten.invoer}`);
-  check(`${label}: het formulier loopt niet over`, gemeten.formulierOverloop <= 0, gemeten.formulierOverloop);
+  check(`${label}: het formulier loopt niet over`, gemeten.formulierOverloop <= 0, `${gemeten.formulierOverloop} · ${JSON.stringify(gemeten.buitenBeeld)}`);
   overflowCheck(label, gemeten);
 }
 
@@ -450,7 +469,18 @@ async function formulierScenario() {
     const { proof, panelClosed } = await applyTheme(theme, { paneel: false });
     for (const width of WIDTHS) {
       const label = `formulier · ${width.name} · ${theme}`;
-      await setViewport(width.width, width.height);
+      // Het hele formulier in één viewport: de breedte blijft 1280/390/320, de
+      // hoogte groeit mee zodat "alles staat in beeld" letterlijk geldt.
+      await setViewport(width.width, 1000);
+      const hoogte = await evalJs(
+        cdp,
+        `(() => {
+          const formulier = document.querySelector('.aanbod-form');
+          if (!formulier) return 0;
+          return Math.ceil(formulier.getBoundingClientRect().height) + 280;
+        })()`,
+      );
+      await setViewport(width.width, Math.min(Math.max(Number(hoogte) || 900, 900), 4000));
       const framing = await scrollTo('.aanbod-form');
       const gemeten = await evalJs(cdp, FORMULIER_STAAT);
       beoordeelFormulier(label, gemeten);

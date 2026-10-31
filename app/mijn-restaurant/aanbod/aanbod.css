@@ -210,7 +210,22 @@
 .aanbod-prijzen {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  /* min(140px, 100%) houdt de kolom binnen de kaart; met een vaste 140 px
+     werden twee kolommen samen breder dan het formulier en liep het op 390 en
+     320 px horizontaal over (BE-67, browsercheck). */
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+}
+
+/* Het prijsveld heeft een intrinsieke breedte van bijna 200 px. Binnen een
+   smalle kolom mag het krimpen in plaats van het formulier te verbreden. */
+.aanbod-prijzen > *,
+.aanbod-prijzen .aanbod-field {
+  min-width: 0;
+}
+
+.aanbod-prijzen .aanbod-input {
+  width: 100%;
+  min-width: 0;
 }
 
 .aanbod-weekdag-knoppen {
@@ -255,7 +270,7 @@
 }
 
 
-/* BE-67, uitkomst 3 — Op = op in het overzicht van de houder. De naam van een
+/* BE-67, uitkomst 3 ï¿½ Op = op in het overzicht van de houder. De naam van een
    uitverkocht aanbod is doorgestreept, met het label ernaast; de knop zegt dan
    "Toch weer beschikbaar". Kleuren alleen via de tokens. */
 .aanbod-uitverkocht-naam {
@@ -273,7 +288,7 @@
   white-space: nowrap;
 }
 
-/* BE-67, uitkomst 4 — de drie cijfers van vandaag per aanbod: bekeken,
+/* BE-67, uitkomst 4 ï¿½ de drie cijfers van vandaag per aanbod: bekeken,
    bewaard en gedeeld. Onder de vijf staat er "< 5" (dezelfde regel als BE-57). */
 .aanbod-cijfers {
   list-style: none;
