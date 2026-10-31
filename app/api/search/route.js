@@ -84,7 +84,9 @@ export async function GET(request) {
     headers: {
       // Een Vandaag-treffer hangt van het actuele aanbod af; die mag niet uit
       // een gedeelde cache komen. Alle andere zoekopdrachten houden hun
-      // bestaande cachekop.
+      // bestaande cachekop — ook met overlay: de Data Cache van de overlay zelf
+      // vervalt meteen via revalidateTag (BE-58), een gedeelde HTTP-cache kan
+      // een nieuwe prijs dus hooguit de bestaande 60 seconden vasthouden.
       'Cache-Control': vandaag
         ? 'no-store'
         : 'public, max-age=60, stale-while-revalidate=300',
