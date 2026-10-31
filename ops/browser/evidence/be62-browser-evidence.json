@@ -1,0 +1,1311 @@
+{
+  "script": "run-be62-browser-check.js",
+  "kind": "fixture_browser_evidence",
+  "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde kies-API; geen productie en geen echte acceptatie",
+  "startedAt": "2026-10-31T12:16:14.956Z",
+  "port": 3196,
+  "filter": null,
+  "scenarioRuns": [
+    {
+      "name": "kies",
+      "checks": 70,
+      "passed": 70,
+      "failed": 0,
+      "durationMs": 17702,
+      "error": null
+    },
+    {
+      "name": "gedeeld",
+      "checks": 84,
+      "passed": 84,
+      "failed": 0,
+      "durationMs": 34899,
+      "error": null
+    },
+    {
+      "name": "tip",
+      "checks": 15,
+      "passed": 15,
+      "failed": 0,
+      "durationMs": 10853,
+      "error": null
+    }
+  ],
+  "network": {
+    "appViolations": [],
+    "pageViolations": []
+  },
+  "checks": [
+    {
+      "name": "kies: geen terugkomvlak vóór de eigen stem",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "kies: stemmen tot de uitslag (1280 light)",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 1280 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 1280 light)",
+      "passed": true,
+      "detail": "true · {\"top\":596,\"bottom\":764,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 1280 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 1280 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 1280 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 1280 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (1280 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (1280 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (1280 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (1280 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 390 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 390 light)",
+      "passed": true,
+      "detail": "true · {\"top\":453,\"bottom\":644,\"height\":191}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 390 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 390 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 390 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 390 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (390 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (390 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (390 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (390 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies na het stemmen (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 320 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 320 light)",
+      "passed": true,
+      "detail": "true · {\"top\":292,\"bottom\":504,\"height\":212}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 320 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 320 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 320 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 320 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (320 light)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (320 light)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (320 light)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (320 light)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 1280 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 1280 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":543,\"bottom\":711,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 1280 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 1280 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 1280 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 1280 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (1280 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (1280 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (1280 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (1280 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 390 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 390 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":453,\"bottom\":644,\"height\":191}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 390 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 390 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 390 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 390 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (390 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (390 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (390 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (390 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "kies na het stemmen (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (kies 320 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (kies 320 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":292,\"bottom\":504,\"height\":212}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (kies 320 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (kies 320 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (kies 320 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (kies 320 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "kies: het vlak staat onder de uitslag (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Jij koos Poussin. Zelf ook een lijstje maken?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig.\",\"cta\":\"Zoek een gerecht →\",\"href\":\"/\"}"
+    },
+    {
+      "name": "kies: de kop noemt het eerste \"lekker\"-gerecht (320 dark)",
+      "passed": true,
+      "detail": "Jij koos Poussin. Zelf ook een lijstje maken?"
+    },
+    {
+      "name": "kies: de kop is een h2 (320 dark)",
+      "passed": true,
+      "detail": "h2"
+    },
+    {
+      "name": "kies: de tekst uit het ontwerp (320 dark)",
+      "passed": true,
+      "detail": "Zoek op gerecht in alle menukaarten van Breda, altijd met prijs. Geen account nodig."
+    },
+    {
+      "name": "kies: de gele knop \"Zoek een gerecht →\" naar / (320 dark)",
+      "passed": true,
+      "detail": "Zoek een gerecht → · /"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "true · {\"top\":376,\"bottom\":524,\"height\":148}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 1280 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (1280 light)",
+      "passed": true,
+      "detail": "{\"cardBottom\":350,\"blockTop\":376,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (1280 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (1280 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "true · {\"top\":306,\"bottom\":474,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 390 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (390 light)",
+      "passed": true,
+      "detail": "{\"cardBottom\":280,\"blockTop\":306,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (390 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (390 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "true · {\"top\":236,\"bottom\":404,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 320 light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (320 light)",
+      "passed": true,
+      "detail": "{\"cardBottom\":210,\"blockTop\":236,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (320 light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (320 light)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":376,\"bottom\":524,\"height\":148}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 1280 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (1280 dark)",
+      "passed": true,
+      "detail": "{\"cardBottom\":350,\"blockTop\":376,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (1280 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (1280 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":306,\"bottom\":474,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 390 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (390 dark)",
+      "passed": true,
+      "detail": "{\"cardBottom\":280,\"blockTop\":306,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (390 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (390 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gedeeld gerecht (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "true · {\"top\":236,\"bottom\":404,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld gerecht 320 dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "volgorde: het vlak staat ná het gedeelde gerecht (320 dark)",
+      "passed": true,
+      "detail": "{\"cardBottom\":210,\"blockTop\":236,\"ok\":true}"
+    },
+    {
+      "name": "gedeeld gerecht: het vlak staat onder de deelregel (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: kop, tekst en knop (320 dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld gerecht: de bestaande Bewaar-knop staat bij het gerecht (320 dark)",
+      "passed": true,
+      "detail": "Bewaar Signature Menu"
+    },
+    {
+      "name": "gewoon bezoek aan een menukaart: geen terugkomvlak",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "true · {\"top\":366,\"bottom\":534,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "rgb(246, 244, 239) · rgb(255, 255, 255)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld lijstje light)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "gedeeld lijstje: het vlak staat er (light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: kop en knop naar de home (light)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: de bestaande bewaarknop blijft (light)",
+      "passed": true,
+      "detail": "Zet ze op mijn eigen lijstje"
+    },
+    {
+      "name": "gedeeld lijstje (light) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "opname: het vlak zelf staat in beeld (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "true · {\"top\":366,\"bottom\":534,\"height\":168}"
+    },
+    {
+      "name": "opname: geen paneel over de pagina (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "false"
+    },
+    {
+      "name": "vorm: het vlak heeft een andere achtergrond dan de pagina (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "rgb(53, 58, 65) · rgb(31, 35, 40)"
+    },
+    {
+      "name": "vorm: de knop is minstens 44 px hoog (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "46"
+    },
+    {
+      "name": "vorm: radius 16 px en padding 18 px (gedeeld lijstje dark)",
+      "passed": true,
+      "detail": "16px · 18px"
+    },
+    {
+      "name": "gedeeld lijstje: het vlak staat er (dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: kop en knop naar de home (dark)",
+      "passed": true,
+      "detail": "{\"present\":true,\"heading\":\"h2\",\"title\":\"Zelf ook zin in iets?\",\"body\":\"Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.\",\"cta\":\"Zoek een gerecht\",\"href\":\"/\"}"
+    },
+    {
+      "name": "gedeeld lijstje: de bestaande bewaarknop blijft (dark)",
+      "passed": true,
+      "detail": "Zet ze op mijn eigen lijstje"
+    },
+    {
+      "name": "gedeeld lijstje (dark) · a11y-audit zonder fouten",
+      "passed": true,
+      "detail": "0 fouten"
+    },
+    {
+      "name": "gewoon bezoek aan mijn lijstje: geen terugkomvlak",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: niet bij het eerste bezoek",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: wel bij het tweede bezoek",
+      "passed": true,
+      "detail": "{\"present\":true,\"title\":\"Zet ons op je beginscherm\",\"heading\":\"h2\",\"body\":\"Dan vind je ons net zo snel als een app. Tik op Delen en daarna op Zet op beginscherm.\",\"logo\":\"om\",\"closeLabel\":\"Tip sluiten\",\"closeSize\":{\"w\":44,\"h\":44},\"rect\":{\"top\":586,\"bottom\":696},\"tabbar\":{\"top\":708,\"bottom\":768},\"inViewport\":true,\"hitIsTip\":true,\"visits\":{\"visits\":2,\"dismissed\":false}}"
+    },
+    {
+      "name": "tip: het bezoek is in localStorage geteld",
+      "passed": true,
+      "detail": "{\"visits\":2,\"dismissed\":false}"
+    },
+    {
+      "name": "tip: boven de tabbalk, helemaal in beeld",
+      "passed": true,
+      "detail": "{\"rect\":{\"top\":586,\"bottom\":696},\"tabbar\":{\"top\":708,\"bottom\":768},\"inViewport\":true}"
+    },
+    {
+      "name": "tip: elementFromPoint raakt de kaart zelf (geen pop-up ervoor)",
+      "passed": true,
+      "detail": "true"
+    },
+    {
+      "name": "tip: kop, logo-tegeltje en tekst uit het ontwerp",
+      "passed": true,
+      "detail": "{\"title\":\"Zet ons op je beginscherm\",\"logo\":\"om\",\"body\":\"Dan vind je ons net zo snel als een app. Tik op Delen en daarna op Zet op beginscherm.\"}"
+    },
+    {
+      "name": "tip: sluitknop van 44 × 44 px met aria-label \"Tip sluiten\"",
+      "passed": true,
+      "detail": "{\"label\":\"Tip sluiten\",\"size\":{\"w\":44,\"h\":44}}"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (tip licht)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "tip: na het sluiten van het paneel staat de tip nog in beeld (licht)",
+      "passed": true,
+      "detail": "{\"top\":586,\"bottom\":696}"
+    },
+    {
+      "name": "opname: het instellingenpaneel is dicht (tip donker)",
+      "passed": true,
+      "detail": "gesloten=true · nogOpen=false"
+    },
+    {
+      "name": "tip: na het sluiten van het paneel staat de tip nog in beeld (donker)",
+      "passed": true,
+      "detail": "{\"top\":586,\"bottom\":696}"
+    },
+    {
+      "name": "tip: weg direct na sluiten",
+      "passed": true,
+      "detail": "clicked · {\"present\":false}"
+    },
+    {
+      "name": "tip: na sluiten nooit meer, ook niet in een nieuw bezoek",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: niet op desktop (1280 px)",
+      "passed": true,
+      "detail": "{\"present\":false}"
+    },
+    {
+      "name": "tip: zonder opslag geen tip en geen fout",
+      "passed": true,
+      "detail": "{\"tip\":{\"present\":false},\"page\":true}"
+    },
+    {
+      "name": "kies: de API is gestubd en elk stemverzoek bleef lokaal",
+      "passed": true,
+      "detail": "{\"stub\":true,\"calls\":0}"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep in de pagina",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "netwerk: geen geblokkeerde oproep op CDP-niveau",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "shots": [
+    {
+      "file": "be62-kies-1280-light.png",
+      "sha256": "9d3a28e6cf455982daaf9d0a69dfc71889b30f19ac1bd459aa3b106d903b4a04",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-390-light.png",
+      "sha256": "18ed2700f19553261a9f7f264ff296968e12a7b277c9d3e9b992d5e323daf781",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-320-light.png",
+      "sha256": "176d226e2a05ba3f74b2556dd10fcf2b07d471c76efe893d2b52f6185fc9c248",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "uitslag",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-1280-dark.png",
+      "sha256": "21d99c289e1af3b82080d7dc81b30ae0413e17f01f150aea2b248f1df53cae43",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-390-dark.png",
+      "sha256": "39160b95389ea09f8c6f290e1b6d45efef1a2d7da12273824ae32715cf390a14",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-kies-320-dark.png",
+      "sha256": "03f6392c6d0e0bba2737253aebf7011186fba6101c165067f66e4631f23a6fc5",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "uitslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-1280-light.png",
+      "sha256": "89c949b251b65dd36557d2d7e1b2d7413453460eea30a5fb8164e32e8278344f",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-390-light.png",
+      "sha256": "96a2ae4c94673bb388c20c782a57956ac4043aed297ff9130155eb6f640bbd64",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-320-light.png",
+      "sha256": "2639a5b336f5f8fbbe805859511ca757df0e6728e943973308f5627e3326e7c0",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-1280-dark.png",
+      "sha256": "26e4390dbecc2610ad2472984fde07e1e082f66ceae878866e6c43e8dc5273c0",
+      "width": 1280,
+      "height": 900,
+      "viewport": "1280x900",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-390-dark.png",
+      "sha256": "e8026bd481b94f586fba6d9d875d0e125388232b8b1335dfa8f6362c66ed7de5",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-gerecht-320-dark.png",
+      "sha256": "d8f98caa77536c37d2bed64fc700cd66f5c44f86947b3f7e678b94a8cbb35cb2",
+      "width": 320,
+      "height": 640,
+      "viewport": "320x640",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-lijstje-390-light.png",
+      "sha256": "225ce675ac34c0ed9bdae0b65fe0445271146e8ecabce04e67b2e9ddcfb650f5",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-lijstje-390-dark.png",
+      "sha256": "077cb4bb0a64f81bc9a77c495fa2df4918cce68a09a056b94c3d31a4d22dd23a",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "gedeeld",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-licht.png",
+      "sha256": "15e713a19140c0af071784b5d1f217f4d65df3d462e9f0478945b1efb4e49670",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "tweede-bezoek",
+      "theme": "light",
+      "themeProof": {
+        "attr": "light",
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#FFFFFF",
+        "bodyBg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-donker.png",
+      "sha256": "ff9d3f9f48377c00fadbef32cb22828ee222833a4255c09bec9867efd9a79c97",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "tweede-bezoek",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker",
+          "Automatisch"
+        ],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    },
+    {
+      "file": "be62-tip-390-geen-opslag.png",
+      "sha256": "498bb7e616fcf32eb72d69c72d390505575e37ffa3597b888067ea4020d90248",
+      "width": 390,
+      "height": 780,
+      "viewport": "390x780",
+      "state": "zonder-opslag",
+      "theme": "dark",
+      "themeProof": {
+        "attr": "dark",
+        "active": [],
+        "buttons": [],
+        "bg": "#1F2328",
+        "bodyBg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "source": "--bg"
+      }
+    }
+  ],
+  "failed": 0,
+  "passed": true
+}

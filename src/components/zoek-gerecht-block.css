@@ -1,0 +1,51 @@
+/* BE-62 (#153) — het vlak "Zelf ook zin in iets?" en de vraag na het stemmen.
+   Eigen bestand naast de component (BE-52); alleen tokens, dus licht en donker
+   gaan automatisch mee. */
+.zoek-gerecht {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+}
+/* In de menukaart staat het vlak als broer van de gerechtkaart in dezelfde
+   grid; het spant de volle breedte zodat het een eigen vlak blijft en niet als
+   derde gerechtkaart tussen de gerechten valt. */
+.zoek-gerecht--dish { grid-column: 1 / -1; }
+.zoek-gerecht-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+.zoek-gerecht-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.zoek-gerecht-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 4px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-fill);
+  color: var(--on-accent-fill);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.zoek-gerecht-btn:hover { background: var(--accent-fill-hover); }
+.zoek-gerecht-btn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .zoek-gerecht-btn { align-self: stretch; }
+}

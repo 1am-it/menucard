@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import PublicHeaderActions from '@/src/components/PublicHeaderActions'
@@ -25,6 +26,12 @@ import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSecti
 // BE-57 (#139): de anonieme teller "bekeken" voor dit restaurant, één keer per
 // pagina en per sessie, na het laden en zonder dat deze pagina erop wacht.
 import ViewBeacon from '@/src/components/ViewBeacon'
+
+// BE-62 (#153) — het terugkomvlak "Zelf ook zin in iets?" bij een gedeelde link.
+// Zelfde component en stylesheet als op /kies en bij een gedeeld lijstje, maar
+// pas geladen als de pagina hem nodig heeft: een gewone menukaart bezoeker
+// betaalt er niets voor (grens +1 KB per route, review ronde 2).
+const ZoekGerechtBlock = dynamic(() => import('@/src/components/ZoekGerechtBlock'), { ssr: false })
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -622,6 +629,14 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
                         shareHref={shareHref}
                         shareTitle={dishShareTitle({ name: item.name, restaurantName: r.name })}
                         shareNote={isResolvedTarget && hasShareTheme(standParam)}
+                        shareBlock={isResolvedTarget && hasShareTheme(standParam) ? (
+                          <ZoekGerechtBlock
+                            variant="dish"
+                            title="Zelf ook zin in iets?"
+                            body="Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig."
+                            cta="Zoek een gerecht"
+                          />
+                        ) : null}
                         saveEntry={saveEntry}
                         dishKey={originalItemIndex >= 0 && origIdx >= 0 ? `${id}-${origIdx}-${originalItemIndex}` : null}
                       />

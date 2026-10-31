@@ -1,0 +1,54 @@
+{
+  "ticket": "BE-62 (#153), review ronde 2",
+  "criterion": "de eerste laadgrootte groeit hooguit 1024 bytes (1 KB) per route ten opzichte van origin/main",
+  "category": "developer-meting uit de eigen build-manifesten van twee lokale productieopbouwen; geen browseroverdracht en geen echte acceptatie",
+  "method": "firstLoadJsFromBuild() uit ops/perf/lib/first-load-js.js: som van de gzip-grootte van de JS-bestanden die de route volgens .next/app-build-manifest.json als eerste laadt. Basis origin/main: uitgepakt met \"git archive\" in be62-basis-origin-main buiten de werkkopie, node_modules als junction; geen git-worktree. Kop: next build in deze werkkopie.",
+  "ranAt": "2026-10-31",
+  "baseRef": "origin/main",
+  "baseSha": "8f9d2896dceb09f1382a7c0e431e29511e3741ad",
+  "headSha": "d78698e49e594b6ca3a6569f67d97da498e12d06",
+  "limitBytes": 1024,
+  "routes": [
+    {
+      "route": "/",
+      "routeKey": "/page",
+      "baseGzipBytes": 124546,
+      "headGzipBytes": 124511,
+      "deltaBytes": -35,
+      "withinLimit": true
+    },
+    {
+      "route": "/menu/[id]",
+      "routeKey": "/menu/[id]/page",
+      "baseGzipBytes": 140676,
+      "headGzipBytes": 140852,
+      "deltaBytes": 176,
+      "withinLimit": true
+    },
+    {
+      "route": "/r/[id]",
+      "routeKey": "/r/[id]/page",
+      "baseGzipBytes": 103577,
+      "headGzipBytes": 103422,
+      "deltaBytes": -155,
+      "withinLimit": true
+    },
+    {
+      "route": "/kies/[code]",
+      "routeKey": "/kies/[code]/page",
+      "baseGzipBytes": 124717,
+      "headGzipBytes": 125320,
+      "deltaBytes": 603,
+      "withinLimit": true
+    }
+  ],
+  "css": {
+    "note": "informatie: alle CSS-bestanden van de build, niet per route. De CSS van het terugkomvlak (zoek-gerecht-block.css) zit hierin; de JS-grens hierboven is de afgesproken maat.",
+    "baseGzipBytes": 45213,
+    "headGzipBytes": 46182,
+    "deltaBytes": 969,
+    "baseFiles": 27,
+    "headFiles": 29
+  },
+  "passed": true
+}

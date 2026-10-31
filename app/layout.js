@@ -1,5 +1,6 @@
 import './globals.css'
 import { siteUrl } from '@/src/lib/siteUrl'
+import BeginschermTipGate from '@/src/components/BeginschermTipGate'
 
 // BE-56 (#137, punt 2) — één basis voor alle relatieve metadata.
 //
@@ -45,7 +46,7 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>{children}<BeginschermTipGate /></body>
     </html>
   )
 }
