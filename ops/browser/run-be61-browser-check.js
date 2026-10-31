@@ -114,6 +114,29 @@ async function themeProof(cdp) {
   return themeProofValue(await evalJs(cdp, themeProofScript()));
 }
 
+// BE-63 (#155): de themakeuze en "Delen via" zitten nu in het ene
+// instellingenpaneel van de publieke kop (PublicHeaderActions). Deze check
+// opent dat paneel zoals een bezoeker het opent; het blijft open staan, zodat
+// het themabewijs de actieve knop kan blijven lezen.
+const SETTINGS_BUTTON = '.pha-settings';
+const SETTINGS_PANEL = '.pha-panel';
+
+async function openSettings(cdp) {
+  if (await evalJs(cdp, `Boolean(document.querySelector('${SETTINGS_PANEL}'))`)) return true;
+  const ready = await waitFor(cdp, `Boolean(document.querySelector('${SETTINGS_BUTTON}'))`, 15000);
+  if (!ready) return false;
+  for (let poging = 0; poging < 4; poging += 1) {
+    await evalJs(cdp, `(() => { const button = document.querySelector('${SETTINGS_BUTTON}'); button.click(); return true; })()`);
+    const open = await waitFor(cdp, `Boolean(document.querySelector('${SETTINGS_PANEL}'))`, 4000);
+    if (open) {
+      await sleep(180);
+      return true;
+    }
+    await sleep(400);
+  }
+  return false;
+}
+
 /**
  * Het thema zetten via de themaknop van de app zelf (BE-46 deel 2, BE-57): een
  * klik op "Licht" of "Donker", geen los attribuut en geen schrijfactie in de
@@ -121,7 +144,8 @@ async function themeProof(cdp) {
  */
 async function applyTheme(cdp, theme) {
   const label = THEME_LABELS[theme];
-  const klaar = await waitFor(cdp, `document.querySelectorAll('.theme-btn').length === 2`, 15000);
+  if (!(await openSettings(cdp))) throw new Error(`settings_button_missing: ${label}`);
+  const klaar = await waitFor(cdp, `document.querySelectorAll('.theme-btn').length >= 2`, 15000);
   if (!klaar) throw new Error(`theme_button_missing: ${label}`);
   // De knop staat al in de server-HTML, dus een klik telt pas als het thema
   // daarna echt aangetoond is. Enkele pogingen dekken de hydratatie.
@@ -135,14 +159,15 @@ async function applyTheme(cdp, theme) {
   throw new Error(`theme_not_applied: ${label}`);
 }
 
-// Het paneel openen zoals een bezoeker dat doet: een klik op "Delen via". De
-// knop bestaat al vóór de hydratatie, dus een klik die niets opent wordt
-// herhaald in plaats van meteen te falen.
+// Het deelblad openen zoals een bezoeker dat doet: het instellingenpaneel open
+// en daarin "Delen via". Beide knoppen bestaan al vóór de hydratatie, dus een
+// klik die niets opent wordt herhaald in plaats van meteen te falen.
 async function openPanel(cdp) {
-  const geopend = await waitFor(cdp, `Boolean(document.querySelector('.share-settings-btn'))`, 15000);
-  if (!geopend) throw new Error('settings_button_missing');
+  if (!(await openSettings(cdp))) throw new Error('settings_button_missing');
+  const geopend = await waitFor(cdp, `Boolean(document.querySelector('.pha-share'))`, 15000);
+  if (!geopend) throw new Error('share_button_missing: Delen via');
   for (let poging = 0; poging < 4; poging += 1) {
-    await evalJs(cdp, `(() => { const button = document.querySelector('.share-settings-btn'); button.click(); return true; })()`);
+    await evalJs(cdp, `(() => { const button = document.querySelector('.pha-share'); button.click(); return true; })()`);
     const open = await waitFor(cdp, `Boolean(document.querySelector('.share-sheet'))`, 4000);
     if (open) {
       await sleep(180);
@@ -281,7 +306,7 @@ async function panelScenario(cdp) {
     for (const size of SIZES) {
       const waar = `${theme}/${size.name}`;
       await setViewport(cdp, size.width, size.height);
-      await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.share-settings-btn'))`);
+      await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.pha-settings'))`);
       // Het thema en zijn bewijs vóór het openen: het paneel dekt de
       // themaknop daarna af.
       const proof = await applyTheme(cdp, theme);
@@ -362,7 +387,7 @@ async function panelScenario(cdp) {
  */
 async function kiezenScenario(cdp) {
   await setViewport(cdp, 390, 844);
-  await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.share-settings-btn'))`);
+  await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.pha-settings'))`);
   const proof = await applyTheme(cdp, 'light');
   await openPanel(cdp);
 
@@ -415,7 +440,7 @@ async function kiezenScenario(cdp) {
  */
 async function sluitenScenario(cdp) {
   await setViewport(cdp, 390, 844);
-  await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.share-settings-btn'))`);
+  await navigate(cdp, `${APP}${PAGE}`, `Boolean(document.querySelector('.pha-settings'))`);
   await evalJs(cdp, `(() => { try { localStorage.removeItem('deelvoorkeur'); } catch (error) { return false; } return true; })()`);
   const proof = await applyTheme(cdp, 'light');
 
@@ -447,7 +472,7 @@ async function sluitenScenario(cdp) {
 
   await openPanel(cdp);
   const punt = await evalJs(cdp, `(() => {
-    const layer = document.querySelector('.share-layer');
+    const layer = document.querySelector('.share-sheet').closest('.share-layer');
     const r = layer.getBoundingClientRect();
     return { x: Math.round(r.left + 6), y: Math.round(r.top + 6) };
   })()`);

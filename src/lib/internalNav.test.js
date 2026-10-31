@@ -441,7 +441,9 @@ test('structural safety net: InternalNav renders the one shared ThemeToggle and 
 test('structural safety net: the theme contract itself stays as decided (explicit Licht/Donker, dark when nothing is stored)', () => {
   const layout = fs.readFileSync(path.join(REPO_ROOT, 'app/layout.js'), 'utf8');
   assert.match(layout, /else\{document\.documentElement\.setAttribute\('data-theme','dark'\);localStorage\.setItem\('bredaeats_theme','dark'\);\}/);
-  assert.equal((layout.match(/prefers-color-scheme/g) || []).length, 1);
+  // BE-63 (#155): twee plekken vragen het systeem: de nieuwe stand 'auto' (die
+  // als 'auto' bewaard blijft) en de oude eenmalige 'system'-omzetting.
+  assert.equal((layout.match(/prefers-color-scheme/g) || []).length, 2);
   const toggle = fs.readFileSync(path.join(REPO_ROOT, 'src/components/ThemeToggle.js'), 'utf8');
   assert.match(toggle, /\{ value: 'light', label: 'Licht' \}/);
   assert.match(toggle, /\{ value: 'dark', label: 'Donker' \}/);
