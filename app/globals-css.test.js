@@ -161,6 +161,7 @@ test('geen CSS-modules: elk stylesheet is een gewoon .css-bestand naast zijn cod
     'app/mijn-restaurant/aanbod/aanbod.css',
     'app/mijn-restaurant/claimen/claimen.css',
     'app/mijn-restaurant/menukaart/menukaart.css',
+    'app/mijn-restaurant/mijn-restaurant-cijfers.css',
     'app/mijn-restaurant/mijn-restaurant.css',
     // BE-55 deel 5: het label en het filter "Vandaag" in de zoekresultaten.
     'app/search/search.css',

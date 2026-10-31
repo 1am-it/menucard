@@ -27,14 +27,18 @@ import {
   OWNER_LOGIN_HREF,
   resolveOwnerEntry,
 } from '@/src/lib/ownerAccess'
-import { OWNER_OVERVIEW_MESSAGES, buildOwnerOverview } from '@/src/lib/ownerRestaurantOverview'
+import { OWNER_OVERVIEW_MESSAGES, buildOwnerOverview, ownedRestaurantIds } from '@/src/lib/ownerRestaurantOverview'
+import { buildStatsView } from '@/src/lib/ownerStatsView'
 import AccountMenuButton from '@/src/components/AccountMenuButton'
 import ThemeToggle from '@/src/components/ThemeToggle'
 // BE-52 (#128): de eigen opmaak van deze pagina staat naast de pagina.
 import './mijn-restaurant.css'
 
 import Wordmark from '@/src/components/Wordmark'
+import PrimaryNav from '@/src/components/PrimaryNav'
+import MobileTabBar from '@/src/components/MobileTabBar'
 import OwnerAccountDeletion from './OwnerAccountDeletion'
+import OwnerStatsPanel from './OwnerStatsPanel'
 
 // BE-55 stap B (#135) — de houder beheert zijn daghap en seizoensgerechten op
 // een eigen pagina; het dashboard linkt daarheen.
@@ -45,6 +49,8 @@ export default function OwnerDashboard({ restaurantIndex }) {
   const router = useRouter()
   const [session, setSession] = useState(undefined) // undefined = loading, null = no session
   const [overview, setOverview] = useState(null)
+  const [statsById, setStatsById] = useState({})
+  const [ownedIds, setOwnedIds] = useState([])
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -114,6 +120,7 @@ export default function OwnerDashboard({ restaurantIndex }) {
         }
         const claims = Array.isArray(claimsBody.claims) ? claimsBody.claims : []
         setOverview(buildOwnerOverview({ roles, claims, restaurants: restaurantIndex }))
+        setOwnedIds(ownedRestaurantIds(roles))
       } catch (err) {
         setError(MESSAGES.generic)
       }
@@ -121,10 +128,59 @@ export default function OwnerDashboard({ restaurantIndex }) {
     [restaurantIndex, router],
   )
 
+  // BE-57 (#139, deel 2): de cijfers komen per restaurant uit
+  // GET /api/mijn-restaurant/<id>/cijfers. Alleen voor de restaurants waar deze
+  // account echt `owner` van is; de route beslist zelf opnieuw (403 voor iemand
+  // anders). Een mislukte telling blijft bij één kaart en nooit bij de pagina.
+  const loadStats = useCallback(
+    async (accessToken, ownedIds) => {
+      const headers = { Authorization: `Bearer ${accessToken}` }
+      const index = restaurantIndex && typeof restaurantIndex === 'object' ? restaurantIndex : {}
+      await Promise.all(
+        ownedIds.map(async (id) => {
+          const entry = index[id] && typeof index[id] === 'object' ? index[id] : {}
+          const menuId = Array.isArray(entry.menuIds) ? entry.menuIds[0] : null
+          const common = {
+            restaurantId: id,
+            menuHref: menuId ? `/menu/${encodeURIComponent(menuId)}` : null,
+            menuUpdatedOn: entry.menuUpdatedOn || null,
+            dishes: entry.dishes || null,
+          }
+          let view
+          try {
+            const res = await fetch(`/api/mijn-restaurant/${encodeURIComponent(id)}/cijfers`, {
+              headers,
+              cache: 'no-store',
+            })
+            if (res.status === 403) {
+              view = buildStatsView({ ...common, forbidden: true })
+            } else if (!res.ok) {
+              view = buildStatsView({ ...common, stats: null })
+            } else {
+              const body = await res.json().catch(() => null)
+              view = buildStatsView({ ...common, stats: body })
+            }
+          } catch (err) {
+            view = buildStatsView({ ...common, stats: null })
+          }
+          setStatsById((current) => ({ ...current, [id]: view }))
+        }),
+      )
+    },
+    [restaurantIndex],
+  )
+
   useEffect(() => {
     if (!session) return
     load(session.access_token)
   }, [session, load])
+
+  // De cijfers pas na het overzicht: de kaarten staan er dan al, en de
+  // tellingen vullen ze zonder de pagina op te houden.
+  useEffect(() => {
+    if (!session || ownedIds.length === 0) return
+    loadStats(session.access_token, ownedIds)
+  }, [session, ownedIds, loadStats])
 
   async function signOut() {
     try {
@@ -142,10 +198,19 @@ export default function OwnerDashboard({ restaurantIndex }) {
 
   return (
     <>
+      {/* BE-57 herstel (issue 139): dezelfde kop-opbouw als /mijn-restaurant/claimen
+          (BE-54). Woordmerk en themaknop staan op één regel; PrimaryNav zit
+          binnen .header-right en is daarmee op de telefoon verborgen
+          (@media max-width 720px in app/globals.css), waar MobileTabBar onderaan
+          de navigatie doet. Zo blijft de kop één regel hoog en schuift de titel
+          "Deze week" niet onder de vaste kop. Het nav-landmark blijft altijd
+          aanwezig: PrimaryNav op desktop, MobileTabBar (aria-label "Hoofdmenu")
+          op mobiel. */}
       <header className="site-header">
         <div className="header-inner">
           <Wordmark />
           <div className="header-right">
+            <PrimaryNav />
             <ThemeToggle />
             <AccountMenuButton />
           </div>
@@ -216,6 +281,9 @@ export default function OwnerDashboard({ restaurantIndex }) {
                           </Link>
                         )}
                       </div>
+                      {overview.hasOwnerAccess && ownedIds.includes(restaurant.id) && (
+                        <OwnerStatsPanel view={statsById[restaurant.id]} />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -277,6 +345,8 @@ export default function OwnerDashboard({ restaurantIndex }) {
           </>
         )}
       </main>
+
+      <MobileTabBar />
     </>
   )
 }

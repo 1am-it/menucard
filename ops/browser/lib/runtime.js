@@ -43,15 +43,27 @@ function killTree(child) {
   }
 }
 
-async function startServer({ port, appUrl, outputDir, readyPath }) {
+async function startServer({ port, appUrl, outputDir, readyPath, mode = 'dev' }) {
   fs.mkdirSync(outputDir, { recursive: true });
-  const log = fs.createWriteStream(path.join(outputDir, 'next-dev.log'));
+  // BE-57 integratie (#139): `mode: 'start'` serveert de echte productieopbouw
+  // (`next build` + `next start`). Een check die inlogt en daarna een paneel
+  // meet, wil geen dev-server die na de eerste keer laden nog een volledige
+  // herlaadbeurt ("Fast Refresh had to perform a full reload") uitvoert: dan
+  // wisselt de pagina tussen overzicht en inloggen en is de meting waardeloos.
+  // De productieopbouw heeft geen HMR en is dus deterministisch.
+  const logName = mode === 'start' ? 'next-server.log' : 'next-dev.log';
+  const log = fs.createWriteStream(path.join(outputDir, logName));
   const env = {
     ...process.env,
     NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:9',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'fixture-anon-key-not-a-secret',
     NEXT_TELEMETRY_DISABLED: '1',
   };
+  if (mode !== 'start') {
+    // Een eigen bouwmap per testserver, zodat `next dev` nooit de `.next` van een
+    // net gedraaide `next build` hergebruikt.
+    env.NEXT_DIST_DIR = process.env.NEXT_DIST_DIR || `.next-browser-${port}`;
+  }
   // Prefer the project script through npm (the usual developer machine). A
   // runner without a global npm (for example this isolated clone, which only has
   // node) starts the same `next dev` directly through node: same command, same
@@ -60,15 +72,27 @@ async function startServer({ port, appUrl, outputDir, readyPath }) {
   const npmAvailable =
     spawnSync(npm, ['--version'], { stdio: 'ignore', shell: process.platform === 'win32' }).status === 0;
   const nextBin = path.join(REPO_ROOT, 'node_modules', 'next', 'dist', 'bin', 'next');
+  if (mode === 'start') {
+    // Altijd vers bouwen: nooit een oude `.next` van een vorige commit meten.
+    const logFd = fs.openSync(path.join(outputDir, logName), 'a');
+    const built = npmAvailable
+      ? spawnSync(npm, ['run', 'build'], { cwd: REPO_ROOT, env, stdio: ['ignore', logFd, logFd], shell: true })
+      : spawnSync(process.execPath, [nextBin, 'build'], { cwd: REPO_ROOT, env, stdio: ['ignore', logFd, logFd] });
+    fs.closeSync(logFd);
+    if (!built || built.status !== 0) {
+      log.end();
+      throw new Error(`build_failed: zie ${path.join(outputDir, logName)}`);
+    }
+  }
   const child = npmAvailable
-    ? spawn(npm, ['run', 'dev', '--', '-p', String(port)], {
+    ? spawn(npm, mode === 'start' ? ['run', 'start', '--', '-p', String(port)] : ['run', 'dev', '--', '-p', String(port)], {
         cwd: REPO_ROOT,
         env,
         stdio: ['ignore', 'pipe', 'pipe'],
         shell: process.platform === 'win32',
         detached: process.platform !== 'win32',
       })
-    : spawn(process.execPath, [nextBin, 'dev', '-p', String(port)], {
+    : spawn(process.execPath, [nextBin, mode === 'start' ? 'start' : 'dev', '-p', String(port)], {
         cwd: REPO_ROOT,
         env,
         stdio: ['ignore', 'pipe', 'pipe'],

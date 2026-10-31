@@ -24,6 +24,11 @@ function installBe48AuthStub(settings) {
   const calls = [];
   const violations = [];
   const otpRequests = [];
+  // BE-57 integratie (#139): de fetch die de pagina al had, vóór de stub hem
+  // vervangt. Nodig om het vooruitladen van de eigen app door te laten (zie
+  // window.fetch hieronder); zonder eigen fetch (zoals in een kale unit test)
+  // blijft alles fail-closed.
+  const realFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
   // BE-47 (#111): wat het verwijderscherm naar de serverroute stuurde, en of de
   // fictieve gebruiker daarna echt weg is. De stub controleert hetzelfde als de
   // echte route: alleen een code, en alleen voor de eigen sessie.
@@ -149,6 +154,14 @@ function installBe48AuthStub(settings) {
 
   function appResponse(url, method, body) {
     const authorized = assurance === 'aal2' || !needsSecondStep();
+    // BE-57 (#139): a route the check wants to stub itself (the owner's figures).
+    // Only for this origin, only for GET, and only with a session — exactly the
+    // shape the real route has.
+    const ownStats = settings.ownerStats && settings.ownerStats[url.pathname];
+    if (ownStats && method === 'GET') {
+      if (!authorized) return jsonResponse({ error: 'Niet ingelogd.' }, 401);
+      return jsonResponse((ownStats && ownStats.body) || {}, (ownStats && ownStats.status) || 200);
+    }
     const known =
       url.pathname === '/api/internal/v1/me' ||
       url.pathname === '/api/internal/v1/workqueue-counts' ||
@@ -307,6 +320,19 @@ function installBe48AuthStub(settings) {
     const body = init && typeof init.body === 'string' ? init.body : null;
     calls.push({ method: method, path: url.pathname, url: url.href });
     if (url.origin === settings.authOrigin) return authResponse(url, method, body);
+    // BE-57 integratie (#139): in een productieopbouw (`next start`) haalt de
+    // client-router van de App Router de RSC-payload van een gelinkte pagina
+    // vooruit op met een gewone fetch naar de eigen origin (`?_rsc=`). Dat is
+    // verkeer van de app naar zijn eigen server — geen API-aanroep en geen
+    // externe host — dus laat de stub het door naar de echte server in plaats
+    // van het als onbekende API-route te weigeren.
+    const ownRscPrefetch =
+      url.origin === window.location.origin &&
+      url.searchParams.has('_rsc') &&
+      url.pathname !== '/api' &&
+      url.pathname.indexOf('/api/') !== 0 &&
+      url.pathname.indexOf('/auth/') !== 0;
+    if (ownRscPrefetch && realFetch) return realFetch(input, init);
     if (url.origin === window.location.origin) return appResponse(url, method, body);
     violations.push({ kind: 'external_origin', method: method, url: url.href });
     throw new TypeError('fixture_network_blocked: ' + url.href);

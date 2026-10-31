@@ -2,9 +2,9 @@
   "category": "fixture evidence (fictional session and fictional teller rows; not real acceptance)",
   "issue": "#114",
   "script": "run-be45-browser-check.js",
-  "generatedAt": "2026-10-30T18:24:57.030Z",
+  "generatedAt": "2026-10-31T00:10:40.532Z",
   "port": 3145,
-  "head": "57b25e3bb60589ca351cfb208d7c883a943bbea3",
+  "head": "2e76ca88dc613109fa3663d462e3f48a11d6cba8",
   "fixtureRows": [
     "Stoofvlees met friet",
     "Tosti ham-kaas",
@@ -19,7 +19,7 @@
       "checks": 22,
       "passed": 22,
       "failed": 0,
-      "durationMs": 6953,
+      "durationMs": 5054,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 33,
       "passed": 33,
       "failed": 0,
-      "durationMs": 8269,
+      "durationMs": 5548,
       "error": null
     },
     {
@@ -35,7 +35,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 4787,
+      "durationMs": 3686,
       "error": null
     },
     {
@@ -43,7 +43,7 @@
       "checks": 8,
       "passed": 8,
       "failed": 0,
-      "durationMs": 4225,
+      "durationMs": 4718,
       "error": null
     }
   ],
@@ -466,7 +466,7 @@
   "screenshots": [
     {
       "file": "be45-desktop-1280-light.png",
-      "sha256": "e64d9ec460de29c0f75891341e0b4834ca6e9bad629f2ad29a3c5e6f01165ab1",
+      "sha256": "e2f4cf8c6d42599a553def611c25c03a250b10b6b07decbe5c612f7dc80c88d6",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -475,7 +475,7 @@
     },
     {
       "file": "be45-desktop-1280-light-30-dagen.png",
-      "sha256": "cdc9f1b903f86b45251e5fe1ebf6b5cc06c7d3953affdce9e2b7c4db2e7f3ece",
+      "sha256": "77df17d53ba5187251c423dd0b7795e9ad178480dd7ff7f8e73182d9d9082075",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -484,7 +484,7 @@
     },
     {
       "file": "be45-desktop-1280-dark.png",
-      "sha256": "b045dc691b942840e483b9c5d443e95118e098fbd4ed476fe4271e8bf01f0a99",
+      "sha256": "3440f27f835fd07967cd8162e894d437dea178217763f66a59e33cc863a59990",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -520,7 +520,7 @@
     },
     {
       "file": "be45-leeg-1280-light.png",
-      "sha256": "5cb3d5ef0013090418fbc5e14740d0c7fed6943fdc0da1b6667409196aec51a8",
+      "sha256": "6d2b96c7e45315492a4a5778280b3ddc743598ff1433e1666d32590874d0910c",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -529,7 +529,7 @@
     },
     {
       "file": "be45-leeg-1280-dark.png",
-      "sha256": "fb11f12e25b838d2583c282b3e2b68949d0abdd6ab6e8e66c717381f2621bc17",
+      "sha256": "9a4cfa1e32b54e083845c16903645ca907c7d75c36e4cbe6dab8674e7a0826ee",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -538,7 +538,7 @@
     },
     {
       "file": "be45-fout-1280-light.png",
-      "sha256": "52e1ddc293be579d8b935fdee1dd4f36a3384cd8d335b66046aaf31505a00fc0",
+      "sha256": "020d2125a6399e350c52ba04c8a85761f9853886c15306f61ea0a5f2ec1d1ab9",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",

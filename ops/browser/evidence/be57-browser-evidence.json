@@ -1,0 +1,2734 @@
+{
+  "ticket": "BE-57 (#139, deel 2)",
+  "route": "/mijn-restaurant",
+  "category": "lokale browsercheck met gestubde API en sessie (next start op poort 3187); geen productie, geen echte acceptatie",
+  "ranAt": "2026-10-31T00:09:28.191Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "overzicht: geen extern of onbekend verzoek",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "overzicht: vier cijfers van \"Deze week\" in vaste volgorde",
+      "passed": true,
+      "detail": "[{\"label\":\"keer bekeken\",\"value\":\"128\",\"change\":\"32 meer dan vorige week\"},{\"label\":\"keer bewaard\",\"value\":\"14\",\"change\":\"4 minder dan vorige week\"},{\"label\":\"keer gedeeld\",\"value\":\"minder dan 5\",\"change\":\"te weinig gegevens om te vergelijken\"},{\"label\":\"keer favoriet in Samen kiezen\",\"value\":\"41\",\"change\":\"gelijk aan vorige week\"}]"
+    },
+    {
+      "name": "overzicht: keer bekeken is 128 met de verandering van vorige week",
+      "passed": true,
+      "detail": "{\"label\":\"keer bekeken\",\"value\":\"128\",\"change\":\"32 meer dan vorige week\"}"
+    },
+    {
+      "name": "overzicht: keer bewaard noemt 14 en \"4 minder dan vorige week\"",
+      "passed": true,
+      "detail": "{\"label\":\"keer bewaard\",\"value\":\"14\",\"change\":\"4 minder dan vorige week\"}"
+    },
+    {
+      "name": "overzicht: een getal onder 5 heet \"minder dan 5\"",
+      "passed": true,
+      "detail": "{\"label\":\"keer gedeeld\",\"value\":\"minder dan 5\",\"change\":\"te weinig gegevens om te vergelijken\"}"
+    },
+    {
+      "name": "overzicht: favoriet in Samen kiezen telt 41 en is gelijk aan vorige week",
+      "passed": true,
+      "detail": "{\"label\":\"keer favoriet in Samen kiezen\",\"value\":\"41\",\"change\":\"gelijk aan vorige week\"}"
+    },
+    {
+      "name": "overzicht: de privacyregel staat er",
+      "passed": true,
+      "detail": "Alleen totalen, nooit wie."
+    },
+    {
+      "name": "overzicht: de top 4 staat er met namen en zichtbare balkjes",
+      "passed": true,
+      "detail": "[{\"name\":\"Signature Menu\",\"value\":\"22\",\"barWidth\":786,\"trackWidth\":786},{\"name\":\"Lunchmenu 3 Gangen\",\"value\":\"11\",\"barWidth\":393,\"trackWidth\":786},{\"name\":\"Blonde d'Aquitaine Beef\",\"value\":\"6\",\"barWidth\":212,\"trackWidth\":786},{\"name\":\"Business Lunch\",\"value\":\"minder dan 5\",\"barWidth\":71,\"trackWidth\":786}]"
+    },
+    {
+      "name": "overzicht: het vierde gerecht onder de drempel toont \"minder dan 5\"",
+      "passed": true,
+      "detail": "{\"name\":\"Business Lunch\",\"value\":\"minder dan 5\",\"barWidth\":71,\"trackWidth\":786}"
+    },
+    {
+      "name": "overzicht: \"Je menukaart\" noemt de datum en linkt naar de publieke pagina",
+      "passed": true,
+      "detail": "{\"note\":\"Laatst bijgewerkt op 25 maart 2026.\",\"link\":{\"text\":\"Bekijk je menukaart op de publieke pagina\",\"href\":\"/menu/1-lunch\",\"height\":44}}"
+    },
+    {
+      "name": "overzicht: geen \"Bevestigd\", geen \"Menukaart bijwerken\" en geen QR",
+      "passed": true,
+      "detail": "Deze week\nkeer bekeken\n128\n32 meer dan vorige week\nkeer bewaard\n14\n4 minder dan vorige week\nkeer gedeeld\nminder dan 5\nte weinig gegevens om te vergelijken\nkeer favoriet in Samen kiezen\n41\ngelijk aan v"
+    },
+    {
+      "name": "toetsenbord: minstens vijf stappen, elk met een zichtbare focusring",
+      "passed": true,
+      "detail": "[{\"selector\":\"a.wordmark\",\"name\":\"Onze Menukaarten, naar de startpagina\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Zoeken\",\"visible\":true},{\"selector\":\"a.primary-nav-link\",\"name\":\"Alle restaurants\",\"visible\":true},{\"selector\":\"button.theme-btn.active\",\"name\":\"Licht\",\"visible\":true},{\"selector\":\"button.theme-btn\",\"name\":\"Donker\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je restaurantpagina\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Daghap of seizoensgerecht plaatsen\",\"visible\":true},{\"selector\":\"a.owner-link\",\"name\":\"Bekijk je menukaart op de publieke pagina\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Uitloggen\",\"visible\":true},{\"selector\":\"button.auth-secondary\",\"name\":\"Account verwijderen\",\"visible\":true}]"
+    },
+    {
+      "name": "toetsenbord: de link naar de menukaart komt langs",
+      "passed": true,
+      "detail": "[\"Onze Menukaarten, naar de startpagina\",\"Zoeken\",\"Alle restaurants\",\"Licht\",\"Donker\",\"Bekijk je restaurantpagina\",\"Bekijk je menukaart\",\"Daghap of seizoensgerecht plaatsen\",\"Bekijk je menukaart op de publieke pagina\",\"Uitloggen\",\"Account verwijderen\"]"
+    },
+    {
+      "name": "a11y overzicht: het thema light staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · contrast: 48 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · koppen: één h1 bij 8 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (licht) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "a11y overzicht: het thema dark staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · contrast: 48 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · koppen: één h1 bij 8 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/overzicht (donker) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 1280px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":73,\"headerBottom\":73,\"position\":\"sticky\",\"navs\":[\"Hoofdnavigatie\"],\"firstContentTop\":97,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 1280px",
+      "passed": true,
+      "detail": "[\"Hoofdnavigatie\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 1280px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":97,\"headerBottom\":73}"
+    },
+    {
+      "name": "overzicht: het thema light is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "overzicht: de opname 1280/light toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 1280/light",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":900,\"viewportHeight\":900}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 1280/light",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "overzicht: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "overzicht: het thema dark is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "overzicht: de opname 1280/dark toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 1280/dark",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":900,\"viewportHeight\":900}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 1280/dark",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "overzicht: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 390px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 390px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 390px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "overzicht: het thema light is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "overzicht: de opname 390/light toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 390/light",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":772,\"viewportHeight\":844}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 390/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "overzicht: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "overzicht: het thema dark is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "overzicht: de opname 390/dark toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 390/dark",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":772,\"viewportHeight\":844}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 390/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "overzicht: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "overzicht: het thema light is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "overzicht: de opname 320/light toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":107,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 320/light",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":628,\"viewportHeight\":700}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 320/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "overzicht: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "overzicht: het thema dark is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "overzicht: de opname 320/dark toont \"Deze week\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Deze week\",\"ok\":true},{\"text\":\"Gerechten die het meest opvallen\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "overzicht: de vier cijfers staan volledig in beeld bij 320/dark",
+      "passed": true,
+      "detail": "{\"figuresInView\":4,\"figureCount\":4,\"safeBottom\":628,\"viewportHeight\":700}"
+    },
+    {
+      "name": "overzicht: geen horizontale scroll bij 320/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "overzicht: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "net-geclaimd: geen extern of onbekend verzoek",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "net-geclaimd: de welkomstmelding staat er",
+      "passed": true,
+      "detail": "Net geclaimd\n\nWelkom. Je cijfers beginnen te lopen zodra gasten je pagina en je menukaart bezoeken. Hieronder zie je wat er in je eerste maand al is geteld.\n\nDE"
+    },
+    {
+      "name": "net-geclaimd: het cijfer van de afgelopen maand staat er",
+      "passed": true,
+      "detail": "[{\"label\":\"keer bekeken\",\"value\":\"7\"},{\"label\":\"keer bewaard\",\"value\":\"minder dan 5\"},{\"label\":\"keer gedeeld\",\"value\":\"minder dan 5\"},{\"label\":\"keer favoriet in Samen kiezen\",\"value\":\"minder dan 5\"}]"
+    },
+    {
+      "name": "net-geclaimd: \"Drie dingen om mee te beginnen\" heeft drie punten",
+      "passed": true,
+      "detail": "[\"Deel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.\",\"Vraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.\",\"Klopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap.\"]"
+    },
+    {
+      "name": "net-geclaimd: het welkomstblok bevat geen enkele link",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "net-geclaimd: \"Je menukaart\" staat er ook in deze stand",
+      "passed": true,
+      "detail": "Laatst bijgewerkt op 25 maart 2026."
+    },
+    {
+      "name": "a11y net-geclaimd: het thema light staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · koppen: één h1 bij 9 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (licht) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "a11y net-geclaimd: het thema dark staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · koppen: één h1 bij 9 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/net-geclaimd (donker) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 1280px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":73,\"headerBottom\":73,\"position\":\"sticky\",\"navs\":[\"Hoofdnavigatie\"],\"firstContentTop\":97,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 1280px",
+      "passed": true,
+      "detail": "[\"Hoofdnavigatie\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 1280px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":97,\"headerBottom\":73}"
+    },
+    {
+      "name": "net-geclaimd: het thema light is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "net-geclaimd: de opname 1280/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 1280/light",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "net-geclaimd: het thema dark is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "net-geclaimd: de opname 1280/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 1280/dark",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 390px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 390px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 390px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "net-geclaimd: het thema light is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "net-geclaimd: de opname 390/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 390/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "net-geclaimd: het thema dark is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "net-geclaimd: de opname 390/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 390/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "net-geclaimd: het thema light is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "net-geclaimd: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":96,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 320/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "net-geclaimd: het thema dark is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "net-geclaimd: de opname 320/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "net-geclaimd: geen horizontale scroll bij 320/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "net-geclaimd: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "geen-cijfers: geen extern of onbekend verzoek",
+      "passed": true,
+      "detail": "[]"
+    },
+    {
+      "name": "geen-cijfers: de welkomstmelding staat er",
+      "passed": true,
+      "detail": "Net geclaimd\n\nWelkom. Je cijfers beginnen te lopen zodra gasten je pagina en je menukaart bezoeken. Hieronder zie je wat er in je eerste maand al is geteld.\n\nDE"
+    },
+    {
+      "name": "geen-cijfers: het cijfer van de afgelopen maand staat er",
+      "passed": true,
+      "detail": "[{\"label\":\"keer bekeken\",\"value\":\"minder dan 5\"},{\"label\":\"keer bewaard\",\"value\":\"minder dan 5\"},{\"label\":\"keer gedeeld\",\"value\":\"minder dan 5\"},{\"label\":\"keer favoriet in Samen kiezen\",\"value\":\"minder dan 5\"}]"
+    },
+    {
+      "name": "geen-cijfers: \"Drie dingen om mee te beginnen\" heeft drie punten",
+      "passed": true,
+      "detail": "[\"Deel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.\",\"Vraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.\",\"Klopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap.\"]"
+    },
+    {
+      "name": "geen-cijfers: het welkomstblok bevat geen enkele link",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "geen-cijfers: \"Je menukaart\" staat er ook in deze stand",
+      "passed": true,
+      "detail": "Laatst bijgewerkt op 25 maart 2026."
+    },
+    {
+      "name": "a11y geen-cijfers: het thema light staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 6.41:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · koppen: één h1 bij 9 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (licht) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "a11y geen-cijfers: het thema dark staat echt voor de audit",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · contrast: 40 teksten gemeten tegen de echte achtergrond",
+      "passed": true,
+      "detail": "zwakste 5.99:1, 0 onder de eis, 0 onmeetbaar (opacity)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · naam: 11 bedieningselementen",
+      "passed": true,
+      "detail": "0 zonder naam, 0 met alleen een symbool"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · tikdoel: 11 doelen, 0 onder 44 px",
+      "passed": true,
+      "detail": "0 te klein of te dicht op een ander doel"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · koppen: één h1 bij 9 koppen",
+      "passed": true,
+      "detail": "h1: \"Mijn restaurant\""
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · koppen: geen niveau overgeslagen",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · landmarks: 1 main, 1 nav",
+      "passed": true,
+      "detail": "main 1 (verwacht 1), nav 1 (verwacht ≥ 1)"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · taal: lang=\"nl\"",
+      "passed": true,
+      "detail": "null"
+    },
+    {
+      "name": "mijn-restaurant-cijfers/geen-cijfers (donker) · formulier: 0 velden met een label",
+      "passed": true,
+      "detail": "0 zonder label"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 1280px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":73,\"headerBottom\":73,\"position\":\"sticky\",\"navs\":[\"Hoofdnavigatie\"],\"firstContentTop\":97,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 1280px",
+      "passed": true,
+      "detail": "[\"Hoofdnavigatie\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 1280px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":97,\"headerBottom\":73}"
+    },
+    {
+      "name": "geen-cijfers: het thema light is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "geen-cijfers: de opname 1280/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 1280/light",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen-cijfers: het thema dark is via de themaknop van de app gezet bij 1280px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":73}"
+    },
+    {
+      "name": "geen-cijfers: de opname 1280/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":81,\"headerHeight\":73,\"safeBottom\":900}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 1280/dark",
+      "passed": true,
+      "detail": "-6"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 390px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 390px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 390px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "geen-cijfers: het thema light is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "geen-cijfers: de opname 390/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":105,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 390/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen-cijfers: het thema dark is via de themaknop van de app gezet bij 390px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "geen-cijfers: de opname 390/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":true}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":772}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 390/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "mijn-restaurant: de kop is op 320px niet hoger dan 96 px",
+      "passed": true,
+      "detail": "{\"scrollY\":0,\"headerHeight\":85,\"headerBottom\":85,\"position\":\"sticky\",\"navs\":[\"Hoofdmenu\"],\"firstContentTop\":103,\"firstContentTag\":\"h1.owner-title\"}"
+    },
+    {
+      "name": "mijn-restaurant: het nav-landmark is zichtbaar op 320px",
+      "passed": true,
+      "detail": "[\"Hoofdmenu\"]"
+    },
+    {
+      "name": "mijn-restaurant: de inhoud begint onder de kop op 320px",
+      "passed": true,
+      "detail": "{\"first\":\"h1.owner-title\",\"top\":103,\"headerBottom\":85}"
+    },
+    {
+      "name": "geen-cijfers: het thema light is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"light\",\"bg\":\"rgb(255, 255, 255)\",\"luminance\":255,\"active\":[\"Licht\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "geen-cijfers: de opname 320/light toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":113,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 320/light",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt light",
+      "passed": true,
+      "detail": "light"
+    },
+    {
+      "name": "geen-cijfers: het thema dark is via de themaknop van de app gezet bij 320px",
+      "passed": true,
+      "detail": "{\"attr\":\"dark\",\"bg\":\"rgb(31, 35, 40)\",\"luminance\":35,\"active\":[\"Donker\"],\"buttons\":[\"Licht\",\"Donker\"],\"headerHeight\":85}"
+    },
+    {
+      "name": "geen-cijfers: de opname 320/dark toont \"Net geclaimd\" volledig in beeld",
+      "passed": true,
+      "detail": "{\"titles\":[{\"text\":\"Net geclaimd\",\"ok\":true},{\"text\":\"Je menukaart\",\"ok\":false}],\"panelTop\":93,\"headerHeight\":85,\"safeBottom\":628}"
+    },
+    {
+      "name": "geen-cijfers: geen horizontale scroll bij 320/dark",
+      "passed": true,
+      "detail": "0"
+    },
+    {
+      "name": "geen-cijfers: het thema is echt dark",
+      "passed": true,
+      "detail": "dark"
+    },
+    {
+      "name": "geen onafgevangen browserfout",
+      "passed": true,
+      "detail": "[]"
+    }
+  ],
+  "errors": [],
+  "shots": [
+    {
+      "name": "be57-overzicht-1280-licht.png",
+      "state": "overzicht",
+      "theme": "light",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 81
+      },
+      "file": "be57-overzicht-1280-licht.png",
+      "sha256": "4a7bad087361b0a1f9c081231058ff98cecb66ee2f95c6935df0cea7460247be",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-overzicht-1280-donker.png",
+      "state": "overzicht",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 81
+      },
+      "file": "be57-overzicht-1280-donker.png",
+      "sha256": "9a92fdda233ad3e825396120d88706b41a23cacc7081fce2d7c0e2f1424d8702",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-overzicht-390-licht.png",
+      "state": "overzicht",
+      "theme": "light",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 105
+      },
+      "file": "be57-overzicht-390-licht.png",
+      "sha256": "311ac1a75e69862b12a0a642f91f1219fa21510e490faad5bc1d290d2ab8e338",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-overzicht-390-donker.png",
+      "state": "overzicht",
+      "theme": "dark",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 93
+      },
+      "file": "be57-overzicht-390-donker.png",
+      "sha256": "ff74266b9fc13d82950e30a7dc2e29b4e02bd25d3be9085abed6ff6588075914",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-overzicht-320-licht.png",
+      "state": "overzicht",
+      "theme": "light",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 107
+      },
+      "file": "be57-overzicht-320-licht.png",
+      "sha256": "9900cbda607a0287d08d8c126757251dfcef4156cb33e0e8a6b27555876c6b84",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be57-overzicht-320-donker.png",
+      "state": "overzicht",
+      "theme": "dark",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Deze week",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Deze week",
+            "ok": true
+          },
+          {
+            "text": "Gerechten die het meest opvallen",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 4,
+        "figuresInView": 4,
+        "allFiguresInView": true,
+        "panelTop": 93
+      },
+      "file": "be57-overzicht-320-donker.png",
+      "sha256": "5e8684d709fd64ada33cdb8e731f61380631ff816f39ff50f3c31c850c4ab2cd",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be57-net-geclaimd-1280-licht.png",
+      "state": "net-geclaimd",
+      "theme": "light",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 81
+      },
+      "file": "be57-net-geclaimd-1280-licht.png",
+      "sha256": "b6583bb9287de8c3ba426c77d0cafd483096ce72f4b10a2984bd3e9929983492",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-net-geclaimd-1280-donker.png",
+      "state": "net-geclaimd",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 81
+      },
+      "file": "be57-net-geclaimd-1280-donker.png",
+      "sha256": "ee959f20a1735a963d6676fba37aa706ed450012d719085c8584b04a5dacfa1c",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-net-geclaimd-390-licht.png",
+      "state": "net-geclaimd",
+      "theme": "light",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 105
+      },
+      "file": "be57-net-geclaimd-390-licht.png",
+      "sha256": "e9ad34292ff94567a0830ee0a631ddb1de33281443e9305a373ff534b013b03a",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-net-geclaimd-390-donker.png",
+      "state": "net-geclaimd",
+      "theme": "dark",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 93
+      },
+      "file": "be57-net-geclaimd-390-donker.png",
+      "sha256": "13f37d6d105cc4fb14e6feb58a3d81f8d8e8298f58c766b6c9e32d9ba7e9584d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-net-geclaimd-320-licht.png",
+      "state": "net-geclaimd",
+      "theme": "light",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 96
+      },
+      "file": "be57-net-geclaimd-320-licht.png",
+      "sha256": "3a3de3ccabf791dcd07110b9ae4dcdb9478a00ada73cb1ccb4fa9bfc5104a5be",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be57-net-geclaimd-320-donker.png",
+      "state": "net-geclaimd",
+      "theme": "dark",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 93
+      },
+      "file": "be57-net-geclaimd-320-donker.png",
+      "sha256": "b0b90b43bf34263c826153e626887dcacdce9e965d35d637d4d644e035ba8284",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be57-geen-cijfers-1280-licht.png",
+      "state": "geen-cijfers",
+      "theme": "light",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 81
+      },
+      "file": "be57-geen-cijfers-1280-licht.png",
+      "sha256": "a352c4a6861fb302ffbacc907dbcf2c661bc343bc77642508d1ba87b42ccda32",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-geen-cijfers-1280-donker.png",
+      "state": "geen-cijfers",
+      "theme": "dark",
+      "viewport": "1280x900",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 73
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 73,
+        "tabbarVisible": false,
+        "safeBottom": 900,
+        "viewportHeight": 900,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 81
+      },
+      "file": "be57-geen-cijfers-1280-donker.png",
+      "sha256": "fa5db021a25eb43f49c985f97745f61e80e20646aef72b883eae9fc8ec7b3883",
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "name": "be57-geen-cijfers-390-licht.png",
+      "state": "geen-cijfers",
+      "theme": "light",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 105
+      },
+      "file": "be57-geen-cijfers-390-licht.png",
+      "sha256": "6a00b2f177f2fd63852e113a2e40234f17e254ce24d470ead2fba5ea98f4d356",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-geen-cijfers-390-donker.png",
+      "state": "geen-cijfers",
+      "theme": "dark",
+      "viewport": "390x844",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 772,
+        "viewportHeight": 844,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": true
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 93
+      },
+      "file": "be57-geen-cijfers-390-donker.png",
+      "sha256": "ea7f88d324c026f7285ae0d02250973f97692d6b6c5b87669476584d6339634f",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "be57-geen-cijfers-320-licht.png",
+      "state": "geen-cijfers",
+      "theme": "light",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "light",
+        "bg": "rgb(255, 255, 255)",
+        "luminance": 255,
+        "active": [
+          "Licht"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 113
+      },
+      "file": "be57-geen-cijfers-320-licht.png",
+      "sha256": "8078be1c8b4aeb6ceefc7a3d7730fdacad5355d1ed41841e151ec7fdde3c16a9",
+      "width": 320,
+      "height": 700
+    },
+    {
+      "name": "be57-geen-cijfers-320-donker.png",
+      "state": "geen-cijfers",
+      "theme": "dark",
+      "viewport": "320x700",
+      "themeProof": {
+        "attr": "dark",
+        "bg": "rgb(31, 35, 40)",
+        "luminance": 35,
+        "active": [
+          "Donker"
+        ],
+        "buttons": [
+          "Licht",
+          "Donker"
+        ],
+        "headerHeight": 85
+      },
+      "framing": {
+        "wantTitle": "Net geclaimd",
+        "headerHeight": 85,
+        "tabbarVisible": true,
+        "safeBottom": 628,
+        "viewportHeight": 700,
+        "titleInView": true,
+        "titles": [
+          {
+            "text": "Net geclaimd",
+            "ok": true
+          },
+          {
+            "text": "Je menukaart",
+            "ok": false
+          }
+        ],
+        "figureCount": 0,
+        "figuresInView": 0,
+        "allFiguresInView": false,
+        "panelTop": 93
+      },
+      "file": "be57-geen-cijfers-320-donker.png",
+      "sha256": "336fd53a87c86fed53b12900cfd89360832ca3dabf790e1351e8073ef6ea7522",
+      "width": 320,
+      "height": 700
+    }
+  ],
+  "states": [
+    {
+      "name": "overzicht",
+      "measured": {
+        "panelText": "Deze week\nkeer bekeken\n128\n32 meer dan vorige week\nkeer bewaard\n14\n4 minder dan vorige week\nkeer gedeeld\nminder dan 5\nte weinig gegevens om te vergelijken\nkeer favoriet in Samen kiezen\n41\ngelijk aan vorige week\n\nAlleen totalen, nooit wie.\n\nGerechten die het meest opvallen\nSignature Menu\n22\nLunchmenu 3 Gangen\n11\nBlonde d'Aquitaine Beef\n6\nBusiness Lunch\nminder dan 5\nJe menukaart\n\nLaatst bijgewerkt op 25 maart 2026.\n\nBekijk je menukaart op de publieke pagina",
+        "subtitles": [
+          "Deze week",
+          "Gerechten die het meest opvallen",
+          "Je menukaart"
+        ],
+        "figures": [
+          {
+            "label": "keer bekeken",
+            "value": "128",
+            "change": "32 meer dan vorige week"
+          },
+          {
+            "label": "keer bewaard",
+            "value": "14",
+            "change": "4 minder dan vorige week"
+          },
+          {
+            "label": "keer gedeeld",
+            "value": "minder dan 5",
+            "change": "te weinig gegevens om te vergelijken"
+          },
+          {
+            "label": "keer favoriet in Samen kiezen",
+            "value": "41",
+            "change": "gelijk aan vorige week"
+          }
+        ],
+        "privacy": "Alleen totalen, nooit wie.",
+        "top": [
+          {
+            "name": "Signature Menu",
+            "value": "22",
+            "barWidth": 786,
+            "trackWidth": 786
+          },
+          {
+            "name": "Lunchmenu 3 Gangen",
+            "value": "11",
+            "barWidth": 393,
+            "trackWidth": 786
+          },
+          {
+            "name": "Blonde d'Aquitaine Beef",
+            "value": "6",
+            "barWidth": 212,
+            "trackWidth": 786
+          },
+          {
+            "name": "Business Lunch",
+            "value": "minder dan 5",
+            "barWidth": 71,
+            "trackWidth": 786
+          }
+        ],
+        "menuNote": "Laatst bijgewerkt op 25 maart 2026.",
+        "menuLink": {
+          "text": "Bekijk je menukaart op de publieke pagina",
+          "href": "/menu/1-lunch",
+          "height": 44
+        },
+        "monthFigures": [],
+        "startItems": [],
+        "welcomeLinks": 0,
+        "statsLinks": [
+          "/menu/1-lunch"
+        ],
+        "overflowX": -6,
+        "theme": "light"
+      },
+      "walk": [
+        {
+          "selector": "a.wordmark",
+          "name": "Onze Menukaarten, naar de startpagina",
+          "visible": true
+        },
+        {
+          "selector": "a.primary-nav-link",
+          "name": "Zoeken",
+          "visible": true
+        },
+        {
+          "selector": "a.primary-nav-link",
+          "name": "Alle restaurants",
+          "visible": true
+        },
+        {
+          "selector": "button.theme-btn.active",
+          "name": "Licht",
+          "visible": true
+        },
+        {
+          "selector": "button.theme-btn",
+          "name": "Donker",
+          "visible": true
+        },
+        {
+          "selector": "a.owner-link",
+          "name": "Bekijk je restaurantpagina",
+          "visible": true
+        },
+        {
+          "selector": "a.owner-link",
+          "name": "Bekijk je menukaart",
+          "visible": true
+        },
+        {
+          "selector": "a.owner-link",
+          "name": "Daghap of seizoensgerecht plaatsen",
+          "visible": true
+        },
+        {
+          "selector": "a.owner-link",
+          "name": "Bekijk je menukaart op de publieke pagina",
+          "visible": true
+        },
+        {
+          "selector": "button.auth-secondary",
+          "name": "Uitloggen",
+          "visible": true
+        },
+        {
+          "selector": "button.auth-secondary",
+          "name": "Account verwijderen",
+          "visible": true
+        }
+      ],
+      "shots": [
+        {
+          "viewport": "1280",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "1280",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 105
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 93
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 107
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Deze week",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Deze week",
+                "ok": true
+              },
+              {
+                "text": "Gerechten die het meest opvallen",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 4,
+            "figuresInView": 4,
+            "allFiguresInView": true,
+            "panelTop": 93
+          }
+        }
+      ]
+    },
+    {
+      "name": "net-geclaimd",
+      "measured": {
+        "panelText": "Net geclaimd\n\nWelkom. Je cijfers beginnen te lopen zodra gasten je pagina en je menukaart bezoeken. Hieronder zie je wat er in je eerste maand al is geteld.\n\nDE AFGELOPEN MAAND\nkeer bekeken\n7\nkeer bewaard\nminder dan 5\nkeer gedeeld\nminder dan 5\nkeer favoriet in Samen kiezen\nminder dan 5\nDRIE DINGEN OM MEE TE BEGINNEN\nDeel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.\nVraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.\nKlopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap.\nJe menukaart\n\nLaatst bijgewerkt op 25 maart 2026.\n\nBekijk je menukaart op de publieke pagina",
+        "subtitles": [
+          "Net geclaimd",
+          "Je menukaart"
+        ],
+        "figures": [],
+        "privacy": null,
+        "top": [],
+        "menuNote": "Laatst bijgewerkt op 25 maart 2026.",
+        "menuLink": {
+          "text": "Bekijk je menukaart op de publieke pagina",
+          "href": "/menu/1-lunch",
+          "height": 44
+        },
+        "monthFigures": [
+          {
+            "label": "keer bekeken",
+            "value": "7"
+          },
+          {
+            "label": "keer bewaard",
+            "value": "minder dan 5"
+          },
+          {
+            "label": "keer gedeeld",
+            "value": "minder dan 5"
+          },
+          {
+            "label": "keer favoriet in Samen kiezen",
+            "value": "minder dan 5"
+          }
+        ],
+        "startItems": [
+          "Deel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.",
+          "Vraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.",
+          "Klopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap."
+        ],
+        "welcomeLinks": 0,
+        "statsLinks": [
+          "/menu/1-lunch"
+        ],
+        "overflowX": -6,
+        "theme": "light"
+      },
+      "walk": [],
+      "shots": [
+        {
+          "viewport": "1280",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "1280",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 105
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 93
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 96
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 93
+          }
+        }
+      ]
+    },
+    {
+      "name": "geen-cijfers",
+      "measured": {
+        "panelText": "Net geclaimd\n\nWelkom. Je cijfers beginnen te lopen zodra gasten je pagina en je menukaart bezoeken. Hieronder zie je wat er in je eerste maand al is geteld.\n\nDE AFGELOPEN MAAND\nkeer bekeken\nminder dan 5\nkeer bewaard\nminder dan 5\nkeer gedeeld\nminder dan 5\nkeer favoriet in Samen kiezen\nminder dan 5\nDRIE DINGEN OM MEE TE BEGINNEN\nDeel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.\nVraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.\nKlopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap.\nJe menukaart\n\nLaatst bijgewerkt op 25 maart 2026.\n\nBekijk je menukaart op de publieke pagina",
+        "subtitles": [
+          "Net geclaimd",
+          "Je menukaart"
+        ],
+        "figures": [],
+        "privacy": null,
+        "top": [],
+        "menuNote": "Laatst bijgewerkt op 25 maart 2026.",
+        "menuLink": {
+          "text": "Bekijk je menukaart op de publieke pagina",
+          "href": "/menu/1-lunch",
+          "height": 44
+        },
+        "monthFigures": [
+          {
+            "label": "keer bekeken",
+            "value": "minder dan 5"
+          },
+          {
+            "label": "keer bewaard",
+            "value": "minder dan 5"
+          },
+          {
+            "label": "keer gedeeld",
+            "value": "minder dan 5"
+          },
+          {
+            "label": "keer favoriet in Samen kiezen",
+            "value": "minder dan 5"
+          }
+        ],
+        "startItems": [
+          "Deel je menukaart met je gasten, bijvoorbeeld via je eigen website of sociale media.",
+          "Vraag je gasten om gerechten te bewaren; die tellingen zie je hier terug.",
+          "Klopt er iets niet aan je menukaart? Meld het bij de redactie; zelf aanpassen volgt in een latere stap."
+        ],
+        "welcomeLinks": 0,
+        "statsLinks": [
+          "/menu/1-lunch"
+        ],
+        "overflowX": -6,
+        "theme": "light"
+      },
+      "walk": [],
+      "shots": [
+        {
+          "viewport": "1280",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "1280",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 73
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 73,
+            "tabbarVisible": false,
+            "safeBottom": 900,
+            "viewportHeight": 900,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 81
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 105
+          }
+        },
+        {
+          "viewport": "390",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 772,
+            "viewportHeight": 844,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": true
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 93
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "light",
+          "themeProof": {
+            "attr": "light",
+            "bg": "rgb(255, 255, 255)",
+            "luminance": 255,
+            "active": [
+              "Licht"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 113
+          }
+        },
+        {
+          "viewport": "320",
+          "theme": "dark",
+          "themeProof": {
+            "attr": "dark",
+            "bg": "rgb(31, 35, 40)",
+            "luminance": 35,
+            "active": [
+              "Donker"
+            ],
+            "buttons": [
+              "Licht",
+              "Donker"
+            ],
+            "headerHeight": 85
+          },
+          "framing": {
+            "wantTitle": "Net geclaimd",
+            "headerHeight": 85,
+            "tabbarVisible": true,
+            "safeBottom": 628,
+            "viewportHeight": 700,
+            "titleInView": true,
+            "titles": [
+              {
+                "text": "Net geclaimd",
+                "ok": true
+              },
+              {
+                "text": "Je menukaart",
+                "ok": false
+              }
+            ],
+            "figureCount": 0,
+            "figuresInView": 0,
+            "allFiguresInView": false,
+            "panelTop": 93
+          }
+        }
+      ]
+    }
+  ]
+}

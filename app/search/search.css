@@ -59,6 +59,25 @@
   overflow-wrap: anywhere;
 }
 
+/* BE-60 (#150) — het label "Tijdelijk niet beschikbaar" bij een gerecht in de
+   zoekresultaten. Zelfde vorm als op de menukaart (BE-58, .mc-unavailable):
+   een klein kader onder de naam, zodat het gerecht blijft staan en zijn plaats
+   houdt. Eigen bestand naast de pagina (BE-52); alleen bestaande tokens. */
+.dish-result-unavailable {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 8px;
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 390px) {
   .vandaag-label {
     margin-left: 4px;

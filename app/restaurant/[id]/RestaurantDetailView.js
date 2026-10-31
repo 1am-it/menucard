@@ -24,6 +24,9 @@ import DaghapVandaag from '@/src/components/DaghapVandaag'
 // BE-58 (#143): het bevestigingslabel, apart geïmporteerd zodat de bestaande
 // regressie op deze importregel blijft kloppen.
 import { MenuConfirmation } from '@/src/components/MenuBody'
+// BE-57 (#139): de anonieme teller "bekeken", één keer per pagina en per
+// sessie, na het laden en zonder dat deze pagina erop wacht.
+import ViewBeacon from '@/src/components/ViewBeacon'
 
 const DAYS = ['ma','di','wo','do','vr','za','zo']
 const DAY_LABELS = {
@@ -64,6 +67,7 @@ export default function RestaurantDetailView({ id, restaurant, menus, bevestigin
 
   return (
     <>
+      <ViewBeacon restaurantId={id} />
       {/* ── Header ── */}
       <header>
         <div className="header-inner">

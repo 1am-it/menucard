@@ -24,6 +24,9 @@ import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
 import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation } from '@/src/components/MenuBody'
+// BE-57 (#139): de anonieme teller "bekeken" voor dit restaurant, één keer per
+// pagina en per sessie, na het laden en zonder dat deze pagina erop wacht.
+import ViewBeacon from '@/src/components/ViewBeacon'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -278,6 +281,7 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
 
   return (
     <>
+      <ViewBeacon restaurantId={baseId} />
       {/* ── Header ── */}
       <header>
         <div className="header-inner">
