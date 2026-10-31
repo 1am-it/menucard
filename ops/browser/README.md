@@ -1083,6 +1083,47 @@ ontwikkelaarsbewijs met een gestubde API, geen onafhankelijke review en geen
 echte acceptatie; de visuele vergelijking met de goedgekeurde mockup blijft
 mensenwerk (daarom staan de schermafdrukken erin).
 
+## BE-61 (#152, variant A) — het deelblad "Delen via" in een echte browser
+
+`npm run test:browser:be61` (of `node ops/browser/run-be61-browser-check.js`).
+Drie scenario's op poort 3188 (uit 3180-3189, via `BE61_PORT` te wijzigen), met
+een verse productieopbouw (`next build` + `next start`, de BE-57-opzet, zodat er
+geen HMR-herlaadbeurt in een meting valt) en een lokale Edge/Chrome via CDP. De
+pagina is `/mijn-lijstje`: die heeft de kop, de themaknop en de vaste tabbalk
+zonder restaurantgegevens. Draai deze check alleen.
+
+Wat hij meet:
+
+- **het paneel in licht en donker op 1280, 390 en 320 px** — een echt
+  dialoogvenster met naam en hint, een greepje van 36 × 4 px, een ronde
+  sluitknop van 44 × 44 px met `aria-label="Sluiten"`, twee echte radios in één
+  fieldset met een visueel verborgen legend, vijf regels van minstens 56 px met
+  een icoon van 36 px, "0 van 3 gekozen", "Opslaan" van 52 px en "Wissen" zonder
+  "Annuleren";
+- **"Opslaan" is te raken** — de knop staat volledig in beeld en
+  `elementFromPoint` in zijn midden geeft de knop zelf; geen horizontale
+  overloop;
+- **op 390 en 320 px ligt het paneel boven de tabbalk** — op drie punten over de
+  balk is het bovenste element het paneel;
+- **de volgorde van kiezen** — eerst Sms, dan WhatsApp, dan E-mail geeft de
+  merkjes 2-1-3, "3 van 3 gekozen", de hint over 3 favorieten en de twee andere
+  regels uit; het telefoonmenu schakelt de lijst uit en dimt hem;
+- **sluiten en opslaan** — het kruisje, Esc en een tik naast het paneel sluiten
+  het; "Opslaan" bewaart de keuze in `localStorage` onder `deelvoorkeur`;
+- **het thema is aangetoond, niet aangenomen**, net als bij BE-60: een klik op
+  de themaknop van de app zelf, en per opname `themeProof` met `data-theme`, de
+  actieve knop en de helderheid van `--bg`.
+
+Bewijs: `ops/browser/evidence/be-61/` (acht schermafdrukken als volledige
+viewport, in git) en `ops/browser/evidence/be61-browser-evidence.json` (111
+controles). De a11y-check is gefilterd gedraaid op de pagina met het paneel open:
+`node ops/browser/run-a11y-public-check.js --alleen=instellingen --poort=3189`
+(64 controles, 0 fouten). Grenzen: dit is ontwikkelaarsbewijs, geen
+onafhankelijke review en geen echte acceptatie; de opslag en de keuze van het
+gedrag staan in `src/lib/sharePreference.test.js` en de bedrading in
+`src/lib/sharePreferenceSurface.test.js`.
+
+
 ## BE-60 (#150) — goedgekeurde houderwijzigingen in de zoekresultaten
 
 `npm run test:browser:be60` (of `node ops/browser/run-be60-browser-check.js`).
