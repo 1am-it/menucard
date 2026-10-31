@@ -1,0 +1,19 @@
+{
+  "be": "BE-62 (#153)",
+  "kind": "first_load_js_measurement",
+  "method": "firstLoadJsFromBuild() uit ops/perf/lib/first-load-js.js op twee productieopbouwen: origin/main (8f9d289, losse worktree met een junction naar node_modules) en deze branch (`next build`, standaard .next). Getal = som van de gzip-grootte van de JS-bestanden die de route volgens app-build-manifest.json als eerste laadt.",
+  "base": {
+    "commit": "8f9d289",
+    "note": "origin/main, losse worktree zonder eigen node_modules (junction)"
+  },
+  "head": {
+    "note": "deze branch, `next build` in de eigen checkout (.next)"
+  },
+  "limitBytes": 1024,
+  "routes": [
+    { "route": "/page", "label": "/", "baseGzipBytes": 124199, "headGzipBytes": 124510, "deltaBytes": 311, "withinLimit": true },
+    { "route": "/menu/[id]/page", "label": "/menu/[id]", "baseGzipBytes": 140316, "headGzipBytes": 140817, "deltaBytes": 501, "withinLimit": true },
+    { "route": "/kies/[code]/page", "label": "/kies/[code]", "baseGzipBytes": 124312, "headGzipBytes": 125319, "deltaBytes": 1007, "withinLimit": true }
+  ],
+  "measuredAt": "2026-10-31"
+}

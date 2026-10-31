@@ -48,12 +48,18 @@ test('BE-62: /kies toont de vraag alleen na een eigen stem', () => {
 });
 
 test('BE-62: een gedeeld gerecht krijgt het vlak onder de deelregel, met Bewaar', () => {
-  assert.match(MENU_BODY, /import ZoekGerechtBlock from '@\/src\/components\/ZoekGerechtBlock'/);
+  // De opmaak staat hier zelf (geen extra component), zodat de eerste lading
+  // van de menukaart niet groeit.
+  assert.doesNotMatch(MENU_BODY, /import ZoekGerechtBlock/);
   // Deelregel en vlak delen dezelfde voorwaarde; het vlak staat er direct na.
   assert.match(MENU_BODY, /\{shareNote && <div className="dish-share-note">\{SHARED_DISH_NOTE\}<\/div>\}/);
   const after = MENU_BODY.slice(MENU_BODY.indexOf('{shareNote && <div className="dish-share-note">'));
-  assert.match(after, /\{shareNote && \(\s*<ZoekGerechtBlock/);
-  assert.equal(MENU_BODY.match(/<ZoekGerechtBlock/g).length, 1);
+  assert.match(after, /\{shareNote && \(\s*<section className="zoek-gerecht zoek-gerecht--dish">/);
+  assert.equal(MENU_BODY.match(/className="zoek-gerecht zoek-gerecht--dish"/g).length, 1);
+  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_TITLE}<`));
+  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_BODY}<`));
+  assert.ok(MENU_BODY.includes(`>${SHARED_RETURN_CTA}<`));
+  assert.match(MENU_BODY, /<Link href="\/" className="zoek-gerecht-btn" prefetch=\{false\}>/);
   // De bestaande bewaarknop blijft op de kaart staan (Bewaar + Delen).
   assert.match(MENU_BODY, /<DishShareButton[\s\S]*?entry=\{saveEntry\}/);
   // En de deelregel verschijnt alleen bij een gedeelde link, zoals voorheen.
@@ -67,8 +73,9 @@ test('BE-62: een gedeeld lijstje krijgt hetzelfde vlak, naast de bestaande bewaa
   const sharedBranch = LIJST.slice(LIJST.indexOf('{shared ? ('), LIJST.indexOf(') : own.length === 0 ? ('));
   assert.ok(sharedBranch.includes('<ZoekGerechtBlock'), 'het vlak staat in de tak van het gedeelde lijstje');
   assert.ok(sharedBranch.includes('ADD_TO_OWN_LIST_LABEL'), 'de bestaande bewaarknop staat ernaast');
-  // De woorden in het vlak zijn dezelfde als die van het gedeelde gerecht.
-  for (const source of [MENU_BODY, LIJST]) {
+  // De woorden in het lijstje zijn dezelfde als die van het gedeelde gerecht;
+  // het vlak op de menukaart staat in MenuBody (zie de test hierboven).
+  for (const source of [LIJST]) {
     assert.ok(source.includes(`title="${SHARED_RETURN_TITLE}"`));
     assert.ok(source.includes(`body="${SHARED_RETURN_BODY}"`));
     assert.ok(source.includes(`cta="${SHARED_RETURN_CTA}"`));

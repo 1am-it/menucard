@@ -5,11 +5,11 @@
 // chrome, no URL parameters, no filters, no reservation actions — those stay
 // in MenuView. Classes and markup are the public menu's own (app/globals.css).
 
+import Link from 'next/link'
 import Emoji from '@/src/components/Emoji'
-// BE-62 — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?". De woorden
-// staan hier bewust als tekst en niet in een extra module: dit vlak hoort niet
-// in de eerste lading te groeien (contract, acceptatie 3).
-import ZoekGerechtBlock from '@/src/components/ZoekGerechtBlock'
+// BE-62 — bij een gedeeld gerecht het vlak "Zelf ook zin in iets?". De opmaak
+// staat hier zelf en niet in een extra component: dit vlak hoort de eerste
+// lading van de menukaart niet te laten groeien (contract, acceptatie 3).
 import DishShareButton from '@/src/components/DishShareButton'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
@@ -158,12 +158,11 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
           onder de regel hierboven. De Bewaar-knop staat al in de voet van deze
           kaart (DishShareButton) en houdt de bestaande bewaarlogica. */}
       {shareNote && (
-        <ZoekGerechtBlock
-          title="Zelf ook zin in iets?"
-          body="Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig."
-          cta="Zoek een gerecht"
-          variant="dish"
-        />
+        <section className="zoek-gerecht zoek-gerecht--dish">
+          <h2 className="zoek-gerecht-title">Zelf ook zin in iets?</h2>
+          <p className="zoek-gerecht-body">Zoek op gerecht in alle menukaarten van Breda. Geen app of account nodig.</p>
+          <Link href="/" className="zoek-gerecht-btn" prefetch={false}>Zoek een gerecht</Link>
+        </section>
       )}
       <div className="card-top">
         <div className="td-name">{highlight(item.name, displayQuery)}</div>

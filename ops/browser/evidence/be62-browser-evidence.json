@@ -2,7 +2,7 @@
   "script": "run-be62-browser-check.js",
   "kind": "fixture_browser_evidence",
   "category": "lokale browsercheck van de productieopbouw (next start op poort 3196) met een gestubde kies-API; geen productie en geen echte acceptatie",
-  "startedAt": "2026-10-31T11:07:38.475Z",
+  "startedAt": "2026-10-31T11:33:19.486Z",
   "port": 3196,
   "filter": null,
   "scenarioRuns": [
@@ -11,7 +11,7 @@
       "checks": 34,
       "passed": 34,
       "failed": 0,
-      "durationMs": 14261,
+      "durationMs": 14273,
       "error": null
     },
     {
@@ -19,7 +19,7 @@
       "checks": 30,
       "passed": 30,
       "failed": 0,
-      "durationMs": 22974,
+      "durationMs": 17926,
       "error": null
     },
     {
@@ -27,7 +27,7 @@
       "checks": 11,
       "passed": 11,
       "failed": 0,
-      "durationMs": 10562,
+      "durationMs": 9337,
       "error": null
     }
   ],
@@ -579,7 +579,7 @@
     },
     {
       "file": "be62-gerecht-1280-light.png",
-      "sha256": "c54efb4d23fe989de10f0df237bd1ff217e0dee62247663a1d5843fdab36947f",
+      "sha256": "57c1081c6e248d116f7ff6974d6e21ea0ef333a0f915a6388fa2fd112bbd8cd7",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -603,7 +603,7 @@
     },
     {
       "file": "be62-gerecht-390-light.png",
-      "sha256": "f33b7f95fffce7b9c303ab8a54187b12bbb1dc795caad08a6dc1568b793f3203",
+      "sha256": "2ad5f285f69424c30f9d7116330dfbc3727c13aaefb0c0a2358591234efb8fca",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -627,7 +627,7 @@
     },
     {
       "file": "be62-gerecht-320-light.png",
-      "sha256": "178ec1e73e2cc2b2f098bb857b5ab840d953c5fb93d38a281320613fffa78f6f",
+      "sha256": "cc2982d8adb33943ff6438e9b9165de431f160fdb57e821471bda965a49af61c",
       "width": 320,
       "height": 640,
       "viewport": "320x640",
@@ -651,7 +651,7 @@
     },
     {
       "file": "be62-gerecht-1280-dark.png",
-      "sha256": "2f480a04bd0a08f6c550ee07bd5d74efb14b1891e3be8d8d17000e3e9b7b700c",
+      "sha256": "f676da7a8527016a45c38242de0bb79ebda48ec64465e60ede3320a3de95641c",
       "width": 1280,
       "height": 900,
       "viewport": "1280x900",
@@ -675,7 +675,7 @@
     },
     {
       "file": "be62-gerecht-390-dark.png",
-      "sha256": "4c017ead971801b3f699efe8b3e51d96f725dbfa947dfa48a854f754f9b57d04",
+      "sha256": "0f6ced5d063e5152b4da763dbefa1e87a14e2a4fd26b663aa2719837a0116665",
       "width": 390,
       "height": 780,
       "viewport": "390x780",
@@ -699,7 +699,7 @@
     },
     {
       "file": "be62-gerecht-320-dark.png",
-      "sha256": "fad93565eb872e200a7d21ed0aceed70681f40af5f1f98a7dc1484a6635b50c3",
+      "sha256": "92a616e1f8551863e4053724a7bb0e34cfe7a456ce208cca2b2ab369fc45ed2d",
       "width": 320,
       "height": 640,
       "viewport": "320x640",
