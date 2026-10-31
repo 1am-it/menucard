@@ -43,8 +43,10 @@
 -- which is the only writer.
 --
 -- The history table (0023) learns two actions, 'uitverkocht' and 'beschikbaar',
--- so the Op = op button can leave its trail without a third migration. Nothing
--- else on that table changes.
+-- so the Op = op button can leave its trail without a third migration, and the
+-- three daily counters 'bekeken', 'bewaard' and 'gedeeld' per offer (the holder's
+-- overview counts today's rows; no new table). Nothing else on that table
+-- changes.
 --
 -- Without this migration the app keeps working exactly as it does now: no
 -- dagmenu, no repetition and no sold-out state appear, and no route answers 500
@@ -144,14 +146,18 @@ alter table daghap_aanbod add constraint daghap_aanbod_herhaling_check
     end
   );
 
--- The two actions of Op = op in the history of 0023. Everything else stays the
--- same list, so the older rows keep passing this check.
+-- The actions of Op = op ('uitverkocht', 'beschikbaar') and the three daily
+-- counters of an offer ('bekeken', 'bewaard', 'gedeeld'). The counters live in
+-- this existing history table, so there is no new table: the holder's overview
+-- counts today's rows per offer. Everything else stays the same list, so the
+-- older rows keep passing this check.
 alter table daghap_gebeurtenissen drop constraint if exists daghap_gebeurtenissen_actie_check;
 alter table daghap_gebeurtenissen add constraint daghap_gebeurtenissen_actie_check
   check (actie in (
     'geplaatst', 'gewijzigd', 'offline', 'in_controle', 'gemeld',
     'goedgekeurd', 'verwijderd', 'verlopen', 'recht_afgenomen',
-    'recht_teruggegeven', 'uitverkocht', 'beschikbaar'
+    'recht_teruggegeven', 'uitverkocht', 'beschikbaar',
+    'bekeken', 'bewaard', 'gedeeld'
   ));
 
 -- Same posture as 0023: row level security on, deliberately no policy for anon

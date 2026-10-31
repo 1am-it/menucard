@@ -42,6 +42,7 @@ const {
   begindagVan,
   beoordeelAanbod,
   berichtBij,
+  cijferTekst,
   isVerlopen,
   magSoortToevoegen,
   magVandaagWijzigen,
@@ -58,6 +59,9 @@ const DAGHAP_TABLE_GEBEURTENISSEN = 'daghap_gebeurtenissen';
 // houder voor dit restaurant het plaatsrecht ontnam (stap B).
 const DAGHAP_TABLE_PLAATSRECHT = 'daghap_plaatsrecht';
 const DAGHAP_CLEANUP_FUNCTION = 'ruim_verlopen_daghap_op';
+// BE-67, uitkomst 4: de drie tellers van een aanbod, in de bestaande
+// gebeurtenissentabel (geen nieuwe tabel).
+const DAGHAP_CIJFERS = Object.freeze(['bekeken', 'bewaard', 'gedeeld']);
 // Na zoveel meldingen van verschillende apparaten gaat het aanbod op
 // `in_controle` (contract). Eén melding per apparaat telt.
 const DAGHAP_MELDINGEN_TOT_CONTROLE = 3;
@@ -746,6 +750,61 @@ function createDaghapHandlers({
   }
 
   /**
+   * BE-67, uitkomst 4: het aantal keer bekeken, bewaard en gedeeld van elk
+   * aanbod vandaag (Europe/Amsterdam). De bestaande gebeurtenissentabel van 0023
+   * telt ze; er is geen nieuwe tabel en geen nieuwe teller. Ontbreekt de tabel of
+   * kent de database de acties van 0026 nog niet, dan is er geen cijfer en blijft
+   * het overzicht gewoon werken.
+   */
+  async function telCijfers(supabase, ids) {
+    if (ids.length === 0) return { perAanbod: new Map() };
+    const gevonden = await ask(
+      supabase
+        .from(DAGHAP_TABLE_GEBEURTENISSEN)
+        .select('aanbod_id, actie')
+        .in('aanbod_id', ids)
+        .in('actie', DAGHAP_CIJFERS)
+        .gte('moment', begindagVan(now())),
+    );
+    if (gevonden.error) return { perAanbod: new Map() };
+    const perAanbod = new Map();
+    for (const rij of Array.isArray(gevonden.data) ? gevonden.data : []) {
+      const sleutel = String(rij.aanbod_id);
+      const telling = perAanbod.get(sleutel) || { bekeken: 0, bewaard: 0, gedeeld: 0 };
+      if (DAGHAP_CIJFERS.includes(rij.actie)) telling[rij.actie] += 1;
+      perAanbod.set(sleutel, telling);
+    }
+    return { perAanbod };
+  }
+
+  /**
+   * BE-67, uitkomst 4: één `bekeken`-regel per getoond aanbod. Bewust
+   * fire-and-forget: een ontbrekende tabel of een fout mag de publieke pagina
+   * nooit breken, en er gaat niets over de bezoeker mee — alleen het aanbod en
+   * het moment.
+   */
+  async function telBekeken(supabase, rijen) {
+    const geldig = (Array.isArray(rijen) ? rijen : [])
+      .map((rij) => ({ id: rij && rij.id, restaurant_id: rij && rij.restaurant_id }))
+      .filter((rij) => rij.id !== undefined && rij.id !== null && rij.restaurant_id);
+    if (geldig.length === 0) return;
+    const moment = new Date(Number(now())).toISOString();
+    await ask(
+      supabase.from(DAGHAP_TABLE_GEBEURTENISSEN).insert(
+        geldig.map((rij) => ({
+          aanbod_id: rij.id,
+          restaurant_id: rij.restaurant_id,
+          actie: 'bekeken',
+          door: null,
+          apparaat: null,
+          gegevens: {},
+          moment,
+        })),
+      ),
+    );
+  }
+
+  /**
    * GET /api/v1/daghap?restaurant_id=<id> — wat er nu van dit restaurant
    * online staat. Verlopen aanbod komt hier nooit meer in voor, ook niet als de
    * opruimfunctie nog niet gelopen heeft.
@@ -777,11 +836,30 @@ function createDaghapHandlers({
     if (gevonden.error) return missingStorage(gevonden.error) ? UNAVAILABLE : failed();
 
     const rijen = Array.isArray(gevonden.data) ? gevonden.data : [];
+    // BE-67, uitkomst 4: de drie cijfers van vandaag per aanbod, in dezelfde
+    // vorm als het overzicht ze toont ("< 5" onder de vijf).
+    const cijfers = await telCijfers(supabase, rijen.map((rij) => rij.id));
+    const perAanbodCijfers = (id) => {
+      const telling = cijfers.perAanbod.get(String(id)) || { bekeken: 0, bewaard: 0, gedeeld: 0 };
+      return {
+        bekeken: telling.bekeken,
+        bewaard: telling.bewaard,
+        gedeeld: telling.gedeeld,
+        bekekenTekst: cijferTekst(telling.bekeken),
+        bewaardTekst: cijferTekst(telling.bewaard),
+        gedeeldTekst: cijferTekst(telling.gedeeld),
+      };
+    };
     return {
       status: 200,
       body: {
         ok: true,
-        aanbod: rijen.map((rij) => aanbodVoorScherm(rij)).filter(Boolean),
+        aanbod: rijen
+          .map((rij) => {
+            const scherm = aanbodVoorScherm(rij);
+            return scherm ? { ...scherm, cijfers: perAanbodCijfers(rij.id) } : null;
+          })
+          .filter(Boolean),
         daghap: rijen.filter((rij) => rij.soort === 'daghap').length,
         dagmenu: rijen.filter((rij) => rij.soort === 'dagmenu').length,
         seizoensgerechten: rijen.filter((rij) => rij.soort === 'seizoensgerecht').length,
@@ -841,6 +919,9 @@ function createDaghapHandlers({
       .filter((rij) => !isVerlopen(rij.verloopt_op, now()))
       .map((rij) => publiekAanbodVoorScherm(rij, now()))
       .filter(Boolean);
+    // BE-67, uitkomst 4: telt wat de gast ziet. Best effort; een fout hier
+    // verandert het antwoord nooit.
+    await telBekeken(supabase, rijen.map((rij) => ({ id: rij.id, restaurant_id: restaurantId })));
 
     return { status: 200, body: { ok: true, aanbod } };
   }
@@ -894,6 +975,9 @@ function createDaghapHandlers({
         return { ...scherm, restaurantId: rij.restaurant_id || null };
       })
       .filter(Boolean);
+
+    // BE-67, uitkomst 4: telt de aanbiedingen die deze gast echt ziet.
+    await telBekeken(supabase, aanbod.map((rij) => ({ id: rij.id, restaurant_id: rij.restaurantId })));
 
     return { status: 200, body: { ok: true, aanbod } };
   }

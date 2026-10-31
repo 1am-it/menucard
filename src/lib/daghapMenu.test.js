@@ -17,6 +17,7 @@ const {
   aanbodVoorScherm,
   beoordeelAanbod,
   berichtBij,
+  cijferTekst,
   isUitverkochtVandaag,
   magSoortToevoegen,
   normaliseerAanbod,
@@ -316,4 +317,14 @@ test('BE-67: een oude rij zonder de kolommen van 0026 geeft geen fout', () => {
   assert.equal(staatOnlineVandaag({ verlooptOp: oud.verloopt_op, nu: VRIJDAG }).online, true);
   const morgen = staatOnlineVandaag({ verlooptOp: oud.verloopt_op, nu: Date.parse('2026-10-31T11:00:00.000Z') });
   assert.equal(morgen.online, false);
+});
+
+test('BE-67: een cijfer onder de vijf leest als "< 5", daarboven als getal', () => {
+  // Uitkomst 4, dezelfde regel als BE-57.
+  assert.equal(cijferTekst(0), '< 5');
+  assert.equal(cijferTekst(4), '< 5');
+  assert.equal(cijferTekst(5), '5');
+  assert.equal(cijferTekst(41), '41');
+  assert.equal(cijferTekst(undefined), '< 5');
+  assert.equal(cijferTekst(-3), '< 5');
 });

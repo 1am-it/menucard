@@ -130,6 +130,15 @@ test('0026: de geschiedenis kent de twee acties van Op = op', () => {
   }
 });
 
+test('0026: de geschiedenis kent de drie tellers van een aanbod', () => {
+  // Uitkomst 4: bekeken, bewaard en gedeeld per aanbod, in de bestaande
+  // gebeurtenissentabel — geen nieuwe tabel.
+  const acties = blok('daghap_gebeurtenissen_actie_check', 'same posture');
+  for (const actie of ['bekeken', 'bewaard', 'gedeeld']) {
+    assert.ok(acties.includes(`'${actie}'`), `de teller ${actie} ontbreekt`);
+  }
+});
+
 test('0026: dezelfde RLS en rechten als 0023, en geen policy', () => {
   assert.match(flat, /alter table daghap_aanbod enable row level security/);
   assert.match(flat, /revoke all on public\.daghap_aanbod from public, anon, authenticated/);

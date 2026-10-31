@@ -110,6 +110,11 @@ const FORM_MESSAGES = Object.freeze({
   opIsOpWeerDone: 'Dit aanbod is weer beschikbaar.',
   uitverkochtLabel: 'Uitverkocht',
   uitverkochtBadge: DAGHAP_PUBLIEK.uitverkocht,
+  // BE-67, uitkomst 4: de drie tegels in het overzicht van de houder.
+  cijfersTitel: 'Vandaag',
+  cijferBekeken: 'bekeken',
+  cijferBewaard: 'bewaard',
+  cijferGedeeld: 'gedeeld',
   // BE-67, uitkomst 5: de twee prijschips bij een dagmenu.
   prijs2Chip: DAGHAP_PUBLIEK.prijs2,
   prijs3Chip: DAGHAP_PUBLIEK.prijs3,

@@ -736,6 +736,25 @@ export default function AanbodView({ restaurantIndex }) {
                         </p>
                       )}
                       {item.inControle && <p className="aanbod-controle">{FORM_MESSAGES.wordtGecontroleerd}</p>}
+                      {/* BE-67, uitkomst 4: bekeken, bewaard en gedeeld
+                          vandaag. De cijfers komen uit de bestaande tellers;
+                          onder de vijf staat er "< 5". */}
+                      {item.cijfers && (
+                        <ul className="aanbod-cijfers" aria-label={FORM_MESSAGES.cijfersTitel}>
+                          <li className="aanbod-cijfer">
+                            <span className="aanbod-cijfer-getal">{item.cijfers.bekekenTekst}</span>
+                            <span className="aanbod-cijfer-label">{FORM_MESSAGES.cijferBekeken}</span>
+                          </li>
+                          <li className="aanbod-cijfer">
+                            <span className="aanbod-cijfer-getal">{item.cijfers.bewaardTekst}</span>
+                            <span className="aanbod-cijfer-label">{FORM_MESSAGES.cijferBewaard}</span>
+                          </li>
+                          <li className="aanbod-cijfer">
+                            <span className="aanbod-cijfer-getal">{item.cijfers.gedeeldTekst}</span>
+                            <span className="aanbod-cijfer-label">{FORM_MESSAGES.cijferGedeeld}</span>
+                          </li>
+                        </ul>
+                      )}
                       <div className="aanbod-card-actions">
                         <button type="button" className="owner-link aanbod-knop" onClick={() => beginAanpassen(item)}>
                           {FORM_MESSAGES.adjust}

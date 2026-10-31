@@ -62,6 +62,9 @@ const DAGHAP_PRIJS_MAX_CENT = 15000;
 const DAGHAP_MAX_DAGHAP = 1;
 // Het dagmenu volgt dezelfde grens als de daghap (contract: "dezelfde controle
 // als de daghap"): één actief dagmenu per restaurant.
+// Het aantal vanaf welke een cijfer als getal getoond wordt; daaronder is het
+// "< 5" (uitkomst 4, dezelfde regel als BE-57).
+const DAGHAP_CIJFERS_MIN = 5;
 const DAGHAP_MAX_DAGMENU = 1;
 // Een prijs boven 3× de duurste prijs op de kaart is verdacht (contract).
 const DAGHAP_PRIJS_FACTOR = 3;
@@ -803,6 +806,17 @@ function aanbodVoorScherm(rij) {
 }
 
 /**
+ * BE-67, uitkomst 4: een getal onder de 5 leest als "< 5" (dezelfde regel als
+ * BE-57). Zo verraadt het overzicht niet of iets één, twee of vier keer bekeken
+ * is. Negatief of onleesbaar telt als nul.
+ */
+function cijferTekst(value) {
+  const aantal = Number(value);
+  if (!Number.isFinite(aantal) || aantal < DAGHAP_CIJFERS_MIN) return '< 5';
+  return String(Math.round(aantal));
+}
+
+/**
  * Het aanbod zoals een gast het ziet (stap B): alleen wat de weergave nodig
  * heeft, nooit het account, de status of de filterreden. Een gast krijgt dus
  * geen enkele interne kolom en ook geen volledige lijst van alle restaurants.
@@ -836,6 +850,7 @@ function publiekAanbodVoorScherm(rij, nu) {
 
 module.exports = {
   DAGHAP_ACTIEVE_STATUSSEN,
+  DAGHAP_CIJFERS_MIN,
   DAGHAP_BESCHRIJVING_MAX,
   DAGHAP_FOUTEN,
   DAGHAP_GANGEN,
@@ -870,6 +885,7 @@ module.exports = {
   beoordeelAanbod,
   berichtBij,
   centenNaarPrijs,
+  cijferTekst,
   controleerTekst,
   dagenTotEinddatum,
   delenInTijdzone,

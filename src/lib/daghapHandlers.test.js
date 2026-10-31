@@ -919,7 +919,9 @@ test('BE-67: zonder migratie 0026 meldt de route netjes dat het dagmenu nog niet
   assert.equal(geplaatst.body.error, 'dagmenu_unavailable');
   assert.equal(geplaatst.body.message, 'Het dagmenu is nog niet beschikbaar.');
   assert.equal(client.tables[DAGHAP_TABLE_AANBOD].length, 1, 'er komt niets bij');
-  assert.equal(geschiedenis(client).length, 0);
+  // Sinds uitkomst 4 schrijft de publieke GET één 'bekeken'-teller per getoond
+  // aanbod; een geweigerde plaatsing schrijft nog steeds niets.
+  assert.equal(geschiedenis(client).filter((rij) => rij.actie !== 'bekeken').length, 0);
 
   // Een gewone daghap blijft ook werken zonder 0026 (op een lege werkvoorraad,
   // want dit restaurant heeft in deze test al een actieve daghap).
@@ -1034,6 +1036,66 @@ test('BE-67: zonder 0026 is Op = op een nette 503 en geen 500', async () => {
   const uitkomst = await handlersFor(client).uitverkochtAanbod(uitverkochtRequest(true), { id: '1' });
   assert.equal(uitkomst.status, 503);
   assert.equal(uitkomst.body.error, 'daghap_unavailable');
+});
+
+// --- BE-67, uitkomst 4: bekeken, bewaard en gedeeld ---------------------------
+
+test('BE-67: het overzicht telt vandaag bekeken, bewaard en gedeeld per aanbod', async () => {
+  const vandaag = new Date(NOW).toISOString();
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }, { id: 2, soort: 'seizoensgerecht' }],
+    gebeurtenissen: [
+      // Vijf keer bekeken, vier keer bewaard en zeven keer gedeeld bij aanbod 1.
+      ...[1, 2, 3, 4, 5].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: vandaag })),
+      ...[1, 2, 3, 4].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bewaard', moment: vandaag })),
+      ...[1, 2, 3, 4, 5, 6, 7].map(() => ({ aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'gedeeld', moment: vandaag })),
+      // Eén keer bekeken bij aanbod 2: dat blijft "< 5".
+      { aanbod_id: 2, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: vandaag },
+      // Een wijziging telt niet mee, en de teller van gisteren ook niet.
+      { aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'gewijzigd', moment: vandaag },
+      { aanbod_id: 1, restaurant_id: RESTAURANT_ID, actie: 'bekeken', moment: '2026-10-29T09:00:00.000Z' },
+    ],
+  });
+
+  const lijst = await handlersFor(client).lijstAanbod(request(null));
+  assert.equal(lijst.status, 200);
+  const eerste = lijst.body.aanbod.find((rij) => rij.id === 1);
+  assert.deepEqual(
+    { bekeken: eerste.cijfers.bekeken, bewaard: eerste.cijfers.bewaard, gedeeld: eerste.cijfers.gedeeld },
+    { bekeken: 5, bewaard: 4, gedeeld: 7 },
+  );
+  assert.equal(eerste.cijfers.bekekenTekst, '5');
+  // Onder de vijf toont het overzicht "< 5" (dezelfde regel als BE-57).
+  assert.equal(eerste.cijfers.bewaardTekst, '< 5');
+  assert.equal(eerste.cijfers.gedeeldTekst, '7');
+  const tweede = lijst.body.aanbod.find((rij) => rij.id === 2);
+  assert.equal(tweede.cijfers.bekekenTekst, '< 5');
+  assert.equal(tweede.cijfers.bewaard, 0, 'geen bewaarregels voor dit aanbod');
+});
+
+test('BE-67: de publieke GET schrijft één bekeken-teller per getoond aanbod', async () => {
+  const client = fakeSupabase({ aanbod: [{ id: 1 }] });
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
+  const tellers = geschiedenis(client).filter((rij) => rij.actie === 'bekeken');
+  assert.equal(tellers.length, 1);
+  assert.equal(String(tellers[0].aanbod_id), '1');
+  assert.equal(tellers[0].restaurant_id, RESTAURANT_ID);
+  assert.equal(tellers[0].moment, new Date(NOW).toISOString());
+});
+
+test('BE-67: zonder de tellerkolommen blijft het overzicht werken, zonder cijfers', async () => {
+  // Een database zonder de acties van 0026 weigert de teller; de leesroute mag
+  // daar nooit op stuklopen (uitkomst: zonder migratie geen fout).
+  const client = fakeSupabase({
+    aanbod: [{ id: 1 }],
+    failing: { [DAGHAP_TABLE_GEBEURTENISSEN]: true },
+  });
+  const lijst = await handlersFor(client).lijstAanbod(request(null));
+  assert.equal(lijst.status, 200);
+  assert.equal(lijst.body.aanbod[0].cijfers.bekekenTekst, '< 5');
+  const publiek = await handlersFor(client).publiekAanbod(request(null));
+  assert.equal(publiek.status, 200);
 });
 
 
