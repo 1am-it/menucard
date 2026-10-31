@@ -2,6 +2,13 @@
 const nextConfig = {
   // PDF.js must run through Node's native loader in server route handlers.
   serverExternalPackages: ['pdfjs-dist'],
+  // BE-57 integratie (#139) — de browsercontroles starten hun eigen `next dev`
+  // (ops/browser/lib/runtime.js) in een aparte bouwmap via NEXT_DIST_DIR. Zonder
+  // die scheiding deelt de testserver `.next` met een net gedraaide
+  // `next build`; Next doet dan een volledige herlaadbeurt en de houderpagina
+  // wisselt met de inlogpagina heen en weer. Zonder de variabele blijft de
+  // productieopbouw gewoon `.next` gebruiken.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // The versioned extraction instruction is read server-side at runtime; keep
   // it in the traced output of both analysis routes instead of relying on a
   // developer's machine path or an untracked working-tree file.

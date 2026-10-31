@@ -100,6 +100,7 @@ test('the v2 design adds no database migration in this branch', () => {
   // BE-55's daghap/season tables (#135, step A). None adds v2/product storage.
   // BE-58's holder changes plus confirmation (0025, #143, owner-approved
   // 30 Oct). None adds v2/product storage.
+  // BE-57's anonymous "bekeken" counter (#139). None adds v2/product storage.
   assert.deepEqual(later, [
     '0020_be25_menu_structure_reviews.sql',
     '0021_be44_dish_counters.sql',

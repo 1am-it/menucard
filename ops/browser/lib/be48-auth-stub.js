@@ -33,6 +33,10 @@ const DEFAULT_SETTINGS = {
   // `emailCode`). Both are plain data: the stub never reaches a real project.
   claims: [],
   deleteCode: null,
+  // BE-57 (#139): fictional answers per app path, for example
+  // `{ '/api/mijn-restaurant/1/cijfers': { status: 200, body: {...} } }`. A path
+  // that is not in the map keeps its normal fixture behaviour.
+  ownerStats: {},
 };
 
 /**

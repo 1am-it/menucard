@@ -65,6 +65,12 @@ const FIXTURE_API_ROUTES = [
   // BE-45 (#114): de tellertabel. Alleen de leesroute; elke schrijfactie blijft
   // onbekend en wordt dus geweigerd.
   { id: 'tellers', match: 'exact', path: '/api/internal/v1/tellers', methods: ['GET'] },
+  // BE-57 (#139): de anonieme bezoekteller op /restaurant/<id> en /menu/<id>.
+  // De pagina stuurt na het laden één POST, zonder cookie, IP of user-agent en
+  // zonder erop te wachten. De fixture laat alleen deze ene schrijfroute door;
+  // elke andere schrijfactie blijft onbekend en wordt geweigerd. Zonder migratie
+  // 0024 antwoordt de echte route met "niets opgeslagen" en geeft geen fout.
+  { id: 'bekeken', match: 'exact', path: '/api/v1/bekeken', methods: ['POST'] },
   { id: 'me', match: 'exact', path: '/api/internal/v1/me', methods: ['GET'] },
   { id: 'auth', match: 'prefix', path: '/auth/v1/', methods: ['GET', 'POST'] },
 ];

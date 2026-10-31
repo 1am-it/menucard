@@ -20,7 +20,7 @@ const APP = 'http://localhost:3139';
 // Node; only window/location/localStorage are supplied here. The storage is a
 // small real map, so the stub's own cleanup of a previous scenario's session is
 // observable too.
-function install(overrides, seed) {
+function install(overrides, seed, realFetch) {
   const store = new Map(Object.entries(seed || {}));
   global.window = {
     location: { href: `${APP}/internal/login`, origin: APP, pathname: '/internal/login' },
@@ -33,7 +33,7 @@ function install(overrides, seed) {
         return store.size;
       },
     },
-    fetch: null,
+    fetch: typeof realFetch === 'function' ? realFetch : null,
   };
   const result = installBe48AuthStub(be48Settings(overrides));
   return { api: result, stored: store, fetch: global.window.fetch };
@@ -198,6 +198,30 @@ test('the stub: everything unknown is refused and recorded, never forwarded', as
     api.violations.map((entry) => entry.kind),
     ['external_origin', 'unknown_api_route', 'unknown_auth_route'],
   );
+});
+
+test('the stub: het vooruitladen van de eigen app gaat door, een API-route blijft dicht', async () => {
+  // BE-57 integratie (#139): in een productieopbouw haalt de App Router de
+  // RSC-payload van een gelinkte pagina vooruit op met een fetch naar de eigen
+  // origin (`?_rsc=`). Dat is verkeer van de app naar zijn eigen server, dus het
+  // gaat door naar de echte fetch; een API- of auth-pad blijft fail-closed, ook
+  // met `_rsc` erachter.
+  const forwarded = [];
+  const realFetch = async (input, init) => {
+    forwarded.push({ input, init });
+    return new Response(null, { status: 204 });
+  };
+  const { fetch, api } = install({}, null, realFetch);
+
+  const prefetch = await fetch(`${APP}/search?_rsc=1ee72`, { method: 'GET' });
+  assert.equal(prefetch.status, 204);
+  assert.equal(forwarded.length, 1);
+  assert.deepEqual(api.violations, []);
+
+  const unknownApi = await fetch(`${APP}/api/internal/v1/onbekend?_rsc=1ee72`, { method: 'GET' });
+  assert.equal(unknownApi.status, 500);
+  assert.deepEqual(api.violations.map((entry) => entry.kind), ['unknown_api_route']);
+  assert.equal(forwarded.length, 1);
 });
 
 test('the stub: the real Supabase SDK accepts the sign-in, code and error shapes', async () => {

@@ -49,6 +49,7 @@ test('0022: één nieuw, uniek migratienummer na 0021', () => {
   // BE-58, #143) zou deze test dan breken. Alleen dat 0022 bestaat en uniek is
   // telt hier.
   assert.ok(files.includes(FILE), '0022 staat in de reeks');
+  assert.ok(files.filter((name) => name < FILE).length > 0, '0022 komt na eerdere migraties');
   assert.match(SQL, /^-- 0022 /);
   assert.match(SQL, /NOT YET APPLIED/i, 'het bestand wordt niet uitgevoerd in deze PR');
 });

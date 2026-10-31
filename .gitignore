@@ -1,5 +1,9 @@
 ﻿node_modules/
 .next/
+# BE-57 integratie (#139): de browsercontroles starten `next dev` in een eigen
+# bouwmap (NEXT_DIST_DIR), zodat een net gedraaide `next build` in .next geen
+# volledige herlaadbeurt in de testserver veroorzaakt.
+.next-browser-*/
 .env.local
 .DS_Store
 
