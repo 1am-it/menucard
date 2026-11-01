@@ -120,6 +120,29 @@ export function MenuConfirmation({ bevestiging }) {
   )
 }
 
+/**
+ * BE-71 (#176, R6) — een kaart waarvan minstens 90% van de gerechten aan de eis
+ * voldoet, staat zonder de twijfelgevallen op de site. Dat zegt de pagina zelf,
+ * met de link naar de volledige kaart bij het restaurant. Alleen kaarten met
+ * `incomplete: true` (uit de startvulling) renderen dit; elke andere kaart
+ * blijft ongewijzigd.
+ */
+export function MenuIncompleteNotice({ entry }) {
+  if (!entry || entry.incomplete !== true) return null
+  const count = Number.isFinite(entry.omittedCount) && entry.omittedCount > 0 ? entry.omittedCount : null
+  const tail = `bekijk de volledige kaart bij het restaurant`
+  return (
+    <p className="menu-incomplete">
+      <span>Niet alle gerechten staan erop{count ? ` (${count} niet)` : ''} · </span>
+      {entry.source ? (
+        <a href={entry.source} target="_blank" rel="noopener">{tail}</a>
+      ) : (
+        <span>{tail}</span>
+      )}
+    </p>
+  )
+}
+
 export function itemMatchesAllergens(item, excludeIds) {
   if (!excludeIds.length) return { safe: true, unknown: false }
   const allergens = item.allergens
