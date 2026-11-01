@@ -293,7 +293,17 @@
     "priceLevel": 3,
     "cuisineLabel": "Scandinavisch · Modern Europees",
     "cardDescription": "Gevestigd in het omgebouwde ketelhuis van de voormalige Nibb-it fabriek. De keuken richt zich op seizoensgebonden, pure ingrediënten en eerlijke smaken.",
-    "phoneDisplay": "076 303 8482"
+    "phoneDisplay": "076 303 8482",
+    "menuLinks": [
+      {
+        "id": "2-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "2-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
   },
   "4": {
     "name": "Restaurant Uijttewaal",
@@ -378,6 +388,10 @@
       {
         "id": "5-lunch",
         "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "5-diner",
+        "label": "🍽 Dinerkaart"
       }
     ]
   },
@@ -1316,14 +1330,6 @@
       {
         "id": "6-diner",
         "label": "🍽 Dinerkaart"
-      },
-      {
-        "id": "6-borrel",
-        "label": "🍸 Borrelkaart"
-      },
-      {
-        "id": "6-specialiteiten",
-        "label": "⭐ Specialiteiten"
       }
     ]
   },
@@ -1449,7 +1455,17 @@
     "badge": "🍺 150+ Beers",
     "cuisineLabel": "Biercafé · Amerikaans · Burgers",
     "cardDescription": "In de historische Oranjeboom brouwerij. Meer dan 150 bieren waaronder 15 speciaal bieren die je zelf tapt aan tafel.",
-    "phoneDisplay": "076 303 6200"
+    "phoneDisplay": "076 303 6200",
+    "menuLinks": [
+      {
+        "id": "9-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "9-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
   },
   "11": {
     "name": "De Beyerd",
@@ -2182,7 +2198,13 @@
     "badge": "🍚 Rijsttafel",
     "cuisineLabel": "Moluks Indonesisch · Rijsttafel",
     "cardDescription": "Authentieke Molukse rijsttafel onder leiding van chef Chesron. Naast dineren ook afhaal, catering en kookworkshops. Tijdens de feestdagen een uitgebreid menu van zo'n 40 gerechten.",
-    "phoneDisplay": "076 888 8941"
+    "phoneDisplay": "076 888 8941",
+    "menuLinks": [
+      {
+        "id": "21-afhaal",
+        "label": "🥡 Afhaalkaart"
+      }
+    ]
   },
   "22": {
     "name": "Makanan",
@@ -3586,10 +3608,6 @@
       {
         "id": "23-diner",
         "label": "🍽 Dinerkaart"
-      },
-      {
-        "id": "23-borrel",
-        "label": "🍸 Borrelkaart"
       }
     ]
   },

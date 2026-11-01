@@ -106,8 +106,9 @@ test('de sitemap bevat de home, de lijstpagina en elke echte restaurant- en menu
     assert.ok(urls.includes(`https://onzemenukaarten.nl/menu/${id}`), `menukaart ${id} ontbreekt`);
   }
   assert.equal(RESTAURANTS.length, 25);
-  // BE-71 ronde 3: de kaart van Restaurant Zenza (17-menukaart) is de veertiende.
-  assert.equal(MENUS.length, 23);
+  // BE-74 (#185): 6-borrel, 6-specialiteiten en 23-borrel zijn vervallen; de
+  // 23 kaarten van BE-71 zijn er 20 geworden.
+  assert.equal(MENUS.length, 26);
   // Elke regel is een volledige https-URL op het eigen domein.
   for (const url of urls) assert.match(url, /^https:\/\/onzemenukaarten\.nl\//);
 });

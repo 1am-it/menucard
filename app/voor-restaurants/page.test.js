@@ -35,6 +35,10 @@ const {
   NVWA_PREVIEW_RESTAURANT_ID,
 } = require('../../src/lib/forRestaurantsCopy');
 
+// BE-74 (#185): het /nvwa/[id]-voorbeeld moet gevulde allergenen hebben. Die
+// controle hoort bij de kaarten van maart; ze draait op de vaste kopie daarvan.
+require('../../src/services/__fixtures__/frozenMarchData').freezeMarchData();
+
 test('de pagina is een Server Component met een eigen stylesheet', () => {
   const source = read(PAGE);
   assert.doesNotMatch(source, /^'use client'/m, 'geen clientcomponent nodig');
