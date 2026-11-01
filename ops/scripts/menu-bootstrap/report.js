@@ -72,6 +72,11 @@ function buildReport({ results, previousMenus, scraped, generatedAt }) {
       candidates: result.candidates || [],
       hadCard,
       previousKeys: Object.keys(previous),
+      // R10/R11: the evidence behind a card the Lead checked, and the date of
+      // that check. A restaurant whose AI output has no correction is skipped
+      // with the reason and shows its evidence here.
+      aiEvidence: result.aiEvidence || null,
+      leadChecked: result.leadChecked || null,
     };
     // A difference is only meaningful against a card that was fetched on an
     // earlier day: a re-run on the same day would compare the card with itself.

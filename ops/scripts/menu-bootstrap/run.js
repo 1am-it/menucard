@@ -16,6 +16,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { bootstrapRestaurant } = require('./engine');
+const { loadLeadCard, buildLeadCard } = require('./leadCard');
 const { buildReport, renderMarkdown } = require('./report');
 const { applyMenuItem } = require('./menuEntry');
 const { serialize } = require('../../../src/lib/menuExport');
@@ -49,6 +50,37 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
+/**
+ * R10: een AI-gelezen kaart komt alleen op de site via de Lead-correctie. Ligt
+ * die er, dan is dat de kaart en is de AI-uitvoer bewijs. Ligt die er niet, dan
+ * wordt er niets geschreven en wordt de site ook niet opnieuw opgehaald: het
+ * bewijs is er immers al, alleen de controle nog niet.
+ */
+function leadRecord({ id, restaurant, lead, menus }) {
+  const built = buildLeadCard({ restaurantId: id, correction: lead.correction, ai: lead.ai, menus });
+  return {
+    restaurantId: id,
+    name: (restaurant && restaurant.name) || (lead.correction && lead.correction.name) || id,
+    website: (restaurant && restaurant.website) || null,
+    status: built.ok ? 'done' : 'skipped',
+    reasons: built.reasons,
+    candidates: [],
+    chosen: built.sourceUrl,
+    menu: null,
+    sourceUrl: built.sourceUrl,
+    kind: lead.correction ? 'lead-correctie' : 'ai',
+    dishCount: built.assessment ? built.assessment.dishCount : 0,
+    pricedCount: built.assessment ? built.assessment.pricedCount : 0,
+    pageCount: null,
+    entry: built.ok ? built.entry : null,
+    entryKey: built.ok ? built.key : null,
+    menuScope: built.scope || null,
+    extraStep: null,
+    aiEvidence: built.ai,
+    leadChecked: built.leadChecked,
+  };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const restaurants = readJson(DATA_RESTAURANTS);
@@ -61,7 +93,10 @@ async function main() {
   console.log(`Startvulling: ${ids.length} restaurant(s), ${args.write ? 'schrijven' : 'droogloop'}.`);
 
   for (const id of ids) {
-    const result = await bootstrapRestaurant({ restaurantId: id, restaurant: restaurants[id], menus, scraped });
+    const lead = loadLeadCard({ restaurantId: id });
+    const result = lead.correction || lead.ai
+      ? leadRecord({ id, restaurant: restaurants[id], lead, menus })
+      : await bootstrapRestaurant({ restaurantId: id, restaurant: restaurants[id], menus, scraped });
     results.push(result);
     const state = result.status === 'done' ? `geslaagd, ${result.dishCount} gerechten` : `${result.status}: ${result.reasons.map((r) => r.text).join('; ')}`;
     console.log(`${id} ${result.name}: ${state}`);
