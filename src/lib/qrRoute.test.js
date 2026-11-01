@@ -17,6 +17,7 @@ const {
   restaurantHref,
 } = require('./qrRoute');
 
+require('../test-fixtures/useFrozenData').useFrozenData();
 const RESTAURANTS = require('../../data/restaurants.json');
 const IDS = Object.keys(RESTAURANTS);
 

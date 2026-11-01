@@ -1,18 +1,23 @@
 'use strict';
 
-// BE-75 (#187) — de levende data zelf: vier gesloten restaurants zijn weg.
+// BE-75 (#187) — vier gesloten restaurants zijn weg.
 //
 // Salon de Provence (10), The Chai Affairs (14), Con Fuego (3) en Masala (18)
 // bestaan niet meer, dus staan ze niet meer in data/restaurants.json en horen
-// ze ook niet in de sitemap. De tests die van die vier of van het oude totaal
-// afhangen, draaien op de vaste kopie van de data van vóór deze wijziging
-// (src/test-fixtures/frozen-data/before-be75/); dit bestand bewaakt
-// juist de echte, levende data en de sitemap.
+// ze ook niet in de sitemap.
+//
+// BE-76 (#189): dit bestand hing daardoor aan de levende data — het aantal van
+// 21, de ids en de sitemap-aantallen braken bij elke nieuwe kaart. Het draait nu
+// op de vaste kopie (src/test-fixtures/frozen-data/, set `current`), met
+// dezelfde verwachtingen. De regels op de echte data staan sinds #189 in
+// src/lib/liveDataContract.test.js; die kijkt nooit naar aantallen.
 
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { test } = require('node:test');
+
+require('../test-fixtures/useFrozenData').useFrozenData();
 
 const { sitemapEntries } = require('./seo');
 

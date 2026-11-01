@@ -32,7 +32,9 @@ const {
 // uit dishSearch.test.js) en niet uit data/ zelf. De verwachting is niet
 // veranderd. Het levende aantal en de sitemap zonder de vier ids staan in
 // src/lib/be75ClosedRestaurants.test.js.
-require('../test-fixtures/useFrozenData').useFrozenData('before-be75');
+const { useFrozenData } = require('../test-fixtures/useFrozenData');
+useFrozenData('before-be75', ['restaurants']);
+useFrozenData('current', ['menus']);
 const RESTAURANTS = Object.keys(require('../../data/restaurants.json'));
 const MENUS = Object.keys(require('../../data/menus.json'));
 

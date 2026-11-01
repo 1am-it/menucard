@@ -70,9 +70,9 @@ test('scope check catches any change outside this restaurant menu', () => {
 
 test('serialisation matches the repository files: 2-space JSON with a trailing newline, a round trip changes nothing', () => {
   const fs = require('node:fs');
-  const path = require('node:path');
-  for (const file of ['data/menus.json', 'data/restaurants.json']) {
-    const raw = fs.readFileSync(path.resolve(__dirname, '..', '..', file), 'utf8').replace(/\r\n/g, '\n');
-    assert.equal(serialize(JSON.parse(raw)), raw, file);
+  const { frozenPath } = require('../test-fixtures/useFrozenData');
+  for (const name of ['menus', 'restaurants']) {
+    const raw = fs.readFileSync(frozenPath('current', name), 'utf8').replace(/\r\n/g, '\n');
+    assert.equal(serialize(JSON.parse(raw)), raw, `frozen-data/${name}.json`);
   }
 });

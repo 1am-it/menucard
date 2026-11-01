@@ -20,6 +20,7 @@ const { loadMenuExtractionProtocol } = require('../../src/lib/menuExtractionProt
 const { validateHoldout, validateRepresentative } = require('./acceptanceSetGuard');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const { frozenPath } = require(path.join(REPO_ROOT, 'src', 'test-fixtures', 'useFrozenData'));
 const STATUSES = new Set(['executed', 'executed_with_limitation', 'blocked', 'unsupported', 'not_available']);
 const PROVENANCE = new Set(['real_source', 'synthetic_fixture', 'historical_dataset', 'candidate_unfetched']);
 const REPRESENTATIVE_REAL_SOURCES = new Set(['smelt', 'blossem', 'debotanist', 'mrmoos', 'colonie']);
@@ -29,7 +30,8 @@ const BROWSER_EVIDENCE = path.join(REPO_ROOT, 'ops', 'browser', 'evidence', 'men
 const SHA256 = /^[0-9a-f]{64}$/;
 
 function canonicalHash(file) {
-  const text = fs.readFileSync(path.join(REPO_ROOT, file), 'utf8').replace(/\r\n?/g, '\n');
+  const absolute = path.isAbsolute(file) ? file : path.join(REPO_ROOT, file);
+  const text = fs.readFileSync(absolute, 'utf8').replace(/\r\n?/g, '\n');
   return crypto.createHash('sha256').update(text).digest('hex');
 }
 
@@ -164,7 +166,7 @@ test('historical cards are a pinned shape snapshot and never current truth', () 
   assert.equal(entry.truthClaim, false);
   const match = /sha256 ([0-9a-f]{64})/.exec(entry.sourceVersion);
   assert.ok(match, 'snapshot hash is pinned');
-  assert.equal(canonicalHash('data/menus.json'), match[1], 'the pinned snapshot is the file in this commit');
+  assert.equal(canonicalHash(frozenPath('current', 'menus')), match[1], 'the pinned snapshot is the frozen copy of data/menus.json');
 });
 
 test('representative and holdout are disjoint; a holdout is evaluated at most once and never tuned', () => {

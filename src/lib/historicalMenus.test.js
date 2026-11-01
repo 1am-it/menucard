@@ -21,6 +21,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
+const { useFrozenData, frozenPath } = require('../test-fixtures/useFrozenData');
+useFrozenData('current');
 const menus = require('../../data/menus.json');
 const { categoryPath } = require('./menuHierarchy');
 const { liveMenuLines, normalizePrice, buildMenuConcept } = require('./menuConcept');
@@ -68,7 +70,7 @@ function multiset(list) {
 }
 
 test('the historical snapshot is pinned by hash and date, never presented as current truth', () => {
-  const text = fs.readFileSync(path.join(REPO_ROOT, 'data', 'menus.json'), 'utf8').replace(/\r\n?/g, '\n');
+  const text = fs.readFileSync(frozenPath('current', 'menus'), 'utf8').replace(/\r\n?/g, '\n');
   assert.equal(crypto.createHash('sha256').update(text).digest('hex'), SNAPSHOT_SHA256);
   const dates = Object.values(menus).map((menu) => menu && menu.scraped).filter(Boolean);
   assert.ok(dates.length > 0);

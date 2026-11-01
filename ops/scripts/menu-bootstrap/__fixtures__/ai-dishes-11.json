@@ -1,0 +1,28 @@
+{
+  "restaurantId": "11",
+  "name": "De Beyerd",
+  "source": "https://www.beyerd.nl/cafe-lunchkaart/",
+  "scraped": "2026-11-01",
+  "model": "fictieve-testuitvoer",
+  "assessment": { "ok": true, "notes": "BE-76 (#189): vaste nepuitvoer voor de R10-regressie; geen echte AI-aanroep, geen .local-bestand." },
+  "dishes": [
+    { "name": "Goat cheese croquettes", "category": "Luxe belegd bierbostelbrood", "price": 11.5 },
+    { "name": "Grilled chicken", "category": "Salades", "price": 14 },
+    { "name": "Croquettes", "category": "Warme lunch", "price": 8 },
+    { "name": "Shrimp croquettes", "category": "Warme lunch", "price": 9.5 },
+    { "name": "Gegrilde kipfilet", "category": "Luxe belegd bierbostelbrood", "price": 12 },
+    { "name": "Gegrilde kipfilet", "category": "Salades", "price": 14 },
+    { "name": "Soep van de dag", "category": "Lunch", "price": 7 },
+    { "name": "Tosti ham en kaas", "category": "Lunch", "price": 8 },
+    { "name": "Uitsmijter", "category": "Lunch", "price": 9.5 },
+    { "name": "Broodje beenham", "category": "Luxe belegd bierbostelbrood", "price": 10.5 },
+    { "name": "Broodje gerookte zalm", "category": "Luxe belegd bierbostelbrood", "price": 12.5 },
+    { "name": "Broodje carpaccio", "category": "Luxe belegd bierbostelbrood", "price": 12 },
+    { "name": "Caesar salad", "category": "Salades", "price": 13 },
+    { "name": "Salade geitenkaas", "category": "Salades", "price": 13.5 },
+    { "name": "Bitterballen", "category": "Warme lunch", "price": 8.5 },
+    { "name": "Frikandel speciaal", "category": "Warme lunch", "price": 5 },
+    { "name": "Patat", "category": "Warme lunch", "price": 4 },
+    { "name": "Appeltaart", "category": "Lunch", "price": 5.5 }
+  ]
+}
