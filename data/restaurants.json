@@ -1785,7 +1785,13 @@
     "badge": "🧀 Fondue",
     "cuisineLabel": "Kaasfondue · Hollands",
     "cardDescription": "Restaurant Smelt is dé specialist in kaasfondue en gourmet in Breda. Gezellig tafelen met heerlijke gesmolten kaas.",
-    "phoneDisplay": "06 13 32 44 00"
+    "phoneDisplay": "06 13 32 44 00",
+    "menuLinks": [
+      {
+        "id": "16-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "17": {
     "name": "Restaurant Zenza",

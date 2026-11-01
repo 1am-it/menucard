@@ -1,0 +1,584 @@
+{
+  "subtitle": "Dinerkaart",
+  "scraped": "2026-11-01",
+  "source": "https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-Dinerkaart.pdf",
+  "leadChecked": "2026-11-01",
+  "notes": "Hoofdgerechten zonder bijgerechten, tenzij anders vermeld. Naast de kaart wisselende seizoensgerechten.",
+  "categories": [
+    {
+      "name": "Klassieke borrelhappen",
+      "items": [
+        {
+          "name": "Oesters naturel",
+          "desc": "met sjalottenvinaigrette en citroen · per stuk · extra topping (gin-tonicschuim & sinaasappel, Asian style of hollandaise en dragonolie) +€0,95",
+          "price": "€4",
+          "priceValue": 4,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Pata Negra",
+          "desc": "70 gram · Spaanse Ibericoham",
+          "price": "€22,95",
+          "priceValue": 22.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Paté en croute",
+          "desc": "gefrituurde kappertjes · uienconfit",
+          "price": "€16,95",
+          "priceValue": 16.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Charcuterie",
+          "desc": "diverse vleeswaren",
+          "price": "€16,95",
+          "priceValue": 16.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Paling",
+          "desc": "brioche · rode biet · crème fraîche en roze peper · per 2 stuks",
+          "price": "€13,95",
+          "priceValue": 13.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Blini gerookte zalm",
+          "desc": "crème fraîche · bieslook · per 2 stuks",
+          "price": "€8,95",
+          "priceValue": 8.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Gebakken eendenlever",
+          "desc": "brioche · appelconfit · port · per 2 stuks",
+          "price": "€14,95",
+          "priceValue": 14.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Oeuf mayonnaise",
+          "desc": "zoetzure mosterdzaad · bieslook",
+          "price": "€4,95",
+          "priceValue": 4.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kaviaar 'Osietra'",
+          "desc": "10 gram · supplement blini's en zure room €5",
+          "price": "€35",
+          "priceValue": 35,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Voorgerechten",
+      "items": [
+        {
+          "name": "Bisque de homard",
+          "desc": "rivierkreeft · saffraanrouille",
+          "price": "€13,95",
+          "priceValue": 13.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Garnalenkroketten",
+          "desc": "2 stuks · met citroenmayonaise",
+          "price": "€22,95",
+          "priceValue": 22.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Escargots",
+          "desc": "persillade · knoflooksabayon · croutons",
+          "price": "€12,95",
+          "priceValue": 12.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Burrata",
+          "desc": "chutney van ratatouille · dragon · perzik",
+          "price": "€16,95",
+          "priceValue": 16.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Klassieke steak tartaar",
+          "desc": "90 gram · supplement eendenlever €6,95",
+          "price": "€15,95",
+          "priceValue": 15.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Zacht gegaard kalfsvlees",
+          "desc": "met pistou · zoetzure sjalot · gedroogde cherry tomaat · hangop · toast",
+          "price": "€18,95",
+          "priceValue": 18.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Salade niçoise",
+          "desc": "gegrilde tonijn · haricots verts · aardappel · ansjovis · rode ui · poftomaat · olijf · ei",
+          "price": "€18,95",
+          "priceValue": 18.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kreeft",
+          "desc": "500/600 gram · ½ of 1/1 · gekookt of gegrild met citroenmayonaise · dagprijs",
+          "price": null,
+          "priceValue": null,
+          "priceOnRequest": true,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Specialiteiten van Bardot",
+      "items": [
+        {
+          "name": "Poussin",
+          "desc": "krielkippetje van onze huisrotisserie met citroen, tijm en appelcompote",
+          "price": "€20,95",
+          "priceValue": 20.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kreeft, pasta aglio e olio",
+          "desc": "½ of 1/1 · antiboise · parmezaan · dagprijs",
+          "price": null,
+          "priceValue": null,
+          "priceOnRequest": true,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Chateaubriand",
+          "desc": "om te delen, 450 gram · 45 minuten bereidingstijd · het beste stuk van de ossenhaas met persillade boter of béarnaise of blauwe kaas of groene pepersaus",
+          "price": "€79,95",
+          "priceValue": 79.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Hoofdgerechten",
+      "items": [
+        {
+          "name": "Klassieke steak tartaar",
+          "desc": "150 gram · supplement eendenlever €6,95",
+          "price": "€24,95",
+          "priceValue": 24.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Confit de canard",
+          "desc": "met saus van Dijon mosterd en dragon · barigoule · aardappelmousseline",
+          "price": "€28,95",
+          "priceValue": 28.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Runder rib-eye",
+          "desc": "200 gram · met beurre Café de Paris of béarnaise",
+          "price": "€35,95",
+          "priceValue": 35.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Tournedos",
+          "desc": "170 gram · spinazie · champignons · truffeljus · supplement gebakken eendenlever €8,50",
+          "price": "€36,95",
+          "priceValue": 36.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Hele dorade van de grill",
+          "desc": "kruidenolie van salie",
+          "price": "€26,95",
+          "priceValue": 26.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Zeetong à la meunière",
+          "desc": "dagprijs",
+          "price": null,
+          "priceValue": null,
+          "priceOnRequest": true,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Risotto",
+          "desc": "asperge · citroen · doperwt · stracciatella",
+          "price": "€23,95",
+          "priceValue": 23.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Kreeftenmenu",
+      "items": [
+        {
+          "name": "Kreeftenmenu",
+          "desc": "Bisque de homard: kreeftensoep · rivierkreeft · saffraanrouille · Halve kreeft: pasta aglio e olio · antiboise · parmezaan · Café complet: zoete lekkernijen met koffie of thee naar keuze",
+          "price": "€59,95",
+          "priceValue": 59.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Extra bijgerechten",
+      "items": [
+        {
+          "name": "Desem stokbrood",
+          "desc": "met seizoensroomboter en olijfolie",
+          "price": "€5,95",
+          "priceValue": 5.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Verse frites met Belgische mayonaise",
+          "desc": "",
+          "price": "€4,95",
+          "priceValue": 4.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Verse frites met truffelmayonaise en parmezaan",
+          "desc": "",
+          "price": "€5,95",
+          "priceValue": 5.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Frisse botersalade",
+          "desc": "",
+          "price": "€6,95",
+          "priceValue": 6.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Seizoensgroenten",
+          "desc": "",
+          "price": "€6,95",
+          "priceValue": 6.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Voor onze kleine gasten",
+      "items": [
+        {
+          "name": "Kindergerecht",
+          "desc": "kipfilet of witvis, frites, salade",
+          "price": "€15,95",
+          "priceValue": 15.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "name": "Crème brûlée",
+          "desc": "supplement bol vanille-ijs €2,50",
+          "price": "€9,95",
+          "priceValue": 9.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Profiterol de Bardot",
+          "desc": "",
+          "price": "€12,95",
+          "priceValue": 12.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Tartelette",
+          "desc": "citroen crémeux · yoghurt · honing · zomers fruit",
+          "price": "€11,95",
+          "priceValue": 11.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Plateau de fromage",
+          "desc": "kweeperengelei · rozijnenbrood · 3 stuks €11,95 · 5 stuks €16,95",
+          "price": "€11,95",
+          "priceValue": 11.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": true,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Café complet",
+          "desc": "zoete lekkernijen met koffie of thee naar keuze",
+          "price": "€13,95",
+          "priceValue": 13.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Chocolade truffels",
+          "desc": "2 stuks",
+          "price": "€3,75",
+          "priceValue": 3.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Digestief",
+      "items": [
+        {
+          "name": "Café Special",
+          "desc": "French, Italian, Spanish of Bardot",
+          "price": "€9,95",
+          "priceValue": 9.95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Diverse likeuren",
+          "desc": "",
+          "price": "€6,25",
+          "priceValue": 6.25,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": true,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Limoncello Primo",
+          "desc": "",
+          "price": "€6,25",
+          "priceValue": 6.25,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Espresso Martini",
+          "desc": "",
+          "price": "€11,75",
+          "priceValue": 11.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    }
+  ]
+}

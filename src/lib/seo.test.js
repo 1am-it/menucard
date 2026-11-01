@@ -98,7 +98,7 @@ test('de sitemap bevat de home, de lijstpagina en elke echte restaurant- en menu
   }
   assert.equal(RESTAURANTS.length, 25);
   // BE-71 ronde 3: de kaart van Restaurant Zenza (17-menukaart) is de veertiende.
-  assert.equal(MENUS.length, 22);
+  assert.equal(MENUS.length, 23);
   // Elke regel is een volledige https-URL op het eigen domein.
   for (const url of urls) assert.match(url, /^https:\/\/onzemenukaarten\.nl\//);
 });

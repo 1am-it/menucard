@@ -1,0 +1,50 @@
+{
+  "subtitle": "Lunchkaart",
+  "scraped": "2026-11-01",
+  "source": "https://www.restaurantwolfslaar.com/nl/menu-lunch",
+  "leadChecked": "2026-11-01",
+  "notes": "Bij de lunch zijn ook de à la carte kaart en het Signature Menu te bestellen (zie de dinerkaart). Lunch dinsdag t/m vrijdag vanaf 12.00 uur.",
+  "categories": [
+    {
+      "name": "Lunchmenu",
+      "items": [
+        {
+          "name": "Business Lunch",
+          "desc": "twee gangen van de chef, binnen één uur geserveerd",
+          "price": "€70",
+          "priceValue": 70,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Lunchmenu 3 gangen",
+          "desc": "voorgerecht, hoofdgerecht en dessert, keuze van de chef",
+          "price": "€85",
+          "priceValue": 85,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Lunchmenu 4 gangen",
+          "desc": "voorgerecht, tussengerecht, hoofdgerecht en dessert, keuze van de chef · de volledige middagervaring van Wolfslaar",
+          "price": "€95",
+          "priceValue": 95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    }
+  ]
+}

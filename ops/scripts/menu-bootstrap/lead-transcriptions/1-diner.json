@@ -1,0 +1,233 @@
+{
+  "subtitle": "Dinerkaart",
+  "scraped": "2026-11-01",
+  "source": "https://www.restaurantwolfslaar.com/nl/menu-diner",
+  "leadChecked": "2026-11-01",
+  "notes": "Op zaterdagavond alleen het Signature Menu, eventueel met een kaasselectie. Geen veganistische gerechten; vegetarisch kan op verzoek.",
+  "categories": [
+    {
+      "name": "Signature Menu Maarten Camps",
+      "items": [
+        {
+          "name": "Signature Menu",
+          "desc": "Witte Heilbot: zeeuwse mossel · sjalot · escabeche · Zeebaars: geschroeid · oester · shiitake · kombucha · Coquille: limburgs kloostervarken · kimchi · bosui · xo · Tarbot (alleen bij zes gangen): gebakken in boerenboter · artisjok · polenta · bouillabaisse · Grain-fed Entrecote: gegrild op de konro grill · knolselderij · boleet · zwarte boon · Conference Peer: pecannoot · kardemom · karamel · vanille · vijf gangen €130 · zes gangen €150",
+          "price": "€130",
+          "priceValue": 130,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": true,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kazen uit het seizoen",
+          "desc": "notenbrood · bijpassende garnituren · 3 kazen €15 · 5 kazen €20 · kaasselectie in plaats van dessert €15 supplement",
+          "price": "€15",
+          "priceValue": 15,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": true,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Voorgerechten",
+      "items": [
+        {
+          "name": "Witte Heilbot",
+          "desc": "zeeuwse mossel · sjalot · escabeche",
+          "price": "€32",
+          "priceValue": 32,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Zeebaars",
+          "desc": "geschroeid · oester · shiitake · kombucha",
+          "price": "€34",
+          "priceValue": 34,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Noordzeekrab",
+          "desc": "als cocktail geserveerd · struikselderij · granny Smith · piment d’espelette",
+          "price": "€38",
+          "priceValue": 38,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Tartaar",
+          "desc": "blonde d’aquitaine rund · kapperappel · radijs · witte aceto balsamico",
+          "price": "€26",
+          "priceValue": 26,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Limburgs Kloostervarken",
+          "desc": "bospeen · paksoy · xo · yuzu",
+          "price": "€26",
+          "priceValue": 26,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Royal Belgian Platinum Caviar",
+          "desc": "blini’s · bieslook · crème fraîche · 30 gram €65 · 50 gram €98",
+          "price": "€65",
+          "priceValue": 65,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": true,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Hoofdgerechten",
+      "items": [
+        {
+          "name": "Tarbot",
+          "desc": "gebakken in boerenboter · artisjok · polenta · bouillabaisse",
+          "price": "€62",
+          "priceValue": 62,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Zeetong",
+          "desc": "à la meuniere · spinazie · pont neuf",
+          "price": "€69",
+          "priceValue": 69,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Mechelse Koekoek",
+          "desc": "zacht gegaard · stoof van dijen · witlof · geweckte wintertruffel · inclusief gebakken ganzenlever €54",
+          "price": "€44",
+          "priceValue": 44,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": true,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Tournedos",
+          "desc": "blonde d’acquitaine rund · seizoensgroenten · sjalot jus",
+          "price": "€52",
+          "priceValue": 52,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Grain-fed Entrecote",
+          "desc": "gegrild op de konro grill · knolselderij · boleet · zwarte boon",
+          "price": "€52",
+          "priceValue": 52,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Nagerechten",
+      "items": [
+        {
+          "name": "Madeleines",
+          "desc": "twee warme madeleines · crème surprise",
+          "price": "€10",
+          "priceValue": 10,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Conference Peer",
+          "desc": "pecannoot · kardemom · karamel · vanille",
+          "price": "€18",
+          "priceValue": 18,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Passie Curd",
+          "desc": "mango · passievrucht · meringue · sorbet",
+          "price": "€18",
+          "priceValue": 18,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kaaswagen",
+          "desc": "kazen uit het seizoen · notenbrood · bijpassende garnituren",
+          "price": "€25",
+          "priceValue": 25,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,506 @@
+{
+  "subtitle": "Dinerkaart",
+  "scraped": "2026-11-01",
+  "source": "https://t-huis.online/wp-content/uploads/2026/09/THS-Diner_Herfst-2026.2_DIGI.svg",
+  "leadChecked": "2026-11-01",
+  "notes": "Diner vanaf 17.00 uur, signature snacks vanaf 14.00 uur.",
+  "categories": [
+    {
+      "name": "Voorgerechten",
+      "items": [
+        {
+          "name": "Steak tartaar 'Pho'",
+          "desc": "steak tartaar · pho vinaigrette · basilicum crème · huisgemaakt zuur · groene kruiden",
+          "price": "€14",
+          "priceValue": 14,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Coquilles",
+          "desc": "gebakken coquilles · duxelles · beurre blanc · truffelolie",
+          "price": "€16",
+          "priceValue": 16,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Bimi & beans",
+          "desc": "geroosterde bimi · canellini bonen crème · chimichurri · crispy broodkruim",
+          "price": "€13",
+          "priceValue": 13,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegan"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Kwartel",
+          "desc": "kwartel borst en poot confit · pompoen puree · artisjok tapenade · crispy chicken skin",
+          "price": "€16",
+          "priceValue": 16,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Tomatensalade",
+          "desc": "tomatenvariatie · artisjok crème · kruidenvinaigrette · ingelegde druiven",
+          "price": "€13",
+          "priceValue": 13,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Schelpen laksa",
+          "desc": "seizoensschelpen · laksa curry · rode peper · koriander · limoen · brood",
+          "price": "€15",
+          "priceValue": 15,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Hoofdgerechten",
+      "items": [
+        {
+          "name": "Slow cheeks",
+          "desc": "langzaam gegaarde varkenswang · knolselderij crème · jus · gebrande sjalot · spekpoeder · granny smith · aardappel kaantjes",
+          "price": "€25",
+          "priceValue": 25,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Sukade & hummus",
+          "desc": "sukade · huisgemaakte hummus · jus · groene harissa · sumak ui · amba · munt",
+          "price": "€25",
+          "priceValue": 25,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Steak à la T-Huis 180 gr",
+          "desc": "rumpsteak · keuze uit saus Diane, truffeljus of wisselende huisboter · + pancetta, ui & champignons €3,50",
+          "price": "€24",
+          "priceValue": 24,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Cauliflower steak",
+          "desc": "bloemkool steak · camembert ranch · zilverui · dukkah · crispy broodkruim · bieslook",
+          "price": "€23",
+          "priceValue": 23,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "T-Burger",
+          "desc": "beef burger · truffelmayo · gruyère · bacon · uiencompote · little gem · tomaat · ook te bestellen met Redefined meat burger (vegetarisch)",
+          "price": "€17",
+          "priceValue": 17,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Signatures",
+      "items": [
+        {
+          "name": "Ribeye à la T-Huis 250 gr",
+          "desc": "ribeye · keuze uit saus Diane, truffeljus of wisselende huisboter · + pancetta, ui & champignons €3,50",
+          "price": "€31",
+          "priceValue": 31,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Vis van het moment",
+          "desc": "seizoensgebonden visgerecht · dagprijs",
+          "price": null,
+          "priceValue": null,
+          "priceOnRequest": true,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "name": "Verse friet",
+          "desc": "zaanse mayonaise",
+          "price": "€5,75",
+          "priceValue": 5.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Roast potatoes",
+          "desc": "geplette krieltjes · ranch · verse kruiden",
+          "price": "€6,75",
+          "priceValue": 6.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Roast veggies",
+          "desc": "geroosterde seizoensgroenten · chimichurri",
+          "price": "€6,75",
+          "priceValue": 6.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegan"
+          ],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Signature snacks (vanaf 14.00 uur)",
+      "items": [
+        {
+          "name": "Toast brioche pata negra",
+          "desc": "iberico cebo campo · aïoli",
+          "price": "€4,75",
+          "priceValue": 4.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Toast brioche seizoenspaddenstoelen",
+          "desc": "roomkaas · bieslook",
+          "price": "€3,75",
+          "priceValue": 3.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Elote corn ribs",
+          "desc": "maïs ribbetjes · tajine · mayonaise · feta",
+          "price": "€7,75",
+          "priceValue": 7.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Pata negra",
+          "desc": "iberico cebo campo",
+          "price": "€15,75",
+          "priceValue": 15.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Eendenrillette",
+          "desc": "huisgemaakte eendenrillette · compote · toast",
+          "price": "€11,75",
+          "priceValue": 11.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Camembert",
+          "desc": "camembert uit de oven · honing · tijm · walnoot · bussing desembol",
+          "price": "€9,75",
+          "priceValue": 9.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Kaasplankje",
+          "desc": "selectie van jonge en oude kazen · huisgemaakt zuur · mosterd",
+          "price": "€11,75",
+          "priceValue": 11.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Nacho's",
+          "desc": "pulled pork · jalapeños · crème fraîche · salsa · guacamole · bosui",
+          "price": "€15,75",
+          "priceValue": 15.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Brood & boter",
+          "desc": "bussing desembol · wisselende huisboter · maldon zout · extra desembol €1,75",
+          "price": "€6,75",
+          "priceValue": 6.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Noten & olijven",
+          "desc": "Spaanse olijven · luxe noten",
+          "price": "€6,75",
+          "priceValue": 6.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegan"
+          ],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Fried delight",
+      "items": [
+        {
+          "name": "Chorizo kroketjes",
+          "desc": "aïoli · 6 stuks",
+          "price": "€9",
+          "priceValue": 9,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Gyoza's",
+          "desc": "vegetarische gyoza's · sesammayo · crispy chili · bosui · 8 stuks",
+          "price": "€9,50",
+          "priceValue": 9.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegan"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Buffalo chicken bites",
+          "desc": "crispy karaage chicken · buffalo saus · ranch dressing · bieslook · 8 stuks",
+          "price": "€9,75",
+          "priceValue": 9.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kaastengels",
+          "desc": "chilisaus · 8 stuks",
+          "price": "€9,75",
+          "priceValue": 9.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Frikandelletjes",
+          "desc": "mayonaise · 10 stuks",
+          "price": "€8,50",
+          "priceValue": 8.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Luxe rundvlees bitterballen",
+          "desc": "mosterd · 8 stuks",
+          "price": "€8,75",
+          "priceValue": 8.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Kids",
+      "items": [
+        {
+          "name": "Pancakes",
+          "desc": "keuze uit stroop & suiker, nutella, rood fruit",
+          "price": "€8",
+          "priceValue": 8,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [
+            "vegetarisch"
+          ],
+          "allergens": []
+        },
+        {
+          "name": "Kids burger",
+          "desc": "brioche bun · tomaat · sla · ketchup · augurk · frietjes",
+          "price": "€9,75",
+          "priceValue": 9.75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Frietjes & snacks",
+          "desc": "keuze uit bitterballen, frikandelletjes & kipnuggets",
+          "price": "€8",
+          "priceValue": 8,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kids biefstukje",
+          "desc": "kinder biefstukje · frietjes",
+          "price": "€10",
+          "priceValue": 10,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    }
+  ]
+}

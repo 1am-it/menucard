@@ -1,0 +1,276 @@
+{
+  "subtitle": "Dinerkaart",
+  "scraped": "2026-11-01",
+  "source": "https://www.restaurantzuyd.nl/diner",
+  "leadChecked": "2026-11-01",
+  "notes": "À la carte in verfijnd tussengerecht-formaat. Advies: 3 à 4 gerechtjes per persoon.",
+  "categories": [
+    {
+      "name": "Bites · voor bij het aperitief",
+      "items": [
+        {
+          "name": "Oesterproeverij",
+          "desc": "6 stuks naturel oesters · Balinese vinaigrette",
+          "price": "€23,50",
+          "priceValue": 23.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Oesterproeverij Deluxe",
+          "desc": "6 stuks opgemaakte oesters: citroen · tomaat · bleekselderij · bieslook · pancetta · bloemkool · aardpeer · rode biet · dille · zalmeitjes",
+          "price": "€29,50",
+          "priceValue": 29.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Jamon Iberico Bellota",
+          "desc": "de exclusieve Spaanse ham · 75 gram",
+          "price": "€19,50",
+          "priceValue": 19.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Brioche met paling",
+          "desc": "",
+          "price": "€9,50",
+          "priceValue": 9.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Crumpet met huisgerookte zalm",
+          "desc": "",
+          "price": "€9,50",
+          "priceValue": 9.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Toast met Mangalica, sriracha en sesam",
+          "desc": "",
+          "price": "€8,50",
+          "priceValue": 8.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Duivels eitje met kimchi",
+          "desc": "",
+          "price": "€8,50",
+          "priceValue": 8.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "Verrassingsmenu's",
+      "items": [
+        {
+          "name": "4-gangen verrassingsmenu",
+          "desc": "alleen op dinsdag, woensdag en donderdag · wijnarrangement €32 · ½ glas €22",
+          "price": "€75",
+          "priceValue": 75,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "5-gangen verrassingsmenu",
+          "desc": "wijnarrangement €40 · ½ glas €27,50",
+          "price": "€85",
+          "priceValue": 85,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "6-gangen verrassingsmenu",
+          "desc": "wijnarrangement €48 · ½ glas €33",
+          "price": "€95",
+          "priceValue": 95,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "7-gangen verrassingsmenu",
+          "desc": "wijnarrangement €56 · ½ glas €38,50",
+          "price": "€105",
+          "priceValue": 105,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    },
+    {
+      "name": "À la carte",
+      "items": [
+        {
+          "name": "Steak tartaar",
+          "desc": "steak tartaar van Holsteiner rund · runderham · bitterbal van zwezerik · prei · truffelpecorino",
+          "price": "€27,50",
+          "priceValue": 27.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kreeft",
+          "desc": "lauwwarm gegaarde kreeftenstaart · salade van kreeft · bospeen · tandoori",
+          "price": "€29,50",
+          "priceValue": 29.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Coquille",
+          "desc": "gebakken coquille · tartaar van coquille · knolselderij · kalamansi · hazelnoot · witte soja",
+          "price": "€29",
+          "priceValue": 29,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Catch of the day",
+          "desc": "warm of koud gerecht",
+          "price": "€26",
+          "priceValue": 26,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Zeetongfilet",
+          "desc": "gebakken zeetongfilet · Hollandse garnaal · saffraan · pompoen · bouillabaisse",
+          "price": "€39",
+          "priceValue": 39,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Ossenhaas",
+          "desc": "rosé gebraden ossenhaas · runderstoverij · 'triple fried' pont-neuf · paprika · jus Stroganoff · supplement eendenlever €9",
+          "price": "€35",
+          "priceValue": 35,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Eendenlever",
+          "desc": "gebakken lever · macaron · crème van lever · peer · steranijs",
+          "price": "€28",
+          "priceValue": 28,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kaasgerecht ‘3 x Epoisses’",
+          "desc": "crème brûlée · Zuydvruchtencompote · soufflé · ui · kummel · appelstroop · boekweit · in plaats van dessert: supplement €8,50",
+          "price": "€17",
+          "priceValue": 17,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Kaasassortiment",
+          "desc": "selectie van kazen · Zuydvruchtencompote · brood · vier stuks €13 · zes stuks €19,50 · in plaats van dessert: supplement €8,50",
+          "price": "€13",
+          "priceValue": 13,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": true,
+          "tags": [],
+          "allergens": []
+        },
+        {
+          "name": "Dessert",
+          "desc": "laat u verrassen…",
+          "price": "€16,50",
+          "priceValue": 16.5,
+          "priceOnRequest": false,
+          "priceIsSupplement": false,
+          "priceIsFrom": false,
+          "priceIsMultiple": false,
+          "tags": [],
+          "allergens": []
+        }
+      ]
+    }
+  ]
+}
