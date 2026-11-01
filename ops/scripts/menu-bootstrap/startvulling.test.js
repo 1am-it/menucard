@@ -13,7 +13,7 @@ const path = require('node:path');
 const { readHtmlMenu, readPdfMenu, parsePrintedPrice } = require('./readMenuSource');
 const { assessCompleteMenu, MIN_DISHES } = require('./completeMenu');
 const { buildEntry, buildExport, applyMenuItem, menuLinksFor, menuScopeFor, menuKey, MENU_VARIANTS } = require('./menuEntry');
-const { createSourceFetcher, USER_AGENT } = require('./fetchSource');
+const { createSourceFetcher, USER_AGENT, robustRobotsCheck, describeRobotsAttempt } = require('./fetchSource');
 const { bootstrapRestaurant } = require('./engine');
 const { buildReport, renderMarkdown } = require('./report');
 
@@ -186,6 +186,32 @@ test('robots.txt wordt gerespecteerd en er zit rust tussen twee verzoeken naar d
   assert.ok(calls.length >= 3, String(calls.length));
   assert.ok(clock.waits.length >= 1);
   assert.ok(clock.waits.every((ms) => ms >= 2000), JSON.stringify(clock.waits));
+});
+
+test('robots.txt: een 4xx betekent geen regels en ophalen mag, een 5xx of time-out betekent niet ophalen', async () => {
+  const notFound = async () => {
+    throw Object.assign(new Error('not found'), { reason: 'bad-status', statusCode: 404 });
+  };
+  const gate404 = await robustRobotsCheck('https://voorbeeld.nl/menu', notFound);
+  assert.equal(gate404.robotsStatus, 'missing');
+  assert.equal(gate404.shouldFetchPage, true);
+
+  const serverError = async () => {
+    throw Object.assign(new Error('server error'), { reason: 'bad-status', statusCode: 503 });
+  };
+  const gate5xx = await robustRobotsCheck('https://voorbeeld.nl/menu', serverError);
+  assert.equal(gate5xx.robotsStatus, 'unreachable');
+  assert.equal(gate5xx.shouldFetchPage, false);
+  assert.equal(gate5xx.attempts, 2);
+  assert.match(describeRobotsAttempt(gate5xx), /503/);
+
+  const timeout = async () => {
+    throw Object.assign(new Error('timeout'), { reason: 'timeout' });
+  };
+  const gateTimeout = await robustRobotsCheck('https://voorbeeld.nl/menu', timeout);
+  assert.equal(gateTimeout.shouldFetchPage, false);
+  assert.equal(gateTimeout.attempts, 2);
+  assert.match(describeRobotsAttempt(gateTimeout), /timeout/);
 });
 
 test('de cache: een tweede run haalt een html-pagina niet opnieuw op', async () => {

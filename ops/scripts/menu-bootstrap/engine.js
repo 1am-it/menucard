@@ -66,12 +66,14 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
   }
 
   const source = fetcher || createSourceFetcher({ cacheDir, fetchImpl, sleep, now });
-  const home = await source.getPage(record.website);
-  if (!home.ok) {
-    record.status = 'blocked';
-    record.reasons.push({ code: home.reason, text: home.detail || home.reason, detail: home.url });
-    return record;
-  }
+    const home = await source.getPage(record.website);
+    if (!home.ok) {
+      record.status = 'blocked';
+      // The exact robots.txt outcome travels with the reason, so the report
+      // shows a 404 (no rules, may fetch) apart from a 5xx/timeout (no fetch).
+      record.reasons.push({ code: home.reason, text: home.detail || home.reason, detail: home.robotsAttempt || home.url });
+      return record;
+    }
 
   const reads = [];
   const homeRead = await readResponse(home);

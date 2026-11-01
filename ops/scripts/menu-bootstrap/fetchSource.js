@@ -17,15 +17,74 @@ const { fetchWebsiteSafely } = require('../../../src/lib/safeOutboundFetch');
 const {
   checkRobotsForUrl,
   fetchSameSiteWithRedirects,
+  classifyRobotsOutcome,
+  robotsAllowsPath,
   describeRobotsBlock,
   RedirectPolicyError,
 } = require('../../../src/lib/restaurantSourceFetch');
+const { parseRobotsTxtDisallowRules } = require('../../../src/lib/candidateSuggestions');
 
 const USER_AGENT = 'OnzeMenukaarten-startvulling/1.0 (+[E-MAILADRES])';
 const MIN_INTERVAL_MS = 2000;
 const MAX_BYTES = 15 * 1024 * 1024;
 const DEFAULT_CACHE_DIR = path.join('.local', 'menu-bootstrap-cache');
 const MAX_CANDIDATES = 5;
+// A robots.txt that was unreachable (timeout, TLS, network, 5xx) is checked
+// once more with a wider timeout, so the report can say what happened. The
+// rule itself does not change: without a readable robots.txt nothing is
+// fetched (RFC 9309 §2.3.1.4); a 4xx means "no rules" and may proceed
+// (§2.3.1.3) — that is the shared gate's existing `missing` status.
+const ROBOTS_TIMEOUT_MS = 5000;
+const ROBOTS_RETRY_TIMEOUT_MS = 20000;
+const ROBOTS_MAX_BYTES = 200 * 1024;
+const ROBOTS_CACHE_POLICY = 'robots-retry-v1';
+
+/**
+ * One robots.txt gate with at most one retry. The first try is the shared
+ * gate unchanged (5 s). Only an `unreachable` outcome (timeout, TLS, network
+ * error or 5xx) is tried once more with a wider timeout, so the report can
+ * name what happened. The decision stays fail-closed either way.
+ */
+async function robustRobotsCheck(url, pacedFetch) {
+  const first = await checkRobotsForUrl(url, { fetchImpl: pacedFetch });
+  if (first.robotsStatus !== 'unreachable') return { ...first, attempts: 1 };
+  const target = new URL(url);
+  const robotsUrl = `${target.origin}/robots.txt`;
+  let attempt;
+  try {
+    const result = await fetchSameSiteWithRedirects(robotsUrl, {
+      fetchImpl: pacedFetch,
+      fetchOptions: { maxBytes: ROBOTS_MAX_BYTES, timeoutMs: ROBOTS_RETRY_TIMEOUT_MS },
+      robotsCheck: null,
+    });
+    attempt = classifyRobotsOutcome({ result: result.response });
+    if (attempt.robotsStatus === 'rules_loaded') attempt.disallowRules = parseRobotsTxtDisallowRules(result.response.body);
+  } catch (error) {
+    attempt = error instanceof RedirectPolicyError
+      ? { robotsStatus: 'invalid_or_unknown', httpStatus: error.statusCode || null, detail: error.reason }
+      : classifyRobotsOutcome({ error });
+  }
+  const allowed = robotsAllowsPath(attempt, target.pathname);
+  return {
+    ...attempt,
+    decision: allowed ? 'allowed' : attempt.robotsStatus === 'rules_loaded' ? 'disallowed' : 'blocked',
+    robotsUrl,
+    shouldFetchPage: allowed,
+    disallowRules: attempt.disallowRules || [],
+    attempts: 2,
+    firstAttempt: { robotsStatus: first.robotsStatus, httpStatus: first.httpStatus || null, detail: first.detail || null },
+  };
+}
+
+/** One line the report can print: what exactly happened with robots.txt. */
+function describeRobotsAttempt(gate) {
+  if (!gate) return null;
+  const first = gate.firstAttempt || null;
+  const reason = gate.detail || (gate.httpStatus ? `http ${gate.httpStatus}` : 'onbekend');
+  const text = `${gate.robotsStatus} (${reason}${gate.attempts > 1 ? `, na een tweede poging met ${ROBOTS_RETRY_TIMEOUT_MS} ms` : ''})`;
+  return first ? `${text}; eerste poging: ${first.robotsStatus} (${first.detail || (first.httpStatus ? `http ${first.httpStatus}` : 'onbekend')})` : text;
+}
+
 
 function cacheKey(url) {
   return crypto.createHash('sha256').update(String(url)).digest('hex').slice(0, 40);
@@ -61,7 +120,7 @@ function createSourceFetcher({ cacheDir = DEFAULT_CACHE_DIR, fetchImpl = fetchWe
   }
 
   function robotsCheck(url) {
-    return checkRobotsForUrl(url, { fetchImpl: pacedFetch });
+    return robustRobotsCheck(url, pacedFetch);
   }
 
   function store(entry) {
@@ -85,7 +144,9 @@ function createSourceFetcher({ cacheDir = DEFAULT_CACHE_DIR, fetchImpl = fetchWe
    */
   async function getPage(url) {
     const cached = load(url);
-    if (cached) {
+    // A refusal written before the retry policy existed is checked once more:
+    // the report must say what really happened, not repeat an older guess.
+    if (cached && !(cached.ok === false && cached.robotsPolicy !== ROBOTS_CACHE_POLICY)) {
       if (cached.ok === false) return { ...cached, fromCache: true };
       const bytes = Buffer.from(cached.bodyBase64, 'base64');
       return {
@@ -103,7 +164,18 @@ function createSourceFetcher({ cacheDir = DEFAULT_CACHE_DIR, fetchImpl = fetchWe
 
     const gate = await robotsCheck(url);
     if (!gate.shouldFetchPage) {
-      const entry = { ok: false, url, reason: 'robots', detail: describeRobotsBlock(gate), robotsStatus: gate.robotsStatus };
+      const entry = {
+        ok: false,
+        url,
+        reason: 'robots',
+        detail: describeRobotsBlock(gate),
+        robotsStatus: gate.robotsStatus,
+        robotsHttpStatus: gate.httpStatus || null,
+        robotsDetail: gate.detail || null,
+        robotsAttempt: describeRobotsAttempt(gate),
+        robotsAttempts: gate.attempts || 1,
+        robotsPolicy: ROBOTS_CACHE_POLICY,
+      };
       store(entry);
       return entry;
     }
@@ -142,4 +214,4 @@ function createSourceFetcher({ cacheDir = DEFAULT_CACHE_DIR, fetchImpl = fetchWe
   return { getPage, robotsCheck, pacedFetch, USER_AGENT };
 }
 
-module.exports = { USER_AGENT, MIN_INTERVAL_MS, MAX_CANDIDATES, DEFAULT_CACHE_DIR, createSourceFetcher, cacheKey };
+module.exports = { USER_AGENT, MIN_INTERVAL_MS, MAX_CANDIDATES, DEFAULT_CACHE_DIR, ROBOTS_RETRY_TIMEOUT_MS, createSourceFetcher, cacheKey, robustRobotsCheck, describeRobotsAttempt };
