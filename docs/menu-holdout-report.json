@@ -1,0 +1,1252 @@
+{
+  "issue": "#180 (BE-73)",
+  "decision": "planning/decisions/021-breda-menu-bootstrap.md",
+  "measurement": "alleen meten: niets naar data/, niets gepubliceerd, motor van BE-71 ongewijzigd",
+  "scraped": "2026-11-01",
+  "generatedAt": "2026-11-01T10:13:59.448Z",
+  "selection": {
+    "source": "ops/data/breda-restaurant-candidates.json",
+    "measured": 50,
+    "excluded": []
+  },
+  "totals": {
+    "restaurants": 50,
+    "done": 3,
+    "skipped": 35,
+    "blocked": 12,
+    "measured": 38
+  },
+  "places": {
+    "subpagina": 6,
+    "geblokkeerd": 12,
+    "pdf met tekstlaag": 7,
+    "geen kaart online": 12,
+    "JavaScript": 3,
+    "afbeelding": 8,
+    "extern platform": 2
+  },
+  "groups": {
+    "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.": 8,
+    "gerechten zonder categorie": 4,
+    "gerechten zonder prijs": 1,
+    "geen gerechten herkend": 25,
+    "herkende sectie niet als gerechten opgeslagen": 1,
+    "robots.txt van deze site kon niet betrouwbaar worden gelezen (HTTP 301) — de pagina is niet opgehaald.": 2,
+    "robots.txt van deze site weigert toegang (HTTP 403) — de pagina is niet opgehaald.": 1,
+    "menukopje met onzekere structuur": 3,
+    "minder dan 8 gerechten": 1,
+    "robots.txt van deze site staat het ophalen van deze pagina niet toe.": 1
+  },
+  "baseline": {
+    "restaurants": 25,
+    "done": 3,
+    "percent": 12
+  },
+  "comparison": {
+    "baselinePercent": 12,
+    "holdoutPercent": 6,
+    "differencePoints": -6
+  },
+  "restaurants": [
+    {
+      "rank": 1,
+      "name": "Tortillas Breda",
+      "website": "https://www.tortillas.nl/",
+      "menuUrl": "https://www.tortillas.nl/menu/",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "126 gerechten uit html op /menu/",
+      "dishCount": 126,
+      "pricedCount": 126,
+      "status": "done",
+      "reasons": [],
+      "sample": [
+        {
+          "name": "Portie croquetas",
+          "price": 9.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Portie uienringen",
+          "price": 8.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Portie calamares",
+          "price": 8.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Portie garnalen",
+          "price": 12.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Portie albondigas",
+          "price": 8.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Poppers",
+          "price": 8.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Alitas Callejeras",
+          "price": 9.5,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Elote",
+          "price": 4.75,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Gepofte aardappel",
+          "price": 5.25,
+          "category": "Tapas & Bites"
+        },
+        {
+          "name": "Bakje Batata",
+          "price": 4.25,
+          "category": "Tapas & Bites"
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "De Broodtoren",
+      "website": "https://www.broodtoren.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 3,
+      "name": "Brandpunt",
+      "website": "https://www.brandpuntbreda.nl/",
+      "menuUrl": "https://www.brandpuntbreda.nl/wp-content/uploads/Brandpunt_Menu_Compleet_v2.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "64 gerechten uit een pdf met tekstlaag (/wp-content/uploads/Brandpunt_Menu_Compleet_v2.pdf)",
+      "dishCount": 64,
+      "pricedCount": 64,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncategorised_dishes",
+          "text": "gerechten zonder categorie",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "8 sectie(s)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "3 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 4,
+      "name": "Enjoy Vietnam",
+      "website": "https://www.enjoyvietnam.nl/",
+      "menuUrl": "https://www.enjoyvietnam.nl/menu",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "31 gerechten uit html op /menu",
+      "dishCount": 31,
+      "pricedCount": 30,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "unpriced_dishes",
+          "text": "gerechten zonder prijs",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        },
+        {
+          "code": "price_variants",
+          "text": "gerecht met meerdere prijzen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 5,
+      "name": "Sylvie's Baguettes",
+      "website": "https://www.sylviesbaguettes.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 6,
+      "name": "Cafetaria De Toren",
+      "website": "https://www.cafetariadetoren.nl/",
+      "menuUrl": "https://www.cafetariadetoren.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 371 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 7,
+      "name": "De Colonie",
+      "website": "http://www.breda.colonie.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 8,
+      "name": "Popocatepetl",
+      "website": "https://www.popo.nl/",
+      "menuUrl": "https://www.popo.nl/",
+      "form": "html",
+      "place": "JavaScript",
+      "placeEvidence": "homepage: 3 woorden, 0 menulink(en)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 9,
+      "name": "Friet Panters",
+      "website": "https://www.frietpanters.nl/",
+      "menuUrl": "https://www.frietpanters.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 279 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 10,
+      "name": "Dönerland Breda",
+      "website": "https://www.donerland-breda.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 11,
+      "name": "Lunchroom Canella",
+      "website": "https://www.canella-breda.nl/",
+      "menuUrl": "https://www.canella-breda.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "2 afbeelding(en) met een menuwoord op /, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 12,
+      "name": "Tapasbar Plan B",
+      "website": "https://www.tapasbarplanb.nl/",
+      "menuUrl": "https://www.tapasbarplanb.nl/hapasmenu/",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "31 gerechten uit html op /hapasmenu/",
+      "dishCount": 31,
+      "pricedCount": 31,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 13,
+      "name": "El Greco Breda",
+      "website": "https://www.elgrecobreda.nl/",
+      "menuUrl": "https://www.elgrecobreda.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 1448 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 14,
+      "name": "Geisha Lounge",
+      "website": "https://www.geishalounge.nl/",
+      "menuUrl": "https://www.geishalounge.nl/",
+      "form": "html",
+      "place": "extern platform",
+      "placeEvidence": "1 menulink(en) naar takeaway.eatcard.nl op /",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 15,
+      "name": "Restaurant Sirtaki Breda",
+      "website": "https://www.restaurantsirtakibreda.nl/",
+      "menuUrl": "https://www.restaurantsirtakibreda.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "1 afbeelding(en) met een menuwoord op /, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 16,
+      "name": "Le Smash",
+      "website": "https://www.le-smash.com/",
+      "menuUrl": "https://www.le-smash.com/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 523 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 17,
+      "name": "Mariposa",
+      "website": "https://www.mariposabreda.nl/",
+      "menuUrl": "https://mariposabreda.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "10 afbeelding(en) met een menuwoord op /menu, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 18,
+      "name": "Ellis Gourmet Burger Breda",
+      "website": "https://www.ellisgourmetburger.be/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "invalid_or_unknown (redirect-cross-host)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site kon niet betrouwbaar worden gelezen (HTTP 301) — de pagina is niet opgehaald.",
+          "detail": "invalid_or_unknown (redirect-cross-host)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 19,
+      "name": "Tante Betsie",
+      "website": "https://www.tante-betsie.nl/",
+      "menuUrl": "https://www.tante-betsie.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 226 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 20,
+      "name": "Sultan Breda",
+      "website": "https://www.sultanbreda.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 21,
+      "name": "JanenAlleman",
+      "website": "http://www.janenallemanbreda.nl/",
+      "menuUrl": "http://www.janenallemanbreda.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 1014 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 22,
+      "name": "Texburger",
+      "website": "https://www.texburgerbreda.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 23,
+      "name": "Koffie Bij Teun",
+      "website": "https://www.koffiebijteun.nl/",
+      "menuUrl": "https://www.koffiebijteun.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "1 afbeelding(en) met een menuwoord op /, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 24,
+      "name": "Willy's Eethuis",
+      "website": "https://www.willys.eu/",
+      "menuUrl": "https://www.willys.eu/",
+      "form": "html",
+      "place": "JavaScript",
+      "placeEvidence": "homepage: 0 woorden, 0 menulink(en)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 25,
+      "name": "Een kopje geluk",
+      "website": "https://www.eenkopjegeluk.nl/",
+      "menuUrl": "https://www.eenkopjegeluk.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 546 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 26,
+      "name": "Saigon Deli",
+      "website": "https://www.saigondeli.nl/",
+      "menuUrl": "https://www.saigondeli.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 301 woorden, 1 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 27,
+      "name": "L'Anatra",
+      "website": "https://www.lanatra.nl/",
+      "menuUrl": "https://lanatra.nl/Lunch/",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "12 gerechten uit html op /Lunch/",
+      "dishCount": 12,
+      "pricedCount": 12,
+      "status": "done",
+      "reasons": [],
+      "sample": [
+        {
+          "name": "Brioche Anatolia",
+          "price": 15.5,
+          "category": "Lunch"
+        },
+        {
+          "name": "Kıymalı Humus",
+          "price": 14.5,
+          "category": "Lunch"
+        },
+        {
+          "name": "Çılbır",
+          "price": 12.5,
+          "category": "Lunch"
+        },
+        {
+          "name": "Köfte Anatolia",
+          "price": 14.5,
+          "category": "Lunch"
+        },
+        {
+          "name": "Falafel Anatolia",
+          "price": 11.5,
+          "category": "Lunch"
+        },
+        {
+          "name": "Zeytin Salatası",
+          "price": 11.5,
+          "category": "Salade en soep"
+        },
+        {
+          "name": "Mantar Çorbası",
+          "price": 8,
+          "category": "Salade en soep"
+        },
+        {
+          "name": "Meze Tabağı",
+          "price": 17.5,
+          "category": "Borrel"
+        },
+        {
+          "name": "Bitterballen",
+          "price": 9.5,
+          "category": "Borrel"
+        },
+        {
+          "name": "Yeşil Biber",
+          "price": 4.5,
+          "category": "Borrel"
+        }
+      ]
+    },
+    {
+      "rank": 28,
+      "name": "Rhodos Breda",
+      "website": "https://www.rhodos-restaurant.nl/",
+      "menuUrl": "https://rhodos-restaurant.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "52 afbeelding(en) met een menuwoord op /diner/, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 29,
+      "name": "Bar Belle",
+      "website": "https://www.barbellebreda.com/",
+      "menuUrl": "https://www.barbellebreda.com/",
+      "form": "html",
+      "place": "extern platform",
+      "placeEvidence": "2 menulink(en) naar qrfy.io op /menu",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 30,
+      "name": "Liefdegesticht",
+      "website": "https://www.liefdegesticht.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "access_denied (http 403)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site weigert toegang (HTTP 403) — de pagina is niet opgehaald.",
+          "detail": "access_denied (http 403)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 31,
+      "name": "Sol Y Sombra",
+      "website": "http://www.solysombra.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "invalid_or_unknown (redirect-cross-host)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site kon niet betrouwbaar worden gelezen (HTTP 301) — de pagina is niet opgehaald.",
+          "detail": "invalid_or_unknown (redirect-cross-host)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 32,
+      "name": "De Jongens van Zand & Klei",
+      "website": "https://www.zandenklei.nl/",
+      "menuUrl": "https://www.zandenklei.nl/wp-content/uploads/2026/03/allergenen-menu.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "12 gerechten uit een pdf met tekstlaag (/wp-content/uploads/2026/03/allergenen-menu.pdf)",
+      "dishCount": 12,
+      "pricedCount": 12,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "5 sectie(s)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 33,
+      "name": "Bobbi's Bar",
+      "website": "https://www.bobbisbar.nl/",
+      "menuUrl": "https://bobbisbar.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "3 afbeelding(en) met een menuwoord op /menukaart/lunch/, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 34,
+      "name": "Kees Kroket",
+      "website": "https://www.keeskroketbreda.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 35,
+      "name": "Kej Caban",
+      "website": "https://kejcaban.nl/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 36,
+      "name": "Restaurant Lades",
+      "website": "http://www.restaurantlades.nl/",
+      "menuUrl": "https://www.restaurantlades.nl/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "2 afbeelding(en) met een menuwoord op /, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 37,
+      "name": "The Tosti Club",
+      "website": "https://thetosticlub.nl/",
+      "menuUrl": "https://thetosticlub.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 814 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 38,
+      "name": "Gaudím",
+      "website": "https://www.gaudim.nl/",
+      "menuUrl": "https://www.gaudim.nl/lunch/",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "13 gerechten uit html op /lunch/",
+      "dishCount": 13,
+      "pricedCount": 13,
+      "status": "done",
+      "reasons": [],
+      "sample": [
+        {
+          "name": "Sandvitx amb tonyina, ou dur i escalivada",
+          "price": 11.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Pa amb croquetes de pernil ibèric / gambes",
+          "price": 9.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Entrepà de pernil serrat, pebre i oli verge extra",
+          "price": 8.75,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Pa torrat amb tomàquet i formatge manxec",
+          "price": 11.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Hamburguesa de vedella amb ceba, pebrots i formatge gratinat",
+          "price": 13.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Ous remenats amb llonganissa",
+          "price": 11.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Truita de bacallà i bolets",
+          "price": 12.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Bikini amb pernil serrat i tetilla",
+          "price": 9,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Entrepà de sobrassada i formatge manxec",
+          "price": 10.5,
+          "category": "BROODJES"
+        },
+        {
+          "name": "Plat de pinxos 6 peces",
+          "price": 18,
+          "category": "LUNCHSPECIALITEITEN"
+        }
+      ]
+    },
+    {
+      "rank": 39,
+      "name": "Chidoz",
+      "website": "https://www.chidoz.mx/",
+      "menuUrl": "https://chidoz.mx/",
+      "form": "html",
+      "place": "afbeelding",
+      "placeEvidence": "8 afbeelding(en) met een menuwoord op /menu/, 0 prijzen in de html",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 40,
+      "name": "Brasserie Houtmarkt",
+      "website": "https://www.brasseriehoutmarkt.nl/",
+      "menuUrl": "https://brasseriehoutmarkt.nl/wp-content/uploads/2024/10/drukklaar-nu-echt-Brasserie-Houtmarkt-Menukaart-zomer-2024-v1-1.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "65 gerechten uit een pdf met tekstlaag (/wp-content/uploads/2024/10/drukklaar-nu-echt-Brasserie-Houtmarkt-Menukaart-zomer-2024-v1-1.pdf)",
+      "dishCount": 65,
+      "pricedCount": 65,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncategorised_dishes",
+          "text": "gerechten zonder categorie",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "3 sectie(s)"
+        },
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "3 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 41,
+      "name": "KoffieTenTje",
+      "website": "https://www.koffietentje.nl/",
+      "menuUrl": "https://www.koffietentje.nl/",
+      "form": "html",
+      "place": "JavaScript",
+      "placeEvidence": "homepage: 164 woorden, 0 menulink(en)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 42,
+      "name": "Kamome",
+      "website": "https://kamomeramen.nl/",
+      "menuUrl": "https://kamomeramen.nl/",
+      "form": "html",
+      "place": "subpagina",
+      "placeEvidence": "6 gerechten uit html op /",
+      "dishCount": 6,
+      "pricedCount": 6,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "too_few_dishes",
+          "text": "minder dan 8 gerechten",
+          "detail": "6 gerechten"
+        },
+        {
+          "code": "excluded_sections",
+          "text": "herkende sectie niet als gerechten opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 43,
+      "name": "Siri Sorn",
+      "website": "http://siri-sorn-thaifood.com/",
+      "menuUrl": null,
+      "form": null,
+      "place": "geblokkeerd",
+      "placeEvidence": "rules_loaded (http 200)",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "blocked",
+      "reasons": [
+        {
+          "code": "robots",
+          "text": "robots.txt van deze site staat het ophalen van deze pagina niet toe.",
+          "detail": "rules_loaded (http 200)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 44,
+      "name": "Kamu",
+      "website": "https://www.kamu-breda.nl/",
+      "menuUrl": "https://www.kamu-breda.nl/wp-content/uploads/2026/03/KAART_LENTE_2026-1.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "82 gerechten uit een pdf met tekstlaag (/wp-content/uploads/2026/03/KAART_LENTE_2026-1.pdf)",
+      "dishCount": 82,
+      "pricedCount": 82,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "21 sectie(s)"
+        },
+        {
+          "code": "duplicate_dishes",
+          "text": "dubbel gerecht binnen een categorie",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 45,
+      "name": "Ume Breda",
+      "website": "https://www.umebreda.nl/",
+      "menuUrl": "https://umebreda.nl/wp-content/uploads/2024/02/Menu-Ume-2024-2wb.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "10 gerechten uit een pdf met tekstlaag (/wp-content/uploads/2024/02/Menu-Ume-2024-2wb.pdf)",
+      "dishCount": 10,
+      "pricedCount": 7,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncategorised_dishes",
+          "text": "gerechten zonder categorie",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "unpriced_dishes",
+          "text": "gerechten zonder prijs",
+          "detail": "3 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 46,
+      "name": "T-Thai",
+      "website": "https://www.tthai.nl/",
+      "menuUrl": "https://www.tthai.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 213 woorden, 0 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 47,
+      "name": "Koya",
+      "website": "https://restaurantkoya.nl/",
+      "menuUrl": "https://restaurantkoya.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 447 woorden, 1 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 48,
+      "name": "Gastropub De Kleine Wereld",
+      "website": "https://www.gastropubdkw.nl/",
+      "menuUrl": "https://www.gastropubdkw.nl/dkw/wijnkaart-.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "64 gerechten uit een pdf met tekstlaag (/dkw/wijnkaart-.pdf)",
+      "dishCount": 64,
+      "pricedCount": 64,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncategorised_dishes",
+          "text": "gerechten zonder categorie",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "6 sectie(s)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "4 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 49,
+      "name": "New Maddox",
+      "website": "https://maddoxbreda.nl/",
+      "menuUrl": "https://maddoxbreda.nl/wp-content/uploads/2026/10/Maddox-Dinerkaart-Oktober-2026.pdf",
+      "form": "pdf",
+      "place": "pdf met tekstlaag",
+      "placeEvidence": "23 gerechten uit een pdf met tekstlaag (/wp-content/uploads/2026/10/Maddox-Dinerkaart-Oktober-2026.pdf)",
+      "dishCount": 23,
+      "pricedCount": 23,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "19 sectie(s)"
+        }
+      ],
+      "sample": []
+    },
+    {
+      "rank": 50,
+      "name": "Mr.Moos Bistro",
+      "website": "https://mrmoos.nl/",
+      "menuUrl": "https://mrmoos.nl/",
+      "form": "html",
+      "place": "geen kaart online",
+      "placeEvidence": "homepage: 202 woorden, 1 menulink(en), geen kaart gevonden",
+      "dishCount": 0,
+      "pricedCount": 0,
+      "status": "skipped",
+      "reasons": [
+        {
+          "code": "no_dishes",
+          "text": "geen gerechten herkend"
+        }
+      ],
+      "sample": []
+    }
+  ]
+}

@@ -421,6 +421,22 @@ function renderHoldoutMarkdown(report) {
     : 'niet te berekenen';
   lines.push(`Verschil: ${difference}. ${report.totals.blocked} site(s) blokkeerden en zijn niet meegeteld als meting.`);
   lines.push('');
+  lines.push('## Werkwijze');
+  lines.push('');
+  lines.push('- De kaart is gelezen door de ongewijzigde motor van BE-71: geen regel versoepeld, geen');
+  lines.push('  uitzondering voor één site, niets naar `data/` geschreven.');
+  lines.push('- De plek van de kaart komt uit wat de motor zelf ophaalde. Herkende hij gerechten, dan zegt de');
+  lines.push('  bron het: een html-pagina op de eigen site is `subpagina`, een pdf met tekstlaag is');
+  lines.push('  `pdf met tekstlaag` (de kaart-url in de tabel laat zien of dat de homepage of een subpagina is).');
+  lines.push('- Herkende hij geen gerechten, dan beslist het bewijs uit de cache van de pagina\'s die hij wél');
+  lines.push('  ophaalde, in deze volgorde: `pdf zonder tekstlaag`, `afbeelding` (een afbeelding met een');
+  lines.push('  menuwoord in de naam op een pagina zonder prijzen), `extern platform` (een menulink naar een');
+  lines.push('  andere host), `JavaScript` (minder dan 200 woorden en geen menulink) en anders');
+  lines.push('  `geen kaart online`.');
+  lines.push('- `geblokkeerd` is geen oordeel over de kaart: robots.txt of het netwerk weigerde het ophalen, dus');
+  lines.push('  er is niets gelezen. Er is nooit om een blokkade heen gewerkt.');
+  lines.push('- De steekproef per geslaagde kaart is de eerste 10 gerechten met een prijs, in kaartvolgorde.');
+  lines.push('');
   lines.push('## Plek van de kaart');
   lines.push('');
   lines.push('| Plek | Aantal |');
@@ -438,7 +454,10 @@ function renderHoldoutMarkdown(report) {
   lines.push('| # | Restaurant | Kaart | Vorm | Plek | Gerechten | Met prijs | Uitkomst |');
   lines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
   for (const row of report.restaurants) {
-    lines.push(`| ${row.rank} | ${row.name} | ${row.menuUrl || '—'} | ${row.form || '—'} | ${row.place} | ${row.dishCount} | ${row.pricedCount} | ${statusText(row)} |`);
+    // The Kaart column only names a page that really held dishes; a page the
+    // reader refused outright is not the card (the Plek column says what it is).
+    const card = row.dishCount > 0 ? row.menuUrl || '—' : '—';
+    lines.push(`| ${row.rank} | ${row.name} | ${card} | ${row.form || '—'} | ${row.place} | ${row.dishCount} | ${row.pricedCount} | ${statusText(row)} |`);
   }
   lines.push('');
   lines.push('## Bewijs per niet-geslaagde kandidaat');

@@ -204,6 +204,9 @@ test('de meetrun schrijft alleen het rapport, nooit iets in data/', async () => 
   assert.equal(report.restaurants[0].sample.length, FIRST_DISHES);
   assert.match(markdown, /- Tomatensoep \(Voorgerechten\) — € 6,50/);
   assert.match(markdown, /Alleen Afbeelding \| afbeelding/);
+  // A page the reader refused is not named as the card: the Plek column says
+  // what it is, the Kaart column stays empty.
+  assert.match(markdown, /\| 2 \| Alleen Afbeelding \| — \| html \| afbeelding \| 0 \| 0 \| overgeslagen/);
 
   // data/ is byte for byte the same, and no file was added there.
   assert.deepEqual(dataFiles(), before.files);
