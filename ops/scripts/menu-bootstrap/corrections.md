@@ -28,12 +28,12 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | R0 | Een tekstregel tussen haakjes direct na een naam zonder prijs is een omschrijving, nooit een gerechtnaam. Een kop zonder prijs boven een groep gerechten is een categorie. | Lead, review ronde 1 (BE-71) | Makanan: "(bami, nasi goreng of witte rijst …)" | gebouwd in ronde 2 |
 | R4 | Een afkorting die hoofdletters houdt (R1), is een woord van hooguit 3 letters **zonder klinker** (BBQ, XL, GR). "VAN DE" is geen afkorting. | Eigenaar, 1 nov 2026 (4a) | "SOEP VAN DE DAG" → "Soep van de dag" | gebouwd in ronde 3 (verfijning van R1) |
 | R5 | Een extra of toeslag (bijvoorbeeld onder "Extra vlees": "Kipfilet € 4") is een toeslag bij de kaart (`priceIsSupplement`, "+ € 4"), geen los gerecht. Een toeslag telt niet als gerecht in de zoekresultaten. Er gaat geen actief bericht naar de houder; na een claim legt Mijn restaurant dit uit. | Eigenaar, 1 nov 2026 (5b) | Zenza: "Extra vlees": Kipfilet € 4, Lamskotelet € 4 | gebouwd in ronde 4 (de kop van de sectie beslist; de kaart toont "+ € 4"; dishSearch slaat een toeslag over) |
-| R6 | Een kaart waarvan minstens 90% van de gerechten aan de eis voldoet, mag zonder de twijfelgevallen op de site. Voorwaarden: de weggelaten gerechten staan in het rapport, en de site toont "Niet alle gerechten staan erop · bekijk de volledige kaart bij het restaurant" met een link naar de bron. Dit is een uitzondering op besluit 016 §4, alleen binnen deze startvulling. | Eigenaar, 1 nov 2026 (6b) | Trattoria Perron: 131 van 142 met prijs | open |
+| R6 | Een kaart waarvan minstens 90% van de gerechten aan de eis voldoet, mag zonder de twijfelgevallen op de site. Voorwaarden: de weggelaten gerechten staan in het rapport, en de site toont "Niet alle gerechten staan erop · bekijk de volledige kaart bij het restaurant" met een link naar de bron. Dit is een uitzondering op besluit 016 §4, alleen binnen deze startvulling. | Eigenaar, 1 nov 2026 (6b) | Trattoria Perron: 131 van 142 met prijs | gebouwd in ronde 7 (`assessIncompleteMenu`, `incomplete`/`omittedCount` in de kaart, melding op de menupagina); nog geen kaart toegepast — zie "Ronde 7" |
 | R7 | Een kaart die pas na JavaScript zichtbaar wordt, wordt gelezen na het renderen in de bestaande headless browser van de browserchecks. Er komt geen nieuwe dependency. Dezelfde regels voor ophalen gelden: robots.txt, de rust tussen verzoeken, en alleen dezelfde site. | Eigenaar, 1 nov 2026 (7a) | Con Fuego, Bardot, Salon de Provence, The Chai Affairs, Smelt | open |
 | R8 | Een kaart als afbeelding wordt gelezen met de bestaande AI-menuherkenning (`claude-haiku-5-5`, BE-33). Het script draait alleen in de terminal van de eigenaar, die de sleutel zelf invoert; de Lead en de developer zien de sleutel nooit. Er geldt een harde kostengrens van € 1, er zijn geen herpogingen, en het gaat alleen om deze startvulling. De Lead controleert **elke** prijs tegen de afbeelding. | Eigenaar, 1 nov 2026 (8b) | Wolfslaar, Al Dente, De Beyerd, Klein Java, T-Huis | gebouwd in ronde 5 (`ai-images.js`, twaalf tests met een nep-client); de echte run doet de eigenaar |
 | R9 | Een zin is geen categoriekop (bijvoorbeeld "Al onze gerechten zijn 100% halal"). Koppen in hoofdletters zonder prijs ("WRAPS", "BURGERS & LOADED FRIES", "EXTRA VLEES") zijn categorieën. | Lead, review ronde 3 | Zenza: 72 gerechten onder de slogan | gebouwd in ronde 4 (`R9: een zin is geen categorie en een korte kop in hoofdletters boven een groep is dat wel`) |
 | R10 | Een kaart die de AI uit een afbeelding las, wordt pas gebruikt na de controle van de Lead: **alle prijzen, namen en koppen** tegen de afbeelding. Afwijkingen verbetert de Lead zelf, met een notitie "Lead-correctie" in het rapport. De AI krijgt de instructie om namen letterlijk over te nemen, tussenkoppen als categorie te nemen en niets toe te voegen. | Eigenaar, 1 nov 2026 (9a) | De Beyerd: "'N Smoke" → "'n Smoske"; "(salade)" verzonnen; tussenkoppen gemist | instructie gebouwd in ronde 6; Lead-controle per kaart |
-| R11 | Staat dezelfde kaart in meer talen op de site, dan telt alleen de Nederlandse versie. Een vertaling is geen extra gerecht. | Lead, review AI-run 2 | De Beyerd: Lunchkaart-2025-Engels*.jpg | open: de afbeeldingskeuze en de html-lezer slaan anderstalige versies over als er een Nederlandse is |
+| R11 | Staat dezelfde kaart in meer talen op de site, dan telt alleen de Nederlandse versie. Een vertaling is geen extra gerecht. | Lead, review AI-run 2 | De Beyerd: Lunchkaart-2025-Engels*.jpg | de Lead-correctie van De Beyerd telt 15 Nederlandse gerechten (niet 22); de afbeeldingskeuze en de html-lezer slaan anderstalige versies nog niet automatisch over |
 
 ## Voortgang per batch
 
@@ -45,6 +45,51 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | 25 bestaande, ronde 4 | 1 nov 2026 | Zenza opnieuw geschreven met de echte koppen (13 categorieën, 72 gerechten, 5 toeslagen); Chocolat gerepareerd (twee onterechte toeslagen) | nog niet nagekeken (Lead) | — |
 | 25 bestaande, ronde 5 | 1 nov 2026 | nog geen nieuwe batch: eerst R8 gebouwd (`ai-images.js`) en de robots-regel van punt 4 (doorverwijzing tot 5 stappen; een onbereikbare site heet "site niet bereikbaar") | — | — |
 | 25 bestaande, ronde 6 | 1 nov 2026 | nog geen nieuwe batch: de afbeeldingskeuze is verscherpt (punt 1), lange kaarten gaan in groepen van drie (punt 2) en het AI-script geeft een trouw-instructie mee (punt 3). R6 en R7 staan nog open. | — | — |
+| 25 bestaande, ronde 7 | 1 nov 2026 | De Beyerd geschreven met de Lead-correctie (R10): `11-lunch`, 15 gerechten, 4 categorieën, alle 15 met prijs; de Engelse kaart telt niet mee (R11). R6 gebouwd en getest, nog niet toegepast. | 15 / 15 (de Lead) | 0 |
+
+## Ronde 7: van AI-uitvoer naar data/ (R10, R11) en R6
+
+**R10 in de motor.** `ops/scripts/menu-bootstrap/leadCard.js` leest per restaurant
+`.local/menu-bootstrap-ai/<id>.json` (bewijs) en
+`ops/scripts/menu-bootstrap/lead-corrections/<id>.json`. Bestaat de correctie, dan
+is dat de kaart: dezelfde eis, dezelfde regels R1-R9, dezelfde vorm, met
+`source`, `scraped` (de datum van de AI-run), `subtitle`, `notes` (de `note` uit
+het correctiebestand), `aiRead: true` en `leadChecked`. Bestaat de correctie
+niet, dan wordt er geen kaart geschreven en gaat de AI-uitvoer alleen als bewijs
+het rapport in (reden `ai_without_lead_check`). `run.js` doet deze stap vóór het
+ophalen, zodat een AI-gelezen site niet nog eens bevraagd wordt.
+
+**Waarom een eigen stap en geen AI-lezer in de motor.** De motor blijft
+deterministisch en AI-vrij; de AI-uitvoer komt van buiten (de eigenaar draaide
+`ai-images.js`) en de controle van de Lead eveneens. De motor leest dus alleen
+bestanden die er al liggen.
+
+**De Beyerd.** Correctie telt 15 gerechten in 4 categorieën (Lunch, Luxe belegd
+bierbostelbrood, Salades, Warme lunch), alle 15 met prijs. "Gegrilde kipfilet"
+staat twee keer: als broodje (€ 12) en als salade (€ 14) — twee gerechten, zoals
+de kaart ze toont. De AI-uitvoer had 22 gerechten, inclusief de Engelse kaart; die
+telt niet mee (R11). Het restaurant kreeg in een eigen commit `menuLinks` met
+`11-lunch` / "🥗 Lunchkaart", anders linkt de site de kaart niet.
+
+**R6.** `assessIncompleteMenu` in `completeMenu.js` scheidt de gerechten die aan
+de eis voldoen van de twijfelgevallen (zonder prijs, prijs buiten € 1–€ 150,
+zonder categorie, onzekere sectie, dubbel). Haalt minstens 90% de eis en blijven
+er minstens 8 gerechten over, dan gaat de kaart zonder de twijfelgevallen naar
+`data/menus.json` met `incomplete: true` en `omittedCount`; de bron-url staat er
+al. Elk weggelaten gerecht staat met zijn reden in het rapport. De menupagina
+toont dan "Niet alle gerechten staan erop · bekijk de volledige kaart bij het
+restaurant", met de link naar de bron (`MenuIncompleteNotice` in
+`src/components/MenuBody.js`, opmaak in `menu-body.css`).
+
+**Wat er nog niet is: een toegepaste R6-kaart.** Van de 25 kaarten heeft élke
+kandidaat uit het rapport nog een open aandachtspunt (`excluded_sections`,
+`price_variants` of `unread_pdf_lines`). Zo'n punt gaat over regels die de lezer
+helemaal niet als gerecht opsloeg; die staan dus ook niet in de telling en
+kunnen niet één voor één weggelaten worden. Daarom blokkeren ze de kaart nog
+steeds (geen gok). Dat raakt precies het voorbeeld van de eigenaar: Trattoria
+Perron (24) haalt met 131 van 142 met prijs de 90%, maar heeft ook
+`price_variants`. De Lead moet beslissen of dat punt als "twijfelgeval" mag
+tellen; de developer past R6 daarna per kaart toe.
 
 ## Wat ronde 6 per site vond (punt 1 van de review)
 
