@@ -1554,7 +1554,13 @@
     "badge": "🍺 Proefcafé",
     "cuisineLabel": "Biercafé · Nederlands",
     "cardDescription": "Een iconisch biercafé aan de Boschstraat met een ongekende selectie van ambachtelijke bieren en klassieke Nederlandse borrelhapjes.",
-    "phoneDisplay": "076 521 4265"
+    "phoneDisplay": "076 521 4265",
+    "menuLinks": [
+      {
+        "id": "11-lunch",
+        "label": "🥗 Lunchkaart"
+      }
+    ]
   },
   "12": {
     "name": "Pellens",
