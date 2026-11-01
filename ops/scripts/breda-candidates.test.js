@@ -292,3 +292,13 @@ test('keukenwoorden: Nederlands wordt het OSM-woord, weekdagen tellen niet mee',
   assert.equal(summarize(candidates, {}).newCuisines.length, 3);
 });
 
+
+test('al bekend: een soortwoord op een andere plek in de naam telt niet (Wolfslaar)', () => {
+  const { coreBusinessName, knownBaseline, isKnownCandidate } = require('./breda-candidates');
+  assert.equal(coreBusinessName('Wolfslaar Restaurant'), 'wolfslaar');
+  assert.equal(coreBusinessName('Restaurant Wolfslaar'), 'wolfslaar');
+  assert.equal(coreBusinessName('Restaurant'), null);
+  const baseline = knownBaseline({ 1: { name: 'Restaurant Wolfslaar', website: 'https://www.restaurantwolfslaar.com/' } });
+  assert.equal(isKnownCandidate({ name: 'Wolfslaar Restaurant', website: 'https://wolfslaar.com/' }, baseline), true);
+  assert.equal(isKnownCandidate({ name: 'Wolfslaar Bakkerij', website: 'https://bakkerij.example/' }, baseline), false);
+});

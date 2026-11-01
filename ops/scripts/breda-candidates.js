@@ -193,10 +193,26 @@ function knownCuisineTokens(restaurants = {}) {
   return tokens;
 }
 
+/** Words that only say what kind of place it is, wherever they stand in a name. */
+const KIND_WORDS = Object.freeze(['restaurant', 'eetcafe', 'cafe', 'brasserie', 'bistro', 'eethuis']);
+
+/**
+ * The name without kind words, its words sorted: "Wolfslaar Restaurant" and
+ * "Restaurant Wolfslaar" both become "wolfslaar". `comparableBusinessName`
+ * only drops a leading kind word, so the reversed order slipped through.
+ */
+function coreBusinessName(name) {
+  const normalized = normalizeBusinessName(name);
+  if (!normalized) return null;
+  const words = normalized.split(/\s+/).filter((word) => word && !KIND_WORDS.includes(word));
+  return words.length ? words.sort().join(' ') : null;
+}
+
 /** The 25 existing restaurants as data to compare against: name, host, cuisine. */
 function knownBaseline(restaurants = {}) {
   const names = new Set();
   const comparableNames = new Set();
+  const coreNames = new Set();
   const hosts = new Set();
   for (const restaurant of Object.values(restaurants || {})) {
     if (!restaurant) continue;
@@ -204,10 +220,12 @@ function knownBaseline(restaurants = {}) {
     if (name) names.add(name);
     const comparable = comparableBusinessName(restaurant.name);
     if (comparable) comparableNames.add(comparable);
+    const core = coreBusinessName(restaurant.name);
+    if (core) coreNames.add(core);
     const host = websiteHost(restaurant.website);
     if (host) hosts.add(host);
   }
-  return { names, comparableNames, hosts, cuisineTokens: knownCuisineTokens(restaurants) };
+  return { names, comparableNames, coreNames, hosts, cuisineTokens: knownCuisineTokens(restaurants) };
 }
 
 /** Already on the site: the same normalized name, or the same website host. */
@@ -217,6 +235,8 @@ function isKnownCandidate(candidate, baseline) {
   const comparable = comparableBusinessName(candidate.name);
   if (name && baseline.names.has(name)) return true;
   if (comparable && baseline.comparableNames.has(comparable)) return true;
+  const core = coreBusinessName(candidate.name);
+  if (core && baseline.coreNames && baseline.coreNames.has(core)) return true;
   const host = websiteHost(candidate.website);
   return Boolean(host && baseline.hosts.has(host));
 }
@@ -646,6 +666,7 @@ module.exports = {
   DEFAULT_OUTPUT_JSON,
   DEFAULT_REPORT,
   websiteHost,
+  coreBusinessName,
   usableWebsite,
   isChain,
   isGone,
