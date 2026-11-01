@@ -6,8 +6,8 @@
 // (./completeMenu.js). It produces a report entry and, when the card passes, a
 // data/menus.json entry (./menuEntry.js). The caller decides whether to write.
 
-const { findSameHostMenuCandidates } = require('../../../src/lib/sameHostDiscovery');
 const { createSourceFetcher, MAX_CANDIDATES } = require('./fetchSource');
+const { chooseSameHostCandidates, findSameHostPdfLinks } = require('./candidateChoice');
 const { readHtmlMenu, readPdfMenu } = require('./readMenuSource');
 const { assessCompleteMenu } = require('./completeMenu');
 const { buildExport } = require('./menuEntry');
@@ -60,6 +60,9 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
     entry: null,
     entryKey: null,
     menuScope: null,
+    // The one extra fetch a site may need (Lead-review ronde 3): the pdf that a
+    // page links when the page itself holds no card.
+    extraStep: null,
   };
   if (!record.website) {
     record.reasons.push({ code: 'no_website', text: 'geen website in data/restaurants.json' });
@@ -85,8 +88,10 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
 
   // One link step, only for a homepage that itself holds no complete card.
   const homePasses = homeRead.refusal === null && assessCompleteMenu(homeRead).ok;
+  const htmlPages = [];
+  if (home.kind === 'html') htmlPages.push({ html: home.text, url: home.finalUrl || home.url });
   if (!homePasses && home.kind === 'html') {
-    const queue = findSameHostMenuCandidates(home.text, home.finalUrl || home.url).slice(0, MAX_CANDIDATES);
+    const queue = chooseSameHostCandidates(home.text, home.finalUrl || home.url, { max: MAX_CANDIDATES });
     for (const candidate of queue) {
       if (reads.length > MAX_CANDIDATES) break;
       const page = await source.getPage(candidate.url);
@@ -94,9 +99,33 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
         reads.push({ url: candidate.url, kind: null, menu: null, refusal: { status: 'not_read', reason: page.reason }, detail: page.detail });
         continue;
       }
+      if (page.kind === 'html') htmlPages.push({ html: page.text, url: page.finalUrl || candidate.url });
       const read = await readPage(page);
       reads.push({ url: page.finalUrl || candidate.url, kind: read.kind, menu: read, refusal: read.refusal });
       if (read.refusal === null && assessCompleteMenu(read).ok) break;
+    }
+  }
+
+  // One extra step on the same site (Lead-review ronde 3): a page that prints
+  // no card of its own can link a pdf that does hold one. At most one pdf is
+  // fetched, the same host, through the same robots gate and cache.
+  const hasCompleteCard = () => reads.some((read) => read.menu && read.refusal === null && assessCompleteMenu(read.menu).ok);
+  if (!hasCompleteCard()) {
+    for (const page of htmlPages) {
+      const [pdf] = findSameHostPdfLinks(page.html, page.url);
+      if (!pdf) continue;
+      // Already proposed as a candidate: fetching it twice would cost a second
+      // request for the same page.
+      if (reads.some((read) => read.url === pdf.url)) continue;
+      const response = await source.getPage(pdf.url);
+      if (!response.ok) {
+        record.extraStep = { url: pdf.url, reason: response.reason || 'not_read' };
+        continue;
+      }
+      const read = await readPage(response);
+      reads.push({ url: response.finalUrl || pdf.url, kind: read.kind, menu: read, refusal: read.refusal, extraStep: true });
+      record.extraStep = { url: response.finalUrl || pdf.url, reason: null };
+      break;
     }
   }
 

@@ -16,6 +16,7 @@ const { buildEntry, buildExport, applyMenuItem, menuLinksFor, menuScopeFor, menu
 const { createSourceFetcher, USER_AGENT, robustRobotsCheck, describeRobotsAttempt } = require('./fetchSource');
 const { bootstrapRestaurant } = require('./engine');
 const { normaliseDishName, normaliseHeading, restaurantWords } = require('./normalizeMenu');
+const { chooseSameHostCandidates, findSameHostPdfLinks, hasMenuWord, MAX_CANDIDATES } = require('./candidateChoice');
 const { buildReport, renderMarkdown } = require('./report');
 
 const FIXTURES = path.join(__dirname, '__fixtures__');
@@ -476,6 +477,50 @@ test('R1 en R3 in de motor: de gelezen kaart gaat genormaliseerd naar de uitvoer
   // The card itself still carries every dish with its own price.
   assert.equal(result.dishCount, 9);
   assert.equal(result.pricedCount, 9);
+});
+
+test('de kandidaatkeuze: een subpagina of pdf met een menuwoord, ook uit de navigatie, hooguit vijf en nooit een andere host', () => {
+  const html = fs.readFileSync(path.join(FIXTURES, 'menu-links.html'), 'utf8');
+  const candidates = chooseSameHostCandidates(html, 'https://voorbeeld.nl/');
+  assert.ok(candidates.length <= MAX_CANDIDATES, candidates.map((c) => c.url).join(','));
+  const urls = candidates.map((c) => c.url);
+  // The pdf with a text layer on the site itself comes first, then the
+  // navigation links: the card is often only in the menu bar.
+  assert.equal(urls[0], 'https://voorbeeld.nl/files/afhaalmenu-2026.pdf');
+  assert.ok(urls.includes('https://voorbeeld.nl/nl/menukaart/'), urls.join(','));
+  assert.ok(urls.includes('https://voorbeeld.nl/nl/lunch'), urls.join(','));
+  // Never another host, never a gift card, a blog post or a reservation page.
+  assert.ok(urls.every((url) => new URL(url).hostname === 'voorbeeld.nl'), urls.join(','));
+  assert.ok(!urls.some((url) => /cadeaukaart|blog|reserveren|over-ons|extern/.test(url)), urls.join(','));
+  // A menu word matches as its own word, so "weten" is not a menu link.
+  assert.equal(hasMenuWord('Weten waar u moet zijn'), false);
+  assert.equal(hasMenuWord('Onze menukaart'), true);
+});
+
+test('de kandidaatkeuze: een pdf met een menuwoord op dezelfde site is de ene extra ophaalstap', async () => {
+  const html = fs.readFileSync(path.join(FIXTURES, 'menu-links.html'), 'utf8');
+  const pdfs = findSameHostPdfLinks(html, 'https://voorbeeld.nl/');
+  assert.deepEqual(pdfs.map((pdf) => pdf.url), ['https://voorbeeld.nl/files/afhaalmenu-2026.pdf']);
+
+  // The engine reads the pdf once. The stored pdf is not a menu card, so the
+  // restaurant is still skipped with a reason.
+  const clock = fakeClock();
+  const pdfBytes = fs.readFileSync(NOT_A_MENU_PDF);
+  const { fetchImpl, calls } = fakeFetch({ pages: { '/': html, '/files/afhaalmenu-2026.pdf': pdfBytes } });
+  const fetcher = createSourceFetcher({ cacheDir: null, fetchImpl, sleep: clock.sleep, now: clock.now });
+  const result = await bootstrapRestaurant({
+    restaurantId: '99',
+    restaurant: { name: 'Fictief', website: 'https://voorbeeld.nl/' },
+    menus: {},
+    scraped: '2026-11-01',
+    fetcher,
+  });
+  assert.equal(result.status, 'skipped');
+  // Already a candidate of the homepage, so the extra pdf step does not fetch it
+  // a second time; the card is read exactly once.
+  assert.equal(result.extraStep, null);
+  assert.equal(calls.filter((call) => call.url.endsWith('.pdf')).length, 1);
+  assert.equal(result.candidates.filter((candidate) => candidate.kind === 'pdf').length, 1);
 });
 
 test('geen AI: de motor laadt geen Anthropic-SDK, geen AI-adapter en geen modelprotocol', () => {
