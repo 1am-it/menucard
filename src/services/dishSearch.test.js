@@ -197,12 +197,15 @@ test('BE-15: an unknown group value falls back to the exact ungrouped response, 
   assert.deepEqual(unknownGroup, ungrouped, 'an unrecognized group value must fall back completely and silently, never zero out results like an invalid `meal` would');
 });
 
-test('BE-16: q=kip — 36 dishes match across 5 restaurants; every restaurant becomes its own group, none stays an individual result, and lowCoverage is correctly absent', () => {
+test('BE-16: q=kip — 37 dishes match across 6 restaurants; every restaurant becomes its own group, none stays an individual result, and lowCoverage is correctly absent', () => {
   const res = searchDishes({ q: 'kip', group: 'restaurant' });
-  assert.equal(res.restaurantGroups.length, 5, 'BE-15\'s old "4 or more" threshold is retired — Brasserie Bardot, Restaurant Zuyd, T-Huis, Makanan and (since BE-71 ronde 3) Restaurant Zenza all qualify now');
-  assert.equal(res.total, 5, 'group-mode total counts restaurant groups');
-  assert.equal(res.results.length, 0, 'no leftover individual results — every one of the 36 dishes lives inside a group');
+  assert.equal(res.restaurantGroups.length, 6, 'BE-15\'s old "4 or more" threshold is retired — Brasserie Bardot, Restaurant Zuyd, T-Huis, Makanan, (since BE-71 ronde 3) Restaurant Zenza and (since BE-71 ronde 7) De Beyerd all qualify now');
+  assert.equal(res.total, 6, 'group-mode total counts restaurant groups');
+  assert.equal(res.results.length, 0, 'no leftover individual results — every one of the 37 dishes lives inside a group');
   const byRestaurant = Object.fromEntries(res.restaurantGroups.map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]));
+  // BE-71 ronde 7: the Lead-checked lunch card of De Beyerd (11), three dishes
+  // whose name or description prints kip (kipfilet, kip/spek in de club).
+  assert.deepEqual(byRestaurant['De Beyerd'], [['lunch', 3]]);
   assert.deepEqual(byRestaurant['Makanan'], [['afhaal', 4]], 'BE-71: the startvulling card of Makanan (22)');
   // BE-71 ronde 4: the startvulling card of Restaurant Zenza (17) now carries
   // its real sections (R9), so 19 dishes match "kip" instead of the 21 under
@@ -211,7 +214,7 @@ test('BE-16: q=kip — 36 dishes match across 5 restaurants; every restaurant be
   assert.deepEqual(byRestaurant['Brasserie Bardot'], [['lunch', 2], ['diner', 1], ['specialiteiten', 1]]);
   assert.deepEqual(byRestaurant['Restaurant Zuyd'], [['lunch', 1], ['diner', 1]]);
   assert.deepEqual(byRestaurant['T-Huis'], [['lunch', 3], ['diner', 2]]);
-  assert.equal(res.lowCoverage, undefined, 'lowCoverage must not appear — the underlying, ungrouped dish count (36) is not zero');
+  assert.equal(res.lowCoverage, undefined, 'lowCoverage must not appear — the underlying, ungrouped dish count (37) is not zero');
 });
 
 test('BE-16: q=friet — two restaurant groups; T-Huis keeps its two subgroups', () => {
@@ -229,9 +232,9 @@ test('BE-16: q=friet — two restaurant groups; T-Huis keeps its two subgroups',
   assert.equal(res.results.length, 0, 'no leftover individual results');
 });
 
-test('BE-16: q=brood — five restaurant groups (not one), no leftover individual results, sum equals the ungrouped total exactly', () => {
+test('BE-16: q=brood — six restaurant groups (not one), no leftover individual results, sum equals the ungrouped total exactly', () => {
   const res = searchDishes({ q: 'brood', group: 'restaurant' });
-  assert.equal(res.restaurantGroups.length, 5, 'every restaurant with a match is now its own group: Brasserie Bardot, Restaurant Zenza, Restaurant Zuyd, T-Huis, Restaurant Wolfslaar');
+  assert.equal(res.restaurantGroups.length, 6, 'every restaurant with a match is now its own group: Brasserie Bardot, Restaurant Zenza, Restaurant Zuyd, T-Huis, (since BE-71 ronde 7) De Beyerd and Restaurant Wolfslaar');
   assert.equal(res.results.length, 0, 'no leftover individual results — every dish lives inside a group');
   const byRestaurant = Object.fromEntries(res.restaurantGroups.map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]));
   assert.deepEqual(byRestaurant['T-Huis'], [['diner', 7], ['lunch', 5], ['borrel', 1]], 'exact, complete per-menu totals (diner=7, lunch=5) — a client-side pass over one dish-level page alone would undercount these');
@@ -239,9 +242,12 @@ test('BE-16: q=brood — five restaurant groups (not one), no leftover individua
   // BE-71 ronde 3: the startvulling card of Restaurant Zenza (17) prints four broodjes.
   assert.deepEqual(byRestaurant['Restaurant Zenza'], [['menukaart', 4]]);
   assert.deepEqual(byRestaurant['Restaurant Zuyd'], [['lunch', 3], ['diner', 1]]);
+  // BE-71 ronde 7: the Lead-checked lunch card of De Beyerd (11) prints brood
+  // in eight dishes (bierbostelbrood, meergranenbroodje, bostelbrood, croutons).
+  assert.deepEqual(byRestaurant['De Beyerd'], [['lunch', 8]]);
   assert.deepEqual(byRestaurant['Restaurant Wolfslaar'], [['diner', 1]]);
   const sum = res.restaurantGroups.reduce((s, g) => s + g.menus.reduce((s2, m) => s2 + m.count, 0), 0);
-  assert.equal(sum, 28, '6 (Bardot) + 4 (Zenza) + 4 (Zuyd) + 13 (T-Huis) + 1 (Wolfslaar) = 28, matching the ungrouped total exactly — no dish counted twice or dropped');
+  assert.equal(sum, 36, '6 (Bardot) + 4 (Zenza) + 4 (Zuyd) + 13 (T-Huis) + 8 (De Beyerd) + 1 (Wolfslaar) = 36, matching the ungrouped total exactly — no dish counted twice or dropped');
 });
 
 test('BE-15: the ungrouped q=brood response still exhibits the real pagination boundary this ticket\'s architecture is designed around', () => {
@@ -249,7 +255,7 @@ test('BE-15: the ungrouped q=brood response still exhibits the real pagination b
   // page 1 alone would undercount 23-lunch/23-diner.
   const page1 = searchDishes({ q: 'brood', cursor: 0, limit: 20 });
   const page2 = searchDishes({ q: 'brood', cursor: 20, limit: 20 });
-  assert.equal(page1.total, 28);
+  assert.equal(page1.total, 36);
   assert.equal(page1.hasMore, true);
   const countOnPage1 = (mealType) => page1.results.filter((d) => d.restaurantId === '23' && d.mealType === mealType).length;
   const countOnPage2 = (mealType) => page2.results.filter((d) => d.restaurantId === '23' && d.mealType === mealType).length;
@@ -264,22 +270,22 @@ test('BE-15: server-side aggregation happens before pagination — a small curso
 });
 
 test('BE-16: restaurant-level pagination — cursor/limit paginate restaurant groups across real multi-group data, never raw dishes, and a group is never split across two pages', () => {
-  // q=brood now produces 5 real restaurant groups — enough to prove
+  // q=brood now produces 6 real restaurant groups — enough to prove
   // restaurant-level pagination across three pages of real, multi-group data
   // (BE-15 could only prove this against one real group).
   const page1 = searchDishes({ q: 'brood', group: 'restaurant', limit: 2 });
   const page2 = searchDishes({ q: 'brood', group: 'restaurant', limit: 2, cursor: page1.nextCursor });
   const page3 = searchDishes({ q: 'brood', group: 'restaurant', limit: 2, cursor: page2.nextCursor });
   assert.equal(page1.restaurantGroups.length, 2);
-  assert.equal(page1.total, 5);
+  assert.equal(page1.total, 6);
   assert.equal(page1.hasMore, true);
   assert.equal(page2.restaurantGroups.length, 2);
   assert.equal(page2.hasMore, true);
-  assert.equal(page3.restaurantGroups.length, 1);
+  assert.equal(page3.restaurantGroups.length, 2);
   assert.equal(page3.hasMore, false);
   assert.equal(page3.nextCursor, null);
   const allNames = [...page1.restaurantGroups, ...page2.restaurantGroups, ...page3.restaurantGroups].map((g) => g.restaurantName);
-  assert.deepEqual(allNames, ['Brasserie Bardot', 'Restaurant Zenza', 'Restaurant Zuyd', 'T-Huis', 'Restaurant Wolfslaar'], 'restaurant groups are ordered by relevance (first-appearance in the ranked candidates), never alphabetical, and no group spans two pages');
+  assert.deepEqual(allNames, ['Brasserie Bardot', 'Restaurant Zenza', 'Restaurant Zuyd', 'T-Huis', 'De Beyerd', 'Restaurant Wolfslaar'], 'restaurant groups are ordered by relevance (first-appearance in the ranked candidates), never alphabetical, and no group spans two pages');
   // T-Huis's own three menus (including the thin, 1-match borrel menu)
   // stay together, un-split, on page 2.
   assert.equal(page2.restaurantGroups[1].menus.length, 3);
