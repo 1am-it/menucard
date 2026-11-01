@@ -5338,7 +5338,7 @@
         ],
         "items": [
           {
-            "name": "STEAK TARTARE",
+            "name": "Steak tartare",
             "desc": "Gerookte Ei-dooier · Kappertjes · Zoetzuur",
             "price": "€17",
             "priceValue": 17,
@@ -5350,7 +5350,7 @@
             "allergens": []
           },
           {
-            "name": "ROGVLEUGEL & STOOF",
+            "name": "Rogvleugel & stoof",
             "desc": "Gebakken · Truffel · Bruine Boter",
             "price": "€24",
             "priceValue": 24,
@@ -5362,7 +5362,7 @@
             "allergens": []
           },
           {
-            "name": "1/2 KREEFT THERMIDOR",
+            "name": "1/2 Kreeft thermidor",
             "desc": "Gegratineerd · Dragon · Parmezaanse Kaas",
             "price": "€28",
             "priceValue": 28,
@@ -5374,7 +5374,7 @@
             "allergens": []
           },
           {
-            "name": "LINGUINE BOUILLABAISSE",
+            "name": "Linguine bouillabaisse",
             "desc": "Scampi · Venkel · Rouille · Brioche",
             "price": "€21",
             "priceValue": 21,
@@ -5386,7 +5386,7 @@
             "allergens": []
           },
           {
-            "name": "GARNALEN KROKETTEN",
+            "name": "Garnalen kroketten",
             "desc": "Gebakken Scampi · Limoen Mayonaise (friet of toast)",
             "price": "€19",
             "priceValue": 19,
@@ -5398,7 +5398,7 @@
             "allergens": []
           },
           {
-            "name": "SANDWICH CHOCOLAT",
+            "name": "Sandwich Chocolat",
             "desc": "Steak Tartare · Pata Negra · Truffel Roerei",
             "price": "€18",
             "priceValue": 18,
@@ -5410,7 +5410,7 @@
             "allergens": []
           },
           {
-            "name": "BULGOGI",
+            "name": "Bulgogi",
             "desc": "Diamanthaas · Kimchi · Gefrituurde Bloemkool · Chili Flakes",
             "price": "€17",
             "priceValue": 17,
@@ -5422,7 +5422,7 @@
             "allergens": []
           },
           {
-            "name": "SALADE BOTANIQUE",
+            "name": "Salade botanique",
             "desc": "Groene Asperges · Suikersla · Avocado · Groene Kruiden · Komkommer",
             "price": "€17",
             "priceValue": 17,
@@ -5434,7 +5434,7 @@
             "allergens": []
           },
           {
-            "name": "CHOCOLAT FAVORITES",
+            "name": "Chocolat favorites",
             "desc": "Mini Hamburger · Brioche Steak Tartare · Toast Krab",
             "price": "€18",
             "priceValue": 18,
@@ -5446,7 +5446,7 @@
             "allergens": []
           },
           {
-            "name": "ZALM",
+            "name": "Zalm",
             "desc": "Ras el Hanout · Granaatappel · Basilicum",
             "price": "€18",
             "priceValue": 18,
@@ -5458,7 +5458,7 @@
             "allergens": []
           },
           {
-            "name": "STEAK CHOCOLAT",
+            "name": "Steak Chocolat",
             "desc": "Paddenstoelen · Truffel · Verse Friet",
             "price": "€32",
             "priceValue": 32,
@@ -5470,7 +5470,7 @@
             "allergens": []
           },
           {
-            "name": "SALADE STRACCIATELLA",
+            "name": "Salade stracciatella",
             "desc": "Biet · Granaatappel · Suikersla · Zuurdesem",
             "price": "€17",
             "priceValue": 17,
