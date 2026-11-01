@@ -120,6 +120,14 @@ test('een echte fout blijft gevangen: het bedrag van de buur wordt niet geleend'
   assert.equal(wrong.found, 3.2);
 });
 
+test('een percentage, een inhoud en een aantal zijn geen bedrag', () => {
+  assert.deepEqual(findPrices('Westmalle Tripel 9,5%'), [], 'een alcoholpercentage is geen prijs');
+  assert.equal(check('perron', { name: 'Westmalle Tripel 9,5%', priceValue: 6.8 }).status, 'ok');
+  assert.equal(check('perron', { name: 'Appelsap', priceValue: 3.7 }).status, 'ok', '20 cl is geen prijs');
+  assert.equal(check('perron', { name: 'Royal Bliss Ginger Beer', priceValue: 4 }).status, 'ok');
+  assert.deepEqual(findPrices('12,5% korting'), []);
+});
+
 test('een bron zonder leesbare prijzen levert geen valse afwijkingen op', () => {
   // De kaart van de Aldente is een afbeelding: de html draagt geen prijslijst,
   // alleen een paar bedragen uit de tekst eromheen.

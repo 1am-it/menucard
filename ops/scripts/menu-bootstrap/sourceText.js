@@ -292,6 +292,11 @@ function findPrices(text) {
   let lastEnd = -1;
   for (const candidate of candidates) {
     if (candidate.index < lastEnd) continue;
+    // "Westmalle Tripel 9,5%": a percentage is a strength, not a price.
+    if (/^\s*%/.test(source.slice(candidate.end, candidate.end + 2))) {
+      lastEnd = candidate.end;
+      continue;
+    }
     prices.push({ value: candidate.value, raw: candidate.raw, index: candidate.index, form: candidate.form });
     lastEnd = candidate.end;
   }
