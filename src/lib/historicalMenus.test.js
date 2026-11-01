@@ -34,7 +34,7 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 // 6-borrel, 6-specialiteiten en 23-borrel zijn vervallen. Dat is opnieuw de
 // expliciete actualisering van dit bewijs: dezelfde hash en datum, en de vier
 // doelen hieronder blijven één-op-één gecontroleerd.
-const SNAPSHOT_SHA256 = '7dd07b2263e10d84a92e772e88fe81e256c39ab97aba3d2f490714b3c34aa86b';
+const SNAPSHOT_SHA256 = '61ff8feafe76e92cce3c308ce77e16ed2ef538824397526ffea2d5252032c72c';
 const LATEST_SCRAPED = '2026-11-01';
 const TARGETS = [
   { id: '1', name: 'Restaurant Wolfslaar' },

@@ -293,47 +293,17 @@
     "priceLevel": 3,
     "cuisineLabel": "Scandinavisch · Modern Europees",
     "cardDescription": "Gevestigd in het omgebouwde ketelhuis van de voormalige Nibb-it fabriek. De keuken richt zich op seizoensgebonden, pure ingrediënten en eerlijke smaken.",
-    "phoneDisplay": "076 303 8482"
-  },
-  "3": {
-    "name": "Con Fuego",
-    "cuisine": "Grill · Steakhouse",
-    "price": "€€€",
-    "hours": "Ma–Zo 17:00–23:00",
-    "address": "Grote Markt 24, 4811 XR Breda",
-    "phone": "+31 76 870 0176",
-    "website": "https://www.restaurantconfuego.com",
-    "reservation": {
-      "type": "unverified",
-      "whatsapp": "+31 76 870 0176",
-      "url": "https://www.restaurantconfuego.com",
-      "phone": "+31 76 870 0176",
-      "verified": false
-    },
-    "buurt": "Binnenstad",
-    "color": "#1a0d00",
-    "description": "Het ultieme grillrestaurant op de Grote Markt. Exclusieve cuts, Japans Wagyu en een bekroonde wijnkaart van meer dan 600 labels.",
-    "tags": [
-      "🥩 Dry-aged",
-      "Wagyu",
-      "600+ wijnen",
-      "Grote Markt"
-    ],
-    "openingHours": {
-      "ma": "17:00-23:00",
-      "di": "17:00-23:00",
-      "wo": "17:00-23:00",
-      "do": "17:00-23:00",
-      "vr": "12:00-23:00",
-      "za": "12:00-23:00",
-      "zo": "12:00-22:00"
-    },
-    "cuisineKeywords": "grill steak american maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
-    "priceLevel": 3,
-    "badge": "🥩 Steakhouse",
-    "cuisineLabel": "Grill · Steakhouse",
-    "cardDescription": "Exclusieve cuts zoals Japans Wagyu en dry-aged steaks op de Grote Markt. Bekroonde wijnkaart met meer dan 600 wijnen.",
-    "phoneDisplay": "076 870 0176"
+    "phoneDisplay": "076 303 8482",
+    "menuLinks": [
+      {
+        "id": "2-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "2-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
   },
   "4": {
     "name": "Restaurant Uijttewaal",
@@ -418,6 +388,10 @@
       {
         "id": "5-lunch",
         "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "5-diner",
+        "label": "🍽 Dinerkaart"
       }
     ]
   },
@@ -1481,44 +1455,17 @@
     "badge": "🍺 150+ Beers",
     "cuisineLabel": "Biercafé · Amerikaans · Burgers",
     "cardDescription": "In de historische Oranjeboom brouwerij. Meer dan 150 bieren waaronder 15 speciaal bieren die je zelf tapt aan tafel.",
-    "phoneDisplay": "076 303 6200"
-  },
-  "10": {
-    "name": "Salon de Provence",
-    "cuisine": "Zuid-Afrikaans · Frans Creatief",
-    "price": "€€",
-    "hours": "Di–Za 18:00–22:00",
-    "address": "Salon de Provence Breda",
-    "phone": "Via website",
-    "website": "https://www.salondeprovence.nl",
-    "reservation": {
-      "type": "unverified",
-      "whatsapp": "Via website",
-      "url": "https://www.salondeprovence.nl",
-      "phone": "Via website",
-      "verified": false
-    },
-    "buurt": "Binnenstad",
-    "color": "#1a1100",
-    "description": "Chefs Niels van Kooten en Bono van Veelen brengen een onderscheidende Zuid-Afrikaans-Franse flair. Creatief, persoonlijk en met een uitzonderlijke wijnkennis.",
-    "tags": [
-      "Verborgen parel",
-      "Creatief",
-      "Zuid-Afrikaans",
-      "Wijnspecialisten"
-    ],
-    "openingHours": {
-      "di": "17:30-22:00",
-      "wo": "17:30-22:00",
-      "do": "17:30-22:00",
-      "vr": "12:00-22:00",
-      "za": "12:00-22:00"
-    },
-    "cuisineKeywords": "french fusion european dinsdag woensdag donderdag vrijdag zaterdag",
-    "priceLevel": 2,
-    "cuisineLabel": "Zuid-Afrikaans · Frans Creatief",
-    "cardDescription": "Onderscheidende Zuid-Afrikaans-Franse flair aan de Ginnekenweg. Creatieve bereidingen en een deskundige wijnselectie — een verborgen parel.",
-    "phoneDisplay": "Contact via website"
+    "phoneDisplay": "076 303 6200",
+    "menuLinks": [
+      {
+        "id": "9-lunch",
+        "label": "🥗 Lunchkaart"
+      },
+      {
+        "id": "9-diner",
+        "label": "🍽 Dinerkaart"
+      }
+    ]
   },
   "11": {
     "name": "De Beyerd",
@@ -1654,45 +1601,6 @@
         "label": "🥡 Afhaalkaart"
       }
     ]
-  },
-  "14": {
-    "name": "The Chai Affairs",
-    "cuisine": "Indiaas · Chai",
-    "price": "€€",
-    "hours": "Di–Zo 12:00–22:00",
-    "address": "Korte Boschstraat 8-10, 4811 GK Breda",
-    "phone": "+31 686 477 229",
-    "website": "https://www.thechaiaffairs.nl",
-    "reservation": {
-      "type": "unverified",
-      "whatsapp": "+31 686 477 229",
-      "url": "https://www.thechaiaffairs.nl",
-      "phone": "+31 686 477 229",
-      "verified": false
-    },
-    "buurt": "Binnenstad",
-    "color": "#1a0a00",
-    "description": "Waar Indiase culinaire traditie en de Britse theetraditie samenkomen. The Chai Affairs serveert verse curry's, huisgemaakte naan en een breed scala aan geurige chai-variaties.",
-    "tags": [
-      "🫖 Chai specialist",
-      "Indiaas",
-      "Korte Boschstraat",
-      "Vegetarisch-vriendelijk"
-    ],
-    "openingHours": {
-      "di": "17:00-22:00",
-      "wo": "17:00-22:00",
-      "do": "17:00-22:00",
-      "vr": "12:00-22:30",
-      "za": "12:00-22:30",
-      "zo": "12:00-21:30"
-    },
-    "cuisineKeywords": "indian asian dinsdag woensdag donderdag vrijdag zaterdag zondag",
-    "priceLevel": 2,
-    "badge": "🫖 Chai &amp; Curry",
-    "cuisineLabel": "Indiaas · Chai",
-    "cardDescription": "Een bijzondere ontmoeting van Indiase smaken en Britse theetraditie. Verse curry's, tikka masala en heerlijke chai.",
-    "phoneDisplay": "0686 477 229"
   },
   "15": {
     "name": "Andalous",
@@ -1830,46 +1738,6 @@
         "label": "📋 Menukaart"
       }
     ]
-  },
-  "18": {
-    "name": "Masala",
-    "cuisine": "Indiaas · Curry",
-    "price": "€",
-    "hours": "Ma–Zo 12:00–22:30",
-    "address": "Boschstraat 51, 4811 GK Breda",
-    "phone": "+31 76 522 5150",
-    "website": "https://www.masalabreda.nl",
-    "reservation": {
-      "type": "unverified",
-      "whatsapp": "+31 76 522 5150",
-      "url": "https://www.masalabreda.nl",
-      "phone": "+31 76 522 5150",
-      "verified": false
-    },
-    "buurt": "Binnenstad",
-    "color": "#1a0800",
-    "description": "Masala brengt de levendige smaken van de authentieke Indiase keuken naar de Boschstraat in Breda. Van geurige curry's tot verse tandoorige bereidingen — altijd warm en vol karakter.",
-    "tags": [
-      "🌶️ Curry",
-      "Indiaas",
-      "Boschstraat",
-      "Naan & Tandoori"
-    ],
-    "openingHours": {
-      "ma": "12:00-22:00",
-      "di": "12:00-22:00",
-      "wo": "12:00-22:00",
-      "do": "12:00-22:00",
-      "vr": "12:00-22:30",
-      "za": "12:00-22:30",
-      "zo": "12:00-21:00"
-    },
-    "cuisineKeywords": "indian asian maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
-    "priceLevel": 1,
-    "badge": "🌶️ Curry",
-    "cuisineLabel": "Indiaas · Curry",
-    "cardDescription": "Masala brengt de authentieke smaken van de Indiase keuken naar de Boschstraat, met geurige curry's en verse naan.",
-    "phoneDisplay": "076 522 5150"
   },
   "19": {
     "name": "Restaurant Zuyd",
@@ -2330,7 +2198,13 @@
     "badge": "🍚 Rijsttafel",
     "cuisineLabel": "Moluks Indonesisch · Rijsttafel",
     "cardDescription": "Authentieke Molukse rijsttafel onder leiding van chef Chesron. Naast dineren ook afhaal, catering en kookworkshops. Tijdens de feestdagen een uitgebreid menu van zo'n 40 gerechten.",
-    "phoneDisplay": "076 888 8941"
+    "phoneDisplay": "076 888 8941",
+    "menuLinks": [
+      {
+        "id": "21-afhaal",
+        "label": "🥡 Afhaalkaart"
+      }
+    ]
   },
   "22": {
     "name": "Makanan",

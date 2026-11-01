@@ -343,7 +343,7 @@
       "class": "historical_cards",
       "provenance": "historical_dataset",
       "sourceRef": "data/menus.json",
-      "sourceVersion": "20 menu entries; latest scraped 2026-11-01 (BE-74: the eight March cards of Wolfslaar, Bardot, Zuyd and T-Huis replaced by the Lead-checked November cards, and 6-borrel, 6-specialiteiten and 23-borrel removed because they are no longer on those sites), on top of the BE-71 startvulling (16-menukaart, 5-lunch, 22-afhaal, 17-menukaart, 11-lunch, 4-menukaart, 8-menukaart, 12-menukaart, 13-afhaal, 15-menukaart, 24-menukaart and 25-menukaart added to the 11 March entries, all checked by the Lead); canonical LF sha256 7dd07b2263e10d84a92e772e88fe81e256c39ab97aba3d2f490714b3c34aa86b",
+      "sourceVersion": "26 menu entries; latest scraped 2026-11-01 (5-diner, 2-lunch, 2-diner, 21-afhaal, 9-lunch, 9-diner added by the Lead; BE-74: the eight March cards of Wolfslaar, Bardot, Zuyd and T-Huis replaced by the Lead-checked November cards, and 6-borrel, 6-specialiteiten and 23-borrel removed because they are no longer on those sites), on top of the BE-71 startvulling (16-menukaart, 5-lunch, 22-afhaal, 17-menukaart, 11-lunch, 4-menukaart, 8-menukaart, 12-menukaart, 13-afhaal, 15-menukaart, 24-menukaart and 25-menukaart added to the 11 March entries, all checked by the Lead); canonical LF sha256 61ff8feafe76e92cce3c308ce77e16ed2ef538824397526ffea2d5252032c72c",
       "truthClaim": false,
       "expected": [
         "Wolfslaar, Bardot, Zuyd and T-Huis snapshots map to live menu lines one-for-one with category path, order and normalised price preserved.",

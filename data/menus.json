@@ -12621,5 +12621,2495 @@
         ]
       }
     ]
+  },
+  "5-diner": {
+    "subtitle": "Dinerkaart",
+    "scraped": "2026-11-01",
+    "source": "https://www.restaurant-chocolat.nl/diner/",
+    "notes": "Een volledig vegetarisch menu is altijd mogelijk.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Voorgerechten",
+        "items": [
+          {
+            "name": "Noordzee krab",
+            "desc": "Jamaicaanse peper · coulis van krab · haringkuit · sorbet van wasabi",
+            "price": "€25",
+            "priceValue": 25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Watermeloen",
+            "desc": "gepekeld & gedroogd · tartaar · nori · waterkers · jalapeño",
+            "price": "€22",
+            "priceValue": 22,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Kingfish",
+            "desc": "crème van bokking · hangop · passievrucht · nashipeer",
+            "price": "€28",
+            "priceValue": 28,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Zwezerik",
+            "desc": "suikerbrood · kropsla · truffel · Belperknolle",
+            "price": "€28",
+            "priceValue": 28,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Steak tartare",
+            "desc": "Wagyu A5 · sukiyaki · bosui · appelciderazijn",
+            "price": "€26",
+            "priceValue": 26,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Hoofdgerechten",
+        "items": [
+          {
+            "name": "Runderhaas",
+            "desc": "truffelstoof · cantharel · doperwt · jus met bonenkruid",
+            "price": "€38",
+            "priceValue": 38,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Rogvleugel",
+            "desc": "venkel · gepofte paprika · courgette · beurre blanc met sriracha",
+            "price": "€32",
+            "priceValue": 32,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Knolselderij",
+            "desc": "crispy chili boter · prei hollandaise · polenta · spinazie",
+            "price": "€29",
+            "priceValue": 29,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Runderbavette",
+            "desc": "kroket van wang · vadouvan · snijboon · oude kaas",
+            "price": "€37",
+            "priceValue": 37,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Iberico presa",
+            "desc": "zoete aardappel · zwarte knoflook · shiitake",
+            "price": "€39",
+            "priceValue": 39,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Nagerechten",
+        "items": [
+          {
+            "name": "Surprise",
+            "desc": "wisselend dessert van onze patissier",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chocolat & chocolat puur",
+            "desc": "bereidingen van pure chocolat",
+            "price": "€19",
+            "priceValue": 19,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chocolat & chocolat wit",
+            "desc": "bereidingen van witte chocolat",
+            "price": "€19",
+            "priceValue": 19,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasassortiment",
+            "desc": "4 soorten · wortel gember compote · kletzenbrood",
+            "price": "€22",
+            "priceValue": 22,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Chocolat Gastronomique",
+        "items": [
+          {
+            "name": "Chocolat Gastronomique",
+            "desc": "verrassingsmenu van de chefs, inclusief brood en amuses · 4 gangen €65 · 5 gangen €75 · 6 gangen €85 · 7 gangen €95 · wijnarrangement €32 / €40 / €48 / €56",
+            "price": "€65",
+            "priceValue": 65,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": true,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "All the way Chocolat",
+            "desc": "vijf verrassende gerechten · wijnarrangement · tafelwater · koffie met huisgemaakte friandises",
+            "price": "€125",
+            "priceValue": 125,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
+  },
+  "2-lunch": {
+    "subtitle": "Lunchkaart",
+    "scraped": "2026-11-01",
+    "source": "https://restaurantblossem.nl/nl/restaurant",
+    "notes": "Lunch woensdag t/m zondag vanaf 12.00 uur.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Bites",
+        "items": [
+          {
+            "name": "Gemarineerde olijven",
+            "desc": "",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Nibbit",
+            "desc": "",
+            "price": "€3",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gerookte amandelen",
+            "desc": "",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sesam kroepoek met dip van vadouvan",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Brioche gerookte paling en crème van knoflook",
+            "desc": "4 stuks",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Blini met zalm, crème fraîche en cavi-art",
+            "desc": "",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Abdij kaas uit de oven met honingglaze en walnoten",
+            "desc": "",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Pata negra",
+            "desc": "80 gram",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bonbon van ganzenlever, witte chocolade en truffelkaviaar",
+            "desc": "4 stuks",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Krokante bloemkool met bbq-kruiden en geklopte feta",
+            "desc": "",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bitterbal",
+        "items": [
+          {
+            "name": "Rundvleesbitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Oude kaas bitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kreeftbitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Brood",
+        "items": [
+          {
+            "name": "Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon",
+            "desc": "",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemaakt focaccia X Funkybread",
+            "desc": "met seizoensboter, Blossem-olijfolie en maldon",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Koud",
+        "items": [
+          {
+            "name": "Gamba, rabarber, komkommer, nori",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Steak tartaar, parmezaan, piccalilly, basilicum",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Venkel, feta, kaffir, couscous, hazelnoot",
+            "desc": "",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Warm",
+        "items": [
+          {
+            "name": "Rode mul, tomaat, jalapeño, bleekselderij, basilicum",
+            "desc": "",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Hoender, paling, cevenne ui, gele curry, cashew",
+            "desc": "",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bloemkool, snijboon, ras el hanout, prei",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bijgerechten",
+        "items": [
+          {
+            "name": "Friet met mayonaise",
+            "desc": "",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Seasonal salad",
+            "desc": "",
+            "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Op brood",
+        "items": [
+          {
+            "name": "Steak tartaar Blossem style",
+            "desc": "",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Koudgerookte zalm, citroenmayonaise, kappertjes",
+            "desc": "",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Burrata, zongerijpte tomaat, artisjok",
+            "desc": "",
+            "price": "€14,50",
+            "priceValue": 14.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Dessert",
+        "items": [
+          {
+            "name": "Limoen mousse, witte chocolade, matcha, mango, amandelcake",
+            "desc": "",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Marshmallow, groene appel, pure chocolade, karamel, citrus",
+            "desc": "",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Selectie van kazen",
+            "desc": "",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Blossem's shared lunch table",
+        "items": [
+          {
+            "name": "Tafeltje vol lunchgerechten",
+            "desc": "per persoon · vanaf 2 personen",
+            "price": "€42",
+            "priceValue": 42,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "2-gangen lunch",
+            "desc": "per persoon · vanaf 2 personen",
+            "price": "€35",
+            "priceValue": 35,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
+  },
+  "2-diner": {
+    "subtitle": "Dinerkaart",
+    "scraped": "2026-11-01",
+    "source": "https://restaurantblossem.nl/nl/restaurant",
+    "notes": "Pizza Night op dinsdag en woensdag met wekelijks wisselende pizza's.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Bites",
+        "items": [
+          {
+            "name": "Gemarineerde olijven",
+            "desc": "",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Nibbit",
+            "desc": "",
+            "price": "€3",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gerookte amandelen",
+            "desc": "",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sesam kroepoek met dip van vadouvan",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Brioche gerookte paling en crème van knoflook",
+            "desc": "4 stuks",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Blini met zalm, crème fraîche en cavi-art",
+            "desc": "",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Abdij kaas uit de oven met honingglaze en walnoten",
+            "desc": "",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Pata negra",
+            "desc": "80 gram",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bonbon van ganzenlever, witte chocolade en truffelkaviaar",
+            "desc": "4 stuks",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Krokante bloemkool met bbq-kruiden en geklopte feta",
+            "desc": "",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bitterbal",
+        "items": [
+          {
+            "name": "Rundvleesbitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Oude kaas bitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kreeftbitterbal",
+            "desc": "per stuk",
+            "price": "€1,85",
+            "priceValue": 1.85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Brood",
+        "items": [
+          {
+            "name": "Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon",
+            "desc": "",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemaakt focaccia X Funkybread",
+            "desc": "met seizoensboter, Blossem-olijfolie en maldon",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Voor",
+        "items": [
+          {
+            "name": "Gamba, rabarber, komkommer, nori",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Steak tartaar, parmezaan, piccalilly, basilicum",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Venkel, feta, kaffir, couscous, hazelnoot",
+            "desc": "",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Tussen",
+        "items": [
+          {
+            "name": "Rode mul, tomaat, jalapeño, bleekselderij, basilicum",
+            "desc": "",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Hoender, paling, cevenne ui, gele curry, cashew",
+            "desc": "",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bloemkool, snijboon, ras el hanout, prei",
+            "desc": "",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Hoofd",
+        "items": [
+          {
+            "name": "Wilde zeebaars, coquille, saffraan, courgette, limoenblad",
+            "desc": "",
+            "price": "€31",
+            "priceValue": 31,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Runder rib-eye, zoete peper, béarnaise, truffelaardappel, jus",
+            "desc": "",
+            "price": "€35",
+            "priceValue": 35,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Purpura aubergine, eekhoorntjesbrood, gegrilde groenten, muntpesto",
+            "desc": "",
+            "price": "€27",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bijgerechten",
+        "items": [
+          {
+            "name": "Friet met mayonaise",
+            "desc": "",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Seasonal salad",
+            "desc": "",
+            "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Dessert",
+        "items": [
+          {
+            "name": "Limoen mousse, witte chocolade, matcha, mango, amandelcake",
+            "desc": "",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Marshmallow, groene appel, pure chocolade, karamel, citrus",
+            "desc": "",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Selectie van kazen",
+            "desc": "",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Blossem menu",
+        "items": [
+          {
+            "name": "Blossem menu",
+            "desc": "3 gangen €57 · 4 gangen €66 · 5 gangen €76 · wijnarrangement: 3 gangen €27 · 4 gangen €35 · 5 gangen €43",
+            "price": "€57",
+            "priceValue": 57,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": true,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Date Night Donderdag",
+        "items": [
+          {
+            "name": "Shared diner + glas cava",
+            "desc": "iedere donderdag · per persoon",
+            "price": "€47,50",
+            "priceValue": 47.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
+  },
+  "21-afhaal": {
+    "subtitle": "Afhaalkaart",
+    "scraped": "2026-11-01",
+    "source": "https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf",
+    "notes": "Moluks-Indonesische takeaway. Bestellen per telefoon: 076 888 8941. Elke donderdag een daghap.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Voorgerecht",
+        "items": [
+          {
+            "name": "Kroepoek of casave of emping",
+            "desc": "",
+            "price": "€3,75",
+            "priceValue": 3.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemaakte loempia",
+            "desc": "kip, groente",
+            "price": "€3,75",
+            "priceValue": 3.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemaakte risolles",
+            "desc": "Indonesische kroketten gevuld met gekruid gehakt",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ayam goreng",
+            "desc": "gefrituurde kipkluifjes",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ayam rica2",
+            "desc": "",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Senang's plate",
+            "desc": "voor 2 personen · mix van 2 loempia's, 2 pangsit goreng, 4 ayam goreng",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Pangsit goreng",
+            "desc": "gekruide kippendijgehakt balletjes in een krokant velletje",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Soto",
+            "desc": "450 ml · kruidig kippenbouillon",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Soto groot",
+            "desc": "750 ml · kruidig kippenbouillon, pulled chicken, taugé, paksoi, selderij en bosui · + noodles €2",
+            "price": "€9,25",
+            "priceValue": 9.25,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bao spek",
+            "desc": "gestoomde bun, met gegrilde gemarineerde buikspek",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Saté",
+        "items": [
+          {
+            "name": "Saté spek",
+            "desc": "4 stokjes · ons welbekende vers gegrilde buikspeksaté",
+            "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Saté ayam",
+            "desc": "4 stokjes · vers gegrilde kippendijensaté",
+            "price": "€13,75",
+            "priceValue": 13.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Saté ayam gado2 menu",
+            "desc": "4 stokjes kipsaté met gado2 en witte rijst",
+            "price": "€17,75",
+            "priceValue": 17.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Saté spek gado2 menu",
+            "desc": "geserveerd met witte rijst, atjar en kroepoek",
+            "price": "€17,75",
+            "priceValue": 17.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Saté tofu",
+            "desc": "4 stokjes",
+            "price": "€12,50",
+            "priceValue": 12.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Saté tempeh",
+            "desc": "4 stokjes",
+            "price": "€12,50",
+            "priceValue": 12.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Nasi goreng of nasi kuning",
+            "desc": "in plaats van witte rijst",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Combi",
+        "items": [
+          {
+            "name": "Ayam smoor",
+            "desc": "gesmoorde kippendijen, tomaten, tamarinde met ketjap en witte rijst",
+            "price": "€16,75",
+            "priceValue": 16.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Daging smoor kering",
+            "desc": "kruidig gestoofd rundvlees, kecap, specerijen",
+            "price": "€16,75",
+            "priceValue": 16.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Rendang",
+            "desc": "pittig gestoofd rundvlees, kokos, specerijen en witte rijst",
+            "price": "€16,75",
+            "priceValue": 16.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ikan rica2",
+            "desc": "vers gebakken makreelmoten, zoetpittige ketjapmarinade en specerijen",
+            "price": "€16,75",
+            "priceValue": 16.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ayam rica rica",
+            "desc": "gemarineerde kippenkluifjes, pikante tomatensaus en witte rijst",
+            "price": "€15,50",
+            "priceValue": 15.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Spare ribs Senang",
+            "desc": "gesneden spare ribs in een ketjapmarinade van het huis met gado2 en witte rijst",
+            "price": "€23,75",
+            "priceValue": 23.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ikan colo2",
+            "desc": "vers gebakken makreelmoten geserveerd met een zoetzure ketjapdressing",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gamba's uit de oven",
+            "desc": "gemarineerde gamba's uit de oven",
+            "price": "€16,75",
+            "priceValue": 16.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Groenten",
+        "items": [
+          {
+            "name": "Gado2",
+            "desc": "diverse groente, ei, satésaus",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Sambal goreng buncis",
+            "desc": "sperziebonen, tomaten, specerijen",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Sayor lodeh",
+            "desc": "diverse groentes in kokos",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Sambal goreng tempeh",
+            "desc": "tempeh, kecap, specerijen · koud gerecht",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Sambal Senang",
+            "desc": "350 ml",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Rijsttafel (vanaf 2 personen)",
+        "items": [
+          {
+            "name": "Rijsttafel Senang",
+            "desc": "per persoon · 3 stokjes speksaté, 3 stokjes kipsaté, ayam smoor, rendang, daging smoor, sayor lodeh, telor pedis, sayor buncis, gado2, atjar ketimun, kroepoek en witte rijst · per 2 rijsttafels 1 bijgerecht naar keuze: nasi kuning, bami goreng of nasi goreng",
+            "price": "€28,50",
+            "priceValue": 28.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Rijsttafel Senang de Luxe",
+            "desc": "per persoon · voorgerecht: Senang's plate · hoofdgerecht: 3 stokjes speksaté, 3 stokjes kipsaté, ayam smoor, rendang, daging smoor, sayor lodeh, telor pedis, sayor buncis, gado2, atjar ketimun, kroepoek en witte rijst · per 2 rijsttafels 1 bijgerecht naar keuze",
+            "price": "€31,75",
+            "priceValue": 31.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Spekkoek",
+        "items": [
+          {
+            "name": "Spekkoek",
+            "desc": "kwart €8,50 · half €16 · heel €27,50",
+            "price": "€8,50",
+            "priceValue": 8.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": true,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Dadar gulung",
+            "desc": "gerolde pannenkoek van pandan met gevulde kokos in palmsuiker",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
+  },
+  "9-lunch": {
+    "subtitle": "Lunchkaart",
+    "scraped": "2026-11-01",
+    "source": "https://static.rce.eu/wp-content/uploads/sites/32/2025/06/18064446/WEB_D25235-B_B-Lunchkaart_140-320mm_NL_MT_V9-1-1.pdf",
+    "notes": "Lunch tot 16.00 uur. De kaart van het restaurant is Engelstalig.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Lunch",
+        "items": [
+          {
+            "name": "Flat iron steak",
+            "desc": "200 gr flat iron steak, roasted tomato, chimichurri, fries, mayonnaise",
+            "price": "€27,50",
+            "priceValue": 27.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Spareribs",
+            "desc": "slow roasted marinated ribs, scallions, coleslaw, fries, mayonnaise",
+            "price": "€25,50",
+            "priceValue": 25.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Caesar salad",
+            "desc": "little gem, chicken, egg, Parmesan cheese, Caesar dressing",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Texas loaded fries",
+            "desc": "blackened mushrooms, pickled red cabbage, jalapeño, spring onions, BBQ sauce, plant-based mayonnaise",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sandwich steak tartare",
+            "desc": "sourdough bread, steak tartare, chipotle sauce",
+            "price": "€15",
+            "priceValue": 15,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sandwich burrata",
+            "desc": "sourdough bread, burrata, smoky bell pepper dip, smoked almond",
+            "price": "€14,50",
+            "priceValue": 14.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Sandwich pulled chicken",
+            "desc": "sourdough bread, pulled chicken, avocado, pico de gallo, chimichurri mayonnaise",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Grilled cheese sandwich",
+            "desc": "sourdough bread, cowboy butter, cheese, B&B sauce",
+            "price": "€10,50",
+            "priceValue": 10.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Burgers & fries",
+        "items": [
+          {
+            "name": "Smoked brisket burger",
+            "desc": "12-hour smoked blackened brisket, red onion, smoky garlic cheese, little gem, jalapeño, chimichurri mayonnaise",
+            "price": "€24,50",
+            "priceValue": 24.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Beers & Barrels loaded burger",
+            "desc": "beef burger, little gem, coleslaw, crispy bacon, cheddar, beer battered onion, BBQ sauce · favourite",
+            "price": "€23,50",
+            "priceValue": 23.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Face melter",
+            "desc": "beef burger, cheddar, little gem, tomato, pulled pork, fried egg, bacon, BBQ sauce, chipotle sauce",
+            "price": "€22",
+            "priceValue": 22,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Asian chicken burger",
+            "desc": "sticky wakadori chicken, little gem, kimchi, crispy chilli mayonnaise",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Classic burger",
+            "desc": "beef burger, little gem, tomato, pickles, red onion, farmhouse cheese, bacon, B&B sauce",
+            "price": "€20",
+            "priceValue": 20,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Crunchy burger",
+            "desc": "crunchy parsnip burger, little gem, red onion, roasted bell pepper, crispy chilli mayonnaise",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bites",
+        "items": [
+          {
+            "name": "Superior platter",
+            "desc": "pork belly burnt ends, chicken jalapeño sausages, chicken wings, BBQ sauce, nachos",
+            "price": "€27,50",
+            "priceValue": 27.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Mixed snacks",
+            "desc": "18 pieces · bitterballen, beer battered onion rings, crispy cauliflower, chicken bites",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Smoky spareribs",
+            "desc": "slow-roasted spareribs, B&B sauce",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Pork belly burnt ends",
+            "desc": "slow-cooked & caramelised, BBQ sauce, green herb crumble",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Grilled nachos",
+            "desc": "tortilla chips, sour cream, tomato salsa, guacamole, pico de gallo, cheese · + pulled chicken or pulled pork €3",
+            "price": "€11,50",
+            "priceValue": 11.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chicken on a stick",
+            "desc": "2 chicken jalapeño sausages, chimichurri mayonnaise, tortilla onion crunch",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chicken wings",
+            "desc": "8 pieces, chipotle sauce",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bitterballen",
+            "desc": "8 pieces, mustard",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Crispy cauliflower",
+            "desc": "6 pieces, scallions, BBQ sauce",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Bread & butter board",
+            "desc": "sourdough bread, cowboy butter, red chilli pepper, scallions",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Sides",
+        "items": [
+          {
+            "name": "Loaded brisket fries",
+            "desc": "12-hour smoked blackened brisket, black pepper gravy, sour cream, spring onion",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sweet potato fries",
+            "desc": "mayonnaise",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Sweets",
+        "items": [
+          {
+            "name": "Rum soaked banana muffin",
+            "desc": "salted caramel sauce, vanilla ice cream · favourite",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Grilled pineapple",
+            "desc": "ginger syrup, lemon grass oil, mango sorbet",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Mississippi chocolate pie",
+            "desc": "vanilla ice cream, chocolate sauce, cookie crumble",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Whiskey cream affogato",
+            "desc": "vanilla ice cream, espresso, whiskey cream, sugar-coated peanut crunch",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
+  },
+  "9-diner": {
+    "subtitle": "Dinerkaart",
+    "scraped": "2026-11-01",
+    "source": "https://static.rce.eu/wp-content/uploads/sites/32/2026/01/08092428/25238-BB-Dinerkaart_417x320mm_ENG_MT.pdf",
+    "notes": "De kaart van het restaurant is Engelstalig.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Starters",
+        "items": [
+          {
+            "name": "Beers & Barrels platter",
+            "desc": "burrata, sourdough bread, dips, smoky pork ribs, steak tartare with chipotle sauce, chicken tostadas · favourite",
+            "price": "€32,50",
+            "priceValue": 32.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Steak tartare",
+            "desc": "crunchy potato, chipotle sauce",
+            "price": "€15",
+            "priceValue": 15,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Burrata & dip",
+            "desc": "roasted sweet pepper sauce, olive oil, sourdough bread",
+            "price": "€14,50",
+            "priceValue": 14.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Chicken tostadas",
+            "desc": "deep fried corn tortillas, chicken carnitas, pickled onions, avocado, coriander",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Beer battered skewer",
+            "desc": "pineapple, tempeh, kimchi, BBQ sauce",
+            "price": "€11,50",
+            "priceValue": 11.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "On the table",
+        "items": [
+          {
+            "name": "Bread & butter board",
+            "desc": "sourdough bread, cowboy butter, red chilli pepper, scallions",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Plates for two",
+        "items": [
+          {
+            "name": "Grilled tomahawk 1000 gram",
+            "desc": "roasted tomatoes, chimichurri, black pepper gravy, cowboy butter, fries, mayonnaise",
+            "price": "€85",
+            "priceValue": 85,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Low & slow",
+            "desc": "smoked brisket, ½ free range roasted chicken, smoky spareribs, pulled pork, chipotle sauce, coleslaw, fries, mayonnaise",
+            "price": "€67,50",
+            "priceValue": 67.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Butcher classic",
+            "desc": "classic burger, ½ free range roasted chicken, flat iron steak, chimichurri, roasted tomatoes, B&B sauce, fries, mayonnaise · favourite",
+            "price": "€66,50",
+            "priceValue": 66.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Mains",
+        "items": [
+          {
+            "name": "Ribeye",
+            "desc": "300 gr, charcoal grilled, chimichurri, black pepper gravy, cowboy butter, fries, mayonnaise",
+            "price": "€36,50",
+            "priceValue": 36.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Entrecôte",
+            "desc": "250 gr, charcoal grilled, chimichurri, black pepper gravy, cowboy butter, fries, mayonnaise",
+            "price": "€32,50",
+            "priceValue": 32.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Beers & Barrels smoked brisket",
+            "desc": "12-hour smoked blackened brisket, coleslaw, black pepper gravy, fries, mayonnaise · favourite",
+            "price": "€28,50",
+            "priceValue": 28.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Flat iron steak",
+            "desc": "200 gr flat iron steak, roasted tomatoes, chimichurri, fries, mayonnaise",
+            "price": "€27,50",
+            "priceValue": 27.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Spareribs",
+            "desc": "slow roasted marinated ribs, scallions, coleslaw, fries, mayonnaise",
+            "price": "€25,50",
+            "priceValue": 25.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Roasted chicken",
+            "desc": "½ free range roasted chicken, B&B sauce, fries, mayonnaise",
+            "price": "€23,50",
+            "priceValue": 23.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Caesar salad",
+            "desc": "little gem, chicken, egg, Parmesan cheese, Caesar dressing",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Texas loaded fries",
+            "desc": "blackened mushrooms, pickled red cabbage, jalapeño, spring onions, BBQ sauce, plant-based mayonnaise",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Burgers & fries",
+        "items": [
+          {
+            "name": "Smoked brisket burger",
+            "desc": "12-hour smoked blackened brisket, red onion, smoky garlic cheese, little gem, jalapeño, chimichurri mayonnaise",
+            "price": "€24,50",
+            "priceValue": 24.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Beers & Barrels loaded burger",
+            "desc": "beef burger, little gem, coleslaw, crispy bacon, cheddar, beer battered onion, B&B sauce · favourite",
+            "price": "€23,50",
+            "priceValue": 23.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Face melter",
+            "desc": "beef burger, cheddar, little gem, tomato, pulled pork, fried egg, bacon, BBQ sauce, chipotle sauce",
+            "price": "€22",
+            "priceValue": 22,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Asian chicken burger",
+            "desc": "sticky wakadori chicken, little gem, kimchi, crispy chilli mayonnaise",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Classic burger",
+            "desc": "beef burger, little gem, tomato, pickles, red onion, farmhouse cheese, bacon, B&B sauce",
+            "price": "€20",
+            "priceValue": 20,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Crunchy burger",
+            "desc": "crunchy parsnip burger, little gem, red onion, roasted bell pepper, crispy chilli mayonnaise",
+            "price": "€19,50",
+            "priceValue": 19.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Sides",
+        "items": [
+          {
+            "name": "Loaded brisket fries",
+            "desc": "12-hour smoked blackened brisket, black pepper gravy, sour cream, spring onion",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sweet potato fries",
+            "desc": "mayonnaise",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Dirty little leaf",
+            "desc": "little gem, anchovy dressing, bacon, onion crumble",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bites",
+        "items": [
+          {
+            "name": "Superior platter",
+            "desc": "pork belly burnt ends, chicken jalapeño sausages, chicken wings, BBQ sauce, nachos",
+            "price": "€27,50",
+            "priceValue": 27.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Mixed snacks",
+            "desc": "18 pieces · bitterballen, beer battered onion rings, crispy cauliflower, chicken bites",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Smoky spareribs",
+            "desc": "slow-roasted spareribs, B&B sauce",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Pork belly burnt ends",
+            "desc": "slow-cooked & caramelised, BBQ sauce, green herb crumble",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Grilled nachos",
+            "desc": "tortilla chips, sour cream, tomato salsa, guacamole, pico de gallo, cheese · + pulled chicken or pulled pork €3",
+            "price": "€11,50",
+            "priceValue": 11.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chicken on a stick",
+            "desc": "2 chicken jalapeño sausages, chimichurri mayonnaise, tortilla onion crunch",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Chicken wings",
+            "desc": "8 pieces, chipotle sauce",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bitterballen",
+            "desc": "8 pieces, mustard",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Crispy cauliflower",
+            "desc": "6 pieces, scallions, BBQ sauce",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Bread & butter board",
+            "desc": "sourdough bread, cowboy butter, red chilli pepper, scallions",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Sweets",
+        "items": [
+          {
+            "name": "Rum soaked banana muffin",
+            "desc": "salted caramel sauce, vanilla ice cream · favourite",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Grilled pineapple",
+            "desc": "ginger syrup, lemon grass oil, mango sorbet",
+            "price": "€7,50",
+            "priceValue": 7.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Mississippi chocolate pie",
+            "desc": "vanilla ice cream, chocolate sauce, cookie crumble",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Whiskey cream affogato",
+            "desc": "vanilla ice cream, espresso, whiskey cream, sugar-coated peanut crunch",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
   }
 }

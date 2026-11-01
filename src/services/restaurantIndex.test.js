@@ -8,9 +8,12 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
-// BE-74 (#185): de tellingen en de menuLinks hieronder zijn die van de kaarten
-// van maart; deze tests draaien op de vaste kopie daarvan, niet op de levende
-// data die ververst is.
+// BE-74 (#185) en BE-75 (#187): de tellingen, de menuLinks, de 25 restaurants,
+// het placeholder-adres van restaurant 10 en "Con  Fuego" horen bij de data van
+// vóór de verversing en vóór het weghalen van de vier gesloten restaurants.
+// Deze tests draaien daarom op de vaste kopie in
+// src/services/__fixtures__/dishSearch-data/ (die beide nog bevat). De levende
+// data wordt bewaakt door src/lib/be75ClosedRestaurants.test.js.
 require('./__fixtures__/frozenMarchData').freezeMarchData();
 
 const { searchRestaurants, isValidAddress, hasUniqueRestaurantNameMatch } = require('./restaurantIndex');

@@ -7,6 +7,15 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
+// BE-75 (#187): vier gesloten restaurants (3, 10, 14, 18) zijn uit
+// data/restaurants.json verdwenen. Het aantal van 25 hieronder hoort bij de
+// data van vóór die wijziging; deze test draait daarom op de vaste kopie in
+// src/services/__fixtures__/be75-closed-restaurants/ (require.cache-patroon
+// uit dishSearch.test.js). De verwachting is niet veranderd. Het levende
+// aantal en de afwezigheid van de vier ids staan in
+// src/lib/be75ClosedRestaurants.test.js.
+require('../services/__fixtures__/be75-closed-restaurants/beforeClosed').useRestaurantsBeforeBe75();
+
 const {
   CLAIM_STATUS_LABELS,
   OWNER_OVERVIEW_MESSAGES,
