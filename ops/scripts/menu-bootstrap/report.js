@@ -72,6 +72,11 @@ function buildReport({ results, previousMenus, scraped, generatedAt }) {
       candidates: result.candidates || [],
       hadCard,
       previousKeys: Object.keys(previous),
+      // R6: a card that went to the site without its doubtful dishes, with the
+      // reason per omitted dish. Empty for a complete card.
+      incomplete: result.incomplete === true,
+      omittedCount: (result.omitted || []).length,
+      omitted: result.omitted || [],
       // R10/R11: the evidence behind a card the Lead checked, and the date of
       // that check. A restaurant whose AI output has no correction is skipped
       // with the reason and shows its evidence here.
@@ -119,7 +124,7 @@ function euro(value) {
 }
 
 function statusText(row) {
-  if (row.status === 'done') return 'geslaagd';
+  if (row.status === 'done') return row.incomplete ? 'geslaagd (R6: zonder de twijfelgevallen)' : 'geslaagd';
   const reasons = row.reasons.map((reason) => reason.text + (reason.detail ? ` (${reason.detail})` : ''));
   return `${row.status === 'blocked' ? 'geblokkeerd' : 'overgeslagen'}: ${reasons.join('; ') || 'onbekende reden'}`;
 }
@@ -151,6 +156,24 @@ function renderMarkdown(report) {
     lines.push(`| ${row.id} | ${row.name} | ${row.menuUrl || '—'} | ${row.kind || '—'} | ${row.dishCount || 0} | ${row.pricedCount || 0} | ${statusText(row)} |`);
   }
   lines.push('');
+  const incompleteCards = report.restaurants.filter((row) => row.incomplete && row.omittedCount > 0);
+  if (incompleteCards.length > 0) {
+    lines.push('## Kaarten met weggelaten gerechten (R6)');
+    lines.push('');
+    lines.push('Een kaart waarvan minstens 90% van de gerechten aan de eis voldoet, staat zonder de');
+    lines.push('twijfelgevallen op de site. De site zegt dan: "Niet alle gerechten staan erop · bekijk de');
+    lines.push('volledige kaart bij het restaurant", met een link naar de bron hieronder. Elk weggelaten');
+    lines.push('gerecht staat met zijn reden in dit rapport.');
+    lines.push('');
+    for (const row of incompleteCards) {
+      lines.push(`### ${row.name} (${row.id}) — ${row.omittedCount} van ${row.dishCount + row.omittedCount} weggelaten`);
+      lines.push('');
+      lines.push(`- Kaart: ${row.menuUrl || '—'}`);
+      lines.push(`- Op de site: ${row.dishCount} gerechten, waarvan ${row.pricedCount} met prijs`);
+      for (const dish of row.omitted) lines.push(`- weggelaten: ${dish.name} (${dish.category || 'zonder categorie'}): ${dish.text}`);
+      lines.push('');
+    }
+  }
   const compared = report.restaurants.filter((row) => row.diff);
   if (compared.length === 0) {
     lines.push('## Verschillen met de kaarten van 25 maart 2026');

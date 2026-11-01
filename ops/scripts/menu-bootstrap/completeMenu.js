@@ -16,6 +16,9 @@
 const MIN_DISHES = 8;
 const MIN_PRICE_EUR = 1;
 const MAX_PRICE_EUR = 150;
+// R6 (correctielog, eigenaar 1 nov 2026): a card where at least 90% of the
+// dishes meet the requirement may go on the site without the doubtful ones.
+const MIN_COMPLETE_SHARE = 0.9;
 
 // One closed vocabulary, so the report and the checkpoint can group the
 // reasons without free text.
@@ -109,4 +112,97 @@ function assessCompleteMenu(menu) {
   return { ok: reasons.length === 0, reasons, dishCount, pricedCount, categoryCount: categories.length };
 }
 
-module.exports = { MIN_DISHES, MIN_PRICE_EUR, MAX_PRICE_EUR, REASON_TEXT, dishKey, assessCompleteMenu };
+/**
+ * R6: which dishes of this card meet the requirement on their own, and which
+ * are doubtful (with the reason). A doubtful dish is left out of the site card
+ * but named in the report; the card keeps its source url, so the reader can
+ * open the full card at the restaurant.
+ */
+function doubtfulReason(category, item, seen) {
+  if (!category || !text(category.name)) return 'uncategorised_dishes';
+  if (category.uncertain === true) return 'uncertain_sections';
+  if (!Number.isFinite(item.price)) return 'unpriced_dishes';
+  if (item.priceIsSupplement !== true && (item.price < MIN_PRICE_EUR || item.price > MAX_PRICE_EUR)) return 'price_out_of_bounds';
+  const key = `${text(category.name).toLowerCase()}|${dishKey(item.name)}|${dishKey(item.desc || '')}|${item.price}`;
+  if (seen.has(key)) return 'duplicate_dishes';
+  seen.add(key);
+  return null;
+}
+
+/**
+ * `{ ok, share, keptCount, omittedCount, omitted: [{ name, category, reason,
+ * text }], reasons, dishCount, pricedCount }`. `ok` means: at least MIN_DISHES
+ * dishes remain and at least MIN_COMPLETE_SHARE of the read dishes meet the
+ * requirement; an open attention point still blocks, because it points at lines
+ * the reader could not place at all (those cannot be named one by one).
+ */
+function assessIncompleteMenu(menu) {
+  const reasons = [];
+  const categories = menu && Array.isArray(menu.categories) ? menu.categories : [];
+  const dishes = [];
+  categories.forEach((category, categoryIndex) => {
+    ((category && Array.isArray(category.items) && category.items) || []).forEach((item, itemIndex) => {
+      if (item && text(item.name)) dishes.push({ category, item, categoryIndex, itemIndex });
+    });
+  });
+  const seen = new Set();
+  const omitted = [];
+  const omittedIndexes = [];
+  let keptCount = 0;
+  let pricedCount = 0;
+  for (const { category, item, categoryIndex, itemIndex } of dishes) {
+    const reason = doubtfulReason(category, item, seen);
+    if (reason) {
+      omitted.push({ name: item.name, category: text(category && category.name) || null, reason, text: REASON_TEXT[reason] });
+      omittedIndexes.push([categoryIndex, itemIndex]);
+      continue;
+    }
+    keptCount += 1;
+    if (Number.isFinite(item.price)) pricedCount += 1;
+  }
+  const dishCount = dishes.length;
+  const share = dishCount === 0 ? 0 : keptCount / dishCount;
+
+  const attention = menu && Array.isArray(menu.attention) ? menu.attention : [];
+  for (const code of ['excluded_sections', 'price_variants', 'unread_pdf_lines']) {
+    const count = attention.filter((entry) => entry && entry.code === code).length;
+    if (count > 0) reasons.push({ code, text: REASON_TEXT[code], detail: `${count} aandachtspunt(en)` });
+  }
+  if (keptCount < MIN_DISHES) reasons.push({ code: 'too_few_dishes', text: REASON_TEXT.too_few_dishes, detail: `${keptCount} gerechten` });
+
+  return {
+    ok: reasons.length === 0 && dishCount > 0 && share >= MIN_COMPLETE_SHARE,
+    share,
+    keptCount,
+    omittedCount: omitted.length,
+    omitted,
+    omittedIndexes,
+    reasons,
+    dishCount,
+    pricedCount,
+  };
+}
+
+/** The same read menu without the doubtful dishes; empty sections are dropped. */
+function retainAcceptedDishes(menu, assessment) {
+  const drop = new Set(((assessment && assessment.omittedIndexes) || []).map(([categoryIndex, itemIndex]) => `${categoryIndex}:${itemIndex}`));
+  const categories = ((menu && menu.categories) || [])
+    .map((category, categoryIndex) => ({
+      ...category,
+      items: ((category && category.items) || []).filter((item, itemIndex) => !drop.has(`${categoryIndex}:${itemIndex}`)),
+    }))
+    .filter((category) => category.items.length > 0);
+  return { ...menu, categories };
+}
+
+module.exports = {
+  MIN_DISHES,
+  MIN_PRICE_EUR,
+  MAX_PRICE_EUR,
+  MIN_COMPLETE_SHARE,
+  REASON_TEXT,
+  dishKey,
+  assessCompleteMenu,
+  assessIncompleteMenu,
+  retainAcceptedDishes,
+};

@@ -9,7 +9,7 @@
 const { createSourceFetcher, MAX_CANDIDATES } = require('./fetchSource');
 const { chooseSameHostCandidates, findSameHostPdfLinks, hasMenuWord } = require('./candidateChoice');
 const { readHtmlMenu, readPdfMenu } = require('./readMenuSource');
-const { assessCompleteMenu } = require('./completeMenu');
+const { assessCompleteMenu, assessIncompleteMenu, retainAcceptedDishes } = require('./completeMenu');
 const { buildExport } = require('./menuEntry');
 const { normaliseMenu } = require('./normalizeMenu');
 
@@ -60,6 +60,9 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
     entry: null,
     entryKey: null,
     menuScope: null,
+    // R6: set when the card went to the site without its doubtful dishes.
+    incomplete: false,
+    omitted: [],
     // The one extra fetch a site may need (Lead-review ronde 3): the pdf that a
     // page links when the page itself holds no card.
     extraStep: null,
@@ -164,6 +167,26 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
   record.pageCount = best.read.menu.pageCount || null;
 
   if (!best.assessment.ok) {
+    // R6 (correctielog): a card where at least 90% of the dishes meets the
+    // requirement may go on the site without the doubtful ones. They are named
+    // with their reason in the report, and the card keeps its source url plus
+    // `incomplete: true` / `omittedCount`, so the site can say so.
+    const partial = assessIncompleteMenu(best.read.menu);
+    if (partial.ok) {
+      const trimmed = retainAcceptedDishes(best.read.menu, partial);
+      const built = buildExport({ restaurantId, menu: trimmed, menus, sourceUrl: record.sourceUrl, scraped });
+      const { categories, ...rest } = built.entry;
+      record.menu = trimmed;
+      record.status = 'done';
+      record.incomplete = true;
+      record.omitted = partial.omitted;
+      record.dishCount = partial.keptCount;
+      record.pricedCount = partial.pricedCount;
+      record.entry = { ...rest, incomplete: true, omittedCount: partial.omittedCount, categories };
+      record.entryKey = built.key;
+      record.menuScope = built.scope;
+      return record;
+    }
     record.reasons.push(...best.assessment.reasons);
     record.status = best.assessment.dishCount === 0 ? 'skipped' : 'skipped';
     return record;
