@@ -5323,5 +5323,166 @@
         ]
       }
     ]
+  },
+  "5-lunch": {
+    "subtitle": "Lunchkaart",
+    "scraped": "2026-11-01",
+    "source": "https://www.restaurant-chocolat.nl/lunch/",
+    "notes": "Opgehaald van de eigen website van het restaurant. Controleer altijd de actuele kaart.",
+    "categories": [
+      {
+        "name": "LUNCHGERECHTEN",
+        "path": [
+          "LUNCHKAART CHOCOLAT",
+          "LUNCHGERECHTEN"
+        ],
+        "items": [
+          {
+            "name": "STEAK TARTARE",
+            "desc": "Gerookte Ei-dooier · Kappertjes · Zoetzuur",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": true,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "ROGVLEUGEL & STOOF",
+            "desc": "Gebakken · Truffel · Bruine Boter",
+            "price": "€24",
+            "priceValue": 24,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "1/2 KREEFT THERMIDOR",
+            "desc": "Gegratineerd · Dragon · Parmezaanse Kaas",
+            "price": "€28",
+            "priceValue": 28,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "LINGUINE BOUILLABAISSE",
+            "desc": "Scampi · Venkel · Rouille · Brioche",
+            "price": "€21",
+            "priceValue": 21,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "GARNALEN KROKETTEN",
+            "desc": "Gebakken Scampi · Limoen Mayonaise (friet of toast)",
+            "price": "€19",
+            "priceValue": 19,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "SANDWICH CHOCOLAT",
+            "desc": "Steak Tartare · Pata Negra · Truffel Roerei",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": true,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "BULGOGI",
+            "desc": "Diamanthaas · Kimchi · Gefrituurde Bloemkool · Chili Flakes",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "SALADE BOTANIQUE",
+            "desc": "Groene Asperges · Suikersla · Avocado · Groene Kruiden · Komkommer",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "CHOCOLAT FAVORITES",
+            "desc": "Mini Hamburger · Brioche Steak Tartare · Toast Krab",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "ZALM",
+            "desc": "Ras el Hanout · Granaatappel · Basilicum",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "STEAK CHOCOLAT",
+            "desc": "Paddenstoelen · Truffel · Verse Friet",
+            "price": "€32",
+            "priceValue": 32,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "SALADE STRACCIATELLA",
+            "desc": "Biet · Granaatappel · Suikersla · Zuurdesem",
+            "price": "€17",
+            "priceValue": 17,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
   }
 }
