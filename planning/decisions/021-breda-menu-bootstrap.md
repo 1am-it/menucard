@@ -74,6 +74,26 @@ lezer moet daarbij steeds beter worden. Afgesproken:
   - **Tips voor de houder** (bijvoorbeeld bij dubbele namen) in Mijn restaurant.
     Dat wordt een apart ticket, na fase 2.
 
+## Aanvulling, 1 nov 2026: reviewronde 2
+De eigenaar besliste R4 tot en met R8. Ze staan in het correctielog. Twee
+besluiten wijken af van het oorspronkelijke besluit:
+- **R6, bijna-complete kaarten.** Een kaart waarvan minstens 90% in orde is, mag
+  zonder de twijfelgevallen op de site. Er staat dan een zichtbare melding bij,
+  met een link naar de bron. Dit is een uitzondering op besluit 016 §4, alleen
+  voor deze startvulling.
+- **R8, begrensde AI voor kaarten als afbeelding.** Dit vervangt voor deze
+  startvulling de regel "geen AI" uit vangrail 2:
+  - alleen `claude-haiku-5-5`, via de bestaande code van BE-33;
+  - alleen de restaurants met een kaart als afbeelding;
+  - een harde kostengrens van € 1, zonder herpogingen;
+  - de eigenaar draait het script in zijn eigen terminal en voert daar de sleutel
+    in, liefst een aparte sleutel "startvulling" die hij daarna intrekt. De Lead,
+    de runners en DeepSeek zien de sleutel nooit;
+  - de Lead controleert elke prijs tegen de afbeelding.
+
+  Dit geldt niet als akkoord voor betaalde AI in de app (BE-21 blijft
+  NEEDS_APPROVAL).
+
 ## Wat het niet doet
 - Geen herkomst per veld in de database (`field_provenance`). Dat is bewust
   geaccepteerd voor deze eenmalige vulling.
