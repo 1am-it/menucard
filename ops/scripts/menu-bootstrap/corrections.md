@@ -62,6 +62,23 @@ Totaal: 12 kaarten in 6 verzoeken, maximaal 36 cent van de harde grens van
 100 cent. Wolfslaar en T-Huis leveren in deze vorm geen leesbare kaart; dat is
 een vondst voor het rapport, geen omzeiling.
 
+## De AI-run van ronde 6 (eigenaar)
+
+Het script `ai-images.js` is in deze ronde niet uitgevoerd. De eigenaar draait
+na de review:
+
+```text
+node ops/scripts/menu-bootstrap/ai-images.js --plan
+node ops/scripts/menu-bootstrap/ai-images.js --only=8,11,20
+```
+
+`--plan` toont 36 cent als maximum (Al Dente 21, De Beyerd 12, Klein Java 3) van
+de harde grens van 100 cent; de echte run vraagt één keer verborgen om de
+sleutel, doet 6 verzoeken (3 + 2 + 1, groepen van drie) en schrijft alleen naar
+`.local/menu-bootstrap-ai/`. Wolfslaar (1) en T-Huis (23) staan er niet bij: hun
+kaarten zijn in deze vorm niet leesbaar (foto's, respectievelijk svg).
+
+
 Ronde 5 leverde twee dingen die geen nieuwe batch vragen. **R8:** het script
 `ai-images.js` voor de vijf kaarten als afbeelding, met een verborgen
 sleutelinvoer, een harde grens van 100 cent, geen herpogingen, en per restaurant
