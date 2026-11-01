@@ -10,7 +10,7 @@
 // Changing either requires an explicit acceptance-evidence update, not a
 // silent refresh.
 //
-// BE-71 (#176, besluit 021) added two live cards (5-menukaart, 22-menukaart) to
+// BE-71 (#176, besluit 021) added two live cards (5-lunch, 22-afhaal) to
 // the same file. That is the explicit acceptance-evidence update named above:
 // the whole file stays pinned by this hash and the latest scraped date, and the
 // four March cards of TARGETS below are still asserted one-for-one.
@@ -26,7 +26,7 @@ const { categoryPath } = require('./menuHierarchy');
 const { liveMenuLines, normalizePrice, buildMenuConcept } = require('./menuConcept');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const SNAPSHOT_SHA256 = '61a3fdaa21df0c7705c8c5d96d01e560d298002515d92e04f2863a1f45ec3e92';
+const SNAPSHOT_SHA256 = '0473b79d7df394b4a2e097d85f96d11831e85e55d7f204b6a3806daf614bf88e';
 const LATEST_SCRAPED = '2026-11-01';
 const TARGETS = [
   { id: '1', name: 'Restaurant Wolfslaar' },

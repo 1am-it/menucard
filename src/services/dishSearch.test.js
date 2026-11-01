@@ -96,9 +96,9 @@ test('ordinary query unaffected by sup/wine: "steak" keeps its exact pre-existin
   const res = searchDishes({ q: 'steak' });
   const expectedOrder = [
     '6-diner-1-1', '6-diner-1-0', '6-lunch-2-4', '6-lunch-2-3',
-    '5-menukaart-0-10', '5-menukaart-0-0',
+    '5-lunch-0-10', '5-lunch-0-0',
     '19-lunch-3-0', '19-diner-2-0', '23-lunch-0-10', '23-diner-1-0',
-    '23-diner-0-0', '5-menukaart-0-8', '5-menukaart-0-5',
+    '23-diner-0-0', '5-lunch-0-8', '5-lunch-0-5',
     '23-lunch-3-2', '23-diner-4-2',
   ];
   assert.equal(res.total, expectedOrder.length);
@@ -144,7 +144,7 @@ test('BE-13: "friet" keeps its exact, unchanged pre-existing result set — unaf
     '23-lunch-3-1', '23-diner-4-1', '23-diner-4-3', '23-diner-1-2',
     '23-diner-1-0', '23-lunch-0-12', '23-diner-1-6', '23-diner-1-1',
     // BE-71: the live card of Restaurant Chocolat (5) prints friet twice.
-    '5-menukaart-0-4', '5-menukaart-0-10',
+    '5-lunch-0-4', '5-lunch-0-10',
   ];
   assert.equal(res.total, expectedIds.length);
   assert.deepEqual(res.results.map((d) => d.dishId).sort(), expectedIds.sort());
@@ -180,7 +180,7 @@ test('BE-16: q=kip — 11 dishes match across 4 restaurants; every restaurant be
   assert.equal(res.total, 4, 'group-mode total counts restaurant groups');
   assert.equal(res.results.length, 0, 'no leftover individual results — every one of the 11 dishes lives inside a group');
   const byRestaurant = Object.fromEntries(res.restaurantGroups.map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]));
-  assert.deepEqual(byRestaurant['Makanan'], [['menukaart', 4]], 'BE-71: the startvulling card of Makanan (22)');
+  assert.deepEqual(byRestaurant['Makanan'], [['afhaal', 4]], 'BE-71: the startvulling card of Makanan (22)');
   assert.deepEqual(byRestaurant['Brasserie Bardot'], [['lunch', 2], ['diner', 1], ['specialiteiten', 1]]);
   assert.deepEqual(byRestaurant['Restaurant Zuyd'], [['lunch', 1], ['diner', 1]]);
   assert.deepEqual(byRestaurant['T-Huis'], [['lunch', 3], ['diner', 2]]);
@@ -197,7 +197,7 @@ test('BE-16: q=friet — two restaurant groups; T-Huis keeps its two subgroups',
   // BE-71: the live card of Restaurant Chocolat (5) is a second group.
   assert.deepEqual(
     res.restaurantGroups.filter((g) => g.restaurantId === '5').map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]),
-    [['Restaurant Chocolat', [['menukaart', 2]]]],
+    [['Restaurant Chocolat', [['lunch', 2]]]],
   );
   assert.equal(res.results.length, 0, 'no leftover individual results');
 });
