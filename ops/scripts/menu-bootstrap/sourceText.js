@@ -16,7 +16,7 @@
 //     possibly gone, possibly new). Pure: it never writes anything.
 
 const { createSourceFetcher } = require('./fetchSource');
-const { extractDigitalPdfTextWithFallback } = require('../../../src/lib/pdfTextExtraction');
+const { extractDigitalPdfLines } = require('../../../src/lib/pdfTextExtraction');
 
 /** Half a cent: two printed prices that differ less than that are the same. */
 const PRICE_TOLERANCE = 0.005;
@@ -467,7 +467,9 @@ async function fetchSourceText(url, options = {}) {
   if (page.kind === 'pdf') {
     let extracted;
     try {
-      extracted = await extractDigitalPdfTextWithFallback(page.bytes);
+      // Line-aware: a pdf prints a dish name and its amount on one visual row,
+      // and reading the raw content-stream order would separate them.
+      extracted = await extractDigitalPdfLines(page.bytes);
     } catch (error) {
       return {
         ok: false,
@@ -477,17 +479,20 @@ async function fetchSourceText(url, options = {}) {
         detail: String((error && error.message) || error).slice(0, 200),
       };
     }
-    const text = String((extracted && extracted.text) || '').trim();
-    if (!text || extracted.usedFallback) {
-      // Same rule as ./readMenuSource.js: bytes without a text layer are not read
-      // by a fallback that destroys the printed layout.
-      return {
-        ok: false,
-        url,
-        kind: 'pdf',
-        reason: 'no_text_layer',
-        detail: extracted && extracted.usedFallback ? 'alleen tekst uit de content-stream, geen tekstlaag' : 'geen tekstlaag',
-      };
+    const lines = [];
+    for (const pdfPage of Array.isArray(extracted && extracted.pages) ? extracted.pages : []) {
+      for (const line of Array.isArray(pdfPage.lines) ? pdfPage.lines : []) {
+        const text = (Array.isArray(line.items) ? line.items : [])
+          .map((item) => (item && typeof item.str === 'string' ? item.str : ''))
+          .join(' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if (text) lines.push(text);
+      }
+    }
+    const text = lines.join('\n');
+    if (!text) {
+      return { ok: false, url, kind: 'pdf', reason: 'no_text_layer', detail: 'geen tekstlaag' };
     }
     return {
       ok: true,
