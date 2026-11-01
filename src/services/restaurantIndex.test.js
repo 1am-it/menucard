@@ -8,6 +8,16 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
+// BE-75 (#187): vier gesloten restaurants (3, 10, 14, 18) zijn uit
+// data/restaurants.json verdwenen. De verwachtingen hieronder (25 restaurants,
+// 16 Binnenstad, het placeholder-adres van restaurant 10, "Con  Fuego") horen
+// bij de data van vóór die wijziging. Deze tests draaien daarom op de vaste
+// kopie in src/services/__fixtures__/be75-closed-restaurants/, met hetzelfde
+// require.cache-patroon als dishSearch.test.js. Geen enkele verwachting is
+// veranderd. De levende data wordt bewaakt door
+// src/lib/be75ClosedRestaurants.test.js.
+require('./__fixtures__/be75-closed-restaurants/beforeClosed').useRestaurantsBeforeBe75();
+
 const { searchRestaurants, isValidAddress, hasUniqueRestaurantNameMatch } = require('./restaurantIndex');
 
 test('whitelist: no internal field leaks into the public shape, for any result', () => {
