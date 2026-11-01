@@ -112,7 +112,7 @@ De eigenaar besloot Breda uit te breiden met de werklijst van BE-72 (OpenStreetM
 - **in golven:** eerst de ±79 hoogst gerangschikte restaurants (BE-79), dan de rest van de ±200 restaurants, daarna cafés en snackbars met een kaart online;
 - **na golf 1 meten** we het rendement, de doorlooptijd en het aandeel gesloten zaken;
 - **alleen in het daltarief van DeepSeek;**
-- **dezelfde regels als de startvulling:** alleen de eigen website, niets verzinnen, en de Lead controleert elke kaart (met , BE-78) voordat hij  zet.
+- **dezelfde regels als de startvulling:** alleen de eigen website, niets verzinnen, en de Lead controleert elke kaart (met `price-check.js`, BE-78) voordat hij `leadChecked` zet.
 
 Ketens blijven buiten de werklijst, net als in BE-72.
 
