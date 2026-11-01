@@ -26,6 +26,13 @@ a confusing empty or misleadingly short result list.
 - At most, a link/pointer toward a future contribution mechanism — not the
   mechanism itself.
 
+## Tone (owner, 2026-11-01)
+Positive, not apologetic. Lead with what there is, then offer an
+alternative, then one inviting line. For example: "2 restaurants met pad thai
+in Dordrecht" → "Ook zin in Thais? Bekijk Thaise restaurants in de buurt" →
+"Mis je jouw favoriet? Laat het weten." Avoid "weinig gevonden", "nog niet
+compleet" or "nieuw" as the headline.
+
 ## Out of scope
 
 - **Any actual contribution flow or form.** This is `PLATFORM-08` and does
