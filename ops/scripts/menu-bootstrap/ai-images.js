@@ -1,11 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 
-// BE-71 (#176, besluit 021, R8 in ../corrections.md) — leest de menukaarten die
-// alleen als afbeelding bestaan met de bestaande AI-menuherkenning.
+// BE-71 (#176, besluit 021, R8 en R12 in ../corrections.md) — leest de
+// menukaarten met de bestaande AI-menuherkenning: eerst alleen de kaarten als
+// afbeelding (R8), sinds ronde 8 alle overgebleven kaarten (R12: html, pdf en
+// afbeelding).
 //
-//   node ops/scripts/menu-bootstrap/ai-images.js --plan   # wat, en de maximale kosten
-//   node ops/scripts/menu-bootstrap/ai-images.js          # de echte run (eigenaar)
+//   node ops/scripts/menu-bootstrap/ai-images.js --plan        # wat, en de maximale kosten
+//   node ops/scripts/menu-bootstrap/ai-images.js               # de echte run (eigenaar)
+//   node ops/scripts/menu-bootstrap/ai-images.js --plan --all  # alle overgebleven kaarten
+//   node ops/scripts/menu-bootstrap/ai-images.js --all         # de echte run (eigenaar)
+//
+// `--all` neemt elke restaurant uit het rapport dat nog geen kaart in
+// data/menus.json heeft, geen `lead-corrections/<id>.json` heeft en waarvan de
+// site bereikbaar was. De bron per restaurant is de beste kandidaat uit het
+// rapport: de leesbare tekst van de pagina (zonder scripts en stijl), het
+// pdf-document met een tekstlaag via de bestaande documentbron, of de
+// kaartafbeeldingen zoals in R8. Een pagina die zijn kaart pas met JavaScript
+// toont, wordt overgeslagen met de reden `javascript_only`.
 //
 // De eigenaar draait dit zelf. `--plan` doet geen verzoek aan Anthropic en vraagt
 // niet om de sleutel: het toont de restaurants, de afbeeldingen en de maximale
@@ -40,8 +52,11 @@ const {
   estimateOf,
   planImageRead,
   base64Bytes,
+  hasMenuText,
+  menuPriceLineCount,
   MAX_MENU_IMAGES,
   MAX_IMAGE_BYTES,
+  MAX_DOCUMENT_BYTES,
   IMAGE_MEDIA_TYPES,
 } = require('../../../src/lib/menuImageRead');
 const {
@@ -86,6 +101,26 @@ const IMAGE_RESTAURANTS = Object.freeze({
 
 const SECRET_MASK = '[verborgen]';
 
+/** Waar de kaarten en de correcties van de Lead staan (R10). */
+const MENUS_FILE = path.join('data', 'menus.json');
+const CORRECTIONS_DIR = path.join('ops', 'scripts', 'menu-bootstrap', 'lead-corrections');
+/** De pdf-downloads van `--all`, met dezelfde cache en dezelfde rust. */
+const DOCUMENT_CACHE_DIR = path.join('.local', 'menu-bootstrap-cache', 'ai-documents');
+/** Een tekstbron gaat begrensd naar het model: nooit een hele site. */
+const MAX_TEXT_CHARS = 120_000;
+/** De redenen waarom `--all` een restaurant overslaat. */
+const ALL_SKIP_REASONS = Object.freeze({
+  already_has_menu: 'heeft al een kaart in data/menus.json',
+  lead_correction: 'heeft een Lead-correctie (R10)',
+  site_unreachable: 'site niet bereikbaar',
+  no_menu_url: 'het rapport noemt geen kaart-url',
+  other_host: 'de kaart-url staat op een andere host',
+  javascript_only: 'de kaart verschijnt pas na JavaScript',
+  pdf_without_text_layer: 'de pdf heeft geen tekstlaag',
+  pdf_unreadable: 'de pdf is niet te lezen',
+  no_text: 'geen leesbare tekst op de pagina',
+});
+
 /**
  * Ronde 6, punt 1 (Lead-review 6557509881): alleen een afbeelding met een
  * menuwoord in de bestandsnaam, de alt-tekst of het bijschrift is een kaart.
@@ -122,6 +157,22 @@ function hostOf(value) {
     return new URL(String(value)).host.toLowerCase();
   } catch {
     return null;
+  }
+}
+
+/** Dezelfde host, maar zonder een leidende `www.`: dat is dezelfde site. */
+function bareHostOf(value) {
+  const host = hostOf(value);
+  return host === null ? null : host.replace(/^www\./i, '');
+}
+
+/** Staat deze url op de kaartpagina zelf, of op de homepage van de site? */
+function isRootUrl(value) {
+  try {
+    const pathName = new URL(String(value)).pathname;
+    return pathName === '' || pathName === '/';
+  } catch {
+    return false;
   }
 }
 
@@ -164,6 +215,79 @@ function imageRestaurantsFromReport(report) {
       continue;
     }
     restaurants.push({ id, name: entry.name || id, website, pageUrl });
+  }
+  return { restaurants, skipped };
+}
+
+/* ------------------------------------------------------------------ *
+ * --all: elke overgebleven kaart, uit het rapport
+ * ------------------------------------------------------------------ */
+
+/** Heeft dit restaurant al een kaart in data/menus.json? De sleutel is `<id>-<soort>`. */
+function hasMenuFor(id, menus) {
+  const prefix = `${id}-`;
+  return Object.keys(menus || {}).some((key) => key.startsWith(prefix));
+}
+
+/**
+ * Was de site bij de motor niet bereikbaar (R8, punt 4)? Dan is er niets om te
+ * lezen en slaat `--all` het restaurant over; het is geen kaartprobleem.
+ */
+function isSiteUnreachable(entry) {
+  const reasons = (entry && Array.isArray(entry.reasons) ? entry.reasons : []);
+  return reasons.some((reason) => reason
+    && (reason.code === 'unreachable' || /unreachable|niet bereikbaar/i.test(`${reason.text || ''} ${reason.detail || ''}`)));
+}
+
+/**
+ * De restaurants voor `--all`, uit het rapport van de motor (R12):
+ * - geen kaart in data/menus.json;
+ * - geen `lead-corrections/<id>.json` (R10);
+ * - de site was bereikbaar;
+ * - het rapport noemt een kaart-url op de eigen host.
+ * De bron per restaurant is die kaart-url met de soort uit het rapport.
+ */
+function allSourceRestaurants({
+  report,
+  menus = {},
+  correctionsDir = CORRECTIONS_DIR,
+  existsSync = fs.existsSync,
+} = {}) {
+  const restaurants = [];
+  const skipped = [];
+  for (const entry of (report && report.restaurants) || []) {
+    const id = String(entry.id);
+    const name = entry.name || id;
+    if (hasMenuFor(id, menus)) {
+      skipped.push({ id, name, reason: 'already_has_menu' });
+      continue;
+    }
+    if (existsSync(path.join(correctionsDir, `${id}.json`))) {
+      skipped.push({ id, name, reason: 'lead_correction' });
+      continue;
+    }
+    if (isSiteUnreachable(entry)) {
+      skipped.push({ id, name, reason: 'site_unreachable' });
+      continue;
+    }
+    const menuUrl = text(entry.menuUrl);
+    if (menuUrl === '') {
+      skipped.push({ id, name, reason: 'no_menu_url' });
+      continue;
+    }
+    const website = text(entry.website);
+    if (!website || bareHostOf(menuUrl) !== bareHostOf(website)) {
+      skipped.push({ id, name, reason: 'other_host', detail: website || null });
+      continue;
+    }
+    restaurants.push({
+      id,
+      name,
+      website,
+      pageUrl: menuUrl,
+      reportKind: entry.kind === 'pdf' ? 'pdf' : 'html',
+      reportPageCount: Number.isInteger(entry.pageCount) && entry.pageCount > 0 ? entry.pageCount : null,
+    });
   }
   return { restaurants, skipped };
 }
@@ -243,6 +367,31 @@ function decodeAttribute(value) {
     .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>');
+}
+
+/**
+ * De leesbare tekst van een pagina: zonder scripts, stijl, svg en commentaar,
+ * met de blokgrenzen als regeleinde (een gerecht en zijn prijs staan vaak op
+ * één regel) en de html-entiteiten gedecodeerd. Een tekstbron is begrensd.
+ */
+function readablePageText(html, { maxChars = MAX_TEXT_CHARS } = {}) {
+  const source = String(html || '');
+  const body = source
+    .replace(/<head\b[\s\S]*?<\/head>/gi, ' ')
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ');
+  const withLines = body
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(?:p|div|li|tr|td|th|h[1-6]|section|article|dd|dt|table|ul|ol|header|footer|nav|main)\s*>/gi, '\n');
+  const plain = decodeAttribute(withLines.replace(/<[^>]*>/g, ' ')).replace(/&nbsp;/gi, ' ');
+  const lines = plain
+    .split('\n')
+    .map((line) => line.replace(/[ \t\u00a0]+/g, ' ').trim())
+    .filter((line) => line !== '');
+  return lines.join('\n').slice(0, maxChars);
 }
 
 /**
@@ -466,6 +615,96 @@ function createImageLoader({ fetcher, cacheDir = IMAGE_CACHE_DIR, now = () => ne
   };
 }
 
+/**
+ * De pdf-download met dezelfde regels als de afbeeldingen: robots.txt, dezelfde
+ * site, rust tussen verzoeken en de cache onder `.local/menu-bootstrap-cache/`.
+ * Alleen `application/pdf` (of een url die op .pdf eindigt) is een document.
+ */
+function createDocumentLoader({ fetcher, cacheDir = DOCUMENT_CACHE_DIR, now = () => new Date() } = {}) {
+  if (!fetcher || typeof fetcher.pacedFetch !== 'function') throw new TypeError('een fetcher is verplicht');
+  const fileFor = (url) => path.join(cacheDir, `${cacheKey(url)}.json`);
+
+  function store(entry) {
+    try {
+      fs.mkdirSync(cacheDir, { recursive: true });
+      fs.writeFileSync(fileFor(entry.url), JSON.stringify(entry));
+    } catch {
+      // Een cache die niet schrijfbaar is kost een tweede verzoek, nooit de run.
+    }
+  }
+
+  function load(url) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(fileFor(url), 'utf8'));
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return async function loadDocument(url) {
+    const cached = load(url);
+    if (cached) {
+      if (cached.ok !== true) return { ...cached, fromCache: true };
+      return {
+        ok: true,
+        url,
+        finalUrl: cached.finalUrl,
+        contentType: cached.contentType,
+        fetchedAt: cached.fetchedAt,
+        bytes: Buffer.from(String(cached.bodyBase64 || ''), 'base64'),
+        fromCache: true,
+      };
+    }
+
+    const gate = await fetcher.robotsCheck(url);
+    if (!gate.shouldFetchPage) {
+      const entry = { ok: false, url, reason: 'robots', detail: gate.robotsStatus || null };
+      store(entry);
+      return entry;
+    }
+
+    let fetched;
+    try {
+      fetched = await fetchSameSiteWithRedirects(url, {
+        fetchImpl: fetcher.pacedFetch,
+        fetchOptions: { encoding: 'buffer', maxBytes: MAX_DOCUMENT_BYTES },
+        robotsCheck: fetcher.robotsCheck,
+      });
+    } catch (error) {
+      const entry = { ok: false, url, reason: (error && error.reason) || 'fetch_failed' };
+      store(entry);
+      return entry;
+    }
+
+    const response = fetched.response;
+    const contentType = response.contentType || '';
+    const finalUrl = response.finalUrl || url;
+    const isPdf = /^application\/pdf\b/i.test(contentType) || /\.pdf$/i.test(fileNameOf(finalUrl));
+    if (!isPdf) {
+      const entry = { ok: false, url, reason: 'not_a_pdf', detail: contentType || null };
+      store(entry);
+      return entry;
+    }
+    const bytes = response.bytes || Buffer.from(String(response.body || ''), 'utf8');
+    if (bytes.length > MAX_DOCUMENT_BYTES) {
+      const entry = { ok: false, url, reason: 'document_too_large', detail: `${bytes.length} bytes` };
+      store(entry);
+      return entry;
+    }
+    const entry = {
+      ok: true,
+      url,
+      finalUrl,
+      contentType: contentType || 'application/pdf',
+      fetchedAt: now().toISOString(),
+      bodyBase64: bytes.toString('base64'),
+    };
+    store(entry);
+    return { ...entry, bytes, fromCache: false };
+  };
+}
+
 /** De standaard paginalader: dezelfde fetcher, dezelfde cache, dezelfde rust. */
 function defaultLoadPage(fetcher) {
   return async function loadPage(url) {
@@ -572,6 +811,192 @@ async function planImages({ restaurants = [], loadPage, log = () => {} } = {}) {
         record.estimate && record.images.length > 0 ? `, maximaal ${record.estimate.maxEurCents} cent` : `, overgeslagen (${record.reason})`
       } — ${record.pageUrl}`,
     );
+  }
+  return { restaurants: planned, maxCostEurCents };
+}
+
+/* ------------------------------------------------------------------ *
+ * --all: plannen per bronsoort, zonder verzoek aan het model
+ * ------------------------------------------------------------------ */
+
+let readPdfMenuImpl = null;
+
+/**
+ * De bestaande deterministische pdf-lezing, lui geladen: een plan zonder
+ * pdf-bron hoeft de pdf-bibliotheek niet te laden en een test met een
+ * nep-inspectie al helemaal niet.
+ */
+function defaultInspectPdf(bytes) {
+  if (typeof readPdfMenuImpl !== 'function') {
+    // eslint-disable-next-line global-require
+    readPdfMenuImpl = require('./readMenuSource').readPdfMenu;
+  }
+  return readPdfMenuImpl(bytes);
+}
+
+/** Een pdf-bron: het document met een tekstlaag, of overgeslagen met de reden. */
+async function planPdfSource(record, { loadDocument, inspectPdf }) {
+  let document;
+  try {
+    document = await loadDocument(record.sourceUrl);
+  } catch (error) {
+    document = { ok: false, reason: 'document_error', detail: (error && error.message) || null };
+  }
+  if (!document || document.ok !== true) {
+    record.status = 'skipped';
+    record.reason = (document && document.reason) || 'not_read';
+    return record;
+  }
+  record.sourceUrl = document.finalUrl || record.sourceUrl;
+  let reading;
+  try {
+    reading = await inspectPdf(document.bytes);
+  } catch (error) {
+    reading = { refusal: { status: 'unreadable', reason: (error && error.reason) || 'pdf_extraction_failed' } };
+  }
+  const pageCount = reading && Number.isInteger(reading.pageCount) && reading.pageCount > 0 ? reading.pageCount : record.pageCount;
+  record.pageCount = Number.isInteger(pageCount) && pageCount > 0 ? pageCount : null;
+  if (!reading || reading.refusal) {
+    record.status = 'skipped';
+    record.reason = reading && reading.refusal && reading.refusal.status === 'unparsed'
+      ? 'pdf_without_text_layer'
+      : 'pdf_unreadable';
+    return record;
+  }
+  if (record.pageCount === null) {
+    record.status = 'skipped';
+    record.reason = 'page_count_unknown';
+    return record;
+  }
+  record.sourceKind = 'pdf';
+  record.estimate = estimateOf(0, record.pageCount);
+  return record;
+}
+
+/**
+ * Een html-bron: eerst de kaartafbeeldingen van de pagina (R8, met hooguit één
+ * extra stap), anders de leesbare tekst. Een pagina die zijn kaart pas met
+ * JavaScript toont, heeft geen prijsregels en wordt `javascript_only`.
+ */
+async function planHtmlSource(record, { loadPage }) {
+  let page;
+  try {
+    page = await loadPage(record.pageUrl);
+  } catch (error) {
+    page = { ok: false, reason: 'page_error', detail: (error && error.message) || null };
+  }
+  if (!page || page.ok !== true) {
+    record.status = 'skipped';
+    record.reason = (page && page.reason) || 'not_read';
+    return record;
+  }
+  record.sourceUrl = page.finalUrl || record.pageUrl;
+  record.sourceSearch.pageUrl = record.sourceUrl;
+
+  const selected = collectStrictMenuImages({ html: page.text, pageUrl: record.sourceUrl, limit: MAX_MENU_IMAGES });
+  record.sourceSearch.found = selected.images.length + selected.dropped.length;
+  record.sourceSearch.dropped = selected.dropped.slice(0, 12);
+  let images = selected.images.filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType)).slice(0, MAX_MENU_IMAGES);
+  let textHtml = page.text;
+
+  // Hooguit één extra ophaalstap op dezelfde site, en alleen wanneer het
+  // rapport de homepage noemt: noemt het rapport al de kaartpagina zelf, dan is
+  // dat de bron en volgt er geen tweede, mogelijk verkeerde pagina.
+  if (images.length === 0 && isRootUrl(record.pageUrl)) {
+    const [candidate] = menuSourceLinks({ html: page.text, pageUrl: record.sourceUrl, limit: 1 });
+    if (candidate && candidate.kind === 'html') {
+      let second;
+      try {
+        second = await loadPage(candidate.url);
+      } catch (error) {
+        second = { ok: false, reason: 'page_error', detail: (error && error.message) || null };
+      }
+      record.sourceSearch.extraStep = {
+        url: candidate.url,
+        ok: second && second.ok === true,
+        reason: (second && second.reason) || null,
+        images: 0,
+        dropped: 0,
+      };
+      if (second && second.ok === true) {
+        const extra = collectStrictMenuImages({ html: second.text, pageUrl: second.finalUrl || candidate.url, limit: MAX_MENU_IMAGES });
+        const extraImages = extra.images.filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType)).slice(0, MAX_MENU_IMAGES);
+        record.sourceSearch.extraStep.images = extraImages.length;
+        record.sourceSearch.extraStep.dropped = extra.dropped.length;
+        if (extraImages.length > 0) images = extraImages;
+        else textHtml = second.text;
+        record.sourceUrl = second.finalUrl || candidate.url;
+      }
+    } else if (candidate && candidate.kind === 'pdf') {
+      record.sourceSearch.pdfMenu = candidate.url;
+    }
+  }
+
+  if (images.length > 0) {
+    record.sourceKind = 'image';
+    record.images = images;
+    record.sourceSearch.kept = images.length;
+    record.estimate = estimateOf(images.length, 0);
+    return record;
+  }
+
+  const readable = readablePageText(textHtml);
+  record.textWords = readable === '' ? 0 : readable.split(/\s+/).length;
+  record.priceLines = menuPriceLineCount(readable);
+  if (readable !== '' && hasMenuText(readable)) {
+    record.sourceKind = 'text';
+    record.sourceText = readable;
+    record.estimate = estimateOf(0, 0);
+    return record;
+  }
+  record.status = 'skipped';
+  record.reason = record.sourceSearch.pdfMenu ? 'menu_is_pdf' : 'javascript_only';
+  return record;
+}
+
+/**
+ * Wat `--all` zou lezen, zonder een verzoek aan het model: per restaurant de
+ * bron, de soort en het maximum van die lezing, plus het totaal.
+ */
+async function planAllSources({
+  restaurants = [],
+  loadPage,
+  loadDocument,
+  inspectPdf = defaultInspectPdf,
+  log = () => {},
+} = {}) {
+  const planned = [];
+  let maxCostEurCents = 0;
+  for (const restaurant of restaurants) {
+    const record = {
+      ...restaurant,
+      sourceKind: null,
+      sourceUrl: restaurant.pageUrl,
+      images: [],
+      sourceText: null,
+      textWords: 0,
+      priceLines: 0,
+      pageCount: restaurant.reportPageCount || null,
+      estimate: null,
+      status: 'planned',
+      reason: null,
+      sourceSearch: { pageUrl: restaurant.pageUrl, found: 0, kept: 0, dropped: [], extraStep: null, pdfMenu: null },
+    };
+    planned.push(record);
+    if (restaurant.reportKind === 'pdf') await planPdfSource(record, { loadDocument, inspectPdf });
+    else await planHtmlSource(record, { loadPage });
+
+    if (record.status !== 'planned') {
+      log(`${record.id} ${record.name}: overgeslagen (${record.reason}) — ${record.sourceUrl}`);
+      continue;
+    }
+    maxCostEurCents += record.estimate.maxEurCents;
+    const detail = record.sourceKind === 'image'
+      ? `${record.images.length} afbeelding(en)`
+      : record.sourceKind === 'pdf'
+        ? `pdf, ${record.pageCount} pagina('s)`
+        : `tekst, ${record.textWords} woorden, ${record.priceLines} prijsregel(s)`;
+    log(`${record.id} ${record.name}: ${record.sourceKind} (${detail}), maximaal ${record.estimate.maxEurCents} cent — ${record.sourceUrl}`);
   }
   return { restaurants: planned, maxCostEurCents };
 }
@@ -697,6 +1122,80 @@ function composeProtocol(protocol) {
  * ------------------------------------------------------------------ */
 
 /**
+ * De bronnen van één restaurant, klaar voor de AI (R12): de afbeeldingen in
+ * groepen van hooguit drie (R8), de leesbare tekst als één tekstbron, of de pdf
+ * als één document. Elke groep is één verzoek, met dezelfde kostengrens.
+ */
+async function readingUnitsFor(record, { loadImage, loadDocument, log = () => {} } = {}) {
+  const sourceKind = record.sourceKind
+    || (Array.isArray(record.images) && record.images.length > 0 ? 'image' : null);
+  const sourceUrl = record.sourceUrl || record.pageUrl;
+  if (sourceKind === 'text') {
+    if (typeof record.sourceText !== 'string' || record.sourceText.trim() === '') {
+      return { sourceKind, sourceUrl, images: [], units: [], error: 'no_text' };
+    }
+    return {
+      sourceKind,
+      sourceUrl,
+      images: [],
+      units: [{
+        sources: [{ id: record.id, url: sourceUrl, kind: 'html', text: record.sourceText }],
+        images: [],
+        label: { kind: 'text', url: sourceUrl },
+      }],
+    };
+  }
+  if (sourceKind === 'pdf') {
+    const loaded = await loadDocument(sourceUrl);
+    if (!loaded || loaded.ok !== true) {
+      return { sourceKind, sourceUrl, images: [], units: [], error: (loaded && loaded.reason) || 'document_not_read' };
+    }
+    if (!Number.isInteger(record.pageCount) || record.pageCount < 1) {
+      return { sourceKind, sourceUrl, images: [], units: [], error: 'page_count_unknown' };
+    }
+    return {
+      sourceKind,
+      sourceUrl,
+      images: [],
+      units: [{
+        sources: [{ id: record.id, url: sourceUrl, kind: 'pdf', documentBase64: loaded.bytes.toString('base64'), pageCount: record.pageCount }],
+        images: [],
+        label: { kind: 'pdf', url: sourceUrl, pages: record.pageCount },
+      }],
+    };
+  }
+  if (sourceKind !== 'image') return { sourceKind, sourceUrl, images: [], units: [], error: 'no_source' };
+
+  const images = [];
+  for (const candidate of record.images) {
+    const loaded = await loadImage(candidate.url);
+    if (!loaded || loaded.ok !== true) {
+      log(`${record.id}: afbeelding ${candidate.number} overgeslagen (${(loaded && loaded.reason) || 'not_read'})`);
+      continue;
+    }
+    images.push({
+      number: candidate.number,
+      url: loaded.finalUrl || candidate.url,
+      mediaType: loaded.mediaType,
+      data: loaded.bytes.toString('base64'),
+    });
+  }
+  if (images.length === 0) return { sourceKind, sourceUrl, images, units: [], error: 'no_images_read' };
+
+  const units = chunkImages(images, IMAGE_CHUNK_SIZE).map((chunk) => {
+    // De AI telt de afbeeldingen per verzoek: binnen dit verzoek is de eerste
+    // afbeelding weer "afbeelding 1". De pagina-orde blijft in `sourceImages`.
+    const local = chunk.map((image, index) => ({ ...image, number: index + 1, pageNumber: image.number }));
+    return {
+      sources: [{ id: record.id, url: record.pageUrl, kind: 'image', images: local }],
+      images: local,
+      label: { images: chunk.map((image) => image.number) },
+    };
+  });
+  return { sourceKind, sourceUrl, images, units };
+}
+
+/**
  * Leest elk gepland restaurant met de AI, in groepen van hooguit drie
  * afbeeldingen per verzoek. De werkelijke kosten van elk verzoek komen uit de
  * eigen usage van de provider en worden direct opgeteld; kan het volgende
@@ -708,6 +1207,7 @@ async function readImages({
   plan,
   adapter,
   loadImage,
+  loadDocument,
   writeOutput = () => {},
   log = () => {},
   secret = '',
@@ -740,48 +1240,38 @@ async function readImages({
       log(`${record.id} ${record.name}: overgeslagen, ${stop}`);
       continue;
     }
-    if (record.status !== 'planned' || !Array.isArray(record.images) || record.images.length === 0) {
-      outcome.reason = record.reason || 'no_images';
+    if (record.status !== 'planned') {
+      outcome.reason = record.reason || 'not_planned';
       continue;
     }
 
-    const images = [];
-    for (const candidate of record.images) {
-      const loaded = await loadImage(candidate.url);
-      if (!loaded || loaded.ok !== true) {
-        log(`${record.id}: afbeelding ${candidate.number} overgeslagen (${(loaded && loaded.reason) || 'not_read'})`);
-        continue;
-      }
-      images.push({
-        number: candidate.number,
-        url: loaded.finalUrl || candidate.url,
-        mediaType: loaded.mediaType,
-        data: loaded.bytes.toString('base64'),
-      });
+    // R12: de bron van dit restaurant is een afbeelding, tekst of pdf. Elke
+    // groep is één verzoek; de grenzen en de reservering gelden per verzoek.
+    const prepared = await readingUnitsFor(record, { loadImage, loadDocument, log });
+    const images = prepared.images;
+    if (prepared.error) {
+      outcome.reason = prepared.error;
+      continue;
     }
-    if (images.length === 0) {
-      outcome.reason = 'no_images_read';
+    if (prepared.units.length === 0) {
+      outcome.reason = record.reason || 'no_source';
       continue;
     }
 
-    // Ronde 6, punt 2: hooguit drie afbeeldingen per verzoek. De grenzen van een
-    // afbeeldingslezing en de reservering gelden per verzoek, en er zijn nog
-    // steeds geen herpogingen.
     outcome.attempted = true;
+    outcome.sourceKind = prepared.sourceKind;
+    outcome.sourceUrl = prepared.sourceUrl;
     outcome.chunks = [];
     outcome.attempts = 0;
     const readings = [];
     let failure = null;
-    for (const chunk of chunkImages(images, IMAGE_CHUNK_SIZE)) {
-      // De AI telt de afbeeldingen per verzoek: binnen dit verzoek is de eerste
-      // afbeelding weer "afbeelding 1". De pagina-orde blijft in `sourceImages`.
-      const local = chunk.map((image, index) => ({ ...image, number: index + 1, pageNumber: image.number }));
-      const check = planImageRead({ sources: [{ id: record.id, url: record.pageUrl, images: chunk }] });
+    for (const unit of prepared.units) {
+      const check = planImageRead({ sources: unit.sources });
       if (!check.ok) {
         failure = { reason: check.reason || 'reading_refused' };
         break;
       }
-      const reserve = estimateOf(chunk.length, 0).maxEurCents;
+      const reserve = check.estimate ? check.estimate.maxEurCents : 0;
       if (spentEurCents + reserve > budgetEurCents) {
         stop = 'budget_ceiling';
         failure = { reason: stop };
@@ -792,7 +1282,7 @@ async function readImages({
       try {
         answer = await adapter.call({
           protocol: composeProtocol(protocol),
-          sources: [{ id: record.id, url: record.pageUrl, kind: 'image', images: local }],
+          sources: unit.sources,
           limits: { maxOutputTokens: MAX_OUTPUT_TOKENS, callTimeoutMs: CALL_TIMEOUT_MS },
         });
       } catch (error) {
@@ -817,8 +1307,8 @@ async function readImages({
       } else {
         stop = 'cost_unknown';
       }
-      outcome.chunks.push({ images: chunk.map((image) => image.number), costEurCents: cost });
-      readings.push(toMenuReading(answer, { images: local }));
+      outcome.chunks.push({ ...unit.label, costEurCents: cost });
+      readings.push(toMenuReading(answer, { images: unit.images }));
       if (cost === null) {
         failure = { reason: 'cost_unknown' };
         break;
@@ -854,6 +1344,8 @@ async function readImages({
       restaurantId: record.id,
       name: record.name,
       pageUrl: record.pageUrl,
+      sourceKind: outcome.sourceKind,
+      sourceUrl: outcome.sourceUrl,
       scraped,
       model,
       // Ronde 6, punt 3: de vlag en de bron-afbeelding per gerecht, zodat de
@@ -891,8 +1383,10 @@ async function runAiImages(options = {}) {
   const {
     restaurants = [],
     planOnly = false,
+    plan: givenPlan = null,
     loadPage,
     loadImage,
+    loadDocument,
     promptKey,
     createCall,
     writeOutput = () => {},
@@ -903,7 +1397,7 @@ async function runAiImages(options = {}) {
     scraped = null,
   } = options;
 
-  const plan = await planImages({ restaurants, loadPage, log });
+  const plan = givenPlan || await planImages({ restaurants, loadPage, log });
   if (planOnly) {
     log(`Maximaal ${plan.maxCostEurCents} cent van de harde grens van ${budgetEurCents} cent, zonder verzoek en zonder sleutel.`);
     return { planOnly: true, plan, outcomes: [], spentEurCents: 0, stop: null, calls: 0 };
@@ -922,6 +1416,7 @@ async function runAiImages(options = {}) {
       plan,
       adapter,
       loadImage,
+      loadDocument,
       writeOutput,
       log,
       secret,
@@ -944,9 +1439,10 @@ async function runAiImages(options = {}) {
 }
 
 function parseArgs(argv) {
-  const args = { plan: false, only: null, help: false };
+  const args = { plan: false, all: false, only: null, help: false };
   for (const arg of argv) {
     if (arg === '--plan') args.plan = true;
+    else if (arg === '--all') args.all = true;
     else if (arg === '--help' || arg === '-h') args.help = true;
     else if (arg.startsWith('--only=')) {
       args.only = arg.slice('--only='.length).split(',').map((id) => id.trim()).filter(Boolean);
@@ -986,6 +1482,8 @@ function writeRunSummary({ outputDir = OUTPUT_DIR, summary } = {}) {
 const USAGE = `Gebruik:
   node ops/scripts/menu-bootstrap/ai-images.js --plan
   node ops/scripts/menu-bootstrap/ai-images.js [--only=1,8]
+  node ops/scripts/menu-bootstrap/ai-images.js --plan --all
+  node ops/scripts/menu-bootstrap/ai-images.js --all [--only=8,10]
 
 --plan toont de restaurants met een kaart als afbeelding, hun afbeeldingen en de
 maximale kosten van de hele run. Het doet geen verzoek aan Anthropic en vraagt
@@ -997,6 +1495,14 @@ er geen, dan volgt hooguit één extra ophaalstap op dezelfde site en staat de
 vondst (kaart, pdf of svg) in het plan. Een restaurant met meer dan drie
 afbeeldingen wordt in groepen van drie gelezen; de reservering en de kostengrens
 gelden per verzoek.
+
+--all (R12, ronde 8) neemt elke restaurant uit het rapport dat nog geen kaart in
+data/menus.json heeft, geen lead-corrections/<id>.json heeft en waarvan de site
+bereikbaar was. De bron per restaurant is de beste kandidaat uit het rapport: de
+kaartafbeeldingen (zoals hierboven), het pdf met een tekstlaag als document, of
+de leesbare tekst van de pagina zonder scripts en stijl. Een pagina die zijn
+kaart pas met JavaScript toont, wordt overgeslagen met de reden javascript_only.
+Het plan noemt per restaurant de bron, de soort en het maximum, plus het totaal.
 
 Zonder --plan volgt de echte run. De sleutel wordt dan één keer verborgen in de
 terminal gevraagd; hij komt niet uit een omgevingsvariabele, een argument of een
@@ -1011,23 +1517,45 @@ async function main(argv = process.argv.slice(2), deps = {}) {
     return 0;
   }
   const report = deps.report || JSON.parse(fs.readFileSync(REPORT_FILE, 'utf8'));
-  const { restaurants, skipped } = imageRestaurantsFromReport(report);
-  for (const entry of skipped) console.log(`${entry.id}: overgeslagen (${entry.reason})`);
+  let restaurants;
+  let skipped;
+  if (args.all) {
+    // R12: elke overgebleven kaart, uit het rapport van de motor.
+    const menus = deps.menus || JSON.parse(fs.readFileSync(MENUS_FILE, 'utf8'));
+    ({ restaurants, skipped } = allSourceRestaurants({ report, menus, correctionsDir: deps.correctionsDir }));
+  } else {
+    ({ restaurants, skipped } = imageRestaurantsFromReport(report));
+  }
+  for (const entry of skipped) console.log(`${entry.id}${entry.name ? ` ${entry.name}` : ''}: overgeslagen (${entry.reason})`);
   const selected = args.only ? restaurants.filter((restaurant) => args.only.includes(restaurant.id)) : restaurants;
   if (selected.length === 0) {
-    console.error('geen restaurant met een kaart als afbeelding gevonden');
+    console.error(args.all ? 'geen overgebleven kaart gevonden' : 'geen restaurant met een kaart als afbeelding gevonden');
     return 2;
   }
 
   const fetcher = deps.fetcher || createSourceFetcher({});
+  const loadPage = defaultLoadPage(fetcher);
+  const loadDocument = createDocumentLoader({ fetcher });
   const writer = createWriter();
   const protocol = args.plan ? null : loadMenuExtractionProtocol();
+  const plan = args.all
+    ? await planAllSources({
+      restaurants: selected,
+      loadPage,
+      loadDocument,
+      inspectPdf: deps.inspectPdf,
+      log: (line) => console.log(line),
+    })
+    : null;
+  if (plan) console.log(`Samen maximaal ${plan.maxCostEurCents} cent van de harde grens van ${BUDGET_EUR_CENTS} cent.`);
 
   const result = await runAiImages({
     restaurants: selected,
+    plan,
     planOnly: args.plan,
-    loadPage: defaultLoadPage(fetcher),
+    loadPage,
     loadImage: createImageLoader({ fetcher }),
+    loadDocument,
     promptKey: () => readHiddenLine({ prompt: 'Anthropic-sleutel (wordt niet getoond): ' }),
     createCall: (secret) =>
       createAnthropicStructuredCall({ env: { [ANTHROPIC_API_KEY_ENV]: secret }, model: ANTHROPIC_MODEL }),
@@ -1040,6 +1568,7 @@ async function main(argv = process.argv.slice(2), deps = {}) {
 
   if (result.planOnly) return 0;
   const summary = {
+    mode: args.all ? 'all' : 'images',
     scraped: today(),
     calls: result.calls,
     spentEurCents: result.spentEurCents,
@@ -1071,35 +1600,53 @@ if (require.main === module) {
 module.exports = {
   AI_READ_INSTRUCTIONS,
   ALLOWED_MEDIA_TYPES,
+  ALL_SKIP_REASONS,
   BUDGET_EUR_CENTS,
   CALL_TIMEOUT_MS,
+  CORRECTIONS_DIR,
+  DOCUMENT_CACHE_DIR,
   IMAGE_CACHE_DIR,
   IMAGE_CHUNK_SIZE,
   IMAGE_RESTAURANTS,
   MAX_OUTPUT_TOKENS,
+  MAX_TEXT_CHARS,
+  MENUS_FILE,
   MENU_WORD,
   NEVER_A_MENU,
   OUTPUT_DIR,
   REPORT_FILE,
   SECRET_MASK,
+  SUPPORTED_MEDIA_TYPES,
   USAGE,
+  allSourceRestaurants,
+  bareHostOf,
   chunkImages,
   collectStrictMenuImages,
   composeProtocol,
+  createDocumentLoader,
   createImageLoader,
   createWriter,
+  defaultInspectPdf,
   defaultLoadPage,
   flattenDishes,
+  hasMenuFor,
   imageRestaurantsFromReport,
+  isSiteUnreachable,
+  isRootUrl,
   isStrictMenuImage,
   main,
   menuSourceLinks,
   mergeMenuReadings,
   pageLinks,
   parseArgs,
+  planAllSources,
+  planHtmlSource,
   planImages,
+  planPdfSource,
   readHiddenLine,
   readImages,
+  readablePageText,
+  readingUnitsFor,
   redact,
   runAiImages,
   sourceImageOf,

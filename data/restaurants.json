@@ -370,7 +370,13 @@
     "priceLevel": 3,
     "cuisineLabel": "Modern Europees · Seizoensgebonden",
     "cardDescription": "Biologische, seizoensgebonden producten uit de regio. Verfijnde proeverijen erkend in zowel de Michelin- als Gault&amp;Millau-gids.",
-    "phoneDisplay": "076 565 0970"
+    "phoneDisplay": "076 565 0970",
+    "menuLinks": [
+      {
+        "id": "4-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "5": {
     "name": "Restaurant Chocolat",
@@ -1437,7 +1443,13 @@
     "badge": "🇮🇹 Italian",
     "cuisineLabel": "Italiaans · Klassiek",
     "cardDescription": "Een geliefde Italiaanse instelling in Breda al meer dan 23 jaar. Authentieke antipasti, risotto en pasta in een warme sfeer.",
-    "phoneDisplay": "076 520 4333"
+    "phoneDisplay": "076 520 4333",
+    "menuLinks": [
+      {
+        "id": "8-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "9": {
     "name": "Beers & Barrels",
@@ -1598,7 +1610,13 @@
     "badge": "🔥 Baskische Grill",
     "cuisineLabel": "Baskisch · Grill",
     "cardDescription": "Houtgestookte Baskische grill als middelpunt van de keuken. Chef Daan de Brouwer werkt met seizoensproducten van eigen biologisch boerderij De Vloeiweide.",
-    "phoneDisplay": "06 27 34 79 41"
+    "phoneDisplay": "06 27 34 79 41",
+    "menuLinks": [
+      {
+        "id": "12-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "13": {
     "name": "Gantau Village",
@@ -1637,7 +1655,13 @@
     "badge": "🥟 Dim Sum",
     "cuisineLabel": "Chinees · Kantonees",
     "cardDescription": "Authentieke Chinese keuken van de Kantonese school. Gantau Village is geliefd om haar dim sum en verse zeevruchtenschotels.",
-    "phoneDisplay": "076 520 8929"
+    "phoneDisplay": "076 520 8929",
+    "menuLinks": [
+      {
+        "id": "13-afhaal",
+        "label": "🥡 Afhaalkaart"
+      }
+    ]
   },
   "14": {
     "name": "The Chai Affairs",
@@ -1716,7 +1740,13 @@
     "badge": "🫒 Mediterraan",
     "cuisineLabel": "Mediterraans · Noord-Afrikaans",
     "cardDescription": "Andalous brengt de warmte van het Middellandse Zeegebied naar Breda met authentieke tajines, couscous en mezze.",
-    "phoneDisplay": "076 515 4585"
+    "phoneDisplay": "076 515 4585",
+    "menuLinks": [
+      {
+        "id": "15-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "16": {
     "name": "Restaurant Smelt",
@@ -3752,7 +3782,13 @@
     "badge": "🍕 Italiaans",
     "cuisineLabel": "Italiaans · Bij het Station",
     "cardDescription": "Authentieke Italiaanse trattoria naast Breda Centraal. Handgemaakte pizza's en pasta met ingrediënten direct uit Italië, tegen eerlijke prijzen. Ook afhalen via Perron @ Home.",
-    "phoneDisplay": "076 532 7575"
+    "phoneDisplay": "076 532 7575",
+    "menuLinks": [
+      {
+        "id": "24-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "25": {
     "name": "Dolce e Salato",
@@ -3790,6 +3826,12 @@
     "badge": "🍕 Italiaans",
     "cuisineLabel": "Italiaans · Pizza & Pasta",
     "cardDescription": "Al 18 jaar een gezellig Italiaans restaurant in het hart van Breda. Handgemaakte pizza's, verse pasta en antipasti bereid met ingrediënten rechtstreeks uit Italië. Ook beschikbaar via Thuisbezorgd.",
-    "phoneDisplay": "06 34 01 46 97"
+    "phoneDisplay": "06 34 01 46 97",
+    "menuLinks": [
+      {
+        "id": "25-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   }
 }
