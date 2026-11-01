@@ -80,6 +80,21 @@ function menuContent(menu) {
   };
 }
 
+/** Marks the dishes whose printed amount is a supplement, so the existing
+ * data shape carries `priceIsSupplement` (buildMenuEntry fills the field, but
+ * only this read knows it). Category and item order is one-to-one with the
+ * reader's own output. */
+function markSupplements(categories, menu) {
+  const source = (menu && menu.categories) || [];
+  categories.forEach((category, categoryIndex) => {
+    const read = source[categoryIndex] || {};
+    (category.items || []).forEach((item, itemIndex) => {
+      if (((read.items || [])[itemIndex] || {}).priceIsSupplement === true) item.priceIsSupplement = true;
+    });
+  });
+  return categories;
+}
+
 /** The one data/menus.json entry for this restaurant, in file order. */
 function buildEntry({ restaurantId, menu, menus, sourceUrl, scraped, scope }) {
   const built = buildMenuEntry({
@@ -96,7 +111,7 @@ function buildEntry({ restaurantId, menu, menus, sourceUrl, scraped, scope }) {
     scraped: built.scraped,
     source: built.source,
     notes: NOTES,
-    categories: built.categories,
+    categories: markSupplements(built.categories, menu),
   };
 }
 

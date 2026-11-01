@@ -68,7 +68,7 @@ test('de volledigheidseis: een open aandachtspunt of een dubbel gerecht blokkeer
   const withAttention = syntheticMenu(eight, { attention: [{ code: 'excluded_sections', detail: '1 sectie' }] });
   assert.deepEqual(assessCompleteMenu(withAttention).reasons.map((reason) => reason.code), ['excluded_sections']);
 
-  const duplicated = syntheticMenu([...eight, dish('Gerecht 1', 13.5)]);
+  const duplicated = syntheticMenu([...eight, dish('Gerecht 1', 12.5)]);
   assert.deepEqual(assessCompleteMenu(duplicated).reasons.map((reason) => reason.code), ['duplicate_dishes']);
 });
 
@@ -343,6 +343,28 @@ test('een regel tussen haakjes wordt ook buiten een tabel nooit een gerechtnaam'
   assert.ok(!names.some((name) => name.startsWith('(')), names.join(' | '));
   assert.ok(names[0].startsWith('Bami Rames'), names.join(' | '));
   assert.ok(names.includes('Gado Gado'), names.join(' | '));
+});
+
+test('een dubbel gerecht is alleen dubbel bij dezelfde naam, omschrijving en prijs', () => {
+  const eight = Array.from({ length: 8 }, (_, index) => dish(`Gerecht ${index + 1}`, 12.5));
+  // Dezelfde regel twee keer in de html (mobiel en desktop): ontdubbelen.
+  const exact = syntheticMenu([...eight, { name: 'Gerecht 1', desc: '', price: 12.5 }]);
+  assert.deepEqual(assessCompleteMenu(exact).reasons.map((reason) => reason.code), ['duplicate_dishes']);
+
+  // Een echte variant met een andere prijs of omschrijving blijft staan.
+  const variantPrice = syntheticMenu([...eight, { name: 'Gerecht 1', desc: '', price: 14.5 }]);
+  assert.equal(assessCompleteMenu(variantPrice).ok, true);
+  const variantDesc = syntheticMenu([...eight, { name: 'Gerecht 1', desc: 'met extra saus', price: 12.5 }]);
+  assert.equal(assessCompleteMenu(variantDesc).ok, true);
+});
+
+test('een toeslag telt niet mee voor de prijsgrens, een fles wijn boven € 150 wel', () => {
+  const eight = Array.from({ length: 8 }, (_, index) => dish(`Gerecht ${index + 1}`, 12.5));
+  const supplement = syntheticMenu([...eight, { name: 'Extra saus', desc: '', price: 2.5, priceIsSupplement: true }]);
+  assert.equal(assessCompleteMenu(supplement).ok, true, JSON.stringify(assessCompleteMenu(supplement).reasons));
+
+  const bottle = syntheticMenu([...eight, { name: 'Fles Château Fictief', desc: '', price: 175 }]);
+  assert.deepEqual(assessCompleteMenu(bottle).reasons.map((reason) => reason.code), ['price_out_of_bounds']);
 });
 
 test('het rapport telt nieuw, weg en een andere prijs tegen de kaart van maart', () => {

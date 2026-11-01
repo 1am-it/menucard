@@ -67,10 +67,14 @@ function readHtmlMenu(html) {
       const name = typeof item.name === 'string' ? item.name.trim() : '';
       if (!name) continue;
       const priced = item.priceStatus === 'known' && Number.isInteger(item.amountMinorUnits);
+      const supplement = item.evidence && typeof item.evidence.supplementText === 'string' ? item.evidence.supplementText.trim() : '';
       items.push({
         name,
         desc: typeof item.description === 'string' ? item.description : '',
         price: priced ? Number((item.amountMinorUnits / 100).toFixed(2)) : null,
+        // A printed supplement is not the dish's own amount (Lead review
+        // ronde 2): it is kept, but the € 1–€ 150 bound does not apply to it.
+        ...(supplement ? { priceIsSupplement: true, supplementText: supplement.slice(0, 120) } : {}),
         ...(priced ? {} : { priceStatus: item.priceStatus || 'unknown', priceText: item.priceText || null }),
       });
     }

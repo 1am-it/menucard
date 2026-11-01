@@ -78,17 +78,23 @@ function assessCompleteMenu(menu) {
   const unpriced = dishes.filter(({ item }) => !Number.isFinite(item.price));
   if (unpriced.length > 0) add('unpriced_dishes', `${unpriced.length} gerecht(en)`);
 
-  const outOfBounds = dishes.filter(({ item }) => Number.isFinite(item.price) && (item.price < MIN_PRICE_EUR || item.price > MAX_PRICE_EUR));
+  // A printed supplement (priceIsSupplement) is not the dish's own amount, so
+  // the € 1–€ 150 bound does not apply to it (Lead review ronde 2, #176).
+  const outOfBounds = dishes.filter(
+    ({ item }) => Number.isFinite(item.price) && item.priceIsSupplement !== true && (item.price < MIN_PRICE_EUR || item.price > MAX_PRICE_EUR),
+  );
   if (outOfBounds.length > 0) add('price_out_of_bounds', `${outOfBounds.length} gerecht(en)`);
 
+  // Two lines are the same dish only when name, description AND price are
+  // exactly the same. A real variant with its own price or description stays,
+  // and a section the page prints twice (mobile and desktop markup) collapses
+  // only on that exact match.
   const seen = new Map();
   let duplicates = 0;
   for (const { category, item } of dishes) {
-    const key = `${text(category.name).toLowerCase()}|${dishKey(item.name)}`;
-    if (!key.endsWith('|')) {
-      if (seen.has(key)) duplicates += 1;
-      else seen.set(key, true);
-    }
+    const key = `${text(category.name).toLowerCase()}|${dishKey(item.name)}|${dishKey(item.desc || '')}|${Number.isFinite(item.price) ? item.price : 'x'}`;
+    if (seen.has(key)) duplicates += 1;
+    else seen.set(key, true);
   }
   if (duplicates > 0) add('duplicate_dishes', `${duplicates} gerecht(en)`);
 
