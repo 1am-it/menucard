@@ -430,3 +430,69 @@ test('--all bevat geen AI-module, geen omgeving en geen data-schrijfactie', () =
   assert.equal(/writeFileSync\([^)]*data[/\\]menus\.json/.test(source), false);
   assert.match(source, /MENUS_FILE = path\.join\('data', 'menus\.json'\)/, 'data/menus.json wordt alleen gelezen');
 });
+
+test('--all ziet een www-variant als dezelfde host', () => {
+  const report = {
+    restaurants: [
+      {
+        id: '2',
+        name: 'Restaurant Blossem',
+        website: 'https://www.restaurantblossem.nl',
+        status: 'skipped',
+        kind: 'html',
+        menuUrl: 'https://restaurantblossem.nl/nl/restaurant',
+      },
+      {
+        id: '16',
+        name: 'Restaurant Smelt',
+        website: 'https://www.restaurantsmelt.nl',
+        status: 'skipped',
+        kind: 'html',
+        menuUrl: 'https://restaurantsmelt.nl/',
+      },
+    ],
+  };
+  const { restaurants, skipped } = ai.allSourceRestaurants({
+    report,
+    menus: {},
+    correctionsDir: 'lead-corrections',
+    existsSync: () => false,
+  });
+  assert.deepEqual(restaurants.map((restaurant) => restaurant.id), ['2', '16']);
+  assert.deepEqual(skipped, []);
+  assert.equal(ai.bareHostOf('https://www.restaurantblossem.nl'), ai.bareHostOf('https://restaurantblossem.nl'));
+});
+
+test('--all volgt geen tweede pagina als het rapport de kaartpagina al noemt', async () => {
+  const pageUrl = 'https://www.trattoriaperron.nl/menu/';
+  const html = `<html><body><nav><a href="/magazine/">Magazine</a></nav>
+    <p>Onze kaart vindt u in het restaurant.</p>
+    <p>Voorbeeldgerecht € 12,50</p></body></html>`;
+  const loaded = [];
+  const plan = await ai.planAllSources({
+    restaurants: [{
+      id: '24',
+      name: 'Trattoria Perron',
+      website: 'https://www.trattoriaperron.nl',
+      pageUrl,
+      reportKind: 'html',
+      reportPageCount: null,
+    }],
+    loadPage: async (url) => {
+      loaded.push(url);
+      return { ok: true, url, finalUrl: url, text: html };
+    },
+    loadDocument: loadedDocument(),
+    inspectPdf: async () => ({ pageCount: 2 }),
+    log: () => {},
+  });
+  assert.deepEqual(loaded, [pageUrl], 'geen extra ophaalstap buiten de kaartpagina');
+  const record = plan.restaurants[0];
+  assert.equal(record.sourceUrl, pageUrl);
+  assert.equal(record.sourceSearch.extraStep, null);
+  // Eén prijsregel is geen kaart: overgeslagen met een reden, geen gok.
+  assert.equal(record.status, 'skipped');
+  assert.equal(record.reason, 'javascript_only');
+  assert.equal(ai.isRootUrl(pageUrl), false);
+  assert.equal(ai.isRootUrl('https://www.trattoriaperron.nl/'), true);
+});

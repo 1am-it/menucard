@@ -160,6 +160,22 @@ function hostOf(value) {
   }
 }
 
+/** Dezelfde host, maar zonder een leidende `www.`: dat is dezelfde site. */
+function bareHostOf(value) {
+  const host = hostOf(value);
+  return host === null ? null : host.replace(/^www\./i, '');
+}
+
+/** Staat deze url op de kaartpagina zelf, of op de homepage van de site? */
+function isRootUrl(value) {
+  try {
+    const pathName = new URL(String(value)).pathname;
+    return pathName === '' || pathName === '/';
+  } catch {
+    return false;
+  }
+}
+
 /** De sleutel mag nergens opduiken, ook niet in een foutmelding van de SDK. */
 function redact(value, secret) {
   const source = typeof value === 'string' ? value : String(value === undefined || value === null ? '' : value);
@@ -260,7 +276,7 @@ function allSourceRestaurants({
       continue;
     }
     const website = text(entry.website);
-    if (!website || hostOf(menuUrl) !== hostOf(website)) {
+    if (!website || bareHostOf(menuUrl) !== bareHostOf(website)) {
       skipped.push({ id, name, reason: 'other_host', detail: website || null });
       continue;
     }
@@ -883,8 +899,10 @@ async function planHtmlSource(record, { loadPage }) {
   let images = selected.images.filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType)).slice(0, MAX_MENU_IMAGES);
   let textHtml = page.text;
 
-  // Hooguit één extra ophaalstap op dezelfde site, net als bij de afbeeldingen.
-  if (images.length === 0) {
+  // Hooguit één extra ophaalstap op dezelfde site, en alleen wanneer het
+  // rapport de homepage noemt: noemt het rapport al de kaartpagina zelf, dan is
+  // dat de bron en volgt er geen tweede, mogelijk verkeerde pagina.
+  if (images.length === 0 && isRootUrl(record.pageUrl)) {
     const [candidate] = menuSourceLinks({ html: page.text, pageUrl: record.sourceUrl, limit: 1 });
     if (candidate && candidate.kind === 'html') {
       let second;
@@ -1601,6 +1619,7 @@ module.exports = {
   SUPPORTED_MEDIA_TYPES,
   USAGE,
   allSourceRestaurants,
+  bareHostOf,
   chunkImages,
   collectStrictMenuImages,
   composeProtocol,
@@ -1613,6 +1632,7 @@ module.exports = {
   hasMenuFor,
   imageRestaurantsFromReport,
   isSiteUnreachable,
+  isRootUrl,
   isStrictMenuImage,
   main,
   menuSourceLinks,
