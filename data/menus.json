@@ -5799,11 +5799,7 @@
     "notes": "Opgehaald van de eigen website van het restaurant. Controleer altijd de actuele kaart.",
     "categories": [
       {
-        "name": "Al onze gerechten zijn 100% halal",
-        "path": [
-          "Home",
-          "Al onze gerechten zijn 100% halal"
-        ],
+        "name": "BROODJES",
         "items": [
           {
             "name": "Broodje kip",
@@ -5888,7 +5884,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "WRAPS",
+        "items": [
           {
             "name": "Wrap kip",
             "desc": "",
@@ -5924,7 +5925,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "BURGERS & LOADED FRIES",
+        "items": [
           {
             "name": "Beefburger",
             "desc": "",
@@ -6032,7 +6038,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "FRENCH TACO",
+        "items": [
           {
             "name": "Taco kip",
             "desc": "",
@@ -6068,7 +6079,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "SCHOTELS",
+        "items": [
           {
             "name": "Kipfilet",
             "desc": "",
@@ -6176,7 +6192,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "SMASHED POTATO",
+        "items": [
           {
             "name": "Kip andalouse",
             "desc": "",
@@ -6200,7 +6221,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "PASTA'S",
+        "items": [
           {
             "name": "Pollo",
             "desc": "",
@@ -6260,14 +6286,19 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "EXTRA VLEES",
+        "items": [
           {
             "name": "Kipfilet",
             "desc": "",
             "price": "€4",
             "priceValue": 4,
             "priceOnRequest": false,
-            "priceIsSupplement": false,
+            "priceIsSupplement": true,
             "priceIsFrom": false,
             "priceIsMultiple": false,
             "tags": [],
@@ -6279,7 +6310,7 @@
             "price": "€5",
             "priceValue": 5,
             "priceOnRequest": false,
-            "priceIsSupplement": false,
+            "priceIsSupplement": true,
             "priceIsFrom": false,
             "priceIsMultiple": false,
             "tags": [],
@@ -6291,7 +6322,7 @@
             "price": "€8",
             "priceValue": 8,
             "priceOnRequest": false,
-            "priceIsSupplement": false,
+            "priceIsSupplement": true,
             "priceIsFrom": false,
             "priceIsMultiple": false,
             "tags": [],
@@ -6303,7 +6334,7 @@
             "price": "€4",
             "priceValue": 4,
             "priceOnRequest": false,
-            "priceIsSupplement": false,
+            "priceIsSupplement": true,
             "priceIsFrom": false,
             "priceIsMultiple": false,
             "tags": [],
@@ -6315,12 +6346,17 @@
             "price": "€4",
             "priceValue": 4,
             "priceOnRequest": false,
-            "priceIsSupplement": false,
+            "priceIsSupplement": true,
             "priceIsFrom": false,
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "GEBAKKEN RIJST",
+        "items": [
           {
             "name": "Pollo",
             "desc": "",
@@ -6356,7 +6392,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "SNACKS",
+        "items": [
           {
             "name": "Chili cheese bites",
             "desc": "",
@@ -6416,7 +6457,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "DESSERTS & PANCAKES",
+        "items": [
           {
             "name": "Verse cheesecake",
             "desc": "",
@@ -6500,7 +6546,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "MILKSHAKES",
+        "items": [
           {
             "name": "Strawberry",
             "desc": "",
@@ -6572,7 +6623,12 @@
             "priceIsMultiple": false,
             "tags": [],
             "allergens": []
-          },
+          }
+        ]
+      },
+      {
+        "name": "MOCKTAILS",
+        "items": [
           {
             "name": "Virgin mojito",
             "desc": "",
