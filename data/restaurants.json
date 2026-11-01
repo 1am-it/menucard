@@ -1356,14 +1356,6 @@
       {
         "id": "6-diner",
         "label": "🍽 Dinerkaart"
-      },
-      {
-        "id": "6-borrel",
-        "label": "🍸 Borrelkaart"
-      },
-      {
-        "id": "6-specialiteiten",
-        "label": "⭐ Specialiteiten"
       }
     ]
   },
@@ -3742,10 +3734,6 @@
       {
         "id": "23-diner",
         "label": "🍽 Dinerkaart"
-      },
-      {
-        "id": "23-borrel",
-        "label": "🍸 Borrelkaart"
       }
     ]
   },

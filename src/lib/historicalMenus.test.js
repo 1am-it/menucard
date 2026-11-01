@@ -29,7 +29,12 @@ const REPO_ROOT = path.resolve(__dirname, '..', '..');
 // BE-71 ronde 3 (#176): de kaart van Restaurant Zenza (17-menukaart) kwam erbij,
 // met dezelfde vorm en met R1 en R3 toegepast. Ronde 4 herschreef die kaart met
 // de echte koppen (R9) en repareerde twee onterechte toeslagen bij Chocolat (5).
-const SNAPSHOT_SHA256 = '3a7ccdab1e4378013df03a301f32c1fb4b315433120f23e5b7bae7ff445e8883';
+// BE-74 (#185): de acht kaarten van maart van Wolfslaar, Bardot, Zuyd en T-Huis
+// zijn vervangen door de door de Lead nagekeken kaarten van november, en
+// 6-borrel, 6-specialiteiten en 23-borrel zijn vervallen. Dat is opnieuw de
+// expliciete actualisering van dit bewijs: dezelfde hash en datum, en de vier
+// doelen hieronder blijven één-op-één gecontroleerd.
+const SNAPSHOT_SHA256 = '7dd07b2263e10d84a92e772e88fe81e256c39ab97aba3d2f490714b3c34aa86b';
 const LATEST_SCRAPED = '2026-11-01';
 const TARGETS = [
   { id: '1', name: 'Restaurant Wolfslaar' },
