@@ -12,7 +12,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 // BE-74 (#185): deze verwachtingen horen bij de kaarten van maart. Ze draaien
 // daarom op de vaste kopie daarvan, niet op de levende data die ververst is.
-require('../services/__fixtures__/frozenMarchData').freezeMarchData();
+require('../test-fixtures/useFrozenData').useFrozenData('maart-2026');
 const menusData = require('../../data/menus.json');
 const { resolveDishTarget } = require('./dishDeepLink');
 

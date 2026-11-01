@@ -6,6 +6,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+require('../test-fixtures/useFrozenData').useFrozenData();
 const { buildOwnerRestaurantIndex, menuSummary } = require('./ownerRestaurantIndex');
 
 const MENUS = {

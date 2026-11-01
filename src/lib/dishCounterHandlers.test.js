@@ -18,6 +18,7 @@
 
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
+require('../test-fixtures/useFrozenData').useFrozenData();
 const menusData = require('../../data/menus.json');
 const { createDishCounterHandlers } = require('./dishCounterHandlers');
 

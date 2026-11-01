@@ -3167,7 +3167,8 @@
           }
         ]
       }
-    ]
+    ],
+    "leadChecked": "2026-11-01"
   },
   "22-afhaal": {
     "subtitle": "Afhaalkaart",
@@ -3474,7 +3475,8 @@
           }
         ]
       }
-    ]
+    ],
+    "leadChecked": "2026-11-01"
   },
   "17-menukaart": {
     "subtitle": "Menukaart",
@@ -4411,7 +4413,8 @@
           }
         ]
       }
-    ]
+    ],
+    "leadChecked": "2026-11-01"
   },
   "11-lunch": {
     "subtitle": "Lunchkaart",

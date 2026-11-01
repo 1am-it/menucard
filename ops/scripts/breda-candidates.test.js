@@ -31,9 +31,10 @@ const {
 } = require('./breda-candidates');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+const { frozenPath } = require(path.join(REPO_ROOT, 'src', 'test-fixtures', 'useFrozenData'));
 const FIXTURE_PATH = path.join(__dirname, '__fixtures__', 'breda-candidates-overpass.json');
 const FIXTURE = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf8'));
-const RESTAURANTS = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'data', 'restaurants.json'), 'utf8'));
+const RESTAURANTS = JSON.parse(fs.readFileSync(frozenPath('current', 'restaurants'), 'utf8'));
 
 /** The fixture plus the live restaurants (21 since BE-75, #187), filtered, deduplicated and ranked. */
 function selection({ restaurants = RESTAURANTS, payload = FIXTURE } = {}) {

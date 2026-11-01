@@ -15,7 +15,12 @@ const path = require('node:path');
 
 const { loadLeadCard, buildLeadCard, AI_WITHOUT_LEAD_CHECK, CORRECTIONS_DIR } = require('./leadCard');
 
-const REAL_AI = path.join('.local', 'menu-bootstrap-ai');
+// BE-76 (#189): de R10-regressie draait op een vaste nepuitvoer in
+// ops/scripts/menu-bootstrap/__fixtures__/, niet op .local/menu-bootstrap-ai/.
+// Die map staat alleen op de machine van de Lead en maakte deze test in elke
+// andere werkmap rood. De nepuitvoer leest de kaart breder (de Engelse kaart),
+// net als de echte AI-uitvoer, dus de verwachtingen blijven gelijk.
+const FIXTURE_AI = path.join(__dirname, '__fixtures__', 'ai-dishes-11.json');
 
 function correctionOf(id) {
   return JSON.parse(fs.readFileSync(path.join(CORRECTIONS_DIR, `${id}.json`), 'utf8'));
@@ -31,8 +36,8 @@ function dishesOf(entry) {
 
 test('R10: de Lead-correctie wint van de AI-uitvoer (De Beyerd, 15 gerechten)', () => {
   const correction = correctionOf('11');
-  const ai = aiOf(path.join(REAL_AI, '11.json'));
-  assert.ok(ai, 'de AI-uitvoer van De Beyerd hoort in .local/menu-bootstrap-ai/11.json te staan');
+  const ai = aiOf(FIXTURE_AI);
+  assert.ok(ai, 'de vaste nepuitvoer van De Beyerd hoort in ops/scripts/menu-bootstrap/__fixtures__/ai-dishes-11.json te staan');
   assert.notEqual((ai.dishes || []).length, correction.categories.reduce((n, c) => n + c.items.length, 0), 'de AI las meer (de Engelse kaart); de correctie is korter');
 
   const built = buildLeadCard({ restaurantId: '11', correction, ai, menus: {} });
@@ -68,7 +73,7 @@ test('R10: zonder Lead-correctie wordt er geen AI-kaart geschreven', () => {
 
 test('R10: de velden van de gecorrigeerde kaart zijn bron, datum, subtitel, notes, aiRead en leadChecked', () => {
   const correction = correctionOf('11');
-  const ai = aiOf(path.join(REAL_AI, '11.json'));
+  const ai = aiOf(FIXTURE_AI);
   const built = buildLeadCard({ restaurantId: '11', correction, ai, menus: {} });
   const entry = built.entry;
   assert.equal(entry.source, 'https://www.beyerd.nl/cafe-lunchkaart/');

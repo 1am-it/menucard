@@ -76,7 +76,7 @@ function getOpenStatus(restaurant) {
 // BE-75 (#187) removed that restaurant from the live data (it closed), so the
 // rule now guards against a pattern rather than a known row; the case is kept
 // as a regression on the frozen copy of the data in
-// src/services/__fixtures__/be75-closed-restaurants/ (see
+// src/test-fixtures/frozen-data/before-be75/ (see
 // src/services/restaurantIndex.test.js and src/lib/be75ClosedRestaurants.test.js).
 function isValidAddress(address, restaurantName) {
   if (!address || typeof address !== 'string') return false
