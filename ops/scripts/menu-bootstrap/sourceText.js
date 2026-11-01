@@ -17,13 +17,19 @@
 
 const { createSourceFetcher } = require('./fetchSource');
 const { extractDigitalPdfLines } = require('../../../src/lib/pdfTextExtraction');
+// The one-decimal point family (Blossem prints `4.5`): the same printed-line
+// rule the review card already uses, reused instead of read a second way.
+const { findDecimalPointPrices } = require('../../../src/lib/htmlMenuStructure');
 
 /** Half a cent: two printed prices that differ less than that are the same. */
 const PRICE_TOLERANCE = 0.005;
 
-/** How far around a dish name a printed price still belongs to that dish. */
+/**
+ * The old character window, kept as the documented default for callers that pass
+ * their own window. Matching itself now reads printed rows, not characters
+ * (round 2, review #6560710718): a price belongs to the row it is printed on.
+ */
 const DEFAULT_WINDOW = { before: 40, after: 140 };
-
 const NAMED_ENTITIES = {
   amp: '&',
   lt: '<',
@@ -234,6 +240,35 @@ function findWholeEuroPrices(text) {
   return prices;
 }
 
+/**
+ * A price printed with a decimal point and one decimal, at the end of its own
+ * printed row: Blossem prints `Gemarineerde olijven 4.5`. The rule is not new
+ * here — `src/lib/htmlMenuStructure.js` already reads exactly this family for
+ * the review card (`findDecimalPointPrices`: 1–3 digits at a printed boundary, a
+ * name before it, and a version, time, unit, range, date or phone refused).
+ * Reading it per printed row keeps that rule intact, and an amount the money
+ * parser already read is never counted twice.
+ */
+function findRowDecimalPrices(source) {
+  const prices = [];
+  const lines = String(source || '').split('\n');
+  let offset = 0;
+  for (const line of lines) {
+    for (const price of findDecimalPointPrices(line)) {
+      prices.push({
+        value: price.amountMinorUnits / 100,
+        raw: price.raw,
+        index: offset + price.index,
+        end: offset + price.index + price.length,
+        form: 'decimal-point',
+        priority: PRICE_PATTERNS.length + 1,
+      });
+    }
+    offset += line.length + 1;
+  }
+  return prices;
+}
+
 function findPrices(text) {
   const source = String(text || '');
   const candidates = [];
@@ -249,6 +284,9 @@ function findPrices(text) {
     }
   });
   for (const candidate of findWholeEuroPrices(source)) candidates.push(candidate);
+  for (const candidate of findRowDecimalPrices(source)) {
+    if (candidate.value > 0 && !/€\s*$/.test(source.slice(0, candidate.index))) candidates.push(candidate);
+  }
   candidates.sort((left, right) => left.index - right.index || left.priority - right.priority || right.end - left.end);
   const prices = [];
   let lastEnd = -1;
@@ -260,53 +298,177 @@ function findPrices(text) {
   return prices;
 }
 
-function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+// ─── Reading one source once: words, printed rows and prices ────────────────
+//
+// Words a card and its source rarely print the same way (an article, a joining
+// word, a preposition) carry no identity: they never decide whether two names
+// are the same dish.
+const NAME_FILLER = new Set([
+  'de', 'het', 'een', 'n', 'ons', 'onze', 't', 'the', 'a', 'an',
+  'en', 'and', 'und', 'e', 'y', 'met', 'with', 'mit', 'con',
+  'van', 'of', 'from', 'von', 'di', 'del', 'della', 'dei', 'der', 'den',
+  'la', 'le', 'les', 'il', 'lo', 'gli', 'i', 'al', 'alla', 'au', 'aux', 'des',
+  'op', 'in', 'bij', 'per', 'for', 'fur', 'zum', 'zur', 'am', 'an', 'auf',
+]);
 
-function isWordCharacter(character) {
-  return typeof character === 'string' && character !== '' && /[a-z0-9]/.test(character);
+const TOKEN_PATTERN = /[a-z0-9]+/g;
+
+/** Every printed word of the source with its position in the original text. */
+function tokenizeSource(normalized, map) {
+  const tokens = [];
+  TOKEN_PATTERN.lastIndex = 0;
+  let match = TOKEN_PATTERN.exec(normalized);
+  while (match !== null) {
+    tokens.push({
+      token: match[0],
+      index: match.index,
+      start: map[match.index],
+      end: map[match.index + match[0].length - 1] + 1,
+    });
+    match = TOKEN_PATTERN.exec(normalized);
+  }
+  return tokens;
 }
 
 /**
- * Where in the original text the dish name is printed. Case and accents do not
- * matter; a name whose words are separated by other punctuation in the source
- * ("Zeetong à la meunière" vs "Zeetong - à la meunière") is still found.
+ * One read of a source: its printed rows, its words and its prices, all in
+ * original-text positions. `matchItem` accepts it through `options.index`, so a
+ * whole card is read once instead of once per dish.
+ */
+function buildSourceIndex(text) {
+  const source = typeof text === 'string' ? text : '';
+  const { text: normalized, map } = normalizeWithMap(source);
+  const starts = [];
+  let offset = 0;
+  for (const line of source.split('\n')) {
+    starts.push(offset);
+    offset += line.length + 1;
+  }
+  const index = {
+    source,
+    text: source,
+    normalized,
+    map,
+    tokens: tokenizeSource(normalized, map),
+    lineStarts: starts,
+    prices: findPrices(source),
+  };
+  index.lineOfPrice = index.prices.map((price) => lineOf(index, price.index));
+  return index;
+}
+
+/** Which printed row holds this position. */
+function lineOf(index, position) {
+  const starts = index.lineStarts;
+  let low = 0;
+  let high = starts.length - 1;
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    if (starts[middle] <= position) low = middle;
+    else high = middle - 1;
+  }
+  return low;
+}
+
+/** The prices printed on one row, left to right. */
+function pricesOnLine(index, lineNumber) {
+  if (lineNumber < 0 || lineNumber >= index.lineStarts.length) return [];
+  return index.prices.filter((price, position) => index.lineOfPrice[position] === lineNumber);
+}
+
+/** The words of a dish name that carry its identity. */
+function nameTokens(name) {
+  const words = normalizeText(name)
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  const content = words.filter((word) => !NAME_FILLER.has(word) && word.length > 1);
+  return content.length > 0 ? content : words;
+}
+
+/**
+ * One alignment of the name's words from a source word: walks forward and takes
+ * the name's words in order, allowing the source to print other words in
+ * between. The name is only the same dish when its LAST word is printed — that
+ * is what keeps "Broodje kip" away from the "Broodje kip speciaal" row.
+ * `allowMissing` lets one word of the name drop out (a card that adds a word its
+ * source does not print); it scores lower.
+ */
+function alignWords(tokens, content, from, allowMissing) {
+  const limit = from + content.length * 2 + 8;
+  let wanted = 0;
+  let position = from;
+  let matched = 0;
+  let last = -1;
+  let missing = 0;
+  while (wanted < content.length && position < tokens.length && position <= limit) {
+    if (tokens[position].token === content[wanted]) {
+      matched += 1;
+      last = position;
+      wanted += 1;
+    } else if (allowMissing && wanted < content.length - 1 && missing < 1) {
+      missing += 1;
+      wanted += 1;
+      continue;
+    }
+    position += 1;
+  }
+  if (matched === 0 || last < 0 || wanted < content.length) return null;
+  return { matched, missing, last };
+}
+
+/**
+ * Every place where the source prints this dish name, the best match first.
+ * A name is compared by its words, not its characters: case, accents,
+ * punctuation, apostrophes, an article and a different word order in the source
+ * do not matter, and a shortened source name ("BONBON" for "Bonbon van
+ * ganzenlever, …") is still the same dish.
+ */
+function findNameOccurrences(sourceOrIndex, name) {
+  const index = typeof sourceOrIndex === 'string' ? buildSourceIndex(sourceOrIndex) : sourceOrIndex;
+  if (!index || !Array.isArray(index.tokens) || index.tokens.length === 0) return [];
+  const content = nameTokens(name);
+  if (content.length === 0) return [];
+  const found = [];
+  const seen = new Set();
+  const collect = (allowMissing) => {
+    for (let position = 0; position < index.tokens.length; position += 1) {
+      // Anchor on any word of the name: a source that prints fewer words
+      // ("Hollands" for "Kaasfondue Hollands") still counts, as long as the
+      // printed tail of the name matches.
+      for (let wanted = 0; wanted < content.length; wanted += 1) {
+        if (index.tokens[position].token !== content[wanted]) continue;
+        const tail = content.slice(wanted);
+        if (tail.length * 2 < content.length) continue;
+        const aligned = alignWords(index.tokens, tail, position, allowMissing);
+        if (!aligned) continue;
+        const start = index.tokens[position].start;
+        const end = index.tokens[aligned.last].end;
+        const key = `${start}:${end}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        found.push({
+          start,
+          end,
+          score: (tail.length - aligned.missing) / content.length,
+          words: tail.length,
+          missing: aligned.missing,
+        });
+      }
+    }
+  };
+  collect(false);
+  if (found.length === 0) collect(true);
+  return found.sort((left, right) => right.score - left.score || left.start - right.start);
+}
+
+/**
+ * Where in the original text the dish name is printed: the best occurrence.
  * Resolves `{ start, end }` in original-text indexes, or null.
  */
 function findName(text, name) {
-  const source = String(text || '');
-  const wanted = normalizeText(name).replace(/\s+/g, ' ').trim();
-  if (!wanted || !source) return null;
-  const { text: normalized, map } = normalizeWithMap(source);
-  const bounded = (start, length) => {
-    const before = start > 0 ? normalized.charAt(start - 1) : '';
-    const after = start + length < normalized.length ? normalized.charAt(start + length) : '';
-    const startsWithWord = isWordCharacter(normalized.charAt(start));
-    const endsWithWord = isWordCharacter(normalized.charAt(start + length - 1));
-    return (!startsWithWord || !isWordCharacter(before)) && (!endsWithWord || !isWordCharacter(after));
-  };
-  let from = normalized.indexOf(wanted);
-  while (from !== -1) {
-    if (bounded(from, wanted.length)) {
-      return { start: map[from], end: map[from + wanted.length - 1] + 1 };
-    }
-    from = normalized.indexOf(wanted, from + 1);
-  }
-  const words = wanted
-    .split(' ')
-    .map((word) => word.replace(/[^a-z0-9]/g, ''))
-    .filter(Boolean);
-  if (words.length < 2) return null;
-  const pattern = new RegExp(words.map(escapeRegExp).join('[^a-z0-9]{1,3}'), 'g');
-  let found = pattern.exec(normalized);
-  while (found !== null) {
-    if (bounded(found.index, found[0].length)) {
-      return { start: map[found.index], end: map[found.index + found[0].length - 1] + 1 };
-    }
-    found = pattern.exec(normalized);
-  }
-  return null;
+  const occurrences = findNameOccurrences(String(text || ''), name);
+  if (occurrences.length === 0) return null;
+  return { start: occurrences[0].start, end: occurrences[0].end };
 }
 
 /**
@@ -327,15 +489,54 @@ function expectedPrices(item) {
 }
 
 /**
- * Does the source print the price of this dish right next to its name?
+ * The printed prices that belong to one occurrence of a name, nearest first.
+ * The dish's own printed row always wins: a card prints its amount on the same
+ * row, or on the row just below it (name, amount, description), or in the cell
+ * to its left. The row ABOVE is only read when the rows below print no price at
+ * all, so the amount of the previous dish is never borrowed. A row that prints
+ * nothing but one bare number ("LUNCHMENU" / "50") counts as that row's price.
+ */
+function occurrencePrices(index, occurrence) {
+  const lineNumber = lineOf(index, occurrence.start);
+  const own = pricesOnLine(index, lineNumber);
+  if (own.length > 0) return { prices: own, scope: 'row' };
+  for (let step = 1; step <= 2; step += 1) {
+    const next = pricesOnLine(index, lineNumber + step);
+    if (next.length > 0) return { prices: next, scope: step === 1 ? 'next-row' : 'near-row' };
+  }
+  // A menu row whose amount is printed on a row of its own ("50").
+  for (let step = 1; step <= 2; step += 1) {
+    const bare = bareNumberOnLine(index, lineNumber + step);
+    if (bare) return { prices: [bare], scope: 'next-row' };
+  }
+  for (let step = 1; step <= 2; step += 1) {
+    const previous = pricesOnLine(index, lineNumber - step);
+    if (previous.length > 0) return { prices: previous, scope: 'prev-row' };
+  }
+  return { prices: [], scope: 'none' };
+}
+
+/** A row that prints one bare number and nothing else: a menu amount on its own row. */
+function bareNumberOnLine(index, lineNumber) {
+  if (lineNumber < 0 || lineNumber >= index.lineStarts.length) return null;
+  const start = index.lineStarts[lineNumber];
+  const end = lineNumber + 1 < index.lineStarts.length ? index.lineStarts[lineNumber + 1] - 1 : index.source.length;
+  const text = index.source.slice(start, end).trim();
+  if (!/^\d{1,3}$/.test(text)) return null;
+  return { value: Number(text), raw: text, index: start, form: 'bare-row' };
+}
+
+/**
+ * Does the source print the price of this dish next to its name?
  * Status: `ok`, `price-deviates` (with the price that was found), `name-not-found`
  * or `skipped` (a dish with `priceOnRequest`, or one without any price).
+ *
+ * A dish that a card prints more than once (lunch and dinner, a broodje and a
+ * salade) is `ok` as soon as ONE of those occurrences carries the right price.
  * `nameFound` says whether the name itself was printed.
  */
 function matchItem(text, item = {}, options = {}) {
-  const source = typeof text === 'string' ? text : '';
-  const before = Number.isInteger(options.before) ? options.before : DEFAULT_WINDOW.before;
-  const after = Number.isInteger(options.after) ? options.after : DEFAULT_WINDOW.after;
+  const index = options.index && options.index.tokens ? options.index : buildSourceIndex(typeof text === 'string' ? text : '');
   const base = { name: item && item.name ? String(item.name) : null, nameFound: false };
   if (!item || item.priceOnRequest === true) {
     return { ...base, status: 'skipped', reason: 'price-on-request', expected: [], found: null, foundPrices: [] };
@@ -344,35 +545,37 @@ function matchItem(text, item = {}, options = {}) {
   if (expected.length === 0) {
     return { ...base, status: 'skipped', reason: 'geen-prijs-op-de-kaart', expected, found: null, foundPrices: [] };
   }
-  const located = findName(source, base.name);
-  if (!located) {
+  const occurrences = findNameOccurrences(index, base.name);
+  if (occurrences.length === 0) {
     return { ...base, status: 'name-not-found', reason: 'naam-niet-gevonden', expected, found: null, foundPrices: [] };
   }
-  const windowStart = Math.max(0, located.start - before);
-  // A printed price belongs to the dish on its own printed line. Only when that
-  // line carries no price at all is the wider window used (a card that prints
-  // the amount in the next block); a flattened pdf text layer has no line
-  // breaks, so it keeps the wider window.
-  const lineEnd = source.indexOf('\n', located.end);
-  const sameLine = lineEnd !== -1 && lineEnd <= located.end + after;
-  const collect = (end) => {
-    const start = windowStart;
-    return findPrices(source.slice(start, end)).map((price) => ({ ...price, absoluteIndex: start + price.index }));
-  };
-  let foundPrices = collect(sameLine ? lineEnd : located.end + after);
-  if (foundPrices.length === 0 && sameLine) foundPrices = collect(located.end + after);
-  if (foundPrices.length === 0) {
+  let best = null;
+  for (const occurrence of occurrences) {
+    const { prices, scope } = occurrencePrices(index, occurrence);
+    if (prices.length === 0) continue;
+    const missing = expected.filter((value) => !prices.some((found) => Math.abs(found.value - value) < PRICE_TOLERANCE));
+    const candidate = { occurrence, prices, scope, missing };
+    if (missing.length === 0) return { ...base, nameFound: true, status: 'ok', expected, found: prices[0].value, foundPrices: prices };
+    if (!best || candidate.missing.length < best.missing.length) best = candidate;
+  }
+  if (!best) {
     return { ...base, nameFound: true, status: 'name-not-found', reason: 'naam-gevonden-zonder-prijs', expected, found: null, foundPrices: [] };
   }
-  const missing = expected.filter((value) => !foundPrices.some((found) => Math.abs(found.value - value) < PRICE_TOLERANCE));
-  // The printed price that belongs to this name: the first one after it, else
-  // the nearest one before it (a column layout prints the amount on the left).
-  const afterName = foundPrices.find((price) => price.absoluteIndex >= located.end);
-  const found = (afterName || foundPrices[foundPrices.length - 1]).value;
-  if (missing.length === 0) {
-    return { ...base, nameFound: true, status: 'ok', expected, found, foundPrices };
-  }
-  return { ...base, nameFound: true, status: 'price-deviates', reason: 'prijs-wijkt-af', expected, missing, found, foundPrices };
+  // The printed price that belongs to this name: the one after the name, else the
+  // one in its own row (a column layout prints the amount on the left).
+  const afterName = best.prices.find((price) => price.index >= best.occurrence.end);
+  const found = (afterName || best.prices[0]).value;
+  return {
+    ...base,
+    nameFound: true,
+    status: 'price-deviates',
+    reason: 'prijs-wijkt-af',
+    expected,
+    missing: best.missing,
+    found,
+    foundPrices: best.prices,
+    scope: best.scope,
+  };
 }
 
 function flattenItems(card) {
@@ -418,7 +621,7 @@ function diffCard(text, card = {}) {
   let ok = 0;
   for (const { category, item } of rows) {
     const result = matchItem(source, item);
-    for (const price of result.foundPrices) claimed.add(price.absoluteIndex);
+    for (const price of result.foundPrices) claimed.add(price.index);
     if (result.status === 'price-deviates') {
       checked += 1;
       changed.push({ category, name: result.name, expected: result.expected, missing: result.missing, found: result.found });
@@ -549,6 +752,8 @@ module.exports = {
   normalizeText,
   findPrices,
   findName,
+  buildSourceIndex,
+  findNameOccurrences,
   expectedPrices,
   matchItem,
   diffCard,
