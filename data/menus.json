@@ -6728,5 +6728,215 @@
         ]
       }
     ]
+  },
+  "11-lunch": {
+    "subtitle": "Lunchkaart",
+    "scraped": "2026-11-01",
+    "source": "https://www.beyerd.nl/cafe-lunchkaart/",
+    "notes": "Lunch van 12.00 tot 16.00 uur in het café. Alle salades worden geserveerd met bierbostelbrood en boter.",
+    "aiRead": true,
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Lunch",
+        "items": [
+          {
+            "name": "Brouwerslunch",
+            "desc": "Bierbostelbrood · Ardennerham · Abdijkaas · Rundvleeskroket met Gulpener mosterd · Dagsoepje",
+            "price": "€14",
+            "priceValue": 14,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Soep van de dag",
+            "desc": "Wij serveren vers huisgemaakte soep, wij vertellen u graag welke dit vandaag is!",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Luxe belegd bierbostelbrood",
+        "items": [
+          {
+            "name": "Abdijkaas",
+            "desc": "Tomaat · Komkommer · Gemengde sla · Gulpener mosterd",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Runderpastrami",
+            "desc": "Augurk · Rucola melange · Chipotlemayonaise",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gegrilde kipfilet",
+            "desc": "Meergranenbroodje · Parmezaan · Tomaat · Komkommer · Romaine sla · Yoghurt-citroendressing",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "'n Smoske",
+            "desc": "Meergranenbroodje · Abdijkaas · Boerenham · Ei · Tomaat · Komkommer · Gemengde sla · Belse mayonaise",
+            "price": "€11",
+            "priceValue": 11,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Clubsandwich",
+            "desc": "Kipfilet · Spek · Ei · Uienring in bierbeslag · Tomaat · Komkommer · Gemengde sla · Weisse-kruidenmayonaise",
+            "price": "€13,50",
+            "priceValue": 13.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gemarineerde zalm",
+            "desc": "Ingelegde komkommer · Rode ui · Zoetzuur · Romaine sla · Wasabimayonaise",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Salades",
+        "items": [
+          {
+            "name": "Geitenkaas",
+            "desc": "Druiven · Appel · Noten · Rucola melange · Honing",
+            "price": "€12,50",
+            "priceValue": 12.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gegrilde kipfilet",
+            "desc": "Bostelbroodcroutons · Parmezaan · Tomaat · Komkommer · Romaine salade · Yoghurt-citroendressing",
+            "price": "€14",
+            "priceValue": 14,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemarineerde zalm",
+            "desc": "Ingelegde komkommer · Rode ui · Zoetzuur · Romaine salade · Wasabimayonaise",
+            "price": "€15",
+            "priceValue": 15,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Warme lunch",
+        "items": [
+          {
+            "name": "Beyerd Burger",
+            "desc": "Briochebroodje · Abdijkaas · Compote van rode ui · BBBBQsaus (Beyerd Bier Barbecuesaus) · Groentechips · Salade",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Uitsmijter Beyerd",
+            "desc": "Bostelbrood · Drie gebakken eieren · Spek · Abdijkaas · Boerenham · Salade",
+            "price": "€14",
+            "priceValue": 14,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kroketten",
+            "desc": "Bostelbrood · Twee rundvleeskroketten (ook vegetarisch mogelijk) · Gulpener mosterd · Salade",
+            "price": "€9,50",
+            "priceValue": 9.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Garnaalkroketjes",
+            "desc": "Bostelbrood · Twee garnaalkroketten · Tartaarsaus · Salade",
+            "price": "€16",
+            "priceValue": 16,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
   }
 }
