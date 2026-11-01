@@ -376,6 +376,52 @@ function pricesOnLine(index, lineNumber) {
   return index.prices.filter((price, position) => index.lineOfPrice[position] === lineNumber);
 }
 
+/** The character range of one printed row. */
+function rowBounds(index, lineNumber) {
+  if (lineNumber < 0 || lineNumber >= index.lineStarts.length) return null;
+  const start = index.lineStarts[lineNumber];
+  const end = lineNumber + 1 < index.lineStarts.length ? index.lineStarts[lineNumber + 1] - 1 : index.source.length;
+  return { start, end };
+}
+
+const ROW_AMOUNT = /(?<![\d.,])(\d{1,3})(?:[.,](\d{1,2})|-{1,2})?(?![\d.,%])/g;
+const AMOUNT_SEPARATOR_BEFORE = /(?:^|[\s]?[-–—|·+&:]\s?)$/;
+const AMOUNT_COUNTING_BEFORE = /\b(?:stuks?|porties?|personen|pers|st|pp)\s*$/i;
+const AMOUNT_UNIT_AFTER = /^\s*(?:gram|grams|gr|g|kg|kilo|cl|ml|dl|l|ltr|liter|stuks?|st\.|personen|pers|x|%|uur|min|cm|mm)\b/i;
+
+/**
+ * Every amount of one printed row that sits at a printed boundary of that row:
+ * after the name and a separator ("Steak tartaar - 17"), right after a counting
+ * word ("vier stuks 13"), at the start of the row ("35 - supplement …"), or at
+ * the end of the row (the row reader already found those). A card prints an
+ * amount in exactly those places; a weight, a count, a time or a year is refused.
+ */
+function rowAmounts(index, lineNumber, options = {}) {
+  const bounds = rowBounds(index, lineNumber);
+  if (!bounds) return [];
+  const requireName = options.requireName !== false;
+  const text = index.source.slice(bounds.start, bounds.end);
+  const prices = pricesOnLine(index, lineNumber).slice();
+  ROW_AMOUNT.lastIndex = 0;
+  let match = ROW_AMOUNT.exec(text);
+  while (match !== null) {
+    const absolute = bounds.start + match.index;
+    if (!prices.some((price) => Math.abs(price.index - absolute) < 3)) {
+      const before = text.slice(Math.max(0, match.index - 20), match.index);
+      const after = text.slice(match.index + match[0].length, match.index + match[0].length + 12);
+      const boundary = match.index === 0 || AMOUNT_SEPARATOR_BEFORE.test(before) || AMOUNT_COUNTING_BEFORE.test(before);
+      const letters = (text.slice(0, match.index).match(/\p{L}/gu) || []).length;
+      if (boundary && (letters > 0 || !requireName) && !AMOUNT_UNIT_AFTER.test(after)) {
+        const fraction = match[2] === undefined ? 0 : Number(`0.${match[2]}`);
+        const value = Math.round((Number(match[1]) + fraction) * 100) / 100;
+        if (value > 0) prices.push({ value, raw: match[0], index: absolute, form: 'row-boundary' });
+      }
+    }
+    match = ROW_AMOUNT.exec(text);
+  }
+  return prices.sort((left, right) => left.index - right.index);
+}
+
 /** The words of a dish name that carry its identity. */
 function nameTokens(name) {
   const words = normalizeText(name)
@@ -406,7 +452,7 @@ function alignWords(tokens, content, from, allowMissing) {
       matched += 1;
       last = position;
       wanted += 1;
-    } else if (allowMissing && wanted < content.length - 1 && missing < 1) {
+    } else if (allowMissing && missing < 1 && wanted > 0) {
       missing += 1;
       wanted += 1;
       continue;
@@ -442,6 +488,9 @@ function findNameOccurrences(sourceOrIndex, name) {
         if (tail.length * 2 < content.length) continue;
         const aligned = alignWords(index.tokens, tail, position, allowMissing);
         if (!aligned) continue;
+        // A name that loses a word must still be recognised by at least two of
+        // its words, so one borrowed word never becomes a match on its own.
+        if (allowMissing && content.length > 1 && aligned.matched < 2) continue;
         const start = index.tokens[position].start;
         const end = index.tokens[aligned.last].end;
         const key = `${start}:${end}`;
@@ -512,7 +561,7 @@ function expectedPrices(item) {
  */
 function adjacentAmount(index, occurrence) {
   const after = index.source.slice(occurrence.end, occurrence.end + 8);
-  const match = /^[\s|·]{1,3}(\d{1,3})(?:[.,](?:(\d{1,2})|-{1,2}))?(?![\d.,])/.exec(after);
+  const match = /^[\s|·–—-]{1,4}(\d{1,3})(?:[.,](?:(\d{1,2})|-{1,2}))?(?![\d.,])/.exec(after);
   if (!match) return null;
   const whole = Number(match[1]);
   const fraction = match[2] === undefined ? 0 : Number(`0.${match[2]}`);
@@ -532,7 +581,7 @@ function adjacentAmount(index, occurrence) {
  */
 function occurrencePrices(index, occurrence) {
   const lineNumber = lineOf(index, occurrence.start);
-  const own = pricesOnLine(index, lineNumber);
+  const own = rowAmounts(index, lineNumber);
   const adjacent = adjacentAmount(index, occurrence);
   // An amount the row reader already saw is never counted twice.
   const extra = adjacent && !own.some((price) => Math.abs(price.index - adjacent.index) < 4) ? [adjacent] : [];
@@ -542,7 +591,7 @@ function occurrencePrices(index, occurrence) {
   // before it prints the amount of this dish. The first row that prints a price
   // after the name is the one that belongs to it.
   for (let step = 1; step <= 4; step += 1) {
-    const next = pricesOnLine(index, lineNumber + step);
+    const next = rowAmounts(index, lineNumber + step, { requireName: false });
     if (next.length > 0) return { prices: next, scope: step === 1 ? 'next-row' : 'near-row' };
   }
   // A menu row whose amount is printed on a row of its own ("50").
@@ -631,6 +680,19 @@ function matchItem(text, item = {}, options = {}) {
     foundPrices: best.prices,
     scope: best.scope,
   };
+}
+
+/**
+ * Does this source print a price list at all? A card whose menu is an image (an
+ * html page that only carries navigation, an svg or a pdf without a text layer)
+ * prints a handful of amounts that are not dish prices; checking it dish by dish
+ * would report a hundred false findings, so the control says it cannot check it.
+ */
+const MIN_PRINTED_PRICES = 3;
+
+function sourceCarriesPriceList(sourceOrIndex) {
+  const index = typeof sourceOrIndex === 'string' ? buildSourceIndex(sourceOrIndex) : sourceOrIndex;
+  return Boolean(index && Array.isArray(index.prices) && index.prices.length >= MIN_PRINTED_PRICES);
 }
 
 function flattenItems(card) {
@@ -809,6 +871,8 @@ module.exports = {
   findName,
   buildSourceIndex,
   findNameOccurrences,
+  sourceCarriesPriceList,
+  MIN_PRINTED_PRICES,
   expectedPrices,
   matchItem,
   diffCard,

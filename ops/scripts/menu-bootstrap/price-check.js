@@ -12,7 +12,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { fetchSourceText, flattenItems, matchItem } = require('./sourceText');
+const { fetchSourceText, flattenItems, matchItem, buildSourceIndex, sourceCarriesPriceList, MIN_PRINTED_PRICES } = require('./sourceText');
 
 const MENUS_FILE = path.join('data', 'menus.json');
 const USAGE = [
@@ -115,12 +115,24 @@ async function main() {
   }
 
   const rows = flattenItems(card);
+  // One read of the source for the whole card, not one per dish.
+  const index = buildSourceIndex(read.text);
+  if (!sourceCarriesPriceList(index)) {
+    // The menu of this card is an image (or an svg): the page itself prints no
+    // price list, so every dish would look "not found". Say so instead of
+    // reporting a hundred findings the Lead cannot use.
+    console.log(`${key} — ${source} (${read.kind}${read.fromCache ? ', uit cache' : ''})`);
+    console.log(
+      `niet controleerbaar: de bron print geen prijslijst (${index.prices.length} bedrag${index.prices.length === 1 ? '' : 'en'}, minder dan ${MIN_PRINTED_PRICES}) — een afbeelding of svg blijft handwerk`,
+    );
+    return;
+  }
   const deviations = [];
   const notFound = [];
   let ok = 0;
   let skipped = 0;
   for (const { category, item } of rows) {
-    const result = matchItem(read.text, item);
+    const result = matchItem(read.text, item, { index });
     if (result.status === 'ok') ok += 1;
     else if (result.status === 'skipped') skipped += 1;
     else if (result.status === 'price-deviates') deviations.push({ category, item, result });
