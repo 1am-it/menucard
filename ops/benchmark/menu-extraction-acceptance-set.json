@@ -343,7 +343,7 @@
       "class": "historical_cards",
       "provenance": "historical_dataset",
       "sourceRef": "data/menus.json",
-      "sourceVersion": "13 menu entries; latest scraped 2026-11-01 (BE-71 startvulling added 5-lunch and 22-afhaal to the 11 March entries); canonical LF sha256 0473b79d7df394b4a2e097d85f96d11831e85e55d7f204b6a3806daf614bf88e",
+      "sourceVersion": "14 menu entries; latest scraped 2026-11-01 (BE-71 startvulling added 5-lunch, 22-afhaal and 17-menukaart to the 11 March entries); canonical LF sha256 7333584755820b41f43e3af04f7a50677ee85bb6067707045bcd664dd03f6eca",
       "truthClaim": false,
       "expected": [
         "Wolfslaar, Bardot, Zuyd and T-Huis snapshots map to live menu lines one-for-one with category path, order and normalised price preserved.",

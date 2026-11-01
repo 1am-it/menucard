@@ -26,7 +26,9 @@ const { categoryPath } = require('./menuHierarchy');
 const { liveMenuLines, normalizePrice, buildMenuConcept } = require('./menuConcept');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const SNAPSHOT_SHA256 = '0473b79d7df394b4a2e097d85f96d11831e85e55d7f204b6a3806daf614bf88e';
+// BE-71 ronde 3 (#176): de kaart van Restaurant Zenza (17-menukaart) kwam erbij,
+// met dezelfde vorm en met R1 en R3 toegepast.
+const SNAPSHOT_SHA256 = '7333584755820b41f43e3af04f7a50677ee85bb6067707045bcd664dd03f6eca';
 const LATEST_SCRAPED = '2026-11-01';
 const TARGETS = [
   { id: '1', name: 'Restaurant Wolfslaar' },
