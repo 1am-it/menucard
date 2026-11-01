@@ -2,16 +2,16 @@
   "issue": "#176 (BE-71)",
   "decision": "planning/decisions/021-breda-menu-bootstrap.md",
   "scraped": "2026-11-01",
-  "generatedAt": "2026-10-31T23:44:07.302Z",
+  "generatedAt": "2026-11-01T07:26:40.400Z",
   "totals": {
     "restaurants": 25,
-    "done": 2,
-    "skipped": 21,
+    "done": 3,
+    "skipped": 20,
     "blocked": 2
   },
   "groups": {
     "geen gerechten herkend": 13,
-    "dubbel gerecht binnen een categorie": 2,
+    "dubbel gerecht binnen een categorie": 1,
     "menukopje met onzekere structuur": 1,
     "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.": 2,
     "gerechten zonder prijs": 2,
@@ -307,7 +307,7 @@
         {
           "code": "robots",
           "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
-          "detail": "https://www.restaurantruitersbosch.nl"
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
         }
       ],
       "candidates": [],
@@ -495,8 +495,8 @@
       "status": "skipped",
       "menuUrl": "https://pellens.nl/",
       "kind": "html",
-      "dishCount": 36,
-      "pricedCount": 26,
+      "dishCount": 32,
+      "pricedCount": 22,
       "pageCount": null,
       "reasons": [
         {
@@ -507,7 +507,7 @@
         {
           "code": "duplicate_dishes",
           "text": "dubbel gerecht binnen een categorie",
-          "detail": "13 gerecht(en)"
+          "detail": "11 gerecht(en)"
         },
         {
           "code": "excluded_sections",
@@ -524,8 +524,8 @@
         {
           "url": "https://pellens.nl/",
           "kind": "html",
-          "dishCount": 36,
-          "pricedCount": 26,
+          "dishCount": 32,
+          "pricedCount": 22,
           "refusal": null
         }
       ],
@@ -703,19 +703,13 @@
       "id": "17",
       "name": "Restaurant Zenza",
       "website": "https://www.restaurantzenza.nl",
-      "status": "skipped",
+      "status": "done",
       "menuUrl": "https://restaurantzenza.nl/",
       "kind": "html",
       "dishCount": 72,
       "pricedCount": 72,
       "pageCount": null,
-      "reasons": [
-        {
-          "code": "duplicate_dishes",
-          "text": "dubbel gerecht binnen een categorie",
-          "detail": "8 gerecht(en)"
-        }
-      ],
+      "reasons": [],
       "candidates": [
         {
           "url": "https://restaurantzenza.nl/",
@@ -723,16 +717,6 @@
           "dishCount": 72,
           "pricedCount": 72,
           "refusal": null
-        },
-        {
-          "url": "https://restaurantzenza.nl/menu/",
-          "kind": null,
-          "dishCount": 0,
-          "pricedCount": 0,
-          "refusal": {
-            "status": "not_read",
-            "reason": "bad-status"
-          }
         }
       ],
       "hadCard": false,
@@ -752,7 +736,7 @@
         {
           "code": "robots",
           "text": "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.",
-          "detail": "https://www.masalabreda.nl"
+          "detail": "unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)"
         }
       ],
       "candidates": [],
@@ -802,8 +786,8 @@
         {
           "url": "https://www.restaurantzuyd.nl/diner",
           "kind": "html",
-          "dishCount": 16,
-          "pricedCount": 16,
+          "dishCount": 18,
+          "pricedCount": 18,
           "refusal": null
         },
         {
