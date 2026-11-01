@@ -94,6 +94,19 @@ besluiten wijken af van het oorspronkelijke besluit:
   Dit geldt niet als akkoord voor betaalde AI in de app (BE-21 blijft
   NEEDS_APPROVAL).
 
+## Aanvulling, 1 nov 2026: omschakeling naar AI
+Na 7 rondes haalde de lezer zonder AI 3 van de 25 restaurants. De eigenaar vond
+dat te traag. Besloten:
+- de AI (`claude-haiku-5-5`) mag **alle** overgebleven Bredase kaarten lezen,
+  niet alleen afbeeldingen (R12);
+- de grenzen van R8 blijven gelden: de sleutel alleen bij de eigenaar, een harde
+  grens van € 1 per run, en geen herpogingen;
+- elke AI-kaart gaat pas naar de site na de controle van de Lead (R10). De
+  correcties staan in `ops/scripts/menu-bootstrap/lead-corrections/`;
+- de lezer zonder AI blijft bestaan, voor goedkope hercontroles op prijswijzigingen.
+
+Ook dit geldt niet als akkoord voor betaalde AI in de app (BE-21).
+
 ## Wat het niet doet
 - Geen herkomst per veld in de database (`field_provenance`). Dat is bewust
   geaccepteerd voor deze eenmalige vulling.
