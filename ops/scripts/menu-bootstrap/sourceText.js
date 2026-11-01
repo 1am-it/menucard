@@ -387,6 +387,7 @@ function rowBounds(index, lineNumber) {
 const ROW_AMOUNT = /(?<![\d.,])(\d{1,3})(?:[.,](\d{1,2})|-{1,2})?(?![\d.,%])/g;
 const AMOUNT_SEPARATOR_BEFORE = /(?:^|[\s]?[-–—|·+&:]\s?)$/;
 const AMOUNT_COUNTING_BEFORE = /\b(?:stuks?|porties?|personen|pers|st|pp)\s*$/i;
+const AMOUNT_COUNTING_AFTER = /^\s*(?:gangen|gang|glazen|glas|stuk|stuks|porties?|personen|pers|stokjes|stokje|soorten|personen)\b/i;
 const AMOUNT_UNIT_AFTER = /^\s*(?:gram|grams|gr|g|kg|kilo|cl|ml|dl|l|ltr|liter|stuks?|st\.|personen|pers|x|%|uur|min|cm|mm)\b/i;
 
 /**
@@ -411,7 +412,7 @@ function rowAmounts(index, lineNumber, options = {}) {
       const after = text.slice(match.index + match[0].length, match.index + match[0].length + 12);
       const boundary = match.index === 0 || AMOUNT_SEPARATOR_BEFORE.test(before) || AMOUNT_COUNTING_BEFORE.test(before);
       const letters = (text.slice(0, match.index).match(/\p{L}/gu) || []).length;
-      if (boundary && (letters > 0 || !requireName) && !AMOUNT_UNIT_AFTER.test(after)) {
+      if (boundary && (letters > 0 || !requireName) && !AMOUNT_UNIT_AFTER.test(after) && !AMOUNT_COUNTING_AFTER.test(after) && !/^\s*%/.test(after)) {
         const fraction = match[2] === undefined ? 0 : Number(`0.${match[2]}`);
         const value = Math.round((Number(match[1]) + fraction) * 100) / 100;
         if (value > 0) prices.push({ value, raw: match[0], index: absolute, form: 'row-boundary' });
@@ -563,12 +564,31 @@ function adjacentAmount(index, occurrence) {
   const after = index.source.slice(occurrence.end, occurrence.end + 8);
   const match = /^[\s|·–—-]{1,4}(\d{1,3})(?:[.,](?:(\d{1,2})|-{1,2}))?(?![\d.,])/.exec(after);
   if (!match) return null;
+  const rest = index.source.slice(occurrence.end + match[0].length, occurrence.end + match[0].length + 12);
+  // A weight, a volume, a count, a time or a percentage is not an amount.
+  if (/^\s*(?:gram|grams|gr|g|kg|kilo|cl|ml|dl|l|ltr|liter|stuks?|st\.|personen|pers|x|%|uur|min|cm|mm)\b/i.test(rest)) return null;
+  if (AMOUNT_COUNTING_AFTER.test(rest)) return null;
+  if (/^\s*%/.test(rest)) return null;
   const whole = Number(match[1]);
   const fraction = match[2] === undefined ? 0 : Number(`0.${match[2]}`);
   const value = Math.round((whole + fraction) * 100) / 100;
   if (!Number.isFinite(value) || value <= 0) return null;
   const start = occurrence.end + match[0].indexOf(match[1]);
   return { value, raw: match[0].trim(), index: start, form: 'adjacent' };
+}
+
+/** A row that prints one amount and nothing else: a group or section price. */
+function priceOnlyRow(index, lineNumber) {
+  const bounds = rowBounds(index, lineNumber);
+  if (!bounds) return null;
+  const text = index.source.slice(bounds.start, bounds.end).trim();
+  if (!text) return null;
+  const onRow = index.prices.filter((price, position) => index.lineOfPrice[position] === lineNumber);
+  if (onRow.length !== 1) return null;
+  const price = onRow[0];
+  const offset = price.index - bounds.start;
+  const rest = `${text.slice(0, offset)}${text.slice(offset + price.raw.length)}`;
+  return /^[\s.,;:–—-]*$/.test(rest) ? price : null;
 }
 
 /**
@@ -602,6 +622,12 @@ function occurrencePrices(index, occurrence) {
   for (let step = 1; step <= 2; step += 1) {
     const previous = pricesOnLine(index, lineNumber - step);
     if (previous.length > 0) return { prices: previous, scope: 'prev-row' };
+  }
+  // A section that prints its amount once ("Visgerechten" / "€22,-" / the dishes
+  // below it): the nearest group price above the name belongs to this dish.
+  for (let step = 1; step <= 8; step += 1) {
+    const group = priceOnlyRow(index, lineNumber - step);
+    if (group) return { prices: [group], scope: 'group' };
   }
   return { prices: [], scope: 'none' };
 }

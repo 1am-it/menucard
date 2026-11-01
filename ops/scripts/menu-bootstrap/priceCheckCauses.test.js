@@ -91,6 +91,12 @@ test('oorzaak 5: een groepsprijs als los bedrag onder de naam', () => {
   const deviates = check('zuyd', { name: '4-gangen lunchmenu', priceValue: 75 });
   assert.equal(deviates.status, 'price-deviates', 'een gewijzigde groepsprijs moet opvallen');
   assert.equal(deviates.found, 70);
+  // Dolce e Salato print de groepsprijs één keer boven een lijst gerechten.
+  assert.equal(check('dolce', { name: "Scampi all'aglio", priceValue: 22 }).status, 'ok');
+  assert.equal(check('dolce', { name: 'Sambuca', priceValue: 5.5 }).status, 'ok');
+  const groupChanged = check('dolce', { name: 'Amaretto', priceValue: 6 });
+  assert.equal(groupChanged.status, 'price-deviates');
+  assert.equal(groupChanged.found, 5.5);
 });
 
 test('een echte fout blijft gevangen: een gewijzigde prijs', () => {
