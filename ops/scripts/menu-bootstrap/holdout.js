@@ -350,7 +350,7 @@ function buildHoldoutReport({ results = [], excluded = [], baseline = null, scra
     generatedAt: generatedAt || null,
     selection: {
       source: 'ops/data/breda-restaurant-candidates.json',
-      measured: total,
+      count: total,
       excluded,
     },
     totals: { restaurants: total, done, skipped, blocked, measured: total - blocked },

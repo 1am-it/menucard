@@ -6,7 +6,7 @@
   "generatedAt": "2026-11-01T10:13:59.448Z",
   "selection": {
     "source": "ops/data/breda-restaurant-candidates.json",
-    "measured": 50,
+    "count": 50,
     "excluded": []
   },
   "totals": {
