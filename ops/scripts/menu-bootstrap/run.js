@@ -66,9 +66,9 @@ async function main() {
     const state = result.status === 'done' ? `geslaagd, ${result.dishCount} gerechten` : `${result.status}: ${result.reasons.map((r) => r.text).join('; ')}`;
     console.log(`${id} ${result.name}: ${state}`);
     if (args.write && result.status === 'done') {
-      menus = applyMenuItem({ menus, restaurants, restaurantId: id, entry: result.entry });
+      menus = applyMenuItem({ menus, restaurantId: id, entry: result.entry, key: result.entryKey });
       fs.writeFileSync(DATA_MENUS, serialize(menus));
-      console.log(`${id}: data/menus.json bijgewerkt (${result.dishCount} gerechten, ${result.sourceUrl}).`);
+      console.log(`${id}: data/menus.json bijgewerkt (${result.entryKey}, ${result.dishCount} gerechten, ${result.sourceUrl}).`);
     }
   }
 

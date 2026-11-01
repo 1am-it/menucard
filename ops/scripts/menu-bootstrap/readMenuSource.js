@@ -25,20 +25,39 @@ function parsePrintedPrice(value) {
 }
 
 /**
+ * The document title of one html page, for the soort of the card (a page can
+ * live on `/menu/` while its own title says "Lunchkaart"). Read from the
+ * `<title>` element only: no guessing from the body.
+ */
+function pageTitle(html) {
+  const match = String(html || '').match(/<title\b[^>]*>([\s\S]{1,300}?)<\/title>/i);
+  if (!match) return null;
+  const text = match[1]
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text || null;
+}
+
+/**
  * Reads one HTML page with the deterministic HTML menu reader. Returns
  * `{ kind: 'html', title, categories, attention, refusal }`; `refusal` names
  * the reader's own reason (`too_few_items`, `content_not_menu_suspected`, …)
  * so a read page never looks like an empty one.
  */
 function readHtmlMenu(html) {
+  const title = pageTitle(html);
   let result = null;
   try {
     result = extractHtmlMenuStructure(String(html || ''));
   } catch {
-    return { kind: 'html', title: null, categories: [], attention: [], refusal: { status: 'unparsed', reason: 'reader_error' } };
+    return { kind: 'html', title, categories: [], attention: [], refusal: { status: 'unparsed', reason: 'reader_error' } };
   }
   if (!result || result.status !== 'parsed') {
-    return { kind: 'html', title: null, categories: [], attention: [], refusal: { status: (result && result.status) || 'unparsed', reason: (result && result.reason) || null } };
+    return { kind: 'html', title, categories: [], attention: [], refusal: { status: (result && result.status) || 'unparsed', reason: (result && result.reason) || null } };
   }
   const categories = [];
   for (const section of Array.isArray(result.sections) ? result.sections : []) {
@@ -64,7 +83,7 @@ function readHtmlMenu(html) {
   if (excluded.length > 0) attention.push({ code: 'excluded_sections', detail: `${excluded.length} sectie(s)` });
   const variants = (Number.isInteger(stats.priceVariantLines) ? stats.priceVariantLines : 0) + (Number.isInteger(stats.priceVariantItems) ? stats.priceVariantItems : 0);
   if (variants > 0) attention.push({ code: 'price_variants', detail: `${variants} gerecht(en)` });
-  return { kind: 'html', title: null, categories, attention, refusal: null };
+  return { kind: 'html', title, categories, attention, refusal: null };
 }
 
 
@@ -141,4 +160,4 @@ async function readPdfMenu(bytes) {
   };
 }
 
-module.exports = { parsePrintedPrice, readHtmlMenu, readPdfMenu };
+module.exports = { parsePrintedPrice, pageTitle, readHtmlMenu, readPdfMenu };

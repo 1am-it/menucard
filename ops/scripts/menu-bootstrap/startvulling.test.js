@@ -12,7 +12,7 @@ const path = require('node:path');
 
 const { readHtmlMenu, readPdfMenu, parsePrintedPrice } = require('./readMenuSource');
 const { assessCompleteMenu, MIN_DISHES } = require('./completeMenu');
-const { buildEntry } = require('./menuEntry');
+const { buildEntry, buildExport, applyMenuItem, menuLinksFor, menuScopeFor, menuKey, MENU_VARIANTS } = require('./menuEntry');
 const { createSourceFetcher, USER_AGENT } = require('./fetchSource');
 const { bootstrapRestaurant } = require('./engine');
 const { buildReport, renderMarkdown } = require('./report');
@@ -241,6 +241,54 @@ test('de motor levert voor een complete kaart een entry; het rapport noemt bron,
   const markdown = renderMarkdown(report);
   assert.match(markdown, /https:\/\/voorbeeld\.nl\//);
   assert.match(markdown, /\| 12 \| 12 \| geslaagd \|/);
+});
+
+test('de soort van de kaart komt uit de url en de paginatitel, met de bestaande sleutel, subtitel en label', () => {
+  const cases = [
+    ['https://www.restaurant-chocolat.nl/lunch/', null, 'lunch', '5-lunch', 'Lunchkaart', '🥗 Lunchkaart'],
+    ['https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/', 'Afhaal Prijslijst', 'afhaal', '5-afhaal', 'Afhaalkaart', '🥡 Afhaalkaart'],
+    ['https://www.restaurantzuyd.nl/diner', null, 'diner', '5-diner', 'Dinerkaart', '🍽 Dinerkaart'],
+    ['https://voorbeeld.nl/borrelkaart', null, 'borrel', '5-borrel', 'Borrelkaart', '🍸 Borrelkaart'],
+    ['https://voorbeeld.nl/menu/', null, 'menukaart', '5-menukaart', 'Menukaart', '📋 Menukaart'],
+    // Geen dagdeel in de url: de paginatitel beslist.
+    ['https://voorbeeld.nl/onze-kaart/', 'Lunchkaart | Fictief', 'lunch', '5-lunch', 'Lunchkaart', '🥗 Lunchkaart'],
+  ];
+  for (const [sourceUrl, title, scope, key, subtitle, label] of cases) {
+    assert.equal(menuScopeFor({ sourceUrl, title }), scope, `${sourceUrl} ${title}`);
+    assert.equal(menuKey('5', scope), key);
+    assert.equal(MENU_VARIANTS[scope].subtitle, subtitle);
+    assert.equal(MENU_VARIANTS[scope].label, label);
+  }
+  // De url gaat voor de titel: de pagina die je leest is de bron.
+  assert.equal(menuScopeFor({ sourceUrl: 'https://voorbeeld.nl/lunch/', title: 'Dinerkaart' }), 'lunch');
+});
+
+test('de sleutel van de uitvoer volgt de soort, en twee kaarten van een restaurant staan naast elkaar', () => {
+  const menu = readHtmlMenu(COMPLETE_HTML);
+  const lunch = buildExport({ restaurantId: '5', menu, menus: {}, sourceUrl: 'https://voorbeeld.nl/lunch/', scraped: '2026-11-01' });
+  assert.equal(lunch.key, '5-lunch');
+  assert.equal(lunch.entry.subtitle, 'Lunchkaart');
+
+  const menukaart = buildExport({ restaurantId: '5', menu, menus: {}, sourceUrl: 'https://voorbeeld.nl/menu/', scraped: '2026-11-01' });
+  assert.equal(menukaart.key, '5-menukaart');
+  assert.equal(menukaart.entry.subtitle, 'Menukaart');
+
+  const menus = { '4-borrel': { subtitle: 'Borrelkaart', categories: [] } };
+  const withLunch = applyMenuItem({ menus, restaurantId: '5', entry: lunch.entry, key: lunch.key });
+  const withBoth = applyMenuItem({ menus: withLunch, restaurantId: '5', entry: menukaart.entry, key: menukaart.key });
+  assert.deepEqual(Object.keys(withBoth), ['4-borrel', '5-lunch', '5-menukaart']);
+  // De kaart van een ander restaurant blijft ongemoeid.
+  assert.deepEqual(withBoth['4-borrel'], menus['4-borrel']);
+
+  // Dezelfde sleutel opnieuw schrijven vervangt alleen die kaart.
+  const replaced = applyMenuItem({ menus: withBoth, restaurantId: '5', entry: { subtitle: 'Lunchkaart', categories: [], scraped: '2026-12-01' }, key: '5-lunch' });
+  assert.deepEqual(Object.keys(replaced), ['4-borrel', '5-lunch', '5-menukaart']);
+  assert.equal(replaced['5-lunch'].scraped, '2026-12-01');
+  assert.equal(replaced['5-menukaart'].subtitle, 'Menukaart');
+
+  // Elk lid van het restaurant houdt zijn eigen label.
+  const links = menuLinksFor({ menus: replaced, restaurantId: '5', currentLinks: [] });
+  assert.deepEqual(links, [{ id: '5-lunch', label: '🥗 Lunchkaart' }, { id: '5-menukaart', label: '📋 Menukaart' }]);
 });
 
 test('het rapport telt nieuw, weg en een andere prijs tegen de kaart van maart', () => {

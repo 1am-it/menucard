@@ -10,7 +10,7 @@ const { findSameHostMenuCandidates } = require('../../../src/lib/sameHostDiscove
 const { createSourceFetcher, MAX_CANDIDATES } = require('./fetchSource');
 const { readHtmlMenu, readPdfMenu } = require('./readMenuSource');
 const { assessCompleteMenu } = require('./completeMenu');
-const { buildEntry } = require('./menuEntry');
+const { buildExport } = require('./menuEntry');
 
 async function readResponse(page) {
   if (page.kind === 'pdf') return readPdfMenu(page.bytes);
@@ -57,6 +57,8 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
     pricedCount: 0,
     pageCount: null,
     entry: null,
+    entryKey: null,
+    menuScope: null,
   };
   if (!record.website) {
     record.reasons.push({ code: 'no_website', text: 'geen website in data/restaurants.json' });
@@ -130,7 +132,10 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
 
   record.menu = best.read.menu;
   record.status = 'done';
-  record.entry = buildEntry({ restaurantId, menu: best.read.menu, menus, sourceUrl: record.sourceUrl, scraped });
+  const built = buildExport({ restaurantId, menu: best.read.menu, menus, sourceUrl: record.sourceUrl, scraped });
+  record.entry = built.entry;
+  record.entryKey = built.key;
+  record.menuScope = built.scope;
   return record;
 }
 
