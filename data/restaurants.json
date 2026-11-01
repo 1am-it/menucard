@@ -1789,7 +1789,13 @@
     "badge": "🌙 Halal",
     "cuisineLabel": "Halal · Midden-Oosters",
     "cardDescription": "Restaurant Zenza serveert smakelijke Midden-Oosterse gerechten in een eigentijdse sfeer. Halal gecertificeerd, ideaal voor het hele gezin.",
-    "phoneDisplay": "076 514 3000"
+    "phoneDisplay": "076 514 3000",
+    "menuLinks": [
+      {
+        "id": "17-menukaart",
+        "label": "📋 Menukaart"
+      }
+    ]
   },
   "18": {
     "name": "Masala",
