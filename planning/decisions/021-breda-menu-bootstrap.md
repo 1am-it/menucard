@@ -45,6 +45,35 @@ gevulde kaarten kan de site bij de lancering niet laten zien wat hij belooft.
   restaurant door de eigenaar.
 - **Herbruikbaarheid.** De motor is ook de basis voor latere steden.
 
+## Aanvulling, 1 nov 2026: de leerlus (fase 1)
+De eigenaar wil via deze route als beheerder zoveel mogelijk data toevoegen. De
+lezer moet daarbij steeds beter worden. Afgesproken:
+- **Taken:**
+  - de **eigenaar** beslist over algemene regels: hoe namen eruitzien, wat de
+    houder te zien krijgt, wat we weglaten;
+  - de **Lead** kijkt de prijzen na tegen de website en vertaalt besluiten naar
+    regels;
+  - de **developer** bouwt elke regel met een fixture en een test.
+
+  De eigenaar kijkt geen prijzen na.
+- **Review per batch, niet per kaart.** In de chat staan alleen de uitzonderingen
+  en de regelvragen, als genummerde keuzes met een advies. Wat klopt, meldt de
+  Lead als aantal.
+- **Het correctielog:** `ops/scripts/menu-bootstrap/corrections.md`. Daarin staan
+  elke regel, het besluit, een voorbeeld en de status, plus het slagingspercentage
+  per batch.
+- **De stopregel:** geen merge van een kaart zonder de prijscontrole van de Lead.
+- **Vervolg** (nog niet besloten, advies van de Lead):
+  - **fase 2:** een reviewscherm in `/internal`. De motor levert dan concepten in
+    de werkvoorraad van besluit 016, met de uitzonderingen eerst, en een knop "maak
+    hier een regel van". Pas zodra de lezer op de 25 stabiel is (15 of meer
+    geslaagd).
+  - **fase 3:** kaarten die alle regels halen gaan automatisch door. Pas als het
+    slagingspercentage ook op de werklijst van BE-72 hoog is, zonder fouten in
+    prijzen.
+  - **Tips voor de houder** (bijvoorbeeld bij dubbele namen) in Mijn restaurant.
+    Dat wordt een apart ticket, na fase 2.
+
 ## Wat het niet doet
 - Geen herkomst per veld in de database (`field_provenance`). Dat is bewust
   geaccepteerd voor deze eenmalige vulling.
