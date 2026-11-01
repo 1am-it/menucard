@@ -479,6 +479,51 @@ test('R1 en R3 in de motor: de gelezen kaart gaat genormaliseerd naar de uitvoer
   assert.equal(result.pricedCount, 9);
 });
 
+test('R9: een zin is geen categorie en een korte kop in hoofdletters boven een groep is dat wel', () => {
+  const html = fs.readFileSync(path.join(FIXTURES, 'zenza-home.html'), 'utf8');
+  const menu = readHtmlMenu(html);
+  assert.equal(menu.refusal, null);
+  assert.deepEqual(menu.categories.map((category) => category.name), ['BROODJES', 'WRAPS', 'EXTRA VLEES']);
+  // The slogan ("Al onze gerechten zijn 100% halal") and the page title
+  // ("Home") are context: neither becomes a category, and no dishes are lost.
+  assert.deepEqual(menu.categories.map((category) => category.items.length), [2, 2, 2]);
+  for (const category of menu.categories) assert.notEqual(category.uncertain, true);
+  assert.ok(!JSON.stringify(menu.categories).includes('halal'));
+});
+
+test('R9: een losse regel in hoofdletters zonder gerechten eronder is geen categorie', () => {
+  const html = `<h2>Menukaart</h2><ul>
+    <li>Soep van de dag <span>€ 8,50</span></li>
+    <li>Salade <span>€ 9,50</span></li>
+  </ul><p>RESERVEREN</p><ul>
+    <li>Steak <span>€ 22,50</span></li>
+    <li>Vis <span>€ 19,00</span></li>
+  </ul>`;
+  const menu = readHtmlMenu(html);
+  assert.deepEqual(menu.categories.map((category) => category.name), ['Menukaart']);
+  assert.equal(menu.categories[0].items.length, 4);
+});
+
+test('R5: gerechten onder een kop met "extra" zijn toeslagen, geen losse gerechten', () => {
+  const html = fs.readFileSync(path.join(FIXTURES, 'zenza-home.html'), 'utf8');
+  const menu = readHtmlMenu(html);
+  const byName = new Map(menu.categories.map((category) => [category.name, category]));
+  const extras = byName.get('EXTRA VLEES');
+  assert.equal(extras.supplementSection, true);
+  for (const item of extras.items) assert.equal(item.priceIsSupplement, true);
+  assert.deepEqual(extras.items.map((item) => [item.name, item.price]), [['KIPFILET', 4], ['LAMSKOTELET', 4]]);
+  // A dish under an ordinary heading is never a supplement.
+  for (const item of byName.get('BROODJES').items) assert.notEqual(item.priceIsSupplement, true);
+});
+
+test('R5: een toeslag telt niet mee als gerecht van de kaart', () => {
+  const html = fs.readFileSync(path.join(FIXTURES, 'zenza-home.html'), 'utf8');
+  const menu = readHtmlMenu(html);
+  const assessment = assessCompleteMenu(menu);
+  assert.equal(assessment.dishCount, 6);
+  assert.equal(assessment.pricedCount, 6);
+});
+
 test('de kandidaatkeuze: een subpagina of pdf met een menuwoord, ook uit de navigatie, hooguit vijf en nooit een andere host', () => {
   const html = fs.readFileSync(path.join(FIXTURES, 'menu-links.html'), 'utf8');
   const candidates = chooseSameHostCandidates(html, 'https://voorbeeld.nl/');

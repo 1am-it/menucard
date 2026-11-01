@@ -1860,6 +1860,111 @@ function isProseHeading(text) {
   return words >= MIN_SENTENCE_WORDS - 1 && /[.!?]\s+\p{Lu}/u.test(t)
 }
 
+// R9 (correctielog BE-71, Lead review ronde 3): a sentence is never a
+// category heading. One closing mark, or a form of "zijn"/"is", is enough
+// evidence. "Al onze gerechten zijn 100% halal" above 72 dishes is context for
+// the card, not the section those dishes belong to. Length alone still never
+// decides (see isProseHeading); the startvulling's own reader adds its
+// six-word rule on top (ops/scripts/menu-bootstrap/readMenuSource.js).
+const SENTENCE_MARK_PATTERN = /[.!?…]$/
+const SENTENCE_VERB_PATTERN = /(?:^|\s)(?:is|zijn|was|waren)(?:\s|$)/i
+const MAX_SECTION_LABEL_WORDS = 6
+
+function isSentenceHeading(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!t) return true
+  if (SENTENCE_MARK_PATTERN.test(t)) return true
+  return SENTENCE_VERB_PATTERN.test(t)
+}
+
+// R9 — the other half of the same rule: a short text printed in capitals,
+// without a price, directly above a group of priced lines is a category. Some
+// sources print it as a button or a plain span instead of a heading (Zenza:
+// "WRAPS", "BURGERS & LOADED FRIES", "EXTRA VLEES"). Only that exact shape is
+// accepted; a lone capitalised word elsewhere on the page is never a category.
+const MAX_SECTION_LABEL_LENGTH = 70
+const MAX_GROUP_CAPTION_LENGTH = 200
+
+function isUppercaseGroupLabel(value) {
+  const label = String(value || '').replace(/\s+/g, ' ').trim()
+  if (!label || label.length > MAX_SECTION_LABEL_LENGTH) return false
+  if (/[a-zà-ÿ]/.test(label)) return false
+  if (!/[A-ZÀ-Ý]/.test(label)) return false
+  if (letterCount(label) < 2) return false
+  if (findPrices(label).length > 0) return false
+  if (label.split(' ').filter(Boolean).length > MAX_SECTION_LABEL_WORDS) return false
+  if (isSentenceHeading(label)) return false
+  if (NON_MENU_HEADING_PATTERN.test(label)) return false
+  return true
+}
+
+const GROUP_LABEL_TAGS = new Set(['div', 'p', 'span', 'a', 'strong', 'b', 'section', 'header', 'button', 'td', 'li'])
+const NAV_CONTAINER_PATTERN = /(?:^|[-_ ])(nav|navbar|navigation|menu|breadcrumb)(?:$|[-_ ])/i
+
+/** A label inside the site's own navigation is a link, never a category. */
+function insideNavigation(node) {
+  let depth = 0
+  for (let parent = node.parent; parent && depth < 4; parent = parent.parent, depth += 1) {
+    if (parent.tag === 'nav') return true
+    const attrs = parent.attrs || {}
+    if (attrs.role === 'navigation') return true
+    if (typeof attrs.class === 'string' && NAV_CONTAINER_PATTERN.test(attrs.class)) return true
+  }
+  return false
+}
+
+/** A link to another page (not an in-page anchor) is navigation, not a label. */
+function linksAway(node) {
+  if (node.tag !== 'a') return false
+  const href = node.attrs && typeof node.attrs.href === 'string' ? node.attrs.href.trim() : ''
+  return href !== '' && !href.startsWith('#')
+}
+
+/**
+ * True when no sibling between two group labels prints a price: the second
+ * label then qualifies the first instead of starting a new category.
+ */
+function onlyLabelsBetween(siblings, from, to, markerCounter, budget) {
+  for (let i = from + 1; i < to; i += 1) {
+    const node = siblings[i]
+    if (!node || node.tag === '#text') continue
+    if (findPrices(textOf(node, { markerCounter, budget })).length > 0) return false
+  }
+  return true
+}
+
+/**
+ * True when `node` is a capitals group label whose next priced sibling block is
+ * the group it labels: at most three label-like blocks may sit in between (a
+ * divider caption such as "ALLEEN IN COMBINATIE MET EEN SCHOTEL"), and nothing
+ * else is skipped.
+ */
+function isGroupLabelBeforeDishes(node, siblings, index, markerCounter, budget) {
+  if (!GROUP_LABEL_TAGS.has(node.tag) || isMarker(node)) return false
+  if (insideNavigation(node) || linksAway(node)) return false
+  if (!isUppercaseGroupLabel(textOf(node, { markerCounter, budget }))) return false
+  let skipped = 0
+  for (let i = index + 1; i < siblings.length; i += 1) {
+    const next = siblings[i]
+    if (!next) continue
+    if (next.tag === '#text') {
+      if (next.text.trim()) return false
+      continue
+    }
+    const nextText = textOf(next, { markerCounter, budget })
+    const prices = findPrices(nextText).length
+    if (prices >= 2) return true
+    if (prices > 0) return false
+    if (!nextText.trim()) continue
+    // Only a caption between label and group may be skipped (a sentence such
+    // as "Alle schotels worden geserveerd met …"), never a whole block.
+    if (nextText.replace(/\s+/g, ' ').trim().length > MAX_GROUP_CAPTION_LENGTH) return false
+    skipped += 1
+    if (skipped > 3) return false
+  }
+  return false
+}
+
 function headingLevel(node) {
   if (/^h[1-6]$/.test(node.tag)) return Number(node.tag[1])
   const level = Number(node.attrs && node.attrs['aria-level'])
@@ -2457,7 +2562,7 @@ function extractWithinBudget(html, budget, stats) {
     const key = JSON.stringify(path)
     // A sentence kept in the route (not safely nested below a real section
     // heading) is never trusted as structure: the section is uncertain.
-    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: path.some(isProseHeading) })
+    if (!sectionsByKey.has(key)) sectionsByKey.set(key, { path, items: [], unpriced: [], uncertain: path.some(isSentenceHeading) })
     return sectionsByKey.get(key)
   }
 
@@ -2781,7 +2886,13 @@ function extractWithinBudget(html, budget, stats) {
       stats.depthLimited = true
       return
     }
-    for (const child of node.children) {
+    // R9 — a capitals group label pushed by this walk labels the dishes below
+    // it inside this same container; when the container ends, it ends too.
+    const stackDepthOnEntry = headingStack.length
+    let groupLabelLevel = null
+    let groupLabelIndex = -1
+    for (let childIndex = 0; childIndex < node.children.length; childIndex += 1) {
+      const child = node.children[childIndex]
       budget.spend(1)
       // Hidden, third-party injected text (a hijacked restaurant site) is
       // never read as menu content. Only a hidden block with at least two
@@ -2842,7 +2953,7 @@ function extractWithinBudget(html, budget, stats) {
           // same or a higher level it is kept in the route, so its dishes
           // never join the previous section; the hierarchy then marks that
           // route uncertain ("Controle nodig").
-          if (!panelHeading && top && level > top.level && isProseHeading(raw)) continue
+          if (!panelHeading && top && level > top.level && isSentenceHeading(raw)) continue
           // A section heading identical to the enclosing label (Blossem:
           // panel "BITES" containing h3 "BITES") adds a level but no
           // information; it is not duplicated in the route.
@@ -2851,6 +2962,28 @@ function extractWithinBudget(html, budget, stats) {
           headingStack.push({ level, text })
           if (child.hidden === true) hiddenHeadingPaths.add(JSON.stringify(currentPath()))
         }
+        continue
+      }
+      // R9 — a short capitals label without a price, directly above a group of
+      // priced lines, is that group's category even when the source prints it
+      // as a button or a span instead of a heading.
+      if (isGroupLabelBeforeDishes(child, node.children, childIndex, markerCounter, budget)) {
+        // A second label directly above the same group (a divider caption
+        // qualifying the label above it, "EXTRA VLEES" → "ALLEEN IN
+        // COMBINATIE MET EEN SCHOTEL") does not start a category of its own.
+        if (groupLabelIndex >= 0 && onlyLabelsBetween(node.children, groupLabelIndex, childIndex, markerCounter, budget)) {
+          groupLabelIndex = childIndex
+          continue
+        }
+        const groupText = clip(textOf(child, { markerCounter, budget }))
+        const top = headingStack[headingStack.length - 1]
+        // Every label of this container sits at the same level, so a later
+        // label replaces the previous one instead of nesting into it.
+        const level = groupLabelLevel !== null ? groupLabelLevel : top ? Math.min(top.level + 1, 6) : 1
+        while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
+        headingStack.push({ level, text: groupText, groupLabel: true })
+        groupLabelLevel = level
+        groupLabelIndex = childIndex
         continue
       }
       // A labelled tab panel is a menu variant: its label sits above the
@@ -2976,6 +3109,8 @@ function extractWithinBudget(html, budget, stats) {
       }
       walk(child, depth + 1, extraLabel)
     }
+    // R9 — a capitals group label never outlives the container it labels.
+    while (headingStack.length > stackDepthOnEntry && headingStack[headingStack.length - 1].groupLabel) headingStack.pop()
   }
   walk(root, 0, null)
   stats.ignoredMarkers = markerCounter.count
@@ -3125,6 +3260,8 @@ module.exports = {
   displayName,
   decodeEntities,
   isProseHeading,
+  isSentenceHeading,
+  isUppercaseGroupLabel,
   extractHtmlMenuStructure,
   createHtmlStructureAdapter,
   spamSignals,
