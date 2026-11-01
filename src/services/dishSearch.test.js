@@ -19,19 +19,14 @@
 
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
-const path = require('node:path');
 
 // BE-71 (#176): de verwachtingen hieronder (aantallen, groepen, de zwakke
 // treffer van "friet") horen bij de kaarten zoals ze waren toen deze tests
 // geschreven werden. De startvulling voegt kaarten toe; daarom draaien deze
-// tests op een vaste kopie van die data in plaats van op data/ zelf. Elke
-// module die data/menus.json of data/restaurants.json laadt, krijgt hier de
-// kopie, nog vóór dishSearch geladen wordt.
-for (const name of ['menus', 'restaurants']) {
-  const real = require.resolve(`../../data/${name}.json`);
-  const frozen = path.join(__dirname, '__fixtures__', 'dishSearch-data', `${name}.json`);
-  require.cache[real] = { id: real, filename: real, loaded: true, exports: require(frozen) };
-}
+// tests op de vaste kopie van die data in plaats van op data/ zelf.
+// BE-76 (#189): die kopie staat nu in src/test-fixtures/frozen-data/maart-2026/
+// en wordt via één hulpmodule klaargezet.
+require('../test-fixtures/useFrozenData').useFrozenData('maart-2026');
 
 const { searchDishes } = require('./dishSearch');
 

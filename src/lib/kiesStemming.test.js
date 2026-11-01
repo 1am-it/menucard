@@ -19,7 +19,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 // BE-74 (#185): de stemgerechten komen uit de kaarten van maart; deze tests
 // draaien op de vaste kopie daarvan, niet op de levende data.
-require('../services/__fixtures__/frozenMarchData').freezeMarchData();
+require('../test-fixtures/useFrozenData').useFrozenData('maart-2026');
 const menusData = require('../../data/menus.json');
 const restaurantsData = require('../../data/restaurants.json');
 const {

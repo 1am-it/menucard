@@ -37,7 +37,7 @@ const {
 
 // BE-74 (#185): het /nvwa/[id]-voorbeeld moet gevulde allergenen hebben. Die
 // controle hoort bij de kaarten van maart; ze draait op de vaste kopie daarvan.
-require('../../src/services/__fixtures__/frozenMarchData').freezeMarchData();
+require('../../src/test-fixtures/useFrozenData').useFrozenData('maart-2026');
 
 test('de pagina is een Server Component met een eigen stylesheet', () => {
   const source = read(PAGE);

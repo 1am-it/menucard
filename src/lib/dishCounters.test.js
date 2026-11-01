@@ -15,7 +15,7 @@ const assert = require('node:assert/strict');
 const { test } = require('node:test');
 // BE-74 (#185): het getelde gerecht is een gerecht van maart; vaste kopie van
 // die kaarten in plaats van de levende data.
-require('../services/__fixtures__/frozenMarchData').freezeMarchData();
+require('../test-fixtures/useFrozenData').useFrozenData('maart-2026');
 const menusData = require('../../data/menus.json');
 const {
   COUNTER_THROTTLE_MS,

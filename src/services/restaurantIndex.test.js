@@ -12,9 +12,9 @@ const { test } = require('node:test');
 // het placeholder-adres van restaurant 10 en "Con  Fuego" horen bij de data van
 // vóór de verversing en vóór het weghalen van de vier gesloten restaurants.
 // Deze tests draaien daarom op de vaste kopie in
-// src/services/__fixtures__/dishSearch-data/ (die beide nog bevat). De levende
+// src/test-fixtures/frozen-data/maart-2026/ (die beide nog bevat). De levende
 // data wordt bewaakt door src/lib/be75ClosedRestaurants.test.js.
-require('./__fixtures__/frozenMarchData').freezeMarchData();
+require('../test-fixtures/useFrozenData').useFrozenData('maart-2026');
 
 const { searchRestaurants, isValidAddress, hasUniqueRestaurantNameMatch } = require('./restaurantIndex');
 

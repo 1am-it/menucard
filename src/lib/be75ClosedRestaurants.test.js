@@ -6,7 +6,7 @@
 // bestaan niet meer, dus staan ze niet meer in data/restaurants.json en horen
 // ze ook niet in de sitemap. De tests die van die vier of van het oude totaal
 // afhangen, draaien op de vaste kopie van de data van vóór deze wijziging
-// (src/services/__fixtures__/be75-closed-restaurants/); dit bestand bewaakt
+// (src/test-fixtures/frozen-data/before-be75/); dit bestand bewaakt
 // juist de echte, levende data en de sitemap.
 
 const assert = require('node:assert/strict');
