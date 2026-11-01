@@ -301,4 +301,255 @@ test('de sleutel komt niet uit de omgeving of een argument en gaat niet naar een
   assert.match(source, /setRawMode\(true\)/, 'de invoer wordt verborgen gelezen');
 });
 
+// ---------------------------------------------------------------------------
+// Ronde 6 (Lead-review 6557509881): punten 1, 2 en 3.
+// ---------------------------------------------------------------------------
+
+function menuPageHtml(count, { prefix = 'menukaart', alt = 'menukaart' } = {}) {
+  const images = Array.from(
+    { length: count },
+    (_, index) => `<img src="/wp-content/uploads/2026/03/${prefix}-${index + 1}.jpg" alt="${alt} ${index + 1}">`,
+  ).join('\n');
+  return `<html><head><title>Menukaart</title></head><body>\n${images}\n</body></html>`;
+}
+
+const okPageWith = (html) => async (url) => ({ ok: true, url, finalUrl: url, text: html });
+
+function answerWithItems(items, { category = 'Lunch', title = 'Menukaart' } = {}) {
+  return {
+    menus: [
+      {
+        title,
+        sourceId: '1',
+        variant: null,
+        order: null,
+        categories: [
+          {
+            name: category,
+            path: [],
+            uncertain: false,
+            items: items.map((entry, index) => ({
+              name: entry.name,
+              description: '',
+              priceStatus: 'known',
+              amountMinorUnits: entry.price,
+              currency: 'EUR',
+              priceText: `€ ${(entry.price / 100).toFixed(2).replace('.', ',')}`,
+              isFrom: false,
+              allergens: { status: 'unknown', values: [] },
+              evidence: { sourceId: '1', locator: entry.locator || `afbeelding ${index + 1}`, quote: entry.name },
+            })),
+          },
+        ],
+      },
+    ],
+    rejected: [],
+    coverage: { status: 'complete', sourcesRead: 1, pagesRead: 1, unreadSources: [], limitations: [] },
+  };
+}
+
+test('punt 1: alleen een menuwoord in de naam, de alt of het bijschrift is een kaart', () => {
+  const pageUrl = 'https://www.restaurantwolfslaar.com/menu';
+  const html = [
+    // De echte gevallen uit de cache van de eigenaar: portretten en sfeerfoto's.
+    '<img src="/assets/files/Afbeeldingen/Portretten/DSC05737.jpg" alt="DSC05737">',
+    '<img src="/assets/files/Afbeeldingen/Nieuwe-foto-indeling/Portretten/Studio-1412---Wolfslaar-Maarten-Camps-261023-1.jpg" alt="Studio 1412 Wolfslaar">',
+    '<img src="/assets/thumbs/640-1000-fit/Afbeeldingen/Nieuwe-foto-indeling/Food-fotografie/2026/Studio1412-RestaurantWolfslaarsfeer.jpg" alt="">',
+    '<img src="/assets/files/Logos/16_POINTS_GM_BLACK.png" alt="">',
+    // De echte kaart.
+    '<img src="/wp-content/uploads/2026/08/Menukaart0826a.jpg" alt="">',
+    // Een kaart die alleen in de alt-tekst een menuwoord heeft (Klein Java).
+    '<img src="/_astro/smart_PeDwL.png" alt="Indonesiche-Gerechten-afhalen-bestellen">',
+  ].join('\n');
+  const { images, dropped } = ai.collectStrictMenuImages({ html, pageUrl });
+  assert.deepEqual(images.map((image) => image.url), [
+    'https://www.restaurantwolfslaar.com/wp-content/uploads/2026/08/Menukaart0826a.jpg',
+    'https://www.restaurantwolfslaar.com/_astro/smart_PeDwL.png',
+  ]);
+  assert.deepEqual(images.map((image) => image.number), [1, 2], "de nummering volgt de kaarten, niet de foto's");
+  // De twee sfeerfoto's vallen al af bij de bestaande lezer; de twee portretten
+  // vallen hier af, met hun reden.
+  assert.equal(dropped.length, 2);
+  for (const entry of dropped) assert.equal(entry.reason, 'never_a_menu');
+  assert.equal(ai.isStrictMenuImage({ url: 'https://voorbeeld.nl/DSC05294-scaled.jpg', alt: 'dsc05294' }), false);
+  assert.equal(ai.isStrictMenuImage({ url: 'https://voorbeeld.nl/portret.jpg', alt: 'Menukaart' }), false);
+  assert.equal(ai.isStrictMenuImage({ url: 'https://voorbeeld.nl/lunch.jpg' }), true);
+  assert.equal(ai.isStrictMenuImage({ url: 'https://voorbeeld.nl/foto.jpg', caption: 'Bekijk de menukaart' }), true);
+});
+
+test('punt 1: zonder kaart op de pagina volgt hooguit één extra ophaalstap op dezelfde site', async () => {
+  const pageUrl = 'https://www.restaurantwolfslaar.com/menu';
+  const first = `<html><head><title>Menu</title></head><body>
+    <img src="/assets/files/Afbeeldingen/Portretten/DSC05737.jpg" alt="DSC05737">
+    <a href="/nl/menu-lunch">Menukaart lunch</a>
+    <a href="/nl/menu-diner">Menukaart diner</a>
+    <a href="https://andere-site.nl/menu">Menukaart elders</a>
+  </body></html>`;
+  const second = menuPageHtml(2, { prefix: 'Lunchkaart-2026', alt: 'lunchkaart' });
+  const loaded = [];
+  const plan = await ai.planImages({
+    restaurants: [{ id: '1', name: 'Restaurant Wolfslaar', website: 'https://www.restaurantwolfslaar.com', pageUrl }],
+    loadPage: async (url) => {
+      loaded.push(url);
+      return { ok: true, url, finalUrl: url, text: url === pageUrl ? first : second };
+    },
+    log: () => {},
+  });
+  assert.deepEqual(loaded, [pageUrl, 'https://www.restaurantwolfslaar.com/nl/menu-lunch'], 'precies één extra stap, op dezelfde host');
+  const record = plan.restaurants[0];
+  assert.equal(record.status, 'planned');
+  assert.equal(record.images.length, 2);
+  assert.equal(record.imageSearch.found, 1, 'de portretfoto is gevonden en afgekeurd');
+  assert.equal(record.imageSearch.dropped[0].reason, 'never_a_menu');
+  assert.equal(record.imageSearch.extraStep.url, 'https://www.restaurantwolfslaar.com/nl/menu-lunch');
+  assert.equal(record.imageSearch.extraStep.images, 2);
+  assert.equal(record.pageUrl, 'https://www.restaurantwolfslaar.com/nl/menu-lunch', 'de bron is de pagina met de kaart');
+});
+
+test('punt 1: een kaart die alleen als svg bestaat wordt overgeslagen met die reden', async () => {
+  const pageUrl = 'https://t-huis.online/menu/';
+  const html = `<html><head><title>Menu</title></head><body>
+    <img src="https://t-huis.online/wp-content/uploads/2025/12/DSC05294-scaled.jpg" alt="dsc05294">
+    <img src="https://t-huis.online/wp-content/uploads/2026/09/THS-Diner_Herfst-2026.2_DIGI.svg" alt="ths diner herfst 2026 digi">
+    <img src="https://t-huis.online/wp-content/uploads/2026/09/THS-Lunch_Herfst-2026.2_DIGI.svg" alt="ths lunch herfst 2026 digi">
+  </body></html>`;
+  const plan = await ai.planImages({
+    restaurants: [{ id: '23', name: 'T-Huis', website: 'https://t-huis.online', pageUrl }],
+    loadPage: async (url) => ({ ok: true, url, finalUrl: url, text: html }),
+    log: () => {},
+  });
+  const record = plan.restaurants[0];
+  assert.equal(record.images.length, 0, 'een svg gaat niet naar de AI');
+  assert.equal(record.status, 'skipped');
+  assert.equal(record.reason, 'menu_is_svg');
+  assert.deepEqual(record.imageSearch.svgMenus, [
+    'https://t-huis.online/wp-content/uploads/2026/09/THS-Diner_Herfst-2026.2_DIGI.svg',
+    'https://t-huis.online/wp-content/uploads/2026/09/THS-Lunch_Herfst-2026.2_DIGI.svg',
+  ]);
+  assert.equal(plan.maxCostEurCents, 0);
+});
+
+test('punt 1: een kaart-pdf wordt als vondst vastgelegd, niet gefetcht', async () => {
+  const pageUrl = 'https://voorbeeld.nl/menu';
+  const html = `<html><head><title>Menu</title></head><body>
+    <a href="https://voorbeeld.nl/wp-content/uploads/2026/03/menukaart.pdf">Menukaart (pdf)</a>
+  </body></html>`;
+  const loaded = [];
+  const plan = await ai.planImages({
+    restaurants: [{ id: '9', name: 'Voorbeeld', website: 'https://voorbeeld.nl', pageUrl }],
+    loadPage: async (url) => {
+      loaded.push(url);
+      return { ok: true, url, finalUrl: url, text: html };
+    },
+    log: () => {},
+  });
+  assert.deepEqual(loaded, [pageUrl], 'een pdf wordt niet als pagina opgehaald');
+  assert.equal(plan.restaurants[0].reason, 'menu_is_pdf');
+  assert.equal(plan.restaurants[0].imageSearch.pdfMenu, 'https://voorbeeld.nl/wp-content/uploads/2026/03/menukaart.pdf');
+});
+
+test('punt 2: meer dan drie afbeeldingen worden in groepen van drie gelezen en samengevoegd', async () => {
+  const pageUrl = 'https://www.aldentebreda.nl/menukaart-restaurant-2/';
+  const html = menuPageHtml(7);
+  const inputs = [];
+  const answers = [
+    answerWithItems([{ name: 'Soep', price: 650 }, { name: 'Bruschetta', price: 750 }, { name: 'Carpaccio', price: 1150 }]),
+    answerWithItems(
+      [{ name: 'Pizza Margherita', price: 1050 }, { name: 'Pizza Diavola', price: 1250 }, { name: 'Lasagne', price: 1350 }],
+      { category: 'Pizza' },
+    ),
+    answerWithItems([{ name: 'Tiramisu', price: 750 }], { category: 'Dolci' }),
+  ];
+  const written = [];
+  const adapter = {
+    enabled: true,
+    lastCall: null,
+    callCount: 0,
+    async call(input) {
+      inputs.push(input);
+      adapter.callCount += 1;
+      adapter.lastCall = { costEurCents: 2 };
+      return answers[adapter.callCount - 1];
+    },
+  };
+  const result = await ai.runAiImages({
+    restaurants: [{ id: '8', name: 'Al Dente Ristorante', website: 'https://www.aldentebreda.nl', pageUrl }],
+    loadPage: okPageWith(html),
+    loadImage: loadedImage,
+    promptKey: async () => Buffer.from(SECRET),
+    createCall: () => adapter,
+    writeOutput: (record) => written.push(record),
+    log: () => {},
+  });
+  assert.equal(adapter.callCount, 3, 'zeven afbeeldingen zijn drie verzoeken');
+  assert.deepEqual(inputs.map((input) => input.sources[0].images.length), [3, 3, 1]);
+  assert.deepEqual(inputs.map((input) => input.sources[0].images.map((image) => image.number)), [[1, 2, 3], [1, 2, 3], [1]]);
+  assert.equal(ai.IMAGE_CHUNK_SIZE, 3);
+  const record = written[0];
+  assert.equal(record.chunks.length, 3);
+  assert.equal(record.budget.spentEurCents, 6, 'elk verzoek wordt met zijn eigen kosten geboekt');
+  assert.equal(record.dishes.length, 7);
+  assert.deepEqual(record.reading.categories.map((category) => category.name), ['Lunch', 'Pizza', 'Dolci']);
+  // De bron-afbeelding per gerecht blijft de afbeelding uit de pagina-orde.
+  assert.equal(record.dishes[3].sourceImage, 'https://www.aldentebreda.nl/wp-content/uploads/2026/03/menukaart-4.jpg');
+  assert.equal(record.dishes[6].sourceImage, 'https://www.aldentebreda.nl/wp-content/uploads/2026/03/menukaart-7.jpg');
+  assert.equal(result.calls, 3);
+  assert.equal(result.outcomes[0].attempts, 3);
+});
+
+test('punt 2: de kostengrens geldt per verzoek, zonder herpoging', async () => {
+  const pageUrl = 'https://www.aldentebreda.nl/menukaart-restaurant-2/';
+  const adapter = fakeAdapter({ answer: answerWith(3), costEurCents: 50 });
+  const written = [];
+  const result = await ai.runAiImages({
+    restaurants: [{ id: '8', name: 'Al Dente Ristorante', website: 'https://www.aldentebreda.nl', pageUrl }],
+    loadPage: okPageWith(menuPageHtml(7)),
+    loadImage: loadedImage,
+    promptKey: async () => Buffer.from(SECRET),
+    createCall: () => adapter,
+    writeOutput: (record) => written.push(record),
+    log: () => {},
+  });
+  assert.equal(adapter.callCount, 2, 'na twee verzoeken van 50 cent past een derde reservering niet meer');
+  assert.equal(result.stop, 'budget_ceiling');
+  assert.equal(result.outcomes[0].status, 'failed');
+  assert.equal(result.outcomes[0].reason, 'budget_ceiling');
+  assert.equal(written.length, 0, 'een onaffe kaart wordt niet geschreven');
+});
+
+test('punt 3: de extra instructie gaat mee en het vastgepinde protocol blijft ongewijzigd', async () => {
+  const pinned = '# MENU-EXTRACTION\nStatus: CONCEPT v1.0\n\nLees de kaart.\n';
+  const inputs = [];
+  const adapter = fakeAdapter({ answer: answerWith(8) });
+  const original = adapter.call;
+  adapter.call = async (input) => {
+    inputs.push(input);
+    return original(input);
+  };
+  const written = [];
+  await ai.runAiImages({
+    restaurants: [restaurant()],
+    loadPage: okPage,
+    loadImage: loadedImage,
+    promptKey: async () => Buffer.from(SECRET),
+    createCall: () => adapter,
+    writeOutput: (record) => written.push(record),
+    log: () => {},
+    protocol: pinned,
+  });
+  assert.equal(inputs.length, 1);
+  assert.equal(inputs[0].protocol.startsWith(pinned), true, 'het protocol staat er letterlijk en vooraan');
+  assert.equal(inputs[0].protocol.includes(ai.AI_READ_INSTRUCTIONS), true, 'de instructie gaat mee in hetzelfde verzoek');
+  assert.match(ai.AI_READ_INSTRUCTIONS, /letterlijk over/i);
+  assert.match(ai.AI_READ_INSTRUCTIONS, /tussenkop/i);
+  assert.match(ai.AI_READ_INSTRUCTIONS, /Voeg niets toe/i);
+  // Het vastgepinde bestand zelf is niet veranderd.
+  const protocolFile = fs.readFileSync(path.join(__dirname, '..', '..', '..', 'MENU-EXTRACTION.md'), 'utf8');
+  assert.equal(protocolFile.includes('Aanvulling voor deze startvulling'), false);
+  // De uitvoer draagt de vlag en de bron-afbeelding per gerecht.
+  assert.equal(written[0].aiRead, true);
+  assert.equal(written[0].instruction.appended, true);
+  for (const dish of written[0].dishes) assert.equal(dish.sourceImage, IMAGE_URL);
+});
+
 // EINDE-TESTS

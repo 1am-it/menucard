@@ -86,6 +86,33 @@ const IMAGE_RESTAURANTS = Object.freeze({
 
 const SECRET_MASK = '[verborgen]';
 
+/**
+ * Ronde 6, punt 1 (Lead-review 6557509881): alleen een afbeelding met een
+ * menuwoord in de bestandsnaam, de alt-tekst of het bijschrift is een kaart.
+ * De pagina-hint van de bestaande lezer (`/menu/` in de url) is hier te ruim:
+ * daardoor gingen portretten en camerafoto's mee.
+ */
+const MENU_WORD = /(?:menu|kaart|lunch|diner|dinner|gerechten|gerecht|prijslijst|prijzen|spijskaart|menus)/i;
+/** Nooit een kaart: camera- en studionamen, portretten, logo's en sfeerbeelden. */
+const NEVER_A_MENU = /(?:logo|icon|favicon|portret|portrait|studio|dsc\d|img[_-]?\d{3,}|sfeer|ambiance|interieur|interior|gevel|terras|\bteam\b|personeel)/i;
+
+/** Hooguit drie afbeeldingen per AI-verzoek (ronde 6, punt 2). */
+const IMAGE_CHUNK_SIZE = 3;
+
+/**
+ * De extra instructie van deze run (ronde 6, punt 3). Hij komt náást het
+ * vastgepinde protocol (MENU-EXTRACTION.md blijft ongewijzigd) en vraagt om
+ * trouw aan de bron: geen verzonnen namen, geen verzonnen toevoegingen, en een
+ * tussenkop wordt een categorie.
+ */
+const AI_READ_INSTRUCTIONS = [
+  'Aanvulling voor deze startvulling (gaat vóór de algemene stijlregels, niet boven de bron):',
+  '1. Neem een gerechtnaam letterlijk over van de afbeelding, inclusief spelling en hoofdletters.',
+  '2. Maak van een tussenkop op de kaart een categorie; verzin geen categorieën en voeg geen gerechten toe.',
+  '3. Voeg niets toe dat niet op de afbeelding staat: geen "(salade)", geen vertaling, geen toelichting.',
+  '4. Een gerecht dat je niet zeker kunt lezen, laat je weg; verzin geen naam en geen prijs.',
+].join('\n');
+
 function text(value) {
   return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
 }
@@ -139,6 +166,128 @@ function imageRestaurantsFromReport(report) {
     restaurants.push({ id, name: entry.name || id, website, pageUrl });
   }
   return { restaurants, skipped };
+}
+
+/* ------------------------------------------------------------------ *
+ * Kiezen: alleen een echte kaart, en hooguit één extra ophaalstap
+ * ------------------------------------------------------------------ */
+
+/** De bestandsnaam van een url, zonder query, fragment en mappen. */
+function fileNameOf(value) {
+  const parts = String(value || '').split(/[?#]/)[0].split('/');
+  return parts.length > 0 ? parts[parts.length - 1] : '';
+}
+
+/**
+ * Is dit een kaart? Het menuwoord moet in de bestandsnaam, de alt-tekst, de
+ * titel of het bijschrift staan, en een camera- of studionummer, een portret of
+ * een logo valt altijd af. Zo blijven echte kaartafbeeldingen over en gaan
+ * portretten (`Studio-1412…`, `DSC05737`) en sfeerfoto's niet naar de AI.
+ */
+function isStrictMenuImage({ url, alt, caption } = {}) {
+  const haystack = [fileNameOf(url), alt, caption].filter(Boolean).join(' ');
+  if (haystack.trim() === '') return false;
+  if (NEVER_A_MENU.test(haystack)) return false;
+  return MENU_WORD.test(haystack);
+}
+
+/**
+ * De kandidaten van één pagina, met per afgevallen afbeelding de reden. De
+ * bestaande lezer levert de url's, de alt-teksten en het bijschrift; deze
+ * strengere regel beslist daarna wat er werkelijk naar de AI gaat.
+ */
+function collectStrictMenuImages({ html, pageUrl, limit = MAX_MENU_IMAGES } = {}) {
+  const found = collectMenuImages({ html, pageUrl, limit: Number.MAX_SAFE_INTEGER });
+  const images = [];
+  const dropped = [];
+  for (const candidate of found) {
+    if (images.length >= limit) break;
+    if (isStrictMenuImage(candidate)) {
+      images.push({ number: images.length + 1, url: candidate.url, mediaType: candidate.mediaType, alt: candidate.alt || '' });
+      continue;
+    }
+    const haystack = [fileNameOf(candidate.url), candidate.alt, candidate.caption].filter(Boolean).join(' ');
+    dropped.push({ url: candidate.url, reason: NEVER_A_MENU.test(haystack) ? 'never_a_menu' : 'no_menu_word' });
+  }
+  return { images, dropped };
+}
+
+/** De anchors van een pagina, met hun tekst, voor de linkstap. */
+function pageLinks({ html, pageUrl } = {}) {
+  const source = String(html || '');
+  const pageHost = hostOf(pageUrl);
+  if (!pageHost) return [];
+  const links = [];
+  for (const match of source.matchAll(/<a\b([^>]*)>([\s\S]{0,600}?)<\/a>/gi)) {
+    const href = /\bhref\s*=\s*["']([^"']*)["']/i.exec(match[1]);
+    if (!href) continue;
+    let absolute;
+    try {
+      absolute = new URL(decodeAttribute(href[1]), pageUrl).href;
+    } catch {
+      continue;
+    }
+    if (hostOf(absolute) !== pageHost) continue;
+    const label = decodeAttribute(match[2].replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
+    const title = (/\btitle\s*=\s*["']([^"']*)["']/i.exec(match[1]) || [])[1] || '';
+    links.push({ url: absolute, label, title: decodeAttribute(title) });
+  }
+  return links;
+}
+
+/** Dezelfde decodering als de bestaande lezer, hier lokaal gehouden. */
+function decodeAttribute(value) {
+  return String(value || '')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+}
+
+/**
+ * De kandidaten voor de ene extra ophaalstap: een link met een menuwoord op
+ * dezelfde host, die nog niet gelezen is. Een pdf telt ook mee — die kan deze
+ * lezer niet lezen, maar de vondst hoort wel in het rapport.
+ */
+function menuSourceLinks({ html, pageUrl, limit = 1 } = {}) {
+  const seen = new Set();
+  const links = [];
+  for (const link of pageLinks({ html, pageUrl })) {
+    if (links.length >= limit) break;
+    const clean = link.url.split('#')[0];
+    if (clean === String(pageUrl).split('#')[0]) continue;
+    if (seen.has(clean)) continue;
+    const haystack = [fileNameOf(clean), link.label, link.title].filter(Boolean).join(' ');
+    if (!MENU_WORD.test(haystack) || NEVER_A_MENU.test(haystack)) continue;
+    seen.add(clean);
+    links.push({ url: clean, kind: /\.pdf$/i.test(fileNameOf(clean)) ? 'pdf' : 'html' });
+  }
+  return links;
+}
+
+/** Kaarten die alleen als svg bestaan: geen leesbare afbeelding in deze ronde. */
+function svgMenuUrls({ html, pageUrl, limit = 10 } = {}) {
+  const pageHost = hostOf(pageUrl);
+  if (!pageHost) return [];
+  const source = String(html || '');
+  const urls = [];
+  for (const tag of source.match(/<(?:img|a|source)\b[^>]*>/gi) || []) {
+    const raw = /\b(?:src|data-src|href|srcset)\s*=\s*["']([^"']*)["']/i.exec(tag);
+    if (!raw) continue;
+    const value = raw[1].split(',')[0].trim().split(/\s+/)[0];
+    let absolute;
+    try {
+      absolute = new URL(decodeAttribute(value), pageUrl).href;
+    } catch {
+      continue;
+    }
+    if (hostOf(absolute) !== pageHost) continue;
+    if (!/\.svg$/i.test(fileNameOf(absolute))) continue;
+    if (!MENU_WORD.test(`${fileNameOf(absolute)} ${decodeAttribute(tag)}`) || NEVER_A_MENU.test(fileNameOf(absolute))) continue;
+    if (!urls.includes(absolute) && urls.length < limit) urls.push(absolute);
+  }
+  return urls;
 }
 
 /* ------------------------------------------------------------------ *
@@ -331,12 +480,25 @@ function defaultLoadPage(fetcher) {
  * Wat de run zou lezen, zonder netwerk naar Anthropic: per restaurant de
  * kaartpagina en de kandidaten-afbeeldingen die erop staan, met de schatting en
  * het maximum van die lezing.
+ *
+ * Ronde 6, punt 1 (Lead-review 6557509881): alleen een afbeelding met een
+ * menuwoord (bestandsnaam, alt of bijschrift) is een kaart. Vindt de pagina er
+ * geen, dan volgt hooguit één extra ophaalstap op dezelfde site — een link met
+ * een menuwoord, of de vondst dat de kaart een pdf of een svg is. Wat er per site
+ * gevonden is, staat in `imageSearch` en komt zo in het rapport.
  */
 async function planImages({ restaurants = [], loadPage, log = () => {} } = {}) {
   const planned = [];
   let maxCostEurCents = 0;
   for (const restaurant of restaurants) {
-    const record = { ...restaurant, images: [], estimate: null, status: 'planned', reason: null };
+    const record = {
+      ...restaurant,
+      images: [],
+      estimate: null,
+      status: 'planned',
+      reason: null,
+      imageSearch: { pageUrl: restaurant.pageUrl, found: 0, kept: 0, dropped: [], extraStep: null, svgMenus: [] },
+    };
     let page;
     try {
       page = await loadPage(restaurant.pageUrl);
@@ -351,20 +513,64 @@ async function planImages({ restaurants = [], loadPage, log = () => {} } = {}) {
       continue;
     }
     record.pageUrl = page.finalUrl || restaurant.pageUrl;
-    record.images = collectMenuImages({ html: page.text, pageUrl: record.pageUrl, limit: MAX_MENU_IMAGES })
-      .filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType))
-      .slice(0, MAX_MENU_IMAGES)
-      .map((image) => ({ number: image.number, url: image.url, mediaType: image.mediaType }));
+    record.imageSearch.pageUrl = record.pageUrl;
+
+    const selected = collectStrictMenuImages({ html: page.text, pageUrl: record.pageUrl, limit: MAX_MENU_IMAGES });
+    record.imageSearch.found = selected.images.length + selected.dropped.length;
+    record.imageSearch.dropped = selected.dropped.slice(0, 12);
+    record.imageSearch.svgMenus = svgMenuUrls({ html: page.text, pageUrl: record.pageUrl });
+    record.images = selected.images.filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType)).slice(0, MAX_MENU_IMAGES);
+
+    // Hooguit één extra ophaalstap op dezelfde site (ronde 6, punt 1).
+    if (record.images.length === 0) {
+      const [candidate] = menuSourceLinks({ html: page.text, pageUrl: record.pageUrl, limit: 1 });
+      if (candidate && candidate.kind === 'html') {
+        let second;
+        try {
+          second = await loadPage(candidate.url);
+        } catch (error) {
+          second = { ok: false, reason: 'page_error', detail: (error && error.message) || null };
+        }
+        record.imageSearch.extraStep = {
+          url: candidate.url,
+          ok: second && second.ok === true,
+          reason: (second && second.reason) || null,
+          images: 0,
+          dropped: 0,
+        };
+        if (second && second.ok === true) {
+          const extraPageUrl = second.finalUrl || candidate.url;
+          const extra = collectStrictMenuImages({ html: second.text, pageUrl: extraPageUrl, limit: MAX_MENU_IMAGES });
+          record.imageSearch.extraStep.images = extra.images.length;
+          record.imageSearch.extraStep.dropped = extra.dropped.length;
+          const extraSvg = svgMenuUrls({ html: second.text, pageUrl: extraPageUrl });
+          if (extraSvg.length > 0) record.imageSearch.svgMenus = extraSvg;
+          record.images = extra.images.filter((image) => SUPPORTED_MEDIA_TYPES.includes(image.mediaType)).slice(0, MAX_MENU_IMAGES);
+          if (record.images.length > 0) record.pageUrl = extraPageUrl;
+        }
+      } else if (candidate && candidate.kind === 'pdf') {
+        // Een pdf kan deze lezer niet lezen; de vondst gaat als reden het rapport in.
+        record.imageSearch.extraStep = { url: candidate.url, ok: null, reason: 'pdf', images: 0, dropped: 0 };
+        record.imageSearch.pdfMenu = candidate.url;
+      }
+    }
+    record.imageSearch.kept = record.images.length;
     record.estimate = estimateOf(record.images.length, 0);
     if (record.images.length === 0) {
       record.status = 'skipped';
-      record.reason = 'no_images';
+      record.reason = record.imageSearch.svgMenus.length > 0
+        ? 'menu_is_svg'
+        : record.imageSearch.pdfMenu
+          ? 'menu_is_pdf'
+          : 'no_images';
     } else {
       maxCostEurCents += record.estimate.maxEurCents;
     }
     planned.push(record);
     log(
-      `${record.id} ${record.name}: ${record.images.length} afbeelding(en), maximaal ${record.estimate.maxEurCents} cent — ${record.pageUrl}`,
+      `${record.id} ${record.name}: ${record.imageSearch.found} gevonden, ${record.images.length} kaart(en)${
+        record.estimate && record.images.length > 0 ? `, maximaal ${record.estimate.maxEurCents} cent` : `, overgeslagen (${record.reason})`
+      } — ${record.pageUrl}`,
     );
   }
   return { restaurants: planned, maxCostEurCents };
@@ -436,17 +642,67 @@ function flattenDishes(reading) {
   return dishes;
 }
 
+/** De afbeeldingen in groepen van hooguit `size` (ronde 6, punt 2). */
+function chunkImages(images, size = IMAGE_CHUNK_SIZE) {
+  const list = Array.isArray(images) ? images : [];
+  if (!Number.isInteger(size) || size <= 0) throw new RangeError('een groep moet minstens één afbeelding hebben');
+  const chunks = [];
+  for (let index = 0; index < list.length; index += size) chunks.push(list.slice(index, index + size));
+  return chunks;
+}
+
+/**
+ * De antwoorden van de groepen samenvoegen tot één lezing: dezelfde categorienaam
+ * wordt één categorie (in de volgorde van de eerste vondst), de gerechten komen
+ * erachter en een onzekere groep blijft onzeker.
+ */
+function mergeMenuReadings(readings) {
+  const categories = [];
+  const byName = new Map();
+  const attention = [];
+  let title = null;
+  for (const reading of Array.isArray(readings) ? readings : []) {
+    if (!reading) continue;
+    if (title === null && reading.title) title = reading.title;
+    for (const category of reading.categories || []) {
+      const existing = byName.get(category.name);
+      if (existing) {
+        existing.items.push(...(category.items || []));
+        if (category.uncertain === true) existing.uncertain = true;
+        continue;
+      }
+      const copy = { name: category.name, uncertain: category.uncertain === true, items: [...(category.items || [])] };
+      byName.set(category.name, copy);
+      categories.push(copy);
+    }
+    attention.push(...(reading.attention || []));
+  }
+  return { title, categories, attention };
+}
+
+/**
+ * Het vastgepinde protocol blijft ongewijzigd; de extra instructie van deze
+ * startvulling komt er als laatste blok achter (ronde 6, punt 3). Zo is in de
+ * test te zien dat de tekst uit MENU-EXTRACTION.md letterlijk vooraan staat.
+ */
+function composeProtocol(protocol) {
+  const pinned = typeof protocol === 'string' ? protocol : '';
+  if (pinned.trim() === '') return AI_READ_INSTRUCTIONS;
+  return `${pinned.replace(/\s+$/, '')}\n\n${AI_READ_INSTRUCTIONS}\n`;
+}
+
 
 /* ------------------------------------------------------------------ *
  * De run: één verzoek per restaurant, met de harde kostengrens
  * ------------------------------------------------------------------ */
 
 /**
- * Leest elk gepland restaurant met één AI-verzoek. De werkelijke kosten van elk
- * verzoek komen uit de eigen usage van de provider en worden direct opgeteld;
- * kan het volgende verzoek de grens van `budgetEurCents` passeren, dan stopt de
- * run. Er zijn geen herpogingen: één verzoek per restaurant, en een fout of een
- * onbekende prijs stopt de run in plaats van hem te herhalen.
+ * Leest elk gepland restaurant met de AI, in groepen van hooguit drie
+ * afbeeldingen per verzoek. De werkelijke kosten van elk verzoek komen uit de
+ * eigen usage van de provider en worden direct opgeteld; kan het volgende
+ * verzoek de grens van `budgetEurCents` niet meer reserveren, dan stopt de run.
+ * Er zijn geen herpogingen: een fout of een onbekende prijs stopt de run in
+ * plaats van hem te herhalen.
  */
 async function readImages({
   plan,
@@ -488,15 +744,6 @@ async function readImages({
       outcome.reason = record.reason || 'no_images';
       continue;
     }
-    // De reservering is het maximum van deze lezing; past die niet meer, dan
-    // gaat er geen enkel verzoek meer uit.
-    const reserve = record.estimate && Number.isInteger(record.estimate.maxEurCents) ? record.estimate.maxEurCents : 0;
-    if (spentEurCents + reserve > budgetEurCents) {
-      stop = 'budget_ceiling';
-      outcome.reason = stop;
-      log(`${record.id} ${record.name}: overgeslagen, de kostengrens van ${budgetEurCents} cent is bereikt`);
-      continue;
-    }
 
     const images = [];
     for (const candidate of record.images) {
@@ -516,48 +763,82 @@ async function readImages({
       outcome.reason = 'no_images_read';
       continue;
     }
-    // De grenzen van een afbeeldingslezing (MAX_MENU_IMAGES, MAX_IMAGE_BYTES)
-    // gelden ook hier, en worden vóór elk betaald verzoek gecontroleerd.
-    const reading = planImageRead({ sources: [{ id: record.id, url: record.pageUrl, images }] });
-    if (!reading.ok) {
-      outcome.reason = reading.reason || 'reading_refused';
-      log(`${record.id} ${record.name}: overgeslagen, ${outcome.reason}`);
-      continue;
-    }
 
+    // Ronde 6, punt 2: hooguit drie afbeeldingen per verzoek. De grenzen van een
+    // afbeeldingslezing en de reservering gelden per verzoek, en er zijn nog
+    // steeds geen herpogingen.
     outcome.attempted = true;
-    let answer;
-    try {
-      answer = await adapter.call({
-        protocol,
-        sources: [{ id: record.id, url: record.pageUrl, kind: 'image', images }],
-        limits: { maxOutputTokens: MAX_OUTPUT_TOKENS, callTimeoutMs: CALL_TIMEOUT_MS },
-      });
-    } catch (error) {
-      const failed = (error && error.callRecord) || null;
-      const cost = failed && Number.isInteger(failed.costEurCents) ? failed.costEurCents : null;
-      if (cost !== null) spentEurCents += cost;
-      outcome.status = 'failed';
-      outcome.reason = (error && error.code) || 'call_failed';
-      outcome.message = redact((error && error.message) || 'het verzoek is mislukt', secret);
-      outcome.costEurCents = cost;
-      log(`${record.id} ${record.name}: mislukt, ${outcome.reason}`);
-      // Geen herpoging; een onbekende prijs stopt de run.
-      if (cost === null) stop = 'cost_unknown';
+    outcome.chunks = [];
+    outcome.attempts = 0;
+    const readings = [];
+    let failure = null;
+    for (const chunk of chunkImages(images, IMAGE_CHUNK_SIZE)) {
+      // De AI telt de afbeeldingen per verzoek: binnen dit verzoek is de eerste
+      // afbeelding weer "afbeelding 1". De pagina-orde blijft in `sourceImages`.
+      const local = chunk.map((image, index) => ({ ...image, number: index + 1, pageNumber: image.number }));
+      const check = planImageRead({ sources: [{ id: record.id, url: record.pageUrl, images: chunk }] });
+      if (!check.ok) {
+        failure = { reason: check.reason || 'reading_refused' };
+        break;
+      }
+      const reserve = estimateOf(chunk.length, 0).maxEurCents;
+      if (spentEurCents + reserve > budgetEurCents) {
+        stop = 'budget_ceiling';
+        failure = { reason: stop };
+        break;
+      }
+      let answer;
+      outcome.attempts += 1;
+      try {
+        answer = await adapter.call({
+          protocol: composeProtocol(protocol),
+          sources: [{ id: record.id, url: record.pageUrl, kind: 'image', images: local }],
+          limits: { maxOutputTokens: MAX_OUTPUT_TOKENS, callTimeoutMs: CALL_TIMEOUT_MS },
+        });
+      } catch (error) {
+        const failedCall = (error && error.callRecord) || null;
+        const cost = failedCall && Number.isInteger(failedCall.costEurCents) ? failedCall.costEurCents : null;
+        if (cost !== null) {
+          spentEurCents += cost;
+          outcome.costEurCents += cost;
+        }
+        outcome.message = redact((error && error.message) || 'het verzoek is mislukt', secret);
+        // Geen herpoging; een onbekende prijs stopt de run.
+        if (cost === null) stop = 'cost_unknown';
+        failure = { reason: (error && error.code) || 'call_failed' };
+        break;
+      }
+
+      const call = adapter.lastCall || null;
+      const cost = call && Number.isInteger(call.costEurCents) ? call.costEurCents : null;
+      if (cost !== null) {
+        spentEurCents += cost;
+        outcome.costEurCents += cost;
+      } else {
+        stop = 'cost_unknown';
+      }
+      outcome.chunks.push({ images: chunk.map((image) => image.number), costEurCents: cost });
+      readings.push(toMenuReading(answer, { images: local }));
+      if (cost === null) {
+        failure = { reason: 'cost_unknown' };
+        break;
+      }
+    }
+
+    if (failure) {
+      // Een grens die vóór het eerste verzoek al blokkeert, is een overslag en
+      // geen mislukte lezing; daarna is het een mislukt verzoek zonder herpoging.
+      outcome.status = failure.reason === 'budget_ceiling' && outcome.attempts === 0 ? 'skipped' : 'failed';
+      outcome.reason = failure.reason;
+      log(`${record.id} ${record.name}: ${outcome.status === 'skipped' ? 'overgeslagen' : 'mislukt'}, ${outcome.reason}`);
       continue;
     }
 
-    const call = adapter.lastCall || null;
-    const cost = call && Number.isInteger(call.costEurCents) ? call.costEurCents : null;
-    outcome.costEurCents = cost;
-    if (cost !== null) spentEurCents += cost;
-
-    const menuReading = toMenuReading(answer, { images });
+    const menuReading = mergeMenuReadings(readings);
     if (menuReading.categories.length === 0) {
       outcome.status = 'failed';
       outcome.reason = 'answer_without_categories';
       log(`${record.id} ${record.name}: mislukt, het antwoord bevat geen categorieën`);
-      if (cost === null) stop = 'cost_unknown';
       continue;
     }
 
@@ -568,13 +849,19 @@ async function readImages({
     outcome.dishCount = assessment.dishCount;
     outcome.pricedCount = assessment.pricedCount;
     outcome.complete = assessment.ok;
+    outcome.calls = outcome.chunks.length;
     writeOutput({
       restaurantId: record.id,
       name: record.name,
       pageUrl: record.pageUrl,
       scraped,
       model,
+      // Ronde 6, punt 3: de vlag en de bron-afbeelding per gerecht, zodat de
+      // Lead elke prijs tegen de afbeelding kan nakijken.
+      aiRead: true,
+      instruction: { appended: true },
       budget: { ceilingEurCents: budgetEurCents, spentEurCents },
+      chunks: outcome.chunks,
       sourceImages: images.map((image) => ({
         number: image.number,
         url: image.url,
@@ -587,9 +874,8 @@ async function readImages({
       writesData: false,
     });
     log(
-      `${record.id} ${record.name}: ${assessment.dishCount} gerechten, ${assessment.pricedCount} met prijs, ${cost} cent${assessment.ok ? '' : ` — niet compleet: ${assessment.reasons.map((reason) => reason.code).join(', ')}`}`,
+      `${record.id} ${record.name}: ${assessment.dishCount} gerechten, ${assessment.pricedCount} met prijs, ${outcome.costEurCents} cent in ${outcome.calls} verzoek(en)${assessment.ok ? '' : ` — niet compleet: ${assessment.reasons.map((reason) => reason.code).join(', ')}`}`,
     );
-    if (cost === null) stop = 'cost_unknown';
   }
 
   return { outcomes, spentEurCents, stop };
@@ -644,7 +930,10 @@ async function runAiImages(options = {}) {
       scraped,
       budgetEurCents,
     });
-    const calls = result.outcomes.filter((outcome) => outcome.attempted).length;
+    const calls = result.outcomes.reduce(
+      (total, outcome) => total + (Number.isInteger(outcome.attempts) ? outcome.attempts : 0),
+      0,
+    );
     return { planOnly: false, plan, ...result, calls };
   } finally {
     // De ingevoerde bytes wissen en de string loslaten; meer kan JavaScript
@@ -701,6 +990,13 @@ const USAGE = `Gebruik:
 --plan toont de restaurants met een kaart als afbeelding, hun afbeeldingen en de
 maximale kosten van de hele run. Het doet geen verzoek aan Anthropic en vraagt
 niet om de sleutel.
+
+Alleen een afbeelding met een menuwoord (bestandsnaam, alt of bijschrift) is een
+kaart; portretten, camera- en studionummers en logo's vallen af. Vindt een pagina
+er geen, dan volgt hooguit één extra ophaalstap op dezelfde site en staat de
+vondst (kaart, pdf of svg) in het plan. Een restaurant met meer dan drie
+afbeeldingen wordt in groepen van drie gelezen; de reservering en de kostengrens
+gelden per verzoek.
 
 Zonder --plan volgt de echte run. De sleutel wordt dan één keer verborgen in de
 terminal gevraagd; hij komt niet uit een omgevingsvariabele, een argument of een
@@ -773,22 +1069,33 @@ if (require.main === module) {
 }
 
 module.exports = {
+  AI_READ_INSTRUCTIONS,
   ALLOWED_MEDIA_TYPES,
   BUDGET_EUR_CENTS,
   CALL_TIMEOUT_MS,
   IMAGE_CACHE_DIR,
+  IMAGE_CHUNK_SIZE,
   IMAGE_RESTAURANTS,
   MAX_OUTPUT_TOKENS,
+  MENU_WORD,
+  NEVER_A_MENU,
   OUTPUT_DIR,
   REPORT_FILE,
   SECRET_MASK,
   USAGE,
+  chunkImages,
+  collectStrictMenuImages,
+  composeProtocol,
   createImageLoader,
   createWriter,
   defaultLoadPage,
   flattenDishes,
   imageRestaurantsFromReport,
+  isStrictMenuImage,
   main,
+  menuSourceLinks,
+  mergeMenuReadings,
+  pageLinks,
   parseArgs,
   planImages,
   readHiddenLine,
@@ -796,6 +1103,7 @@ module.exports = {
   redact,
   runAiImages,
   sourceImageOf,
+  svgMenuUrls,
   toMenuReading,
   today,
   wipeSecret,
