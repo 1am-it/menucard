@@ -5484,5 +5484,312 @@
         ]
       }
     ]
+  },
+  "22-afhaal": {
+    "subtitle": "Afhaalkaart",
+    "scraped": "2026-11-01",
+    "source": "https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/",
+    "notes": "Opgehaald van de eigen website van het restaurant. Controleer altijd de actuele kaart.",
+    "categories": [
+      {
+        "name": "Afhaal Prijslijst",
+        "items": [
+          {
+            "name": "Witte Rijst 1 persoon",
+            "desc": "",
+            "price": "€3",
+            "priceValue": 3,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Witte Rijst 2 personen",
+            "desc": "",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bami/Nasi Goreng 1 persoon",
+            "desc": "",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bami/Nasi Goreng 2 personen",
+            "desc": "",
+            "price": "€6",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bami/Nasi Rames",
+            "desc": "(bami, nasi goreng of witte rijst met 2 vlees-, 2 groentengerechten, 1 s.g. telor en 1 sate)",
+            "price": "€14",
+            "priceValue": 14,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bami/Nasi Rames",
+            "desc": "(vlees- en groente gerechten apart)",
+            "price": "€15",
+            "priceValue": 15,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Vleesgerechten",
+        "path": [
+          "Afhaal Prijslijst",
+          "Vleesgerechten"
+        ],
+        "items": [
+          {
+            "name": "Sate met (kip of varken) 3 stokjes",
+            "desc": "",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Rendang (rundvlees in mild pittige kokossaus) 250 gr",
+            "desc": "",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Smoor (kippendij in zoete ketjapsaus) 250 gr",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Babi Ketjap (buikspek in zoete ketjapsaus) 250 gr",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ajam Pedis (hete kip van kippendij) 250 gr",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ajam Besengeh (mild-pittig kruidig gerecht met kippendij) 250 gr",
+            "desc": "",
+            "price": "€5,50",
+            "priceValue": 5.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Groente-/Vegetarische gerechten",
+        "path": [
+          "Afhaal Prijslijst",
+          "Vleesgerechten",
+          "Groente-/Vegetarische gerechten"
+        ],
+        "items": [
+          {
+            "name": "Sambel Goreng Tempe 250 gr",
+            "desc": "",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sambel Goreng Boontjes 250 gr",
+            "desc": "",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sajur Lodeh (gemengde groenten in kokossaus) 250 gr",
+            "desc": "",
+            "price": "€4,50",
+            "priceValue": 4.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sambel Goreng Telor per stuk (ei)",
+            "desc": "",
+            "price": "€1,50",
+            "priceValue": 1.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sambel Goreng Tahu Udang met peteh (garnalen) 250 gr",
+            "desc": "",
+            "price": "€4,75",
+            "priceValue": 4.75,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Foeyong Hai (gebakken ei met groenten en zoete tomatensaus)",
+            "desc": "",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gado-Gado (koude groenten schotel met pindasaus)",
+            "desc": "",
+            "price": "€6",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Tahu Telor (gebakken ei met tahu en pinda/ketjapsaus)",
+            "desc": "",
+            "price": "€6,50",
+            "priceValue": 6.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Visgerechten indien voorradig:",
+        "path": [
+          "Afhaal Prijslijst",
+          "Vleesgerechten",
+          "Groente-/Vegetarische gerechten",
+          "Visgerechten indien voorradig:"
+        ],
+        "items": [
+          {
+            "name": "Pepesan (hele makreel in bananenblad)",
+            "desc": "",
+            "price": "€10",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Ikan Bali (gebakken makreel in pittige saus)",
+            "desc": "",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
   }
 }
