@@ -170,3 +170,21 @@ server's own reading and stores the source line in
 into server output. A green build and green unit tests do not prove
 this: a function shipped without the worker fails every PDF while every
 local run still passes. Not wired into `npm run build`.
+
+## Breda candidate working list from OpenStreetMap (added 2026-11-01, BE-72 / #178)
+
+`node ops/scripts/breda-candidates.js` — one real Overpass request through the
+existing `src/lib/osmOverpass.js` helper (same Breda bounds, same mirrors, same
+identifying User-Agent), then two committed preparations:
+`ops/data/breda-restaurant-candidates.json` (every candidate, ranked) and
+`docs/breda-candidates-report.md` (counts, the ranking explained, the top 100).
+Kept: `restaurant`, `fast_food` and `cafe` without a `brand`/`brand:wikidata`
+tag, with a usable `website`/`contact:website`, not tagged `disused:`/`was:`,
+not `opening_hours=closed`, not already in `data/restaurants.json` (normalized
+name or website host), deduplicated per comparable name plus host. Ranked by
+distance to the Grote Markt with a documented 500 m head start for a cuisine the
+existing 25 do not have. It fetches no restaurant website, touches no database
+and writes nothing under `data/` or `app/`; the site never reads its output.
+`node --test ops/scripts/breda-candidates.test.js` runs offline on a committed
+Overpass fixture.
+
