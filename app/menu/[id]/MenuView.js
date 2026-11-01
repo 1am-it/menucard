@@ -322,7 +322,7 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
             <div className="hero-eyebrow">{r.name || restaurant.name}</div>
             <h1 className="hero-title">{subtitle}</h1>
             <MenuConfirmation bevestiging={bevestiging} />
-            {/* BE-71 (#176, R6) — de kaart staat zonder de twijfelgevallen op de
+            {/* BE-71, R6 — de kaart staat zonder de twijfelgevallen op de
                 site; dat zegt de pagina hier, met de link naar de bron. */}
             <MenuIncompleteNotice entry={r} />
             {menuSeason && (
