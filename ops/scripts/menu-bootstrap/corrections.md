@@ -30,7 +30,7 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | R5 | Een extra of toeslag (bijvoorbeeld onder "Extra vlees": "Kipfilet € 4") is een toeslag bij de kaart (`priceIsSupplement`, "+ € 4"), geen los gerecht. Een toeslag telt niet als gerecht in de zoekresultaten. Er gaat geen actief bericht naar de houder; na een claim legt Mijn restaurant dit uit. | Eigenaar, 1 nov 2026 (5b) | Zenza: "Extra vlees": Kipfilet € 4, Lamskotelet € 4 | gebouwd in ronde 4 (de kop van de sectie beslist; de kaart toont "+ € 4"; dishSearch slaat een toeslag over) |
 | R6 | Een kaart waarvan minstens 90% van de gerechten aan de eis voldoet, mag zonder de twijfelgevallen op de site. Voorwaarden: de weggelaten gerechten staan in het rapport, en de site toont "Niet alle gerechten staan erop · bekijk de volledige kaart bij het restaurant" met een link naar de bron. Dit is een uitzondering op besluit 016 §4, alleen binnen deze startvulling. | Eigenaar, 1 nov 2026 (6b) | Trattoria Perron: 131 van 142 met prijs | open |
 | R7 | Een kaart die pas na JavaScript zichtbaar wordt, wordt gelezen na het renderen in de bestaande headless browser van de browserchecks. Er komt geen nieuwe dependency. Dezelfde regels voor ophalen gelden: robots.txt, de rust tussen verzoeken, en alleen dezelfde site. | Eigenaar, 1 nov 2026 (7a) | Con Fuego, Bardot, Salon de Provence, The Chai Affairs, Smelt | open |
-| R8 | Een kaart als afbeelding wordt gelezen met de bestaande AI-menuherkenning (`claude-haiku-5-5`, BE-33). Het script draait alleen in de terminal van de eigenaar, die de sleutel zelf invoert; de Lead en de developer zien de sleutel nooit. Er geldt een harde kostengrens van € 1, er zijn geen herpogingen, en het gaat alleen om deze startvulling. De Lead controleert **elke** prijs tegen de afbeelding. | Eigenaar, 1 nov 2026 (8b) | Wolfslaar, Al Dente, De Beyerd, Klein Java, T-Huis | open, in ronde 5 |
+| R8 | Een kaart als afbeelding wordt gelezen met de bestaande AI-menuherkenning (`claude-haiku-5-5`, BE-33). Het script draait alleen in de terminal van de eigenaar, die de sleutel zelf invoert; de Lead en de developer zien de sleutel nooit. Er geldt een harde kostengrens van € 1, er zijn geen herpogingen, en het gaat alleen om deze startvulling. De Lead controleert **elke** prijs tegen de afbeelding. | Eigenaar, 1 nov 2026 (8b) | Wolfslaar, Al Dente, De Beyerd, Klein Java, T-Huis | gebouwd in ronde 5 (`ai-images.js`, twaalf tests met een nep-client); de echte run doet de eigenaar |
 | R9 | Een zin is geen categoriekop (bijvoorbeeld "Al onze gerechten zijn 100% halal"). Koppen in hoofdletters zonder prijs ("WRAPS", "BURGERS & LOADED FRIES", "EXTRA VLEES") zijn categorieën. | Lead, review ronde 3 | Zenza: 72 gerechten onder de slogan | gebouwd in ronde 4 (`R9: een zin is geen categorie en een korte kop in hoofdletters boven een groep is dat wel`) |
 
 ## Voortgang per batch
@@ -41,6 +41,16 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | 25 bestaande, ronde 2 | 1 nov 2026 | 3 / 25 | 34 / 34 (Zenza nog niet) | 0 |
 | 25 bestaande, ronde 3 | 1 nov 2026 | 3 / 25 geschreven (5, 17, 22) | 106 / 106 | 0 (Zenza niet gemerged: koppen fout, zie R9) |
 | 25 bestaande, ronde 4 | 1 nov 2026 | Zenza opnieuw geschreven met de echte koppen (13 categorieën, 72 gerechten, 5 toeslagen); Chocolat gerepareerd (twee onterechte toeslagen) | nog niet nagekeken (Lead) | — |
+| 25 bestaande, ronde 5 | 1 nov 2026 | nog geen nieuwe batch: eerst R8 gebouwd (`ai-images.js`) en de robots-regel van punt 4 (doorverwijzing tot 5 stappen; een onbereikbare site heet "site niet bereikbaar") | — | — |
+
+Ronde 5 leverde twee dingen die geen nieuwe batch vragen. **R8:** het script
+`ai-images.js` voor de vijf kaarten als afbeelding, met een verborgen
+sleutelinvoer, een harde grens van 100 cent, geen herpogingen, en per restaurant
+een bestand in `.local/menu-bootstrap-ai/`. **Punt 4 van de review:** een
+doorverwijzing op robots.txt wordt nu tot vijf stappen gevolgd (RFC 9309) en een
+site die niet resolvet of niet antwoordt krijgt de reden "site niet bereikbaar"
+in plaats van een robots-melding. R6, R7 en de nieuwe batch over de 25 staan nog
+open.
 
 
 Ronde 3 voegde R1 en R3 toe en verbeterde de kandidaatkeuze: de 13 sites zonder

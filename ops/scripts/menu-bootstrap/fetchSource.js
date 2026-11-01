@@ -15,7 +15,6 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { fetchWebsiteSafely } = require('../../../src/lib/safeOutboundFetch');
 const {
-  checkRobotsForUrl,
   fetchSameSiteWithRedirects,
   classifyRobotsOutcome,
   robotsAllowsPath,
@@ -37,40 +36,60 @@ const MAX_CANDIDATES = 5;
 const ROBOTS_TIMEOUT_MS = 5000;
 const ROBOTS_RETRY_TIMEOUT_MS = 20000;
 const ROBOTS_MAX_BYTES = 200 * 1024;
+// RFC 9309 §2.3.1.2: a robots.txt redirect is followed for at least five hops.
+const ROBOTS_MAX_REDIRECTS = 5;
 const ROBOTS_CACHE_POLICY = 'robots-retry-v1';
 
 /**
- * One robots.txt gate with at most one retry. The first try is the shared
- * gate unchanged (5 s). Only an `unreachable` outcome (timeout, TLS, network
- * error or 5xx) is tried once more with a wider timeout, so the report can
- * name what happened. The decision stays fail-closed either way.
+ * One robots.txt gate (RFC 9309). A robots.txt redirect is followed within the
+ * same site, up to five hops (§2.3.1.2 asks for at least five); the decision
+ * stays fail-closed: without a readable robots.txt nothing is fetched
+ * (§2.3.1.4), a 4xx means "no rules" and may proceed (§2.3.1.3).
+ *
+ * Only an `unreachable` outcome (timeout, TLS, network error or 5xx) is tried
+ * once more with a wider timeout, so the report can say what happened. The
+ * classification of the second attempt is the one that travels with the result.
  */
-async function robustRobotsCheck(url, pacedFetch) {
-  const first = await checkRobotsForUrl(url, { fetchImpl: pacedFetch });
-  if (first.robotsStatus !== 'unreachable') return { ...first, attempts: 1 };
+async function fetchRobotsOnce(url, pacedFetch, { timeoutMs }) {
   const target = new URL(url);
   const robotsUrl = `${target.origin}/robots.txt`;
-  let attempt;
   try {
     const result = await fetchSameSiteWithRedirects(robotsUrl, {
       fetchImpl: pacedFetch,
-      fetchOptions: { maxBytes: ROBOTS_MAX_BYTES, timeoutMs: ROBOTS_RETRY_TIMEOUT_MS },
-      robotsCheck: null,
+      fetchOptions: { maxBytes: ROBOTS_MAX_BYTES, timeoutMs },
+      robotsCheck: null, // robots.txt itself is never gated by robots.txt
+      maxRedirects: ROBOTS_MAX_REDIRECTS,
     });
-    attempt = classifyRobotsOutcome({ result: result.response });
-    if (attempt.robotsStatus === 'rules_loaded') attempt.disallowRules = parseRobotsTxtDisallowRules(result.response.body);
+    const outcome = classifyRobotsOutcome({ result: result.response });
+    if (outcome.robotsStatus === 'rules_loaded') {
+      outcome.disallowRules = parseRobotsTxtDisallowRules(result.response.body);
+    }
+    return { ...outcome, robotsUrl };
   } catch (error) {
-    attempt = error instanceof RedirectPolicyError
-      ? { robotsStatus: 'invalid_or_unknown', httpStatus: error.statusCode || null, detail: error.reason }
-      : classifyRobotsOutcome({ error });
+    const outcome =
+      error instanceof RedirectPolicyError
+        ? { robotsStatus: 'invalid_or_unknown', httpStatus: error.statusCode || null, detail: error.reason }
+        : classifyRobotsOutcome({ error });
+    return { ...outcome, robotsUrl };
   }
-  const allowed = robotsAllowsPath(attempt, target.pathname);
+}
+
+function decideRobots(outcome, url) {
+  const allowed = robotsAllowsPath(outcome, new URL(url).pathname);
   return {
-    ...attempt,
-    decision: allowed ? 'allowed' : attempt.robotsStatus === 'rules_loaded' ? 'disallowed' : 'blocked',
-    robotsUrl,
+    ...outcome,
+    decision: allowed ? 'allowed' : outcome.robotsStatus === 'rules_loaded' ? 'disallowed' : 'blocked',
     shouldFetchPage: allowed,
-    disallowRules: attempt.disallowRules || [],
+    disallowRules: outcome.disallowRules || [],
+  };
+}
+
+async function robustRobotsCheck(url, pacedFetch) {
+  const first = await fetchRobotsOnce(url, pacedFetch, { timeoutMs: ROBOTS_TIMEOUT_MS });
+  if (first.robotsStatus !== 'unreachable') return { ...decideRobots(first, url), attempts: 1 };
+  const second = await fetchRobotsOnce(url, pacedFetch, { timeoutMs: ROBOTS_RETRY_TIMEOUT_MS });
+  return {
+    ...decideRobots(second, url),
     attempts: 2,
     firstAttempt: { robotsStatus: first.robotsStatus, httpStatus: first.httpStatus || null, detail: first.detail || null },
   };
@@ -164,11 +183,16 @@ function createSourceFetcher({ cacheDir = DEFAULT_CACHE_DIR, fetchImpl = fetchWe
 
     const gate = await robotsCheck(url);
     if (!gate.shouldFetchPage) {
+      // A robots.txt that could not be read because the site itself does not
+      // resolve or does not answer is a different report line than a site that
+      // refuses: "site niet bereikbaar" (Lead review ronde 5, #176). A 5xx on
+      // robots.txt alone keeps its own robots line.
+      const siteUnreachable = gate.robotsStatus === 'unreachable' && (gate.httpStatus === null || gate.httpStatus === undefined);
       const entry = {
         ok: false,
         url,
-        reason: 'robots',
-        detail: describeRobotsBlock(gate),
+        reason: siteUnreachable ? 'unreachable' : 'robots',
+        detail: siteUnreachable ? 'site niet bereikbaar' : describeRobotsBlock(gate),
         robotsStatus: gate.robotsStatus,
         robotsHttpStatus: gate.httpStatus || null,
         robotsDetail: gate.detail || null,
