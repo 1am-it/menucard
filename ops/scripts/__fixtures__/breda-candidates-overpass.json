@@ -1,0 +1,235 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62 (fixture for BE-72, #178 — fictional values in Breda)",
+  "osm3s": {
+    "timestamp_osm_base": "2026-11-01T09:00:00Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "node",
+      "id": 1001,
+      "lat": 51.5861,
+      "lon": 4.7931,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Wolfslaar",
+        "website": "https://wolfslaar.example/",
+        "cuisine": "dutch",
+        "addr:street": "Wolfslaardreef",
+        "addr:housenumber": "100",
+        "addr:postcode": "4834 SP",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1002,
+      "center": { "lat": 51.5891, "lon": 4.7757 },
+      "tags": {
+        "amenity": "restaurant",
+        "name": "De Nieuwe Markt",
+        "website": "https://www.deniewemarkt.example/nl/menu",
+        "cuisine": "italian;pizza",
+        "addr:street": "Grote Markt",
+        "addr:housenumber": "12",
+        "addr:postcode": "4811 XA",
+        "addr:city": "Breda",
+        "phone": "+31 76 100 20 02",
+        "opening_hours": "Mo-Su 12:00-22:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1003,
+      "lat": 51.5888,
+      "lon": 4.7762,
+      "tags": {
+        "amenity": "fast_food",
+        "name": "Big Chain Burger",
+        "brand": "Big Chain",
+        "website": "https://bigchain.example/breda",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1004,
+      "lat": 51.5894,
+      "lon": 4.7751,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Koffiehuis Centraal",
+        "brand:wikidata": "Q000000",
+        "website": "https://koffiecentraal.example/",
+        "cuisine": "coffee_shop"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1005,
+      "lat": 51.5892,
+      "lon": 4.7748,
+      "tags": {
+        "amenity": "bar",
+        "name": "Café Zonder Website",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1006,
+      "lat": 51.5901,
+      "lon": 4.7759,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "De Gesloten Deur",
+        "website": "https://geslotendeur.example/",
+        "disused:amenity": "restaurant",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1007,
+      "lat": 51.5905,
+      "lon": 4.7766,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Was Eens",
+        "website": "https://waseens.example/",
+        "was:amenity": "restaurant",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1008,
+      "lat": 51.5945,
+      "lon": 4.783,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Dichtbij Vis",
+        "website": "https://dichtbijvis.example/",
+        "cuisine": "seafood",
+        "opening_hours": "Tu-Su 17:00-23:00",
+        "phone": "+31 76 100 20 08"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1009,
+      "lat": 51.6,
+      "lon": 4.78,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Stadspark Grill",
+        "website": "https://stadsparkgrill.example/",
+        "cuisine": "grill"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1010,
+      "lat": 51.61,
+      "lon": 4.785,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Theehuis Rustpunt",
+        "website": "https://theehuisrustpunt.example/",
+        "cuisine": "vegan"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1011,
+      "lat": 51.589,
+      "lon": 4.7755,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "De Nieuwe Markt",
+        "contact:website": "https://deniewemarkt.example/reserveren",
+        "cuisine": "italian",
+        "addr:street": "Grote Markt",
+        "addr:housenumber": "12",
+        "addr:postcode": "4811 XA",
+        "addr:city": "Breda",
+        "contact:phone": "+31 76 100 20 02"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1013,
+      "lat": 51.5873,
+      "lon": 4.7769,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Al Dente",
+        "website": "https://www.aldentebreda.nl/",
+        "cuisine": "italian"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1014,
+      "lat": 51.5886,
+      "lon": 4.7771,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Zonder Site",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1015,
+      "lat": 51.5925,
+      "lon": 4.776,
+      "tags": {
+        "amenity": "fast_food",
+        "name": "Frituur Breda",
+        "website": "https://frituurbreda.example/",
+        "cuisine": "snack",
+        "opening_hours": "Mo-Sa 11:00-20:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1016,
+      "lat": 51.5887,
+      "lon": 4.775,
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Buiten Beeld",
+        "website": "n/a",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1017,
+      "lat": 51.5896,
+      "lon": 4.7764,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Koffie Enzo",
+        "website": "https://koffieenzo.example/",
+        "opening_hours": "closed",
+        "addr:city": "Breda"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1019,
+      "center": { "lat": 51.606, "lon": 4.7719 },
+      "tags": {
+        "amenity": "restaurant",
+        "name": "Onbekende Keuken",
+        "website": "https://onbekendekeuken.example/",
+        "addr:street": "Nieuwe Ginnekenstraat",
+        "addr:housenumber": "5",
+        "addr:city": "Breda"
+      }
+    }
+  ]
+}

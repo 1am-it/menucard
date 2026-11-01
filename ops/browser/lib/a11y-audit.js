@@ -223,6 +223,25 @@ function describeElement(element) {
   return out;
 }
 
+/**
+ * Ligt het element in een vaste laag (de zwevende menubalk onderin, een sticky
+ * balk)? Zo'n laag schuift over de pagina heen; een link erin is geen doel dat
+ * "te dicht op een ander doel" staat. Zonder deze wandeling telde alleen een
+ * element met `position: fixed` zelf en werden de links *in* de balk als buur
+ * van de kaart eronder gemeld (BE-70, /alle-restaurants op 390 px).
+ */
+function insideFixedLayer(element) {
+  let node = element;
+  let diepte = 0;
+  while (node && node.nodeType === 1 && diepte < 8) {
+    const style = window.getComputedStyle(node);
+    if (style.position === 'fixed' || style.position === 'sticky') return true;
+    node = node.parentElement;
+    diepte += 1;
+  }
+  return false;
+}
+
 /** Zichtbaar zoals een gebruiker het ziet: geen `display:none`, geen 0×0. */
 function isVisible(element) {
   if (!element || !element.getClientRects) return false;
@@ -625,7 +644,7 @@ function auditPage(options) {
         width: Math.round(rect.width * 10) / 10,
         height: Math.round(rect.height * 10) / 10,
         inlineInText,
-        fixed: style.position === 'fixed' || style.position === 'sticky',
+        fixed: insideFixedLayer(element),
         rect: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
       };
       interactive.push(record);
@@ -1330,6 +1349,7 @@ const PAGE_HELPERS = [
   requiredContrast,
   contrastResult,
   describeElement,
+  insideFixedLayer,
   isVisible,
   isVisuallyHiddenBox,
   insideHorizontalScroller,

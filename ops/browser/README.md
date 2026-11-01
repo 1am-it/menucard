@@ -1,5 +1,37 @@
 # Isolated browser fixture — #59 menu import/review
 
+## BE-70 (#173) — lanceringscheck van de publieke pagina's
+
+`run-launch-check.js` (also `npm run test:browser:launch-check`) is één
+herhaalbare meting van alle publieke pagina's tegelijk, op een verse
+productieopbouw (`mode: 'start'`, eigen bouwmap) en een echte browser via CDP:
+
+- de pagina's uit het contract: `/`, `/search` met resultaten
+  (`?q=steak`) en zonder (`?q=qzxvbb`), `/restaurant/6` met een gestubd
+  dagmenu (`lib/be67-daghap-stub.js`), `/menu/6-diner`, `/restaurants`,
+  `/alle-restaurants`, `/mijn-lijstje` leeg en met drie echte gerechten,
+  `/kies/<code>` met de kies-stub van BE-62 (`lib/be62-kies-stub.js`),
+  `/r/6`, `/voor-restaurants` en `/inloggen`;
+- per pagina in licht en donker op 1280, 390 en 320 px: de laadgrootte
+  (CDP `Network.loadingFinished` → `encodedDataLength`, cache uit, budget
+  250 kB), de afbeeldingen van de eerste lading (alleen logo en iconen), geen
+  horizontale overloop, tikdoelen ≥ 24 px en hoofdknoppen ≥ 44 px, precies één
+  h1 zonder overgeslagen niveau, de eerste Tab op een zichtbare focus en de
+  bestaande a11y-audit met 0 fouten;
+- het thema gaat via de themakeuze in het instellingenpaneel, het paneel is
+  dicht vóór de opname en elke opname heeft een `themeProof`; de opnamen staan
+  als volledige viewport in de gitignored `ops/browser/output/launch-check/`;
+- het bewijs staat in `ops/browser/evidence/launch-check.json` (in git) en de
+  korte samenvatting in `docs/launch-check.md`, met per pagina de laadgrootte en
+  groen of rood met de reden.
+
+Rood is een meting, geen fout van de check: wat rood is, staat als rood punt in
+het rapport (uitkomst 4 van #173 lost daarna de kleine punten op). Een gefilterde
+run (`--alleen=<naam>`) schrijft naar `launch-check.filtered.json` en laat het
+volledige rapport staan. Poort 3198; draai deze check alleen. Ontwikkelaarsbewijs
+op een lokale opbouw — niet productie, niet onafhankelijk gereviewd en geen echte
+acceptatie.
+
 ## BE-55 part B: "Vandaag" and reporting (#135)
 
 `run-be55-browser-check.js` (also `npm run test:browser:be55`) drives

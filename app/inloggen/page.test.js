@@ -61,16 +61,31 @@ test('het claimblok staat ernaast, met drie genummerde stappen en de omlijnde kn
   assert.match(source, /<h2 className="inloggen-claim-title" id="inloggen-claim-title">/);
   assert.match(source, /\{LOGIN_PAGE\.claim\.steps\.map\(\(step, index\) => \(/);
   assert.match(source, /<ol className="inloggen-steps">/);
-  assert.match(source, /className="inloggen-claim-action" href=\{LOGIN_PAGE\.claim\.actionHref\}/);
+  assert.match(source, /className="inloggen-claim-action" href=\{LOGIN_PAGE\.claim\.actionHref\} prefetch=\{false\}>/);
 });
 
 test('de bezoekerszin en de kleine teamlink staan onderaan', () => {
   const source = read(PAGE);
   assert.match(source, /className="inloggen-visitor">\{LOGIN_PAGE\.visitor\}/);
-  assert.match(source, /className="inloggen-team-link" href=\{LOGIN_PAGE\.teamHref\}/);
+  assert.match(source, /className="inloggen-team-link" href=\{LOGIN_PAGE\.teamHref\} prefetch=\{false\}>/);
   assert.match(source, /\{LOGIN_PAGE\.teamLabel\}/);
   // De teamlink is niet de grote knop: die hoort bij het claimblok.
   assert.doesNotMatch(source, /inloggen-team-link[^>]*href="\/internal\/login"/, 'geen tweede, los pad');
+});
+
+test('BE-70: de interne team-inlog en de claimpagina worden niet vooruitgeladen', () => {
+  // De eerste lading van /inloggen woog 258,6 kB omdat een standaard `Link` de
+  // interne inlogpagina (met de Supabase-client) al prefetcht. Beide links
+  // werken hetzelfde, maar halen hun doelpagina pas bij de klik.
+  const source = read(PAGE);
+  const links = source.match(/<Link[^>]*>/g) || [];
+  const zwaar = links.filter((link) => /inloggen-team-link|inloggen-claim-action/.test(link));
+  assert.equal(zwaar.length, 2, 'beide links gevonden');
+  for (const link of zwaar) {
+    assert.match(link, /prefetch=\{false\}/, `${link} laadt de doelpagina vooraf`);
+  }
+  // De goedkope links (het woordmerk, de privacyverklaring) houden hun prefetch.
+  assert.match(source, /<Link className="inloggen-privacy-link" href=\{LOGIN_PRIVACY_LINK\.href\}>/);
 });
 
 test('/inloggen bevat geen eigen inloglogica, geen sessiecheck en geen Supabase', () => {
