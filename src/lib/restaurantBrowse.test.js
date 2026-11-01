@@ -2,8 +2,9 @@
 
 // BE-28b (#68) — regressies voor de sorteer-, filter-, tel- en kaartregels
 // van /alle-restaurants. Fictieve fixtures in dezelfde vorm als
-// docs/api/restaurant-summary-shape.md, plus de echte verhoudingen
-// (25 restaurants, 4 met menukaart) als controle op de telling.
+// docs/api/restaurant-summary-shape.md. De echte verhoudingen staan hier niet
+// meer vast: sinds BE-75 (#187) zijn vier gesloten restaurants uit de data
+// verdwenen (zie src/lib/be75ClosedRestaurants.test.js).
 
 const assert = require('node:assert/strict');
 const { test } = require('node:test');

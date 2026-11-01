@@ -35,7 +35,7 @@ const FIXTURE_PATH = path.join(__dirname, '__fixtures__', 'breda-candidates-over
 const FIXTURE = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf8'));
 const RESTAURANTS = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'data', 'restaurants.json'), 'utf8'));
 
-/** The fixture plus the real 25 restaurants, filtered, deduplicated and ranked. */
+/** The fixture plus the live restaurants (21 since BE-75, #187), filtered, deduplicated and ranked. */
 function selection({ restaurants = RESTAURANTS, payload = FIXTURE } = {}) {
   return selectCandidates({
     businesses: parseOverpassResponse(payload),

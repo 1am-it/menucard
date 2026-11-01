@@ -24,6 +24,15 @@ const {
 
 // De echte statische gegevens, net als app/sitemap.js ze aanlevert. Deze test
 // controleert dus de werkelijke 25 restaurants en 11 menukaarten, geen fixture.
+//
+// BE-75 (#187): vier gesloten restaurants (3, 10, 14, 18) zijn uit
+// data/restaurants.json verdwenen. De verwachting van 25 hieronder hoort bij de
+// data van vóór die wijziging; daarom komt de restaurantlijst uit de vaste kopie
+// in src/services/__fixtures__/be75-closed-restaurants/ (require.cache-patroon
+// uit dishSearch.test.js) en niet uit data/ zelf. De verwachting is niet
+// veranderd. Het levende aantal en de sitemap zonder de vier ids staan in
+// src/lib/be75ClosedRestaurants.test.js.
+require('../services/__fixtures__/be75-closed-restaurants/beforeClosed').useRestaurantsBeforeBe75();
 const RESTAURANTS = Object.keys(require('../../data/restaurants.json'));
 const MENUS = Object.keys(require('../../data/menus.json'));
 
