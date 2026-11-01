@@ -129,8 +129,8 @@ test('claimSearch: zonder NEXT_PUBLIC_CONTACT_EMAIL geen mailto, met een adres w
 
 test('claimSearch: dezelfde zoektermen geven dezelfde restaurants als de bestaande zoeklogica', () => {
   // De volledige catalogus zoals /alle-restaurants hem laadt (zelfde API, zelfde
-  // paginering). De echte data telt 25 restaurants; één pagina van 50 is genoeg,
-  // de lus blijft toch staan voor het geval de catalogus groeit.
+  // paginering). Sinds BE-75 (#187) telt de echte data 21 restaurants; één pagina
+  // van 50 is genoeg, de lus blijft toch staan voor het geval de catalogus groeit.
   const first = searchRestaurants({ limit: 50 });
   const catalog = [...first.results];
   let cursor = first.nextCursor;

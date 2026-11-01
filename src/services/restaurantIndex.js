@@ -68,11 +68,16 @@ function getOpenStatus(restaurant) {
 // pattern: the address field is literally just the restaurant's own name
 // with ", Breda" -> "Breda" appended, i.e. no real address was ever
 // entered and something defaulted to a self-referential placeholder.
-// Restaurant id 10 ("Salon de Provence") is the one confirmed instance in
-// the current dataset — see docs/api/restaurant-summary-shape.md "Known
+// Restaurant id 10 ("Salon de Provence") was the one confirmed instance in
+// the dataset — see docs/api/restaurant-summary-shape.md "Known
 // limitations" for the full data-quality note and the correction path
 // (PLATFORM-07 owner claim / PLATFORM-08 community micro-task; this
 // module never guesses or writes a replacement address).
+// BE-75 (#187) removed that restaurant from the live data (it closed), so the
+// rule now guards against a pattern rather than a known row; the case is kept
+// as a regression on the frozen copy of the data in
+// src/services/__fixtures__/be75-closed-restaurants/ (see
+// src/services/restaurantIndex.test.js and src/lib/be75ClosedRestaurants.test.js).
 function isValidAddress(address, restaurantName) {
   if (!address || typeof address !== 'string') return false
   const trimmed = address.trim()
