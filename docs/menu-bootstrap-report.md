@@ -5,17 +5,18 @@ Eenmalige vulling volgens besluit 021 (BE-71, #176). Alleen de eigen websites va
 geen AI en geen betaalde dienst.
 
 - Ophaaldatum: 2026-11-01
-- Gegenereerd: 2026-11-01T07:26:40.400Z
+- Gegenereerd: 2026-11-01T09:51:33.176Z
 - Geslaagd: 3 · overgeslagen: 20 · geblokkeerd: 2 (van 25)
 
 ## Redenen, gegroepeerd
 
-- geen gerechten herkend: 13
+- geen gerechten herkend: 11
+- menukopje met onzekere structuur: 2
 - robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.: 2
 - gerechten zonder prijs: 2
 - herkende sectie niet als gerechten opgeslagen: 2
 - dubbel gerecht binnen een categorie: 1
-- menukopje met onzekere structuur: 1
+- gerechten zonder categorie: 1
 - prijs buiten € 1–€ 150: 1
 
 ## Per restaurant
@@ -34,7 +35,7 @@ geen AI en geen betaalde dienst.
 | 10 | Salon de Provence | https://www.salondeprovence.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
 | 11 | De Beyerd | https://www.beyerd.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
 | 12 | Pellens | https://pellens.nl/ | html | 32 | 22 | overgeslagen: gerechten zonder prijs (10 gerecht(en)); dubbel gerecht binnen een categorie (11 gerecht(en)); herkende sectie niet als gerechten opgeslagen (1 aandachtspunt(en)); gerecht met meerdere prijzen (1 aandachtspunt(en)) |
-| 13 | Gantau Village | https://gantauvillage.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
+| 13 | Gantau Village | https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf | pdf | 68 | 68 | overgeslagen: menukopje met onzekere structuur (11 sectie(s)); prijs buiten € 1–€ 150 (1 gerecht(en)); pdf-regels gelezen maar niet als gerecht opgeslagen (1 aandachtspunt(en)) |
 | 14 | The Chai Affairs | https://www.thechaiaffairs.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
 | 15 | Andalous | https://www.andalous-breda.nl/menukaart/ | html | 84 | 84 | overgeslagen: herkende sectie niet als gerechten opgeslagen (1 aandachtspunt(en)); gerecht met meerdere prijzen (1 aandachtspunt(en)) |
 | 16 | Restaurant Smelt | https://restaurantsmelt.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
@@ -42,7 +43,7 @@ geen AI en geen betaalde dienst.
 | 18 | Masala | — | — | 0 | 0 | geblokkeerd: robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald. (unreachable (request-error, na een tweede poging met 20000 ms); eerste poging: unreachable (request-error)) |
 | 19 | Restaurant Zuyd | https://www.restaurantzuyd.nl/lunch | html | 18 | 18 | overgeslagen: herkende sectie niet als gerechten opgeslagen (1 aandachtspunt(en)); gerecht met meerdere prijzen (1 aandachtspunt(en)) |
 | 20 | Klein Java | https://www.klein-java.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
-| 21 | Senang Makan | https://www.senangmakan.nl/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
+| 21 | Senang Makan | https://www.senangmakan.nl/wp-content/uploads/2025/11/BESTELLIJST-Kerst-2025-1.pdf | pdf | 10 | 10 | overgeslagen: gerechten zonder categorie (1 sectie(s)); menukopje met onzekere structuur (1 sectie(s)); pdf-regels gelezen maar niet als gerecht opgeslagen (1 aandachtspunt(en)) |
 | 22 | Makanan | https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/ | html | 22 | 22 | geslaagd |
 | 23 | T-Huis | https://t-huis.online/ | html | 0 | 0 | overgeslagen: geen gerechten herkend |
 | 24 | Trattoria Perron | https://www.trattoriaperron.nl/menu/ | html | 142 | 131 | overgeslagen: gerechten zonder prijs (11 gerecht(en)); prijs buiten € 1–€ 150 (1 gerecht(en)); gerecht met meerdere prijzen (1 aandachtspunt(en)) |

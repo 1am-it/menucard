@@ -33,3 +33,27 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 |---|---|---|---|---|
 | 25 bestaande, ronde 1 | 1 nov 2026 | 2 / 25 | 34 / 34 | 0 |
 | 25 bestaande, ronde 2 | 1 nov 2026 | 3 / 25 | 34 / 34 (Zenza nog niet) | 0 |
+| 25 bestaande, ronde 3 | 1 nov 2026 | 3 / 25 geschreven (5, 17, 22) | nog niet nagekeken | — |
+
+Ronde 3 voegde R1 en R3 toe en verbeterde de kandidaatkeuze: de 13 sites zonder
+herkende gerechten werden er 11. Gantau Village en Senang Makan lezen nu een pdf
+met een tekstlaag op de eigen site (68 en 10 gerechten), maar halen de eis niet
+(onzekere secties, gerechten zonder categorie, gerechten zonder categorie in de
+kerstbestellijst). De overige 11, met het bewijs uit de cache:
+
+| # | Restaurant | Waar de kaart staat | Bewijs uit de cache |
+|---|---|---|---|
+| 1 | Restaurant Wolfslaar | afbeelding | `/menu` (= `/menu-1`): 317 woorden, 16 afbeeldingen, 0 prijzen in de html |
+| 3 | Con Fuego | in JavaScript geladen | homepage: 11 woorden tekst, geen menulink |
+| 6 | Brasserie Bardot | in JavaScript geladen | homepage: 110 woorden, geen menulink |
+| 8 | Al Dente Ristorante | afbeelding | `/menukaart-restaurant-2/`: 7 afbeeldingen met "kaart" in de naam, 0 prijzen |
+| 9 | Beers & Barrels | extern platform | de kaart-pdf's staan op `static.rce.eu`, een andere host |
+| 10 | Salon de Provence | in JavaScript geladen | homepage: 1,9 kB, alleen een lege pagina |
+| 11 | De Beyerd | afbeelding | `/cafe-lunchkaart/`: 4 afbeeldingen met "kaart" in de naam, 0 prijzen |
+| 14 | The Chai Affairs | in JavaScript geladen | homepage: 3,3 kB, alleen een lege pagina |
+| 16 | Restaurant Smelt | in JavaScript geladen | homepage: 78 woorden, geen menulink |
+| 20 | Klein Java | afbeelding | `/gerechten`: 310 woorden, 1 afbeelding met "gerecht" in de naam, 0 prijzen |
+| 23 | T-Huis | afbeelding | `/menu/`: 17 afbeeldingen, 74 woorden, 0 prijzen |
+
+Soort in het kort: 5 afbeelding, 5 in JavaScript geladen, 1 extern platform. Geen
+ervan wordt omzeild; ze gaan naar de handmatige route.

@@ -7,7 +7,7 @@
 // data/menus.json entry (./menuEntry.js). The caller decides whether to write.
 
 const { createSourceFetcher, MAX_CANDIDATES } = require('./fetchSource');
-const { chooseSameHostCandidates, findSameHostPdfLinks } = require('./candidateChoice');
+const { chooseSameHostCandidates, findSameHostPdfLinks, hasMenuWord } = require('./candidateChoice');
 const { readHtmlMenu, readPdfMenu } = require('./readMenuSource');
 const { assessCompleteMenu } = require('./completeMenu');
 const { buildExport } = require('./menuEntry');
@@ -111,7 +111,11 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
   // fetched, the same host, through the same robots gate and cache.
   const hasCompleteCard = () => reads.some((read) => read.menu && read.refusal === null && assessCompleteMenu(read.menu).ok);
   if (!hasCompleteCard()) {
-    for (const page of htmlPages) {
+    // A page that itself looks like the card (its url holds a menu word) is
+    // read before the homepage: its pdf is the current card, not an old
+    // Christmas list the homepage still links.
+    const ordered = [...htmlPages].sort((a, b) => Number(hasMenuWord(b.url)) - Number(hasMenuWord(a.url)));
+    for (const page of ordered) {
       const [pdf] = findSameHostPdfLinks(page.html, page.url);
       if (!pdf) continue;
       // Already proposed as a candidate: fetching it twice would cost a second

@@ -2,7 +2,7 @@
   "issue": "#176 (BE-71)",
   "decision": "planning/decisions/021-breda-menu-bootstrap.md",
   "scraped": "2026-11-01",
-  "generatedAt": "2026-11-01T07:26:40.400Z",
+  "generatedAt": "2026-11-01T09:51:33.176Z",
   "totals": {
     "restaurants": 25,
     "done": 3,
@@ -10,12 +10,13 @@
     "blocked": 2
   },
   "groups": {
-    "geen gerechten herkend": 13,
+    "geen gerechten herkend": 11,
     "dubbel gerecht binnen een categorie": 1,
-    "menukopje met onzekere structuur": 1,
+    "menukopje met onzekere structuur": 2,
     "robots.txt van deze site was niet bereikbaar — de pagina is niet opgehaald.": 2,
     "gerechten zonder prijs": 2,
     "herkende sectie niet als gerechten opgeslagen": 2,
+    "gerechten zonder categorie": 1,
     "prijs buiten € 1–€ 150": 1
   },
   "restaurants": [
@@ -254,7 +255,7 @@
       ],
       "hadCard": true,
       "previousKeys": [
-        "5-menukaart"
+        "5-lunch"
       ]
     },
     {
@@ -465,7 +466,7 @@
           }
         },
         {
-          "url": "https://www.beyerd.nl/untappd-menu-location4321-theme13562/",
+          "url": "https://www.beyerd.nl/cafe-lunchkaart/",
           "kind": "html",
           "dishCount": 0,
           "pricedCount": 0,
@@ -475,7 +476,7 @@
           }
         },
         {
-          "url": "https://www.beyerd.nl/cafe-lunchkaart/",
+          "url": "https://www.beyerd.nl/untappd-menu-location4321-theme13562/",
           "kind": "html",
           "dishCount": 0,
           "pricedCount": 0,
@@ -537,15 +538,26 @@
       "name": "Gantau Village",
       "website": "https://www.gantauvillage.nl",
       "status": "skipped",
-      "menuUrl": "https://gantauvillage.nl/",
-      "kind": "html",
-      "dishCount": 0,
-      "pricedCount": 0,
-      "pageCount": null,
+      "menuUrl": "https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf",
+      "kind": "pdf",
+      "dishCount": 68,
+      "pricedCount": 68,
+      "pageCount": 5,
       "reasons": [
         {
-          "code": "no_dishes",
-          "text": "geen gerechten herkend"
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "11 sectie(s)"
+        },
+        {
+          "code": "price_out_of_bounds",
+          "text": "prijs buiten € 1–€ 150",
+          "detail": "1 gerecht(en)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
         }
       ],
       "candidates": [
@@ -568,6 +580,13 @@
             "status": "unparsed",
             "reason": "too_few_items"
           }
+        },
+        {
+          "url": "https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf",
+          "kind": "pdf",
+          "dishCount": 68,
+          "pricedCount": 68,
+          "refusal": null
         }
       ],
       "hadCard": false,
@@ -655,6 +674,16 @@
           }
         },
         {
+          "url": "https://www.andalous-breda.nl/thuisbezorgd/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
           "url": "https://www.andalous-breda.nl/ramadan-menu/",
           "kind": "html",
           "dishCount": 0,
@@ -663,6 +692,13 @@
             "status": "unparsed",
             "reason": "no_structured_items"
           }
+        },
+        {
+          "url": "https://andalous-breda.nl/wp-content/uploads/2026/02/Ramadan-menu-kaart-Essaouira-_20240316_170004_0000.pdf_compressed-1.pdf",
+          "kind": "pdf",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": null
         }
       ],
       "hadCard": false,
@@ -719,8 +755,10 @@
           "refusal": null
         }
       ],
-      "hadCard": false,
-      "previousKeys": []
+      "hadCard": true,
+      "previousKeys": [
+        "17-menukaart"
+      ]
     },
     {
       "id": "18",
@@ -789,16 +827,6 @@
           "dishCount": 18,
           "pricedCount": 18,
           "refusal": null
-        },
-        {
-          "url": "https://www.restaurantzuyd.nl/kerstmenu",
-          "kind": "html",
-          "dishCount": 0,
-          "pricedCount": 0,
-          "refusal": {
-            "status": "unparsed",
-            "reason": "no_structured_items"
-          }
         }
       ],
       "hadCard": true,
@@ -853,15 +881,26 @@
       "name": "Senang Makan",
       "website": "https://www.senangmakan.nl",
       "status": "skipped",
-      "menuUrl": "https://www.senangmakan.nl/",
-      "kind": "html",
-      "dishCount": 0,
-      "pricedCount": 0,
-      "pageCount": null,
+      "menuUrl": "https://www.senangmakan.nl/wp-content/uploads/2025/11/BESTELLIJST-Kerst-2025-1.pdf",
+      "kind": "pdf",
+      "dishCount": 10,
+      "pricedCount": 10,
+      "pageCount": 2,
       "reasons": [
         {
-          "code": "no_dishes",
-          "text": "geen gerechten herkend"
+          "code": "uncategorised_dishes",
+          "text": "gerechten zonder categorie",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "uncertain_sections",
+          "text": "menukopje met onzekere structuur",
+          "detail": "1 sectie(s)"
+        },
+        {
+          "code": "unread_pdf_lines",
+          "text": "pdf-regels gelezen maar niet als gerecht opgeslagen",
+          "detail": "1 aandachtspunt(en)"
         }
       ],
       "candidates": [
@@ -876,6 +915,26 @@
           }
         },
         {
+          "url": "https://www.senangmakan.nl/kerst-bestellijst/",
+          "kind": "html",
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "unparsed",
+            "reason": "no_structured_items"
+          }
+        },
+        {
+          "url": "https://www.senangmakan.nl/kerst-bestellijst-2024/",
+          "kind": null,
+          "dishCount": 0,
+          "pricedCount": 0,
+          "refusal": {
+            "status": "not_read",
+            "reason": "bad-status"
+          }
+        },
+        {
           "url": "https://www.senangmakan.nl/afhaal-menu-nieuw/",
           "kind": "html",
           "dishCount": 0,
@@ -884,6 +943,13 @@
             "status": "unparsed",
             "reason": "no_structured_items"
           }
+        },
+        {
+          "url": "https://www.senangmakan.nl/wp-content/uploads/2025/11/BESTELLIJST-Kerst-2025-1.pdf",
+          "kind": "pdf",
+          "dishCount": 10,
+          "pricedCount": 10,
+          "refusal": null
         }
       ],
       "hadCard": false,
@@ -921,7 +987,7 @@
       ],
       "hadCard": true,
       "previousKeys": [
-        "22-menukaart"
+        "22-afhaal"
       ]
     },
     {
@@ -1015,7 +1081,7 @@
           "refusal": null
         },
         {
-          "url": "https://www.trattoriaperron.nl/kerstavond-2026/",
+          "url": "https://www.trattoriaperron.nl/afhalen/",
           "kind": "html",
           "dishCount": 0,
           "pricedCount": 0,
@@ -1071,16 +1137,6 @@
           "dishCount": 10,
           "pricedCount": 10,
           "refusal": null
-        },
-        {
-          "url": "https://dolceesalato.nl/stempelkaart/",
-          "kind": "html",
-          "dishCount": 0,
-          "pricedCount": 0,
-          "refusal": {
-            "status": "unparsed",
-            "reason": "no_structured_items"
-          }
         }
       ],
       "hadCard": false,
