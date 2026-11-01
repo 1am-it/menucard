@@ -249,18 +249,29 @@ function collectMenuImages({ html, pageUrl, limit = MAX_MENU_IMAGES } = {}) {
     const absolute = absoluteUrl(src, pageUrl);
     if (!absolute) return;
     if (!isMenuImageCandidate({ url: absolute, alt, linkText, small: isSmallImageTag(tag) }, pageUrl, { pageHint })) return;
+    // BE-71 ronde 6 (#176): the caption (title attribute plus the text of the
+    // link around the image) travels with the candidate, so a stricter caller
+    // can require a menu word there instead of accepting any image on a page
+    // whose URL says "menu".
+    const caption = String(linkText || '').replace(/\s+/g, ' ').trim().slice(0, 200);
     const key = fileVariantKey(absolute);
     const existing = groups.get(key);
     if (existing === undefined) {
       groups.set(key, found.length);
-      found.push({ number: 0, url: absolute, alt: String(alt || '').slice(0, 200), mediaType: mediaTypeForUrl(absolute) });
+      found.push({ number: 0, url: absolute, alt: String(alt || '').slice(0, 200), caption, mediaType: mediaTypeForUrl(absolute) });
       return;
     }
     // The same file in another WordPress size: keep one image, preferring the
     // original that has no -WxH suffix.
     const stored = found[existing];
     if (stored.url !== key && absolute === key) {
-      found[existing] = { ...stored, url: absolute, alt: String(alt || stored.alt || '').slice(0, 200), mediaType: mediaTypeForUrl(absolute) };
+      found[existing] = {
+        ...stored,
+        url: absolute,
+        alt: String(alt || stored.alt || '').slice(0, 200),
+        caption: caption || stored.caption || '',
+        mediaType: mediaTypeForUrl(absolute),
+      };
     }
   };
   for (const match of source.matchAll(/<img\b[^>]*>/gi)) {

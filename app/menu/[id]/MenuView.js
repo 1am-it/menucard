@@ -22,7 +22,7 @@ import useClientNow from '@/src/components/useClientNow'
 import DaghapVandaag from '@/src/components/DaghapVandaag'
 import { todayOpening, openingBadge } from '@/src/lib/openingStatus'
 import { seasonLabelForMenu } from '@/src/lib/seasonCalendar'
-import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation } from '@/src/components/MenuBody'
+import { EU14, MEAL_CONFIG, menuTitle, itemMatchesAllergens, MenuItem, MenuSection, MenuGroupHeadings, MenuConfirmation, MenuIncompleteNotice } from '@/src/components/MenuBody'
 // BE-57 (#139): de anonieme teller "bekeken" voor dit restaurant, één keer per
 // pagina en per sessie, na het laden en zonder dat deze pagina erop wacht.
 import ViewBeacon from '@/src/components/ViewBeacon'
@@ -322,6 +322,9 @@ export default function MenuView({ id, r, restaurant, availableMeals, bevestigin
             <div className="hero-eyebrow">{r.name || restaurant.name}</div>
             <h1 className="hero-title">{subtitle}</h1>
             <MenuConfirmation bevestiging={bevestiging} />
+            {/* BE-71, R6 — de kaart staat zonder de twijfelgevallen op de
+                site; dat zegt de pagina hier, met de link naar de bron. */}
+            <MenuIncompleteNotice entry={r} />
             {menuSeason && (
               <div>
                 <span className="menu-season-label">

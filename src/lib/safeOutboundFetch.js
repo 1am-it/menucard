@@ -374,6 +374,11 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
     lookup = createGuardedLookup(),
     requestImplHttp = http.request,
     requestImplHttps = https.request,
+    // The honest, identifying agent stays the default. A caller with its own
+    // owner-approved identification (BE-71's one-off menu startvulling) may
+    // name itself instead; it can never become a browser agent, because no
+    // caller in this project passes anything but another honest bot string.
+    userAgent = USER_AGENT,
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -406,7 +411,7 @@ function fetchWebsiteSafely(targetUrl, options = {}) {
           // The same broad default as ordinary clients: Apache content negotiation
           // (e.g. MultiViews serving /lunch from lunch.php) answers 406 to an
           // Accept list without a wildcard, even for a normal HTML page.
-          headers: { 'User-Agent': USER_AGENT, Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
+          headers: { 'User-Agent': userAgent, Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
           timeout: timeoutMs,
         },
         (res) => {

@@ -250,8 +250,10 @@ test('BE-29: the Dagspecial tag is not duplicated next to the honest Daghap labe
 
 test('BE-29: the menu card shows the same honest price as the home (unit/2-person qualifier included)', () => {
   const source = readComponentSource();
-  assert.match(source, /import \{ honestPriceLabel \} from '@\/src\/lib\/menuPrice'/);
-  assert.match(source, /const priceLabel = honestPriceLabel\(item\) \|\| item\.price \|\| 'op aanvraag'/);
+  // BE-71 ronde 4 (#176): hetzelfde eerlijke label, nu via menuPrice.menuPriceLabel,
+  // zodat een toeslag als "+ € 4" op de kaart staat.
+  assert.match(source, /import \{ menuPriceLabel \} from '@\/src\/lib\/menuPrice'/);
+  assert.match(source, /const priceLabel = menuPriceLabel\(item\)/);
   assert.match(source, /<div className=\{`td-price \$\{!item\.price \? 'no-price' : ''\}`\}>\s*\{priceLabel\}\s*<\/div>/);
 });
 

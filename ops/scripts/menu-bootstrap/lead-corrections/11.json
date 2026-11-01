@@ -1,0 +1,48 @@
+{
+  "restaurantId": "11",
+  "name": "De Beyerd",
+  "rule": "R10",
+  "checkedBy": "Lead",
+  "checkedAt": "2026-11-01",
+  "source": "https://www.beyerd.nl/cafe-lunchkaart/",
+  "sourceImages": [
+    "https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.4.jpg",
+    "https://www.beyerd.nl/wp-content/uploads/2025/05/Lunchkaart-2025-3.42.jpg"
+  ],
+  "aiRun": ".local/menu-bootstrap-ai/11.json (2026-11-01, 2 verzoeken, 2 cent)",
+  "corrections": [
+    "Alleen de Nederlandse kaart: de Engelse versie (Lunchkaart-2025-Engels*.jpg) is dezelfde kaart en telt niet mee (R11).",
+    "\"'N Smoke\" → \"'n Smoske\" (zo staat het op de kaart: 'N SMOSKE).",
+    "Tussenkoppen van de kaart als categorie: Lunch, Luxe belegd bierbostelbrood, Salades, Warme lunch.",
+    "Omschrijving Clubsandwich: \"Uitnring\" → \"Uienring\".",
+    "Omschrijving Huisgemarineerde zalm: \"Romaine sla\" → \"Romaine salade\".",
+    "Prijzen: 15 van 15 gelijk aan de kaart; niets veranderd."
+  ],
+  "subtitle": "Lunchkaart",
+  "note": "Lunch van 12.00 tot 16.00 uur in het café. Alle salades worden geserveerd met bierbostelbrood en boter.",
+  "categories": [
+    { "name": "Lunch", "items": [
+      { "name": "Brouwerslunch", "desc": "Bierbostelbrood · Ardennerham · Abdijkaas · Rundvleeskroket met Gulpener mosterd · Dagsoepje", "price": 14 },
+      { "name": "Soep van de dag", "desc": "Wij serveren vers huisgemaakte soep, wij vertellen u graag welke dit vandaag is!", "price": 6.5 }
+    ]},
+    { "name": "Luxe belegd bierbostelbrood", "items": [
+      { "name": "Abdijkaas", "desc": "Tomaat · Komkommer · Gemengde sla · Gulpener mosterd", "price": 9 },
+      { "name": "Runderpastrami", "desc": "Augurk · Rucola melange · Chipotlemayonaise", "price": 12 },
+      { "name": "Gegrilde kipfilet", "desc": "Meergranenbroodje · Parmezaan · Tomaat · Komkommer · Romaine sla · Yoghurt-citroendressing", "price": 12 },
+      { "name": "'n Smoske", "desc": "Meergranenbroodje · Abdijkaas · Boerenham · Ei · Tomaat · Komkommer · Gemengde sla · Belse mayonaise", "price": 11 },
+      { "name": "Clubsandwich", "desc": "Kipfilet · Spek · Ei · Uienring in bierbeslag · Tomaat · Komkommer · Gemengde sla · Weisse-kruidenmayonaise", "price": 13.5 },
+      { "name": "Gemarineerde zalm", "desc": "Ingelegde komkommer · Rode ui · Zoetzuur · Romaine sla · Wasabimayonaise", "price": 12 }
+    ]},
+    { "name": "Salades", "items": [
+      { "name": "Geitenkaas", "desc": "Druiven · Appel · Noten · Rucola melange · Honing", "price": 12.5 },
+      { "name": "Gegrilde kipfilet", "desc": "Bostelbroodcroutons · Parmezaan · Tomaat · Komkommer · Romaine salade · Yoghurt-citroendressing", "price": 14 },
+      { "name": "Huisgemarineerde zalm", "desc": "Ingelegde komkommer · Rode ui · Zoetzuur · Romaine salade · Wasabimayonaise", "price": 15 }
+    ]},
+    { "name": "Warme lunch", "items": [
+      { "name": "Beyerd Burger", "desc": "Briochebroodje · Abdijkaas · Compote van rode ui · BBBBQsaus (Beyerd Bier Barbecuesaus) · Groentechips · Salade", "price": 16 },
+      { "name": "Uitsmijter Beyerd", "desc": "Bostelbrood · Drie gebakken eieren · Spek · Abdijkaas · Boerenham · Salade", "price": 14 },
+      { "name": "Kroketten", "desc": "Bostelbrood · Twee rundvleeskroketten (ook vegetarisch mogelijk) · Gulpener mosterd · Salade", "price": 9.5 },
+      { "name": "Garnaalkroketjes", "desc": "Bostelbrood · Twee garnaalkroketten · Tartaarsaus · Salade", "price": 16 }
+    ]}
+  ]
+}

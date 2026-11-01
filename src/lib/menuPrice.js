@@ -45,8 +45,22 @@ function honestPriceLabel(item) {
   return label;
 }
 
+/**
+ * BE-71 R5 (#176) — het prijslabel zoals de kaart het toont. Een toeslag is een
+ * aanvulling op een gerecht, geen eigen prijs: "+ € 4", nooit "€4" alsof het
+ * een los gerecht is.
+ * @param {{price?:string,priceValue?:number|null,priceOnRequest?:boolean,priceIsSupplement?:boolean}} item
+ * @returns {string}
+ */
+function menuPriceLabel(item) {
+  const label = honestPriceLabel(item) || (item && item.price) || 'op aanvraag';
+  if (item && item.priceIsSupplement === true && !String(label).startsWith('+')) return `+ ${label}`;
+  return label;
+}
+
 module.exports = {
   PRICE_QUALIFIER_PATTERN,
   sourcePriceNotes,
   honestPriceLabel,
+  menuPriceLabel,
 };

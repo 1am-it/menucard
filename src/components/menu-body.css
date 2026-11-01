@@ -21,6 +21,24 @@
   font-size: 12px;
 }
 
+/* BE-71 (#176, R6) — "Niet alle gerechten staan erop · bekijk de volledige
+   kaart bij het restaurant" bij een kaart die zonder de twijfelgevallen op de
+   site staat. Zelfde vorm als het bevestigingslabel, kleuren uit de tokens. */
+.menu-incomplete {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.menu-incomplete a {
+  color: var(--accent);
+}
+
 .mc-unavailable {
   display: inline-block;
   margin-top: 6px;
