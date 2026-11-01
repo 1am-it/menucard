@@ -15,6 +15,7 @@ const { assessCompleteMenu, MIN_DISHES } = require('./completeMenu');
 const { buildEntry, buildExport, applyMenuItem, menuLinksFor, menuScopeFor, menuKey, MENU_VARIANTS } = require('./menuEntry');
 const { createSourceFetcher, USER_AGENT, robustRobotsCheck, describeRobotsAttempt } = require('./fetchSource');
 const { bootstrapRestaurant } = require('./engine');
+const { normaliseDishName, normaliseHeading, restaurantWords } = require('./normalizeMenu');
 const { buildReport, renderMarkdown } = require('./report');
 
 const FIXTURES = path.join(__dirname, '__fixtures__');
@@ -421,6 +422,60 @@ test('het rapport telt nieuw, weg en een andere prijs tegen de kaart van maart',
   assert.equal(diff.repriced.length, 1);
   assert.equal(diff.repriced[0].was, 24);
   assert.equal(diff.repriced[0].now, 26);
+});
+
+test('R1: een naam in alleen hoofdletters krijgt een gewone hoofdletter, met de twee uitzonderingen', () => {
+  const words = restaurantWords('Restaurant Chocolat');
+  // The two examples of the owner's decision.
+  assert.equal(normaliseDishName('STEAK TARTARE', words), 'Steak tartare');
+  assert.equal(normaliseDishName('SANDWICH CHOCOLAT', words), 'Sandwich Chocolat');
+  // An abbreviation of at most three letters keeps its capitals.
+  assert.equal(normaliseDishName('BBQ PLATE', words), 'BBQ plate');
+  assert.equal(normaliseDishName('GRILL XL', words), 'Grill XL');
+  assert.equal(normaliseDishName('OSSENHAAS 200 GR', words), 'Ossenhaas 200 GR');
+  // A short ordinary word does follow the rule, so a Dutch dish stays readable.
+  assert.equal(normaliseDishName('KIP MET RIJST', words), 'Kip met rijst');
+  assert.equal(normaliseDishName('SOEP VAN DE DAG', words), 'Soep van de dag');
+  // A name with mixed upper and lower case is never touched.
+  assert.equal(normaliseDishName('Broodje KIP', words), 'Broodje KIP');
+  assert.equal(normaliseDishName('Biefstuk', words), 'Biefstuk');
+  // A price line is not a name in capitals.
+  assert.equal(normaliseDishName('12,50', words), '12,50');
+});
+
+test('R3: een dubbele punt aan het eind van een categoriekop gaat weg', () => {
+  assert.equal(normaliseHeading('Visgerechten indien voorradig:'), 'Visgerechten indien voorradig');
+  assert.equal(normaliseHeading('Nagerechten :'), 'Nagerechten');
+  // A colon inside the heading stays.
+  assert.equal(normaliseHeading('Soep: van de dag'), 'Soep: van de dag');
+  // A heading that is only a colon never becomes empty.
+  assert.equal(normaliseHeading(':'), ':');
+});
+
+test('R1 en R3 in de motor: de gelezen kaart gaat genormaliseerd naar de uitvoer', async () => {
+  const clock = fakeClock();
+  const capsHtml = fs.readFileSync(path.join(FIXTURES, 'caps-menu.html'), 'utf8');
+  const { fetchImpl } = fakeFetch({ pages: { '/': capsHtml } });
+  const fetcher = createSourceFetcher({ cacheDir: null, fetchImpl, sleep: clock.sleep, now: clock.now });
+  const result = await bootstrapRestaurant({
+    restaurantId: '99',
+    restaurant: { name: 'Restaurant Chocolat', website: 'https://voorbeeld.nl/' },
+    menus: {},
+    scraped: '2026-11-01',
+    fetcher,
+  });
+  assert.equal(result.status, 'done');
+  assert.equal(result.entry.subtitle, 'Lunchkaart');
+  const headings = result.entry.categories.map((category) => category.name);
+  assert.deepEqual(headings, ['Voorgerechten', 'Hoofdgerechten']);
+  const names = result.entry.categories.flatMap((category) => category.items.map((item) => item.name));
+  assert.ok(names.includes('Steak tartare'), names.join(' | '));
+  assert.ok(names.includes('Sandwich Chocolat'), names.join(' | '));
+  assert.ok(names.includes('BBQ plate'), names.join(' | '));
+  assert.ok(names.includes('Biefstuk'), names.join(' | '));
+  // The card itself still carries every dish with its own price.
+  assert.equal(result.dishCount, 9);
+  assert.equal(result.pricedCount, 9);
 });
 
 test('geen AI: de motor laadt geen Anthropic-SDK, geen AI-adapter en geen modelprotocol', () => {

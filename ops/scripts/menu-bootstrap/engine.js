@@ -11,6 +11,7 @@ const { createSourceFetcher, MAX_CANDIDATES } = require('./fetchSource');
 const { readHtmlMenu, readPdfMenu } = require('./readMenuSource');
 const { assessCompleteMenu } = require('./completeMenu');
 const { buildExport } = require('./menuEntry');
+const { normaliseMenu } = require('./normalizeMenu');
 
 async function readResponse(page) {
   if (page.kind === 'pdf') return readPdfMenu(page.bytes);
@@ -76,7 +77,10 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
     }
 
   const reads = [];
-  const homeRead = await readResponse(home);
+  // R1 and R3 (correctielog) apply to every page read, before the completeness
+  // requirement compares the dishes.
+  const readPage = async (page) => normaliseMenu(await readResponse(page), { restaurantName: record.name });
+  const homeRead = await readPage(home);
   reads.push({ url: home.finalUrl || home.url, kind: homeRead.kind, menu: homeRead, refusal: homeRead.refusal });
 
   // One link step, only for a homepage that itself holds no complete card.
@@ -90,7 +94,7 @@ async function bootstrapRestaurant({ restaurantId, restaurant, menus, scraped, f
         reads.push({ url: candidate.url, kind: null, menu: null, refusal: { status: 'not_read', reason: page.reason }, detail: page.detail });
         continue;
       }
-      const read = await readResponse(page);
+      const read = await readPage(page);
       reads.push({ url: page.finalUrl || candidate.url, kind: read.kind, menu: read, refusal: read.refusal });
       if (read.refusal === null && assessCompleteMenu(read).ok) break;
     }
