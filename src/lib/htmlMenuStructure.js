@@ -1941,6 +1941,150 @@ function letterCount(text) {
 /** One table cell: 'price' (only prices, optionally with variant words such
  * as "glas"/"fles"), 'variant' (only variant words), 'name' (a plausible
  * name, no price), 'mixed' (a name AND a price in one cell), or 'other'. */
+/** A printed fragment that continues the previous line (a wrapped description,
+ * not a dish name): "(", an unbalanced ")", a trailing comma/dash or a
+ * lowercase start. A dish name never begins with a bracket. */
+function isContinuationText(value) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim()
+  if (!text) return true
+  if (text.startsWith('(')) return true
+  const opens = (text.match(/\(/g) || []).length
+  const closes = (text.match(/\)/g) || []).length
+  if (closes > opens) return true
+  if (/[,\-–—]$/.test(text)) return true
+  if (/^[a-zà-ÿ0-9]/.test(text)) return true
+  return false
+}
+
+/** A text line that is a parenthesised continuation, never a dish name. */
+function looksLikeParenthesisedLine(value) {
+  const text = String(value || '').trim()
+  if (!text) return false
+  if (text.startsWith('(')) return true
+  return (text.match(/\)/g) || []).length > (text.match(/\(/g) || []).length
+}
+
+/** Fragments joined back into one line; a wrapped word (a trailing "-") is
+ * joined without a space. */
+function joinFragments(fragments) {
+  let out = ''
+  for (const fragment of fragments) {
+    const value = String(fragment || '').replace(/\s+/g, ' ').trim()
+    if (!value) continue
+    if (!out) out = value
+    else out = /-$/.test(out) ? `${out}${value}` : `${out} ${value}`
+  }
+  return out
+}
+
+/** A table row read only for its structure: the cell texts, which cells carry
+ * a printed price, and whether one cell is printed entirely bold (a category
+ * heading the source prints without a price). */
+function scanTableRow(row, budget) {
+  const cells = []
+  let boldText = ''
+  for (const cell of row.children) {
+    if (cell.tag !== 'td' && cell.tag !== 'th') continue
+    budget.spend(1)
+    const text = textOf(cell, { budget }).replace(/\s+/g, ' ').trim()
+    if (!text) continue
+    cells.push(text)
+    // Bold over the whole cell: the source prints this line as a heading.
+    const elements = cell.children.filter((child) => child.tag !== '#text' || String(child.text || '').trim() !== '')
+    if (elements.length === 1 && (elements[0].tag === 'strong' || elements[0].tag === 'b')) {
+      const inner = textOf(elements[0], { budget }).replace(/\s+/g, ' ').trim()
+      if (inner === text) boldText = text
+    }
+  }
+  const priceCells = cells.filter((cell) => findPrices(cell).length > 0)
+  const textCells = cells.filter((cell) => findPrices(cell).length === 0)
+  return {
+    text: cells.join(' '),
+    textWithoutPrice: textCells.join(' ').trim(),
+    boldText,
+    hasPrice: priceCells.length > 0,
+    priceText: priceCells.join(' '),
+  }
+}
+
+/** A short printed label, never a sentence: a heading the source prints as a
+ * bold line above a group of dishes. */
+function isHeadingRowText(value) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim().replace(/:$/, '')
+  if (!text || text.length > 70) return false
+  if (text.split(' ').filter(Boolean).length > 6) return false
+  return !/[.,;]$/.test(text)
+}
+
+/**
+ * Reads one table's rows for structure only: which rows are a printed category
+ * heading (bold, no price, followed by a priced row) and which rows continue
+ * the dish above them (a parenthesised description under a name without a
+ * price). Pure: it never adds an item; the walk decides.
+ */
+function scanTableRows(table, budget) {
+  const rows = []
+  const queue = [...table.children]
+  for (let head = 0; head < queue.length && rows.length < 400; head += 1) {
+    const node = queue[head]
+    budget.spend(1)
+    if (node.tag === '#text') continue
+    if (node.tag === 'tr') {
+      rows.push({ node, ...scanTableRow(node, budget) })
+      continue
+    }
+    if (node.tag === 'table') continue
+    for (const child of node.children) queue.push(child)
+  }
+  const heading = new WeakSet()
+  const merged = new Map()
+  const consumed = new WeakSet()
+  const headingRow = (info) => Boolean(info.boldText) && !info.hasPrice && isHeadingRowText(info.text)
+  for (let i = 0; i < rows.length; i += 1) {
+    if (!headingRow(rows[i])) continue
+    // Only a heading that actually introduces priced rows is a category; a
+    // bold line without dishes under it stays an ordinary (unpriced) row.
+    let introducesDish = false
+    for (let j = i + 1; j < rows.length; j += 1) {
+      if (headingRow(rows[j])) break
+      if (rows[j].hasPrice) {
+        introducesDish = true
+        break
+      }
+    }
+    if (introducesDish) heading.add(rows[i].node)
+  }
+  for (let i = 0; i < rows.length; i += 1) {
+    const info = rows[i]
+    if (info.hasPrice || heading.has(info.node)) continue;
+    const name = info.textWithoutPrice
+    if (!name || name.length > 80 || !isPlausibleItemName(name)) continue
+    // The continuation rows under this name: a parenthesised description the
+    // source wrapped over more than one row.
+    const fragments = []
+    let j = i + 1
+    for (; j < rows.length && j <= i + 3; j += 1) {
+      const next = rows[j]
+      if (heading.has(next.node) || next.hasPrice) break
+      if (!next.textWithoutPrice) continue
+      if (!isContinuationText(next.textWithoutPrice)) break
+      fragments.push(next.textWithoutPrice)
+    }
+    const closing = rows[j]
+    if (!closing || !closing.hasPrice) continue
+    // The closing row prints the rest of the description next to the amount
+    // ("… 1 sate)  € 14,00"); a row that prints a name of its own is a dish.
+    if (!closing.textWithoutPrice || !isContinuationText(closing.textWithoutPrice)) continue
+    merged.set(info.node, {
+      name,
+      description: joinFragments([...fragments, closing.textWithoutPrice]),
+      priceText: closing.priceText,
+    })
+    for (let k = i + 1; k <= j; k += 1) consumed.add(rows[k].node)
+  }
+  return { heading, merged, consumed }
+}
+
 function classifyCell(cell) {
   if (cell.length === 0 || cell.length > MAX_ITEM_TEXT) return 'other'
   const prices = findPrices(cell)
@@ -2349,6 +2493,10 @@ function extractWithinBudget(html, budget, stats) {
     if (item.ambiguous) return reject(fullText, 'ambiguous_structure', node)
 
     const name = cleanName(item.name)
+    // A parenthesised text line is never a dish name: it is the description of
+    // the dish above it (Lead review ronde 2, Makanan). Never stored, and never
+    // counted as an unpriced dish.
+    if (looksLikeParenthesisedLine(name)) return reject(fullText, 'continuation_line', node)
     const prices = item.price
       ? [{ raw: item.priceText, amountMinorUnits: item.price.amountMinorUnits, hasEuroSign: false }]
       : findPrices(item.priceText)
@@ -2419,6 +2567,7 @@ function extractWithinBudget(html, budget, stats) {
     }
     const name = cleanName(line.name)
     const section = sectionFor(headingPath)
+    if (looksLikeParenthesisedLine(name)) return reject(fullText, 'continuation_line', node)
     if (!line.price) {
       if (isPlausibleItemName(name) && name.length <= 80) section.unpriced.push({ text: fullText, node })
       return undefined
@@ -2543,6 +2692,33 @@ function extractWithinBudget(html, budget, stats) {
     }, supplementText ? { quote: quoteText, supplementText } : { quote: quoteText })
   }
 
+  // One dish whose name, wrapped description and amount the source prints on
+  // three consecutive table rows (Makanan: "Bami/Nasi Rames" / "(bami, nasi
+  // goreng of witte rijst met …" / "… 1 sate)  € 14,00"). The name is the name
+  // row, the description the parenthesised rows, the price the printed amount.
+  function addContinuedRow(node, info, headingPath) {
+    stats.candidates += 1
+    const name = cleanName(info.name)
+    const section = sectionFor(headingPath)
+    const prices = findPrices(info.priceText)
+    if (prices.length !== 1) {
+      if (isPlausibleItemName(name) && name.length <= 80) section.unpriced.push({ text: info.name, node })
+      return undefined
+    }
+    if (!isPlausibleItemName(name) || name.length > 80 || findPrices(name).length > 0) {
+      return reject(`${info.name} ${info.priceText}`, 'missing_name', node)
+    }
+    const description = cleanName(info.description)
+    const descriptionValue = description && findPrices(description).length === 0 ? clip(description) : null
+    return addItem(section, node, 'table_row_continued', {
+      name: clip(displayName(name)),
+      priceStatus: 'known',
+      amountMinorUnits: prices[0].amountMinorUnits,
+      currency: prices[0].hasEuroSign ? 'EUR' : null,
+      description: descriptionValue,
+    }, { quote: `${info.name} ${info.description || ''} ${info.priceText}`.replace(/\s+/g, ' ').trim() })
+  }
+
   function addItem(section, node, pattern, item, evidenceExtra = null) {
     const key = `${JSON.stringify(section.path)}|${item.name.toLowerCase()}|${item.priceStatus}|${item.amountMinorUnits}`
     if (seen.has(key)) {
@@ -2568,6 +2744,20 @@ function extractWithinBudget(html, budget, stats) {
 
   // Document-order walk with an explicit heading stack; bounded depth.
   const headingStack = []
+  // Per table, one structural scan (printed bold category rows, rows that
+  // continue the dish above them). A table is scanned once, on first use.
+  const tableScans = new Map()
+  function tableScanFor(row) {
+    let node = row.parent
+    let guard = 0
+    while (node && guard < 4 && node.tag !== 'table') {
+      node = node.parent
+      guard += 1
+    }
+    if (!node || node.tag !== 'table') return null
+    if (!tableScans.has(node)) tableScans.set(node, scanTableRows(node, budget))
+    return tableScans.get(node)
+  }
   // Labelled tab panels (`role="tab"` + aria-controls) are menu variants: the
   // label becomes a route level, and their content is never treated as a
   // "hidden duplicate view" (a variant is a deliberate second path).
@@ -2700,7 +2890,36 @@ function extractWithinBudget(html, budget, stats) {
         continue
       }
       if (child.tag === 'tr' && (budget.spend(child.children.length), child.children.some((c) => c.tag === 'td'))) {
+        const scan = tableScanFor(child)
+        if (scan && scan.heading.has(child)) {
+          // A category the source prints as a bold line above a group of
+          // dishes (Makanan: "Vleesgerechten"). It sits directly below the
+          // heading above the table, exactly like a nested section.
+          const row = scanTableRow(child, budget)
+          const heading = clip(row.boldText || row.text)
+          if (heading) {
+            const top = headingStack[headingStack.length - 1]
+            const level = top ? Math.min(top.level + 1, 6) : 1
+            while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) headingStack.pop()
+            headingStack.push({ level, text: heading })
+          }
+          continue
+        }
+        if (scan && scan.consumed.has(child)) continue
+        if (scan && scan.merged.has(child)) {
+          addContinuedRow(child, scan.merged.get(child), currentPath(extraLabel))
+          continue
+        }
         handleItem(child, 'table_row', currentPath(extraLabel))
+        continue
+      }
+      if (child.tag === 'table') {
+        // A printed heading inside this table is a section of this table only:
+        // the route above the table survives, and nothing after the table
+        // inherits its last category.
+        const savedDepth = headingStack.length
+        walk(child, depth + 1, extraLabel)
+        headingStack.length = savedDepth
         continue
       }
       if (child.tag === 'dt') {

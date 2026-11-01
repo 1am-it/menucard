@@ -291,6 +291,60 @@ test('de sleutel van de uitvoer volgt de soort, en twee kaarten van een restaura
   assert.deepEqual(links, [{ id: '5-lunch', label: '🥗 Lunchkaart' }, { id: '5-menukaart', label: '📋 Menukaart' }]);
 });
 
+const MAKANAN_HTML = fs.readFileSync(path.join(FIXTURES, 'makanan-prijslijst.html'), 'utf8');
+
+test('de Makanan-pagina: een vetgedrukte kop zonder prijs boven een groep is een categorie', () => {
+  const menu = readHtmlMenu(MAKANAN_HTML);
+  assert.equal(menu.refusal, null);
+  assert.deepEqual(
+    menu.categories.map((category) => category.name),
+    ['Afhaal Prijslijst', 'Vleesgerechten', 'Groente-/Vegetarische gerechten', 'Visgerechten indien voorradig:'],
+  );
+  // De pagina print "Visgerechten indien voorradig:" zonder spatie voor de ";"
+  // in de kop; de categorie houdt de regel van de site.
+  const dishes = menu.categories.reduce((sum, category) => sum + category.items.length, 0);
+  assert.equal(dishes, 22);
+  assert.equal(menu.categories[1].items[0].name, 'Sate met (kip of varken) 3 stokjes');
+  assert.equal(menu.categories[1].items[0].price, 5);
+  assert.deepEqual(menu.attention, []);
+});
+
+test('de Makanan-pagina: een regel tussen haakjes is de omschrijving van het gerecht erboven, nooit de naam', () => {
+  const menu = readHtmlMenu(MAKANAN_HTML);
+  const items = menu.categories[0].items;
+  const rames = items.filter((item) => item.name === 'Bami/Nasi Rames');
+  assert.equal(rames.length, 2);
+  assert.deepEqual(rames.map((item) => item.price), [14, 15]);
+  assert.match(rames[0].desc, /^\(bami, nasi goreng of witte rijst met 2 vlees-, 2 groentengerechten, 1 s\.g\. telor en 1 sate\)$/);
+  assert.equal(rames[1].desc, '(vlees- en groente gerechten apart)');
+  // Geen enkel gerecht begint met een haakje of eindigt op een half haakje.
+  for (const category of menu.categories) {
+    for (const item of category.items) {
+      assert.ok(!item.name.startsWith('('), item.name);
+      assert.ok((item.name.match(/\(/g) || []).length >= (item.name.match(/\)/g) || []).length, item.name);
+    }
+  }
+});
+
+test('een regel tussen haakjes wordt ook buiten een tabel nooit een gerechtnaam', () => {
+  const html = `<html><body><h2>Menukaart</h2><ul>
+    <li>Bami Rames <span>(bami of nasi met twee bijgerechten)</span> <span>€ 14,00</span></li>
+    <li>(losse omschrijving zonder gerecht) <span>€ 9,50</span></li>
+    <li>Gado Gado <span>€ 12,00</span></li>
+    <li>Sate Ajam <span>€ 6,50</span></li>
+    <li>Nasi Goreng <span>€ 8,00</span></li>
+  </ul></body></html>`;
+  const menu = readHtmlMenu(html);
+  const names = menu.categories.flatMap((category) => category.items.map((item) => item.name));
+  // De losse regel tussen haakjes is geen gerecht; de vier echte gerechten zijn
+  // er wel. Een omschrijving tussen haakjes achter een naam mag in de naam
+  // blijven staan (dat is de bestaande, geteste lezing van één regel).
+  assert.equal(names.length, 4, names.join(' | '));
+  assert.ok(!names.some((name) => name.startsWith('(')), names.join(' | '));
+  assert.ok(names[0].startsWith('Bami Rames'), names.join(' | '));
+  assert.ok(names.includes('Gado Gado'), names.join(' | '));
+});
+
 test('het rapport telt nieuw, weg en een andere prijs tegen de kaart van maart', () => {
   const previous = {
     '99-menukaart': {
