@@ -34,7 +34,7 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | R9 | Een zin is geen categoriekop (bijvoorbeeld "Al onze gerechten zijn 100% halal"). Koppen in hoofdletters zonder prijs ("WRAPS", "BURGERS & LOADED FRIES", "EXTRA VLEES") zijn categorieën. | Lead, review ronde 3 | Zenza: 72 gerechten onder de slogan | gebouwd in ronde 4 (`R9: een zin is geen categorie en een korte kop in hoofdletters boven een groep is dat wel`) |
 | R10 | Een kaart die de AI uit een afbeelding las, wordt pas gebruikt na de controle van de Lead: **alle prijzen, namen en koppen** tegen de afbeelding. Afwijkingen verbetert de Lead zelf, met een notitie "Lead-correctie" in het rapport. De AI krijgt de instructie om namen letterlijk over te nemen, tussenkoppen als categorie te nemen en niets toe te voegen. | Eigenaar, 1 nov 2026 (9a) | De Beyerd: "'N Smoke" → "'n Smoske"; "(salade)" verzonnen; tussenkoppen gemist | instructie gebouwd in ronde 6; Lead-controle per kaart |
 | R11 | Staat dezelfde kaart in meer talen op de site, dan telt alleen de Nederlandse versie. Een vertaling is geen extra gerecht. | Lead, review AI-run 2 | De Beyerd: Lunchkaart-2025-Engels*.jpg | de Lead-correctie van De Beyerd telt 15 Nederlandse gerechten (niet 22); de afbeeldingskeuze en de html-lezer slaan anderstalige versies nog niet automatisch over |
-| R12 | De AI mag alle overgebleven Bredase kaarten lezen (html, pdf en afbeelding), niet alleen afbeeldingen. Dezelfde grenzen als R8 gelden: de eigenaar draait het script en voert de sleutel in, een harde grens van € 1, en geen herpogingen. Elke kaart gaat pas naar de site na de Lead-controle volgens R10. De lezer zonder AI blijft bestaan, voor goedkope hercontroles later. | Eigenaar, 1 nov 2026 | De lezer zonder AI haalde 3 van de 25; de AI las De Beyerd voor 1 cent met alle prijzen goed | open, ronde 8 |
+| R12 | De AI mag alle overgebleven Bredase kaarten lezen (html, pdf en afbeelding), niet alleen afbeeldingen. Dezelfde grenzen als R8 gelden: de eigenaar draait het script en voert de sleutel in, een harde grens van € 1, en geen herpogingen. Elke kaart gaat pas naar de site na de Lead-controle volgens R10. De lezer zonder AI blijft bestaan, voor goedkope hercontroles later. | Eigenaar, 1 nov 2026 | De lezer zonder AI haalde 3 van de 25; de AI las De Beyerd voor 1 cent met alle prijzen goed | gebouwd in ronde 8 (`--all` in `ai-images.js`, elf tests met een nep-client); de echte run doet de eigenaar |
 
 ## Voortgang per batch
 
@@ -47,6 +47,43 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | 25 bestaande, ronde 5 | 1 nov 2026 | nog geen nieuwe batch: eerst R8 gebouwd (`ai-images.js`) en de robots-regel van punt 4 (doorverwijzing tot 5 stappen; een onbereikbare site heet "site niet bereikbaar") | — | — |
 | 25 bestaande, ronde 6 | 1 nov 2026 | nog geen nieuwe batch: de afbeeldingskeuze is verscherpt (punt 1), lange kaarten gaan in groepen van drie (punt 2) en het AI-script geeft een trouw-instructie mee (punt 3). R6 en R7 staan nog open. | — | — |
 | 25 bestaande, ronde 7 | 1 nov 2026 | De Beyerd geschreven met de Lead-correctie (R10): `11-lunch`, 15 gerechten, 4 categorieën, alle 15 met prijs; de Engelse kaart telt niet mee (R11). R6 gebouwd en getest, nog niet toegepast. | 15 / 15 (de Lead) | 0 |
+| 25 bestaande, ronde 8 | 1 nov 2026 | nog geen nieuwe batch: `--all` gebouwd (R12). `--plan --all` leest 9 van de 25 als bron (3 pdf, 2 afbeelding, 4 tekst) voor samen maximaal 84 cent van de 100; 6 pagina's zijn `javascript_only`, 2 sites onbereikbaar en 8 hebben al een kaart. | â€” | â€” |
+
+## Ronde 8: `--all` leest alle overgebleven kaarten (R12)
+
+`ai-images.js` heeft er `--all` bij; de naam van het bestand blijft. De selectie
+komt uit `docs/menu-bootstrap-report.json`: elk restaurant zonder kaart in
+`data/menus.json`, zonder `lead-corrections/<id>.json` en met een bereikbare
+site. De bron per restaurant is de kaart-url uit het rapport:
+
+- **html** met kaartafbeeldingen: zoals in R8, in groepen van drie;
+- **html** met leesbare tekst: de tekst zonder scripts en stijl, als tekstbron;
+- **pdf met tekstlaag**: het document via de bestaande documentbron
+  (`kind: 'pdf'`, begrensd op 10 pagina's en 10 MB);
+- **html die zijn kaart pas met JavaScript toont**: overgeslagen met de reden
+  `javascript_only`. Een pagina telt als kaart als er minstens drie prijsregels
+  in de leesbare tekst staan; een pagina zonder prijzen is geen kaart.
+- Een extra ophaalstap volgt alleen wanneer het rapport de homepage noemt; noemt
+  het rapport de kaartpagina zelf, dan is dat de bron. Een `www.`-variant geldt
+  als dezelfde host.
+
+Dezelfde ophaallaag en cache gelden (robots.txt, dezelfde site, twee seconden
+rust); de pdf-download cachet onder `.local/menu-bootstrap-cache/ai-documents/`.
+De uitvoer gaat naar `.local/menu-bootstrap-ai/<id>.json` met `sourceKind`,
+`sourceUrl`, de chunks en `writesData: false`; er gaat niets naar `data/`.
+
+`--plan --all` op 1 nov 2026 (geen verzoek, geen sleutel):
+
+| Uitkomst | Restaurants |
+|---|---|
+| pdf | 4 Uijttewaal (9 p.), 13 Gantau Village (5 p.), 21 Senang Makan (2 p.) |
+| afbeelding | 8 Al Dente (7), 20 Klein Java (1) |
+| tekst | 12 Pellens (88 prijsregels), 15 Andalous (88), 24 Trattoria Perron (166), 25 Dolce e Salato (98) |
+| `javascript_only` | 2 Blossem, 3 Con Fuego, 9 Beers & Barrels, 10 Salon de Provence, 14 The Chai Affairs, 16 Smelt |
+| site onbereikbaar | 7 Ruitersbosch, 18 Masala |
+| heeft al een kaart | 1, 5, 6, 11, 17, 19, 22, 23 |
+
+Samen maximaal 84 cent van de harde grens van 100 cent.
 
 ## Ronde 7: van AI-uitvoer naar data/ (R10, R11) en R6
 
