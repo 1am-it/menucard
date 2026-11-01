@@ -3701,5 +3701,41 @@
         "label": "📋 Menukaart"
       }
     ]
+  },
+  "26": {
+    "name": "De Colonie",
+    "cuisine": "Lunch · Diner · High tea",
+    "hours": "Ma–Wo, Zo 09:00–23:00, Do–Za 09:00–00:00",
+    "address": "Grote Markt 26-28, 4811 XR Breda",
+    "phone": "076 521 4082",
+    "website": "http://breda.colonie.nl",
+    "reservation": {
+      "type": "unverified",
+      "url": "http://breda.colonie.nl",
+      "phone": "076 521 4082",
+      "verified": false
+    },
+    "buurt": "Binnenstad",
+    "color": "#1a0500",
+    "description": "De menukaart van De Colonie wisselt drie keer per jaar en biedt gerechten uit diverse windstreken en specialiteiten van het seizoen.",
+    "tags": [
+      "🍽 Restaurant",
+      "High tea",
+      "Brunch"
+    ],
+    "openingHours": {
+      "ma": "09:00-23:00",
+      "di": "09:00-23:00",
+      "wo": "09:00-23:00",
+      "do": "09:00-00:00",
+      "vr": "09:00-00:00",
+      "za": "09:00-00:00",
+      "zo": "09:00-23:00"
+    },
+    "cuisineKeywords": "breakfast lunch drinks diner high tea brunch maandag dinsdag woensdag donderdag vrijdag zaterdag zondag",
+    "badge": "🍽 Restaurant",
+    "cuisineLabel": "Lunch · Diner · High tea",
+    "cardDescription": "De menukaart wisselt drie keer per jaar, met gerechten uit diverse windstreken en specialiteiten van het seizoen.",
+    "phoneDisplay": "076 521 4082"
   }
 }
