@@ -97,7 +97,7 @@ export default function InloggenPage() {
         <div className="inloggen-footer">
           <p className="inloggen-visitor">{LOGIN_PAGE.visitor}</p>
           <p className="inloggen-team">
-            {/* BE-70 (#173): de team-inlog is een interne pagina met de
+            {/* BE-70 (issue 173): de team-inlog is een interne pagina met de
                 inlogclient van de houder in de eerste lading. Een standaard
                 `Link` prefetcht die route meteen, en dan weegt /inloggen 258 kB
                 in plaats van ongeveer 190 kB. De link werkt precies hetzelfde;
