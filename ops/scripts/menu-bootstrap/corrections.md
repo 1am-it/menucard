@@ -42,6 +42,25 @@ houder (later ticket) of blijft een uitzondering met een reden in het rapport.
 | 25 bestaande, ronde 3 | 1 nov 2026 | 3 / 25 geschreven (5, 17, 22) | 106 / 106 | 0 (Zenza niet gemerged: koppen fout, zie R9) |
 | 25 bestaande, ronde 4 | 1 nov 2026 | Zenza opnieuw geschreven met de echte koppen (13 categorieën, 72 gerechten, 5 toeslagen); Chocolat gerepareerd (twee onterechte toeslagen) | nog niet nagekeken (Lead) | — |
 | 25 bestaande, ronde 5 | 1 nov 2026 | nog geen nieuwe batch: eerst R8 gebouwd (`ai-images.js`) en de robots-regel van punt 4 (doorverwijzing tot 5 stappen; een onbereikbare site heet "site niet bereikbaar") | — | — |
+| 25 bestaande, ronde 6 | 1 nov 2026 | nog geen nieuwe batch: de afbeeldingskeuze is verscherpt (punt 1), lange kaarten gaan in groepen van drie (punt 2) en het AI-script geeft een trouw-instructie mee (punt 3). R6 en R7 staan nog open. | — | — |
+
+## Wat ronde 6 per site vond (punt 1 van de review)
+
+`node ops/scripts/menu-bootstrap/ai-images.js --plan` over de vijf restaurants met
+een kaart als afbeelding, met de cache van ronde 5 en hooguit één extra
+ophaalstap op dezelfde site. Geen enkel verzoek aan Anthropic, geen sleutel:
+
+| # | Restaurant | Wat er gevonden is | Uitkomst |
+|---|---|---|---|
+| 1 | Restaurant Wolfslaar | `/menu` heeft 3 afbeeldingen met een menuwoord-kandidaat, alle drie een portret (`Portretten/DSC05737`, twee keer `Studio-1412---Wolfslaar…`); de sfeerfoto's vallen al bij de bestaande lezer af. De ene extra stap ging naar `/nl/menu-a-la-carte`: 10 kandidaten, geen ervan een kaart (foto's) | overgeslagen, `no_images` |
+| 8 | Al Dente Ristorante | `/menukaart-restaurant-2/`: 7 echte kaarten (`Menukaart0826a` t/m `g`) | 7 kaarten, 3 verzoeken, maximaal 21 cent |
+| 11 | De Beyerd | `/cafe-lunchkaart/`: 4 kaarten (`Lunchkaart-2025-…`) | 4 kaarten, 2 verzoeken, maximaal 12 cent |
+| 20 | Klein Java | `/gerechten`: 2 kandidaten; de `smart_*.webp` uit de `srcset` heeft geen menuwoord en valt af, de `smart_PeDwL.png` heeft "Gerechten" in de alt | 1 kaart, 1 verzoek, maximaal 3 cent |
+| 23 | T-Huis | `/menu/`: de vier `DSC…-scaled.jpg`-foto's vallen af; de kaarten staan er als **svg** (`THS-Diner_Herfst-2026.2_DIGI.svg`, `THS-Lunch…`, `THS-Wijnkaart…`, `THS-Drankkaart…`, `THS-Dessert…`) en een svg is in deze ronde geen leesbare afbeelding | overgeslagen, `menu_is_svg` |
+
+Totaal: 12 kaarten in 6 verzoeken, maximaal 36 cent van de harde grens van
+100 cent. Wolfslaar en T-Huis leveren in deze vorm geen leesbare kaart; dat is
+een vondst voor het rapport, geen omzeiling.
 
 Ronde 5 leverde twee dingen die geen nieuwe batch vragen. **R8:** het script
 `ai-images.js` voor de vijf kaarten als afbeelding, met een verborgen
