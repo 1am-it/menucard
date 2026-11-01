@@ -410,8 +410,8 @@
     "phoneDisplay": "076 533 5975",
     "menuLinks": [
       {
-        "id": "5-menukaart",
-        "label": "📋 Menukaart"
+        "id": "5-lunch",
+        "label": "🥗 Lunchkaart"
       }
     ]
   },
@@ -2334,8 +2334,8 @@
     "phoneDisplay": "076 514 1712",
     "menuLinks": [
       {
-        "id": "22-menukaart",
-        "label": "📋 Menukaart"
+        "id": "22-afhaal",
+        "label": "🥡 Afhaalkaart"
       }
     ]
   },
