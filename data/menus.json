@@ -14497,5 +14497,445 @@
         ]
       }
     ]
+  },
+  "16-menukaart": {
+    "subtitle": "Menukaart",
+    "scraped": "2026-11-01",
+    "source": "https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf",
+    "notes": "Kaasfondue 12.00–21.30 uur, diner 17.30–21.30 uur, lunch 12.00–15.00 uur, borrel vanaf 14.30 uur. Niet alle broodjes van de lunchkaart staan erop; bekijk de volledige kaart bij het restaurant.",
+    "leadChecked": "2026-11-01",
+    "categories": [
+      {
+        "name": "Kaasfondue",
+        "items": [
+          {
+            "name": "Kaasfondue Hollands",
+            "desc": "Petit Doruvael, Tynjetaler, Bunker Blosse · vol & aromatisch · wijntip: Grüner Veltliner · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€27",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Zwitsers",
+            "desc": "L'Etivaz Alpage, Vacherin Fribourgeois, Appenzeller Noir · aromatisch & krachtig · wijntip: Jacquère · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€29,50",
+            "priceValue": 29.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Truffel",
+            "desc": "Raclette à la Truffe, Doruvael Truffel, Boeren Gatenkaas · aards & romig · wijntip: Pinot Noir · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€28",
+            "priceValue": 28,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Italiaans",
+            "desc": "Provolone, Parmigiano Reggiano, Fontina, Taleggio · krachtig & aromatisch · wijntip: Trollinger · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€29,50",
+            "priceValue": 29.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Frans",
+            "desc": "Abondance, Comté Alpage, Emmentaler Français, Roquefort · notig & scherp · wijntip: Sauvignon Blanc · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€29,50",
+            "priceValue": 29.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Bossche Bierfondue",
+            "desc": "Oudbelegen Stompetoren, Doruvael en gatenkaas · fruitig & zoet · biertip: Boegbeeld · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€27",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Kaasfondue Spaans",
+            "desc": "Cremositos del Zujar, Manchego Romero · optioneel met krokante jamón serrano · kruidig & zoet · wijntip: Riesling · met onbeperkt desembrood, seizoensgroenten & cornichons",
+            "price": "€27",
+            "priceValue": 27,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Vooraf",
+        "items": [
+          {
+            "name": "Lucques olijven",
+            "desc": "frisse olijven uit de Languedoc",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Burrata",
+            "desc": "met gemarineerde courgette, gekarameliseerde pistache en bieslookolie",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Tapenade van geroosterde artisjokken",
+            "desc": "parmigiano reggiano, marcona amandelen en citroenolie · geserveerd met Pane Guttiau",
+            "price": "€13",
+            "priceValue": 13,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Gazpacho met gerookte forel",
+            "desc": "van basilicum, courgette, komkommer en appel",
+            "price": "€10",
+            "priceValue": 10,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Rillette van gerookte makreel",
+            "desc": "huisgemaakte zwarte peper mayonaise · geserveerd met bruschetta",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Hoofd",
+        "items": [
+          {
+            "name": "Ravioli",
+            "desc": "gevuld met ricotta en spinazie, salieboter, champignons, pijnboompitten en parmezaan",
+            "price": "€20",
+            "priceValue": 20,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Smelt's Cheese Burger",
+            "desc": "Black Angus burger met tomaat, augurk, botersla en burgersaus op een bedje van kaasfondue",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Burrata salade",
+            "desc": "met gegrilde tomaat, peer, pistache en botersla",
+            "price": "€18",
+            "priceValue": 18,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Bijgerechten",
+        "items": [
+          {
+            "name": "Gebakken krieltjes",
+            "desc": "",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Extra seizoensgroente",
+            "desc": "",
+            "price": "€4",
+            "priceValue": 4,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Fris knapperige salade",
+            "desc": "botersla, frisée, vinaigrette, parmigiano vacche rosso",
+            "price": "€5",
+            "priceValue": 5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Charcuterieplank",
+            "desc": "drie soorten dungesneden charcuterie",
+            "price": "€14",
+            "priceValue": 14,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bresaola",
+            "desc": "licht gedroogd en dungesneden grasgevoerd rundvlees",
+            "price": "€15",
+            "priceValue": 15,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Desserts",
+        "items": [
+          {
+            "name": "Crème brûlée",
+            "desc": "huisgemaakt, met amarettolikeur",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Huisgemaakte cheesecake",
+            "desc": "vraag de bediening naar de smaak van de week",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Hemelse modder",
+            "desc": "huisgemaakte chocolademousse met amandelcrumble",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Sgroppino",
+            "desc": "wodka, prosecco en citroensorbet",
+            "price": "€9",
+            "priceValue": 9,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Lunch",
+        "items": [
+          {
+            "name": "Omelette du fromage",
+            "desc": "met Zwitserse L'Etivaz Alpage · met bekroonde beenham +€1,50",
+            "price": "€11",
+            "priceValue": 11,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Smelt's kaas tosti",
+            "desc": "met bekroonde beenham +€1,50",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          }
+        ]
+      },
+      {
+        "name": "Borrel · om te delen",
+        "items": [
+          {
+            "name": "Oude boeren kaas",
+            "desc": "klassieke Stolwijker van 2,5 jaar oud met huisgemaakte chutney",
+            "price": "€8",
+            "priceValue": 8,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Brood",
+            "desc": "met gezouten boter",
+            "price": "€6",
+            "priceValue": 6,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Groninger mozzarella",
+            "desc": "met gegrilde tomaat, verse basilicum en bieslookolie",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Kaaskroketten",
+            "desc": "gevuld met Taleggio en L'Etivaz Alpage",
+            "price": "€12",
+            "priceValue": 12,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [
+              "vegetarisch"
+            ],
+            "allergens": []
+          },
+          {
+            "name": "Smelt's kaaskroketjes",
+            "desc": "per stuk · ons eigen recept met L'Etivaz Alpage en Taleggio",
+            "price": "€2",
+            "priceValue": 2,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          },
+          {
+            "name": "Bitterballen",
+            "desc": "per stuk · rundvleesbitterballen van Holtkamp",
+            "price": "€1,50",
+            "priceValue": 1.5,
+            "priceOnRequest": false,
+            "priceIsSupplement": false,
+            "priceIsFrom": false,
+            "priceIsMultiple": false,
+            "tags": [],
+            "allergens": []
+          }
+        ]
+      }
+    ]
   }
 }
