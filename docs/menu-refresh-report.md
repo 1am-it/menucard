@@ -1,6 +1,6 @@
 # Menukaarten verversen — de verschillen
 
-Gegenereerd: 2026-11-01 16:17 · bron: `data/menus.json` · script: `ops/scripts/menu-bootstrap/refresh-diff.js`
+Gegenereerd: 2026-11-01 16:24 · bron: `data/menus.json` · script: `ops/scripts/menu-bootstrap/refresh-diff.js`
 
 Dit rapport is een voorstel. Het script past `data/` nooit aan; de Lead beslist
 wat er in de kaarten verandert. Alleen bronnen die al als `source` in
@@ -11,30 +11,30 @@ tussen verzoeken en via de cache in `.local/`.
 
 | kaart | bron | gelezen | ok | gewijzigde prijs | mogelijk verdwenen | mogelijk nieuw |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1-lunch | https://www.restaurantwolfslaar.com/nl/menu-lunch | html | 0 van 3 | 0 | 3 | 9 |
-| 1-diner | https://www.restaurantwolfslaar.com/nl/menu-diner | html | 0 van 17 | 0 | 17 | 9 |
+| 1-lunch | https://www.restaurantwolfslaar.com/nl/menu-lunch | html | 3 van 3 | 0 | 0 | 31 |
+| 1-diner | https://www.restaurantwolfslaar.com/nl/menu-diner | html | 8 van 17 | 3 | 6 | 18 |
 | 6-diner | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-Dinerkaart.pdf | pdf | 31 van 44 | 7 | 3 | 75 |
 | 6-lunch | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-lunchkaart.pdf | pdf | 33 van 41 | 5 | 1 | 69 |
-| 19-lunch | https://www.restaurantzuyd.nl/lunch | html | 9 van 23 | 7 | 7 | 1 |
-| 19-diner | https://www.restaurantzuyd.nl/diner | html | 8 van 21 | 5 | 8 | 3 |
+| 19-lunch | https://www.restaurantzuyd.nl/lunch | html | 9 van 23 | 7 | 7 | 2 |
+| 19-diner | https://www.restaurantzuyd.nl/diner | html | 8 van 21 | 7 | 6 | 13 |
 | 23-lunch | https://t-huis.online/wp-content/uploads/2026/09/THS-Lunch_Herfst-2026.2_DIGI.svg | unsupported_content_type | — | — | — | — |
 | 23-diner | https://t-huis.online/wp-content/uploads/2026/09/THS-Diner_Herfst-2026.2_DIGI.svg | unsupported_content_type | — | — | — | — |
 | 5-lunch | https://www.restaurant-chocolat.nl/lunch/ | html | 12 van 12 | 0 | 0 | 6 |
 | 22-afhaal | https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/ | html | 7 van 22 | 15 | 0 | 2 |
 | 17-menukaart | https://restaurantzenza.nl/ | html | 27 van 72 | 45 | 0 | 4 |
-| 11-lunch | https://www.beyerd.nl/cafe-lunchkaart/ | html | 0 van 15 | 0 | 15 | 0 |
+| 11-lunch | https://www.beyerd.nl/cafe-lunchkaart/ | html | 0 van 15 | 1 | 14 | 0 |
 | 4-menukaart | https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf | pdf | 3 van 15 | 6 | 6 | 84 |
-| 8-menukaart | https://www.aldentebreda.nl/menukaart-restaurant-2/ | html | 0 van 85 | 1 | 84 | 0 |
-| 12-menukaart | https://pellens.nl/ | html | 10 van 28 | 17 | 1 | 47 |
+| 8-menukaart | https://www.aldentebreda.nl/menukaart-restaurant-2/ | html | 0 van 85 | 1 | 84 | 1 |
+| 12-menukaart | https://pellens.nl/ | html | 10 van 28 | 17 | 1 | 48 |
 | 13-afhaal | https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf | pdf | 64 van 109 | 4 | 41 | 40 |
-| 15-menukaart | https://www.andalous-breda.nl/menukaart/ | html | 78 van 88 | 9 | 1 | 5 |
-| 24-menukaart | https://www.trattoriaperron.nl/menu/ | html | 63 van 141 | 65 | 13 | 37 |
-| 25-menukaart | https://dolceesalato.nl/menu/ | html | 88 van 113 | 15 | 10 | 11 |
-| 16-menukaart | https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf | pdf | 0 van 32 | 2 | 30 | 1 |
-| 5-diner | https://www.restaurant-chocolat.nl/diner/ | html | 0 van 16 | 2 | 14 | 5 |
-| 2-lunch | https://restaurantblossem.nl/nl/restaurant | html | 4 van 31 | 6 | 21 | 1 |
-| 2-diner | https://restaurantblossem.nl/nl/restaurant | html | 4 van 31 | 3 | 24 | 2 |
-| 21-afhaal | https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf | pdf | 26 van 34 | 6 | 2 | 6 |
+| 15-menukaart | https://www.andalous-breda.nl/menukaart/ | html | 78 van 88 | 9 | 1 | 6 |
+| 24-menukaart | https://www.trattoriaperron.nl/menu/ | html | 63 van 141 | 65 | 13 | 38 |
+| 25-menukaart | https://dolceesalato.nl/menu/ | html | 88 van 113 | 15 | 10 | 13 |
+| 16-menukaart | https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf | pdf | 20 van 32 | 5 | 7 | 22 |
+| 5-diner | https://www.restaurant-chocolat.nl/diner/ | html | 13 van 16 | 2 | 1 | 6 |
+| 2-lunch | https://restaurantblossem.nl/nl/restaurant | html | 4 van 31 | 10 | 17 | 1 |
+| 2-diner | https://restaurantblossem.nl/nl/restaurant | html | 5 van 31 | 7 | 19 | 2 |
+| 21-afhaal | https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf | pdf | 26 van 34 | 6 | 2 | 8 |
 | 9-lunch | https://static.rce.eu/wp-content/uploads/sites/32/2025/06/18064446/WEB_D25235-B_B-Lunchkaart_140-320mm_NL_MT_V9-1-1.pdf | robots | — | — | — | — |
 | 9-diner | https://static.rce.eu/wp-content/uploads/sites/32/2026/01/08092428/25238-BB-Dinerkaart_417x320mm_ENG_MT.pdf | robots | — | — | — | — |
 
@@ -46,20 +46,39 @@ Bron: https://www.restaurantwolfslaar.com/nl/menu-lunch
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 0 van 3 gerechten · 0 daarvan ongewijzigd.
+Gecontroleerd: 3 van 3 gerechten · 3 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (0)
 
 - niets
 
-### Mogelijk verdwenen (3)
+### Mogelijk verdwenen (0)
 
-- Lunchmenu · Business Lunch — naam-gevonden-zonder-prijs
-- Lunchmenu · Lunchmenu 3 gangen — naam-gevonden-zonder-prijs
-- Lunchmenu · Lunchmenu 4 gangen — naam-gevonden-zonder-prijs
+- niets
 
-### Mogelijk nieuw (9)
+### Mogelijk nieuw (31)
 
+- Vijf-gangen — € 130
+- Vijf-gangen 130 — € 150
+- 3 kazen — € 15
+- 3 kazen 15 — € 20
+- Witte Heilbot — € 32
+- Zeebaars — € 34
+- Noordzeekrab — € 38
+- Tartaar — € 26
+- Limburgs Kloostervarken — € 26
+- 30 gram — € 65
+- 30 gram 65 — € 98
+- Tarbot — € 62
+- Zeetong — € 69
+- Mechelse Koekoek — € 44
+- inclusief gebakken ganzenlever — € 54
+- Tournedos — € 52
+- Grain-fed Entrecote — € 52
+- Madeleines — € 10
+- Conference Peer — € 18
+- Passie Curd — € 18
+- Kaaswagen — € 25
 - Dinsdag lunch — € 12
 - Dinsdag lunch vanaf 12:00 — € 18
 - Woensdag lunch — € 12
@@ -69,6 +88,7 @@ Gecontroleerd: 0 van 3 gerechten · 0 daarvan ongewijzigd.
 - Vrijdag lunch — € 12
 - Vrijdag lunch vanaf 12:00 — € 18
 - Zaterdag diner — € 18
+- Wolfslaardreef — € 100
 
 ---
 
@@ -78,34 +98,33 @@ Bron: https://www.restaurantwolfslaar.com/nl/menu-diner
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 0 van 17 gerechten · 0 daarvan ongewijzigd.
+Gecontroleerd: 11 van 17 gerechten · 8 daarvan ongewijzigd.
 
-### Gewijzigde prijs (0)
+### Gewijzigde prijs (3)
 
-- niets
+- Voorgerechten · Royal Belgian Platinum Caviar — verwacht € 65 / € 98, in de bron € 26 (€ 65 / € 98 niet teruggevonden)
+- Hoofdgerechten · Mechelse Koekoek — verwacht € 44 / € 54, in de bron € 44 (€ 54 niet teruggevonden)
+- Hoofdgerechten · Grain-fed Entrecote — verwacht € 52, in de bron € 130 (€ 52 niet teruggevonden)
 
-### Mogelijk verdwenen (17)
+### Mogelijk verdwenen (6)
 
 - Signature Menu Maarten Camps · Signature Menu — naam-gevonden-zonder-prijs
-- Signature Menu Maarten Camps · Kazen uit het seizoen — naam-gevonden-zonder-prijs
 - Voorgerechten · Witte Heilbot — naam-gevonden-zonder-prijs
 - Voorgerechten · Zeebaars — naam-gevonden-zonder-prijs
-- Voorgerechten · Noordzeekrab — naam-gevonden-zonder-prijs
-- Voorgerechten · Tartaar — naam-gevonden-zonder-prijs
 - Voorgerechten · Limburgs Kloostervarken — naam-gevonden-zonder-prijs
-- Voorgerechten · Royal Belgian Platinum Caviar — naam-gevonden-zonder-prijs
 - Hoofdgerechten · Tarbot — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Zeetong — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Mechelse Koekoek — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Tournedos — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Grain-fed Entrecote — naam-gevonden-zonder-prijs
-- Nagerechten · Madeleines — naam-gevonden-zonder-prijs
 - Nagerechten · Conference Peer — naam-niet-gevonden
-- Nagerechten · Passie Curd — naam-gevonden-zonder-prijs
-- Nagerechten · Kaaswagen — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (9)
+### Mogelijk nieuw (18)
 
+- Vijf-gangen 130 — € 150
+- Witte Heilbot — € 32
+- Zeebaars — € 34
+- 30 gram — € 65
+- 30 gram 65 — € 98
+- Tarbot — € 62
+- Grain-fed Entrecote — € 52
+- C onference Peer — € 18
 - Dinsdag lunch — € 12
 - Dinsdag lunch vanaf 12:00 — € 18
 - Woensdag lunch — € 12
@@ -115,6 +134,7 @@ Gecontroleerd: 0 van 17 gerechten · 0 daarvan ongewijzigd.
 - Vrijdag lunch — € 12
 - Vrijdag lunch vanaf 12:00 — € 18
 - Zaterdag diner — € 18
+- Wolfslaardreef — € 100
 
 ---
 
@@ -282,8 +302,9 @@ Gecontroleerd: 16 van 23 gerechten · 9 daarvan ongewijzigd.
 - À la carte · Zeetongfilet — naam-gevonden-zonder-prijs
 - À la carte · Dessert — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (1)
+### Mogelijk nieuw (2)
 
+- 35 - supplement eendenlever — € 9
 - (naam onbekend) — € 16,50
 
 ---
@@ -294,17 +315,19 @@ Bron: https://www.restaurantzuyd.nl/diner
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 13 van 21 gerechten · 8 daarvan ongewijzigd.
+Gecontroleerd: 15 van 21 gerechten · 8 daarvan ongewijzigd.
 
-### Gewijzigde prijs (5)
+### Gewijzigde prijs (7)
 
 - À la carte · Kreeft — verwacht € 29,50, in de bron € 27,50 (€ 29,50 niet teruggevonden)
 - À la carte · Coquille — verwacht € 29, in de bron € 29,50 (€ 29 niet teruggevonden)
+- À la carte · Ossenhaas — verwacht € 35 / € 9, in de bron € 9 (€ 35 niet teruggevonden)
+- À la carte · Eendenlever — verwacht € 28, in de bron € 9 (€ 28 niet teruggevonden)
 - À la carte · Kaasgerecht ‘3 x Epoisses’ — verwacht € 17 / € 8,50, in de bron € 8,50 (€ 17 niet teruggevonden)
 - À la carte · Kaasassortiment — verwacht € 13 / € 19,50 / € 8,50, in de bron € 19,50 (€ 13 niet teruggevonden)
 - À la carte · Dessert — verwacht € 16,50, in de bron € 8,50 (€ 16,50 niet teruggevonden)
 
-### Mogelijk verdwenen (8)
+### Mogelijk verdwenen (6)
 
 - Verrassingsmenu's · 4-gangen verrassingsmenu — naam-niet-gevonden
 - Verrassingsmenu's · 5-gangen verrassingsmenu — naam-niet-gevonden
@@ -312,12 +335,20 @@ Gecontroleerd: 13 van 21 gerechten · 8 daarvan ongewijzigd.
 - Verrassingsmenu's · 7-gangen verrassingsmenu — naam-niet-gevonden
 - À la carte · Catch of the day — naam-gevonden-zonder-prijs
 - À la carte · Zeetongfilet — naam-gevonden-zonder-prijs
-- À la carte · Ossenhaas — naam-gevonden-zonder-prijs
-- À la carte · Eendenlever — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (3)
+### Mogelijk nieuw (13)
 
+- 4*-gangen menu — € 75
+- wijnarr. — € 32
+- &frac12; glas wijnarr. — € 22
+- 5-gangen menu — € 85
+- wijnarr. — € 40
 - &frac12; glas wijnarr. — € 27,50
+- 6-gangen menu — € 95
+- wijnarr. — € 48
+- &frac12; glas wijnarr. — € 33
+- 7-gangen menu — € 105
+- wijnarr. — € 56
 - &frac12; glas wijnarr. — € 38,50
 - (naam onbekend) — € 16,50
 
@@ -474,13 +505,13 @@ Bron: https://www.beyerd.nl/cafe-lunchkaart/
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 0 van 15 gerechten · 0 daarvan ongewijzigd.
+Gecontroleerd: 1 van 15 gerechten · 0 daarvan ongewijzigd.
 
-### Gewijzigde prijs (0)
+### Gewijzigde prijs (1)
 
-- niets
+- Warme lunch · Beyerd Burger — verwacht € 16, in de bron € 26 (€ 16 niet teruggevonden)
 
-### Mogelijk verdwenen (15)
+### Mogelijk verdwenen (14)
 
 - Lunch · Brouwerslunch — naam-gevonden-zonder-prijs
 - Lunch · Soep van de dag — naam-niet-gevonden
@@ -493,7 +524,6 @@ Gecontroleerd: 0 van 15 gerechten · 0 daarvan ongewijzigd.
 - Salades · Geitenkaas — naam-gevonden-zonder-prijs
 - Salades · Gegrilde kipfilet — naam-niet-gevonden
 - Salades · Huisgemarineerde zalm — naam-gevonden-zonder-prijs
-- Warme lunch · Beyerd Burger — naam-gevonden-zonder-prijs
 - Warme lunch · Uitsmijter Beyerd — naam-niet-gevonden
 - Warme lunch · Kroketten — naam-niet-gevonden
 - Warme lunch · Garnaalkroketjes — naam-niet-gevonden
@@ -632,9 +662,9 @@ Gecontroleerd: 1 van 85 gerechten · 0 daarvan ongewijzigd.
 - Secondi · hoofdgerechten · Sogliola del Mare del Nord — naam niet meer gevonden (prijs op aanvraag)
 - … en nog 44
 
-### Mogelijk nieuw (0)
+### Mogelijk nieuw (1)
 
-- niets
+- Nieuwe Ginnekenstraat — € 20
 
 ---
 
@@ -670,7 +700,7 @@ Gecontroleerd: 27 van 28 gerechten · 10 daarvan ongewijzigd.
 
 - Formule du Jour · Formule du Jour, 3 gangen — naam-niet-gevonden
 
-### Mogelijk nieuw (47)
+### Mogelijk nieuw (48)
 
 - Diner van woensdag tot en met zondag — € 18
 - Vrijdag en zondag — € 12
@@ -712,7 +742,7 @@ Gecontroleerd: 27 van 28 gerechten · 10 daarvan ongewijzigd.
 - (naam onbekend) — € 21,50
 - (naam onbekend) — € 15,50
 - (naam onbekend) — € 19,50
-- … en nog 7
+- … en nog 8
 
 ---
 
@@ -844,13 +874,14 @@ Gecontroleerd: 87 van 88 gerechten · 78 daarvan ongewijzigd.
 
 - Warme voorgerechten · Kip loempia's — naam-niet-gevonden
 
-### Mogelijk nieuw (5)
+### Mogelijk nieuw (6)
 
 - Kip loempia’s, — € 8
 - Pil Pil, — € 11
 - Chicken, — € 10
 - Chicken Chunks, — € 11
 - Grillburger Andalous, — € 11
+- Boschstraat — € 53
 
 ---
 
@@ -922,7 +953,7 @@ Gecontroleerd: 128 van 141 gerechten · 63 daarvan ongewijzigd.
 - Aperitieven & digestieven · Koreman’s limoncello — naam-niet-gevonden
 - Warme dranken · Koffie — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (37)
+### Mogelijk nieuw (38)
 
 - Kaart — € 1
 - Lunch bestel je tot — € 16
@@ -953,6 +984,7 @@ Gecontroleerd: 128 van 141 gerechten · 63 daarvan ongewijzigd.
 - (naam onbekend) — € 37,50
 - (naam onbekend) — € 6,20
 - (naam onbekend) — € 5,20
+- Willemstraat — € 29
 - 4811 AJ Breda Ma–Do — € 11
 - 4811 AJ Breda Ma–Do 11.00– — € 21
 - 4811 AJ Breda Ma–Do 11.00–21.00 Vr–Za — € 11
@@ -981,7 +1013,7 @@ Gecontroleerd: 103 van 113 gerechten · 88 daarvan ongewijzigd.
 - Pasta · Salmone — verwacht € 15, in de bron € 16 (€ 15 niet teruggevonden)
 - Pasta · Gamberetti — verwacht € 15, in de bron € 14,50 (€ 15 niet teruggevonden)
 - Keuzemenu · Keuzemenu — verwacht € 28,50, in de bron € 12 (€ 28,50 niet teruggevonden)
-- Koffie & thee · Koffie — verwacht € 3, in de bron € 10,50 (€ 3 niet teruggevonden)
+- Koffie & thee · Koffie — verwacht € 3, in de bron € 43 (€ 3 niet teruggevonden)
 - Koffie & thee · Thee — verwacht € 3, in de bron € 12,50 (€ 3 niet teruggevonden)
 - Likeuren · Grappa — verwacht € 5,50, in de bron € 3,25 (€ 5,50 niet teruggevonden)
 - Likeuren · Averna — verwacht € 5,50, in de bron € 3,25 (€ 5,50 niet teruggevonden)
@@ -1003,7 +1035,7 @@ Gecontroleerd: 103 van 113 gerechten · 88 daarvan ongewijzigd.
 - Dessert · Dama Bianca — naam-gevonden-zonder-prijs
 - Dessert · Lavacake — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (11)
+### Mogelijk nieuw (13)
 
 - Mista – — € 13
 - Tonno – — € 14
@@ -1016,6 +1048,8 @@ Gecontroleerd: 103 van 113 gerechten · 88 daarvan ongewijzigd.
 - Tiramisu – — € 8
 - Dama Bianca – — € 8
 - Lavacake – — € 7,50
+- Do–vr: 17:00–21:30 Thu–Fri: 17:00–21: — € 30
+- Za: 16:30–21:30 Sat: 16:30–21: — € 30
 
 ---
 
@@ -1025,49 +1059,50 @@ Bron: https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_ned
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 2 van 32 gerechten · 0 daarvan ongewijzigd.
+Gecontroleerd: 25 van 32 gerechten · 20 daarvan ongewijzigd.
 
-### Gewijzigde prijs (2)
+### Gewijzigde prijs (5)
 
-- Lunch · Omelette du fromage — verwacht € 11 / € 1,50, in de bron € 2,50 (€ 11 / € 1,50 niet teruggevonden)
-- Borrel · om te delen · Oude boeren kaas — verwacht € 8 / € 2,50, in de bron € 2,50 (€ 8 niet teruggevonden)
+- Bijgerechten · Gebakken krieltjes — verwacht € 5, in de bron € 9 (€ 5 niet teruggevonden)
+- Bijgerechten · Extra seizoensgroente — verwacht € 4, in de bron € 9 (€ 4 niet teruggevonden)
+- Lunch · Omelette du fromage — verwacht € 11 / € 1,50, in de bron € 11 (€ 1,50 niet teruggevonden)
+- Lunch · Smelt's kaas tosti — verwacht € 8 / € 1,50, in de bron € 8 (€ 1,50 niet teruggevonden)
+- Borrel · om te delen · Oude boeren kaas — verwacht € 8 / € 2,50, in de bron € 8 (€ 2,50 niet teruggevonden)
 
-### Mogelijk verdwenen (30)
+### Mogelijk verdwenen (7)
 
 - Kaasfondue · Kaasfondue Hollands — naam-niet-gevonden
 - Kaasfondue · Kaasfondue Zwitsers — naam-niet-gevonden
 - Kaasfondue · Kaasfondue Truffel — naam-niet-gevonden
 - Kaasfondue · Kaasfondue Italiaans — naam-niet-gevonden
 - Kaasfondue · Kaasfondue Frans — naam-niet-gevonden
-- Kaasfondue · Kaasfondue Bossche Bierfondue — naam-gevonden-zonder-prijs
 - Kaasfondue · Kaasfondue Spaans — naam-niet-gevonden
-- Vooraf · Lucques olijven — naam-gevonden-zonder-prijs
-- Vooraf · Burrata — naam-gevonden-zonder-prijs
-- Vooraf · Tapenade van geroosterde artisjokken — naam-gevonden-zonder-prijs
-- Vooraf · Gazpacho met gerookte forel — naam-gevonden-zonder-prijs
-- Vooraf · Rillette van gerookte makreel — naam-gevonden-zonder-prijs
-- Hoofd · Ravioli — naam-gevonden-zonder-prijs
-- Hoofd · Smelt's Cheese Burger — naam-gevonden-zonder-prijs
-- Hoofd · Burrata salade — naam-gevonden-zonder-prijs
-- Bijgerechten · Gebakken krieltjes — naam-gevonden-zonder-prijs
-- Bijgerechten · Extra seizoensgroente — naam-gevonden-zonder-prijs
-- Bijgerechten · Fris knapperige salade — naam-gevonden-zonder-prijs
-- Bijgerechten · Charcuterieplank — naam-gevonden-zonder-prijs
-- Bijgerechten · Bresaola — naam-gevonden-zonder-prijs
-- Desserts · Crème brûlée — naam-gevonden-zonder-prijs
-- Desserts · Huisgemaakte cheesecake — naam-gevonden-zonder-prijs
-- Desserts · Hemelse modder — naam-gevonden-zonder-prijs
-- Desserts · Sgroppino — naam-gevonden-zonder-prijs
-- Lunch · Smelt's kaas tosti — naam-gevonden-zonder-prijs
-- Borrel · om te delen · Brood — naam-gevonden-zonder-prijs
-- Borrel · om te delen · Groninger mozzarella — naam-gevonden-zonder-prijs
-- Borrel · om te delen · Kaaskroketten — naam-gevonden-zonder-prijs
-- Borrel · om te delen · Smelt's kaaskroketjes — naam-gevonden-zonder-prijs
 - Borrel · om te delen · Bitterballen — naam-gevonden-zonder-prijs
 
-### Mogelijk nieuw (1)
+### Mogelijk nieuw (22)
 
+- KAASFONDUE 12:00 – 21:30 DINER 17:30 – 21: — € 30
+- Met gemarineerde courgette, gekarameliseerde pistache en bieslookolie — € 8
+- Burrata — € 13
+- n geroosterde artisjokken Van basilicum, courgette, komkommer en appel — € 13
+- Gazpacho met gerookte forel — € 10
+- Rillette van gerookte makreel — € 12
+- Oudbelegen Stompetoren, Doruvael en gatenkaas Ravioli (V) — € 20
+- Spaans — € 27
+- Burrata salade (V) — € 18
+- + Gebakken krieltjes 5 Huisgemaakte cheesecake — € 9
+- + Fris knapperige salade — € 5
+- Hemelse Modder Wodka, prosecco en citroensorbet — € 9
+- + Charcuterieplank — € 14
+- Sgroppino — € 9
+- + Bresaola — € 15
 - BORREL Om te delen — € 14
+- Bresaola — € 13
+- Lucques olijven — € 8
+- Charcuterieplank — € 14
+- Ravioli (V) — € 20
+- Bresaola — € 15
+- Smelt's Cheese Burger — € 18
 
 ---
 
@@ -1077,32 +1112,20 @@ Bron: https://www.restaurant-chocolat.nl/diner/
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 2 van 16 gerechten · 0 daarvan ongewijzigd.
+Gecontroleerd: 15 van 16 gerechten · 13 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (2)
 
 - Chocolat Gastronomique · Chocolat Gastronomique — verwacht € 65 / € 75 / € 85 / € 95 / € 32 / € 40 / € 48 / € 56, in de bron € 65 (€ 75 / € 85 / € 95 / € 40 / € 48 / € 56 niet teruggevonden)
 - Chocolat Gastronomique · All the way Chocolat — verwacht € 125, in de bron € 56 (€ 125 niet teruggevonden)
 
-### Mogelijk verdwenen (14)
+### Mogelijk verdwenen (1)
 
-- Voorgerechten · Noordzee krab — naam-gevonden-zonder-prijs
-- Voorgerechten · Watermeloen — naam-gevonden-zonder-prijs
-- Voorgerechten · Kingfish — naam-gevonden-zonder-prijs
-- Voorgerechten · Zwezerik — naam-gevonden-zonder-prijs
-- Voorgerechten · Steak tartare — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Runderhaas — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Rogvleugel — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Knolselderij — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Runderbavette — naam-gevonden-zonder-prijs
-- Hoofdgerechten · Iberico presa — naam-gevonden-zonder-prijs
-- Nagerechten · Surprise — naam-gevonden-zonder-prijs
-- Nagerechten · Chocolat & chocolat puur — naam-gevonden-zonder-prijs
-- Nagerechten · Chocolat & chocolat wit — naam-gevonden-zonder-prijs
 - Nagerechten · Kaasassortiment — naam-niet-gevonden
 
-### Mogelijk nieuw (5)
+### Mogelijk nieuw (6)
 
+- KAAS ASSORTIMENT — € 22
 - 5 GANGEN — € 75
 - Wijnarrangement — € 40
 - 6 GANGEN — € 85
@@ -1117,24 +1140,27 @@ Bron: https://restaurantblossem.nl/nl/restaurant
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 10 van 31 gerechten · 4 daarvan ongewijzigd.
+Gecontroleerd: 14 van 31 gerechten · 4 daarvan ongewijzigd.
 
-### Gewijzigde prijs (6)
+### Gewijzigde prijs (10)
 
+- Bites · Brioche gerookte paling en crème van knoflook — verwacht € 9, in de bron € 17 (€ 9 niet teruggevonden)
 - Bites · Bonbon van ganzenlever, witte chocolade en truffelkaviaar — verwacht € 12, in de bron € 1,85 (€ 12 niet teruggevonden)
 - Bites · Krokante bloemkool met bbq-kruiden en geklopte feta — verwacht € 7,50, in de bron € 1,85 (€ 7,50 niet teruggevonden)
 - Brood · Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon — verwacht € 8, in de bron € 1,85 (€ 8 niet teruggevonden)
 - Op brood · Steak tartaar Blossem style — verwacht € 17, in de bron € 14,50 (€ 17 niet teruggevonden)
 - Op brood · Koudgerookte zalm, citroenmayonaise, kappertjes — verwacht € 16, in de bron € 14,50 (€ 16 niet teruggevonden)
+- Dessert · Limoen mousse, witte chocolade, matcha, mango, amandelcake — verwacht € 13,50, in de bron € 57 (€ 13,50 niet teruggevonden)
+- Dessert · Marshmallow, groene appel, pure chocolade, karamel, citrus — verwacht € 13,50, in de bron € 57 (€ 13,50 niet teruggevonden)
+- Dessert · Selectie van kazen — verwacht € 16, in de bron € 57 (€ 16 niet teruggevonden)
 - Blossem's shared lunch table · Tafeltje vol lunchgerechten — verwacht € 42 / € 2, in de bron € 2 (€ 42 niet teruggevonden)
 
-### Mogelijk verdwenen (21)
+### Mogelijk verdwenen (17)
 
 - Bites · Gemarineerde olijven — naam-gevonden-zonder-prijs
 - Bites · Nibbit — naam-gevonden-zonder-prijs
 - Bites · Gerookte amandelen — naam-gevonden-zonder-prijs
 - Bites · Sesam kroepoek met dip van vadouvan — naam-gevonden-zonder-prijs
-- Bites · Brioche gerookte paling en crème van knoflook — naam-gevonden-zonder-prijs
 - Bites · Blini met zalm, crème fraîche en cavi-art — naam-gevonden-zonder-prijs
 - Bites · Abdij kaas uit de oven met honingglaze en walnoten — naam-gevonden-zonder-prijs
 - Bites · Pata negra — naam-gevonden-zonder-prijs
@@ -1147,9 +1173,6 @@ Gecontroleerd: 10 van 31 gerechten · 4 daarvan ongewijzigd.
 - Warm · Bloemkool, snijboon, ras el hanout, prei — naam-gevonden-zonder-prijs
 - Bijgerechten · Friet met mayonaise — naam-gevonden-zonder-prijs
 - Bijgerechten · Seasonal salad — naam-gevonden-zonder-prijs
-- Dessert · Limoen mousse, witte chocolade, matcha, mango, amandelcake — naam-gevonden-zonder-prijs
-- Dessert · Marshmallow, groene appel, pure chocolade, karamel, citrus — naam-gevonden-zonder-prijs
-- Dessert · Selectie van kazen — naam-gevonden-zonder-prijs
 - Blossem's shared lunch table · 2-gangen lunch — naam-gevonden-zonder-prijs
 
 ### Mogelijk nieuw (1)
@@ -1164,21 +1187,24 @@ Bron: https://restaurantblossem.nl/nl/restaurant
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 7 van 31 gerechten · 4 daarvan ongewijzigd.
+Gecontroleerd: 12 van 31 gerechten · 5 daarvan ongewijzigd.
 
-### Gewijzigde prijs (3)
+### Gewijzigde prijs (7)
 
+- Bites · Brioche gerookte paling en crème van knoflook — verwacht € 9, in de bron € 17 (€ 9 niet teruggevonden)
 - Bites · Bonbon van ganzenlever, witte chocolade en truffelkaviaar — verwacht € 12, in de bron € 1,85 (€ 12 niet teruggevonden)
 - Bites · Krokante bloemkool met bbq-kruiden en geklopte feta — verwacht € 7,50, in de bron € 1,85 (€ 7,50 niet teruggevonden)
 - Brood · Huisgemaakt focaccia met seizoensboter, Blossem-olijfolie en maldon — verwacht € 8, in de bron € 1,85 (€ 8 niet teruggevonden)
+- Dessert · Limoen mousse, witte chocolade, matcha, mango, amandelcake — verwacht € 13,50, in de bron € 57 (€ 13,50 niet teruggevonden)
+- Dessert · Marshmallow, groene appel, pure chocolade, karamel, citrus — verwacht € 13,50, in de bron € 57 (€ 13,50 niet teruggevonden)
+- Dessert · Selectie van kazen — verwacht € 16, in de bron € 57 (€ 16 niet teruggevonden)
 
-### Mogelijk verdwenen (24)
+### Mogelijk verdwenen (19)
 
 - Bites · Gemarineerde olijven — naam-gevonden-zonder-prijs
 - Bites · Nibbit — naam-gevonden-zonder-prijs
 - Bites · Gerookte amandelen — naam-gevonden-zonder-prijs
 - Bites · Sesam kroepoek met dip van vadouvan — naam-gevonden-zonder-prijs
-- Bites · Brioche gerookte paling en crème van knoflook — naam-gevonden-zonder-prijs
 - Bites · Blini met zalm, crème fraîche en cavi-art — naam-gevonden-zonder-prijs
 - Bites · Abdij kaas uit de oven met honingglaze en walnoten — naam-gevonden-zonder-prijs
 - Bites · Pata negra — naam-gevonden-zonder-prijs
@@ -1194,10 +1220,6 @@ Gecontroleerd: 7 van 31 gerechten · 4 daarvan ongewijzigd.
 - Hoofd · Purpura aubergine, eekhoorntjesbrood, gegrilde groenten, muntpesto — naam-gevonden-zonder-prijs
 - Bijgerechten · Friet met mayonaise — naam-gevonden-zonder-prijs
 - Bijgerechten · Seasonal salad — naam-gevonden-zonder-prijs
-- Dessert · Limoen mousse, witte chocolade, matcha, mango, amandelcake — naam-gevonden-zonder-prijs
-- Dessert · Marshmallow, groene appel, pure chocolade, karamel, citrus — naam-gevonden-zonder-prijs
-- Dessert · Selectie van kazen — naam-gevonden-zonder-prijs
-- Blossem menu · Blossem menu — naam-gevonden-zonder-prijs
 
 ### Mogelijk nieuw (2)
 
@@ -1228,10 +1250,12 @@ Gecontroleerd: 32 van 34 gerechten · 26 daarvan ongewijzigd.
 - Voorgerecht · Senang's plate — naam-niet-gevonden
 - Combi · Gamba's uit de oven — naam-niet-gevonden
 
-### Mogelijk nieuw (6)
+### Mogelijk nieuw (8)
 
 - Halve Spekkoek — € 16
 - Hele Spekkoek — € 27,50
+- bel ons voor meer informatie op 076 88 88 — € 941
+- @CHESRONDEMOLUKSECHEF TETERINGSEDIJK — € 138
 - Senang’s plate (voor 2 personen) — € 13
 - Pangsit Goreng — € 7,50
 - + Noodles — € 2
