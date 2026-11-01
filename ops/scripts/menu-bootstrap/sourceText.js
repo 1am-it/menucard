@@ -381,7 +381,8 @@ function nameTokens(name) {
   const words = normalizeText(name)
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
-  const content = words.filter((word) => !NAME_FILLER.has(word) && word.length > 1);
+  // A number in a name is identity ("3-gangen menu", "2 personen"), never filler.
+  const content = words.filter((word) => !NAME_FILLER.has(word) && (word.length > 1 || /^\d/.test(word)));
   return content.length > 0 ? content : words;
 }
 
@@ -458,7 +459,22 @@ function findNameOccurrences(sourceOrIndex, name) {
   };
   collect(false);
   if (found.length === 0) collect(true);
-  return found.sort((left, right) => right.score - left.score || left.start - right.start);
+  // An occurrence that opens its own printed row is the dish row; one in the
+  // middle of a row is usually part of another dish's description.
+  for (const occurrence of found) occurrence.opensRow = startsRow(index, occurrence.start);
+  return found.sort(
+    (left, right) =>
+      right.score - left.score ||
+      Number(right.opensRow) - Number(left.opensRow) ||
+      left.start - right.start,
+  );
+}
+
+/** Is this position the first thing printed on its row? */
+function startsRow(index, position) {
+  const lineNumber = lineOf(index, position);
+  const rowStart = index.lineStarts[lineNumber];
+  return position - rowStart <= 3;
 }
 
 /**
@@ -489,6 +505,24 @@ function expectedPrices(item) {
 }
 
 /**
+ * An amount printed straight after the name: "Hollands 27", "Menu 160,-". A pdf
+ * that prints two columns on one visual row puts the amount in the middle of the
+ * row, where the row-end rule cannot see it; anchored right after the name it is
+ * still that dish's amount.
+ */
+function adjacentAmount(index, occurrence) {
+  const after = index.source.slice(occurrence.end, occurrence.end + 8);
+  const match = /^[\s|·]{1,3}(\d{1,3})(?:[.,](?:(\d{1,2})|-{1,2}))?(?![\d.,])/.exec(after);
+  if (!match) return null;
+  const whole = Number(match[1]);
+  const fraction = match[2] === undefined ? 0 : Number(`0.${match[2]}`);
+  const value = Math.round((whole + fraction) * 100) / 100;
+  if (!Number.isFinite(value) || value <= 0) return null;
+  const start = occurrence.end + match[0].indexOf(match[1]);
+  return { value, raw: match[0].trim(), index: start, form: 'adjacent' };
+}
+
+/**
  * The printed prices that belong to one occurrence of a name, nearest first.
  * The dish's own printed row always wins: a card prints its amount on the same
  * row, or on the row just below it (name, amount, description), or in the cell
@@ -499,13 +533,20 @@ function expectedPrices(item) {
 function occurrencePrices(index, occurrence) {
   const lineNumber = lineOf(index, occurrence.start);
   const own = pricesOnLine(index, lineNumber);
-  if (own.length > 0) return { prices: own, scope: 'row' };
-  for (let step = 1; step <= 2; step += 1) {
+  const adjacent = adjacentAmount(index, occurrence);
+  // An amount the row reader already saw is never counted twice.
+  const extra = adjacent && !own.some((price) => Math.abs(price.index - adjacent.index) < 4) ? [adjacent] : [];
+  const rowPrices = [...own, ...extra].sort((left, right) => left.index - right.index);
+  if (rowPrices.length > 0) return { prices: rowPrices, scope: 'row' };
+  // Name, description, the label "Prijs", the amount: a card may take a few rows
+  // before it prints the amount of this dish. The first row that prints a price
+  // after the name is the one that belongs to it.
+  for (let step = 1; step <= 4; step += 1) {
     const next = pricesOnLine(index, lineNumber + step);
     if (next.length > 0) return { prices: next, scope: step === 1 ? 'next-row' : 'near-row' };
   }
   // A menu row whose amount is printed on a row of its own ("50").
-  for (let step = 1; step <= 2; step += 1) {
+  for (let step = 1; step <= 4; step += 1) {
     const bare = bareNumberOnLine(index, lineNumber + step);
     if (bare) return { prices: [bare], scope: 'next-row' };
   }
@@ -549,14 +590,28 @@ function matchItem(text, item = {}, options = {}) {
   if (occurrences.length === 0) {
     return { ...base, status: 'name-not-found', reason: 'naam-niet-gevonden', expected, found: null, foundPrices: [] };
   }
+  // The dish's own price must be printed next to its name; a supplement or a
+  // second portion ("+ €4", "glas/fles") only has to be printed on the card
+  // somewhere, because a card lists those once for a whole block.
+  const mainExpected = Number.isFinite(item.priceValue) ? item.priceValue : expected[0];
+  const printedAnywhere = (value) => index.prices.some((price) => Math.abs(price.value - value) < PRICE_TOLERANCE);
+  const extras = expected.filter((value) => Math.abs(value - mainExpected) >= PRICE_TOLERANCE);
   let best = null;
   for (const occurrence of occurrences) {
     const { prices, scope } = occurrencePrices(index, occurrence);
     if (prices.length === 0) continue;
-    const missing = expected.filter((value) => !prices.some((found) => Math.abs(found.value - value) < PRICE_TOLERANCE));
-    const candidate = { occurrence, prices, scope, missing };
-    if (missing.length === 0) return { ...base, nameFound: true, status: 'ok', expected, found: prices[0].value, foundPrices: prices };
-    if (!best || candidate.missing.length < best.missing.length) best = candidate;
+    const mainFound = prices.some((price) => Math.abs(price.value - mainExpected) < PRICE_TOLERANCE);
+    const missing = [];
+    if (!mainFound) missing.push(mainExpected);
+    for (const value of extras) {
+      if (prices.some((price) => Math.abs(price.value - value) < PRICE_TOLERANCE)) continue;
+      if (printedAnywhere(value)) continue;
+      missing.push(value);
+    }
+    if (missing.length === 0) {
+      return { ...base, nameFound: true, status: 'ok', expected, found: mainExpected, foundPrices: prices };
+    }
+    if (!best || missing.length < best.missing.length) best = { occurrence, prices, scope, missing };
   }
   if (!best) {
     return { ...base, nameFound: true, status: 'name-not-found', reason: 'naam-gevonden-zonder-prijs', expected, found: null, foundPrices: [] };
