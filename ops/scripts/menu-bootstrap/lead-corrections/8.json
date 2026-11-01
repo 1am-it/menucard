@@ -1,0 +1,532 @@
+{
+  "restaurantId": "8",
+  "name": "Al Dente Ristorante",
+  "rule": "R10",
+  "checkedBy": "Lead",
+  "checkedAt": "2026-11-01",
+  "source": "https://www.aldentebreda.nl/menukaart-restaurant-2/",
+  "sourceImages": [
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826a.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826b.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826c.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826d.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826e-1-scaled.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826f.jpg",
+    "https://www.aldentebreda.nl/wp-content/uploads/2026/08/Menukaart0826g.jpg"
+  ],
+  "aiRun": ".local/menu-bootstrap-ai/8.json (2026-11-01, 3 verzoeken, 3 cent)",
+  "corrections": [
+    "Prijzen: 84 van 84 gelijk aan de kaart; niets veranderd.",
+    "Sogliola del Mare del Nord: \"dagprijs\" op de kaart, dus prijs op aanvraag (geen ontbrekende prijs).",
+    "Diverse grappa: \"vanaf 9\" op de kaart, dus een vanaf-prijs.",
+    "Indeling zoals op de kaart: de AI zette de voor- en hoofdgerechten van het Pasta e Basta-menu, het Menu Classico en de Antipasti samen; nu elk een eigen categorie.",
+    "De twee keuzemenu's staan als eigen gerecht met hun menuprijs; de inbegrepen bruschetta en het brood staan in de omschrijving."
+  ],
+  "subtitle": "Menukaart",
+  "note": null,
+  "categories": [
+    {
+      "name": "Pasta e Basta menu",
+      "items": [
+        {
+          "name": "Pasta e Basta menu",
+          "desc": "Drie gangen keuzemenu · vooraf bruschetta met tomaat en een bakje olijven, en brood met olijfolie",
+          "price": 44.95
+        }
+      ]
+    },
+    {
+      "name": "Pasta e Basta · voorgerechten",
+      "items": [
+        {
+          "name": "Vitello tonnato",
+          "desc": "Dun gesneden gepocheerd kalfsvlees | crème van tonijn",
+          "price": 17.95
+        },
+        {
+          "name": "Carpaccio di carne con rucola",
+          "desc": "Ossenhaas-carpaccio | olijfolie | balsamico | rucola | Parmezaanse kaas",
+          "price": 19.95
+        },
+        {
+          "name": "Tagliata di tonno",
+          "desc": "Getrancheerde rauwe tonijn | peperolie",
+          "price": 18.95
+        },
+        {
+          "name": "Insalata con formaggio di capra e fragole",
+          "desc": "Baby spinazie | geitenkaas | aardbei | peperolie | balsamico",
+          "price": 16.95
+        }
+      ]
+    },
+    {
+      "name": "Pasta e Basta · hoofdgerechten",
+      "items": [
+        {
+          "name": "Pasta del giorno",
+          "desc": "Pasta van de dag",
+          "price": 22.95
+        },
+        {
+          "name": "Taglierini con ragù di carne",
+          "desc": "Dunne lintpasta | saus van tomaat | ui | runder tartaar",
+          "price": 22.95
+        },
+        {
+          "name": "Conchiglie rigate al gorgonzola",
+          "desc": "Deegschelpjes | peer | gorgonzola | rucola | Parmezaanse kaas | walnoot",
+          "price": 22.95
+        },
+        {
+          "name": "Risotto agli scampi",
+          "desc": "Risotto | gepelde garnalen | zeekraal | witte wijn | Parmezaanse kaas",
+          "price": 23.95
+        }
+      ]
+    },
+    {
+      "name": "Pasta e Basta · nagerechten",
+      "items": [
+        {
+          "name": "Sgroppino",
+          "desc": "Vloeibaar citroenijs | wodka | prosecco",
+          "price": 11.95
+        },
+        {
+          "name": "Tiramisù",
+          "desc": "Mascarpone | Amaretto | cacao",
+          "price": 11.95
+        },
+        {
+          "name": "Caffè Affogato",
+          "desc": "Espresso koffie | bolletje vanille roomijs | Amaretto | slagroom",
+          "price": 8.95
+        },
+        {
+          "name": "Ananas di Sorrento",
+          "desc": "Ananas | citroenijs | limoncello | cake | gegratineerd eiwit",
+          "price": 12.95
+        }
+      ]
+    },
+    {
+      "name": "Menu Classico",
+      "items": [
+        {
+          "name": "Menu Classico",
+          "desc": "Drie gangen keuzemenu · vooraf bruschetta met tomaat en een bakje olijven, en brood met olijfolie · nagerecht naar keuze uit de dessertkaart",
+          "price": 59.95
+        }
+      ]
+    },
+    {
+      "name": "Classico · voorgerechten",
+      "items": [
+        {
+          "name": "Scampi dello Chef",
+          "desc": "Gebakken gepelde garnalen | knoflook | wittewijnsaus",
+          "price": 22.95
+        },
+        {
+          "name": "Duo",
+          "desc": "Ossenhaas carpaccio & Parmezaanse kaas | vitello tonnato",
+          "price": 22.95
+        },
+        {
+          "name": "Carpaccio di carne con tartufo",
+          "desc": "Carpaccio van ossenhaas | truffel | olijfolie",
+          "price": 22.95
+        },
+        {
+          "name": "Burrata con verdure grigliate",
+          "desc": "Burrata | gegrilde groenten | cherry tomaat | olijfolie",
+          "price": 18.95
+        }
+      ]
+    },
+    {
+      "name": "Classico · hoofdgerechten",
+      "items": [
+        {
+          "name": "Coda di rospo con capesante",
+          "desc": "Gebakken zeeduivel | Sint Jacobsschelpen | curry ragout | aardappelen",
+          "price": 36.95
+        },
+        {
+          "name": "Linguine al tartufo",
+          "desc": "Linguine | room | kaas | truffel | ei",
+          "price": 26.95
+        },
+        {
+          "name": "Filetto di manzo Al Dente",
+          "desc": "Gegrilde ossenhaas | saus naar keuze: peper, truffel of gorgonzola | groenten | aardappel",
+          "price": 38.95
+        },
+        {
+          "name": "Saltimbocca alla Romana",
+          "desc": "Gebakken kalfsoesters | Parmaham | salie | kalfsjus | groenten | aardappel",
+          "price": 36.95
+        }
+      ]
+    },
+    {
+      "name": "Antipasti · voorgerechten",
+      "items": [
+        {
+          "name": "Tartare di manzo con fegato d'anatra alla griglia",
+          "desc": "Tartaar van ossenhaas | gegrilde groenten | gegrilde eendenlever | balsamico",
+          "price": 21.95
+        },
+        {
+          "name": "Carpaccio di rana pescatrice con astice",
+          "desc": "Carpaccio van zeeduivel | kreeft | venkel | sinaasappel | radijs | kappertjes | olijfolie",
+          "price": 23.95
+        },
+        {
+          "name": "Carpaccio di carne con fegato d'anatra e tartufo",
+          "desc": "Carpaccio van ossenhaas | eendenlever krullen | truffel | rucola | balsamico",
+          "price": 23.95
+        },
+        {
+          "name": "Salmone scottato con salsa olandese",
+          "desc": "Kort aangebraden zalm | hollandaise saus | bieslook | geklaarde boter",
+          "price": 22.95
+        },
+        {
+          "name": "Capesante con salsa alle spugnole",
+          "desc": "Sint Jacobsschelpen | morieljes | room | gnocchi",
+          "price": 22.95
+        },
+        {
+          "name": "Barbabietola con balsamico",
+          "desc": "Dungesneden bietjes | balsamico | peperolie | gorgonzola | walnoot",
+          "price": 16.95
+        },
+        {
+          "name": "Ravioli alle animelle",
+          "desc": "Gebakken kalfszwezerik | gebakken kalfstong | eendenlever-ravioli | Hollandaise saus | truffelsaus",
+          "price": 22.95
+        },
+        {
+          "name": "Scampi Diablo",
+          "desc": "Gebakken scampi | pikante kruiden saus | witte wijn | room",
+          "price": 22.95
+        }
+      ]
+    },
+    {
+      "name": "Pasta e risotti · pasta en risotto gerechten",
+      "items": [
+        {
+          "name": "Risotto al tartufo",
+          "desc": "Risotto | truffel | witte wijn | Parmezaanse kaas",
+          "price": 26.95
+        },
+        {
+          "name": "Risotto con gamberi e capesante",
+          "desc": "Risotto | wilde gamba | Sint Jacobsschelpen | zeekraal | witte wijn | Parmezaanse kaas",
+          "price": 32.95
+        },
+        {
+          "name": "Casarecce alla Norma",
+          "desc": "Casarecce | aubergine | tomaat | pepertje",
+          "price": 22.95
+        },
+        {
+          "name": "Spaghetti alle vongole",
+          "desc": "Spaghetti | venusschelpen | witte wijn | peterselie | knoflook | pepertje",
+          "price": 30.95
+        },
+        {
+          "name": "Ravioli salsa rossa",
+          "desc": "Ravioli | ricotta & spinazie vulling | tomaat | room | Parmezaanse kaas",
+          "price": 22.95
+        },
+        {
+          "name": "Rigatoni con spezzatino",
+          "desc": "Rigatoni | gestoofd rundvlees | tomaat",
+          "price": 24.95
+        },
+        {
+          "name": "Spaghetti aglio, olio e gamberi",
+          "desc": "Spaghetti | gebakken gepelde garnalen | knoflook | cherrytomaat | olijfolie | pepertje",
+          "price": 22.95
+        },
+        {
+          "name": "Linguine con crostacei",
+          "desc": "St. Jacobsschelpen | vongole | mosselen | scampi | zee kraal | knoflook | cherrytomaat | witte wijn",
+          "price": 32.95
+        }
+      ]
+    },
+    {
+      "name": "Secondi · hoofdgerechten",
+      "items": [
+        {
+          "name": "Branzino alle vongole",
+          "desc": "Gestoomde zeebaars | vongole | venkel | aardappelen",
+          "price": 36.95
+        },
+        {
+          "name": "Rombo alla senape",
+          "desc": "Gegrilde tarbot | mosterdsaus | daggroenten | aardappelen",
+          "price": 45.95
+        },
+        {
+          "name": "Sogliola del Mare del Nord",
+          "desc": "Gebakken Noordzee tong | groene salade | aardappelen",
+          "price": null,
+          "priceOnRequest": true,
+          "priceLabel": "dagprijs"
+        },
+        {
+          "name": "Animelle con salsa di spugnole",
+          "desc": "Gebakken zwezerik | morieljes saus | daggroenten | aardappelen",
+          "price": 40.95
+        },
+        {
+          "name": "Carré d'agnello al forno",
+          "desc": "Geroosterde lamscarré | kruidenkorst | lamsjus | daggroenten | aardappelen",
+          "price": 44.95
+        },
+        {
+          "name": "Tagliata di manzo con rucola e parmigiano",
+          "desc": "Getrancheerde ossenhaas | rucola | Parmezaanse kaas | balsamico | aardappelen",
+          "price": 36.95
+        },
+        {
+          "name": "Filetto di manzo Rossini",
+          "desc": "Gegrilde ossenhaas | gegrilde eendenlever | truffelsaus | daggroenten | aardappelen",
+          "price": 42.95
+        },
+        {
+          "name": "Fegato di vitello fritto all'Aceto Balsamico",
+          "desc": "Gebakken kalfslever | daggroenten | balsamico saus | aardappelen",
+          "price": 34.95
+        }
+      ]
+    },
+    {
+      "name": "Contorni · bijgerechten",
+      "items": [
+        {
+          "name": "Spaghetti all'aglio",
+          "desc": "Spaghetti | knoflook | Italiaanse kruiden | pepertje",
+          "price": 6.95
+        },
+        {
+          "name": "Insalata verde",
+          "desc": "Mix van groene salade",
+          "price": 6.95
+        },
+        {
+          "name": "Verdure grigliate",
+          "desc": "Gegrilde groenten (koud geserveerd)",
+          "price": 11.95
+        },
+        {
+          "name": "Patate fritte",
+          "desc": "Aardappelen in olijfolie gebakken",
+          "price": 4.95
+        }
+      ]
+    },
+    {
+      "name": "Il dolce · nagerechten",
+      "items": [
+        {
+          "name": "Tiramisù",
+          "desc": "Mascarpone | Amaretto | cacao",
+          "price": 11.95
+        },
+        {
+          "name": "Formaggi misti",
+          "desc": "Sortering uit Italiaanse kazen",
+          "price": 14.95
+        },
+        {
+          "name": "Meringa alle fragole",
+          "desc": "Cake | banketbakkersroom | aardbeien | gegratineerd eiwit",
+          "price": 12.95
+        },
+        {
+          "name": "Ananas di Sorrento",
+          "desc": "Ananas | citroenijs | limoncello | cake | gegratineerd eiwit",
+          "price": 12.95
+        },
+        {
+          "name": "Cassata Siciliana",
+          "desc": "Siciliaans ijstaartje | gekonfijt fruit",
+          "price": 11.95
+        },
+        {
+          "name": "Torta al cioccolato",
+          "desc": "Chocoladecake | gemarineerde kersen | stracciatella ijs (bereidingstijd 20 min)",
+          "price": 12.95
+        },
+        {
+          "name": "Sgroppino",
+          "desc": "Vloeibaar citroenijs | wodka | prosecco",
+          "price": 11.95
+        },
+        {
+          "name": "Torta di mele",
+          "desc": "Omgekeerd appeltaartje | walnoot-ijs | ahornsiroop (bereidingstijd 20 min)",
+          "price": 12.95
+        },
+        {
+          "name": "Tiramisù con le fragole",
+          "desc": "Tiramisù | aardbeien | stracciatella ijs",
+          "price": 12.95
+        },
+        {
+          "name": "Semifreddo",
+          "desc": "Parfait ijs",
+          "price": 11.95
+        },
+        {
+          "name": "Tartufo",
+          "desc": "Chocolade-zabaglione roomijs | hazelnoot | cacao",
+          "price": 8.95
+        },
+        {
+          "name": "Caffè Affogato",
+          "desc": "Espresso koffie | bolletje vanille roomijs | Amaretto | slagroom",
+          "price": 8.95
+        },
+        {
+          "name": "Caffè Al Dente",
+          "desc": "Koffie of thee naar keuze | kleine tiramisu | puntje likeur",
+          "price": 11.95
+        }
+      ]
+    },
+    {
+      "name": "Caffè · koffie",
+      "items": [
+        {
+          "name": "Espresso",
+          "desc": "kleine sterke koffie",
+          "price": 4.5
+        },
+        {
+          "name": "Caffè Lungo",
+          "desc": "espresso met iets meer water",
+          "price": 4.5
+        },
+        {
+          "name": "Caffè Corretto",
+          "desc": "caffè lungo met scheutje drank | bv Sambucca",
+          "price": 5.5
+        },
+        {
+          "name": "Latte Macchiato",
+          "desc": "glas caffè | veel hete melk | beetje melkschuim",
+          "price": 5
+        },
+        {
+          "name": "Ristretto",
+          "desc": "extra sterke espresso",
+          "price": 4.5
+        },
+        {
+          "name": "Espresso doppio",
+          "desc": "dubbele espresso",
+          "price": 5
+        },
+        {
+          "name": "Macchiato",
+          "desc": "espresso | toefje warme melkschuim",
+          "price": 5
+        },
+        {
+          "name": "Caffè con panna",
+          "desc": "caffè lungo | slagroom",
+          "price": 4.5
+        },
+        {
+          "name": "Cappuccino",
+          "desc": "caffè lungo | wolkje warme melk | melkschuim",
+          "price": 5
+        },
+        {
+          "name": "Caffè Italia",
+          "desc": "caffè | basterdsuiker | Amaretto | slagroom",
+          "price": 10.5
+        },
+        {
+          "name": "Spanish Coffee",
+          "desc": "caffè | basterdsuiker | Tia Maria | slagroom",
+          "price": 10.5
+        },
+        {
+          "name": "French Coffee",
+          "desc": "caffè | basterdsuiker | Grand Marnier | room",
+          "price": 10.5
+        },
+        {
+          "name": "Irish Coffee",
+          "desc": "caffè | basterdsuiker | Jameson whisky | room",
+          "price": 10.5
+        }
+      ]
+    },
+    {
+      "name": "Tè · thee",
+      "items": [
+        {
+          "name": "Tè",
+          "desc": "earl grey | rooibos | zwart | kamille | groen",
+          "price": 4.5
+        },
+        {
+          "name": "Tè Fresco",
+          "desc": "gember | munt | sinaasappel | citroen",
+          "price": 5
+        }
+      ]
+    },
+    {
+      "name": "Digestivo · digestief",
+      "items": [
+        {
+          "name": "Limoncello",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Frangelico",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Amaretto",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Sambuca",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Grappa Chioccolate",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Diverse likeur",
+          "desc": "",
+          "price": 7
+        },
+        {
+          "name": "Diverse grappa",
+          "desc": "",
+          "price": 9,
+          "priceIsFrom": true
+        }
+      ]
+    }
+  ]
+}
