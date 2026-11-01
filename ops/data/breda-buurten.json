@@ -1,0 +1,12 @@
+{
+  "note": "Buurt per adres voor de restaurants van golf 1 (#195). Het postcodegebied is de basis; een straat die volgens de bestaande data in een andere buurt valt, staat in straten. Alleen postcodes en straten die in deze batch of in de bestaande data voorkomen staan erin.",
+  "source": "data/restaurants.json: alle bestaande restaurants met een 4811-adres hebben buurt Binnenstad, behalve John F. Kennedylaan 15 (Valkenberg) en Willemstraat 29 (Station). Het postcodegebied 4811 is daarmee het centrum van Breda, met die twee straten als afwijking. De OSM-kandidatenlijst (ops/data/breda-restaurant-candidates.json) bevat geen addr:suburb, dus de buurt komt uit postcode en straat.",
+  "checked": "2026-11-01",
+  "buurten": {
+    "4811": "Binnenstad"
+  },
+  "straten": {
+    "John F. Kennedylaan": "Valkenberg",
+    "Willemstraat": "Station"
+  }
+}

@@ -107,8 +107,17 @@ dat te traag. Besloten:
 
 Ook dit geldt niet als akkoord voor betaalde AI in de app (BE-21).
 
+## Aanvulling, 1 nov 2026: uitbreiding naar nieuwe restaurants
+De eigenaar besloot Breda uit te breiden met de werklijst van BE-72 (OpenStreetMap):
+- **in golven:** eerst de ±79 hoogst gerangschikte restaurants (BE-79), dan de rest van de ±200 restaurants, daarna cafés en snackbars met een kaart online;
+- **na golf 1 meten** we het rendement, de doorlooptijd en het aandeel gesloten zaken;
+- **alleen in het daltarief van DeepSeek;**
+- **dezelfde regels als de startvulling:** alleen de eigen website, niets verzinnen, en de Lead controleert elke kaart (met `price-check.js`, BE-78) voordat hij `leadChecked` zet.
+
+Ketens blijven buiten de werklijst, net als in BE-72.
+
 ## Wat het niet doet
 - Geen herkomst per veld in de database (`field_provenance`). Dat is bewust
   geaccepteerd voor deze eenmalige vulling.
-- Geen nieuwe restaurants buiten de bestaande 25.
+- Geen nieuwe restaurants buiten de bestaande 25. (Vervallen per 1 nov 2026, zie de aanvulling "uitbreiding naar nieuwe restaurants".)
 - Geen publicatie zonder review: de Lead merget pas na de controle.
