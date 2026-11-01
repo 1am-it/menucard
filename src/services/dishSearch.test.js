@@ -92,6 +92,29 @@ test('allergen-exclusion baseline: "steak" excluding allergen 7 still excludes e
   }
 });
 
+test('BE-71 R5: een toeslag ("Extra vlees: Kipfilet € 4") staat nooit als los zoekresultaat', () => {
+  // The Zenza card prints "Kipfilet" twice: € 18,50 as a dish of the SCHOTELS
+  // and € 4 as an extra under EXTRA VLEES. Only the dish is a search result.
+  const res = searchDishes({ q: 'kipfilet' });
+  const zenza = res.results.filter((dish) => dish.restaurantId === '17');
+  assert.ok(zenza.some((dish) => dish.category === 'SCHOTELS' && dish.priceDisplay === '€18,50'), 'de kipfilet van de schotels is een gerecht');
+  assert.deepEqual(zenza.filter((dish) => dish.category === 'EXTRA VLEES'), [], 'de toeslag van "Extra vlees" staat nergens tussen');
+  for (const dish of res.results) assert.notEqual(dish.priceDisplay, '€4', 'no supplement may surface as a dish');
+
+  // The same check over every supplement of the data, so a future card cannot
+  // quietly reintroduce one.
+  const menus = require('../../data/menus.json');
+  for (const [key, menu] of Object.entries(menus)) {
+    for (const category of menu.categories || []) {
+      for (const item of category.items || []) {
+        if (item.priceIsSupplement !== true) continue;
+        const found = searchDishes({ q: item.name }).results.some((dish) => dish.restaurantId === key.split('-')[0] && dish.category === category.name && dish.priceDisplay === item.price);
+        assert.equal(found, false, `${key}: ${item.name} (${item.price}) is een toeslag`);
+      }
+    }
+  }
+});
+
 test('ordinary query unaffected by sup/wine: "steak" keeps its exact pre-existing result set and order', () => {
   const res = searchDishes({ q: 'steak' });
   const expectedOrder = [
@@ -181,8 +204,10 @@ test('BE-16: q=kip — 36 dishes match across 5 restaurants; every restaurant be
   assert.equal(res.results.length, 0, 'no leftover individual results — every one of the 36 dishes lives inside a group');
   const byRestaurant = Object.fromEntries(res.restaurantGroups.map((g) => [g.restaurantName, g.menus.map((m) => [m.mealType, m.count])]));
   assert.deepEqual(byRestaurant['Makanan'], [['afhaal', 4]], 'BE-71: the startvulling card of Makanan (22)');
-  // BE-71 ronde 3: the startvulling card of Restaurant Zenza (17).
-  assert.deepEqual(byRestaurant['Restaurant Zenza'], [['menukaart', 21]]);
+  // BE-71 ronde 4: the startvulling card of Restaurant Zenza (17) now carries
+  // its real sections (R9), so 19 dishes match "kip" instead of the 21 under
+  // the old slogan section.
+  assert.deepEqual(byRestaurant['Restaurant Zenza'], [['menukaart', 19]]);
   assert.deepEqual(byRestaurant['Brasserie Bardot'], [['lunch', 2], ['diner', 1], ['specialiteiten', 1]]);
   assert.deepEqual(byRestaurant['Restaurant Zuyd'], [['lunch', 1], ['diner', 1]]);
   assert.deepEqual(byRestaurant['T-Huis'], [['lunch', 3], ['diner', 2]]);

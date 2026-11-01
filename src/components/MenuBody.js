@@ -19,7 +19,7 @@ import DishShareButton from '@/src/components/DishShareButton'
 import { SHARED_DISH_NOTE } from '@/src/lib/dishShare'
 import { groupHeadingsBefore } from '@/src/lib/menuGroups'
 import { dailyDishInfo } from '@/src/lib/dailyDish'
-import { honestPriceLabel } from '@/src/lib/menuPrice'
+import { menuPriceLabel } from '@/src/lib/menuPrice'
 // BE-42 (#98) 2A — de kaartnamen staan op één plek (src/lib/menuTabs.js), zodat
 // de tabbladen op de restaurantpagina en de menukaart zelf nooit uit elkaar
 // lopen. Alleen de titel komt daar vandaan; het label met emoji blijft hier.
@@ -141,7 +141,10 @@ export function MenuItem({ item, query = '', excludeAllergens = [], isResolvedTa
   // BE-29 (#70) — dezelfde eerlijke prijs als op de home: een expliciete
   // bron-eenheid ("per stuk", "per kilo", "voor 2 personen") blijft zichtbaar;
   // zonder echte prijs blijft "op aanvraag" staan.
-  const priceLabel = honestPriceLabel(item) || item.price || 'op aanvraag'
+  // BE-71 R5 (#176) — een toeslag ("Extra vlees: Kipfilet € 4") staat als
+  // "+ € 4" op de kaart: hetzelfde label als altijd, met het plusteken van de
+  // bestaande toeslagweergave. Geen nieuwe opmaak, geen nieuw veld.
+  const priceLabel = menuPriceLabel(item)
   // BE-12 — the resolved dish's own substring mark comes from `fromQuery`,
   // never the shared `?q=` filter state, and only for this one item; it
   // stays for as long as this item is the resolved target (the life of

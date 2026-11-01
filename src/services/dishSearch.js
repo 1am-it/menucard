@@ -106,6 +106,10 @@ function buildDishIndex() {
 
     ;(menu.categories || []).forEach((category, categoryIndex) => {
       ;(category.items || []).forEach((item, itemIndex) => {
+        // BE-71 R5 (#176) — een toeslag ("Extra vlees: Kipfilet € 4") is een
+        // aanvulling op een gerecht, geen gerecht: hij staat op de kaart maar
+        // nooit als los zoekresultaat.
+        if (item.priceIsSupplement === true) return
         dishes.push({
           dishId: `${restaurantId}-${mealType}-${categoryIndex}-${itemIndex}`,
           name: item.name || '',
