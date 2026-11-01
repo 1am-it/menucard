@@ -117,7 +117,7 @@ const CUISINE_STOPWORDS = Object.freeze([
   'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag',
   'restaurant', 'restaurants', 'eetcafe', 'cafe', 'grand', 'brasserie', 'bistro',
   'bar', 'food', 'keuken', 'gerechten', 'and', 'the', 'of', 'de', 'het', 'een',
-  'van', 'met', 'en', 'bij', 'op',
+  'van', 'met', 'en', 'bij', 'op', 'shop', 'fast',
 ]);
 
 function firstString(tags, keys) {
