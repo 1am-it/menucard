@@ -7,6 +7,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+// BE-74 (#185): de vier-kaarten-manifest en de historische rijen horen bij de
+// kaarten van maart; deze guards draaien op de vaste kopie daarvan, niet op de
+// inmiddels ververste levende data.
+require('../../src/services/__fixtures__/frozenMarchData').freezeMarchData();
 const menus = require('../../data/menus.json');
 const manifest = require('./existing-card-sources.json');
 const {

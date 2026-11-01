@@ -8,6 +8,11 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 
+// BE-74 (#185): de tellingen en de menuLinks hieronder zijn die van de kaarten
+// van maart; deze tests draaien op de vaste kopie daarvan, niet op de levende
+// data die ververst is.
+require('./__fixtures__/frozenMarchData').freezeMarchData();
+
 const { searchRestaurants, isValidAddress, hasUniqueRestaurantNameMatch } = require('./restaurantIndex');
 
 test('whitelist: no internal field leaks into the public shape, for any result', () => {
