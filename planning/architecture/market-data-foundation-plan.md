@@ -294,3 +294,15 @@ https://claude.ai/artifact/2TNFYCZUtDRF2oVtrro92o (4 screens, light and dark).
 - **Performance:** only the chosen city's data loads; the selector itself is
   static text.
 - Visitors see "stad"/"regio", never "market" (decision 011).
+
+**Addition, owner-approved 2026-11-01: a test city.**
+- **The approved mockup above stays leading** for any second city. A later
+  exploration (https://claude.ai/artifact/HiBAXeyuNc9qdZAUohtmsh) is kept
+  only as reference, not as direction.
+- **Dordrecht is the first test city, hidden from visitors** behind a flag,
+  only visible internally, until it clears the decision 012 thresholds.
+  It then appears in the list like any ready city.
+- **No "nieuw" or "beperkt" labels for visitors.** Because only ready cities
+  are listed, a city never shows up half-filled. Low coverage *within* a live
+  city is PLATFORM-02's job, with positive copy: lead with what there is, then
+  an alternative.
