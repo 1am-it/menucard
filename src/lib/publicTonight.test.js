@@ -298,7 +298,6 @@ test('BE-29: met de echte data zijn lunch en diner drie eerlijke gerechten met p
   const fs = require('node:fs');
   const path = require('node:path');
   const { buildTonightCandidates } = require('./publicTonightData');
-  const root = path.join(__dirname, '..', '..');
   const menus = JSON.parse(fs.readFileSync(frozenPath('current', 'menus'), 'utf8'));
   const candidates = buildTonightCandidates();
 
@@ -578,7 +577,6 @@ test('BE-38: met de echte data geeft 23:30 de lunch van morgen, uit dezelfde bro
   const fs = require('node:fs');
   const path = require('node:path');
   const { buildTonightCandidates } = require('./publicTonightData');
-  const root = path.join(__dirname, '..', '..');
   const menus = JSON.parse(fs.readFileSync(frozenPath('current', 'menus'), 'utf8'));
 
   const selection = selectTonight({ candidates: buildTonightCandidates(), now: new Date(LATE_EVENING) });

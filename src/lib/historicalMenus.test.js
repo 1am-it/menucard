@@ -18,7 +18,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const path = require('node:path');
 const crypto = require('node:crypto');
 
 const { useFrozenData, frozenPath } = require('../test-fixtures/useFrozenData');
@@ -27,7 +26,6 @@ const menus = require('../../data/menus.json');
 const { categoryPath } = require('./menuHierarchy');
 const { liveMenuLines, normalizePrice, buildMenuConcept } = require('./menuConcept');
 
-const REPO_ROOT = path.resolve(__dirname, '..', '..');
 // BE-71 ronde 3 (#176): de kaart van Restaurant Zenza (17-menukaart) kwam erbij,
 // met dezelfde vorm en met R1 en R3 toegepast. Ronde 4 herschreef die kaart met
 // de echte koppen (R9) en repareerde twee onterechte toeslagen bij Chocolat (5).
