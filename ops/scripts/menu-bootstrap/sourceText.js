@@ -204,6 +204,36 @@ function amountOf(form, match) {
  * that is already part of an earlier match is not reported again.
  * Resolves `[{ value, raw, index, form }]`.
  */
+/**
+ * A bare whole euro at the end of a printed line or cell: "ROGVLEUGEL 32",
+ * "Zes-gangen 150 |". This is the whole-euro family the card's own printed-price
+ * reader already uses (src/lib/htmlMenuStructure.js, `findWholeEuroPrices`): the
+ * amount sits at a printed boundary, at least two letters print before it, and a
+ * numbering, version, time or phone word, a unit or a year never counts. A false
+ * price is worse than a missed one, so anything doubtful stays a plain number.
+ */
+const WHOLE_EURO_AT_EDGE = /(?<![\d.,€/\-\p{L}])(\d{1,3})(?=[ \t]*[|\n]|[ \t]*$)/gmu;
+const NUMBERING_WORD_BEFORE = /\b(?:nummer|nr|nrs|punt|stap|etage|verdieping|keuze|optie|plek|plaats|tafel|kamer|pagina|tel|telefoon|mobiel|gsm|fax|versie|version|editie|edition)\s*[.:]?\s*$/i;
+
+function findWholeEuroPrices(text) {
+  const source = String(text || '');
+  const prices = [];
+  WHOLE_EURO_AT_EDGE.lastIndex = 0;
+  let match = WHOLE_EURO_AT_EDGE.exec(source);
+  while (match !== null) {
+    const value = Number(match[1]);
+    const index = match.index;
+    const lineStart = source.lastIndexOf('\n', index) + 1;
+    const before = source.slice(Math.max(lineStart, index - 60), index);
+    const named = (before.match(/\p{L}/gu) || []).length >= 3;
+    if (value >= 1 && named && !/^0/.test(match[1]) && !NUMBERING_WORD_BEFORE.test(before)) {
+      prices.push({ value, raw: match[0].trim(), index, end: index + match[0].length, form: 'whole-euro', priority: PRICE_PATTERNS.length });
+    }
+    match = WHOLE_EURO_AT_EDGE.exec(source);
+  }
+  return prices;
+}
+
 function findPrices(text) {
   const source = String(text || '');
   const candidates = [];
@@ -218,6 +248,7 @@ function findPrices(text) {
       match = entry.pattern.exec(source);
     }
   });
+  for (const candidate of findWholeEuroPrices(source)) candidates.push(candidate);
   candidates.sort((left, right) => left.index - right.index || left.priority - right.priority || right.end - left.end);
   const prices = [];
   let lastEnd = -1;

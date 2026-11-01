@@ -54,6 +54,14 @@ test('een prijs wordt nooit twee keer geteld', () => {
   assert.deepEqual(values('nr. 53'), [], 'een menunummer is geen prijs');
 });
 
+test('een heel euro aan het eind van een gedrukte regel telt als prijs', () => {
+  assert.deepEqual(values('ROGVLEUGEL 32'), [32]);
+  assert.deepEqual(values('Vijf-gangen 130 | Zes-gangen 150'), [130, 150]);
+  assert.deepEqual(values('Kerst 2026'), [], 'een jaar is geen prijs');
+  assert.deepEqual(values('nr. 53 | normaal 17,50'), [17.5], 'het menunummer telt niet mee');
+  assert.deepEqual(values('Wolfslaardreef 100, 4834 SP Breda'), [], 'een adres is geen prijs');
+});
+
 test('een naam met accenten en hoofdletters wordt gevonden', () => {
   assert.notEqual(findName(HTML_TEXT, 'CRÈME BRÛLÉE'), null);
   assert.notEqual(findName(HTML_TEXT, 'creme brulee'), null);
