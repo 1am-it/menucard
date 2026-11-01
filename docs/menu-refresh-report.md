@@ -1,6 +1,6 @@
 # Menukaarten verversen — de verschillen
 
-Gegenereerd: 2026-11-01 16:15 · bron: `data/menus.json` · script: `ops/scripts/menu-bootstrap/refresh-diff.js`
+Gegenereerd: 2026-11-01 16:17 · bron: `data/menus.json` · script: `ops/scripts/menu-bootstrap/refresh-diff.js`
 
 Dit rapport is een voorstel. Het script past `data/` nooit aan; de Lead beslist
 wat er in de kaarten verandert. Alleen bronnen die al als `source` in
@@ -13,28 +13,28 @@ tussen verzoeken en via de cache in `.local/`.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1-lunch | https://www.restaurantwolfslaar.com/nl/menu-lunch | html | 0 van 3 | 0 | 3 | 9 |
 | 1-diner | https://www.restaurantwolfslaar.com/nl/menu-diner | html | 0 van 17 | 0 | 17 | 9 |
-| 6-diner | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-Dinerkaart.pdf | pdf | 38 van 44 | 7 | 3 | 75 |
-| 6-lunch | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-lunchkaart.pdf | pdf | 38 van 41 | 5 | 1 | 69 |
-| 19-lunch | https://www.restaurantzuyd.nl/lunch | html | 16 van 23 | 7 | 7 | 1 |
-| 19-diner | https://www.restaurantzuyd.nl/diner | html | 13 van 21 | 5 | 8 | 3 |
+| 6-diner | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-Dinerkaart.pdf | pdf | 31 van 44 | 7 | 3 | 75 |
+| 6-lunch | https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-lunchkaart.pdf | pdf | 33 van 41 | 5 | 1 | 69 |
+| 19-lunch | https://www.restaurantzuyd.nl/lunch | html | 9 van 23 | 7 | 7 | 1 |
+| 19-diner | https://www.restaurantzuyd.nl/diner | html | 8 van 21 | 5 | 8 | 3 |
 | 23-lunch | https://t-huis.online/wp-content/uploads/2026/09/THS-Lunch_Herfst-2026.2_DIGI.svg | unsupported_content_type | — | — | — | — |
 | 23-diner | https://t-huis.online/wp-content/uploads/2026/09/THS-Diner_Herfst-2026.2_DIGI.svg | unsupported_content_type | — | — | — | — |
 | 5-lunch | https://www.restaurant-chocolat.nl/lunch/ | html | 12 van 12 | 0 | 0 | 6 |
-| 22-afhaal | https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/ | html | 22 van 22 | 15 | 0 | 2 |
-| 17-menukaart | https://restaurantzenza.nl/ | html | 72 van 72 | 45 | 0 | 4 |
+| 22-afhaal | https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/ | html | 7 van 22 | 15 | 0 | 2 |
+| 17-menukaart | https://restaurantzenza.nl/ | html | 27 van 72 | 45 | 0 | 4 |
 | 11-lunch | https://www.beyerd.nl/cafe-lunchkaart/ | html | 0 van 15 | 0 | 15 | 0 |
-| 4-menukaart | https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf | pdf | 9 van 15 | 6 | 6 | 84 |
-| 8-menukaart | https://www.aldentebreda.nl/menukaart-restaurant-2/ | html | 1 van 85 | 1 | 84 | 0 |
-| 12-menukaart | https://pellens.nl/ | html | 27 van 28 | 17 | 1 | 47 |
-| 13-afhaal | https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf | pdf | 68 van 109 | 4 | 41 | 40 |
-| 15-menukaart | https://www.andalous-breda.nl/menukaart/ | html | 87 van 88 | 9 | 1 | 5 |
-| 24-menukaart | https://www.trattoriaperron.nl/menu/ | html | 128 van 141 | 65 | 13 | 37 |
-| 25-menukaart | https://dolceesalato.nl/menu/ | html | 103 van 113 | 15 | 10 | 11 |
-| 16-menukaart | https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf | pdf | 2 van 32 | 2 | 30 | 1 |
-| 5-diner | https://www.restaurant-chocolat.nl/diner/ | html | 2 van 16 | 2 | 14 | 5 |
-| 2-lunch | https://restaurantblossem.nl/nl/restaurant | html | 10 van 31 | 6 | 21 | 1 |
-| 2-diner | https://restaurantblossem.nl/nl/restaurant | html | 7 van 31 | 3 | 24 | 2 |
-| 21-afhaal | https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf | pdf | 32 van 34 | 6 | 2 | 6 |
+| 4-menukaart | https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf | pdf | 3 van 15 | 6 | 6 | 84 |
+| 8-menukaart | https://www.aldentebreda.nl/menukaart-restaurant-2/ | html | 0 van 85 | 1 | 84 | 0 |
+| 12-menukaart | https://pellens.nl/ | html | 10 van 28 | 17 | 1 | 47 |
+| 13-afhaal | https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf | pdf | 64 van 109 | 4 | 41 | 40 |
+| 15-menukaart | https://www.andalous-breda.nl/menukaart/ | html | 78 van 88 | 9 | 1 | 5 |
+| 24-menukaart | https://www.trattoriaperron.nl/menu/ | html | 63 van 141 | 65 | 13 | 37 |
+| 25-menukaart | https://dolceesalato.nl/menu/ | html | 88 van 113 | 15 | 10 | 11 |
+| 16-menukaart | https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf | pdf | 0 van 32 | 2 | 30 | 1 |
+| 5-diner | https://www.restaurant-chocolat.nl/diner/ | html | 0 van 16 | 2 | 14 | 5 |
+| 2-lunch | https://restaurantblossem.nl/nl/restaurant | html | 4 van 31 | 6 | 21 | 1 |
+| 2-diner | https://restaurantblossem.nl/nl/restaurant | html | 4 van 31 | 3 | 24 | 2 |
+| 21-afhaal | https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf | pdf | 26 van 34 | 6 | 2 | 6 |
 | 9-lunch | https://static.rce.eu/wp-content/uploads/sites/32/2025/06/18064446/WEB_D25235-B_B-Lunchkaart_140-320mm_NL_MT_V9-1-1.pdf | robots | — | — | — | — |
 | 9-diner | https://static.rce.eu/wp-content/uploads/sites/32/2026/01/08092428/25238-BB-Dinerkaart_417x320mm_ENG_MT.pdf | robots | — | — | — | — |
 
@@ -46,7 +46,7 @@ Bron: https://www.restaurantwolfslaar.com/nl/menu-lunch
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 0 van 3 gerechten.
+Gecontroleerd: 0 van 3 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (0)
 
@@ -78,7 +78,7 @@ Bron: https://www.restaurantwolfslaar.com/nl/menu-diner
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 0 van 17 gerechten.
+Gecontroleerd: 0 van 17 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (0)
 
@@ -124,7 +124,7 @@ Bron: https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-Dinerkaart.pd
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 38 van 44 gerechten.
+Gecontroleerd: 38 van 44 gerechten · 31 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (7)
 
@@ -194,7 +194,7 @@ Bron: https://brasseriebardot.nl/wp-content/uploads/2026/06/Bardot-lunchkaart.pd
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 38 van 41 gerechten.
+Gecontroleerd: 38 van 41 gerechten · 33 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (5)
 
@@ -260,7 +260,7 @@ Bron: https://www.restaurantzuyd.nl/lunch
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 16 van 23 gerechten.
+Gecontroleerd: 16 van 23 gerechten · 9 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (7)
 
@@ -294,7 +294,7 @@ Bron: https://www.restaurantzuyd.nl/diner
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 13 van 21 gerechten.
+Gecontroleerd: 13 van 21 gerechten · 8 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (5)
 
@@ -345,7 +345,7 @@ Bron: https://www.restaurant-chocolat.nl/lunch/
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 12 van 12 gerechten.
+Gecontroleerd: 12 van 12 gerechten · 12 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (0)
 
@@ -372,7 +372,7 @@ Bron: https://www.makananbreda.nl/indische-gerechten-afhaal-prijslijst/
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 22 van 22 gerechten.
+Gecontroleerd: 22 van 22 gerechten · 7 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (15)
 
@@ -409,7 +409,7 @@ Bron: https://restaurantzenza.nl/
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 72 van 72 gerechten.
+Gecontroleerd: 72 van 72 gerechten · 27 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (45)
 
@@ -472,7 +472,9 @@ Gecontroleerd: 72 van 72 gerechten.
 
 Bron: https://www.beyerd.nl/cafe-lunchkaart/
 
-Gecontroleerd: 0 van 15 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 0 van 15 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (0)
 
@@ -506,7 +508,9 @@ Gecontroleerd: 0 van 15 gerechten.
 
 Bron: https://www.restaurantuijttewaal.nl/_files/ugd/977c56_c45c300c154543d3959029a86fa564ae.pdf
 
-Gecontroleerd: 9 van 15 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 9 van 15 gerechten · 3 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (6)
 
@@ -576,7 +580,9 @@ Gecontroleerd: 9 van 15 gerechten.
 
 Bron: https://www.aldentebreda.nl/menukaart-restaurant-2/
 
-Gecontroleerd: 1 van 85 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 1 van 85 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (1)
 
@@ -636,7 +642,9 @@ Gecontroleerd: 1 van 85 gerechten.
 
 Bron: https://pellens.nl/
 
-Gecontroleerd: 27 van 28 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 27 van 28 gerechten · 10 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (17)
 
@@ -712,7 +720,9 @@ Gecontroleerd: 27 van 28 gerechten.
 
 Bron: https://gantauvillage.nl/wp-content/uploads/2026/02/AFHAALMENU-GANTAU-VILLAGE_02-2026.docx.pdf
 
-Gecontroleerd: 68 van 109 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 68 van 109 gerechten · 64 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (4)
 
@@ -814,7 +824,9 @@ Gecontroleerd: 68 van 109 gerechten.
 
 Bron: https://www.andalous-breda.nl/menukaart/
 
-Gecontroleerd: 87 van 88 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 87 van 88 gerechten · 78 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (9)
 
@@ -846,7 +858,9 @@ Gecontroleerd: 87 van 88 gerechten.
 
 Bron: https://www.trattoriaperron.nl/menu/
 
-Gecontroleerd: 128 van 141 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 128 van 141 gerechten · 63 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (65)
 
@@ -954,7 +968,9 @@ Gecontroleerd: 128 van 141 gerechten.
 
 Bron: https://dolceesalato.nl/menu/
 
-Gecontroleerd: 103 van 113 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 103 van 113 gerechten · 88 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (15)
 
@@ -1007,7 +1023,9 @@ Gecontroleerd: 103 van 113 gerechten.
 
 Bron: https://restaurantsmelt.nl/wp-content/uploads/2026/05/smelt_menu_breda_nederlands.pdf
 
-Gecontroleerd: 2 van 32 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 2 van 32 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (2)
 
@@ -1057,7 +1075,9 @@ Gecontroleerd: 2 van 32 gerechten.
 
 Bron: https://www.restaurant-chocolat.nl/diner/
 
-Gecontroleerd: 2 van 16 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 2 van 16 gerechten · 0 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (2)
 
@@ -1095,7 +1115,9 @@ Gecontroleerd: 2 van 16 gerechten.
 
 Bron: https://restaurantblossem.nl/nl/restaurant
 
-Gecontroleerd: 10 van 31 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 10 van 31 gerechten · 4 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (6)
 
@@ -1142,7 +1164,7 @@ Bron: https://restaurantblossem.nl/nl/restaurant
 
 _Uit de cache van een eerdere ophaalpoging._
 
-Gecontroleerd: 7 van 31 gerechten.
+Gecontroleerd: 7 van 31 gerechten · 4 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (3)
 
@@ -1188,7 +1210,9 @@ Gecontroleerd: 7 van 31 gerechten.
 
 Bron: https://www.senangmakan.nl/wp-content/uploads/2026/04/Senang-Makan-april-2026.pdf
 
-Gecontroleerd: 32 van 34 gerechten.
+_Uit de cache van een eerdere ophaalpoging._
+
+Gecontroleerd: 32 van 34 gerechten · 26 daarvan ongewijzigd.
 
 ### Gewijzigde prijs (6)
 

@@ -143,6 +143,7 @@ test('verversen meldt een gewijzigde prijs, een verdwenen en een nieuw gerecht',
   };
   const diff = diffCard(refreshFixture, card);
   assert.equal(diff.checked, 3, 'drie gerechten hadden een prijs om te vergelijken');
+  assert.equal(diff.ok, 2, 'crème brûlée en zeetong staan er ongewijzigd');
   assert.deepEqual(diff.changed.map((row) => row.name), ['Carpaccio van rode biet']);
   assert.equal(diff.changed[0].found, 14.5);
   assert.deepEqual(diff.gone.map((row) => row.name), ['Stoofpot van rundvlees']);

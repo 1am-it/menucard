@@ -95,7 +95,7 @@ function writeReport(results, startedAt) {
       continue;
     }
     lines.push(
-      `| ${result.key} | ${result.source} | ${kind} | ${result.diff.checked} van ${result.total} | ${result.diff.changed.length} | ${result.diff.gone.length} | ${result.diff.possibleNew.length} |`,
+      `| ${result.key} | ${result.source} | ${kind} | ${result.diff.ok} van ${result.total} | ${result.diff.changed.length} | ${result.diff.gone.length} | ${result.diff.possibleNew.length} |`,
     );
   }
   for (const result of results) {
@@ -108,7 +108,7 @@ function writeReport(results, startedAt) {
       continue;
     }
     if (result.read.fromCache) lines.push('', '_Uit de cache van een eerdere ophaalpoging._');
-    lines.push('', `Gecontroleerd: ${result.diff.checked} van ${result.total} gerechten.`);
+    lines.push('', `Gecontroleerd: ${result.diff.checked} van ${result.total} gerechten · ${result.diff.ok} daarvan ongewijzigd.`);
     section(lines, 'Gewijzigde prijs', result.diff.changed, (row) => {
       const expected = row.expected.map(formatPrice).join(' / ');
       const missing = row.missing.map(formatPrice).join(' / ');

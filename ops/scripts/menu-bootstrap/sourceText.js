@@ -384,6 +384,7 @@ function diffCard(text, card = {}) {
   const changed = [];
   const gone = [];
   let checked = 0;
+  let ok = 0;
   for (const { category, item } of rows) {
     const result = matchItem(source, item);
     for (const price of result.foundPrices) claimed.add(price.absoluteIndex);
@@ -393,8 +394,10 @@ function diffCard(text, card = {}) {
       continue;
     }
     if (result.nameFound) {
-      if (result.status === 'ok') checked += 1;
-      else gone.push({ category, name: result.name, reason: result.reason || 'geen prijs bij de naam' });
+      if (result.status === 'ok') {
+        checked += 1;
+        ok += 1;
+      } else gone.push({ category, name: result.name, reason: result.reason || 'geen prijs bij de naam' });
       continue;
     }
     // A dish with a price on request has no price to compare; whether its name is
@@ -418,7 +421,7 @@ function diffCard(text, card = {}) {
     seenLabels.add(key);
     possibleNew.push({ label, value: price.value, raw: price.raw });
   }
-  return { checked, changed, gone, possibleNew };
+  return { checked, ok, changed, gone, possibleNew };
 }
 
 /**
